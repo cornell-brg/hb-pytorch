@@ -864,6 +864,8 @@ if (USE_OPENMP AND OPENMP_FOUND)
 endif()
 
 target_link_libraries(torch PUBLIC c10)
+# This is not a nice way ... should isolated in if(USE_HB)
+target_link_libraries(torch PUBLIC c10_hammerblade)
 target_link_libraries(torch PUBLIC ${Caffe2_PUBLIC_DEPENDENCY_LIBS})
 target_link_libraries(torch PRIVATE ${Caffe2_DEPENDENCY_LIBS})
 target_link_libraries(torch PRIVATE ${Caffe2_DEPENDENCY_WHOLE_LINK_LIBS})

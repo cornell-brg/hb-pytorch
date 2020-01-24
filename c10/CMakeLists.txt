@@ -90,6 +90,11 @@ if(USE_ROCM)
   add_subdirectory(hip)
 endif()
 
+# use hammerblade by default for now
+# if(USE_HB)
+add_subdirectory(hammerblade)
+# endif()
+
 # ---[ Installation
 # Note: for now, we will put all export path into one single Caffe2Targets group
 # to deal with the cmake deployment need. Inside the Caffe2Targets set, the

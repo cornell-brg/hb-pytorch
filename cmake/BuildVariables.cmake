@@ -43,6 +43,7 @@ set(Caffe2_DEPENDENCY_WHOLE_LINK_LIBS "")
 # transitive to any libraries that depends on Caffe2.
 set(Caffe2_PUBLIC_DEPENDENCY_LIBS "")
 set(Caffe2_PUBLIC_CUDA_DEPENDENCY_LIBS "")
+set(Caffe2_PUBLIC_HAMMERBLADE_DEPENDENCY_LIBS "")
 
 # List of modules that is built as part of the main Caffe2 build. For all
 # binary targets, such as Python and native binaries, they will be linked
