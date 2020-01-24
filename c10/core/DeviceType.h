@@ -27,13 +27,15 @@ enum class DeviceType : int16_t {
   //  - Change the implementations of DeviceTypeName and isValidDeviceType
   //    in DeviceType.cpp
   //  - Change the number below
-  COMPILE_TIME_MAX_DEVICE_TYPES = 10,
+  HAMMERBLADE = 10,
+  COMPILE_TIME_MAX_DEVICE_TYPES = 11,
   ONLY_FOR_TEST = 20901, // This device type is only for test.
 };
 
 constexpr DeviceType kCPU = DeviceType::CPU;
 constexpr DeviceType kCUDA = DeviceType::CUDA;
 constexpr DeviceType kHIP = DeviceType::HIP;
+constexpr DeviceType kHAMMERBLADE = DeviceType::HAMMERBLADE;
 constexpr DeviceType kMSNPU = DeviceType::MSNPU;
 constexpr DeviceType kXLA = DeviceType::XLA;
 

@@ -86,6 +86,11 @@ struct C10_API Device final {
     return type_ == DeviceType::CPU;
   }
 
+  /// Return true if the device is of HAMMERBLADE type.
+  bool is_hammerblade() const noexcept {
+    return type_ == DeviceType::HAMMERBLADE;
+  }
+
   /// Same string as returned from operator<<.
   std::string str() const;
 

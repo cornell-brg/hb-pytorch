@@ -360,6 +360,8 @@ struct C10_API TensorOptions {
             return TensorTypeId::IDEEPTensorId;
           case DeviceType::HIP:
             return TensorTypeId::HIPTensorId;
+          case DeviceType::HAMMERBLADE:
+            return TensorTypeId::HammerBladeTensorId;
           case DeviceType::MSNPU:
             return TensorTypeId::MSNPUTensorId;
           case DeviceType::XLA:
@@ -556,6 +558,8 @@ inline DeviceType computeDeviceType(TensorTypeId tid) {
     return DeviceType::CUDA;
   } else if (tid == TensorTypeId::HIPTensorId) {
     return DeviceType::HIP;
+  } else if (tid == TensorTypeId::HammerBladeTensorId) {
+    return DeviceType::HAMMERBLADE;
   } else if (tid == TensorTypeId::MKLDNNTensorId) {
     return DeviceType::MKLDNN;
   } else if (tid == TensorTypeId::OpenGLTensorId) {

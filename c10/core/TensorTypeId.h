@@ -30,6 +30,7 @@ enum class TensorTypeId : uint8_t {
   OpenCLTensorId, // Caffe2 only
   IDEEPTensorId, // Caffe2 only
   HIPTensorId, // PyTorch/Caffe2 supported
+  HammerBladeTensorId, // PyTorch only
   SparseHIPTensorId, // PyTorch only
   MSNPUTensorId, // PyTorch only
   XLATensorId, // PyTorch only

@@ -139,13 +139,16 @@ NATIVE_FUNCTIONS_H = CodeTemplate.from_file(TEMPLATE_PATH + "/NativeFunctions.h"
 core_file_manager = FileManager(core_install_dir)
 file_manager = FileManager()
 cuda_file_manager = FileManager()
+hammerblade_file_manager = FileManager()
 
 def backend_to_devicetype(backend):
     if backend == 'QuantizedCPU':
         return 'CPU'
+    elif backend == 'HammerBlade':
+        return 'HAMMERBLADE'
     return backend
 
-backends = ['CPU', 'CUDA']
+backends = ['CPU', 'CUDA', 'HammerBlade']
 densities = ['Dense', 'Sparse', 'Mkldnn']  # TODO: layout instead of densities?
 
 quantized_backends = ['QuantizedCPU']
@@ -162,6 +165,7 @@ quantized_scalar_types = [
 top_env = {
     'cpu_type_headers': [],
     'cuda_type_headers': [],
+    'hammerblade_type_headers': [],
     'function_registrations': [],
     'list_of_aten_ops': [],
     'type_method_declarations': [],
@@ -290,12 +294,18 @@ def generate_storage_type_and_tensor(backend, density, declarations):
     fm = file_manager
     if env['DeviceType'] == 'CUDA':
         fm = cuda_file_manager
+    elif env['DeviceType'] == 'HAMMERBLADE':
+        fm = hammerblade_file_manager
 
     if env['Backend'] == 'CPU' or env['Backend'] == 'CUDA':
         env['namespace'] = env['Backend'].lower()
         env['legacy_th_headers'].append('#include <ATen/LegacyTHFunctions' + env['Backend'] + ".h>")
         fm.write('LegacyTHFunctions' + env['Backend'] + ".h", LEGACY_TH_FUNCTIONS_H, env)
         fm.write('LegacyTHFunctions' + env['Backend'] + ".cpp", LEGACY_TH_FUNCTIONS_CPP, env)
+
+
+    if env['Backend'] == 'HammerBlade':
+        env['namespace'] = env['Backend'].lower()
 
     if density != 'Sparse':
         fm.write(env['Type'] + ".cpp", TYPE_DERIVED_CPP, env)
@@ -306,10 +316,14 @@ def generate_storage_type_and_tensor(backend, density, declarations):
     if env['DeviceType'] == 'CPU':
         top_env['cpu_type_headers'].append(
             '#include "ATen/{}.h"'.format(env['Type']))
-    else:
-        assert env['DeviceType'] == 'CUDA'
+    elif env['DeviceType'] == 'CUDA':
         top_env['cuda_type_headers'].append(
             '#include "ATen/{}.h"'.format(env['Type']))
+    else:
+        assert env['DeviceType'] == 'HAMMERBLADE'
+        top_env['hammerblade_type_headers'].append(
+            '#include "ATen/{}.h"'.format(env['Type']))
+
 
 
 # yields (backend, density) tuples
@@ -341,6 +355,8 @@ def declare_outputs():
         fm = file_manager
         if backend == 'CUDA':
             fm = cuda_file_manager
+        elif backend == 'HammerBlade':
+            fm = hammerblade_file_manager
         for kind in ["Type"]:
             if kind != 'Type' and density == "Sparse":
                 # No Storage or Tensor for sparse
@@ -418,11 +434,13 @@ def generate_outputs():
 
     file_manager.check_all_files_written()
     cuda_file_manager.check_all_files_written()
+    hammerblade_file_manager.check_all_files_written()
 
 declare_outputs()
 if options.output_dependencies is not None:
     file_manager.write_outputs(options.output_dependencies)
     core_file_manager.write_outputs(options.output_dependencies + "-core")
     cuda_file_manager.write_outputs(options.output_dependencies + "-cuda")
+    hammerblade_file_manager.write_outputs(options.output_dependencies + "-hammerblade")
 else:
     generate_outputs()

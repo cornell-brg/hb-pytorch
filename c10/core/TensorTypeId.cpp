@@ -24,6 +24,8 @@ const char* toString(TensorTypeId t) {
       return "IDEEPTensorId";
     case TensorTypeId::HIPTensorId:
       return "HIPTensorId";
+    case TensorTypeId::HammerBladeTensorId:
+      return "HammerBladeTensorId";
     case TensorTypeId::SparseHIPTensorId:
       return "SparseHIPTensorId";
     case TensorTypeId::MSNPUTensorId:

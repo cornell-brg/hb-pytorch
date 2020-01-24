@@ -13,7 +13,7 @@
 namespace c10 {
 namespace {
 DeviceType parse_type(const std::string& device_string) {
-  static const std::array<std::pair<std::string, DeviceType>, 9> types = {{
+  static const std::array<std::pair<std::string, DeviceType>, 10> types = {{
       {"cpu", DeviceType::CPU},
       {"cuda", DeviceType::CUDA},
       {"mkldnn", DeviceType::MKLDNN},
@@ -23,6 +23,7 @@ DeviceType parse_type(const std::string& device_string) {
       {"hip", DeviceType::HIP},
       {"msnpu", DeviceType::MSNPU},
       {"xla", DeviceType::XLA},
+      {"hammerblade", DeviceType::HAMMERBLADE},
   }};
   auto device = std::find_if(
       types.begin(),

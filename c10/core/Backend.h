@@ -25,7 +25,7 @@ namespace c10 {
  * or "SparseCUDA"; backend in torch.backends is something like "MKL" or
  * "CUDNN".
  */
-enum class Backend { CPU, CUDA, HIP, SparseCPU, SparseCUDA, SparseHIP, MSNPU, XLA, QuantizedCPU, ComplexCPU, ComplexCUDA, Undefined, MkldnnCPU, NumOptions };
+enum class Backend { CPU, CUDA, HIP, HammerBlade, SparseCPU, SparseCUDA, SparseHIP, MSNPU, XLA, QuantizedCPU, ComplexCPU, ComplexCUDA, Undefined, MkldnnCPU, NumOptions };
 
 static inline Backend toSparse(Backend b) {
   switch (b) {
@@ -35,6 +35,8 @@ static inline Backend toSparse(Backend b) {
       return Backend::SparseCUDA;
     case Backend::HIP:
       return Backend::SparseHIP;
+    case Backend::HammerBlade:
+      throw std::runtime_error("HammerBlade supports dense tensor only");
     case Backend::SparseCPU:
       return Backend::SparseCPU;
     case Backend::SparseCUDA:
@@ -54,6 +56,8 @@ static inline Backend toDense(Backend b) {
       return Backend::CUDA;
     case Backend::HIP:
       return Backend::HIP;
+    case Backend::HammerBlade:
+      return Backend::HammerBlade;
     case Backend::MSNPU:
       return Backend::MSNPU;
     case Backend::XLA:
@@ -82,6 +86,8 @@ static inline Backend tensorTypeIdToBackend(TensorTypeId t) {
     return Backend::CUDA;
   } else if (t == TensorTypeId::HIPTensorId) {
     return Backend::HIP;
+  } else if (t == TensorTypeId::HammerBladeTensorId) {
+    return Backend::HammerBlade;
   } else if (t == TensorTypeId::MSNPUTensorId) {
     return Backend::MSNPU;
   } else if (t == TensorTypeId::XLATensorId) {
@@ -115,6 +121,8 @@ static inline TensorTypeId backendToTensorTypeId(Backend b) {
       return TensorTypeId::CUDATensorId;
     case Backend::HIP:
       return TensorTypeId::HIPTensorId;
+    case Backend::HammerBlade:
+      return TensorTypeId::HammerBladeTensorId;
     case Backend::MSNPU:
       return TensorTypeId::MSNPUTensorId;
     case Backend::XLA:
@@ -148,6 +156,8 @@ static inline DeviceType backendToDeviceType(Backend b) {
       return DeviceType::CUDA;
     case Backend::HIP:
       return DeviceType::HIP;
+    case Backend::HammerBlade:
+      return DeviceType::HAMMERBLADE;
     case Backend::MSNPU:
       return DeviceType::MSNPU;
     case Backend::XLA:
@@ -178,6 +188,8 @@ static inline Backend backendToCPU(Backend b) {
     case Backend::CUDA:
       return Backend::CPU;
     case Backend::HIP:
+      return Backend::CPU;
+    case Backend::HammerBlade:
       return Backend::CPU;
     case Backend::SparseCPU:
       return Backend::SparseCPU;
@@ -219,6 +231,8 @@ static inline Backend backendToCUDA(Backend b) {
       return Backend::ComplexCUDA;
     case Backend::Undefined:
       return Backend::Undefined;
+    case Backend::HammerBlade:
+      AT_ERROR("HammerBlade -> CUDA is not supported");
     default:
       AT_ERROR("Unknown backend");
   }
@@ -238,6 +252,28 @@ static inline Backend backendToHIP(Backend b) {
       return Backend::SparseHIP;
     case Backend::Undefined:
       return Backend::Undefined;
+    case Backend::HammerBlade:
+      AT_ERROR("HammerBlade -> HIP is not supported");
+    default:
+      AT_ERROR("Unknown backend");
+  }
+}
+
+static inline Backend backendToHammerBlade(Backend b) {
+  switch (b) {
+    case Backend::CPU:
+      return Backend::HammerBlade;
+    case Backend::CUDA:
+    case Backend::HIP:
+    case Backend::HammerBlade:
+    case Backend::MSNPU:
+    case Backend::XLA:
+    case Backend::SparseCPU:
+    case Backend::SparseCUDA:
+    case Backend::SparseHIP:
+      AT_ERROR("Backends other than CPU -> HammerBlade is not supported");
+    case Backend::Undefined:
+      return Backend::Undefined;
     default:
       AT_ERROR("Unknown backend");
   }
@@ -252,6 +288,8 @@ static inline const char* toString(Backend b) {
       return "CUDA";
     case Backend::HIP:
       return "HIP";
+    case Backend::HammerBlade:
+      return "HammerBlade";
     case Backend::MSNPU:
       return "MSNPU";
     case Backend::XLA:
