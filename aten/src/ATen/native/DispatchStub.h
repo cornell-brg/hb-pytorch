@@ -76,6 +76,9 @@ struct CAFFE2_API DispatchStub<rT (*)(Args...), T> {
     } else if (device_type == DeviceType::HIP) {
       AT_ASSERTM(hip_dispatch_ptr, "DispatchStub: missing HIP kernel");
       return (*hip_dispatch_ptr)(std::forward<ArgTypes>(args)...);
+    } else if (device_type == DeviceType::HAMMERBLADE) {
+      AT_ASSERTM(hammerblade_dispatch_ptr, "DispatchStub: missing HammerBlade kernel");
+      return (*hammerblade_dispatch_ptr)(std::forward<ArgTypes>(args)...);
     } else {
       AT_ERROR("DispatchStub: unsupported device type", device_type);
     }
@@ -106,10 +109,12 @@ struct CAFFE2_API DispatchStub<rT (*)(Args...), T> {
   FnPtr cpu_dispatch_ptr;
   FnPtr cuda_dispatch_ptr;
   FnPtr hip_dispatch_ptr;
+  FnPtr hammerblade_dispatch_ptr;
 #else
   FnPtr cpu_dispatch_ptr = nullptr;
   FnPtr cuda_dispatch_ptr = nullptr;
   FnPtr hip_dispatch_ptr = nullptr;
+  FnPtr hammerblade_dispatch_ptr = nullptr;
 #endif
   static FnPtr DEFAULT;
 #ifdef HAVE_AVX_CPU_DEFINITION
@@ -133,6 +138,13 @@ struct RegisterHIPDispatch {
   RegisterHIPDispatch(DispatchStub<FnPtr, T>& stub, FnPtr value) {
     // TODO: make this point at hip_dispatch_ptr
     stub.cuda_dispatch_ptr = value;
+  }
+};
+
+template <typename FnPtr, typename T>
+struct RegisterHAMMERBLADEDispatch {
+  RegisterHAMMERBLADEDispatch(DispatchStub<FnPtr, T>& stub, FnPtr value) {
+    stub.hammerblade_dispatch_ptr = value;
   }
 };
 } // anonymous namespace
@@ -178,6 +190,9 @@ struct RegisterHIPDispatch {
 #define REGISTER_HIP_DISPATCH(name, fn) \
   static RegisterHIPDispatch<decltype(fn), struct name> name ## __register(name, fn);
 
+#define REGISTER_HAMMERBLADE_DISPATCH(name, fn) \
+  static RegisterHAMMERBLADEDispatch<decltype(fn), struct name> name ## __register(name, fn);
+
 // NB: This macro must be used in an actual 'cu' file; if you try using
 // it from a 'cpp' file it will not work!
 #if defined(__CUDACC__)
@@ -189,6 +204,8 @@ struct RegisterHIPDispatch {
 // #define REGISTER_DISPATCH(name, fn) REGISTER_HIP_DISPATCH(name, fn)
 #elif defined(CPU_CAPABILITY)
 #define REGISTER_DISPATCH(name, fn) REGISTER_ARCH_DISPATCH(name, CPU_CAPABILITY, fn)
+#elif defined(HB_TRUE)
+#define REGISTER_DISPATCH(name, fn) REGISTER_HAMMERBLADE_DISPATCH(name, fn)
 #endif
 
 
