@@ -758,6 +758,13 @@ PyObject* initModule() {
 #endif
   ASSERT_TRUE(set_module_attr("has_cuda", has_cuda));
 
+#ifdef USE_HB
+  PyObject *has_hammerblade = Py_True;
+#else
+  PyObject *has_hammerblade = Py_False;
+#endif
+  ASSERT_TRUE(set_module_attr("has_hammerblade", has_hammerblade));
+
   ASSERT_TRUE(set_module_attr("has_mkldnn", at::hasMKLDNN() ? Py_True : Py_False));
 
 #ifdef _GLIBCXX_USE_CXX11_ABI
