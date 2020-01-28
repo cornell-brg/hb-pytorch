@@ -31,6 +31,11 @@ static void copy_hb_to_cpu(TensorIterator& iter, bool non_blocking) {
 static void copy_kernel_hammerblade(TensorIterator& iter, bool non_blocking) {
   AT_ASSERT(iter.ntensors() == 2);
 
+  // Since this copy kernel is FAKE ...
+  // In reality we need to be able to copy between tensors with different dtypes
+  TORCH_INTERNAL_ASSERT(iter.dtype(0) == iter.dtype(1),
+      "FAKE HammerBlade copy kernel can only handle tensors with same dtype");
+
   Device dst_device = iter.device(0);
   Device src_device = iter.device(1);
 
