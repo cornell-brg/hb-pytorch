@@ -864,8 +864,6 @@ if (USE_OPENMP AND OPENMP_FOUND)
 endif()
 
 target_link_libraries(torch PUBLIC c10)
-# This is not a nice way ... should isolated in if(USE_HB)
-target_link_libraries(torch PUBLIC c10_hammerblade)
 target_link_libraries(torch PUBLIC ${Caffe2_PUBLIC_DEPENDENCY_LIBS})
 target_link_libraries(torch PRIVATE ${Caffe2_DEPENDENCY_LIBS})
 target_link_libraries(torch PRIVATE ${Caffe2_DEPENDENCY_WHOLE_LINK_LIBS})
@@ -1055,6 +1053,10 @@ if(USE_ROCM)
   # Since PyTorch files contain HIP headers, this is also needed to capture the includes.
   target_include_directories(torch PRIVATE ${Caffe2_HIP_INCLUDE})
   target_include_directories(torch INTERFACE $<INSTALL_INTERFACE:include>)
+endif()
+
+if(USE_HB)
+  target_link_libraries(torch PUBLIC c10_hammerblade)
 endif()
 
 # ---[ Test binaries.

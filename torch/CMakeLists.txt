@@ -6,6 +6,7 @@ if (NOT CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO)
   project(torch CXX C)
   find_package(torch REQUIRED)
   option(USE_CUDA "Use CUDA" ON)
+  option(USE_HB "Use HammerBlade" ON)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
