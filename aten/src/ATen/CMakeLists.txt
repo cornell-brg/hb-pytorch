@@ -56,8 +56,8 @@ FILE(GLOB miopen_cpp "miopen/*.cpp")
 FILE(GLOB mkl_cpp "mkl/*.cpp")
 FILE(GLOB mkldnn_cpp "mkldnn/*.cpp")
 
-FILE(GLOB hammerblade_h "hammerblade/*.h")
-FILE(GLOB hammerblade_cpp "hammerblade/*.cpp")
+FILE(GLOB hammerblade_h "hammerblade/*.h" "hammerblade/detail/*.h")
+FILE(GLOB hammerblade_cpp "hammerblade/*.cpp" "hammerblade/detail/*.cpp")
 
 FILE(GLOB native_cpp "native/*.cpp")
 FILE(GLOB native_mkl_cpp "native/mkl/*.cpp")

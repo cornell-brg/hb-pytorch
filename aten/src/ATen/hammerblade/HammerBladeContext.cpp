@@ -1,4 +1,5 @@
 #include <ATen/hammerblade/HammerBladeContext.h>
+#include <c10/hammerblade/HammerBladeFunctions.h>
 
 /*
  * inlcude Fake HB allocator

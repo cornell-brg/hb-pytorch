@@ -9,6 +9,7 @@
 #include <ATen/core/LegacyTypeDispatch.h>
 #include <ATen/detail/CUDAHooksInterface.h>
 #include <ATen/detail/HIPHooksInterface.h>
+#include <ATen/detail/HammerBladeHooksInterface.h>
 #include <c10/util/Exception.h>
 #include <c10/core/impl/DeviceGuardImplInterface.h>
 #include <c10/core/QEngine.h>
@@ -29,10 +30,13 @@ class CAFFE2_API Context {
     DeviceType device_type = device.type();
     initCUDAIfNeeded(device_type);
     initHIPIfNeeded(device_type);
+    initHammerBladeIfNeeded(device_type);
     if (device_type == at::kCPU) {
       return *at::detail::getDefaultCPUGenerator();
     } else if (device_type == at::kCUDA) {
       return *at::detail::getCUDAHooks().getDefaultCUDAGenerator(device.index());
+    } else if (device_type == at::kHAMMERBLADE) {
+      return *at::detail::getHammerBladeHooks().getDefaultHammerBladeGenerator(device.index());
     } else {
       AT_ERROR(DeviceTypeName(device_type), " device type not enabled.");
     }
@@ -40,10 +44,13 @@ class CAFFE2_API Context {
   Device getDeviceFromPtr(void* data, DeviceType device_type) {
     initCUDAIfNeeded(device_type);
     initHIPIfNeeded(device_type);
+    initHammerBladeIfNeeded(device_type);
     if (device_type == at::kCPU) {
       return DeviceType::CPU;
     } else if (device_type == at::kCUDA) {
       return at::detail::getCUDAHooks().getDeviceFromPtr(data);
+    } else if (device_type == at::kHAMMERBLADE) {
+      return at::detail::getHammerBladeHooks().getDeviceFromPtr(data);
     } else {
       AT_ERROR(DeviceTypeName(device_type), " device type not enabled.");
     }
@@ -67,6 +74,9 @@ class CAFFE2_API Context {
   bool hasXLA() const {
     return c10::impl::hasDeviceGuardImpl(at::DeviceType::XLA);
   }
+  bool hasHammerBlade() const {
+    return detail::getHammerBladeHooks().hasHammerBlade();
+  }
   // defined in header so that getNonVariableType has ability to inline
   // call_once check. getNonVariableType is called fairly frequently
   THCState* lazyInitCUDA() {
@@ -81,6 +91,12 @@ class CAFFE2_API Context {
     });
     return thh_state.get();
   }
+  THBState* lazyInitHammerBlade() {
+    std::call_once(thb_init,[&] {
+      thb_state = detail::getHammerBladeHooks().initHammerBlade();
+    });
+    return thb_state.get();
+  }
   const at::cuda::NVRTC& getNVRTC() {
     return detail::getCUDAHooks().nvrtc();
   }
@@ -90,6 +106,9 @@ class CAFFE2_API Context {
   }
   THHState* getTHHState() {
     return thh_state.get();
+  }
+  THBState* getTHBState() {
+    return thb_state.get();
   }
 
   bool setFlushDenormal(bool on);
@@ -121,8 +140,14 @@ class CAFFE2_API Context {
       lazyInitHIP();
     }
   }
+  void initHammerBladeIfNeeded(DeviceType p) {
+    if (p == DeviceType::HAMMERBLADE) {
+      lazyInitHammerBlade();
+    }
+  }
   std::once_flag thc_init;
   std::once_flag thh_init;
+  std::once_flag thb_init;
   bool enabled_cudnn = true;
   bool deterministic_cudnn = false;
   bool benchmark_cudnn = false;
@@ -130,6 +155,7 @@ class CAFFE2_API Context {
   c10::optional<at::QEngine> quantized_engine = c10::nullopt;
   std::unique_ptr<THCState, void(*)(THCState*)> thc_state;
   std::unique_ptr<THHState, void(*)(THHState*)> thh_state;
+  std::unique_ptr<THBState, void(*)(THBState*)> thb_state;
 };
 
 CAFFE2_API Context& globalContext();
@@ -170,6 +196,10 @@ static inline bool hasHIP() {
 
 static inline bool hasXLA() {
   return globalContext().hasXLA();
+}
+
+static inline bool hasHammerBlade() {
+  return globalContext().hasHammerBlade();
 }
 
 // Despite its name, this function returns the number of *CUDA* GPUs.
