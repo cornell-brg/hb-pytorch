@@ -95,6 +95,7 @@ set(TORCH_PYTHON_SRCS
     ${TORCH_SRC_DIR}/csrc/tensor/python_tensor.cpp
     ${TORCH_SRC_DIR}/csrc/utils.cpp
     ${TORCH_SRC_DIR}/csrc/utils/cuda_lazy_init.cpp
+    ${TORCH_SRC_DIR}/csrc/utils/hammerblade_lazy_init.cpp
     ${TORCH_SRC_DIR}/csrc/utils/invalid_arguments.cpp
     ${TORCH_SRC_DIR}/csrc/utils/object_ptr.cpp
     ${TORCH_SRC_DIR}/csrc/utils/python_arg_parser.cpp
