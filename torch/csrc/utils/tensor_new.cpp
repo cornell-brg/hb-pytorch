@@ -7,6 +7,7 @@
 #include <torch/csrc/autograd/variable.h>
 #include <torch/csrc/utils/auto_gil.h>
 #include <torch/csrc/utils/cuda_lazy_init.h>
+#include <torch/csrc/utils/hammerblade_lazy_init.h>
 #include <torch/csrc/utils/numpy_stub.h>
 #include <torch/csrc/utils/python_arg_parser.h>
 #include <torch/csrc/utils/python_numbers.h>
@@ -31,6 +32,7 @@ using at::DeviceType;
 using at::IntArrayRef;
 using at::kCPU;
 using at::kCUDA;
+using at::kHAMMERBLADE;
 using at::kLong;
 using at::Scalar;
 using at::ScalarType;

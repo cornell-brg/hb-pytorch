@@ -95,7 +95,7 @@ RENAME_ATTRIBUTES = {
 DONT_PROFILE = {
     'data_ptr', 'get_device', 'is_contiguous', 'is_cuda', 'is_distributed',
     'is_same_size', 'is_set_to', 'is_signed', 'is_sparse', 'numel',
-    'size', 'storage_offset', 'stride',
+    'size', 'storage_offset', 'stride', 'is_hammerblade'
 }
 
 # We don't set or modify grad_fn on these methods. Generally, they return

@@ -15,7 +15,10 @@
 #include "torch/csrc/cuda/Stream.h"
 #include "torch/csrc/cuda/Event.h"
 #endif
+#ifdef USE_HB
+#endif
 #include "torch/csrc/utils/cuda_lazy_init.h"
+#include "torch/csrc/utils/hammerblade_lazy_init.h"
 #include "torch/csrc/utils/object_ptr.h"
 #include "torch/csrc/utils/python_arg_parser.h"
 #include "torch/csrc/utils/python_numbers.h"
@@ -418,6 +421,24 @@ static PyObject * THPVariable_cuda(PyObject* self, PyObject* args, PyObject* kwa
   END_HANDLE_TH_ERRORS
 }
 
+static PyObject * THPVariable_hammerblade(PyObject* self, PyObject* args, PyObject* kwargs)
+{
+  HANDLE_TH_ERRORS
+  static PythonArgParser parser({
+    "hammerblade(Device? device=None, bool non_blocking=False, *, MemoryFormat? memory_format=None)",
+    "hammerblade(Device? device=None, bool async=False, *, MemoryFormat? memory_format=None)|deprecated"
+  });
+  auto& self_ = reinterpret_cast<THPVariable*>(self)->cdata;
+  ParsedArgs<3> parsed_args;
+  auto r = parser.parse(args, kwargs, parsed_args);
+  auto device = r.isNone(0) ? at::Device(at::DeviceType::HAMMERBLADE) : r.device(0);
+  auto opt_memory_format = r.memoryformatOptional(2);
+  TORCH_CHECK(device.is_hammerblade(), "Invalid device, must be HammerBlade device");
+  torch::utils::hammerblade_lazy_init();
+  return THPVariable_Wrap(dispatch_to(self_, device, r.toBool(1), false, opt_memory_format));
+  END_HANDLE_TH_ERRORS
+}
+
 static PyObject * THPVariable_to_type(PyObject* self, ScalarType scalarType, c10::optional<c10::MemoryFormat> optional_memory_format) {
   HANDLE_TH_ERRORS
   auto& self_ = reinterpret_cast<THPVariable*>(self)->cdata;
@@ -732,6 +753,9 @@ static PyObject * THPVariable_to(PyObject* self, PyObject* args, PyObject* kwarg
   if (device && device->is_cuda()) {
     torch::utils::cuda_lazy_init();
   }
+  if (device && device->is_hammerblade()) {
+    torch::utils::hammerblade_lazy_init();
+  }
   if (!device && !scalarType && !copy) {
     Py_INCREF(self);
     return self;
@@ -800,6 +824,9 @@ static PyObject * THPVariable_type(PyObject* self, PyObject* args, PyObject* kwa
   if (device.is_cuda()) {
     torch::utils::cuda_lazy_init();
   }
+  if (device.is_hammerblade()) {
+    torch::utils::hammerblade_lazy_init();
+  }
   return THPVariable_Wrap(dispatch_to(self_, device, scalar_type, /*non_blocking=*/ r.toBool(1), /*copy=*/ false, opt_memory_format));
   END_HANDLE_TH_ERRORS
 }
@@ -856,6 +883,7 @@ PyMethodDef variable_methods[] = {
   {"copy_", (PyCFunction)(void(*)(void))THPVariable_copy_, METH_VARARGS | METH_KEYWORDS, NULL},
   {"cpu", (PyCFunction)(void(*)(void))THPVariable_cpu, METH_VARARGS | METH_KEYWORDS, NULL},
   {"cuda", (PyCFunction)(void(*)(void))THPVariable_cuda, METH_VARARGS | METH_KEYWORDS, NULL},
+  {"hammerblade", (PyCFunction)(void(*)(void))THPVariable_hammerblade, METH_VARARGS | METH_KEYWORDS, NULL},
   {"data_ptr", (PyCFunction)THPVariable_data_ptr, METH_NOARGS, NULL},
   {"dim", (PyCFunction)THPVariable_dim, METH_NOARGS, NULL},
 #ifdef BUILD_NAMEDTENSOR
