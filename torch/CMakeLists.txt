@@ -206,6 +206,10 @@ if (USE_NUMPY)
 endif()
 
 if (USE_HB)
+    list(APPEND TORCH_PYTHON_SRCS
+      ${TORCH_SRC_DIR}/csrc/hammerblade/Module.cpp
+      ${TORCH_SRC_DIR}/csrc/hammerblade/python_comm.cpp
+      )
   list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS USE_HB)
 endif()
 

@@ -581,6 +581,15 @@ void initModule(PyObject *module);
 }} // namespace torch::cuda
 #endif
 
+#ifdef USE_HB
+PyMethodDef* THBPModule_methods();
+namespace torch { namespace hammerblade {
+
+void initModule(PyObject *module);
+
+}} // namespace torch::hammerblade
+#endif
+
 bool THDPDoubleStorage_init(PyObject *module);
 bool THDPFloatStorage_init(PyObject *module);
 // TODO: fix
@@ -644,6 +653,9 @@ PyObject* initModule() {
 #ifdef USE_CUDNN
   THPUtils_addPyMethodDefs(methods, THCUDNN_methods());
 #endif
+#ifdef USE_HB
+  THPUtils_addPyMethodDefs(methods, THBPModule_methods());
+#endif
 #ifdef USE_DISTRIBUTED
 #ifdef USE_C10D
   THPUtils_addPyMethodDefs(methods, torch::distributed::c10d::python_functions());
@@ -689,6 +701,9 @@ PyObject* initModule() {
   torch::python::init_bindings(module);
 #ifdef USE_CUDA
   torch::cuda::initModule(module);
+#endif
+#ifdef USE_HB
+  torch::hammerblade::initModule(module);
 #endif
   ASSERT_TRUE(THPDoubleStorage_init(module));
   ASSERT_TRUE(THPFloatStorage_init(module));
