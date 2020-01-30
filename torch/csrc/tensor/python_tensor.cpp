@@ -13,6 +13,8 @@
 #include <torch/csrc/autograd/utils/wrap_outputs.h>
 #include <torch/csrc/utils/cuda_enabled.h>
 #include <torch/csrc/utils/cuda_lazy_init.h>
+#include <torch/csrc/utils/hammerblade_enabled.h>
+#include <torch/csrc/utils/hammerblade_lazy_init.h>
 #include <torch/csrc/utils/python_strings.h>
 #include <torch/csrc/utils/tensor_new.h>
 #include <torch/csrc/utils/tensor_types.h>
@@ -34,6 +36,7 @@ struct PyTensorType {
   THPDtype* dtype;
   THPLayout* layout;
   bool is_cuda;
+  bool is_hammerblade;
   char name[64];
   int backend;
   int scalar_type;
@@ -66,6 +69,8 @@ static PyObject* Tensor_new(PyTypeObject *type, PyObject *args, PyObject *kwargs
   HANDLE_TH_ERRORS
   auto& tensor_type = *((PyTensorType*)type);
   if (tensor_type.is_cuda && !torch::utils::cuda_enabled()) {
+    throw unavailable_type(tensor_type);
+  } else if (tensor_type.is_hammerblade && !torch::utils::hammerblade_enabled()) {
     throw unavailable_type(tensor_type);
   }
   return THPVariable_Wrap(torch::utils::legacy_tensor_ctor(tensor_type.get_type_id(), tensor_type.get_scalar_type(), args, kwargs));
@@ -114,6 +119,14 @@ PyObject *Tensor_is_cuda(PyTensorType* self, void *unused) {
   }
 }
 
+PyObject *Tensor_is_hammerblade(PyTensorType* self, void *unused) {
+  if (self->is_hammerblade) {
+    Py_RETURN_TRUE;
+  } else {
+    Py_RETURN_FALSE;
+  }
+}
+
 PyObject *Tensor_is_sparse(PyTensorType *self, void *unused) {
   if (self->layout->layout == at::Layout::Strided) {
     Py_RETURN_FALSE;
@@ -133,6 +146,7 @@ static struct PyGetSetDef metaclass_properties[] = {
   {"dtype",        (getter)Tensor_dtype, nullptr, nullptr, nullptr},
   {"layout",       (getter)Tensor_layout, nullptr, nullptr, nullptr},
   {"is_cuda",      (getter)Tensor_is_cuda, nullptr, nullptr, nullptr},
+  {"is_hammerblade",(getter)Tensor_is_hammerblade, nullptr, nullptr, nullptr},
   {"is_sparse",    (getter)Tensor_is_sparse, nullptr, nullptr, nullptr},
   {nullptr}
 };
@@ -179,6 +193,7 @@ static const char* get_module(Backend backend) {
   switch (backend) {
     case Backend::CPU: return "torch";
     case Backend::CUDA: return "torch.cuda";
+    case Backend::HammerBlade: return "torch.hammerblade";
     case Backend::SparseCPU: return "torch.sparse";
     case Backend::SparseCUDA: return "torch.cuda.sparse";
     default: AT_ERROR("invalid backend: ", toString(backend));
@@ -211,6 +226,7 @@ static void set_type(PyTensorType& type_obj, Backend backend, ScalarType scalarT
   type_obj.layout = torch::getLayout(backend);
   type_obj.dtype = torch::getDtype(scalarType);
   type_obj.is_cuda = (backend == at::Backend::CUDA || backend == at::Backend::SparseCUDA);
+  type_obj.is_hammerblade = (backend == at::Backend::HammerBlade);
 }
 
 static void set_name(PyTensorType& type_obj, const std::string& name) {
@@ -358,6 +374,9 @@ void py_set_default_tensor_type(PyObject* obj) {
     throw TypeError("invalid type object");
   }
   if (type->is_cuda && !torch::utils::cuda_enabled()) {
+    throw unavailable_type(*type);
+  }
+  if (type->is_hammerblade && !torch::utils::hammerblade_enabled()) {
     throw unavailable_type(*type);
   }
   set_default_tensor_type(type);
