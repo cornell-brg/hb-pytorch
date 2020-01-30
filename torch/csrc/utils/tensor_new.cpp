@@ -58,6 +58,9 @@ Backend backendToBackendOfDeviceType(Backend b, DeviceType d) {
     case DeviceType::XLA:
       TORCH_CHECK(!isSparse(b), "Sparse not implemented for XLA");
       return Backend::XLA;
+    case DeviceType::HAMMERBLADE:
+      TORCH_CHECK(!isSparse(b), "Sparse not implemented for HammerBlade");
+      return backendToHammerBlade(b);
     default:
       AT_ERROR("Unknown device type");
   }
@@ -85,26 +88,42 @@ void maybe_initialize_cuda(const Device device) {
   }
 }
 
+void maybe_initialize_hammerblade(c10::TensorTypeId type_id) {
+  if (backendToDeviceType(tensorTypeIdToBackend(type_id)) == kHAMMERBLADE) {
+    torch::utils::hammerblade_lazy_init();
+  }
+}
+
+void maybe_initialize_hammerblade(const Device device) {
+  if (device.is_hammerblade()) {
+    torch::utils::hammerblade_lazy_init();
+  }
+}
+
 Tensor dispatch_zeros(c10::TensorTypeId type_id, at::ScalarType scalar_type, const optional<Device>& device, IntArrayRef sizes) {
   maybe_initialize_cuda(type_id);
+  maybe_initialize_hammerblade(type_id);
   AutoNoGIL no_gil;
   return torch::zeros(sizes, options(type_id, scalar_type, device));
 }
 
 Tensor dispatch_ones(c10::TensorTypeId type_id, at::ScalarType scalar_type, const optional<Device>& device, IntArrayRef sizes) {
   maybe_initialize_cuda(type_id);
+  maybe_initialize_hammerblade(type_id);
   AutoNoGIL no_gil;
   return torch::ones(sizes, options(type_id, scalar_type, device));
 }
 
 Tensor dispatch_full(c10::TensorTypeId type_id, at::ScalarType scalar_type, Scalar fill_value, const optional<Device>& device, IntArrayRef sizes) {
   maybe_initialize_cuda(type_id);
+  maybe_initialize_hammerblade(type_id);
   AutoNoGIL no_gil;
   return torch::full(sizes, fill_value, options(type_id, scalar_type, device));
 }
 
 Tensor new_with_sizes(c10::TensorTypeId type_id, at::ScalarType scalar_type, const optional<Device>& device, IntArrayRef sizes) {
   maybe_initialize_cuda(type_id);
+  maybe_initialize_hammerblade(type_id);
   AutoNoGIL no_gil;
   return torch::empty(sizes, options(type_id, scalar_type, device));
 }
@@ -249,6 +268,7 @@ Tensor internal_new_from_data(
     auto device = device_opt.has_value() ? *device_opt : (type_inference ? var.device() : at::Device(computeDeviceType(type_id)));
     AutoNoGIL no_gil;
     maybe_initialize_cuda(device);
+    maybe_initialize_hammerblade(device);
     return var.to(device, inferred_scalar_type, /*non_blocking=*/false, /*copy=*/copy_variables);
   }
 
@@ -260,6 +280,7 @@ Tensor internal_new_from_data(
     auto device = device_opt.has_value() ? *device_opt : at::Device(computeDeviceType(type_id));
     AutoNoGIL no_gil;
     maybe_initialize_cuda(device);
+    maybe_initialize_hammerblade(device);
     return tensor.to(device, inferred_scalar_type, /*non_blocking=*/false, /*copy=*/copy_numpy);
   }
 
@@ -270,6 +291,7 @@ Tensor internal_new_from_data(
     auto device = device_opt.has_value() ? *device_opt : at::Device(computeDeviceType(type_id));
     AutoNoGIL no_gil;
     maybe_initialize_cuda(device);
+    maybe_initialize_hammerblade(device);
     return tensor.to(device, inferred_scalar_type, /*non_blocking=*/false, /*copy=*/copy_numpy);
   }
 #endif
@@ -290,6 +312,7 @@ Tensor internal_new_from_data(
   auto device = device_opt.has_value() ? *device_opt : at::Device(computeDeviceType(type_id));
   AutoNoGIL no_gil;
   maybe_initialize_cuda(device);
+  maybe_initialize_hammerblade(device);
   // However, it is VERY important that we trace the to() call here (even
   // though the reason this is important is a hack).  Without *some* factory
   // function call that is traced at construction time, we will consider

@@ -19,6 +19,7 @@ static const char* backend_to_string(const at::Backend& backend) {
   switch (backend) {
     case at::Backend::CPU: return "torch";
     case at::Backend::CUDA: return "torch.cuda";
+    case at::Backend::HammerBlade: return "torch.hammerblade";
     case at::Backend::SparseCPU: return "torch.sparse";
     case at::Backend::SparseCUDA: return "torch.cuda.sparse";
     // We split complex into its own backend, but keeping it the same here for now
@@ -36,10 +37,13 @@ std::string type_to_string(const at::DeprecatedTypeProperties& type) {
 
 at::DeprecatedTypeProperties* type_from_string(const std::string& str) {
   static std::string cuda_prefix("torch.cuda.");
+  static std::string hammerblade_prefix("torch.hammerblade.");
   static std::once_flag cpu_once;
   static std::once_flag cuda_once;
+  static std::once_flag hammerblade_once;
   static std::unordered_map<std::string, at::DeprecatedTypeProperties*> cpu_map;
   static std::unordered_map<std::string, at::DeprecatedTypeProperties*> cuda_map;
+  static std::unordered_map<std::string, at::DeprecatedTypeProperties*> hammerblade_map;
 
   const std::unordered_map<std::string, at::DeprecatedTypeProperties*>* map = nullptr;
 
@@ -57,6 +61,14 @@ at::DeprecatedTypeProperties* type_from_string(const std::string& str) {
       }
     });
     map = &cuda_map;
+  } else if (std::mismatch(hammerblade_prefix.begin(), hammerblade_prefix.end(), str.begin()).first == hammerblade_prefix.end()) {
+    // torch.hammerblade. is prefix of str
+    std::call_once(hammerblade_once, []() {
+      for (auto type : autograd::VariableType::allHammerBladeTypes()) {
+        hammerblade_map.emplace(type_to_string(*type), type);
+      }
+    });
+    map = &hammerblade_map;
   } else {
     std::call_once(cpu_once, []() {
       for (auto type : autograd::VariableType::allCPUTypes()) {
@@ -76,7 +88,7 @@ at::DeprecatedTypeProperties* type_from_string(const std::string& str) {
 std::vector<std::pair<Backend, ScalarType>> all_declared_types() {
   std::vector<std::pair<Backend, ScalarType>> ret;
   // can't easily iterate over enum classes
-  std::vector<Backend> backends = { Backend::CPU, Backend::CUDA, Backend::SparseCPU, Backend::SparseCUDA };
+  std::vector<Backend> backends = { Backend::CPU, Backend::CUDA, Backend::HammerBlade, Backend::SparseCPU, Backend::SparseCUDA };
   std::vector<ScalarType> scalar_types = { ScalarType::Byte, ScalarType::Char, ScalarType::Double, ScalarType::Float,
                                            ScalarType::Int, ScalarType::Long, ScalarType::Short, ScalarType::Half,
                                            ScalarType::Bool, ScalarType::BFloat16};
