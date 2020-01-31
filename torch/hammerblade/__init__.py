@@ -120,7 +120,7 @@ class device(object):
         #self.prev_idx = torch._C._hammerblade_getDevice()
         #if self.prev_idx != self.idx:
         #    torch._C._hammerblade_setDevice(self.idx)
-        #_lazy_init()
+        _lazy_init()
 
     def __exit__(self, *args):
         assert self.idx == self.prev_idx
