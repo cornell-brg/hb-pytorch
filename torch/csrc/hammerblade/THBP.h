@@ -5,11 +5,11 @@
 
 #include <torch/csrc/THP.h>
 #include <torch/csrc/hammerblade/Module.h>
-// #include <torch/csrc/opencl/Storage.h>
-// #include <torch/csrc/opencl/Stream.h>
-// #include <torch/csrc/opencl/Event.h>
+// #include <torch/csrc/hammerblade/Storage.h>
+// #include <torch/csrc/hammerblade/Stream.h>
+// #include <torch/csrc/hammerblade/Event.h>
 // #ifdef _THP_CORE
-// #include <torch/csrc/opencl/utils.h>
+// #include <torch/csrc/hammerblade/utils.h>
 // #endif
 
 #endif

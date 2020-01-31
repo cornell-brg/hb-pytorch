@@ -6,6 +6,7 @@ from ._utils import _type, _cuda
 
 class _StorageBase(object):
     is_cuda = False
+    is_hammerblade = False
     is_sparse = False
 
     def __str__(self):

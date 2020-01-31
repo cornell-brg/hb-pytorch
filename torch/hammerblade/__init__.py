@@ -19,7 +19,7 @@ _queued_calls = []  # don't invoke these until initialization occurs
 _in_bad_fork = False  # this global is also used in torch.manual_seed
 _original_pid = False
 
-class DeferredOpenCLCallError(Exception):
+class DeferredHammerBladeCallError(Exception):
     pass
 
 
@@ -117,22 +117,22 @@ class device(object):
         assert self.idx == self.prev_idx
         #if self.idx == -1:
         #    return
-        #self.prev_idx = torch._C._opencl_getDevice()
+        #self.prev_idx = torch._C._hammerblade_getDevice()
         #if self.prev_idx != self.idx:
-        #    torch._C._opencl_setDevice(self.idx)
+        #    torch._C._hammerblade_setDevice(self.idx)
         #_lazy_init()
 
     def __exit__(self, *args):
         assert self.idx == self.prev_idx
         #if self.prev_idx != self.idx:
-        #    torch._C._opencl_setDevice(self.prev_idx)
+        #    torch._C._hammerblade_setDevice(self.prev_idx)
         #return False
 
 
 def current_device():
     r"""Returns the index of a currently selected device."""
     _lazy_init()
-    return torch._C._opencl_getDevice()
+    return torch._C._hammerblade_getDevice()
 
 ################################################################################
 # Define Storage and Tensor classes

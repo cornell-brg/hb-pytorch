@@ -482,6 +482,7 @@ def _lazy_new(cls, *args, **kwargs):
 
 class _CudaBase(object):
     is_cuda = True
+    is_hammerblade = False
     is_sparse = False
 
     def type(self, *args, **kwargs):
