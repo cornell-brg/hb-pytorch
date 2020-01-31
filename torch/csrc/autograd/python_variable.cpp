@@ -452,6 +452,14 @@ PyObject *THPVariable_is_cuda(THPVariable *self, void *unused)
   END_HANDLE_TH_ERRORS
 }
 
+PyObject *THPVariable_is_hammerblade(THPVariable *self, void *unused)
+{
+  HANDLE_TH_ERRORS
+  auto& self_ = self->cdata;
+  return torch::autograd::utils::wrap(self_.is_hammerblade());
+  END_HANDLE_TH_ERRORS
+}
+
 PyObject *THPVariable_is_sparse(THPVariable *self, void *unused)
 {
   HANDLE_TH_ERRORS
@@ -515,6 +523,7 @@ static struct PyGetSetDef THPVariable_properties[] = {
   {"name", (getter)THPVariable_get_name, nullptr, nullptr, nullptr},
   {"shape", (getter)THPVariable_get_shape, nullptr, nullptr, nullptr},
   {"is_cuda", (getter)THPVariable_is_cuda, nullptr, nullptr, nullptr},
+  {"is_hammerblade", (getter)THPVariable_is_hammerblade, nullptr, nullptr, nullptr},
   {"is_sparse", (getter)THPVariable_is_sparse, nullptr, nullptr, nullptr},
   {"is_mkldnn", (getter)THPVariable_is_mkldnn, nullptr, nullptr, nullptr},
   {"is_quantized", (getter)THPVariable_is_quantized, nullptr, nullptr, nullptr},
