@@ -35,6 +35,11 @@ C10_EXPORT std::vector<at::DeprecatedTypeProperties*> allCUDATypes() {
   return allTypesForBackends({ Backend::CUDA, Backend::SparseCUDA });
 }
 
+C10_EXPORT std::vector<at::DeprecatedTypeProperties*> allHammerBladeTypes() {
+  at::globalContext().lazyInitHammerBlade();
+  return allTypesForBackends({ Backend::HammerBlade });
+}
+
 const Variable & checked_cast_variable(const Tensor & t, const char * name, int pos) {
   if (!t.defined()) {
     AT_ERROR("Expected a Tensor of type Variable but found an undefined Tensor for argument #", pos, " '", name, "'");

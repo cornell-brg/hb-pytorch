@@ -277,7 +277,7 @@ int THPVariable_set_grad(THPVariable *self, PyObject *py_grad, void *unused)
                        grad.layout() == kSparse);
   THPUtils_assertRet(-1, grad.type() == var.type() || gradIsSparse,
       "assigned grad has data of a different type");
-  if (var.is_cuda()) {
+  if (var.is_cuda() || var.is_hammerblade()) {
     THPUtils_assertRet(-1, grad.get_device() == var.get_device(),
         "assigned grad has data located on a different device");
   }
