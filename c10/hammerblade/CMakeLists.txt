@@ -33,6 +33,7 @@ endforeach()
 
 add_library(c10_hammerblade ${C10_HAMMERBLADE_SRCS} ${C10_HAMMERBLADE_HEADERS})
 
+
 # If building shared library, set dllimport/dllexport proper.
 target_compile_options(c10_hammerblade PRIVATE "-DC10_HAMMERBLADE_BUILD_MAIN_LIB")
 # Enable hidden visibility if compiler supports it.
@@ -44,13 +45,18 @@ endif()
 target_link_libraries(c10_hammerblade PUBLIC c10)
 
 # Dependency to bsg_manycore
-# target_link_libraries(c10_hammerblade BSG_MANYCORE)
+if( NOT DEFINED ENV{BSG_MANYCORE_DIR} )
+  message( FATAL_ERROR "BSG_MANYCORE_DIR not set: Please set BSG_MANYCORE_DIR to bsg_f1/libraries location.")
+endif()
+find_library(BSG_MANYCORE_RUNTIME_LIB bsg_manycore_runtime HINTS $ENV{BSG_MANYCORE_DIR})
+target_link_libraries(c10_hammerblade PUBLIC ${BSG_MANYCORE_RUNTIME_LIB})
 
 target_include_directories(
     c10_hammerblade PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
     $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
-    $<INSTALL_INTERFACE:include>)
+    $<INSTALL_INTERFACE:include>
+    $ENV{BSG_MANYCORE_DIR})
 
 # ---[ Installation
 install(TARGETS c10_hammerblade EXPORT Caffe2Targets DESTINATION lib)

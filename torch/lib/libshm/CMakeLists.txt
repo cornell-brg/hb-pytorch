@@ -39,6 +39,12 @@ SET_TARGET_PROPERTIES(shm PROPERTIES
   IMPORT_PREFIX "lib")
 TARGET_LINK_LIBRARIES(shm torch c10)
 
+if(USE_HB)
+  message(STATUS "Building with HammerBlade, --allow-shlib-undefined flag is added")
+  message(STATUS "This could potentially be dangerous.")
+  set_target_properties(torch_shm_manager PROPERTIES LINK_OPTIONS -Wl,--allow-shlib-undefined)
+endif()
+
 if(UNIX AND NOT APPLE)
   include(CheckLibraryExists)
   # https://github.com/libgit2/libgit2/issues/2128#issuecomment-35649830

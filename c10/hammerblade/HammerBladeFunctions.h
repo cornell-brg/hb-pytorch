@@ -7,14 +7,18 @@
 //
 // The naming convention used here matches the naming convention of torch.cuda
 
-/*
- * inlcude bsg_manycore.h here
- * #include <bsg_manycore.h>
- */
-
 // #include <c10/macros/Macros.h>
 #include <c10/hammerblade/HammerBladeMacros.h>
 #include <c10/core/Device.h>
+
+/*
+ * inlcude bsg_manycore.h here
+ */
+#include <bsg_manycore_cuda.h>
+#include <bsg_manycore_tile.h>
+#include <bsg_manycore_loader.h>
+#include <bsg_manycore_errno.h>
+#include <bsg_manycore_printing.h>
 
 namespace c10 {
 namespace hammerblade {

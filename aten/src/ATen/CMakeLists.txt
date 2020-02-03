@@ -96,6 +96,16 @@ if(AT_MKLDNN_ENABLED)
   set(all_cpu_cpp ${all_cpu_cpp} ${mkldnn_cpp})
 endif()
 
+# get bsg_manycore libraries
+if(USE_HB)
+  if( NOT DEFINED ENV{BSG_MANYCORE_DIR} )
+    message( FATAL_ERROR "BSG_MANYCORE_DIR not set: Please set BSG_MANYCORE_DIR to bsg_f1/libraries location.")
+  endif()
+  list(APPEND ATen_CPU_INCLUDE $ENV{BSG_MANYCORE_DIR})
+  find_library(BSG_MANYCORE_RUNTIME_LIB bsg_manycore_runtime HINTS $ENV{BSG_MANYCORE_DIR})
+  list(APPEND ATen_CPU_DEPENDENCY_LIBS ${BSG_MANYCORE_RUNTIME_LIB})
+endif()
+
 if(USE_HB)
   set(all_cpu_cpp ${all_cpu_cpp} ${hammerblade_cpp} ${native_hammerblade_cpp} ${hammerblade_generated_cpp})
 endif()

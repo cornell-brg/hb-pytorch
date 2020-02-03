@@ -1,17 +1,3 @@
-#pragma once
-
-// This header provides C++ wrappers around commonly used HB API functions.
-// The benefit of using C++ here is that we can raise an exception in the
-// event of an error, rather than explicitly pass around error codes.  This
-// leads to more natural APIs.
-//
-// The naming convention used here matches the naming convention of torch.cuda
-
-/*
- * inlcude bsg_manycore.h here
- * #include <bsg_manycore.h>
- */
-
 #include "HammerBladeFunctions.h"
 
 #include <mutex>
@@ -19,11 +5,18 @@
 namespace c10 {
 namespace hammerblade {
 
+static hb_mc_dimension_t _hb_tg_dim = { .x = 2, .y = 2};
+static hb_mc_dimension_t _hb_grid_dim = { .x = 1, .y = 1};
+static hb_mc_device_t _hb_device;
+
 namespace {
 static std::once_flag init_flag;
 static void initHammerBladeDevice() {
-  //TODO: put real HammerBlade init code here
-  AT_WARN("FAKE initialization of HammerBlade Device!");
+  int rc = hb_mc_device_init(&_hb_device, "HB_PYTORCH_PORT", 0);
+  if (rc != HB_MC_SUCCESS) {
+    AT_ERROR("HammerBlade: failed to initialize device!");
+  }
+  AT_WARN("HammerBlade Device Initialized\n");
   return;
 }
 } // namespace unnamed
