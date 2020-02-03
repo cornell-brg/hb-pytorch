@@ -9,7 +9,7 @@
 namespace at {
 namespace hammerblade {
 
-Allocator* getHAMMERBLADEDeviceAllocator() {
+Allocator* getHammerBladeDeviceAllocator() {
   return at::GetAllocator(DeviceType::HAMMERBLADE);
 }
 

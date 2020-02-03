@@ -11,7 +11,7 @@ inline bool is_available() {
   return c10::hammerblade::device_count() > 0;
 }
 
-CAFFE2_API Allocator* getHAMMERBLADEDeviceAllocator();
+CAFFE2_API Allocator* getHammerBladeDeviceAllocator();
 
 } // namespace hammerblade
 } // namespace at

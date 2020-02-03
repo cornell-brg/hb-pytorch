@@ -36,7 +36,7 @@ Tensor empty_hb(IntArrayRef size, const TensorOptions& options, c10::optional<c1
   TORCH_INTERNAL_ASSERT(impl::variable_excluded_from_dispatch());
   check_size_nonnegative(size);
 
-  c10::Allocator* allocator = at::hammerblade::getHAMMERBLADEDeviceAllocator();
+  c10::Allocator* allocator = at::hammerblade::getHammerBladeDeviceAllocator();
 
   int64_t nelements = prod_intlist(size);
   auto dtype = options.dtype();
