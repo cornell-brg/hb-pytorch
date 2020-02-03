@@ -143,56 +143,10 @@ struct C10_API DefaultCPUAllocator final : at::Allocator {
 
 };
 
-/*
- * Fake HammerBlade Allocator
- * which is the same as DefaultCPUAllocator
- */
-struct C10_API DefaultHAMMERBLADEAllocator final : at::Allocator {
-  DefaultHAMMERBLADEAllocator() {}
-  ~DefaultHAMMERBLADEAllocator() override {}
-  at::DataPtr allocate(size_t nbytes) const override {
-    void* data = alloc_cpu(nbytes);
-    if (FLAGS_caffe2_report_cpu_memory_usage && nbytes > 0) {
-      getMemoryAllocationReporter().New(data, nbytes);
-      return {data, data, &ReportAndDelete, at::Device(at::DeviceType::HAMMERBLADE)};
-    }
-    return {data, data, &free_cpu, at::Device(at::DeviceType::HAMMERBLADE)};
-  }
-
-  static void ReportAndDelete(void* ptr) {
-    if (!ptr) {
-      return;
-    }
-    getMemoryAllocationReporter().Delete(ptr);
-    free_cpu(ptr);
-  }
-
-  at::DeleterFnPtr raw_deleter() const override {
-    if (FLAGS_caffe2_report_cpu_memory_usage) {
-      return &ReportAndDelete;
-    }
-    return &free_cpu;
-  }
-
- protected:
-  static MemoryAllocationReporter& getMemoryAllocationReporter() {
-    static MemoryAllocationReporter reporter_;
-    return reporter_;
-  }
-
-};
-
 void NoDelete(void*) {}
 
 at::Allocator* GetCPUAllocator() {
   return GetAllocator(DeviceType::CPU);
-}
-
-/*
- * Fake HammerBlade Allocator
- */
-at::Allocator* GetHAMMERBLADEAllocator() {
-  return GetAllocator(DeviceType::HAMMERBLADE);
 }
 
 void SetCPUAllocator(at::Allocator* alloc) {
@@ -201,32 +155,12 @@ void SetCPUAllocator(at::Allocator* alloc) {
 
 // Global default CPU Allocator
 static DefaultCPUAllocator g_cpu_alloc;
-/*
- * Fake global default HammerBlade Allocator
- */
-static DefaultHAMMERBLADEAllocator g_hb_alloc;
 
 at::Allocator* GetDefaultCPUAllocator() {
   return &g_cpu_alloc;
 }
 
-/*
- * Fake HammerBlade Allocator
- */
-at::Allocator* GetDefaultHAMMERBLADEAllocator() {
-  return &g_hb_alloc;
-}
-
 REGISTER_ALLOCATOR(DeviceType::CPU, &g_cpu_alloc);
-
-/*
- * This is a hack to register cpu alloctor as HB allocator
- * REGISTER_ALLOCATOR(DeviceType::HAMMERBLADE, &g_hb_alloc);
- * which is essentially manually expand this macro.
- */
-namespace {
-  static AllocatorRegisterer<DeviceType::HAMMERBLADE> g_hb_allocator_d(&g_hb_alloc);
-}
 
 void MemoryAllocationReporter::New(void* ptr, size_t nbytes) {
   std::lock_guard<std::mutex> guard(mutex_);

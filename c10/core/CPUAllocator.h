@@ -39,8 +39,4 @@ C10_API void SetCPUAllocator(at::Allocator* alloc);
 // Get the Default CPU Allocator
 C10_API at::Allocator* GetDefaultCPUAllocator();
 
-// Fake HammerBlade Allocator
-C10_API at::Allocator* GetHAMMERBLADEAllocator();
-C10_API at::Allocator* GetDefaultHAMMERBLADEAllocator();
-
 } // namespace c10
