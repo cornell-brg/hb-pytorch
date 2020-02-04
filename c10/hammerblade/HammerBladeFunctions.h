@@ -29,4 +29,11 @@ C10_HAMMERBLADE_API DeviceIndex current_device();
 
 C10_HAMMERBLADE_API void set_device(DeviceIndex device);
 
+//----------------------------------------------------------------------------------------
+// Interface to bsg_manycore runtime
+//----------------------------------------------------------------------------------------
+
+C10_HAMMERBLADE_API int memcpy_host_to_device(void *dst, const void *src, uint32_t nbytes);
+C10_HAMMERBLADE_API int memcpy_device_to_host(void *dst, const void *src, uint32_t nbytes);
+
 }} // namespace c10::hammerblade
