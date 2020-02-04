@@ -8,18 +8,12 @@ namespace hammerblade {
 namespace {
 static std::once_flag init_flag;
 static void initHammerBladeDevice() {
-  int rc = hb_mc_device_init(&_hb_device, "HB_PYTORCH_PORT", 0);
-  if (rc != HB_MC_SUCCESS) {
-    AT_ERROR("HammerBlade: failed to initialize device!");
-  }
+  C10_HB_CHECK(hb_mc_device_init(&_hb_device, "HB_PYTORCH_PORT", 0));
 
   // XXX: apparently you need to load a binary file to setup allocator ...
   char bin_path[] = "/work/global/lc873/work/sdh/cosim/"
     "bsg_bladerunner/bsg_manycore/software/torch/add/add.riscv";
-  rc = hb_mc_device_program_init(&_hb_device, bin_path, "default_allocator", 0);
-  if (rc != HB_MC_SUCCESS) {
-    AT_ERROR("HammerBlade: failed to initialize device!");
-  }
+  C10_HB_CHECK(hb_mc_device_program_init(&_hb_device, bin_path, "default_allocator", 0));
 
   AT_WARN("HammerBlade Device Initialized\n");
   return;

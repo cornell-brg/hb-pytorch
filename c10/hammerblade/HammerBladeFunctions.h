@@ -10,6 +10,7 @@
 // #include <c10/macros/Macros.h>
 #include <c10/hammerblade/HammerBladeMacros.h>
 #include <c10/hammerblade/HammerBladeDevice.h>
+#include <c10/hammerblade/HammerBladeException.h>
 #include <c10/core/Device.h>
 
 /*
@@ -18,8 +19,6 @@
 #include <bsg_manycore_cuda.h>
 #include <bsg_manycore_tile.h>
 #include <bsg_manycore_loader.h>
-#include <bsg_manycore_errno.h>
-#include <bsg_manycore_printing.h>
 
 namespace c10 {
 namespace hammerblade {

@@ -7,6 +7,7 @@
 #include <c10/util/Logging.h>
 #include <c10/util/numa.h>
 #include <c10/hammerblade/HammerBladeDevice.h>
+#include <c10/hammerblade/HammerBladeException.h>
 
 namespace c10 {
 
