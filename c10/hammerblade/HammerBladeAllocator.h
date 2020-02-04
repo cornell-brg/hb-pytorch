@@ -6,6 +6,7 @@
 #include <c10/core/Allocator.h>
 #include <c10/util/Logging.h>
 #include <c10/util/numa.h>
+#include <c10/hammerblade/HammerBladeDevice.h>
 
 namespace c10 {
 

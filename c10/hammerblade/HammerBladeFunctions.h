@@ -9,6 +9,7 @@
 
 // #include <c10/macros/Macros.h>
 #include <c10/hammerblade/HammerBladeMacros.h>
+#include <c10/hammerblade/HammerBladeDevice.h>
 #include <c10/core/Device.h>
 
 /*

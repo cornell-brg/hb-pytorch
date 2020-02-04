@@ -5,10 +5,6 @@
 namespace c10 {
 namespace hammerblade {
 
-static hb_mc_dimension_t _hb_tg_dim = { .x = 2, .y = 2};
-static hb_mc_dimension_t _hb_grid_dim = { .x = 1, .y = 1};
-static hb_mc_device_t _hb_device;
-
 namespace {
 static std::once_flag init_flag;
 static void initHammerBladeDevice() {
@@ -16,6 +12,15 @@ static void initHammerBladeDevice() {
   if (rc != HB_MC_SUCCESS) {
     AT_ERROR("HammerBlade: failed to initialize device!");
   }
+
+  // XXX: apparently you need to load a binary file to setup allocator ...
+  char bin_path[] = "/work/global/lc873/work/sdh/cosim/"
+    "bsg_bladerunner/bsg_manycore/software/torch/add/add.riscv";
+  rc = hb_mc_device_program_init(&_hb_device, bin_path, "default_allocator", 0);
+  if (rc != HB_MC_SUCCESS) {
+    AT_ERROR("HammerBlade: failed to initialize device!");
+  }
+
   AT_WARN("HammerBlade Device Initialized\n");
   return;
 }
