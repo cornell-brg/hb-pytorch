@@ -277,6 +277,7 @@
   dispatch:
     CPU: add
     CUDA: add
+    HammerBlade: add
     SparseCPU: add_sparse
     SparseCUDA: add_sparse
     MkldnnCPU: mkldnn_add

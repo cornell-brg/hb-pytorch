@@ -17,8 +17,6 @@
  * inlcude bsg_manycore.h here
  */
 #include <bsg_manycore_cuda.h>
-#include <bsg_manycore_tile.h>
-#include <bsg_manycore_loader.h>
 
 namespace c10 {
 namespace hammerblade {

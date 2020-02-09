@@ -12,7 +12,7 @@ static void initHammerBladeDevice() {
 
   // XXX: apparently you need to load a binary file to setup allocator ...
   char bin_path[] = "/work/global/lc873/work/sdh/cosim/"
-    "bsg_bladerunner/bsg_manycore/software/torch/add/add.riscv";
+    "brg_bsg_bladerunner/bsg_manycore/software/spmd/bsg_cuda_lite_runtime/empty/main.riscv";
   C10_HB_CHECK(hb_mc_device_program_init(&_hb_device, bin_path, "default_allocator", 0));
 
   AT_WARN("HammerBlade Device Initialized\n");
