@@ -47,6 +47,10 @@ hb_mc_eva_t device_malloc(size_t nbytes) {
   return data_p;
 }
 
+void device_free(hb_mc_eva_t data_p) {
+  C10_HB_CHECK(hb_mc_device_free(&_hb_device, data_p));
+}
+
 void* memcpy_host_to_device(void *dst, const void *src, uint32_t nbytes) {
   C10_HB_CHECK(hb_mc_device_memcpy(&_hb_device, dst, src, nbytes, HB_MC_MEMCPY_TO_DEVICE));
   return dst;
