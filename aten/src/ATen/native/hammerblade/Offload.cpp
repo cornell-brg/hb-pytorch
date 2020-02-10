@@ -10,7 +10,7 @@ namespace native {
  * -------------------------------------------------------------------------------------*/
 
 static hb_mc_eva_t create_device_tensor(uint32_t N, uint32_t dims, const int64_t* strides,
-                                  const void* data, bool copy, std::vector<eva_t>& device_ptrs) {
+                                  const void* data, bool input, std::vector<eva_t>& device_ptrs) {
 
   hb_mc_eva_t tensor, tensor_strides, tensor_data;
 
@@ -34,7 +34,7 @@ static hb_mc_eva_t create_device_tensor(uint32_t N, uint32_t dims, const int64_t
   void* src = (void *) ((intptr_t) &tensor_host);
   c10::hammerblade::memcpy_host_to_device(dst, src, sizeof(hb_mc_tensor_t));
 
-  if(copy) {
+  if(input) {
     // copy strides
     dst = (void *) ((intptr_t) tensor_strides);
     src = (void *) ((intptr_t) strides);
