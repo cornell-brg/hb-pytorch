@@ -9,10 +9,11 @@ namespace native {
  * Author: Bandhav Veluri, Lin Cheng
  * -------------------------------------------------------------------------------------*/
 
-static hb_mc_eva_t create_device_tensor(uint32_t N, uint32_t dims, const int64_t* strides,
-                                  const void* data, bool input, std::vector<eva_t>& device_ptrs) {
+static eva_t create_device_tensor(uint32_t N, uint32_t dims, const int64_t* strides,
+                                  const void* data, bool input,
+                                  std::vector<eva_t>& device_ptrs) {
 
-  hb_mc_eva_t tensor, tensor_strides, tensor_data;
+  eva_t tensor, tensor_strides, tensor_data;
 
   // allocate memory for tensor struct
   tensor = c10::hammerblade::device_malloc(sizeof(hb_mc_tensor_t));
@@ -26,7 +27,7 @@ static hb_mc_eva_t create_device_tensor(uint32_t N, uint32_t dims, const int64_t
     .N = N,
     .dims = dims,
     .strides = tensor_strides,
-    .data = (hb_mc_eva_t)((intptr_t)data),
+    .data = (eva_t)((intptr_t)data),
   };
 
   // copy tensor struct
@@ -45,8 +46,8 @@ static hb_mc_eva_t create_device_tensor(uint32_t N, uint32_t dims, const int64_t
 }
 
 
-static hb_mc_eva_t create_device_scalar(float alpha) {
-  hb_mc_eva_t alpha_d;
+static eva_t create_device_scalar(float alpha) {
+  eva_t alpha_d;
 
   alpha_d = c10::hammerblade::device_malloc(sizeof(float));
 
@@ -57,21 +58,6 @@ static hb_mc_eva_t create_device_scalar(float alpha) {
   return alpha_d;
 }
 
-static void offload_kernel(const char* kernel, std::vector<eva_t> args) {
-
-  uint32_t* cuda_argv = (uint32_t*) malloc(args.size() * sizeof(eva_t));
-  if(!cuda_argv) {
-    AT_ERROR("Falied to allocate cuda_argv!");
-  }
-
-  for(int i=0; i<args.size(); ++i) {
-    cuda_argv[i] = args[i];
-  }
-
-  AT_WARN("TODO: actually invoke a HB kernel");
-
-  free(cuda_argv);
-}
 
 static void cleanup_device(std::vector<eva_t> args, std::vector<eva_t> ptrs) {
   for(int i=0; i<ptrs.size(); i++) {
@@ -81,6 +67,8 @@ static void cleanup_device(std::vector<eva_t> args, std::vector<eva_t> ptrs) {
     c10::hammerblade::device_free(args[i]);
   }
 }
+
+
  /* ------------------------------------------------------------------------------------
  * Offloading wrapper
  * -------------------------------------------------------------------------------------*/
@@ -95,20 +83,20 @@ void offload_op_binary_impl(TensorIterator& iter, Scalar alpha, const char* kern
   // HammerBlade device in the system
   iter.serial_for_each([&](char** data, const int64_t* strides, int64_t n) {
     // Device pointers to tensors on the device
-    std::vector<hb_mc_eva_t> device_args;
-    std::vector<hb_mc_eva_t> device_ptrs;
+    std::vector<eva_t> device_args;
+    std::vector<eva_t> device_ptrs;
 
     // Allocate device tensors and copy the data
     for(int i=0; i<iter.ntensors(); i++) {
       // Iterate over all tensors: a, b and result, to create
       // corresponding tensors on the device.
-      hb_mc_eva_t device_arg = create_device_tensor(n, iter.ndim(),
+      eva_t device_arg = create_device_tensor(n, iter.ndim(),
           &strides[i], data[i], i!=0, device_ptrs);
       device_args.push_back(device_arg);
     }
     device_args.push_back(create_device_scalar(alpha.to<float>()));
 
-    offload_kernel(kernel, device_args);
+    c10::hammerblade::offload_kernel(kernel, device_args);
 
     // Need to deallocate those args on device
     cleanup_device(device_args, device_ptrs);
