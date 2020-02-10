@@ -12,21 +12,27 @@ void offload_op_binary_impl(TensorIterator& iter, Scalar alpha, const char* kern
 
   TORCH_INTERNAL_ASSERT(iter.can_use_32bit_indexing());
   TORCH_INTERNAL_ASSERT(iter.ntensors() == 3); // output, input1, and input2
-  constexpr int ntensors = 3; // it must be 3 ... as the assert says above ...
 
-  at::detail::Array<char*, ntensors> data;
-  for (int i = 0; i < ntensors; i++) {
-    data[i] = (char*)iter.data_ptr(i);
-  }
+  // It is very important to use serial_for_each here, since we assume a single
+  // HammerBlade device in the system
+  iter.serial_for_each([&](char** data, const int64_t* strides, int64_t n) {
+    // Device pointers to tensors on the device
+    std::vector<hb_mc_eva_t> device_args;
 
-  at::detail::Array<ScalarType, ntensors> dtypes;
-  for (int i = 0; i < ntensors; i++) {
-    dtypes[i] = iter.tensor(i).scalar_type();
-  }
+    // Allocate device tensors and copy the data
+    for(int i=0; i<iter.ntensors(); i++) {
+      // Iterate over all tensors: a, b and result, to create
+      // corresponding tensors on the device.
+      hb_mc_eva_t device_arg = create_device_tensor(n, iter.ndim(),
+          &strides[i], data[i]);
+      device_args.push_back(device_arg);
+    }
+    device_args.push_back(create_device_scalar(alpha.to<float>()));
 
-  int64_t numel = iter.numel();
+    offload_kernel(kernel, device_args);
+  });
 
-  AT_WARN("more work to be done");
+  iter.cast_outputs();
 }
 
 void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel) {

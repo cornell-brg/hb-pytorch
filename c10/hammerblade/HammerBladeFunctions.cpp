@@ -41,12 +41,20 @@ void set_device(DeviceIndex device) {
  * Interface to bsg_manycore runtime
  * -------------------------------------------------------------------------------------*/
 
-int memcpy_host_to_device(void *dst, const void *src, uint32_t nbytes) {
-  return hb_mc_device_memcpy(&_hb_device, dst, src, nbytes, HB_MC_MEMCPY_TO_DEVICE);
+hb_mc_eva_t device_malloc(size_t nbytes) {
+  hb_mc_eva_t data_p;
+  C10_HB_CHECK(hb_mc_device_malloc(&_hb_device, (uint32_t) nbytes, &data_p));
+  return data_p;
 }
 
-int memcpy_device_to_host(void *dst, const void *src, uint32_t nbytes) {
-  return hb_mc_device_memcpy(&_hb_device, dst, src, nbytes, HB_MC_MEMCPY_TO_HOST);
+void* memcpy_host_to_device(void *dst, const void *src, uint32_t nbytes) {
+  C10_HB_CHECK(hb_mc_device_memcpy(&_hb_device, dst, src, nbytes, HB_MC_MEMCPY_TO_DEVICE));
+  return dst;
+}
+
+void* memcpy_device_to_host(void *dst, const void *src, uint32_t nbytes) {
+  C10_HB_CHECK(hb_mc_device_memcpy(&_hb_device, dst, src, nbytes, HB_MC_MEMCPY_TO_HOST));
+  return dst;
 }
 
 }} // namespace c10::hammerblade
