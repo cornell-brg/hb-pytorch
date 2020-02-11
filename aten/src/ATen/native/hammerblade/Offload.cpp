@@ -74,7 +74,6 @@ static void cleanup_device(std::vector<eva_t> args, std::vector<eva_t> ptrs) {
  * -------------------------------------------------------------------------------------*/
 
 void offload_op_binary_impl(TensorIterator& iter, Scalar alpha, const char* kernel) {
-  kernel += strlen("tensorlib_"); // remove prepending tag in the kernel name
 
   TORCH_INTERNAL_ASSERT(iter.can_use_32bit_indexing());
   TORCH_INTERNAL_ASSERT(iter.ntensors() == 3); // output, input1, and input2

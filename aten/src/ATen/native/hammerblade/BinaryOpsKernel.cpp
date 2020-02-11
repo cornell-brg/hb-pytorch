@@ -11,7 +11,7 @@ namespace {
 
 void add_kernel_hb(TensorIterator& iter, Scalar alpha_scalar) {
   if (iter.dtype() == ScalarType::Float) {
-    offload_op_binary(iter, alpha_scalar, "add");
+    offload_op_binary(iter, alpha_scalar, "tensorlib_add");
   } else {
     AT_ERROR("HammerBlade only supports adding two floats");
   }
