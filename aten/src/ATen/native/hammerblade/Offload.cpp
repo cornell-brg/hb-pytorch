@@ -36,10 +36,21 @@ static eva_t create_device_tensor(uint32_t N, uint32_t dims, const int64_t* stri
   c10::hammerblade::memcpy_host_to_device(dst, src, sizeof(hb_mc_tensor_t));
 
   if(input) {
+    // construct a uint32_t local_strides
+    uint32_t *local_strides = (uint32_t*) malloc(dims * sizeof(uint32_t));
+    if(!local_strides) {
+      AT_ERROR("Failed to allocate space for tmp strides on host");
+    }
+    // populate local_strides
+    for(int i=0; i<dims; i++) {
+      local_strides[i] = (uint32_t)strides[i];
+    }
     // copy strides
     dst = (void *) ((intptr_t) tensor_strides);
-    src = (void *) ((intptr_t) strides);
-    c10::hammerblade::memcpy_host_to_device(dst, src, N * sizeof(float));
+    src = (void *) ((intptr_t) local_strides);
+    c10::hammerblade::memcpy_host_to_device(dst, src, dims * sizeof(uint32_t));
+
+    free(local_strides);
   }
 
   return tensor;
