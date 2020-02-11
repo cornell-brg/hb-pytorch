@@ -14,8 +14,8 @@
 namespace c10 {
 namespace hammerblade {
 
-static hb_mc_dimension_t _hb_tg_dim = { .x = 2, .y = 2};
-static hb_mc_dimension_t _hb_grid_dim = { .x = 1, .y = 1};
+extern hb_mc_dimension_t _hb_tg_dim;
+extern hb_mc_dimension_t _hb_grid_dim;
 extern hb_mc_device_t _hb_device;
 
 }} // namespace c10::hammerblade
