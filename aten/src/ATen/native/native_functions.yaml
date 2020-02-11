@@ -3017,6 +3017,7 @@
   dispatch:
     CPU: sub
     CUDA: sub
+    HammerBlade: sub
     SparseCPU: sub_sparse
     SparseCUDA: sub_sparse
   supports_named_tensor: True
