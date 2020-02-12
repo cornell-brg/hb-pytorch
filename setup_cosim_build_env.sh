@@ -25,7 +25,7 @@ fi
 
 if [ -z "$YODADA_BASELINE_DIR" ]
 then
-  export HB_KERNEL_DIR=/work/global/lc873/work/sdh/cosim/baseline/examples/torch/kernel.riscv
+  export HB_KERNEL_DIR=$YODADA_BASELINE_DIR/examples/torch/kernel.riscv
 else
   export BSG_MANYCORE_DIR="<path-to-your-torch-kernel>"
 fi
