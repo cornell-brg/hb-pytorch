@@ -1,7 +1,8 @@
 # setup brg sdh pytorch building env
 echo "Setting up PyTorch building environment ... "
-echo "Make sure you enabled devtoolset-6!"
+echo "Make sure you enabled devtoolset-8!"
 
+# setup pytorch building options
 export REL_WITH_DEB_INFO=1
 export BUILD_TEST=0
 export USE_CUDA=0
@@ -13,5 +14,21 @@ export USE_QNNPACK=0
 export USE_DISTRIBUTED=0
 export USE_OPENMP=0
 export ATEN_THREADING=NATIVE
-export BSG_MANYCORE_DIR=/work/global/lc873/work/sdh/cosim/brg_bsg_bladerunner/bsg_replicant/libraries
-export HB_KERNEL_DIR=/work/global/lc873/work/sdh/cosim/baseline/examples/torch/kernel.riscv
+
+# setup cudalite runtime and pytorch kernel binary paths
+if [ -z "$BRG_BSG_BLADERUNNER_DIR" ]
+then
+  export BSG_MANYCORE_DIR=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries
+else
+  export BSG_MANYCORE_DIR="<path-to-your-cudalite-cosim-runtime>"
+fi
+
+if [ -z "$YODADA_BASELINE_DIR" ]
+then
+  export HB_KERNEL_DIR=/work/global/lc873/work/sdh/cosim/baseline/examples/torch/kernel.riscv
+else
+  export BSG_MANYCORE_DIR="<path-to-your-torch-kernel>"
+fi
+
+echo "\$BSG_MANYCORE_DIR is set to $BSG_MANYCORE_DIR"
+echo "\$HB_KERNEL_DIR is set to $HB_KERNEL_DIR"
