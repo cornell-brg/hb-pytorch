@@ -51,6 +51,12 @@ endif()
 find_library(BSG_MANYCORE_RUNTIME_LIB bsg_manycore_runtime HINTS $ENV{BSG_MANYCORE_DIR})
 target_link_libraries(c10_hammerblade PUBLIC ${BSG_MANYCORE_RUNTIME_LIB})
 
+# Dependency on kernel binary path
+if( NOT DEFINED ENV{HB_KERNEL_DIR})
+  message( FATAL_ERROR "HB_KERNEL_DIR not set: Please set HB_KERNEL_DIR to kernel binary location.")
+endif()
+target_compile_definitions(c10_hammerblade PRIVATE "-DHB_KERNEL_DIR=$ENV{HB_KERNEL_DIR}")
+
 target_include_directories(
     c10_hammerblade PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
