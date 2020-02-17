@@ -28,4 +28,16 @@ This work aims to port PyTorch to HammerBlade.
 
 
 ### Important files and directories related to HammerBlade
-
+#### files used to run pytest (adapted from Baseline)
+  - `fragments/`
+  - `environment.mk`
+  - `baseline-README.md`
+  - `run-hb-pytest.sh` (`source` this one to run pytest!)
+  - `hb_device/torch/`
+#### HammerBlade device code
+  - `hb_device/torch/kernel`
+#### Pytest tests
+  - `hb_device/torch/tests/`
+  - `hb_device/torch/tests/targets.py` (Register a new test here!)
+#### files that interacts with HammerBlade CUDALite runtime
+  - `c10/hammerblade/`
