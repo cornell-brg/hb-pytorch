@@ -1,0 +1,5 @@
+bsg-min-fn   = $(shell echo "define min(a,b) { if (a>b) { return (a) } else { return (b) }} min ($(1),$(2))" | bc)
+bsg-max-fn   = $(shell echo "define max(a,b) { if (a>b) { return (a) } else { return (b) }} max ($(1),$(2))" | bc)
+bsg-minus-fn = $(shell expr $(1) - $(2))
+bsg-plus-fn  = $(shell expr $(1) + $(2))
+bsg-times-fn = $(shell expr $(1) \* $(2))
