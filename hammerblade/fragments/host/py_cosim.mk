@@ -29,18 +29,18 @@
 # Paths / Environment Configuration
 ################################################################################
 _REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
--include $(_REPO_ROOT)/environment.mk
+-include $(_REPO_ROOT)/hammerblade/environment.mk
 
 ################################################################################
 # Include the host compilation rules. These define how to generate host object
 # files
 ################################################################################
--include $(FRAGMENTS_PATH)/host/compile.mk
+-include $(FRAGMENTS_PATH)/host/py_compile.mk
 
 ################################################################################
 # Include the linker rules. These define how to generate the cosimulation binary
 ################################################################################
--include $(FRAGMENTS_PATH)/host/link.mk
+-include $(FRAGMENTS_PATH)/host/py_link.mk
 
 ################################################################################
 # Include the analysis rules. These define how to generate analysis products
@@ -71,7 +71,7 @@ ALIASES = vanilla_stats.csv $(HOST_TARGET).vpd vanilla_operation_trace.csv
 $(ALIASES): $(HOST_TARGET).cosim.log ;
 $(HOST_TARGET).cosim.log: kernel.riscv $(HOST_TARGET).cosim 
 	./$(HOST_TARGET).cosim +ntb_random_seed_automatic +trace  \
-		+c_args="kernel.riscv $(DEFAULT_VERSION)" \
+		+c_args="$(CURRENT_PATH) $(PYTHON_NAME)" \
 		+vpdfile+$(HOST_TARGET).vpd | tee $@
 
 ################################################################################
@@ -101,7 +101,7 @@ kernel/%/$(HOST_TARGET).cosim.log: kernel/%/kernel.riscv $(HOST_TARGET).cosim
 	cd $(EXEC_PATH) && \
 	$(CURRENT_PATH)/$(HOST_TARGET).cosim +ntb_random_seed_automatic +trace \
 		+vpdfile+$(HOST_TARGET).vpd \
-		+c_args="$(KERNEL_PATH)/kernel.riscv $(_VERSION)" | tee $(notdir $@)
+		+c_args="$(KERNEL_PATH) $(PYTHON_NAME)" | tee $(notdir $@)
 
 cosim.clean: host.link.clean host.compile.clean
 	rm -rf *.cosim{.daidir,.tmp,.log,} 64
@@ -109,7 +109,7 @@ cosim.clean: host.link.clean host.compile.clean
 	rm -rf *.vpd *.vcs.log
 	rm -rf $(HOST_TARGET)
 
-_HELP_STRING := "Rules from host/cosim.mk\n"
+_HELP_STRING := "Rules from host/py_cosim.mk\n"
 _HELP_STRING += "    $(HOST_TARGET).cosim.log | kernel/<version>/$(HOST_TARGET).cosim.log : \n"
 _HELP_STRING += "        - Run $(HOST_TARGET) on the [default | <version>] kernel\n"
 _HELP_STRING += "\n"

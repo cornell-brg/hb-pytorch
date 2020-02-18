@@ -35,7 +35,7 @@ NC=\033[0m
 ################################################################################
 _REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
 
--include $(_REPO_ROOT)/environment.mk
+-include $(_REPO_ROOT)/hammerblade/environment.mk
 
 ################################################################################
 # BSG Manycore Machine Configuration

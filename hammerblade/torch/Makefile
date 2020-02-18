@@ -31,7 +31,7 @@
 _REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
 CURRENT_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
--include $(_REPO_ROOT)/environment.mk
+-include $(_REPO_ROOT)/hammerblade/environment.mk
 
 ################################################################################
 # Define BSG_MACHINE_PATH, the location of the Makefile.machine.include file

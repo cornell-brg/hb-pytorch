@@ -30,7 +30,7 @@
 ################################################################################
 _REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
 
--include $(_REPO_ROOT)/environment.mk
+-include $(_REPO_ROOT)/hammerblade/environment.mk
 
 
 # We use the default C/C++ Compiler for building the object files for
@@ -43,8 +43,9 @@ CCPPDEFINES    += -DCOSIM -DVCS
 CXXDEFINES     += $(CCPPDEFINES)
 CDEFINES       += $(CCPPDEFINES)
 
-CFLAGS         += -std=c99 $(CDEFINES) $(INCLUDES)
-CXXFLAGS       += -std=c++11 -lstdc++ $(CXXDEFINES) $(INCLUDES)
+PYFLAGS					= $(shell python3.6-config --cflags) -O1
+CFLAGS         += -std=c99 $(CDEFINES) $(INCLUDES) $(PYFLAGS)
+CXXFLAGS       += -std=c++11 -lstdc++ $(CXXDEFINES) $(INCLUDES) $(PYFLAGS)
 
 # HOST_OBJECTS defines the object files that that are linked as part of
 # the kernel. It is derived from HOST_*SOURCES (see below) but other

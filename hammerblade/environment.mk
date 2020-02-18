@@ -67,5 +67,5 @@ endif
 # TODO: Check if exists
 RISCV_BIN_DIR=$(BSG_MANYCORE_DIR)/software/riscv-tools/riscv-install/bin/
 
-FRAGMENTS_PATH=$(_REPO_ROOT)/fragments
+FRAGMENTS_PATH=$(_REPO_ROOT)/hammerblade/fragments
 

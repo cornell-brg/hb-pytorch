@@ -29,7 +29,7 @@
 # Paths / Environment Configuration
 ################################################################################
 _REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
--include $(_REPO_ROOT)/environment.mk
+-include $(_REPO_ROOT)/hammerblade/environment.mk
 
 # These variables are used by simlibs.mk
 TESTBENCH_PATH := $(BSG_F1_DIR)/testbenches

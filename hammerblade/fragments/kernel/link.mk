@@ -36,7 +36,7 @@ _LINK_HELP_STRING := "Rules included from kernel/link.mk\n"
 # Paths / Environment Configuration
 ################################################################################
 _REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
--include $(_REPO_ROOT)/environment.mk
+-include $(_REPO_ROOT)/hammerblade/environment.mk
 
 ################################################################################
 # BSG Manycore Make Functions
