@@ -17,8 +17,9 @@ This work aims to port PyTorch to HammerBlade.
  - Init pytorch third party dependencies
     `git submodule update --init --recursive`
  - Setup building environment variables. You need to edit `hb-pytorch/setup_cosim_build_env.sh` and set `BSG_MANYCORE_DIR` to `<bsg_bladerunner>/bsg_replicant/libraries`
+    `cd hb-pytorch && source setup_cosim_build_env.sh`
  - Build pytorch. This step can take up to 15 minutes
-    `cd hb-pytorch && python setup.py install`
+    `python setup.py install`
 
 ### Run Pytests
  - Goto hb-pytorch directory
