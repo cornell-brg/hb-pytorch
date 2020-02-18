@@ -85,3 +85,34 @@ def test_elementwise_sub_4():
   assert z_h.device == torch.device("hammerblade")
   assert torch.equal(z_h.cpu(), z)
 
+def test_elementwise_mul_1():
+  x = torch.ones(1,10)
+  y = torch.ones(1,10)
+  z = x * y
+  z_h = x.hammerblade() * y.hammerblade()
+  assert z_h.device == torch.device("hammerblade")
+  assert torch.equal(z_h.cpu(), z)
+
+def test_elementwise_mul_2():
+  x = torch.ones(4,5)
+  y = torch.ones(4,5)
+  z = x * y
+  z_h = x.hammerblade() * y.hammerblade()
+  assert z_h.device == torch.device("hammerblade")
+  assert torch.equal(z_h.cpu(), z)
+
+def test_elementwise_mul_3():
+  x = torch.rand(1,128)
+  y = torch.rand(1,128)
+  z = x * y
+  z_h = x.hammerblade() * y.hammerblade()
+  assert z_h.device == torch.device("hammerblade")
+  assert torch.equal(z_h.cpu(), z)
+
+def test_elementwise_mul_4():
+  x = torch.rand(16,32)
+  y = torch.rand(16,32)
+  z = x * y
+  z_h = x.hammerblade() * y.hammerblade()
+  assert z_h.device == torch.device("hammerblade")
+  assert torch.equal(z_h.cpu(), z)

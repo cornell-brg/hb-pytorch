@@ -1843,6 +1843,7 @@
   dispatch:
     CPU: mul
     CUDA: mul
+    HammerBlade: mul
     SparseCPU: mul_sparse
     SparseCUDA: mul_sparse
     MkldnnCPU: mkldnn_mul
@@ -1853,6 +1854,7 @@
   dispatch:
     CPU: mul_
     CUDA: mul_
+    HammerBlade: mul_
     SparseCPU: mul_sparse_
     SparseCUDA: mul_sparse_
     MkldnnCPU: mkldnn_mul_
@@ -1862,6 +1864,7 @@
   dispatch:
     CPU: mul_out
     CUDA: mul_out
+    HammerBlade: mul_out
     SparseCPU: mul_out_sparse_cpu
     SparseCUDA: mul_out_sparse_cuda
     MkldnnCPU: mkldnn_mul_out
