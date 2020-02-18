@@ -35,7 +35,7 @@ else
   export BSG_MANYCORE_DIR=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries
 fi
 
-export HB_KERNEL_DIR=$DIR/hb_device/torch/kernel.riscv
+export HB_KERNEL_DIR=$DIR/hammerblade/torch/kernel.riscv
 
 echo "  \$BSG_MANYCORE_DIR is set to $BSG_MANYCORE_DIR"
 echo "  \$HB_KERNEL_DIR is set to $HB_KERNEL_DIR"
