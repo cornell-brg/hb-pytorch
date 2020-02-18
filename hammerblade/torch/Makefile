@@ -102,7 +102,7 @@ HOST_INCLUDES       := -I$(CURRENT_PATH)
 ################################################################################
 version.clean:
 	rm -rf kernel/*{.csv,.log,.rvo,.riscv,.vpd,.key,.png}
-	rm -rf kernel/*{stats,pc_stats}
+	rm -rf kernel/{stats,pc_stats}
 
 custom.clean: version.clean
 
