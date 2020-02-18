@@ -101,8 +101,8 @@ HOST_INCLUDES       := -I$(CURRENT_PATH)
 # users can add commands and dependencies to custom.clean.
 ################################################################################
 version.clean:
-	rm -rf kernel/*/*{.csv,.log,.rvo,.riscv,.vpd,.key,.png}
-	rm -rf kernel/*/{stats,pc_stats}
+	rm -rf kernel/*{.csv,.log,.rvo,.riscv,.vpd,.key,.png}
+	rm -rf kernel/*{stats,pc_stats}
 
 custom.clean: version.clean
 
