@@ -42,20 +42,9 @@ CURRENT_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 BSG_MACHINE_PATH=$(BSG_F1_DIR)
 
 ################################################################################
-# Define the range of versions
-################################################################################
-# Kernel versions. See kernel/README.md for more information.  Version names do
-# not need to use v* and can be any string
-VERSIONS = v0
-
-################################################################################
 # Define any sources that should be used compiled during kernel compilation,
 # including the source file with the kernel itself. kernel.riscv will
 # be the name of the compiled RISC-V Binary for the Manycore
-#
-# Use KERNEL_*LIBRARIES list sources that should be compiled and linked with all
-# kernel.cpp versions. However, if you have version-specific sources you must
-# come up with your own solution.
 #
 # Use KERNEL_INCLUDES to specify the path to directories that contain headers.
 ################################################################################
@@ -69,8 +58,7 @@ KERNEL_INCLUDES     += -I$(CURRENT_PATH)/kernel/include
 
 # Define the default kernel.cpp file. If KERNEL_DEFAULT is not defined it will
 # be set to kernel.cpp in the same directory as this Makefile.
-DEFAULT_VERSION     := v0
-KERNEL_DEFAULT      := kernel/$(DEFAULT_VERSION)/kernel.cpp
+KERNEL_DEFAULT      := kernel/kernel.cpp
 
 ################################################################################
 # Include the kernel build rules (This must be included after KERNEL_*LIBRARIES,
@@ -121,26 +109,19 @@ custom.clean: version.clean
 clean: cosim.clean analysis.clean cudalite.clean custom.clean
 
 ################################################################################
-# Define overall-goals. The all rule runs all kernel versions, and the default
-# kernel.
+# Define overall-goals.
 ################################################################################
 
 _HELP_STRING := "Makefile Rules\n"
 
 _HELP_STRING += "    default: \n"
-_HELP_STRING += "        - Run the default kernel ($KERNEL_DEFAULT) and generate all of the\n"
+_HELP_STRING += "        - Run the pytest unit tests and generate all of the\n"
 _HELP_STRING += "          analysis products\n"
 default: stats graphs pc_stats
 
-_HELP_STRING += "    analysis: \n"
-_HELP_STRING += "        - Launch indpendent cosimulation executions of each kernel version.\n"
-_HELP_STRING += "          When execution finishes, it generates the analysis products for \n"
-_HELP_STRING += "          each kernel in each respective kernel/version_name/ directory\n"
-analysis: $(foreach v,$(VERSIONS),kernel/$v/stats kernel/$v/graphs kernel/$v/pc_stats)
-
 _HELP_STRING += "    all: \n"
-_HELP_STRING += "        - Launch both the default and analysis target\n"
-all: analysis default
+_HELP_STRING += "        - Same as default.\n"
+all: default
 
 .DEFAULT_GOAL = help
 _HELP_STRING += "    help: \n"

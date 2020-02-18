@@ -49,17 +49,6 @@ _REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
 -include $(FRAGMENTS_PATH)/analysis.mk
 
 ################################################################################
-# The following rules define how to RUN cosimulation tests:
-################################################################################
-
-# This rule defines the `make <version name>` rule (e.g. `make v2`). For all
-# kernel versions defined in $(VERSIONS) you can run `make <version name` and
-# the cosimulation results ($(HOST_TARGET).cosim.log, $(HOST_TARGET).vpd,
-# vanilla_operation_trace.csv, vanila_stats.csv, etc) will be put in the
-# kernel/<version name>/ directory.
-$(VERSIONS): %: kernel/%/$(HOST_TARGET).cosim.log
-
-################################################################################
 # Define rules for the default cosimulation execution.
 ################################################################################
 
@@ -74,35 +63,6 @@ $(HOST_TARGET).cosim.log: kernel.riscv $(HOST_TARGET).cosim
 		+c_args="$(CURRENT_PATH) $(PYTHON_NAME)" \
 		+vpdfile+$(HOST_TARGET).vpd | tee $@
 
-################################################################################
-# Define rules for version-specific cosimulation execution. EXEC_PATH and
-# _VERSION are defined inside of the rule so that the executable can be run from
-# inside of the kernel/<version name> directory and produce outputs
-# there. KERNEL_PATH is the path to the version-specific kernel.riscv binary
-#
-# (NB, since `cd $(EXEC_PATH)` is called before running the executable it is
-# possible to specify kernel.riscv as the path to the kernel file to +c_args
-# since it is resident in $(EXEC_PATH), but I provided the full path to be more
-# explicit and clear)
-################################################################################
-
-# KERNEL_ALIASES defines the outputs that are also generated when cosimulation
-# is run. They are aliases for kernel/<version name>/$(HOST_TARGET).cosim.log
-# (This is simliar to ALIASES above). We use empty an make recipe for aliases
-# for reasons described here:
-# https://www.gnu.org/software/make/manual/html_node/Empty-Recipes.html
-KERNEL_ALIASES = $(foreach a,$(ALIASES),kernel/%/$a)
-.PRECIOUS: $(KERNEL_ALIASES)
-$(KERNEL_ALIASES): kernel/%/$(HOST_TARGET).cosim.log ;
-kernel/%/$(HOST_TARGET).cosim.log: kernel/%/kernel.riscv $(HOST_TARGET).cosim 
-	$(eval EXEC_PATH   := $(patsubst %/,%,$(dir $@)))
-	$(eval KERNEL_PATH := $(CURRENT_PATH)/$(EXEC_PATH))
-	$(eval _VERSION    := $(notdir $(EXEC_PATH)))
-	cd $(EXEC_PATH) && \
-	$(CURRENT_PATH)/$(HOST_TARGET).cosim +ntb_random_seed_automatic +trace \
-		+vpdfile+$(HOST_TARGET).vpd \
-		+c_args="$(KERNEL_PATH) $(PYTHON_NAME)" | tee $(notdir $@)
-
 cosim.clean: host.link.clean host.compile.clean
 	rm -rf *.cosim{.daidir,.tmp,.log,} 64
 	rm -rf vc_hdrs.h ucli.key
@@ -110,8 +70,8 @@ cosim.clean: host.link.clean host.compile.clean
 	rm -rf $(HOST_TARGET)
 
 _HELP_STRING := "Rules from host/py_cosim.mk\n"
-_HELP_STRING += "    $(HOST_TARGET).cosim.log | kernel/<version>/$(HOST_TARGET).cosim.log : \n"
-_HELP_STRING += "        - Run $(HOST_TARGET) on the [default | <version>] kernel\n"
+_HELP_STRING += "    $(HOST_TARGET).cosim.log: \n"
+_HELP_STRING += "        - Run $(HOST_TARGET) on the tensorlib kernel\n"
 _HELP_STRING += "\n"
 _HELP_STRING += $(HELP_STRING)
 

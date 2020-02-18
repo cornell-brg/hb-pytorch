@@ -165,13 +165,9 @@ RISCV_LDFLAGS += -Wl,--no-check-sections
 # files in the linker. KERNEL_DEFAULT can be overridden by the user,
 # but defaults to kernel.cpp
 
-_LINK_HELP_STRING += "    kernel.riscv | kernel/<version>/kernel.riscv :\n"
-_LINK_HELP_STRING += "        - Compile the RISC-V Manycore Kernel from the [default | <version>] \n"
-_LINK_HELP_STRING += "          source file named $(notdir $(KERNEL_DEFAULT)). The default source \n"
-_LINK_HELP_STRING += "          file is $(KERNEL_DEFAULT)\n"
+_LINK_HELP_STRING += "    kernel.riscv:\n"
+_LINK_HELP_STRING += "        - Compile the RISC-V Manycore tensorlib Kernel.\n"
 kernel.riscv: $(MACHINE_CRT_OBJ) main.rvo $(BSG_MANYCORE_LIB_OBJECTS) $(KERNEL_OBJECTS) $(basename $(KERNEL_DEFAULT)).rvo 
-	$(RISCV_LD) -T $(RISCV_LINK_SCRIPT) $^ $(RISCV_LDFLAGS) -o $@
-%/kernel.riscv: $(MACHINE_CRT_OBJ) main.rvo $(BSG_MANYCORE_LIB_OBJECTS) $(KERNEL_OBJECTS) %/kernel.rvo 
 	$(RISCV_LD) -T $(RISCV_LINK_SCRIPT) $^ $(RISCV_LDFLAGS) -o $@
 
 kernel.link.clean:

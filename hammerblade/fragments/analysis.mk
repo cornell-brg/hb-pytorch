@@ -34,26 +34,22 @@ _REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
 # Analysis rules 
 ################################################################################
 _HELP_STRING := "Rules from analysis.mk\n"
-_HELP_STRING += "    kernel.dis | kernel/<version>/kernel.dis :\n"
-_HELP_STRING += "        - Disassemble RISC-V binary of the [default | <version>] kernel\n"
+_HELP_STRING += "    kernel.dis:\n"
+_HELP_STRING += "        - Disassemble RISC-V binary of the tensorlib kernel\n"
 %.dis: %.riscv
 	$(RISCV_OBJDUMP) -M numeric --disassemble-all -S $< > $@
 
-_HELP_STRING += "    stats | kernel/<version>/stats :\n"
+_HELP_STRING += "    stats:\n"
 _HELP_STRING += "        - Run the Vanilla Stats Parser on the output of $(HOST_TARGET).cosim\n"
-_HELP_STRING += "          run on the [default | <version>] kernel to generate statistics\n"
+_HELP_STRING += "          run on the tensorlib kernel to generate statistics\n"
 stats: vanilla_stats.csv
 	python3 $(BSG_MANYCORE_DIR)/software/py/vanilla_stats_parser.py --tile --tile_group
 
-%/stats: %/vanilla_stats.csv
-	cd $(dir $<) && python3 $(BSG_MANYCORE_DIR)/software/py/vanilla_stats_parser.py --tile --tile_group
-
-_HELP_STRING += "    graphs | kernel/<version>/graphs :\n"
+_HELP_STRING += "    graphs:\n"
 _HELP_STRING += "        - Run the Operation Trace Parser on the output of $(HOST_TARGET).cosim\n"
-_HELP_STRING += "          run on the [default | <version>] kernel to generate the\n"
+_HELP_STRING += "          run on the tensorlib kernel to generate the\n"
 _HELP_STRING += "          abstract and detailed profiling graphs\n"
 graphs: blood_abstract.png blood_detailed.png
-%/graphs: %/blood_abstract.png %/blood_detailed.png ;
 
 blood_detailed.png: vanilla_operation_trace.csv vanilla_stats.csv
 	python3 $(BSG_MANYCORE_DIR)/software/py/blood_graph.py --input vanilla_operation_trace.csv --timing-stats vanilla_stats.csv --generate-key
@@ -61,21 +57,12 @@ blood_detailed.png: vanilla_operation_trace.csv vanilla_stats.csv
 blood_abstract.png: vanilla_operation_trace.csv vanilla_stats.csv
 	python3 $(BSG_MANYCORE_DIR)/software/py/blood_graph.py --input vanilla_operation_trace.csv --timing-stats vanilla_stats.csv --generate-key --abstract
 
-%/blood_detailed.png: %/vanilla_operation_trace.csv %/vanilla_stats.csv
-	cd $(dir $<) &&  python3 $(BSG_MANYCORE_DIR)/software/py/blood_graph.py --input vanilla_operation_trace.csv --timing-stats vanilla_stats.csv --generate-key
-
-%/blood_abstract.png: %/vanilla_operation_trace.csv %/vanilla_stats.csv
-	cd $(dir $<) &&  python3 $(BSG_MANYCORE_DIR)/software/py/blood_graph.py --input vanilla_operation_trace.csv --timing-stats vanilla_stats.csv --generate-key --abstract
-
-_HELP_STRING += "    pc_stats | kernel/<version>/pc_stats :\n"
+_HELP_STRING += "    pc_stats:\n"
 _HELP_STRING += "        - Run the Program Counter Histogram utility on the output of\n"
-_HELP_STRING += "          $(HOST_TARGET).cosim run on the [default | <version>] kernel to \n"
+_HELP_STRING += "          $(HOST_TARGET).cosim run on the tensorlib kernel to \n"
 _HELP_STRING += "          generate the Program Counter Histogram\n"
 pc_stats: vanilla_operation_trace.csv
 	python3 $(BSG_MANYCORE_DIR)/software/py/vanilla_pc_histogram.py --dim-x $(_BSG_MACHINE_TILES_X) --dim-y $(_BSG_MACHINE_TILES_Y) --tile --input $<
-
-%/pc_stats: %/vanilla_operation_trace.csv
-	cd $(dir $<) && python3 $(BSG_MANYCORE_DIR)/software/py/vanilla_pc_histogram.py --dim-x $(_BSG_MACHINE_TILES_X) --dim-y $(_BSG_MACHINE_TILES_Y) --tile --input $(notdir $<)
 
 analysis.clean:
 	rm -rf *.dis

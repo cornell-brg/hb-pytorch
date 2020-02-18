@@ -67,7 +67,7 @@ $(HOST_TARGET):
 ################################################################################
 # Cosimulation Linker Rules
 ################################################################################
-_HELP_STRING := "Rules from host/link.mk\n"
+_HELP_STRING := "Rules from host/py_link.mk\n"
 
 # libbsg_manycore_runtime will be compiled in $(LIBRARIES_PATH)
 LDFLAGS        += -lbsg_manycore_runtime -lm
@@ -85,9 +85,8 @@ VCS_VFLAGS     += +memcbk
 # $(HOST_OBJECTS). WRAPPER_NAME is the top-level simulation wrapper
 # defined in simlibs.mk
 
-_HELP_STRING += "    $(HOST_TARGET).cosim :\n"
+_HELP_STRING += "    $(HOST_TARGET).cosim:\n"
 _HELP_STRING += "        - Build the host executable for RTL Cosimulation using VCS\n"
-_HELP_STRING += "          The same executable is reused to run every kernel version \n"
 # We parallelize VCS compilation, but we leave a few cores on the table.
 $(HOST_TARGET).cosim: NPROCS := $(shell echo "(`nproc`/4 + 1)" | bc)
 $(HOST_TARGET).cosim: $(HOST_OBJECTS) $(SIMLIBS)
