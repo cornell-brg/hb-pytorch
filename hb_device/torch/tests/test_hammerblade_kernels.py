@@ -53,6 +53,17 @@ def test_elementwise_add_4():
   assert y_h.device == torch.device("hammerblade")
   assert torch.equal(y_c, y)
 
+def test_elementwise_in_place_add():
+  x1 = torch.rand(16,32)
+  x2 = torch.rand(16,32)
+  x1_h = x1.hammerblade()
+  x2_h = x2.hammerblade()
+  x1.add_(x2)
+  x1_h.add_(x2_h)
+  assert x1_h.device == torch.device("hammerblade")
+  x1_h_c = x1_h.cpu()
+  assert torch.equal(x1_h_c, x1)
+
 def test_elementwise_sub_1():
   x = torch.ones(1,10)
   y = torch.ones(1,10)
@@ -85,6 +96,17 @@ def test_elementwise_sub_4():
   assert z_h.device == torch.device("hammerblade")
   assert torch.equal(z_h.cpu(), z)
 
+def test_elementwise_in_place_sub():
+  x1 = torch.rand(16,32)
+  x2 = torch.rand(16,32)
+  x1_h = x1.hammerblade()
+  x2_h = x2.hammerblade()
+  x1.sub_(x2)
+  x1_h.sub_(x2_h)
+  assert x1_h.device == torch.device("hammerblade")
+  x1_h_c = x1_h.cpu()
+  assert torch.equal(x1_h_c, x1)
+
 def test_elementwise_mul_1():
   x = torch.ones(1,10)
   y = torch.ones(1,10)
@@ -116,3 +138,15 @@ def test_elementwise_mul_4():
   z_h = x.hammerblade() * y.hammerblade()
   assert z_h.device == torch.device("hammerblade")
   assert torch.equal(z_h.cpu(), z)
+
+def test_elementwise_in_place_mul():
+  x1 = torch.rand(16,32)
+  x2 = torch.rand(16,32)
+  x1_h = x1.hammerblade()
+  x2_h = x2.hammerblade()
+  x1.mul_(x2)
+  x1_h.mul_(x2_h)
+  assert x1_h.device == torch.device("hammerblade")
+  x1_h_c = x1_h.cpu()
+  assert torch.equal(x1_h_c, x1)
+
