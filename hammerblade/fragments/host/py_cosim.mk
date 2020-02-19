@@ -52,6 +52,12 @@ _REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
 # Define rules for the default cosimulation execution.
 ################################################################################
 
+ifeq ($(COSIM_DEBUG), 1)
+COSIM_DEBUG_OPTS = +trace +vpdfile+$(HOST_TARGET).vpd
+else
+COSIM_DEBUG_OPTS = +NO_WAVES
+endif
+
 # ALIASES defines the outputs that are also generated when cosimulation is
 # run. They are aliases for running $(HOST_TARGET).cosim.log. We use empty an
 # make recipe for aliases for reasons described here:
@@ -59,9 +65,9 @@ _REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
 ALIASES = vanilla_stats.csv $(HOST_TARGET).vpd vanilla_operation_trace.csv
 $(ALIASES): $(HOST_TARGET).cosim.log ;
 $(HOST_TARGET).cosim.log: kernel.riscv $(HOST_TARGET).cosim 
-	./$(HOST_TARGET).cosim +ntb_random_seed_automatic +trace  \
+	./$(HOST_TARGET).cosim +ntb_random_seed_automatic  \
 		+c_args="$(CURRENT_PATH) $(PYTHON_NAME)" \
-		+vpdfile+$(HOST_TARGET).vpd | tee $@
+		$(COSIM_DEBUG_OPTS) | tee $@
 
 cosim.clean: host.link.clean host.compile.clean
 	rm -rf *.cosim{.daidir,.tmp,.log,} 64
@@ -72,6 +78,7 @@ cosim.clean: host.link.clean host.compile.clean
 _HELP_STRING := "Rules from host/py_cosim.mk\n"
 _HELP_STRING += "    $(HOST_TARGET).cosim.log: \n"
 _HELP_STRING += "        - Run $(HOST_TARGET) on the tensorlib kernel\n"
+_HELP_STRING += "        - Set COSIM_DEBUG=1 for trace and waveform dump\n"
 _HELP_STRING += "\n"
 _HELP_STRING += $(HELP_STRING)
 
