@@ -74,7 +74,8 @@ KERNEL_DEFAULT      := kernel/kernel.cpp
 ################################################################################
 # Define the name of the python file to run
 ################################################################################
-PYTHON_NAME					= pytest_runner
+PYTHON_SCRIPT					= $(CURRENT_PATH)/pytest_runner.py
+PYTHON_ARGS          ?=
 
 
 ################################################################################
@@ -117,6 +118,8 @@ _HELP_STRING := "Makefile Rules\n"
 _HELP_STRING += "    default: \n"
 _HELP_STRING += "        - Run the pytest unit tests and generate all of the\n"
 _HELP_STRING += "          analysis products\n"
+_HELP_STRING += "        - Set PYTHON_SCRIPT=<path to python script>.\n"
+_HELP_STRING += "        - Set PYTHON_ARGS=<argument to the script>.\n"
 default: stats graphs pc_stats
 
 _HELP_STRING += "    all: \n"
