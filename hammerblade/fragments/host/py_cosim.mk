@@ -66,7 +66,7 @@ ALIASES = vanilla_stats.csv $(HOST_TARGET).vpd vanilla_operation_trace.csv
 $(ALIASES): $(HOST_TARGET).cosim.log ;
 $(HOST_TARGET).cosim.log: kernel.riscv $(HOST_TARGET).cosim 
 	./$(HOST_TARGET).cosim +ntb_random_seed_automatic  \
-		+c_args="$(CURRENT_PATH) $(PYTHON_NAME)" \
+		+c_args="$(PYTHON_SCRIPT) $(PYTHON_ARGS)" \
 		$(COSIM_DEBUG_OPTS) | tee $@
 
 cosim.clean: host.link.clean host.compile.clean
@@ -74,6 +74,8 @@ cosim.clean: host.link.clean host.compile.clean
 	rm -rf vc_hdrs.h ucli.key
 	rm -rf *.vpd *.vcs.log
 	rm -rf $(HOST_TARGET)
+
+.PHONY: $(HOST_TARGET).cosim.log cosim.clean
 
 _HELP_STRING := "Rules from host/py_cosim.mk\n"
 _HELP_STRING += "    $(HOST_TARGET).cosim.log: \n"
