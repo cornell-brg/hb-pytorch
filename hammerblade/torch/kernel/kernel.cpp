@@ -90,6 +90,19 @@ extern "C" {
     return rc;
   }
 
+  int  __attribute__ ((noinline)) tensorlib_div(
+          bsg_tensor_t* res,
+          bsg_tensor_t* a,
+          bsg_tensor_t* b,
+          float* alpha) {
+    int rc;
+    bsg_cuda_print_stat_kernel_start();
+    rc = vector_op(a->data, b->data, res->data, *alpha, res->N,
+        [](float a, float b) { return a / b; });
+    bsg_cuda_print_stat_kernel_end();
+    return rc;
+  }
+
 }
 
 //====================================================================

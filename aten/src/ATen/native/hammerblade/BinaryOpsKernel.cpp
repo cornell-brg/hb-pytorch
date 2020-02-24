@@ -29,10 +29,19 @@ void mul_kernel_hb(TensorIterator& iter) {
   }
 }
 
+void div_kernel_hb(TensorIterator& iter) {
+  if (iter.dtype() == ScalarType::Float) {
+    offload_op_binary(iter, 1.0, "tensorlib_div");
+  } else {
+    AT_ERROR("HammerBlade only supports dividing two floats");
+  }
+}
+
 } // anonymous namespace
 
 REGISTER_HAMMERBLADE_DISPATCH(add_stub, &add_kernel_hb);
 REGISTER_HAMMERBLADE_DISPATCH(sub_stub, &sub_kernel_hb);
 REGISTER_HAMMERBLADE_DISPATCH(mul_stub, &mul_kernel_hb);
+REGISTER_HAMMERBLADE_DISPATCH(div_stub, &div_kernel_hb);
 
 }} // namespace at::native

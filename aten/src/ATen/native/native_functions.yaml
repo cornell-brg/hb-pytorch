@@ -910,6 +910,7 @@
     CUDA: div
     SparseCPU: div_sparse
     SparseCUDA: div_sparse
+    HammerBlade: div
   supports_named_tensor: True
 
 - func: div_.Tensor(Tensor(a!) self, Tensor other) -> Tensor(a!)
@@ -919,6 +920,7 @@
     CUDA: div_
     SparseCPU: div_sparse_
     SparseCUDA: div_sparse_
+    HammerBlade: div_
   supports_named_tensor: True
 
 - func: div.out(Tensor self, Tensor other, *, Tensor(a!) out) -> Tensor(a!)
@@ -927,6 +929,7 @@
     CUDA: div_out
     SparseCPU: div_out_sparse_zerodim
     SparseCUDA: div_out_sparse_zerodim
+    HammerBlade: div_out
   supports_named_tensor: True
 
 # For C++ only, until we have conversion from C++ numbers to Tensor
@@ -3751,6 +3754,7 @@
     CUDA: view
     MkldnnCPU: mkldnn_view
     QuantizedCPU: view
+    HammerBlade: view
 
 - func: put_(Tensor(a!) self, Tensor index, Tensor source, bool accumulate=False) -> Tensor(a!)
   variants: method
