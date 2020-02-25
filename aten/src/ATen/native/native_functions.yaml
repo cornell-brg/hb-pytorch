@@ -1049,6 +1049,7 @@
     CPU: resize_cpu_
     CUDA: resize_cuda_
     QuantizedCPU: quantized_resize_cpu_
+    HammerBlade: resize_hb_
 
 - func: empty.out(int[] size, *, MemoryFormat? memory_format=None, Tensor(a!) out) -> Tensor(a!)
   device_guard: False
@@ -3685,6 +3686,7 @@
     CPU: legacy::cpu::_th_set_
     CUDA: legacy::cuda::_th_set_
     QuantizedCPU: set_storage
+    HammerBlade: set_storage
 
 - func: set_.source_Tensor(Tensor(a!) self, Tensor source) -> Tensor(a!)
   variants: method
