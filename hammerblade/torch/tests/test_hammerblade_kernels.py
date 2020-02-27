@@ -82,11 +82,17 @@ def test_view_3():
 
 def test_view_4():
   x1 = torch.rand(2,3)
+  x2 = torch.rand(2,3)
   x1_h = x1.hammerblade()
+  x2_h = x2.hammerblade()
 
-  x1 = x1.view(3,2)
   x1_h = x1_h.view(3,2)
+  x2_h = x2_h.view(3,2)
 
-  assert x1_h.device == torch.device("hammerblade")
-  assert torch.equal(x1_h.cpu(), x1)
+  z = x1 * x2
+  z_h = x1_h * x2_h
+
+  assert z_h.shape == (3,2)
+  assert z_h.device == torch.device("hammerblade")
+  assert torch.equal(z_h.cpu(), z.view(3,2))
 
