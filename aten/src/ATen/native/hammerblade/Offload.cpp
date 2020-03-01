@@ -3,13 +3,14 @@
 namespace at {
 namespace native {
 
- /* ------------------------------------------------------------------------------------
- * Helper functions
- * Adapted from bespoke-silicon-group/pytorch branch hb_pytorch
- * Author: Bandhav Veluri, Lin Cheng
- * -------------------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------
+* Helper functions
+* Adapted from bespoke-silicon-group/pytorch branch hb_pytorch
+* Author: Bandhav Veluri, Lin Cheng
+* ----------------------------------------------------------------------*/
 
-static eva_t create_device_tensor(uint32_t N, uint32_t dims, const int64_t* strides,
+static eva_t create_device_tensor(uint32_t N, uint32_t dims, 
+                                  const int64_t* strides,
                                   const void* data, bool input,
                                   std::vector<eva_t>& device_ptrs) {
 
@@ -56,15 +57,15 @@ static eva_t create_device_tensor(uint32_t N, uint32_t dims, const int64_t* stri
   return tensor;
 }
 
-
-static eva_t create_device_scalar(float alpha) {
+template<typename T>
+static eva_t create_device_scalar(T alpha) {
   eva_t alpha_d;
 
-  alpha_d = c10::hammerblade::device_malloc(sizeof(float));
+  alpha_d = c10::hammerblade::device_malloc(sizeof(T));
 
   void* src = (void*) ((intptr_t) &alpha);
   void* dst = (void*) ((intptr_t) alpha_d);
-  c10::hammerblade::memcpy_host_to_device(dst, src, sizeof(float));
+  c10::hammerblade::memcpy_host_to_device(dst, src, sizeof(T));
 
   return alpha_d;
 }
@@ -80,11 +81,12 @@ static void cleanup_device(std::vector<eva_t> args, std::vector<eva_t> ptrs) {
 }
 
 
- /* ------------------------------------------------------------------------------------
+ /* -------------------------------------------------------------------------
  * Offloading wrapper
- * -------------------------------------------------------------------------------------*/
+ * --------------------------------------------------------------------------*/
 
-void offload_op_binary_impl(TensorIterator& iter, Scalar alpha, const char* kernel) {
+void offload_op_binary_impl(TensorIterator& iter, Scalar alpha, 
+    const char* kernel) {
 
   TORCH_INTERNAL_ASSERT(iter.can_use_32bit_indexing());
   TORCH_INTERNAL_ASSERT(iter.ntensors() == 3); // output, input1, and input2
@@ -135,6 +137,17 @@ void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel) {
   }
 
   offload_op_binary_impl(iter, alpha, kernel);
+}
+
+/* Offload routine for Device to device transfers */
+void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
+  std::vector<eva_t> device_args;
+
+  device_args.push_back(dest);
+  device_args.push_back(src);
+  device_args.push_back(create_device_scalar(n));
+
+  c10::hammerblade::offload_kernel("tensorlib_memcpy", device_args);
 }
 
 } // namespace native

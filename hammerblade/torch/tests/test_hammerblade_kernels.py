@@ -96,3 +96,13 @@ def test_view_4():
   assert z_h.device == torch.device("hammerblade")
   assert torch.equal(z_h.cpu(), z.view(3,2))
 
+def test_resize_1():
+  x1 = torch.rand(2,3)
+  x1_h = x1.hammerblade()
+
+  x1.resize_(12)
+  x1_h.resize_(12)
+
+  assert x1_h.device == torch.device("hammerblade")
+  for i in range(6):
+    assert torch.equal(x1[i], x1_h[i])
