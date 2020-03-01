@@ -103,6 +103,9 @@ def test_resize_1():
   x1.resize_(12)
   x1_h.resize_(12)
 
+  x1_h_cpu = x1_h.cpu()
+
   assert x1_h.device == torch.device("hammerblade")
+  assert x1_h.shape == x1.shape
   for i in range(6):
-    assert torch.equal(x1[i], x1_h[i])
+    assert torch.equal(x1_h_cpu[i], x1[i])
