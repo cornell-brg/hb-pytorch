@@ -411,6 +411,7 @@
     CPU: as_strided_tensorimpl
     CUDA: as_strided_tensorimpl
     QuantizedCPU: as_strided_qtensorimpl
+    HammerBlade: as_strided_tensorimpl
   device_guard: False
   supports_named_tensor: True
 
