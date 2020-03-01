@@ -103,6 +103,21 @@ extern "C" {
     return rc;
   }
 
+  int __attribute__ ((noinline)) tensorlib_memcpy(
+      uint32_t* dest,
+      const uint32_t* src,
+      uint32_t n) {
+    int rc;
+    bsg_cuda_print_stat_kernel_start();
+    
+    if(__bsg_id == 0) {
+      memcpy(dest, src, n);
+    }
+
+    bsg_cuda_print_stat_kernel_end();
+    return 0;
+  }
+
 }
 
 //====================================================================

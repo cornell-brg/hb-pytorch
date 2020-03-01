@@ -25,5 +25,8 @@ typedef struct {
 
 void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel);
 
+void offload_memcpy(eva_t dest, eva_t src, uint32_t n);
+
+
 } // namespace native
 } // namespace at

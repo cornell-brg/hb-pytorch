@@ -3,6 +3,7 @@
 #include <ATen/ATen.h>
 #include <TH/THTensor.hpp>
 #include <ATen/hammerblade/HammerBladeContext.h>
+#include <ATen/native/hammerblade/Offload.h>
 
 namespace at { namespace native {
 
@@ -22,9 +23,9 @@ static inline void HBStorage_resize(THStorage* storage, ptrdiff_t size) {
         copy_size = storage->numel();
       }
       if (copy_size > 0) {
-        c10::hammerblade::memcpy_host_to_device(
-            storage->data(), 
-            old_data.get(), 
+        offload_memcpy(
+            (eva_t) ((intptr_t) storage->data()),
+            (eva_t) ((intptr_t) old_data.get()),
             storage->itemsize() * copy_size);
       }
     }
