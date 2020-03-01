@@ -15,6 +15,11 @@
 #include "bsg_tile_group_barrier.h"
 #include "bsg_tensor.hpp"
 
+#ifdef HB_EMUL
+#include <kernel.h>
+#include <cassert>
+#endif
+
 INIT_TILE_GROUP_BARRIER(r_barrier, c_barrier, 0, bsg_tiles_X-1,
     0, bsg_tiles_Y-1);
 
@@ -73,3 +78,37 @@ extern "C" {
   }
 
 }
+
+#ifdef HB_EMUL
+int tensorlib_add_starter(const uint32_t argc, const uint32_t* argv) {
+  assert (argc == 4);
+  uint32_t   _res = argv[0];
+  uint32_t     _a = argv[1];
+  uint32_t     _b = argv[2];
+  uint32_t _alpha = argv[3];
+  bsg_tensor_t* res = (bsg_tensor_t*)((intptr_t)_res);
+  bsg_tensor_t*   a = (bsg_tensor_t*)((intptr_t)_a);
+  bsg_tensor_t*   b = (bsg_tensor_t*)((intptr_t)_b);
+  float* alpha = (float*)((intptr_t)_alpha);
+  return tensorlib_add(res, a, b, alpha);
+}
+
+int tensorlib_mul_starter(const uint32_t argc, const uint32_t* argv) {
+  assert (argc == 4);
+  uint32_t   _res = argv[0];
+  uint32_t     _a = argv[1];
+  uint32_t     _b = argv[2];
+  uint32_t _alpha = argv[3];
+  bsg_tensor_t* res = (bsg_tensor_t*)((intptr_t)_res);
+  bsg_tensor_t*   a = (bsg_tensor_t*)((intptr_t)_a);
+  bsg_tensor_t*   b = (bsg_tensor_t*)((intptr_t)_b);
+  float* alpha = (float*)((intptr_t)_alpha);
+  return tensorlib_mul(res, a, b, alpha);
+}
+
+void init_kernel_starters() {
+  kernelMap["tensorlib_add"] = tensorlib_add_starter;
+  kernelMap["tensorlib_mul"] = tensorlib_mul_starter;
+  return;
+}
+#endif
