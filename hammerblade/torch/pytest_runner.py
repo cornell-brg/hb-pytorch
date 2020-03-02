@@ -19,11 +19,11 @@ import pathlib
 import pytest
 
 # figure out regression/pytorch directory
-regression_path = str( pathlib.Path(__file__).parent.absolute() )
+regression_path = str(pathlib.Path(__file__).parent.absolute())
 
 # use regression/pytorch so we can find out tests
-sys.path.append( regression_path+"/tests" )
-sys.path.append( regression_path )
+sys.path.append(regression_path + "/tests")
+sys.path.append(regression_path)
 
 # load registered tests
 from tests.targets import pytest_targets
@@ -31,7 +31,7 @@ from tests.targets import pytest_targets
 # construct target list
 targets = []
 for t in pytest_targets:
-  targets.append( regression_path + "/tests/" + t + ".py" )
+    targets.append(regression_path + "/tests/" + t + ".py")
 
 # invoke pytest main loop
 pytest.main(pytest_argv + targets)
