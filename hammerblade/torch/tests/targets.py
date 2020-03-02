@@ -5,6 +5,6 @@
     Lin Cheng
 """
 
-pytest_targets = [ "test_hammerblade_device",
-                   "test_hammerblade_add_sub",
-                   "test_hammerblade_mul"]
+pytest_targets = ["test_hammerblade_device",
+                  "test_hammerblade_add_sub",
+                  "test_hammerblade_mul"]

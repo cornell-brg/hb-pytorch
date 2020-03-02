@@ -14,7 +14,8 @@ def test_import_torch():
 def test_built_with_hammerblade():
     import torch
     assert torch.has_hammerblade
-    torch.hammerblade.init() # we need to manually init hammerblade module
+    # we need to manually init hammerblade module
+    torch.hammerblade.init()
     assert not torch.hammerblade.has_half
 
 
@@ -71,5 +72,3 @@ def test_move_between_cpu_and_hammerblade_path2():
     assert hb_x.type() == 'torch.hammerblade.FloatTensor'
     assert hb_x.is_hammerblade
     assert torch.equal(hb_x.cpu(), cpu_x)
-
-
