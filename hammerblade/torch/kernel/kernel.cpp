@@ -121,34 +121,6 @@ extern "C" {
 // }
 
 #ifdef HB_EMUL
-int tensorlib_add_starter(const uint32_t argc, const uint32_t* argv) {
-  assert (argc == 4);
-  uint32_t   _res = argv[0];
-  uint32_t     _a = argv[1];
-  uint32_t     _b = argv[2];
-  uint32_t _alpha = argv[3];
-  bsg_tensor_t* res = (bsg_tensor_t*)((intptr_t)_res);
-  bsg_tensor_t*   a = (bsg_tensor_t*)((intptr_t)_a);
-  bsg_tensor_t*   b = (bsg_tensor_t*)((intptr_t)_b);
-  float* alpha = (float*)((intptr_t)_alpha);
-  return tensorlib_add(res, a, b, alpha);
-}
-
-REGISTER_KERNEL(tensorlib_add, tensorlib_add_starter);
-
-int tensorlib_mul_starter(const uint32_t argc, const uint32_t* argv) {
-  assert (argc == 4);
-  uint32_t   _res = argv[0];
-  uint32_t     _a = argv[1];
-  uint32_t     _b = argv[2];
-  uint32_t _alpha = argv[3];
-  bsg_tensor_t* res = (bsg_tensor_t*)((intptr_t)_res);
-  bsg_tensor_t*   a = (bsg_tensor_t*)((intptr_t)_a);
-  bsg_tensor_t*   b = (bsg_tensor_t*)((intptr_t)_b);
-  float* alpha = (float*)((intptr_t)_alpha);
-  return tensorlib_mul(res, a, b, alpha);
-}
-
-REGISTER_KERNEL(tensorlib_mul, tensorlib_mul_starter);
-
+HB_EMUL_REG_KERNEL_4ARGS(tensorlib_add, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*);
+HB_EMUL_REG_KERNEL_4ARGS(tensorlib_mul, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*);
 #endif
