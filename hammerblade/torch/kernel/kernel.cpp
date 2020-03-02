@@ -42,14 +42,14 @@ int __attribute__ ((noinline)) vector_op(TA *A, TB *B, TC *C, TD alpha,
   uint32_t len_per_tile = ceil((float) N /
       (float) (bsg_tiles_X * bsg_tiles_Y));
 
-	for (int i = 0; i < len_per_tile; ++i) {
+  for (int i = 0; i < len_per_tile; ++i) {
     int index = len_per_tile * __bsg_id + i;
 
     if(index > N)
       break;
 
     C[index] = op(A[index], alpha * B[index]);
-	}
+  }
 
   // Tile group size in PyTorch is set to 1,1 as of now.
   // bsg_tile_group_barrier(&r_barrier, &c_barrier);
