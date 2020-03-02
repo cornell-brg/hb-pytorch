@@ -317,6 +317,10 @@ void reset_runtime() {
           if (!device_busy || !binary_loaded) {
             return HB_MC_UNINITIALIZED;
           }
+          // assume a single thread for now
+          if (grid_dim.x * grid_dim.y * tg_dim.x * tg_dim.y != 1) {
+            return HB_MC_FAIL;
+          }
           std::string _name(name);
           enqueue_kernel(_name, argc, argv);
           return HB_MC_SUCCESS;
