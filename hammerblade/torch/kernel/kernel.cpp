@@ -97,7 +97,7 @@ extern "C" {
 // 03/02/2020, Lin Cheng (lc873@cornell.edu)
 //====================================================================
 // In order to support function name to function pointer mapping, the
-// kernel author needs to write a kernel starter. Here is an example
+// kernel auhtor needs to register the kernel function
 //
 // kernel:
 // int  __attribute__ ((noinline)) tensorlib_add(
@@ -106,19 +106,8 @@ extern "C" {
 //        bsg_tensor_t* b,
 //        float* alpha)
 //
-// starter:
-// int tensorlib_add_starter(const uint32_t argc, const uint32_t* argv) {
-//    assert (argc == 4);
-//    uint32_t   _res = argv[0];
-//    uint32_t     _a = argv[1];
-//    uint32_t     _b = argv[2];
-//    uint32_t _alpha = argv[3];
-//    bsg_tensor_t* res = (bsg_tensor_t*)((intptr_t)_res);
-//    bsg_tensor_t*   a = (bsg_tensor_t*)((intptr_t)_a);
-//    bsg_tensor_t*   b = (bsg_tensor_t*)((intptr_t)_b);
-//    float* alpha = (float*)((intptr_t)_alpha);
-//    return tensorlib_add(res, a, b, alpha);
-// }
+// registration:
+// HB_EMUL_REG_KERNEL(tensorlib_add, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*);
 
 #ifdef HB_EMUL
 HB_EMUL_REG_KERNEL(tensorlib_add, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*);
