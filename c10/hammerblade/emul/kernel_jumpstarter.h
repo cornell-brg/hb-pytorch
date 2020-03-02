@@ -29,4 +29,12 @@ extern std::vector<uint32_t*> enqueued_argv;
 void enqueue_kernel(const std::string &kernel, uint32_t argc, uint32_t* argv);
 int execute_kernels();
 
+typedef struct _kernel_registry_ {
+    _kernel_registry_(std::string kernel_name, std::function<int(uint32_t, uint32_t*)> kernel_ptr) {
+        kernelMap[kernel_name] = kernel_ptr;
+    }
+} kernel_registry;
+
+#define REGISTER_KERNEL(name, starter) kernel_registry registry_##name = {#name, starter};
+
 #endif // _KERNEL_JUMPSTARTER_H

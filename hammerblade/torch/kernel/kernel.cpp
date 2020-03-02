@@ -134,6 +134,8 @@ int tensorlib_add_starter(const uint32_t argc, const uint32_t* argv) {
   return tensorlib_add(res, a, b, alpha);
 }
 
+REGISTER_KERNEL(tensorlib_add, tensorlib_add_starter);
+
 int tensorlib_mul_starter(const uint32_t argc, const uint32_t* argv) {
   assert (argc == 4);
   uint32_t   _res = argv[0];
@@ -147,9 +149,6 @@ int tensorlib_mul_starter(const uint32_t argc, const uint32_t* argv) {
   return tensorlib_mul(res, a, b, alpha);
 }
 
-void init_kernel_starters() {
-  kernelMap["tensorlib_add"] = tensorlib_add_starter;
-  kernelMap["tensorlib_mul"] = tensorlib_mul_starter;
-  return;
-}
+REGISTER_KERNEL(tensorlib_mul, tensorlib_mul_starter);
+
 #endif
