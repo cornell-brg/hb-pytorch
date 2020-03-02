@@ -9,10 +9,7 @@ namespace {
 static std::once_flag init_flag;
 static void initHammerBladeDevice() {
   C10_HB_CHECK(hb_mc_device_init(&_hb_device, "HB_PYTORCH_PORT", 0));
-
   C10_HB_CHECK(hb_mc_device_program_init(&_hb_device, _bin_path, "default_allocator", 0));
-
-  AT_WARN("HammerBlade Device Initialized\n");
   return;
 }
 } // namespace unnamed
