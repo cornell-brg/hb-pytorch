@@ -124,9 +124,9 @@ class device(object):
 
     def __exit__(self, *args):
         assert self.idx == self.prev_idx
-        #if self.prev_idx != self.idx:
-        #    torch._C._hammerblade_setDevice(self.prev_idx)
-        #return False
+        # if self.prev_idx != self.idx:
+        #     torch._C._hammerblade_setDevice(self.prev_idx)
+        # return False
 
 
 def current_device():
