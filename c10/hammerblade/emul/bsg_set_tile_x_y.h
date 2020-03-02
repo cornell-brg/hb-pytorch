@@ -1,3 +1,9 @@
+//====================================================================
+// bsg_set_tile_x_y.h
+// 03/02/2020, Lin Cheng (lc873@cornell.edu)
+//====================================================================
+// This is an emulation of bsg_set_tile_x_y which does nothing
+
 extern int __bsg_x;               //The X Cord inside a tile group
 extern int __bsg_y;               //The Y Cord inside a tile group
 extern int __bsg_id;              //The ID of a tile in tile group

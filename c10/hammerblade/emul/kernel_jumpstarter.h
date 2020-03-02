@@ -1,3 +1,16 @@
+//====================================================================
+// kernel_jumpstarter
+// 03/02/2020, Lin Cheng (lc873@cornell.edu)
+//====================================================================
+// This file hosts the functions and data structures that are essential
+// to enqueue and tile_execute simulations
+//
+// When a kernel is enqueued, we push its argc, argv, and its function
+// pointer to corresponding queues.
+//
+// When tile_execute is called, we execute all enqueued functions in
+// order.
+
 #ifndef _KERNEL_JUMPSTARTER_H
 #define _KERNEL_JUMPSTARTER_H
 
