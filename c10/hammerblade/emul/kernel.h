@@ -6,6 +6,6 @@
 #ifndef _KERNEL_TEST_H
 #define _KERNEL_TEST_H
 
-#include <kernel_jumpstarter.h>
+#include <kernel_trampoline.h>
 
 #endif

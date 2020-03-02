@@ -1,4 +1,4 @@
-#include <kernel_jumpstarter.h>
+#include <kernel_trampoline.h>
 
 std::map<std::string, std::function<int(uint32_t, uint32_t*)>> kernelMap;
 std::vector<std::function<int(uint32_t, uint32_t*)>> enqueued_kernel;
