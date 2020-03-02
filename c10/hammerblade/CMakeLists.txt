@@ -45,24 +45,35 @@ endif()
 target_link_libraries(c10_hammerblade PUBLIC c10)
 
 # Dependency to bsg_manycore
-if( NOT DEFINED ENV{BSG_MANYCORE_DIR} )
-  message( FATAL_ERROR "BSG_MANYCORE_DIR not set: Please set BSG_MANYCORE_DIR to bsg_f1/libraries location.")
-endif()
-find_library(BSG_MANYCORE_RUNTIME_LIB bsg_manycore_runtime HINTS $ENV{BSG_MANYCORE_DIR})
-target_link_libraries(c10_hammerblade PUBLIC ${BSG_MANYCORE_RUNTIME_LIB})
+if(USE_HB_EMUL)
+  # Use BRG CUDALite Emulation
+  message( STATUS "Linking CUDALite Emulation Layer...")
+  add_subdirectory(emul)
+  target_link_libraries(c10_hammerblade PUBLIC bsg_manycore_runtime.1.0)
+  target_include_directories( c10_hammerblade PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/emul> )
+  target_compile_definitions(c10_hammerblade PRIVATE "-DHB_KERNEL_DIR=NULL")
+else()
+  # Use real BSG CUDALite
+  if( NOT DEFINED ENV{BSG_MANYCORE_DIR} )
+    message( FATAL_ERROR "BSG_MANYCORE_DIR not set: Please set BSG_MANYCORE_DIR to bsg_f1/libraries location.")
+  endif()
+  find_library(BSG_MANYCORE_RUNTIME_LIB bsg_manycore_runtime HINTS $ENV{BSG_MANYCORE_DIR})
+  target_link_libraries(c10_hammerblade PUBLIC ${BSG_MANYCORE_RUNTIME_LIB})
 
-# Dependency on kernel binary path
-if( NOT DEFINED ENV{HB_KERNEL_DIR})
-  message( FATAL_ERROR "HB_KERNEL_DIR not set: Please set HB_KERNEL_DIR to kernel binary location.")
+  # Dependency on kernel binary path
+  if( NOT DEFINED ENV{HB_KERNEL_DIR})
+    message( FATAL_ERROR "HB_KERNEL_DIR not set: Please set HB_KERNEL_DIR to kernel binary location.")
+  endif()
+  target_compile_definitions(c10_hammerblade PRIVATE "-DHB_KERNEL_DIR=$ENV{HB_KERNEL_DIR}")
+
+  target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_DIR} )
 endif()
-target_compile_definitions(c10_hammerblade PRIVATE "-DHB_KERNEL_DIR=$ENV{HB_KERNEL_DIR}")
 
 target_include_directories(
     c10_hammerblade PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
     $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
-    $<INSTALL_INTERFACE:include>
-    $ENV{BSG_MANYCORE_DIR})
+    $<INSTALL_INTERFACE:include>)
 
 # ---[ Installation
 install(TARGETS c10_hammerblade EXPORT Caffe2Targets DESTINATION lib)

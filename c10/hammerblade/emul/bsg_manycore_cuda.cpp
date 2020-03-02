@@ -181,6 +181,7 @@ void reset_runtime() {
           }
           if (!binary_loaded) {
             binary_loaded = true;
+            // collect kernels and populate the map
             init_kernel_starters();
             return HB_MC_SUCCESS;
           } else {

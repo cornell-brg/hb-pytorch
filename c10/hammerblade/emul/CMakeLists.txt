@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
 
-#project(CUDALiteEmulation VERSION 1.0)
-
 # set debug
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -31,6 +29,9 @@ target_compile_options(bsg_manycore_runtime.1.0 PRIVATE "-Wno-unused-but-set-var
 
 # notify the kernel that we are emulating
 target_compile_definitions(bsg_manycore_runtime.1.0 PRIVATE "-DHB_EMUL")
+
+# installation
+install(TARGETS bsg_manycore_runtime.1.0 EXPORT Caffe2Targets DESTINATION lib)
 
 # create library symlink after building
 add_custom_command( TARGET bsg_manycore_runtime.1.0 POST_BUILD

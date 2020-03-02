@@ -6,6 +6,7 @@ std::vector<uint32_t>  enqueued_argc;
 std::vector<uint32_t*> enqueued_argv;
 
 void enqueue_kernel(const std::string &kernel, uint32_t argc, uint32_t* argv) {
+  assert (kernelMap.find(kernel) != kernelMap.end());
   enqueued_argc.push_back(argc);
   enqueued_argv.push_back(argv);
   enqueued_kernel.push_back(kernelMap[kernel]);

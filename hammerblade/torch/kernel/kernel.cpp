@@ -18,19 +18,20 @@
 #ifdef HB_EMUL
 #include <kernel.h>
 #include <cassert>
+#include <iostream>
 #endif
 
 INIT_TILE_GROUP_BARRIER(r_barrier, c_barrier, 0, bsg_tiles_X-1,
     0, bsg_tiles_Y-1);
 
-template 
+template
 <typename TA, typename TB, typename TC, typename TD, typename Func>
 int __attribute__ ((noinline)) vector_op(TA *A, TB *B, TC *C, TD alpha,
     uint32_t N, Func op) {
-  
-  uint32_t len_per_tile = ceil((float) N / 
+
+  uint32_t len_per_tile = ceil((float) N /
       (float) (bsg_tiles_X * bsg_tiles_Y));
-  
+
 	for (int i = 0; i < len_per_tile; ++i) {
     int index = len_per_tile * __bsg_id + i;
 
@@ -58,7 +59,8 @@ extern "C" {
           float* alpha) {
     int rc;
     bsg_cuda_print_stat_kernel_start();
-    rc = vector_op(a->data, b->data, res->data, *alpha, res->N,
+    rc = vector_op((float*)((intptr_t)a->data), (float*)((intptr_t)b->data),
+        (float*)((intptr_t)res->data), *alpha, res->N,
         [](float a, float b) { return a + b; });
     bsg_cuda_print_stat_kernel_end();
     return rc;
@@ -71,7 +73,8 @@ extern "C" {
           float* alpha) {
     int rc;
     bsg_cuda_print_stat_kernel_start();
-    rc = vector_op(a->data, b->data, res->data, *alpha, res->N,
+    rc = vector_op((float*)((intptr_t)a->data), (float*)((intptr_t)b->data),
+        (float*)((intptr_t)res->data), *alpha, res->N,
         [](float a, float b) { return a * b; });
     bsg_cuda_print_stat_kernel_end();
     return rc;
