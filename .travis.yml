@@ -12,6 +12,8 @@ python:
 
 dist: bionic
 
+sudo: require
+
 env:
     - CONFIG=""
 
@@ -20,6 +22,8 @@ compiler:
 
 addons:
     apt:
+        sources:
+            - ubuntu-toolchain-r-test
         packages:
             - gcc-8
             - g++-8
@@ -39,6 +43,10 @@ install:
 #------------------------------------------------------------------------
 
 script:
+    - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
+    - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
+    - export CC=/usr/bin/gcc-8
+    - export CXX=/usr/bin/g++-8
     - ldd --version
     - gcc --version
     - source setup_emul_build_env.sh
