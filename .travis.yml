@@ -43,15 +43,32 @@ install:
 #------------------------------------------------------------------------
 
 script:
+    # Ensure gcc-8 is used
     - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
     - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
     - export CC=/usr/bin/gcc-8
     - export CXX=/usr/bin/g++-8
-    - export CFLAGS="-D_XOPEN_SOURCE=500 -D_BSD_SOURCE"
+    # Check gcc version
     - ldd --version
     - gcc --version
-    - source setup_emul_build_env.sh
+    # Setup building env
+    - export MAX_JOBS=2
+    - export BUILD_TEST=0
+    - export USE_CUDA=0
+    - export USE_CUDNN=0
+    - export USE_FBGEMM=0
+    - export USE_MKLDNN=0
+    - export USE_NNPACK=0
+    - export USE_QNNPACK=0
+    - export USE_DISTRIBUTED=0
+    - export USE_OPENMP=0
+    - export ATEN_THREADING=NATIVE
+    # Enable emulation layer
+    - export USE_HB_EMUL=1
+    # Build pytorch
     - python setup.py install
+    # Check torch
     - pip list
+    # Run pytests
     - cd hammerblade/torch/tests
     - python -m pytest -v .
