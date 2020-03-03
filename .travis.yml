@@ -47,10 +47,11 @@ script:
     - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
     - export CC=/usr/bin/gcc-8
     - export CXX=/usr/bin/g++-8
+    - export CFLAGS="-D_XOPEN_SOURCE=500 -D_BSD_SOURCE"
     - ldd --version
     - gcc --version
     - source setup_emul_build_env.sh
-    # - python setup.py install
+    - python setup.py install
     - pip list
     - cd hammerblade/torch/tests
     - python -m pytest -v .
