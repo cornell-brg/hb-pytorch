@@ -1,0 +1,77 @@
+#=========================================================================
+# TravisCI Setup
+#=========================================================================
+
+#------------------------------------------------------------------------
+# language and build matrix
+#------------------------------------------------------------------------
+
+language: python, cpp
+python:
+    - 3.6
+
+dist: bionic
+
+sudo: require
+
+env:
+    - CONFIG=""
+
+compiler:
+    - gcc
+
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - gcc-8
+            - g++-8
+
+#------------------------------------------------------------------------
+# install dependencies
+#------------------------------------------------------------------------
+
+install:
+    # Install Python requirements
+    - pip install --upgrade pip setuptools twine
+    - pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest
+    - pip list
+
+#------------------------------------------------------------------------
+# Build and run pytorch tests with emulation layer
+#------------------------------------------------------------------------
+
+script:
+    # Disable ASLR
+    - sudo sh -c "echo 0 > /proc/sys/kernel/randomize_va_space"
+    - cat /proc/sys/kernel/randomize_va_space
+    # Ensure gcc-8 is used
+    - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
+    - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
+    - export CC=/usr/bin/gcc-8
+    - export CXX=/usr/bin/g++-8
+    # Check gcc version
+    - ldd --version
+    - gcc --version
+    # Setup building env
+    - export MAX_JOBS=2
+    - export BUILD_TEST=0
+    - export USE_CUDA=0
+    - export USE_CUDNN=0
+    - export USE_FBGEMM=0
+    - export USE_MKLDNN=0
+    - export USE_NNPACK=0
+    - export USE_QNNPACK=0
+    - export USE_DISTRIBUTED=0
+    - export USE_OPENMP=0
+    - export ATEN_THREADING=NATIVE
+    # Enable emulation layer
+    - export USE_HB_EMUL=1
+    # Build pytorch
+    - python setup.py install
+    # Check torch
+    - pip list
+    # Run pytests
+    - cd hammerblade/torch/tests
+    - python -m pytest -v .

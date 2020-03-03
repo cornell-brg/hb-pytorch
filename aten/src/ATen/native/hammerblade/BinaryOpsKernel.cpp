@@ -25,7 +25,7 @@ void mul_kernel_hb(TensorIterator& iter) {
   if (iter.dtype() == ScalarType::Float) {
     offload_op_binary(iter, 1.0, "tensorlib_mul");
   } else {
-    AT_ERROR("HammerBlade only supports adding two floats");
+    AT_ERROR("HammerBlade only supports multiplying two floats");
   }
 }
 

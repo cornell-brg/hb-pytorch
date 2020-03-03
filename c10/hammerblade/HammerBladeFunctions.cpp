@@ -9,10 +9,7 @@ namespace {
 static std::once_flag init_flag;
 static void initHammerBladeDevice() {
   C10_HB_CHECK(hb_mc_device_init(&_hb_device, "HB_PYTORCH_PORT", 0));
-
   C10_HB_CHECK(hb_mc_device_program_init(&_hb_device, _bin_path, "default_allocator", 0));
-
-  AT_WARN("HammerBlade Device Initialized\n");
   return;
 }
 } // namespace unnamed
@@ -74,7 +71,7 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   }
 
   C10_HB_CHECK(hb_mc_kernel_enqueue(&_hb_device, _hb_grid_dim, _hb_tg_dim, kernel,
-                                    args.size(), (const uint32_t*) cuda_argv));
+                                    args.size(), (uint32_t*) cuda_argv));
   C10_HB_CHECK(hb_mc_device_tile_groups_execute(&_hb_device));
 
   free(cuda_argv);

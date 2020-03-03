@@ -17,8 +17,9 @@ This work aims to port PyTorch to HammerBlade.
  - Init pytorch third party dependencies
     `git submodule update --init --recursive`
  - Setup building environment variables. You need to edit `hb-pytorch/setup_cosim_build_env.sh` and set `BSG_MANYCORE_DIR` to `<bsg_bladerunner>/bsg_replicant/libraries`
+    `cd hb-pytorch && source setup_cosim_build_env.sh`
  - Build pytorch. This step can take up to 15 minutes
-    `cd hb-pytorch && python setup.py install`
+    `python setup.py install`
 
 ### Run Pytests
  - Goto hb-pytorch directory
@@ -29,15 +30,15 @@ This work aims to port PyTorch to HammerBlade.
 
 ### Important files and directories related to HammerBlade
 #### files used to run pytest (adapted from Baseline)
-  - `fragments/`
-  - `environment.mk`
+  - `hammerblade/fragments/`
+  - `hammerblade/environment.mk`
   - `baseline-README.md`
   - `run-hb-pytest.sh` (`source` this one to run pytest!)
-  - `hb_device/torch/`
+  - `hammerblade/torch/`
 #### HammerBlade device code
-  - `hb_device/torch/kernel`
+  - `hammerblade/torch/kernel`
 #### Pytest tests
-  - `hb_device/torch/tests/`
-  - `hb_device/torch/tests/targets.py` (Register a new test here!)
+  - `hammerblade/torch/tests/`
+  - `hammerblade/torch/tests/targets.py` (Register a new test here!)
 #### files that interacts with HammerBlade CUDALite runtime
   - `c10/hammerblade/`

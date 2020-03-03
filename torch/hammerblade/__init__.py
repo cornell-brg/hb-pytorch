@@ -54,8 +54,8 @@ def _lazy_init():
         if _in_bad_fork:
             raise RuntimeError(
                 "Cannot re-initialize HammerBlade in forked subprocess.")
-        #TODO: enable this
-        #_check_driver()
+        # TODO: enable this
+        # _check_driver()
         torch._C._hammerblade_init()
         _original_pid = os.getpid()
         # Some of the queued calls may reentrantly call _lazy_init();
@@ -115,18 +115,18 @@ class device(object):
 
     def __enter__(self):
         assert self.idx == self.prev_idx
-        #if self.idx == -1:
-        #    return
-        #self.prev_idx = torch._C._hammerblade_getDevice()
-        #if self.prev_idx != self.idx:
-        #    torch._C._hammerblade_setDevice(self.idx)
+        # if self.idx == -1:
+        #     return
+        # self.prev_idx = torch._C._hammerblade_getDevice()
+        # if self.prev_idx != self.idx:
+        #     torch._C._hammerblade_setDevice(self.idx)
         _lazy_init()
 
     def __exit__(self, *args):
         assert self.idx == self.prev_idx
-        #if self.prev_idx != self.idx:
-        #    torch._C._hammerblade_setDevice(self.prev_idx)
-        #return False
+        # if self.prev_idx != self.idx:
+        #     torch._C._hammerblade_setDevice(self.prev_idx)
+        # return False
 
 
 def current_device():
