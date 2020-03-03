@@ -43,6 +43,9 @@ install:
 #------------------------------------------------------------------------
 
 script:
+    # Disable ASLR
+    - sudo sh -c "echo 0 > /proc/sys/kernel/randomize_va_space"
+    - cat /proc/sys/kernel/randomize_va_space
     # Ensure gcc-8 is used
     - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
     - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
