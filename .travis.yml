@@ -1,0 +1,38 @@
+#=========================================================================
+# TravisCI Setup
+#=========================================================================
+
+#------------------------------------------------------------------------
+# language and build matrix
+#------------------------------------------------------------------------
+
+language: python
+python:
+    - 3.6
+
+dist: xenial
+
+env:
+    - CONFIG=""
+
+#------------------------------------------------------------------------
+# install dependencies
+#------------------------------------------------------------------------
+
+install:
+    # Install Python requirements
+    - pip install --upgrade pip setuptools twine
+    - pip install --requirement requirements/CI.txt
+    - pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest
+    - pip list
+
+#------------------------------------------------------------------------
+# Build and run pytorch tests with emulation layer
+#------------------------------------------------------------------------
+
+script:
+    - source setup_emul_build_env.sh
+    - python setup.py install
+    - pip list
+    - cd hammerblade/torch/tests
+    - python -m pytest -v .
