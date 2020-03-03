@@ -6,14 +6,23 @@
 # language and build matrix
 #------------------------------------------------------------------------
 
-language: python
+language: python, cpp
 python:
     - 3.6
 
-dist: xenial
+dist: bionic
 
 env:
     - CONFIG=""
+
+compiler:
+    - gcc
+
+addons:
+    apt:
+        packages:
+            - gcc-8
+            - g++-8
 
 #------------------------------------------------------------------------
 # install dependencies
