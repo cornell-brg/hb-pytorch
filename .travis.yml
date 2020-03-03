@@ -39,8 +39,10 @@ install:
 #------------------------------------------------------------------------
 
 script:
+    - ldd --version
+    - gcc --version
     - source setup_emul_build_env.sh
-    - python setup.py install
+    # - python setup.py install
     - pip list
     - cd hammerblade/torch/tests
     - python -m pytest -v .
