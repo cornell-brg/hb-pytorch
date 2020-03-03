@@ -22,7 +22,6 @@ env:
 install:
     # Install Python requirements
     - pip install --upgrade pip setuptools twine
-    - pip install --requirement requirements/CI.txt
     - pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest
     - pip list
 
