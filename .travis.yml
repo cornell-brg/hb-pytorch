@@ -38,6 +38,9 @@ addons:
 # install dependencies
 #------------------------------------------------------------------------
 
+before_install:
+    - pyenv global 3.6
+
 install:
     # Install Python requirements
     - pip install --upgrade pip setuptools twine
