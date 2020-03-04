@@ -32,8 +32,3 @@ target_compile_definitions(bsg_manycore_runtime.1.0 PRIVATE "-DHB_EMUL")
 
 # installation
 install(TARGETS bsg_manycore_runtime.1.0 EXPORT Caffe2Targets DESTINATION lib)
-
-# create library symlink after building
-add_custom_command( TARGET bsg_manycore_runtime.1.0 POST_BUILD
-    COMMAND ln -sf libbsg_manycore_runtime.1.0.so libbsg_manycore_runtime.1.so
-    COMMAND ln -sf libbsg_manycore_runtime.1.so libbsg_manycore_runtime.so )
