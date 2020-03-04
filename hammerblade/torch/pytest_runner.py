@@ -37,7 +37,7 @@ if len(sys.argv) > 1:
         targets.append(regression_path + "/tests/" + t)
 else:
     for t in pytest_targets:
-        targets.append( regression_path + "/tests/" + t + ".py" )
+        targets.append(regression_path + "/tests/" + t + ".py")
 
 # invoke pytest main loop
 pytest.main(pytest_argv + targets)
