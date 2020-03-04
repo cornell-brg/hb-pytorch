@@ -125,6 +125,6 @@ extern "C" {
     return 0;
   }
 
-}
-
   HB_EMUL_REG_KERNEL(tensorlib_memcpy, void*, const void*, uint32_t*)
+
+}
