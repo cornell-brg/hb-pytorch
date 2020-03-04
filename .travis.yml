@@ -20,6 +20,8 @@ env:
 compiler:
     - gcc
 
+cache: ccache
+
 addons:
     apt:
         sources:
@@ -68,6 +70,8 @@ script:
     - export ATEN_THREADING=NATIVE
     # Enable emulation layer
     - export USE_HB_EMUL=1
+    # Enable compiler cache
+    - export CC=ccache
     # Build pytorch
     - python setup.py install
     # Check torch
