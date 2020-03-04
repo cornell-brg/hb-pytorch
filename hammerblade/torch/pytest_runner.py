@@ -33,11 +33,11 @@ targets = []
 
 # Get test list from the command line if provided
 if len(sys.argv) > 1:
-  for t in sys.argv[1:]:
-    targets.append(regression_path + "/tests/" + t)
+    for t in sys.argv[1:]:
+        targets.append(regression_path + "/tests/" + t)
 else:
-  for t in pytest_targets:
-    targets.append( regression_path + "/tests/" + t + ".py" )
+    for t in pytest_targets:
+        targets.append( regression_path + "/tests/" + t + ".py" )
 
 # invoke pytest main loop
 pytest.main(pytest_argv + targets)
