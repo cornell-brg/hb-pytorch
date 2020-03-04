@@ -97,7 +97,8 @@ extern "C" {
           float* alpha) {
     int rc;
     bsg_cuda_print_stat_kernel_start();
-    rc = vector_op(a->data, b->data, res->data, *alpha, res->N,
+    rc = vector_op((float*)((intptr_t)a->data), (float*)((intptr_t)b->data),
+        (float*)((intptr_t)res->data), *alpha, res->N,
         [](float a, float b) { return a / b; });
     bsg_cuda_print_stat_kernel_end();
     return rc;
