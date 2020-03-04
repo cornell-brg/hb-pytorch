@@ -54,7 +54,7 @@ KERNEL_CLIBRARIES   +=
 # C++ Libraries
 KERNEL_CXXLIBRARIES +=
 
-KERNEL_INCLUDES     += -I$(CURRENT_PATH)/kernel/include
+KERNEL_INCLUDES     += -I$(CURRENT_PATH)/kernel
 
 # Define the default kernel.cpp file. If KERNEL_DEFAULT is not defined it will
 # be set to kernel.cpp in the same directory as this Makefile.

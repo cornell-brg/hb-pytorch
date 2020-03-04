@@ -18,7 +18,6 @@
 #include <vector>
 #include <cassert>
 #include <functional>
-#include <kernel.h>
 #include <bsg_manycore_errno.h>
 
 extern std::map<std::string, std::function<int(uint32_t, uint32_t*)>> kernelMap;

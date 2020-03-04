@@ -26,10 +26,7 @@
 // Note: when emulation layer is enabled, this file is included when
 // building c10/hammerblade/emul
 
-#ifdef HB_EMUL
-#include <kernel.h>
-#include <cassert>
-#endif
+#include <hammerblade_emul.hpp>
 
 INIT_TILE_GROUP_BARRIER(r_barrier, c_barrier, 0, bsg_tiles_X-1,
     0, bsg_tiles_Y-1);
@@ -76,6 +73,9 @@ extern "C" {
     return rc;
   }
 
+  HB_EMUL_REG_KERNEL(tensorlib_add, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*)
+
+
   int  __attribute__ ((noinline)) tensorlib_mul(
           bsg_tensor_t* res,
           bsg_tensor_t* a,
@@ -89,6 +89,9 @@ extern "C" {
     bsg_cuda_print_stat_kernel_end();
     return rc;
   }
+
+  HB_EMUL_REG_KERNEL(tensorlib_mul, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*)
+
 
   int  __attribute__ ((noinline)) tensorlib_div(
           bsg_tensor_t* res,
@@ -104,13 +107,16 @@ extern "C" {
     return rc;
   }
 
+  HB_EMUL_REG_KERNEL(tensorlib_div, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*)
+
+
   int __attribute__ ((noinline)) tensorlib_memcpy(
       void* dest,
       const void* src,
       uint32_t* n) {
     int rc;
     bsg_cuda_print_stat_kernel_start();
-    
+
     if(__bsg_id == 0) {
       memcpy(dest, src, *n);
     }
@@ -121,26 +127,4 @@ extern "C" {
 
 }
 
-//====================================================================
-// HammerBlade kernel emulation
-// 03/02/2020, Lin Cheng (lc873@cornell.edu)
-//====================================================================
-// In order to support function name to function pointer mapping, the
-// kernel auhtor needs to register the kernel function
-//
-// kernel:
-// int  __attribute__ ((noinline)) tensorlib_add(
-//        bsg_tensor_t* res,
-//        bsg_tensor_t* a,
-//        bsg_tensor_t* b,
-//        float* alpha)
-//
-// registration:
-// HB_EMUL_REG_KERNEL(tensorlib_add, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*);
-
-#ifdef HB_EMUL
-HB_EMUL_REG_KERNEL(tensorlib_add, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*);
-HB_EMUL_REG_KERNEL(tensorlib_mul, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*);
-HB_EMUL_REG_KERNEL(tensorlib_div, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*);
-HB_EMUL_REG_KERNEL(tensorlib_memcpy, void*, const void*, uint32_t*);
-#endif
+  HB_EMUL_REG_KERNEL(tensorlib_memcpy, void*, const void*, uint32_t*)

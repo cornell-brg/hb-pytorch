@@ -15,7 +15,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # collect kernel files from TOP/hammerblade
 set(HB_KERNEL_PATH "../../../hammerblade/torch/kernel/")
 file(GLOB KERNEL_SRCS ${HB_KERNEL_PATH}/*.cpp)
-file(GLOB KERNEL_HEADERS ${HB_KERNEL_PATH}/include/*.hpp)
+file(GLOB KERNEL_HEADERS ${HB_KERNEL_PATH}/*.hpp)
 include_directories(${HB_KERNEL_PATH})
 include_directories(${HB_KERNEL_PATH}/include/)
 
