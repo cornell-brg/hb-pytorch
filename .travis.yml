@@ -51,8 +51,9 @@ script:
     # Ensure gcc-8 is used
     - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
     - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
-    - export CC=/usr/bin/gcc-8
-    - export CXX=/usr/bin/g++-8
+    # Enable compiler cache
+    - export CC="ccache /usr/bin/gcc-8"
+    - export CXX="ccache /usr/bin/g++-8"
     # Check gcc version
     - ldd --version
     - gcc --version
@@ -70,8 +71,6 @@ script:
     - export ATEN_THREADING=NATIVE
     # Enable emulation layer
     - export USE_HB_EMUL=1
-    # Enable compiler cache
-    - export CC=ccache
     # Build pytorch
     - python setup.py install
     # Check torch
