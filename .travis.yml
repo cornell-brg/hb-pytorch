@@ -49,11 +49,11 @@ script:
     - sudo sh -c "echo 0 > /proc/sys/kernel/randomize_va_space"
     - cat /proc/sys/kernel/randomize_va_space
     # Ensure gcc-8 is used
-    - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
-    - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
+    # - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
+    # - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
     # Enable compiler cache
-    - export CC="ccache /usr/bin/gcc-8"
-    - export CXX="ccache /usr/bin/g++-8"
+    - sudo ln -s /usr/lib/ccache /usr/local/bin/gcc
+    - sudo ln -s /usr/lib/ccache /usr/local/bin/g++
     # Check gcc version
     - ldd --version
     - gcc --version
