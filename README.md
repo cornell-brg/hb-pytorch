@@ -2,7 +2,7 @@
 
 --------------------------------------------------------------------------------
 
-# PyTorch HammerBlade Port
+# PyTorch HammerBlade Port ![Travis status](https://travis-ci.com/cornell-brg/hb-pytorch.svg?branch=master)
 This work aims to port PyTorch to HammerBlade.
 
 ### How to build
