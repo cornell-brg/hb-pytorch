@@ -9,7 +9,7 @@ import torch
 def test_elementwise_div_1():
     x = torch.ones(1, 10)
     y = torch.ones(1, 10)
-    z = x * y
+    z = x / y
     z_h = x.hammerblade() / y.hammerblade()
     assert z_h.device == torch.device("hammerblade")
     assert torch.allclose(z_h.cpu(), z)

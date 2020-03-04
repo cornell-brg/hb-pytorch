@@ -141,4 +141,6 @@ extern "C" {
 #ifdef HB_EMUL
 HB_EMUL_REG_KERNEL(tensorlib_add, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*);
 HB_EMUL_REG_KERNEL(tensorlib_mul, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*);
+HB_EMUL_REG_KERNEL(tensorlib_div, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*);
+HB_EMUL_REG_KERNEL(tensorlib_memcpy, void*, const void*, uint32_t*);
 #endif
