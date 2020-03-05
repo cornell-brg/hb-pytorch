@@ -15,7 +15,7 @@
 #define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
 #include "bsg_manycore.h"
 #include "bsg_set_tile_x_y.h"
-#include "bsg_tile_group_barrier.h"
+// #include "bsg_tile_group_barrier.h"
 #include "bsg_tensor.hpp"
 
 //====================================================================
@@ -31,7 +31,7 @@
 
 #include <hammerblade_emul.hpp>
 
-INIT_TILE_GROUP_BARRIER(r_barrier, c_barrier, 0, bsg_tiles_X-1,
-    0, bsg_tiles_Y-1);
+// extern bsg_row_barrier r_barrier;
+// extern bsg_col_barrier c_barrier;
 
 #endif
