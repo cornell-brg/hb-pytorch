@@ -79,6 +79,7 @@ script:
     # Enable emulation layer
     - export USE_HB_EMUL=1
     # Build pytorch
+    - python setup.py build_clib
     - python setup.py install
     # Check torch
     - pip list
