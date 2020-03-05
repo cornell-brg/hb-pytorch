@@ -8,13 +8,7 @@
 extern "C"{
 #endif
 
-int bsg_printf(const char *fmt, ...) {
-  va_list argptr;
-  va_start(argptr, fmt);
-  vfprintf(stderr, fmt, argptr);
-  va_end(argptr);
-  return 0;
-}
+int bsg_printf(const char *fmt, ...);
 
 #ifdef __cplusplus
 }
