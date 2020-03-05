@@ -76,6 +76,8 @@ script:
     - export USE_DISTRIBUTED=0
     - export USE_OPENMP=0
     - export ATEN_THREADING=NATIVE
+    # Disable GCC warnings
+    - export CFLAGS="-w"
     # Enable emulation layer
     - export USE_HB_EMUL=1
     # Build pytorch
