@@ -18,6 +18,21 @@ dist: bionic
 
 env:
     - CONFIG=""
+    - MAX_JOBS=2
+    - BUILD_TEST=0
+    - USE_CUDA=0
+    - USE_CUDNN=0
+    - USE_FBGEMM=0
+    - USE_MKLDNN=0
+    - USE_NNPACK=0
+    - USE_QNNPACK=0
+    - USE_DISTRIBUTED=0
+    - USE_OPENMP=0
+    - ATEN_THREADING=NATIVE
+    # Disable GCC warnings
+    - CFLAGS="-w"
+    # Enable emulation layer
+    - USE_HB_EMUL=1
 
 compiler:
     - gcc
@@ -43,7 +58,7 @@ install:
 
 jobs:
     include:
-        - stage: environment setup
+        - stage: cache warmup
           script:
               # Disable ASLR
               - sudo sh -c "echo 0 > /proc/sys/kernel/randomize_va_space"
@@ -54,39 +69,23 @@ jobs:
               # Check gcc version
               - ldd --version
               - gcc --version
-              # Setup building env
-              - export MAX_JOBS=2
-              - export BUILD_TEST=0
-              - export USE_CUDA=0
-              - export USE_CUDNN=0
-              - export USE_FBGEMM=0
-              - export USE_MKLDNN=0
-              - export USE_NNPACK=0
-              - export USE_QNNPACK=0
-              - export USE_DISTRIBUTED=0
-              - export USE_OPENMP=0
-              - export ATEN_THREADING=NATIVE
-              # Disable GCC warnings
-              - export CFLAGS="-w"
-              # Enable emulation layer
-              - export USE_HB_EMUL=1
-        - stage: build phase 1
-          script:
               # Build pytorch
               - python setup.py build --cmake-only
               - cd build
-              - make onnx -j2
-              - make sleef -j2
-        - stage: build phase 2
-          script:
-              # Build libtorch
               - make torch -j2
-              - cd ../
-        - stage: build phase 3
+        - stage: build pytorch
           script:
+              # Disable ASLR
+              - sudo sh -c "echo 0 > /proc/sys/kernel/randomize_va_space"
+              - cat /proc/sys/kernel/randomize_va_space
+              # Enable compiler cache
+              - sudo ln -s /usr/lib/ccache /usr/local/bin/gcc
+              - sudo ln -s /usr/lib/ccache /usr/local/bin/g++
+              # Check gcc version
+              - ldd --version
+              - gcc --version
+              # Build and install pytorch
               - python setup.py install
-        - stage: unit tests
-          script:
               # Check torch
               - pip list
               # Run pytests
