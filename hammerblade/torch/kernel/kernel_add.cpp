@@ -5,6 +5,9 @@
 
 #include <common.h>
 
+// We wrap all external-facing C++ kernels with `extern "C"` to
+// prevent name mangling
+
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_add(
