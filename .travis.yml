@@ -6,13 +6,15 @@
 # language and build matrix
 #------------------------------------------------------------------------
 
-language: python, cpp
+language: cpp
+
+git:
+    - depth: 3
+
 python:
     - 3.6
 
 dist: bionic
-
-sudo: require
 
 env:
     - CONFIG=""
@@ -20,17 +22,14 @@ env:
 compiler:
     - gcc
 
-addons:
-    apt:
-        sources:
-            - ubuntu-toolchain-r-test
-        packages:
-            - gcc-8
-            - g++-8
+cache: ccache
 
 #------------------------------------------------------------------------
 # install dependencies
 #------------------------------------------------------------------------
+
+before_install:
+    - pyenv global 3.6
 
 install:
     # Install Python requirements
@@ -42,36 +41,70 @@ install:
 # Build and run pytorch tests with emulation layer
 #------------------------------------------------------------------------
 
-script:
-    # Disable ASLR
-    - sudo sh -c "echo 0 > /proc/sys/kernel/randomize_va_space"
-    - cat /proc/sys/kernel/randomize_va_space
-    # Ensure gcc-8 is used
-    - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
-    - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
-    - export CC=/usr/bin/gcc-8
-    - export CXX=/usr/bin/g++-8
-    # Check gcc version
-    - ldd --version
-    - gcc --version
-    # Setup building env
-    - export MAX_JOBS=2
-    - export BUILD_TEST=0
-    - export USE_CUDA=0
-    - export USE_CUDNN=0
-    - export USE_FBGEMM=0
-    - export USE_MKLDNN=0
-    - export USE_NNPACK=0
-    - export USE_QNNPACK=0
-    - export USE_DISTRIBUTED=0
-    - export USE_OPENMP=0
-    - export ATEN_THREADING=NATIVE
-    # Enable emulation layer
-    - export USE_HB_EMUL=1
-    # Build pytorch
-    - python setup.py install
-    # Check torch
-    - pip list
-    # Run pytests
-    - cd hammerblade/torch/tests
-    - python -m pytest -v .
+jobs:
+    include:
+        - stage: cache warmup
+          script:
+              # Disable ASLR
+              - sudo sh -c "echo 0 > /proc/sys/kernel/randomize_va_space"
+              - cat /proc/sys/kernel/randomize_va_space
+              # Enable compiler cache
+              - sudo ln -s /usr/lib/ccache /usr/local/bin/gcc
+              - sudo ln -s /usr/lib/ccache /usr/local/bin/g++
+              # Check gcc version
+              - ldd --version
+              - gcc --version
+              # Env setup
+              - export MAX_JOBS=2
+              - export BUILD_TEST=0
+              - export USE_CUDA=0
+              - export USE_CUDNN=0
+              - export USE_FBGEMM=0
+              - export USE_MKLDNN=0
+              - export USE_NNPACK=0
+              - export USE_QNNPACK=0
+              - export USE_DISTRIBUTED=0
+              - export USE_OPENMP=0
+              - export ATEN_THREADING=NATIVE
+              # Disable GCC warnings
+              - export CFLAGS="-w"
+              # Enable emulation layer
+              - export USE_HB_EMUL=1
+              # Build pytorch
+              - python setup.py build --cmake-only
+              - cd build
+              - make torch -j2
+        - stage: build pytorch
+          script:
+              # Disable ASLR
+              - sudo sh -c "echo 0 > /proc/sys/kernel/randomize_va_space"
+              - cat /proc/sys/kernel/randomize_va_space
+              # Enable compiler cache
+              - sudo ln -s /usr/lib/ccache /usr/local/bin/gcc
+              - sudo ln -s /usr/lib/ccache /usr/local/bin/g++
+              # Check gcc version
+              - ldd --version
+              - gcc --version
+              # Env setup
+              - export MAX_JOBS=2
+              - export BUILD_TEST=0
+              - export USE_CUDA=0
+              - export USE_CUDNN=0
+              - export USE_FBGEMM=0
+              - export USE_MKLDNN=0
+              - export USE_NNPACK=0
+              - export USE_QNNPACK=0
+              - export USE_DISTRIBUTED=0
+              - export USE_OPENMP=0
+              - export ATEN_THREADING=NATIVE
+              # Disable GCC warnings
+              - export CFLAGS="-w"
+              # Enable emulation layer
+              - export USE_HB_EMUL=1
+              # Build and install pytorch
+              - python setup.py install
+              # Check torch
+              - pip list
+              # Run pytests
+              - cd hammerblade/torch/tests
+              - python -m pytest -v .

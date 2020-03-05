@@ -105,7 +105,7 @@ endif()
 
 # Debug messages - if you want to get a list of source files, enable the
 # following.
-if (TRUE)
+if (FALSE)
   message(STATUS "CPU sources: ")
   foreach(tmp ${Caffe2_CPU_SRCS})
     message(STATUS "  " ${tmp})
