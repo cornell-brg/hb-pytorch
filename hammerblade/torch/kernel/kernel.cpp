@@ -59,68 +59,104 @@ int __attribute__ ((noinline)) vector_op(TA *A, TB *B, TC *C, TD alpha,
  */
 extern "C" {
 
-  int  __attribute__ ((noinline)) tensorlib_add(
+  __attribute__ ((noinline))  int tensorlib_add(
           bsg_tensor_t* res,
           bsg_tensor_t* a,
           bsg_tensor_t* b,
           float* alpha) {
-    int rc;
+    // Convert uint32_t pointers to correct types
+    float*    _c = (float*)((intptr_t)res->data);
+    float*    _a = (float*)((intptr_t)a->data);
+    float*    _b = (float*)((intptr_t)b->data);
+    float _alpha = *alpha;
+    // Calculate elements per tile
+    uint32_t len_per_tile = res->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    uint32_t start = len_per_tile * __bsg_id;
+    uint32_t   end = start + len_per_tile;
+    end = (end > res->N)  ? res->N : end;
+    // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    rc = vector_op((float*)((intptr_t)a->data), (float*)((intptr_t)b->data),
-        (float*)((intptr_t)res->data), *alpha, res->N,
-        [](float a, float b) { return a + b; });
+    // Element-wise add
+    for (int i = start; i < end; i++) {
+        _c[i] = _a[i] + (_alpha * _b[i]);
+    }
+    //   End profiling
     bsg_cuda_print_stat_kernel_end();
-    return rc;
+    return 0;
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_add, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*)
 
 
-  int  __attribute__ ((noinline)) tensorlib_mul(
+  __attribute__ ((noinline))  int tensorlib_mul(
           bsg_tensor_t* res,
           bsg_tensor_t* a,
           bsg_tensor_t* b,
           float* alpha) {
-    int rc;
+    // Convert uint32_t pointers to correct types
+    float*    _c = (float*)((intptr_t)res->data);
+    float*    _a = (float*)((intptr_t)a->data);
+    float*    _b = (float*)((intptr_t)b->data);
+    float _alpha = *alpha;
+    // Calculate elements per tile
+    uint32_t len_per_tile = res->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    uint32_t start = len_per_tile * __bsg_id;
+    uint32_t   end = start + len_per_tile;
+    end = (end > res->N)  ? res->N : end;
+    // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    rc = vector_op((float*)((intptr_t)a->data), (float*)((intptr_t)b->data),
-        (float*)((intptr_t)res->data), *alpha, res->N,
-        [](float a, float b) { return a * b; });
+    // Element-wise mul
+    for (int i = start; i < end; i++) {
+        _c[i] = _a[i] * (_alpha * _b[i]);
+    }
+    //   End profiling
     bsg_cuda_print_stat_kernel_end();
-    return rc;
+    return 0;
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_mul, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*)
 
 
-  int  __attribute__ ((noinline)) tensorlib_div(
+  __attribute__ ((noinline))  int tensorlib_div(
           bsg_tensor_t* res,
           bsg_tensor_t* a,
           bsg_tensor_t* b,
           float* alpha) {
-    int rc;
+    // Convert uint32_t pointers to correct types
+    float*    _c = (float*)((intptr_t)res->data);
+    float*    _a = (float*)((intptr_t)a->data);
+    float*    _b = (float*)((intptr_t)b->data);
+    float _alpha = *alpha;
+    // Calculate elements per tile
+    uint32_t len_per_tile = res->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    uint32_t start = len_per_tile * __bsg_id;
+    uint32_t   end = start + len_per_tile;
+    end = (end > res->N)  ? res->N : end;
+    // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    rc = vector_op((float*)((intptr_t)a->data), (float*)((intptr_t)b->data),
-        (float*)((intptr_t)res->data), *alpha, res->N,
-        [](float a, float b) { return a / b; });
+    // Element-wise div
+    for (int i = start; i < end; i++) {
+        _c[i] = _a[i] / (_alpha * _b[i]);
+    }
+    //   End profiling
     bsg_cuda_print_stat_kernel_end();
-    return rc;
+    return 0;
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_div, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*)
 
 
-  int __attribute__ ((noinline)) tensorlib_memcpy(
+  __attribute__ ((noinline))  int tensorlib_memcpy(
       void* dest,
       const void* src,
       uint32_t* n) {
-    int rc;
+    // Start profiling
     bsg_cuda_print_stat_kernel_start();
-
+    // Perform memcpy if __bsg_id is 0
     if(__bsg_id == 0) {
       memcpy(dest, src, *n);
     }
-
+    //   End profiling
     bsg_cuda_print_stat_kernel_end();
     return 0;
   }
