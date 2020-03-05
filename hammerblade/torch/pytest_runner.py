@@ -6,7 +6,7 @@ Lin Cheng
 """
 
 # pytest commandline options
-pytest_argv = ["-vs"]
+pytest_argv = ["-v"]
 
 # This is a work around of the bug in which sys.argv is not set
 # when running as embededd script
@@ -18,15 +18,12 @@ if not hasattr(sys, "argv"):
 import pathlib
 import pytest
 
-# figure out regression/pytorch directory
-regression_path = str(pathlib.Path(__file__).parent.absolute())
+# figure out current directory
+current_path = str(pathlib.Path(__file__).parent.absolute())
 
-# use regression/pytorch so we can find out tests
-sys.path.append(regression_path + "/tests")
-sys.path.append(regression_path)
-
-# load registered tests
-from tests.targets import pytest_targets
+# add current and tests paths
+sys.path.append(current_path + "/tests")
+sys.path.append(current_path)
 
 # construct target list
 targets = []
@@ -34,10 +31,21 @@ targets = []
 # Get test list from the command line if provided
 if len(sys.argv) > 1:
     for t in sys.argv[1:]:
-        targets.append(regression_path + "/tests/" + t)
+        targets.append(current_path + "/tests/" + t)
 else:
-    for t in pytest_targets:
-        targets.append(regression_path + "/tests/" + t + ".py")
+    # collect pytest files. somehow it can't do so automatically
+    # inside COSIM
+    import glob
+    targets = glob.glob(current_path + "/tests/test_*.py")
+
+print()
+print(" files collected by pytest runner:")
+print()
+for t in targets:
+    print(" " + t)
+print()
+print(" starting pytest ...")
+print()
 
 # invoke pytest main loop
 pytest.main(pytest_argv + targets)
