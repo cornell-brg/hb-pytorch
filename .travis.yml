@@ -18,21 +18,6 @@ dist: bionic
 
 env:
     - CONFIG=""
-    - MAX_JOBS=2
-    - BUILD_TEST=0
-    - USE_CUDA=0
-    - USE_CUDNN=0
-    - USE_FBGEMM=0
-    - USE_MKLDNN=0
-    - USE_NNPACK=0
-    - USE_QNNPACK=0
-    - USE_DISTRIBUTED=0
-    - USE_OPENMP=0
-    - ATEN_THREADING=NATIVE
-    # Disable GCC warnings
-    - CFLAGS="-w"
-    # Enable emulation layer
-    - USE_HB_EMUL=1
 
 compiler:
     - gcc
@@ -69,6 +54,22 @@ jobs:
               # Check gcc version
               - ldd --version
               - gcc --version
+              # Env setup
+              - export MAX_JOBS=2
+              - export BUILD_TEST=0
+              - export USE_CUDA=0
+              - export USE_CUDNN=0
+              - export USE_FBGEMM=0
+              - export USE_MKLDNN=0
+              - export USE_NNPACK=0
+              - export USE_QNNPACK=0
+              - export USE_DISTRIBUTED=0
+              - export USE_OPENMP=0
+              - export ATEN_THREADING=NATIVE
+              # Disable GCC warnings
+              - export CFLAGS="-w"
+              # Enable emulation layer
+              - export USE_HB_EMUL=1
               # Build pytorch
               - python setup.py build --cmake-only
               - cd build
@@ -84,6 +85,22 @@ jobs:
               # Check gcc version
               - ldd --version
               - gcc --version
+              # Env setup
+              - export MAX_JOBS=2
+              - export BUILD_TEST=0
+              - export USE_CUDA=0
+              - export USE_CUDNN=0
+              - export USE_FBGEMM=0
+              - export USE_MKLDNN=0
+              - export USE_NNPACK=0
+              - export USE_QNNPACK=0
+              - export USE_DISTRIBUTED=0
+              - export USE_OPENMP=0
+              - export ATEN_THREADING=NATIVE
+              # Disable GCC warnings
+              - export CFLAGS="-w"
+              # Enable emulation layer
+              - export USE_HB_EMUL=1
               # Build and install pytorch
               - python setup.py install
               # Check torch
