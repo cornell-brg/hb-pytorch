@@ -16,8 +16,6 @@ python:
 
 dist: bionic
 
-sudo: require
-
 env:
     - CONFIG=""
 
@@ -25,14 +23,6 @@ compiler:
     - gcc
 
 cache: ccache
-
-addons:
-    apt:
-        sources:
-            - ubuntu-toolchain-r-test
-        packages:
-            - gcc-8
-            - g++-8
 
 #------------------------------------------------------------------------
 # install dependencies
@@ -51,40 +41,54 @@ install:
 # Build and run pytorch tests with emulation layer
 #------------------------------------------------------------------------
 
-script:
-    # Disable ASLR
-    - sudo sh -c "echo 0 > /proc/sys/kernel/randomize_va_space"
-    - cat /proc/sys/kernel/randomize_va_space
-    # Ensure gcc-8 is used
-    # - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
-    # - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
-    # Enable compiler cache
-    - sudo ln -s /usr/lib/ccache /usr/local/bin/gcc
-    - sudo ln -s /usr/lib/ccache /usr/local/bin/g++
-    # Check gcc version
-    - ldd --version
-    - gcc --version
-    # Setup building env
-    - export MAX_JOBS=2
-    - export BUILD_TEST=0
-    - export USE_CUDA=0
-    - export USE_CUDNN=0
-    - export USE_FBGEMM=0
-    - export USE_MKLDNN=0
-    - export USE_NNPACK=0
-    - export USE_QNNPACK=0
-    - export USE_DISTRIBUTED=0
-    - export USE_OPENMP=0
-    - export ATEN_THREADING=NATIVE
-    # Disable GCC warnings
-    - export CFLAGS="-w"
-    # Enable emulation layer
-    - export USE_HB_EMUL=1
-    # Build pytorch
-    - python setup.py build_clib
-    - python setup.py install
-    # Check torch
-    - pip list
-    # Run pytests
-    - cd hammerblade/torch/tests
-    - python -m pytest -v .
+jobs:
+    include:
+        - stage: environment setup
+          script:
+              # Disable ASLR
+              - sudo sh -c "echo 0 > /proc/sys/kernel/randomize_va_space"
+              - cat /proc/sys/kernel/randomize_va_space
+              # Enable compiler cache
+              - sudo ln -s /usr/lib/ccache /usr/local/bin/gcc
+              - sudo ln -s /usr/lib/ccache /usr/local/bin/g++
+              # Check gcc version
+              - ldd --version
+              - gcc --version
+              # Setup building env
+              - export MAX_JOBS=2
+              - export BUILD_TEST=0
+              - export USE_CUDA=0
+              - export USE_CUDNN=0
+              - export USE_FBGEMM=0
+              - export USE_MKLDNN=0
+              - export USE_NNPACK=0
+              - export USE_QNNPACK=0
+              - export USE_DISTRIBUTED=0
+              - export USE_OPENMP=0
+              - export ATEN_THREADING=NATIVE
+              # Disable GCC warnings
+              - export CFLAGS="-w"
+              # Enable emulation layer
+              - export USE_HB_EMUL=1
+        - stage: build phase 1
+          script:
+              # Build pytorch
+              - python setup.py build --cmake-only
+              - cd build
+              - make onnx -j2
+              - make sleef -j2
+        - stage: build phase 2
+          script:
+              # Build libtorch
+              - make torch -j2
+              - cd ../
+        - stage: build phase 3
+          script:
+              - python setup.py install
+        - stage: unit tests
+          script:
+              # Check torch
+              - pip list
+              # Run pytests
+              - cd hammerblade/torch/tests
+              - python -m pytest -v .
