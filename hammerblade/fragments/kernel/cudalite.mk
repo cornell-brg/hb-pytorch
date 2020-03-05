@@ -57,10 +57,10 @@ _BSG_MACHINE_TILES_Y := $(shell expr $(BSG_MACHINE_GLOBAL_Y) - 1)
 _BSG_MACHINE_TILES   := $(shell expr $(_BSG_MACHINE_TILES_X) \* $(_BSG_MACHINE_TILES_Y))
 
 ################################################################################
-# Define the default kernel source file. If it is not defined, set it
-# to kernel.cpp
+# Define the default path to kernel source file. If it is not defined, set it
+# to ./kernel/
 ################################################################################
-KERNEL_DEFAULT ?= kernel.cpp
+KERNEL_DEFAULT ?= kernel/
 
 ################################################################################
 # Kernel Objects
