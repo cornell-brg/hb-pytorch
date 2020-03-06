@@ -644,7 +644,12 @@ at::Tensor _convolution(
                                       params.padding, params.stride, params.dilation, params.groups);
     }
 #endif
-  } else if (input.device().type() == c10::DeviceType::CPU || input.device().type() == c10::DeviceType::CUDA) {
+  } else if (input.device().type() == c10::DeviceType::CPU || input.device().type() == c10::DeviceType::CUDA
+              || input.device().type() == c10::DeviceType::HAMMERBLADE) {
+    
+    TORCH_CHECK(input.device().type() != c10::DeviceType::HAMMERBLADE,
+        "Convolution for HammberBlade TBD");
+
     if (params.use_cpu_depthwise3x3_winograd(input, weight)) {
       output = convolution_depthwise3x3_winograd_stub(
         input.device().type(), input, weight, bias, params.stride, params.padding, params.groups);
