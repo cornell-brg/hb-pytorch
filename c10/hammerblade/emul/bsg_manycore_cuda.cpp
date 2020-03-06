@@ -307,7 +307,7 @@ void reset_runtime() {
                                        hb_mc_dimension_t tg_dim,
                                        const char *name,
                                        const uint32_t argc,
-                                       uint32_t *argv) {
+                                       uint64_t *argv) {
           EMUL_WARNING();
           if (!device_busy || !binary_loaded) {
             return HB_MC_UNINITIALIZED;

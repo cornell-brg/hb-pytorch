@@ -20,16 +20,16 @@
 #include <functional>
 #include <bsg_manycore_errno.h>
 
-extern std::map<std::string, std::function<int(uint32_t, uint32_t*)>> kernelMap;
-extern std::vector<std::function<int(uint32_t, uint32_t*)>> enqueued_kernel;
+extern std::map<std::string, std::function<int(uint32_t, uint64_t*)>> kernelMap;
+extern std::vector<std::function<int(uint32_t, uint64_t*)>> enqueued_kernel;
 extern std::vector<uint32_t>  enqueued_argc;
-extern std::vector<uint32_t*> enqueued_argv;
+extern std::vector<uint64_t*> enqueued_argv;
 
-void enqueue_kernel(const std::string &kernel, uint32_t argc, uint32_t* argv);
+void enqueue_kernel(const std::string &kernel, uint32_t argc, uint64_t* argv);
 int execute_kernels();
 
 typedef struct _kernel_registry_ {
-    _kernel_registry_(std::string kernel_name, std::function<int(uint32_t, uint32_t*)> kernel_ptr) {
+    _kernel_registry_(std::string kernel_name, std::function<int(uint32_t, uint64_t*)> kernel_ptr) {
         kernelMap[kernel_name] = kernel_ptr;
     }
 } kernel_registry;
@@ -42,7 +42,7 @@ typedef struct _kernel_registry_ {
                                                           HB_EMUL_REG_KERNEL_1ARGS)(__VA_ARGS__)      \
 
 #define HB_EMUL_REG_KERNEL_1ARGS(kernel)                                                              \
-int trampoline_##kernel(const uint32_t argc, const uint32_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
     assert (argc == 0);                                                                               \
     return kernel();                                                                                  \
 }                                                                                                     \
@@ -50,19 +50,19 @@ kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};             
 
 
 #define HB_EMUL_REG_KERNEL_2ARGS(kernel, at0)                                                         \
-int trampoline_##kernel(const uint32_t argc, const uint32_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
     assert (argc == 1);                                                                               \
-    uint32_t _arg0 = argv[0];                                                                         \
+    uint64_t _arg0 = argv[0];                                                                         \
     at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
     return kernel(arg0);                                                                              \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_3ARGS(kernel, at0, at1)                                                    \
-int trampoline_##kernel(const uint32_t argc, const uint32_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
     assert (argc == 2);                                                                               \
-    uint32_t _arg0 = argv[0];                                                                         \
-    uint32_t _arg1 = argv[1];                                                                         \
+    uint64_t _arg0 = argv[0];                                                                         \
+    uint64_t _arg1 = argv[1];                                                                         \
     at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
     at1 arg1 = (at1)((intptr_t)_arg1);                                                                \
     return kernel(arg0, arg1);                                                                        \
@@ -70,11 +70,11 @@ int trampoline_##kernel(const uint32_t argc, const uint32_t* argv) {            
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_4ARGS(kernel, at0, at1, at2)                                               \
-int trampoline_##kernel(const uint32_t argc, const uint32_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
     assert (argc == 3);                                                                               \
-    uint32_t _arg0 = argv[0];                                                                         \
-    uint32_t _arg1 = argv[1];                                                                         \
-    uint32_t _arg2 = argv[2];                                                                         \
+    uint64_t _arg0 = argv[0];                                                                         \
+    uint64_t _arg1 = argv[1];                                                                         \
+    uint64_t _arg2 = argv[2];                                                                         \
     at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
     at1 arg1 = (at1)((intptr_t)_arg1);                                                                \
     at2 arg2 = (at2)((intptr_t)_arg2);                                                                \
@@ -83,12 +83,12 @@ int trampoline_##kernel(const uint32_t argc, const uint32_t* argv) {            
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_5ARGS(kernel, at0, at1, at2, at3)                                          \
-int trampoline_##kernel(const uint32_t argc, const uint32_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
     assert (argc == 4);                                                                               \
-    uint32_t _arg0 = argv[0];                                                                         \
-    uint32_t _arg1 = argv[1];                                                                         \
-    uint32_t _arg2 = argv[2];                                                                         \
-    uint32_t _arg3 = argv[3];                                                                         \
+    uint64_t _arg0 = argv[0];                                                                         \
+    uint64_t _arg1 = argv[1];                                                                         \
+    uint64_t _arg2 = argv[2];                                                                         \
+    uint64_t _arg3 = argv[3];                                                                         \
     at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
     at1 arg1 = (at1)((intptr_t)_arg1);                                                                \
     at2 arg2 = (at2)((intptr_t)_arg2);                                                                \
