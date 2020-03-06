@@ -29,7 +29,7 @@ all_types = type_map['floating_point'] + type_map['integral'] + type_map['quanti
 type_map['all'] = all_types
 
 all_backends = ['CPU', 'CUDA', 'SparseCPU', 'SparseCUDA', 'MkldnnCPU', 'QuantizedCPU',
-                'HammerBlade']
+                'HammerBlade', 'SparseHammerBlade']
 default_backends = ['CPU', 'CUDA']
 
 
