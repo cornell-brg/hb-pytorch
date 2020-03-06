@@ -164,10 +164,11 @@ RISCV_LDFLAGS += -Wl,--no-check-sections
 # tile group size. KERNEL_OBJECTS can be used to include other object
 # files in the linker. KERNEL_DEFAULT can be overridden by the user,
 # but defaults to kernel.cpp
+KERNEL_RVO := $(foreach kernel_src, $(wildcard $(KERNEL_DEFAULT)/*.cpp), $(basename $(kernel_src)).rvo)
 
 _LINK_HELP_STRING += "    kernel.riscv:\n"
 _LINK_HELP_STRING += "        - Compile the RISC-V Manycore tensorlib Kernel.\n"
-kernel.riscv: $(MACHINE_CRT_OBJ) main.rvo $(BSG_MANYCORE_LIB_OBJECTS) $(KERNEL_OBJECTS) $(basename $(KERNEL_DEFAULT)).rvo
+kernel.riscv: $(MACHINE_CRT_OBJ) main.rvo $(BSG_MANYCORE_LIB_OBJECTS) $(KERNEL_OBJECTS) $(KERNEL_RVO)
 	$(RISCV_LD) -T $(RISCV_LINK_SCRIPT) $^ $(RISCV_LDFLAGS) -o $@
 
 kernel.link.clean:
