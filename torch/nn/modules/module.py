@@ -287,6 +287,18 @@ class Module(object):
         fn(self)
         return self
 
+    def hammerblade(self):
+        r"""Moves all model parameters and buffers to the HammerBlade.
+
+        This also makes associated parameters and buffers different objects. So
+        it should be called before constructing optimizer if the module will
+        live on HammerBlade while being optimized.
+
+        Returns:
+            Module: self
+        """
+        return self._apply(lambda t: t.hammerblade())
+
     def cuda(self, device=None):
         r"""Moves all model parameters and buffers to the GPU.
 
