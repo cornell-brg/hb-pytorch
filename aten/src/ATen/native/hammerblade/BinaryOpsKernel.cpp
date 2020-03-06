@@ -10,11 +10,9 @@ namespace at { namespace native {
 namespace {
 
 void add_kernel_hb(TensorIterator& iter, Scalar alpha_scalar) {
-  if (iter.dtype() == ScalarType::Float) {
-    offload_op_binary(iter, alpha_scalar, "tensorlib_add");
-  } else {
-    AT_ERROR("HammerBlade only supports adding two floats");
-  }
+  AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "add_hb/sub_hb", [&]() {
+      offload_op_binary(iter, alpha_scalar, "tensorlib_add");
+      });
 }
 
 void sub_kernel_hb(TensorIterator& iter, Scalar alpha_scalar) {
@@ -22,19 +20,15 @@ void sub_kernel_hb(TensorIterator& iter, Scalar alpha_scalar) {
 }
 
 void mul_kernel_hb(TensorIterator& iter) {
-  if (iter.dtype() == ScalarType::Float) {
-    offload_op_binary(iter, 1.0, "tensorlib_mul");
-  } else {
-    AT_ERROR("HammerBlade only supports multiplying two floats");
-  }
+  AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "mul_hb", [&]() {
+      offload_op_binary(iter, 1.0, "tensorlib_mul");
+      });
 }
 
 void div_kernel_hb(TensorIterator& iter) {
-  if (iter.dtype() == ScalarType::Float) {
-    offload_op_binary(iter, 1.0, "tensorlib_div");
-  } else {
-    AT_ERROR("HammerBlade only supports dividing two floats");
-  }
+  AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "div_hb", [&]() {
+      offload_op_binary(iter, 1.0, "tensorlib_div");
+      });
 }
 
 } // anonymous namespace
