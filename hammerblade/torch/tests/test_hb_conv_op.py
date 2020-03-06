@@ -8,7 +8,7 @@ def test_conv2d_1():
     kernel_hb = kernel.hammerblade()
     inputs_hb = inputs.hammerblade()
 
-    conv_result = F.conv2d(inputs, kernel, padding=1)
     conv_result_hb = F.conv2d(inputs_hb, kernel_hb, padding=1)
+    conv_result = F.conv2d(inputs, kernel, padding=1)
 
     assert conv_result == conv_result_hb.cpu()
