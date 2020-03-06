@@ -3,7 +3,7 @@
 // 03/05/2020 Lin Cheng and Bandhav Veluri (lc873@cornell.edu)
 //====================================================================
 
-#include <common.h>
+#include <kernel_common.hpp>
 
 extern "C" {
 

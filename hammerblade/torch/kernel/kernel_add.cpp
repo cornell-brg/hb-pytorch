@@ -3,7 +3,7 @@
 // 03/05/2020 Lin Cheng and Bandhav Veluri (lc873@cornell.edu)
 //====================================================================
 
-#include <common.h>
+#include <kernel_common.hpp>
 
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
