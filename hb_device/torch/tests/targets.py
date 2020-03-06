@@ -5,5 +5,4 @@
     Lin Cheng
 """
 
-pytest_targets = [ "test_hammerblade_device",
-                   "test_hammerblade_kernels" ]
+pytest_targets = [ "test_sparse_hammerblade_device" ]

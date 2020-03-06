@@ -425,6 +425,7 @@ struct C10_API TensorImpl : public c10::intrusive_ptr_target {
     // NB: This method is not virtual and avoid dispatches for performance reasons.
     return type_set_.has(TensorTypeId::SparseCPUTensorId) ||
            type_set_.has(TensorTypeId::SparseCUDATensorId) ||
+           type_set_.has(TensorTypeId::SparseHammerBladeTensorId) ||
            type_set_.has(TensorTypeId::SparseHIPTensorId);
   }
 
@@ -447,7 +448,9 @@ struct C10_API TensorImpl : public c10::intrusive_ptr_target {
 
   bool is_hammerblade() const {
     // NB: This method is not virtual and avoid dispatches for performance reasons.
-    return type_set_.has(TensorTypeId::HammerBladeTensorId);
+    return type_set_.has(TensorTypeId::HammerBladeTensorId) ||
+           type_set_.has(TensorTypeId::SparseHammerBladeTensorId);
+          
   }
 
   bool is_mkldnn() const {
@@ -912,6 +915,7 @@ struct C10_API TensorImpl : public c10::intrusive_ptr_target {
     auto is_sparse = [](TensorTypeSet ts) {
       return ts.has(TensorTypeId::SparseCPUTensorId) ||
              ts.has(TensorTypeId::SparseCUDATensorId) ||
+             ts.has(TensorTypeId::SparseHammerBladeTensorId) || 
              ts.has(TensorTypeId::SparseHIPTensorId);
     };
     return (type_set_ == from) || (is_dense(type_set_) && is_dense(from)) || (is_sparse(type_set_) && is_sparse(from));

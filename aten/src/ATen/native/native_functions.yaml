@@ -280,6 +280,7 @@
     HammerBlade: add
     SparseCPU: add_sparse
     SparseCUDA: add_sparse
+    SparseHammerBlade: add_sparse
     MkldnnCPU: mkldnn_add
   supports_named_tensor: True
 
@@ -1012,6 +1013,7 @@
     MkldnnCPU: empty_mkldnn
     SparseCPU: empty_sparse
     SparseCUDA: empty_sparse
+    SparseHammerBlade: empty_sparse
 
 - func: new_empty(Tensor self, int[] size, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor
   variants: method
@@ -1846,6 +1848,7 @@
     HammerBlade: mul
     SparseCPU: mul_sparse
     SparseCUDA: mul_sparse
+    SparseHammerBlade: mul_sparse
     MkldnnCPU: mkldnn_mul
   supports_named_tensor: True
 
@@ -1857,6 +1860,7 @@
     HammerBlade: mul_
     SparseCPU: mul_sparse_
     SparseCUDA: mul_sparse_
+    SparseHammerBlade: mul_sparse_
     MkldnnCPU: mkldnn_mul_
   supports_named_tensor: True
 
@@ -1867,6 +1871,7 @@
     HammerBlade: mul_out
     SparseCPU: mul_out_sparse_cpu
     SparseCUDA: mul_out_sparse_cuda
+    SparseHammerBlade: mul_out_sparse_hammerblade
     MkldnnCPU: mkldnn_mul_out
   supports_named_tensor: True
 
@@ -3023,6 +3028,7 @@
     HammerBlade: sub
     SparseCPU: sub_sparse
     SparseCUDA: sub_sparse
+    SparseHammerBlade: sub_sparse
   supports_named_tensor: True
 
 - func: sub_.Tensor(Tensor(a!) self, Tensor other, *, Scalar alpha=1) -> Tensor(a!)
@@ -3259,6 +3265,7 @@
   dispatch:
     SparseCPU: sparse_to_dense
     SparseCUDA: sparse_to_dense
+    SparseHammerBlade: Sparse_to_dense
     MkldnnCPU: mkldnn_to_dense
   requires_tensor: True
 
@@ -3271,6 +3278,7 @@
   dispatch:
     SparseCPU: sparse_dim_sparse
     SparseCUDA: sparse_dim_sparse
+    SparseHammerBlade: sparse_dim_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3281,6 +3289,7 @@
   dispatch:
     SparseCPU: sparse_dim_sparse
     SparseCUDA: sparse_dim_sparse
+    SparseHammerBlade: sparse_dim_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3291,6 +3300,7 @@
   dispatch:
     SparseCPU: dense_dim_sparse
     SparseCUDA: dense_dim_sparse
+    SparseHammerBlade: dense_dim_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3301,6 +3311,7 @@
   dispatch:
     SparseCPU: dense_dim_sparse
     SparseCUDA: dense_dim_sparse
+    SparseHammerBlade: dense_dim_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3311,6 +3322,7 @@
   dispatch:
     SparseCPU: _nnz_sparse
     SparseCUDA: _nnz_sparse
+    SparseHammerBlade: _nnz_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3321,6 +3333,7 @@
   dispatch:
     SparseCPU: coalesce_sparse_cpu
     SparseCUDA: coalesce_sparse_cuda
+    SparseHammerBlade: coalesce_sparse_hammerblade
   requires_tensor: True
 
 
@@ -3330,6 +3343,7 @@
   dispatch:
     SparseCPU: is_coalesced_sparse
     SparseCUDA: is_coalesced_sparse
+    SparseHammerBlade: is_coalesced_sparse
   requires_tensor: True
   device_guard: False
   supports_named_tensor: True
@@ -3340,6 +3354,7 @@
   dispatch:
     SparseCPU: _indices_sparse
     SparseCUDA: _indices_sparse
+    SparseHammerBlade: _indices_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3348,6 +3363,7 @@
   dispatch:
     SparseCPU: _values_sparse
     SparseCUDA: _values_sparse
+    SparseHammerBlade: _values_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3359,6 +3375,7 @@
   dispatch:
     SparseCPU: _coalesced_sparse_
     SparseCUDA: _coalesced_sparse_
+    SparseHammerBlade: _coalesced_sparse_
   requires_tensor: True
   device_guard: False
 
@@ -3367,6 +3384,7 @@
   dispatch:
     SparseCPU: indices_sparse
     SparseCUDA: indices_sparse
+    SparseHammerBlade: indices_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3375,6 +3393,7 @@
   dispatch:
     SparseCPU: values_sparse
     SparseCUDA: values_sparse
+    SparseHammerBlade: values_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3397,6 +3416,7 @@
   dispatch:
     SparseCPU: copy_sparse_
     SparseCUDA: copy_sparse_
+    SparseHammerBlade: copy_sparse_
   requires_tensor: True
 
 - func: unbind.int(Tensor(a) self, int dim=0) -> Tensor(a)[]
@@ -3413,6 +3433,7 @@
   dispatch:
     CPU: dense_to_sparse
     CUDA: dense_to_sparse
+    HammerBlade: dense_to_sparse
 
 - func: to_sparse(Tensor self) -> Tensor
   use_c10_dispatcher: full
@@ -3420,11 +3441,12 @@
   dispatch:
     CPU: dense_to_sparse
     CUDA: dense_to_sparse
+    HammerBlade: dense_to_sparse
 
 - func: to_mkldnn(Tensor self) -> Tensor
   use_c10_dispatcher: full
   variants: method
-  dispatch:
+  dispatch: 
     CPU: dense_to_mkldnn
 
 - func: mkldnn_reorder_conv2d_weight(Tensor self, int[2] padding=0, int[2] stride=1, int[2] dilation=1, int groups=1) -> Tensor
