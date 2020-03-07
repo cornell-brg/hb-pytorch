@@ -20,7 +20,7 @@ extern "C" {
     end = (end > res->N)  ? res->N : end;
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    // Element-wise add
+    // Element-wise value filling
     for (int i = start; i < end; i++) {
         _c[i] = _value;
     }
