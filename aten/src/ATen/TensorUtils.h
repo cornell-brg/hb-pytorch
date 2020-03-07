@@ -97,6 +97,11 @@ CAFFE2_API void checkSameGPU(
     const TensorArg& t1,
     const TensorArg& t2);
 CAFFE2_API void checkAllSameGPU(CheckedFrom c, ArrayRef<TensorArg> tensors);
+CAFFE2_API void checkSameHB(
+    CheckedFrom c,
+    const TensorArg& t1,
+    const TensorArg& t2);
+CAFFE2_API void checkAllSameHB(CheckedFrom c, ArrayRef<TensorArg> tensors);
 CAFFE2_API void checkSameType(
     CheckedFrom c,
     const TensorArg& t1,
