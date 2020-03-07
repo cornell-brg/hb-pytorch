@@ -7,15 +7,23 @@
 namespace at {
 namespace native {
 
-Tensor& hb_convolution_nogroup(
-    const Tensor& input, const Tensor& weight, 
-    const Tensor& bias, IntArrayRef stride, 
-    IntArrayRef padding, IntArrayRef dilation, 
-    bool transposed, IntArrayRef output_padding){
+at::Tensor hb_convolution_transpose(
+    const Tensor& input, const Tensor& weight, const Tensor& bias,
+    IntArrayRef padding, IntArrayRef output_padding,
+    IntArrayRef stride, IntArrayRef dilation,
+    int64_t groups){
 
-  TORCH_CHECK(false, "hb_convolution_nogroup: not yet implemented!");
+  TORCH_CHECK(false, "hb_convolution_transpose: not yet implemented!");
+  return at::empty({}, at::TensorOptions(at::kHAMMERBLADE).dtype(at::kFloat));
+}
 
-  return input;
+at::Tensor hb_convolution(
+    const Tensor& input, const Tensor& weight, const Tensor& bias,
+    IntArrayRef padding, IntArrayRef stride, 
+    IntArrayRef dilation, int64_t groups){
+
+  TORCH_CHECK(false, "hb_convolution_transpose: not yet implemented!");
+  return at::empty({}, at::TensorOptions(at::kHAMMERBLADE).dtype(at::kFloat));
 }
 
 }} // namespace at::native

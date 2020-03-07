@@ -644,8 +644,24 @@ at::Tensor _convolution(
                                       params.padding, params.stride, params.dilation, params.groups);
     }
 #endif
-  } else if (input.device().type() == c10::DeviceType::CPU || input.device().type() == c10::DeviceType::CUDA
-              || input.device().type() == c10::DeviceType::HAMMERBLADE) {
+  } else if (input.device().type() == c10::DeviceType::HAMMERBLADE) {
+    TORCH_CHECK(input.type() == weight.type(),
+             "Input type (", input.type().toString(), ") and weight type (", weight.type().toString(),
+             ") should be the same");
+    TORCH_CHECK(!bias.defined() || (input.type() == bias.type()),
+             "Input type (", input.type().toString(), ") and bias type (", bias.type().toString(),
+             ") should be the same");
+    
+    if (params.transposed) {
+      output = at::hb_convolution_transpose(
+          input.contiguous(), weight, bias,
+          params.padding, params.output_padding, params.stride, params.dilation, params.groups);
+    } else {
+      output = at::hb_convolution(
+          input.contiguous(), weight, bias,
+          params.padding, params.stride, params.dilation, params.groups);
+    }
+  } else if (input.device().type() == c10::DeviceType::CPU || input.device().type() == c10::DeviceType::CUDA) {
     if (params.use_cpu_depthwise3x3_winograd(input, weight)) {
       output = convolution_depthwise3x3_winograd_stub(
         input.device().type(), input, weight, bias, params.stride, params.padding, params.groups);
@@ -698,14 +714,7 @@ at::Tensor _convolution_nogroup(
   auto dilated = params.is_dilated();
   auto kernel_size = weight.sizes().slice(2);
 
-  if (input.is_hammerblade()) {
-    TORCH_CHECK(input.dtype() == ScalarType::Float, 
-        "HB tensor dtype must be float"); 
-
-    return hb_convolution_nogroup(
-        input, weight, bias, stride,
-        padding, dilation, transposed, output_padding);
-  } else if (params.transposed) {
+  if (params.transposed) {
     if (dim == 4) {
       return at::slow_conv_transpose2d(
           input, weight, kernel_size, bias,
