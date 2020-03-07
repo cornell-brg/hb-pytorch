@@ -122,9 +122,9 @@ void offload_iterator_op_impl(TensorIterator& iter, Scalar alpha,
   iter.cast_outputs();
 }
 
-#define offload_op_nullary_impl(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 1)
-#define offload_op_unary_impl(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 2)
-#define offload_op_binary_impl(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 3)
+#define OFFLOAD_NULLARY(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 1)
+#define OFFLOAD_UNARY(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 2)
+#define OFFLOAD_BINARY(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 3)
 
 //=======================================================================
 // Offload routine for binary operations
@@ -148,7 +148,7 @@ void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel) {
     return;
   }
 
-  offload_op_binary_impl(iter, alpha, kernel);
+  OFFLOAD_BINARY(iter, alpha, kernel);
 }
 
 //=======================================================================
@@ -187,7 +187,7 @@ void offload_op_unary(TensorIterator& iter, Scalar alpha, const char* kernel) {
     return;
   }
 
-  offload_op_unary_impl(iter, alpha, kernel);
+  OFFLOAD_UNARY(iter, alpha, kernel);
 
 }
 
@@ -213,7 +213,7 @@ void offload_op_nullary(TensorIterator& iter, Scalar alpha, const char* kernel) 
     return;
   }
 
-  offload_op_nullary_impl(iter, alpha, kernel);
+  OFFLOAD_NULLARY(iter, alpha, kernel);
 
 }
 
