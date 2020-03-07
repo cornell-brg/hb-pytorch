@@ -85,11 +85,15 @@ static void cleanup_device(std::vector<eva_t> args, std::vector<eva_t> ptrs) {
  * Offloading wrapper
  * --------------------------------------------------------------------------*/
 
-void offload_op_binary_impl(TensorIterator& iter, Scalar alpha, 
-    const char* kernel) {
+//=======================================================================
+// Offloading operations that use TensorIterator
+//=======================================================================
+
+void offload_iterator_op_impl(TensorIterator& iter, Scalar alpha,
+    const char* kernel, uint32_t ntensors) {
 
   TORCH_INTERNAL_ASSERT(iter.can_use_32bit_indexing());
-  TORCH_INTERNAL_ASSERT(iter.ntensors() == 3); // output, input1, and input2
+  TORCH_INTERNAL_ASSERT(iter.ntensors() == ntensors);
 
   // It is very important to use serial_for_each here, since we assume a single
   // HammerBlade device in the system
@@ -100,7 +104,7 @@ void offload_op_binary_impl(TensorIterator& iter, Scalar alpha,
 
     // Allocate device tensors and copy the data
     for(int i=0; i<iter.ntensors(); i++) {
-      // Iterate over all tensors: a, b and result, to create
+      // Iterate over all tensors to create
       // corresponding tensors on the device.
       eva_t device_arg = create_device_tensor(n, iter.ndim(),
           &strides[i], data[i], i!=0, device_ptrs);
@@ -117,6 +121,14 @@ void offload_op_binary_impl(TensorIterator& iter, Scalar alpha,
 
   iter.cast_outputs();
 }
+
+#define offload_op_nullary_impl(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 1)
+#define offload_op_unary_impl(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 2)
+#define offload_op_binary_impl(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 3)
+
+//=======================================================================
+// Offload routine for binary operations
+//=======================================================================
 
 void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel) {
   TORCH_INTERNAL_ASSERT(iter.ntensors() == 3); // output, input1, and input2
@@ -139,7 +151,10 @@ void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel) {
   offload_op_binary_impl(iter, alpha, kernel);
 }
 
-/* Offload routine for Device to device transfers */
+//=======================================================================
+// Offload routine for device to device transfers
+//=======================================================================
+
 void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
   std::vector<eva_t> device_args;
 
@@ -148,6 +163,58 @@ void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
   device_args.push_back(create_device_scalar(n));
 
   c10::hammerblade::offload_kernel("tensorlib_memcpy", device_args);
+}
+
+//=======================================================================
+// Offload routine for unary operations
+//=======================================================================
+
+void offload_op_unary(TensorIterator& iter, Scalar alpha, const char* kernel) {
+  TORCH_INTERNAL_ASSERT(iter.ntensors() == 2); // output and input1
+
+  for (int arg = 0; arg < iter.ntensors(); arg++) {
+    TORCH_INTERNAL_ASSERT(iter.device(arg).is_hammerblade());
+  }
+
+  if (iter.numel() == 0) {
+    return;
+  }
+
+  if (!iter.can_use_32bit_indexing()) {
+    for (auto& sub_iter : iter.with_32bit_indexing()) {
+      offload_op_binary(sub_iter, alpha, kernel);
+    }
+    return;
+  }
+
+  offload_op_unary_impl(iter, alpha, kernel);
+
+}
+
+//=======================================================================
+// Offload routine for nullary operations
+//=======================================================================
+
+void offload_op_nullary(TensorIterator& iter, Scalar alpha, const char* kernel) {
+  TORCH_INTERNAL_ASSERT(iter.ntensors() == 1); // output
+
+  for (int arg = 0; arg < iter.ntensors(); arg++) {
+    TORCH_INTERNAL_ASSERT(iter.device(arg).is_hammerblade());
+  }
+
+  if (iter.numel() == 0) {
+    return;
+  }
+
+  if (!iter.can_use_32bit_indexing()) {
+    for (auto& sub_iter : iter.with_32bit_indexing()) {
+      offload_op_binary(sub_iter, alpha, kernel);
+    }
+    return;
+  }
+
+  offload_op_nullary_impl(iter, alpha, kernel);
+
 }
 
 } // namespace native

@@ -23,6 +23,8 @@ typedef struct {
   eva_t data;    // Pointer to raw data
 } hb_mc_tensor_t;
 
+void offload_op_nullary(TensorIterator& iter, Scalar alpha, const char* kernel);
+void offload_op_unary(TensorIterator& iter, Scalar alpha, const char* kernel);
 void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel);
 
 void offload_memcpy(eva_t dest, eva_t src, uint32_t n);
