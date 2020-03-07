@@ -1801,6 +1801,14 @@
   dispatch:
     CUDA: miopen_depthwise_convolution_backward_weight
 
+- func: hb_convolution_transpose(Tensor self, Tensor weight, Tensor? bias, int[] padding, int[] output_padding, int[] stride, int[] dilation, int groups) -> Tensor
+  dispatch:
+    HammerBlade: hb_convolution_transpose
+
+- func: hb_convolution(Tensor self, Tensor weight, Tensor? bias, int[] padding, int[] stride, int[] dilation, int groups) -> Tensor
+  dispatch:
+    HammerBlade: hb_convolution
+
 - func: miopen_rnn(Tensor input, Tensor[] weight, int weight_stride0, Tensor hx, Tensor? cx, int mode, int hidden_size, int num_layers, bool batch_first, float dropout, bool train, bool bidirectional, int[] batch_sizes, Tensor? dropout_state) -> (Tensor, Tensor, Tensor, Tensor, Tensor)
   dispatch:
     CUDA: miopen_rnn
