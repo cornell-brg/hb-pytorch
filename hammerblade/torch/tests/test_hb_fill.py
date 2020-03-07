@@ -13,7 +13,7 @@ def test_torch_fill_1():
     assert torch.equal(x_h.cpu(), x)
 
 def test_torch_fill_2():
-    x = torch.empty(5,6)
+    x = torch.empty(5, 6)
     x_h = x.hammerblade()
     x.fill_(42)
     x_h.fill_(42)
