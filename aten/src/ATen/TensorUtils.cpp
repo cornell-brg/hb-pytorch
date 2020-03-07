@@ -132,6 +132,31 @@ void checkAllSameGPU(CheckedFrom c, ArrayRef<TensorArg> tensors) {
   checkAllSame(c, tensors, checkSameGPU);
 }
 
+void checkSameHB(CheckedFrom c, const TensorArg& t1, const TensorArg& t2) {
+  if (! (t1->is_hammerblade()) || ! (t2->is_hammerblade())) {
+    std::ostringstream oss;
+    if (! t1->is_hammerblade()) {
+      oss << "Tensor for " << t1 << " is not on HB, ";
+    }
+    if (! t2->is_hammerblade()) {
+      oss << "Tensor for " << t2 << " is not on HB, ";
+    }
+    oss << "but expected " 
+        << ((!(t1->is_hammerblade() || t2->is_hammerblade())) ? "them" : "it")
+        << " to be on HB (while checking arguments for " << c << ")";
+    AT_ERROR(oss.str());
+  }
+  TORCH_CHECK(
+    t1->get_device() == t2->get_device(),
+    "Expected tensor for ", t1, " to have the same device as tensor for ", t2,
+    "; but device ", t1->get_device(), " does not equal ", t2->get_device(),
+    " (while checking arguments for ", c, ")");
+}
+
+void checkAllSameHB(CheckedFrom c, ArrayRef<TensorArg> tensors) {
+  checkAllSame(c, tensors, checkSameHB);
+}
+
 void checkSameType(CheckedFrom c, const TensorArg& t1, const TensorArg& t2) {
   TORCH_CHECK(
     t1->type() == t2->type(),
