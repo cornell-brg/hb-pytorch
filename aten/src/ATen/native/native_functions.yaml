@@ -949,6 +949,7 @@
   dispatch:
     CPU: legacy::cpu::_th_dot
     CUDA: legacy::cuda::_th_dot
+    HammerBlade: dot_hb
   supports_named_tensor: True
 
 - func: dot.out(Tensor self, Tensor tensor, *, Tensor(a!) out) -> Tensor(a!)

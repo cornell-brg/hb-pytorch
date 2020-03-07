@@ -29,6 +29,55 @@ void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel);
 
 void offload_memcpy(eva_t dest, eva_t src, uint32_t n);
 
+void offload_tensor_kernel_impl(std::vector<Tensor> args, const char* kernel);
+#define HB_OFFLOAD_TENSOR_KERNEL_GET_MACRO(_1,_2,_3,_4,_5,NAME,...) NAME
+#define HB_OFFLOAD_TENSOR_KERNEL(...) HB_OFFLOAD_TENSOR_KERNEL_GET_MACRO(__VA_ARGS__,                   \
+                                                                    HB_OFFLOAD_TENSOR_KERNEL_5ARGS,     \
+                                                                    HB_OFFLOAD_TENSOR_KERNEL_4ARGS,     \
+                                                                    HB_OFFLOAD_TENSOR_KERNEL_3ARGS,     \
+                                                                    HB_OFFLOAD_TENSOR_KERNEL_2ARGS,     \
+                                                                    HB_OFFLOAD_TENSOR_KERNEL_1ARGS)     \
+                                                                    (__VA_ARGS__)                       \
+
+#define HB_OFFLOAD_TENSOR_KERNEL_1ARGS(kernel)                                                          \
+do {                                                                                                    \
+  std::vector<Tensor> args;                                                                             \
+  offload_tensor_kernel_impl(args, kernel);                                                             \
+} while (0);
+
+#define HB_OFFLOAD_TENSOR_KERNEL_2ARGS(arg0, kernel)                                                    \
+do {                                                                                                    \
+  std::vector<Tensor> args;                                                                             \
+  args.push_back(arg0);                                                                                 \
+  offload_tensor_kernel_impl(args, kernel);                                                             \
+} while (0);
+
+#define HB_OFFLOAD_TENSOR_KERNEL_3ARGS(arg0, arg1, kernel)                                              \
+do {                                                                                                    \
+  std::vector<Tensor> args;                                                                             \
+  args.push_back(arg0);                                                                                 \
+  args.push_back(arg1);                                                                                 \
+  offload_tensor_kernel_impl(args, kernel);                                                             \
+} while (0);
+
+#define HB_OFFLOAD_TENSOR_KERNEL_4ARGS(arg0, arg1, arg2, kernel)                                        \
+do {                                                                                                    \
+  std::vector<Tensor> args;                                                                             \
+  args.push_back(arg0);                                                                                 \
+  args.push_back(arg1);                                                                                 \
+  args.push_back(arg2);                                                                                 \
+  offload_tensor_kernel_impl(args, kernel);                                                             \
+} while (0);
+
+#define HB_OFFLOAD_TENSOR_KERNEL_5ARGS(arg0, arg1, arg2, arg3, kernel)                                  \
+do {                                                                                                    \
+  std::vector<Tensor> args;                                                                             \
+  args.push_back(arg0);                                                                                 \
+  args.push_back(arg1);                                                                                 \
+  args.push_back(arg2);                                                                                 \
+  args.push_back(arg3);                                                                                 \
+  offload_tensor_kernel_impl(args, kernel);                                                             \
+} while (0);
 
 } // namespace native
 } // namespace at

@@ -32,4 +32,3 @@ extern "C" {
   HB_EMUL_REG_KERNEL(tensorlib_fill, bsg_tensor_t*, float*)
 
 }
-

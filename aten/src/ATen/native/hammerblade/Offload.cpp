@@ -86,6 +86,42 @@ static void cleanup_device(std::vector<eva_t> args, std::vector<eva_t> ptrs) {
  * --------------------------------------------------------------------------*/
 
 //=======================================================================
+// Offloading operations that have tensors as arguments
+//=======================================================================
+
+void offload_tensor_kernel_impl(std::vector<Tensor> args, const char* kernel) {
+
+  // Device pointers to tensors on the device
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+
+  // Allocate device tensors and copy the data
+  for(int i=0; i<args.size(); i++) {
+    // Iterate over all tensors to create
+    // corresponding tensors on the device.
+    auto arg = args[i];
+    TORCH_INTERNAL_ASSERT(arg.device().is_hammerblade())
+    // Read low-level meta-data from argument tensor
+    uint64_t n = arg.numel();
+    uint32_t dims = arg.dim();
+    const int64_t* strides = arg.strides().data();
+    TORCH_INTERNAL_ASSERT(arg.strides().size() == dims);
+    const void* data = arg.data_ptr();
+    // Create raw-tensor
+    eva_t device_arg = create_device_tensor(n, dims,
+        strides, data, true, device_ptrs);
+    device_args.push_back(device_arg);
+    // NOTE: here we are assuming all strides need to be copied.
+  }
+
+  c10::hammerblade::offload_kernel(kernel, device_args);
+
+  // Need to deallocate those args on device
+  cleanup_device(device_args, device_ptrs);
+
+}
+
+//=======================================================================
 // Offloading operations that use TensorIterator
 //=======================================================================
 
@@ -122,9 +158,9 @@ void offload_iterator_op_impl(TensorIterator& iter, Scalar alpha,
   iter.cast_outputs();
 }
 
-#define OFFLOAD_NULLARY(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 1)
-#define OFFLOAD_UNARY(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 2)
-#define OFFLOAD_BINARY(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 3)
+#define HB_OFFLOAD_NULLARY_OP(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 1)
+#define HB_OFFLOAD_UNARY_OP(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 2)
+#define HB_OFFLOAD_BINARY_OP(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 3)
 
 //=======================================================================
 // Offload routine for binary operations
@@ -148,21 +184,7 @@ void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel) {
     return;
   }
 
-  OFFLOAD_BINARY(iter, alpha, kernel);
-}
-
-//=======================================================================
-// Offload routine for device to device transfers
-//=======================================================================
-
-void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
-  std::vector<eva_t> device_args;
-
-  device_args.push_back(dest);
-  device_args.push_back(src);
-  device_args.push_back(create_device_scalar(n));
-
-  c10::hammerblade::offload_kernel("tensorlib_memcpy", device_args);
+  HB_OFFLOAD_BINARY_OP(iter, alpha, kernel);
 }
 
 //=======================================================================
@@ -187,7 +209,7 @@ void offload_op_unary(TensorIterator& iter, Scalar alpha, const char* kernel) {
     return;
   }
 
-  OFFLOAD_UNARY(iter, alpha, kernel);
+  HB_OFFLOAD_UNARY_OP(iter, alpha, kernel);
 
 }
 
@@ -213,8 +235,22 @@ void offload_op_nullary(TensorIterator& iter, Scalar alpha, const char* kernel) 
     return;
   }
 
-  OFFLOAD_NULLARY(iter, alpha, kernel);
+  HB_OFFLOAD_NULLARY_OP(iter, alpha, kernel);
 
+}
+
+//=======================================================================
+// Offload routine for device to device transfers
+//=======================================================================
+
+void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
+  std::vector<eva_t> device_args;
+
+  device_args.push_back(dest);
+  device_args.push_back(src);
+  device_args.push_back(create_device_scalar(n));
+
+  c10::hammerblade::offload_kernel("tensorlib_memcpy", device_args);
 }
 
 } // namespace native
