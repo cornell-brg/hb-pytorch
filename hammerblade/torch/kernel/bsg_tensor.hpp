@@ -8,4 +8,9 @@ typedef struct {
   uint32_t data;
 } bsg_tensor_t;
 
+typedef struct {
+  uint32_t N;
+  uint32_t data;
+} bsg_vector_t;
+
 #endif // _BSG_TENSOR_HPP
