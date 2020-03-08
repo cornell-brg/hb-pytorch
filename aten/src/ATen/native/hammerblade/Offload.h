@@ -27,6 +27,9 @@ void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel);
 
 void offload_memcpy(eva_t dest, eva_t src, uint32_t n);
 
+void offload_convolution_forward(Tensor& output, const Tensor& input,
+    const Tensor& weight, IntArrayRef padding, IntArrayRef stride,
+    IntArrayRef dilation, int64_t groups);
 
 } // namespace native
 } // namespace at

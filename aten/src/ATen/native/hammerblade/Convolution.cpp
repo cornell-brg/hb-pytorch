@@ -1,4 +1,6 @@
 #include <ATen/ATen.h>
+#include <ATen/native/hammerblade/HammerBladeTensor.h>
+#include <ATen/native/hammerblade/Offload.h>
 
 namespace at {
 namespace native {
@@ -132,11 +134,14 @@ Tensor hb_convolution_forward(
 
   // Avoid ambiguity of "output" when this is being used as backwards
   TensorArg output{ output_t, "result", 0 };
-  convolution_shape_check(c, input, weight, output, padding, stride, dilation, groups);
+  convolution_shape_check(c, input, weight, output, padding, stride, 
+      dilation, groups);
 
   Tensor weight_contig = weight->contiguous();
 
-  TORCH_CHECK(false, "hb_convolution: checks done, computation pending!");
+  offload_convolution_forward(
+      output_t, *input, *weight,
+      padding, stride, dilation, groups);
 
   return *output;
 }

@@ -150,5 +150,11 @@ void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
   c10::hammerblade::offload_kernel("tensorlib_memcpy", device_args);
 }
 
+void offload_convolution_forward(Tensor& output, const Tensor& input,
+    const Tensor& weight, IntArrayRef padding, IntArrayRef stride,
+    IntArrayRef dilation, int64_t groups) {
+  TORCH_CHECK(false, "Offlading conv forward");
+}
+
 } // namespace native
 } // namespace at
