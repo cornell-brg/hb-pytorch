@@ -19,9 +19,17 @@ namespace native {
 typedef struct {
   uint32_t N;    // Number of elements in the tensor
   uint32_t dims; // Number of dimensions
-  eva_t strides;  // Pointer to stride vector; number of strides = dims
+  eva_t strides; // Pointer to stride vector; number of strides = dims
   eva_t data;    // Pointer to raw data
 } hb_mc_tensor_t;
+
+/**
+ * HammerBlade Vector
+ */
+typedef struct {
+  uint32_t N;
+  eva_t data;
+} hb_mc_vector_t;
 
 void offload_op_nullary(TensorIterator& iter, Scalar alpha, const char* kernel);
 void offload_op_unary(TensorIterator& iter, Scalar alpha, const char* kernel);
