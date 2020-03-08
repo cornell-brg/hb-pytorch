@@ -390,9 +390,24 @@ void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
 void offload_convolution_forward(Tensor& output, const Tensor& input,
     const Tensor& weight, IntArrayRef padding, IntArrayRef stride,
     IntArrayRef dilation, int64_t groups) {
-  TORCH_CHECK(dilation.size() == 1, "Dilated convolution not supported for HB yet");
-  TORCH_CHECK(dilation[0] == 1, "Dilated convolution not yet supported for HB");
-  TORCH_CHECK(groups == 1, "Grouped convolution not yet supported for HB");
+  // Dilation check
+  bool dilation_check = true;
+  for(auto d : dilation) {
+    if(d != 1) {
+      TORCH_WARN("dilation[i] = ", d);
+      dilation_check = false;
+      break;
+    }
+  }
+  TORCH_CHECK(dilation_check,
+        "dilation = ", dilation,
+        " is not supported by HB yet.",
+        " Make sure dilation is all ones.");
+
+  // Groups check
+  TORCH_CHECK(groups == 1,
+      "Grouped convolution not supported by HB yet."
+      " Make sure groups = 1.");
 
   std::vector<eva_t> device_args;
   std::vector<eva_t> device_ptrs;
