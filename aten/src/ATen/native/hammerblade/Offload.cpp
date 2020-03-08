@@ -68,6 +68,20 @@ static eva_t create_device_tensor(const Tensor& tensor, bool input,
 }
 
 template<typename T>
+static eva_t create_device_vector(ArrayRef<T> arr_ref, bool input) {
+  eva_t vec_d = c10::hammerblade::device_malloc(arr_ref.size() * sizeof(T));
+
+  if(input) {
+    void* dst = (void*) ((intptr_t) vec_d);
+    void* src = (void*) ((intptr_t) arr_ref.data());
+    c10::hammerblade::memcpy_host_to_device(
+        dst, src, arr_ref.size() * sizeof(T));
+  }
+
+  return vec_d;
+}
+
+template<typename T>
 static eva_t create_device_scalar(T alpha) {
   eva_t alpha_d;
 
@@ -163,6 +177,7 @@ void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
 void offload_convolution_forward(Tensor& output, const Tensor& input,
     const Tensor& weight, IntArrayRef padding, IntArrayRef stride,
     IntArrayRef dilation, int64_t groups) {
+
   // Dilation check
   bool dilation_check = true;
   for(auto d : dilation) {
@@ -187,6 +202,10 @@ void offload_convolution_forward(Tensor& output, const Tensor& input,
   device_args.push_back(create_device_tensor(output, false, device_ptrs));
   device_args.push_back(create_device_tensor(input, true, device_ptrs));
   device_args.push_back(create_device_tensor(weight, true, device_ptrs));
+  device_args.push_back(create_device_scalar(padding.size()));
+  device_args.push_back(create_device_vector(padding, true));
+  device_args.push_back(create_device_scalar(stride.size()));
+  device_args.push_back(create_device_vector(stride, true));
   cleanup_device(device_args, device_ptrs);
 
   TORCH_CHECK(false, "Computation not done");
