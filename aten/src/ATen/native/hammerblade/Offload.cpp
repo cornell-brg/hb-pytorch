@@ -65,14 +65,27 @@ static eva_t create_device_tensor(const Tensor& tensor, bool input,
 }
 
 template<typename T>
-static eva_t create_device_vector(ArrayRef<T> arr_ref, bool input) {
-  eva_t vec_d = c10::hammerblade::device_malloc(arr_ref.size() * sizeof(T));
+static eva_t create_device_vector(ArrayRef<T> arr_ref, bool input,
+                                  std::vector<eva_t> device_ptrs) {
+  uint32_t N = arr_ref.size();
+  eva_t data_d = c10::hammerblade::device_malloc(N * sizeof(T));
+  device_ptrs.push_back(data_d);
+
+  hb_mc_vector_t vec = {
+    .N = N,
+    .data = data_d,
+  };
+
+  eva_t vec_d = c10::hammerblade::device_malloc(sizeof(hb_mc_vector_t));
+  void* dst = (void*) ((intptr_t) vec_d);
+  void* src = (void*) ((intptr_t) &vec);
+  c10::hammerblade::memcpy_host_to_device(dst, src, sizeof(hb_mc_vector_t));
 
   if(input) {
-    void* dst = (void*) ((intptr_t) vec_d);
-    void* src = (void*) ((intptr_t) arr_ref.data());
+    dst = (void*) ((intptr_t) data_d);
+    src = (void*) ((intptr_t) arr_ref.data());
     c10::hammerblade::memcpy_host_to_device(
-        dst, src, arr_ref.size() * sizeof(T));
+        dst, src, N * sizeof(T));
   }
 
   return vec_d;
@@ -429,13 +442,12 @@ void offload_convolution_forward(Tensor& output, const Tensor& input,
   device_args.push_back(create_device_tensor(output, false, device_ptrs));
   device_args.push_back(create_device_tensor(input, true, device_ptrs));
   device_args.push_back(create_device_tensor(weight, true, device_ptrs));
-  device_args.push_back(create_device_scalar(padding.size()));
-  device_args.push_back(create_device_vector(padding, true));
-  device_args.push_back(create_device_scalar(stride.size()));
-  device_args.push_back(create_device_vector(stride, true));
-  cleanup_device(device_args, device_ptrs);
+  device_args.push_back(create_device_vector(padding, true, device_ptrs));
+  device_args.push_back(create_device_vector(stride, true, device_ptrs));
 
-  TORCH_CHECK(false, "Computation not done");
+  c10::hammerblade::offload_kernel(
+      "tensorlib_convolution_forward", device_args);
+  cleanup_device(device_args, device_ptrs);
 }
 
 } // namespace native
