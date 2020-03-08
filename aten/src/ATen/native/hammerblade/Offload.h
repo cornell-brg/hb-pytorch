@@ -88,6 +88,10 @@ do {                                                                            
   std::vector<Scalar> scalars;                                                                          \
   offload_tensor_scalar_impl(args, scalars, kernel);                                                    \
 } while (0);
+       
+void offload_convolution_forward(Tensor& output, const Tensor& input,
+    const Tensor& weight, IntArrayRef padding, IntArrayRef stride,
+    IntArrayRef dilation, int64_t groups);
 
 } // namespace native
 } // namespace at
