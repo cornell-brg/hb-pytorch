@@ -57,6 +57,16 @@ static eva_t create_device_tensor(uint32_t N, uint32_t dims,
   return tensor;
 }
 
+static eva_t create_device_tensor(const Tensor& tensor, bool input,
+                                  std::vector<eva_t> device_ptrs) {
+  uint32_t N = (uint32_t) tensor.numel();
+  uint32_t dims = (uint32_t) tensor.dim();
+  const int64_t* strides = (const int64_t*) tensor.strides().data();
+  const void* data = (const void*) tensor.data_ptr();
+
+  return create_device_tensor(N, dims, strides, data, input, device_ptrs);
+}
+
 template<typename T>
 static eva_t create_device_scalar(T alpha) {
   eva_t alpha_d;
@@ -153,7 +163,18 @@ void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
 void offload_convolution_forward(Tensor& output, const Tensor& input,
     const Tensor& weight, IntArrayRef padding, IntArrayRef stride,
     IntArrayRef dilation, int64_t groups) {
-  TORCH_CHECK(false, "Offlading conv forward");
+  TORCH_CHECK(dilation.size() == 1, "Dilated convolution not supported for HB yet");
+  TORCH_CHECK(dilation[0] == 1, "Dilated convolution not yet supported for HB");
+  TORCH_CHECK(groups == 1, "Grouped convolution not yet supported for HB");
+
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+  device_args.push_back(create_device_tensor(output, false, device_ptrs));
+  device_args.push_back(create_device_tensor(input, true, device_ptrs));
+  device_args.push_back(create_device_tensor(weight, true, device_ptrs));
+  cleanup_device(device_args, device_ptrs);
+
+  TORCH_CHECK(false, "Computation not done");
 }
 
 } // namespace native
