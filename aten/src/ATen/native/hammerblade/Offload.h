@@ -27,6 +27,10 @@ void offload_op_nullary(TensorIterator& iter, Scalar alpha, const char* kernel);
 void offload_op_unary(TensorIterator& iter, Scalar alpha, const char* kernel);
 void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel);
 
+void offload_op_nullary(TensorIterator& iter, Scalar beta, Scalar alpha, const char* kernel);
+void offload_op_unary(TensorIterator& iter, Scalar beta, Scalar alpha, const char* kernel);
+void offload_op_binary(TensorIterator& iter, Scalar beta, Scalar alpha, const char* kernel);
+
 void offload_memcpy(eva_t dest, eva_t src, uint32_t n);
 
 void offload_tensor_scalar_impl(std::vector<Tensor> tensors, std::vector<Scalar> scalars,
