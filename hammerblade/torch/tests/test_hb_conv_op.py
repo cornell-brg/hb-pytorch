@@ -44,7 +44,7 @@ def test_conv2d_4():
     kernel_hb = kernel.hammerblade()
     inputs_hb = inputs.hammerblade()
 
-    conv_result_hb = F.conv2d(inputs_hb, kernel_hb, padding=(1,2), stride=(1,2))
-    conv_result = F.conv2d(inputs, kernel, padding=(1,2), stride=(1,2))
+    conv_result_hb = F.conv2d(inputs_hb, kernel_hb, padding=(1, 2), stride=(1, 2))
+    conv_result = F.conv2d(inputs, kernel, padding=(1, 2), stride=(1, 2))
 
     assert torch.allclose(conv_result, conv_result_hb.cpu())
