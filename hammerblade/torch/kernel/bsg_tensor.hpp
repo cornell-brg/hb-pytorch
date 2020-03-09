@@ -81,4 +81,23 @@ class BSGTensor {
     }
 };
 
+template<typename T>
+class BSGVector {
+  private:
+    uint32_t N;
+    T* data;
+
+  public:
+    BSGVector(bsg_vector_t* v) :
+      N(v->N), data((T*) ((intptr_t) v->data)) {}
+
+    uint32_t size() {
+      return N;
+    }
+
+    T operator[](uint32_t i) {
+      return data[i];
+    }
+};
+
 #endif // _BSG_TENSOR_HPP
