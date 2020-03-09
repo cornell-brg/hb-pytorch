@@ -30,7 +30,9 @@ typedef struct {
 // Device Tensor classes
 //
 // Wrapper classes around device tensor structs to provide
-// convenience operations.
+// convenience operations. This runs on a tiny RISC-V processor 
+// on the device, so be careful about using dynamic memory 
+// allocation.
 // =========================================================
 
 class BSGTensor {
@@ -51,18 +53,26 @@ class BSGTensor {
       return N;
     }
 
-    int dim() {
-      return dims;
+    uint32_t dim(uint32_t d) {
+      if(d >= dims) {
+        bsg_printf("BSGTensor error: dimesnion must be less than %d\n",
+            dims);
+      }
+
+      if(d == 0) {
+        return N / strides[0];
+      } else {
+        return strides[d-1] / strides[d];
+      }
     }
 
     template<typename... T>
-    float operator()(T... indices) {
+    float& operator()(T... indices) {
       std::initializer_list<uint32_t> iarray = {indices...};
 
       if(iarray.size() != dims) {
         bsg_printf("BSGTensor error: number of indices must be %d, given %d\n",
             dims, iarray.size());
-        return NAN;
       }
 
       uint32_t offset = 0;
@@ -74,7 +84,6 @@ class BSGTensor {
 
       if(offset >= N) {
         bsg_printf("BSGTensor error: index out of bounds\n");
-        return NAN;
       }
 
       return data[offset];
@@ -95,7 +104,7 @@ class BSGVector {
       return N;
     }
 
-    T operator[](uint32_t i) {
+    T& operator[](uint32_t i) {
       return data[i];
     }
 };
