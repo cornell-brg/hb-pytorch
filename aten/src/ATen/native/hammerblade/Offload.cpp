@@ -222,7 +222,7 @@ void offload_convolution_forward(Tensor& output, const Tensor& input,
 
   std::vector<eva_t> device_args;
   std::vector<eva_t> device_ptrs;
-  device_args.push_back(create_device_tensor(output, false, device_ptrs));
+  device_args.push_back(create_device_tensor(output, true, device_ptrs));
   device_args.push_back(create_device_tensor(input, true, device_ptrs));
   device_args.push_back(create_device_tensor(weight, true, device_ptrs));
   device_args.push_back(create_device_vector(padding, true, device_ptrs));
