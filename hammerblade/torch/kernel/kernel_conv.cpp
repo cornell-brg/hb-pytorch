@@ -23,7 +23,10 @@ extern "C" {
     uint32_t* _strides = (uint32_t*) ((intptr_t) strides->data);
 
     auto x = BSGTensor(input);
-    std::cout << "First = " << x(0, 1, 1, 1) << std::endl;
+    std::cout << "input(0,1,1,1) = " << x(0, 1, 1, 1) << std::endl;
+
+    auto p = BSGVector<uint32_t>(padding);
+    std::cout << "padding[0] = " << p[0] << std::endl;
 
     return 0;
   }
