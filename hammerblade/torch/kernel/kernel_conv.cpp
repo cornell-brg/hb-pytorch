@@ -25,12 +25,12 @@ extern "C" {
 
     // Conv2d parameters
     auto N = y.dim(0); // number of minibatches
-    auto Cin = x.dim(1); // number of input channels
     auto Cout = y.dim(1); // number of output channels
+    auto Hout = y.dim(2);
+    auto Wout = y.dim(3);
+    auto Cin = x.dim(1); // number of input channels
     auto Hin = x.dim(2);
     auto Win = x.dim(3);
-    auto Hout = y.dim(2);
-    auto Wout = y.dim(2);
     auto Kh = w.dim(2);
     auto Kw = w.dim(3);
     auto Sh = s[0];
@@ -58,12 +58,12 @@ extern "C" {
                       y(n, co, yh, yw) = 0.0;
                     }
 
-                    uint32_t xh = Sh * yh - 2 * Ph + kh;
-                    uint32_t xw = Sw * yw - 2 * Pw + kw;
+                    int32_t xh = Sh * yh - Ph + kh;
+                    int32_t xw = Sw * yw - Pw + kw;
 
-                    if(xh >= 0 && xw >= 0) {
-                      y(n, co, yh, yw) += x(n, ci, xh, xw) * w(n, ci, kh, kw);
-                    }
+                    if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+                      y(n, co, yh, yw) += x(n, ci, xh, xw) * w(co, ci, kh, kw);
+                    } // else 0
                   }
     }
 
