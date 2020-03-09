@@ -86,20 +86,21 @@ static void cleanup_device(std::vector<eva_t> args, std::vector<eva_t> ptrs) {
  * --------------------------------------------------------------------------*/
 
 //=======================================================================
-// Offloading operations that have tensors as arguments
+// Offloading operations that have tensors and scalars as arguments
 //=======================================================================
 
-void offload_tensor_kernel_impl(std::vector<Tensor> args, const char* kernel) {
+void offload_tensor_scalar_impl(std::vector<Tensor> tensors, std::vector<Scalar> scalars,
+                                const char* kernel) {
 
   // Device pointers to tensors on the device
   std::vector<eva_t> device_args;
   std::vector<eva_t> device_ptrs;
 
   // Allocate device tensors and copy the data
-  for(int i=0; i<args.size(); i++) {
+  for(int i=0; i<tensors.size(); i++) {
     // Iterate over all tensors to create
     // corresponding tensors on the device.
-    auto arg = args[i];
+    auto arg = tensors[i];
     TORCH_INTERNAL_ASSERT(arg.device().is_hammerblade())
     // Read low-level meta-data from argument tensor
     uint64_t n = arg.numel();
@@ -112,6 +113,12 @@ void offload_tensor_kernel_impl(std::vector<Tensor> args, const char* kernel) {
         strides, data, true, device_ptrs);
     device_args.push_back(device_arg);
     // NOTE: here we are assuming all strides need to be copied.
+  }
+
+  // Allocate device scalars and copy the data
+  for(int i=0; i<scalars.size(); i++) {
+    auto alpha = scalars[i];
+    device_args.push_back(create_device_scalar(alpha.to<float>()));
   }
 
   c10::hammerblade::offload_kernel(kernel, device_args);
