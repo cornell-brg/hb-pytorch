@@ -1,3 +1,8 @@
+//====================================================================
+// Tensor Data Structures
+// 03/09/2020 Bandhav Veluri and Lin Cheng (lc873@cornell.edu)
+//====================================================================
+
 #ifndef _BSG_TENSOR_HPP
 #define _BSG_TENSOR_HPP
 
@@ -59,11 +64,15 @@ class BSGTensor {
             dims);
       }
 
+      uint32_t dim;
+
       if(d == 0) {
-        return N / strides[0];
+        dim =  N / strides[0];
       } else {
-        return strides[d-1] / strides[d];
+        dim = strides[d-1] / strides[d];
       }
+
+      return dim;
     }
 
     template<typename... T>
