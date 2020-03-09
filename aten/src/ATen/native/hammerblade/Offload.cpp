@@ -67,11 +67,11 @@ static eva_t create_device_tensor(const Tensor& tensor, bool input,
   return create_device_tensor(N, dims, strides, data, input, device_ptrs);
 }
 
-template<typename T>
-static eva_t create_device_vector(ArrayRef<T> arr_ref, bool input,
+static eva_t create_device_vector(IntArrayRef arr_ref, bool input,
                                   std::vector<eva_t> device_ptrs) {
   uint32_t N = arr_ref.size();
-  eva_t data_d = c10::hammerblade::device_malloc(N * sizeof(T));
+  const int64_t* data = arr_ref.data();
+  eva_t data_d = c10::hammerblade::device_malloc(N * sizeof(int32_t));
   device_ptrs.push_back(data_d);
 
   hb_mc_vector_t vec = {
@@ -85,10 +85,17 @@ static eva_t create_device_vector(ArrayRef<T> arr_ref, bool input,
   c10::hammerblade::memcpy_host_to_device(dst, src, sizeof(hb_mc_vector_t));
 
   if(input) {
+    int32_t* local_data = (int32_t*) malloc(N * sizeof(int32_t));
+    TORCH_CHECK(local_data, "Memory allocation failed on host");
+
+    for(int i = 0; i < N; ++i) {
+      local_data[i] = (int32_t) data[i];
+    }
+
     dst = (void*) ((intptr_t) data_d);
-    src = (void*) ((intptr_t) arr_ref.data());
+    src = (void*) ((intptr_t) local_data);
     c10::hammerblade::memcpy_host_to_device(
-        dst, src, N * sizeof(T));
+        dst, src, N * sizeof(int32_t));
   }
 
   return vec_d;
