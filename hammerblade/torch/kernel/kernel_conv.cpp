@@ -4,6 +4,7 @@
 //====================================================================
 
 #include <kernel_common.hpp>
+#include <iostream>
 
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
@@ -16,6 +17,14 @@ extern "C" {
           bsg_tensor_t* weight,
           bsg_vector_t* padding,
           bsg_vector_t* strides) {
+    uint32_t n_pads = padding->N;
+    uint32_t* _padding = (uint32_t*) ((intptr_t) padding->data);
+    uint32_t n_strides = strides->N;
+    uint32_t* _strides = (uint32_t*) ((intptr_t) strides->data);
+
+    auto x = BSGTensor(input);
+    std::cout << "First = " << x(0, 1, 1, 1) << std::endl;
+
     return 0;
   }
 
