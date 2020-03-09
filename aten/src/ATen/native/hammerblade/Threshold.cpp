@@ -14,7 +14,7 @@ static void threshold_kernel_hb(
 
     //TODO: implement the host code for threshold kernel
     //      you may refer to add_kernel_hb in
-    //      aten/src/ATen/native/hammerblade/BinaryOpsKernel.cpp
+    //      aten/src/ATen/native/hammerblade/AddSub.cpp
     //      as an example
 
 }
