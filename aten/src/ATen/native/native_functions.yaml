@@ -2228,6 +2228,7 @@
   dispatch:
     CPU: relu
     CUDA: relu
+    HammerBlade: relu
     MkldnnCPU: mkldnn_relu
     QuantizedCPU: quantized_relu
   supports_named_tensor: True
