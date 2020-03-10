@@ -17,7 +17,7 @@ Tensor dot_hb(const Tensor& self, const Tensor& other) {
   if ( (self.scalar_type() != ScalarType::Float) || (other.scalar_type() != ScalarType::Float) ) {
     AT_ERROR("HammerBlade dot is implemented for Float only");
   }
-  auto sum = at::empty({}, at::TensorOptions(at::kHAMMERBLADE).dtype(at::kFloat));
+  auto sum = at::empty({}, other.options());
 
   HB_OFFLOAD_TENSOR_KERNEL(sum, self, other, "tensorlib_dot");
 
