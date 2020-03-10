@@ -196,6 +196,7 @@ static const char* get_module(Backend backend) {
     case Backend::HammerBlade: return "torch.hammerblade";
     case Backend::SparseCPU: return "torch.sparse";
     case Backend::SparseCUDA: return "torch.cuda.sparse";
+    case Backend::SparseHammerBlade: return "torch.hammerblade.sparse";
     default: AT_ERROR("invalid backend: ", toString(backend));
   }
 }
@@ -226,7 +227,7 @@ static void set_type(PyTensorType& type_obj, Backend backend, ScalarType scalarT
   type_obj.layout = torch::getLayout(backend);
   type_obj.dtype = torch::getDtype(scalarType);
   type_obj.is_cuda = (backend == at::Backend::CUDA || backend == at::Backend::SparseCUDA);
-  type_obj.is_hammerblade = (backend == at::Backend::HammerBlade);
+  type_obj.is_hammerblade = (backend == at::Backend::HammerBlade || backend == at::Backend::SparseHammerBlade);
 }
 
 static void set_name(PyTensorType& type_obj, const std::string& name) {

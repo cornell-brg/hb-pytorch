@@ -7,41 +7,94 @@ Zhongyuan Zhao
 """
 
 #First step, initialize en empty sparse tensor on the hammerblade DRAM.
-def test_sparse_hammerbalde_empty_path1():
+#def test_sparse_hammerbalde_empty_path1():
+#  import torch
+#  sphb = torch.device("hammerblade")
+#  x = torch.empty((1,128), device=sphb).to_sparse()
+#  assert x.device == sphb
+#  assert x.type() == 'torch.hammerblade.sparse.FloatTensor'
+#  assert x.is_hammerblade
+
+
+#def test_sparse_hammerblade_empty_path2():
+#  import torch
+#  sphb = torch.device("hammerblade")
+#  x = torch.empty((1,128), device="hammerblade").to_sparse()
+#  assert x.device == sphb
+#  assert x.type() == 'torch.hammerblade.sparse.FloatTensor'
+#  assert x.is_hammerblade
+
+
+def test_sparse_hammerblade_empty_path3():
   import torch
-  sphb = torch.device("hammerblade")
-  x = torch.empty((1,5), device=sphb).to_sparse()
-  assert x.device == sphb
-  assert x.type() == 'torch.hammerblade.sparse.FloatTensor'
-  assert x.is_hammerblade
 
+  cpu = torch.device("cpu")
+  cpu_x = torch.empty((1,32)).to_sparse()
+  cpu_i = cpu_x._indices()
+  cpu_v = cpu_x._values()
 
-def test_sparse_hammerblade_empty_path2():
-  import torch
-  sphb = torch.device("hammerblade")
-  x = torch.empty((1,5), device="hammerblade").to_sparse()
-  assert x.device == sphb
-  assert x.type() == 'torch.hammerblade.sparse.FloatTensor'
-  assert x.is_hammerblade
+  hb = torch.device("hammerblade")
+  hb_x = cpu_x.to("hammerblade")
+  hb_i = hb_x._indices()
+  hb_v = hb_x._values()
 
+  assert cpu_x.device == cpu
+  assert cpu_x.type() == 'torch.sparse.FloatTensor'
+  assert hb_x.device == hb
+  assert hb_x.type() == 'torch.hammerblade.sparse.FloatTensor'
+  assert hb_x.is_hammerblade
+  assert hb_i.type() == 'torch.hammerblade.LongTensor'
+  assert hb_v.type() == 'torch.hammerblade.FloatTensor'
+  assert torch.equal(hb_i.cpu(), cpu_i)
+  assert torch.equal(hb_v.cpu(), cpu_v)
 
 def test_move_sparsetensor_between_cup_and_hammerblade_path1():
   import torch
+
+  cpu = torch.device("cpu")
   i = torch.LongTensor([[0,1,1],[2,0,2]])
   v = torch.FloatTensor([3, 4, 5])
+  cpu_x = torch.sparse.FloatTensor(i, v, torch.Size([2,3]))
+  cpu_i = cpu_x._indices()
+  cpu_v = cpu_x._values()
+
   hb = torch.device("hammerblade")
-  hb_x = torch.sparse.FloatTensor(i, v, torch.Size([2,3])).hammerblade()
+  hb_x = cpu_x.hammerblade()
+  hb_i = hb_x._indices()
+  hb_v = hb_x._values()
+
+  assert cpu_x.device == cpu
+  assert cpu_x.type() == 'torch.sparse.FloatTensor'
   assert hb_x.device == hb
-  assert hb_x.type() == 'torch.hammerblade.sparse.FloadTensor'
+  assert hb_x.type() == 'torch.hammerblade.sparse.FloatTensor'
   assert hb_x.is_hammerblade
+  assert hb_i.type() == 'torch.hammerblade.LongTensor'
+  assert hb_v.type() == 'torch.hammerblade.FloatTensor'
+  assert torch.equal(hb_i.cpu(), cpu_i)
+  assert torch.equal(hb_v.cpu(), cpu_v)
 
 
 def test_move_sparsetensor_between_cup_and_hammerblade_path2():
   import torch
+
+  cpu = torch.device("cpu")
   i = torch.LongTensor([[0,1,1],[2,0,2]])
   v = torch.FloatTensor([3, 4, 5])
+  cpu_x = torch.sparse.FloatTensor(i, v, torch.Size([2,3]))
+  cpu_i = cpu_x._indices()
+  cpu_v = cpu_x._values()
+
   hb = torch.device("hammerblade")
-  hb_x = torch.sparse.FloatTensor(i, v, torch.Size([2,3])).to("hammerblade")
+  hb_x = cpu_x.to("hammerblade")
+  hb_i = hb_x._indices()
+  hb_v = hb_x._values()
+
+  assert cpu_x.device == cpu
+  assert cpu_x.type() == 'torch.sparse.FloatTensor'
   assert hb_x.device == hb
-  assert hb_x.type() == 'torch.hammerblade.sparse.FloadTensor'
+  assert hb_x.type() == 'torch.hammerblade.sparse.FloatTensor'
   assert hb_x.is_hammerblade
+  assert hb_i.type() == 'torch.hammerblade.LongTensor'
+  assert hb_v.type() == 'torch.hammerblade.FloatTensor'
+  assert torch.equal(hb_i.cpu(), cpu_i)
+  assert torch.equal(hb_v.cpu(), cpu_v)

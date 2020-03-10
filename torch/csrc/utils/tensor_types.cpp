@@ -22,6 +22,7 @@ static const char* backend_to_string(const at::Backend& backend) {
     case at::Backend::HammerBlade: return "torch.hammerblade";
     case at::Backend::SparseCPU: return "torch.sparse";
     case at::Backend::SparseCUDA: return "torch.cuda.sparse";
+    case at::Backend::SparseHammerBlade: return "torch.hammerblade.sparse";
     // We split complex into its own backend, but keeping it the same here for now
     case at::Backend::ComplexCPU: return "torch";
     case at::Backend::ComplexCUDA: return "torch.cuda";

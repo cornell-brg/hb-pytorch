@@ -76,6 +76,8 @@ SparseTensor new_sparse(const TensorOptions& options) {
   TensorTypeId type_id;
   if (options.device().is_cuda()) {
     type_id = TensorTypeId::SparseCUDATensorId;
+  } else if (options.device().is_hammerblade()) {
+    type_id = TensorTypeId::SparseHammerBladeTensorId;
   } else {
     type_id = TensorTypeId::SparseCPUTensorId;
   }
