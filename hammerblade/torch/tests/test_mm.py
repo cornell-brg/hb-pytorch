@@ -35,4 +35,3 @@ def test_torch_mm_mismatching_shape_F():
     mat1_h = mat1.hammerblade()
     mat2_h = mat2.hammerblade()
     out_h = torch.mm(mat1_h, mat2_h)
-
