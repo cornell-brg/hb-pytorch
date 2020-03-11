@@ -50,7 +50,7 @@ def test_move_sparsetensor_between_cup_and_hammerblade_path1():
     import torch
 
     cpu = torch.device("cpu")
-    i = torch.LongTensor([[0, 1, 1],[2, 0, 2]])
+    i = torch.LongTensor([[0, 1, 1], [2, 0, 2]])
     v = torch.FloatTensor([3, 4, 5])
     cpu_x = torch.sparse.FloatTensor(i, v, torch.Size([2, 3]))
     cpu_i = cpu_x._indices()
@@ -76,7 +76,7 @@ def test_move_sparsetensor_between_cup_and_hammerblade_path2():
     import torch
 
     cpu = torch.device("cpu")
-    i = torch.LongTensor([[0, 1, 1],[2, 0, 2]])
+    i = torch.LongTensor([[0, 1, 1], [2, 0, 2]])
     v = torch.FloatTensor([3, 4, 5])
     cpu_x = torch.sparse.FloatTensor(i, v, torch.Size([2, 3]))
     cpu_i = cpu_x._indices()
