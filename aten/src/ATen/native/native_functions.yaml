@@ -3281,7 +3281,7 @@
   dispatch:
     SparseCPU: sparse_to_dense
     SparseCUDA: sparse_to_dense
-    SparseHammerBlade: Sparse_to_dense
+    SparseHammerBlade: sparse_to_dense
     MkldnnCPU: mkldnn_to_dense
   requires_tensor: True
 
