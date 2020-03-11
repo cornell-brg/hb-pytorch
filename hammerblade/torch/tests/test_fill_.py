@@ -5,7 +5,7 @@ Unit tests for torch.fill_ kernel
 import torch
 
 def test_torch_fill_1():
-    x = torch.empty(1,10)
+    x = torch.empty(1, 10)
     x_h = x.hammerblade()
     x.fill_(42)
     x_h.fill_(42)
