@@ -8,6 +8,7 @@ namespace {
 
 static void sigmoid_kernel_hb(TensorIterator& iter) {
 
+  TORCH_CHECK(false, "sigmoid_kernel_hb not implemented");
     //TODO: implement the host code for sigmoid kernel
     //      you may refer to add_kernel_hb in
     //      aten/src/ATen/native/hammerblade/AddSub.cpp
