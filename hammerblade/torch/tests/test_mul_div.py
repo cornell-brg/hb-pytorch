@@ -105,4 +105,4 @@ def test_div_with_scalar():
     y = x.div(42.0)
     y_h = x_h.div(42.0)
     assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_h.cpu(), y)
+    assert torch.allclose(y_h.cpu(), y)
