@@ -54,14 +54,14 @@ static eva_t create_device_tensor(uint32_t N, uint32_t dims,
   return tensor;
 }
 
-static eva_t create_device_tensor(const Tensor& tensor, bool input,
+static eva_t create_device_tensor(const Tensor& tensor,
                                   std::vector<eva_t> device_ptrs) {
   uint32_t N = (uint32_t) tensor.numel();
   uint32_t dims = (uint32_t) tensor.dim();
   const int64_t* strides = (const int64_t*) tensor.strides().data();
   const void* data = (const void*) tensor.data_ptr();
 
-  return create_device_tensor(N, dims, strides, data, input, device_ptrs);
+  return create_device_tensor(N, dims, strides, data, device_ptrs);
 }
 
 static eva_t create_device_vector(IntArrayRef arr_ref, bool input,
@@ -449,9 +449,9 @@ void offload_convolution_forward(Tensor& output, const Tensor& input,
 
   std::vector<eva_t> device_args;
   std::vector<eva_t> device_ptrs;
-  device_args.push_back(create_device_tensor(output, true, device_ptrs));
-  device_args.push_back(create_device_tensor(input, true, device_ptrs));
-  device_args.push_back(create_device_tensor(weight, true, device_ptrs));
+  device_args.push_back(create_device_tensor(output, device_ptrs));
+  device_args.push_back(create_device_tensor(input, device_ptrs));
+  device_args.push_back(create_device_tensor(weight, device_ptrs));
   device_args.push_back(create_device_vector(padding, true, device_ptrs));
   device_args.push_back(create_device_vector(stride, true, device_ptrs));
 

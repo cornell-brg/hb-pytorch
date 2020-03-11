@@ -33,7 +33,11 @@ typedef struct {
 
 typedef struct {
   uint32_t N;
+#ifdef HB_EMUL
+  uint64_t data;
+#else
   uint32_t data;
+#endif
 } bsg_vector_t;
 
 // =========================================================
