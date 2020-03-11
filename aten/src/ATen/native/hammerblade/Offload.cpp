@@ -9,9 +9,9 @@ namespace native {
 * Author: Bandhav Veluri, Lin Cheng
 * ----------------------------------------------------------------------*/
 
-static eva_t create_device_tensor(uint32_t N, uint32_t dims, 
+static eva_t create_device_tensor(uint32_t N, uint32_t dims,
                                   const int64_t* strides,
-                                  const void* data, bool input,
+                                  const void* data,
                                   std::vector<eva_t>& device_ptrs) {
 
   eva_t tensor, tensor_strides, tensor_data;
@@ -36,23 +36,20 @@ static eva_t create_device_tensor(uint32_t N, uint32_t dims,
   void* src = (void *) ((intptr_t) &tensor_host);
   c10::hammerblade::memcpy_host_to_device(dst, src, sizeof(hb_mc_tensor_t));
 
-  if(input) {
-    // construct a uint32_t local_strides
-    uint32_t *local_strides = (uint32_t*) malloc(dims * sizeof(uint32_t));
-    if(!local_strides) {
-      AT_ERROR("Failed to allocate space for tmp strides on host");
-    }
-    // populate local_strides
-    for(int i=0; i<dims; i++) {
-      local_strides[i] = (uint32_t)strides[i];
-    }
-    // copy strides
-    dst = (void *) ((intptr_t) tensor_strides);
-    src = (void *) ((intptr_t) local_strides);
-    c10::hammerblade::memcpy_host_to_device(dst, src, dims * sizeof(uint32_t));
-
-    free(local_strides);
+  // construct a uint32_t local_strides
+  uint32_t *local_strides = (uint32_t*) malloc(dims * sizeof(uint32_t));
+  if(!local_strides) {
+    AT_ERROR("Failed to allocate space for tmp strides on host");
   }
+  // populate local_strides
+  for(int i=0; i<dims; i++) {
+    local_strides[i] = (uint32_t)strides[i];
+  }
+  // copy strides
+  dst = (void *) ((intptr_t) tensor_strides);
+  src = (void *) ((intptr_t) local_strides);
+  c10::hammerblade::memcpy_host_to_device(dst, src, dims * sizeof(uint32_t));
+  free(local_strides);
 
   return tensor;
 }
@@ -110,7 +107,7 @@ void offload_tensor_scalar_impl(std::vector<Tensor> tensors, std::vector<Scalar>
     const void* data = arg.data_ptr();
     // Create raw-tensor
     eva_t device_arg = create_device_tensor(n, dims,
-        strides, data, true, device_ptrs);
+        strides, data, device_ptrs);
     device_args.push_back(device_arg);
     // NOTE: here we are assuming all strides need to be copied.
   }
@@ -150,7 +147,7 @@ void offload_iterator_op_impl(TensorIterator& iter, Scalar alpha,
       // Iterate over all tensors to create
       // corresponding tensors on the device.
       eva_t device_arg = create_device_tensor(n, iter.ndim(),
-          &strides[i], data[i], i!=0, device_ptrs);
+          &strides[i], data[i], device_ptrs);
       device_args.push_back(device_arg);
     }
     device_args.push_back(create_device_scalar(alpha.to<float>()));
@@ -189,7 +186,7 @@ void offload_iterator_op_impl(TensorIterator& iter, Scalar alpha, Scalar beta,
       // Iterate over all tensors to create
       // corresponding tensors on the device.
       eva_t device_arg = create_device_tensor(n, iter.ndim(),
-          &strides[i], data[i], i!=0, device_ptrs);
+          &strides[i], data[i], device_ptrs);
       device_args.push_back(device_arg);
     }
     device_args.push_back(create_device_scalar(beta.to<float>()));
