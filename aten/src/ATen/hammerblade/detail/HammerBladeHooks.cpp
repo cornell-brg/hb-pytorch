@@ -48,6 +48,10 @@ int HammerBladeHooks::getNumHBDevices() const {
   return c10::hammerblade::device_count();
 }
 
+Generator* HammerBladeHooks::getDefaultHammerBladeGenerator(DeviceIndex device_index) const {
+  return at::hammerblade::detail::getDefaultHammerBladeGenerator(device_index);
+}
+
 using at::HammerBladeHooksRegistry;
 using at::RegistererHammerBladeHooksRegistry;
 

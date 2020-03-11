@@ -23,10 +23,71 @@ typedef struct {
   eva_t data;    // Pointer to raw data
 } hb_mc_tensor_t;
 
+void offload_op_nullary(TensorIterator& iter, Scalar alpha, const char* kernel);
+void offload_op_unary(TensorIterator& iter, Scalar alpha, const char* kernel);
 void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel);
+
+void offload_op_nullary(TensorIterator& iter, Scalar beta, Scalar alpha, const char* kernel);
+void offload_op_unary(TensorIterator& iter, Scalar beta, Scalar alpha, const char* kernel);
+void offload_op_binary(TensorIterator& iter, Scalar beta, Scalar alpha, const char* kernel);
 
 void offload_memcpy(eva_t dest, eva_t src, uint32_t n);
 
+void offload_tensor_scalar_impl(std::vector<Tensor> tensors, std::vector<Scalar> scalars,
+                                const char* kernel);
+#define HB_OFFLOAD_TENSOR_KERNEL_GET_MACRO(_1,_2,_3,_4,_5,NAME,...) NAME
+#define HB_OFFLOAD_TENSOR_KERNEL(...) HB_OFFLOAD_TENSOR_KERNEL_GET_MACRO(__VA_ARGS__,                   \
+                                                                    HB_OFFLOAD_TENSOR_KERNEL_5ARGS,     \
+                                                                    HB_OFFLOAD_TENSOR_KERNEL_4ARGS,     \
+                                                                    HB_OFFLOAD_TENSOR_KERNEL_3ARGS,     \
+                                                                    HB_OFFLOAD_TENSOR_KERNEL_2ARGS,     \
+                                                                    HB_OFFLOAD_TENSOR_KERNEL_1ARGS)     \
+                                                                    (__VA_ARGS__)                       \
+
+#define HB_OFFLOAD_TENSOR_KERNEL_1ARGS(kernel)                                                          \
+do {                                                                                                    \
+  std::vector<Tensor> args;                                                                             \
+  std::vector<Scalar> scalars;                                                                          \
+  offload_tensor_scalar_impl(args, scalars, kernel);                                                    \
+} while (0);
+
+#define HB_OFFLOAD_TENSOR_KERNEL_2ARGS(arg0, kernel)                                                    \
+do {                                                                                                    \
+  std::vector<Tensor> args;                                                                             \
+  args.push_back(arg0);                                                                                 \
+  std::vector<Scalar> scalars;                                                                          \
+  offload_tensor_scalar_impl(args, scalars, kernel);                                                    \
+} while (0);
+
+#define HB_OFFLOAD_TENSOR_KERNEL_3ARGS(arg0, arg1, kernel)                                              \
+do {                                                                                                    \
+  std::vector<Tensor> args;                                                                             \
+  args.push_back(arg0);                                                                                 \
+  args.push_back(arg1);                                                                                 \
+  std::vector<Scalar> scalars;                                                                          \
+  offload_tensor_scalar_impl(args, scalars, kernel);                                                    \
+} while (0);
+
+#define HB_OFFLOAD_TENSOR_KERNEL_4ARGS(arg0, arg1, arg2, kernel)                                        \
+do {                                                                                                    \
+  std::vector<Tensor> args;                                                                             \
+  args.push_back(arg0);                                                                                 \
+  args.push_back(arg1);                                                                                 \
+  args.push_back(arg2);                                                                                 \
+  std::vector<Scalar> scalars;                                                                          \
+  offload_tensor_scalar_impl(args, scalars, kernel);                                                    \
+} while (0);
+
+#define HB_OFFLOAD_TENSOR_KERNEL_5ARGS(arg0, arg1, arg2, arg3, kernel)                                  \
+do {                                                                                                    \
+  std::vector<Tensor> args;                                                                             \
+  args.push_back(arg0);                                                                                 \
+  args.push_back(arg1);                                                                                 \
+  args.push_back(arg2);                                                                                 \
+  args.push_back(arg3);                                                                                 \
+  std::vector<Scalar> scalars;                                                                          \
+  offload_tensor_scalar_impl(args, scalars, kernel);                                                    \
+} while (0);
 
 } // namespace native
 } // namespace at

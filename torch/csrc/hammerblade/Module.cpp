@@ -7,7 +7,7 @@
 #include <TH/TH.h>
 #include <ATen/ATen.h>
 #include <ATen/hammerblade/HammerBladeContext.h>
-// #include <ATen/HammerBladeGenerator.h>
+#include <ATen/HammerBladeGenerator.h>
 #include <c10/hammerblade/HammerBladeFunctions.h>
 // #include <c10/hammerblade/HammerBladeCachingAllocator.h>
 

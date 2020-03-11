@@ -294,15 +294,15 @@ typedef int hb_mc_manycore_id_t;
          * @param[in]  argv          List of input arguments to kernel
          * @return HB_MC_SUCCESS if succesful. Otherwise an error code is returned.
          */
-        // Emulation: I changed const uint32_t *argv to uint32_t *argv so it plays
-        // nicely with std::vector
+        // Emulation: I changed const uint32_t *argv to uint64_t *argv so it plays
+        // nicely with std::vector and 64bit memory addr
         __attribute__((warn_unused_result))
         int hb_mc_kernel_enqueue (hb_mc_device_t *device,
                                        hb_mc_dimension_t grid_dim,
                                        hb_mc_dimension_t tg_dim,
                                        const char *name,
                                        const uint32_t argc,
-                                       uint32_t *argv);
+                                       uint64_t *argv);
 
 
 

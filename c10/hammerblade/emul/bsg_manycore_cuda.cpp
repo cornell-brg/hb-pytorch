@@ -27,7 +27,6 @@
 
 #include <bsg_manycore_cuda.h>  
 #include <bsg_manycore_errno.h>
-#include <low_alloc.h>
 
 #ifdef __cplusplus
 #include <cstring>
@@ -181,8 +180,6 @@ void reset_runtime() {
           }
           if (!binary_loaded) {
             binary_loaded = true;
-            // We initialize the low addr buffer for device malloc
-            create_low_buffer();
             return HB_MC_SUCCESS;
           } else {
             return HB_MC_INITIALIZED_TWICE;
@@ -205,10 +202,8 @@ void reset_runtime() {
           if (!device_busy || !binary_loaded) {
             return HB_MC_UNINITIALIZED;
           }
-          void *alloc = low_malloc(size);
+          void *alloc = malloc(size);
           if (alloc == NULL) {
-            return HB_MC_FAIL;
-          } else if ((uint64_t)((intptr_t) alloc) > UINT32_MAX ) {
             return HB_MC_FAIL;
           } else {
             *eva = (hb_mc_eva_t)((intptr_t) alloc);
@@ -286,7 +281,7 @@ void reset_runtime() {
             return HB_MC_UNINITIALIZED;
           }
           void* alloc = (void*)((intptr_t)eva);
-          low_free(alloc);
+          free(alloc);
           return HB_MC_SUCCESS;
         }
 
@@ -312,7 +307,7 @@ void reset_runtime() {
                                        hb_mc_dimension_t tg_dim,
                                        const char *name,
                                        const uint32_t argc,
-                                       uint32_t *argv) {
+                                       uint64_t *argv) {
           EMUL_WARNING();
           if (!device_busy || !binary_loaded) {
             return HB_MC_UNINITIALIZED;

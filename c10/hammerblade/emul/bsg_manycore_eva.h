@@ -41,7 +41,7 @@
 extern "C" {
 #endif
 
-        typedef uint32_t hb_mc_eva_t;
+        typedef uint64_t hb_mc_eva_t;
         typedef hb_mc_eva_t eva_t;
 
 #ifdef __cplusplus

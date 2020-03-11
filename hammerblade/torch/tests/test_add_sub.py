@@ -62,6 +62,14 @@ def test_elementwise_in_place_add():
     x1_h_c = x1_h.cpu()
     assert torch.equal(x1_h_c, x1)
 
+def test_add_with_scalar():
+    x = torch.rand(16)
+    x_h = x.hammerblade()
+    y = x + 5
+    y_h = x_h + 5
+    assert y_h.device == torch.device("hammerblade")
+    assert torch.equal(y_h.cpu(), y)
+
 def test_elementwise_sub_1():
     x = torch.ones(1, 10)
     y = torch.ones(1, 10)
@@ -104,3 +112,11 @@ def test_elementwise_in_place_sub():
     assert x1_h.device == torch.device("hammerblade")
     x1_h_c = x1_h.cpu()
     assert torch.equal(x1_h_c, x1)
+
+def test_sub_with_scalar():
+    x = torch.rand(16)
+    x_h = x.hammerblade()
+    y = x - 5
+    y_h = x_h - 5
+    assert y_h.device == torch.device("hammerblade")
+    assert torch.equal(y_h.cpu(), y)

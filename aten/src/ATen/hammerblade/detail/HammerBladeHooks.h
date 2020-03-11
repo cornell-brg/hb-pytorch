@@ -1,6 +1,7 @@
 #include <ATen/detail/HammerBladeHooksInterface.h>
 
 #include <ATen/Generator.h>
+#include <ATen/HammerBladeGenerator.h>
 #include <c10/util/Optional.h>
 
 namespace at {
@@ -12,7 +13,7 @@ struct HammerBladeHooks : public at::HammerBladeHooksInterface {
   std::unique_ptr<THBState, void (*)(THBState*)> initHammerBlade() const override;
   Device getDeviceFromPtr(void* data) const override;
   // std::unique_ptr<Generator> initHammerBladeGenerator(Context*) const override;
-  // Generator* getDefaultHammerBladeGenerator(DeviceIndex device_index = -1) const override;
+  Generator* getDefaultHammerBladeGenerator(DeviceIndex device_index = -1) const override;
   bool hasHammerBlade() const override;
   int64_t current_device() const override;
   std::string showConfig() const override;

@@ -15,10 +15,14 @@ extern "C" {
           bsg_tensor_t* a,
           bsg_tensor_t* b,
           float* alpha) {
-    // Convert uint32_t pointers to correct types
-    float*    _c = (float*)((intptr_t)res->data);
-    float*    _a = (float*)((intptr_t)a->data);
-    float*    _b = (float*)((intptr_t)b->data);
+    // Get strides
+    uint32_t _c_strides = *(uint32_t*)((intptr_t)res->strides);
+    uint32_t _a_strides = *(uint32_t*)((intptr_t)a->strides);
+    uint32_t _b_strides = *(uint32_t*)((intptr_t)b->strides);
+    // Get starting elements of tensor data
+    intptr_t _c = (intptr_t)res->data;
+    intptr_t _a = (intptr_t)a->data;
+    intptr_t _b = (intptr_t)b->data;
     float _alpha = *alpha;
     // Calculate elements per tile
     uint32_t len_per_tile = res->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
@@ -29,7 +33,10 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
     // Element-wise add
     for (int i = start; i < end; i++) {
-        _c[i] = _a[i] + (_alpha * _b[i]);
+        *(float*)(_c) = *(float*)(_a) + (_alpha * *(float*)(_b));
+        _c += _c_strides;
+        _a += _a_strides;
+        _b += _b_strides;
     }
     //   End profiling
     bsg_cuda_print_stat_kernel_end();

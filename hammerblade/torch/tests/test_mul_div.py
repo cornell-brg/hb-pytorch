@@ -48,6 +48,14 @@ def test_elementwise_in_place_mul():
     x1_h_c = x1_h.cpu()
     assert torch.equal(x1_h_c, x1)
 
+def test_mul_with_scalar():
+    x = torch.rand(16)
+    x_h = x.hammerblade()
+    y = x.mul(42.0)
+    y_h = x_h.mul(42.0)
+    assert y_h.device == torch.device("hammerblade")
+    assert torch.equal(y_h.cpu(), y)
+
 def test_elementwise_div_1():
     x = torch.ones(1, 10)
     y = torch.ones(1, 10)
@@ -90,3 +98,11 @@ def test_elementwise_in_place_div():
     assert x1_h.device == torch.device("hammerblade")
     x1_h_c = x1_h.cpu()
     assert torch.allclose(x1_h_c, x1)
+
+def test_div_with_scalar():
+    x = torch.rand(16)
+    x_h = x.hammerblade()
+    y = x.div(42.0)
+    y_h = x_h.div(42.0)
+    assert y_h.device == torch.device("hammerblade")
+    assert torch.allclose(y_h.cpu(), y)

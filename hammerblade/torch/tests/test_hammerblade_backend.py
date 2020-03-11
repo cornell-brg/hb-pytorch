@@ -72,3 +72,10 @@ def test_move_between_cpu_and_hammerblade_path2():
     assert hb_x.type() == 'torch.hammerblade.FloatTensor'
     assert hb_x.is_hammerblade
     assert torch.equal(hb_x.cpu(), cpu_x)
+
+def test_print_hammerblade_tensor_1():
+    import torch
+    x = torch.ones(10).hammerblade()
+    assert x.is_hammerblade
+    assert str(x) == "tensor([1., 1., 1., 1., 1., 1., 1., 1., 1., 1.], device='hammerblade')"
+    assert x.is_hammerblade

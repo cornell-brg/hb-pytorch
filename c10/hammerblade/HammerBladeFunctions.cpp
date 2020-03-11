@@ -61,7 +61,7 @@ void* memcpy_device_to_host(void *dst, const void *src, uint32_t nbytes) {
 
 void offload_kernel(const char* kernel, std::vector<eva_t> args) {
 
-  uint32_t* cuda_argv = (uint32_t*) malloc(args.size() * sizeof(eva_t));
+  eva_t* cuda_argv = (eva_t*) malloc(args.size() * sizeof(eva_t));
   if(!cuda_argv) {
     AT_ERROR("Falied to allocate cuda_argv!");
   }
@@ -71,7 +71,7 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   }
 
   C10_HB_CHECK(hb_mc_kernel_enqueue(&_hb_device, _hb_grid_dim, _hb_tg_dim, kernel,
-                                    args.size(), (uint32_t*) cuda_argv));
+                                    args.size(), cuda_argv));
   C10_HB_CHECK(hb_mc_device_tile_groups_execute(&_hb_device));
 
   free(cuda_argv);

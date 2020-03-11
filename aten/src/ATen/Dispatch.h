@@ -96,6 +96,18 @@ inline void deprecated_AT_DISPATCH_ALL_TYPES_AND_HALF_AND_COMPLEX() {}
 // but we're just being safe (and it doesn't hurt.)  Note we must
 // use it to shut up warnings about unused store.
 
+#define AT_DISPATCH_FLOAT_TYPE_ONLY(TYPE, NAME, ...)                         \
+  [&] {                                                                      \
+    const auto& the_type = TYPE;                                             \
+    /* don't use TYPE again in case it is an expensive or side-effect op */  \
+    at::ScalarType _st = ::detail::scalar_type(the_type);                    \
+    switch (_st) {                                                           \
+      AT_PRIVATE_CASE_TYPE(at::ScalarType::Float, float, __VA_ARGS__)        \
+      default:                                                               \
+        AT_ERROR(#NAME, " not implemented for '", toString(_st), "'");       \
+    }                                                                        \
+  }()
+
 #define AT_DISPATCH_FLOATING_TYPES(TYPE, NAME, ...)                          \
   [&] {                                                                      \
     const auto& the_type = TYPE;                                             \
