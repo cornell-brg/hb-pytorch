@@ -6,9 +6,9 @@ def _test_conv2d(inputs, kernel, padding=1, stride=1):
     kernel_hb = kernel.hammerblade()
 
     conv_result_hb = F.conv2d(inputs_hb, kernel_hb,
-                       padding=padding, stride=stride)
+                              padding=padding, stride=stride)
     conv_result = F.conv2d(inputs, kernel,
-                    padding=padding, stride=stride)
+                           padding=padding, stride=stride)
 
     assert torch.allclose(conv_result, conv_result_hb.cpu())
 
@@ -57,13 +57,13 @@ def test_conv2d_batch_input_output():
     width = 5
     height = 5
     kernel_size = 3
-    
+
     for batch_size in range(1, 5):
         for input_channels in range(1, 5):
             for output_channels in range(1, 5):
                 inputs = torch.rand(batch_size, input_channels, width, height)
-                kernel = torch.rand(output_channels, input_channels,
-                            kernel_size, kernel_size)
+                kernel = torch.rand(output_channels, input_channels, kernel_size,
+                                    kernel_size)
                 _test_conv2d(inputs, kernel)
 
 def test_conv2d_width_height_kernel():
@@ -73,13 +73,13 @@ def test_conv2d_width_height_kernel():
     batch_size = 2
     input_channels = 2
     output_channels = 4
-    
+
     for width in range(8, 16):
         for height in range(8, 16):
             for kernel_size in range(1, 5):
                 inputs = torch.rand(batch_size, input_channels, width, height)
-                kernel = torch.rand(output_channels, input_channels,
-                            kernel_size, kernel_size)
+                kernel = torch.rand(output_channels, input_channels, kernel_size,
+                                    kernel_size)
                 _test_conv2d(inputs, kernel)
 
 def test_conv2d_width_height_kernel_pad_stride():
@@ -89,14 +89,14 @@ def test_conv2d_width_height_kernel_pad_stride():
     batch_size = 2
     input_channels = 2
     output_channels = 4
-    
+
     for width in range(8, 16):
         for height in range(8, 16):
             for kernel_size in range(1, 5):
                 for pad in range(1, kernel_size):
                     for stride in range(1, kernel_size):
-                        inputs = torch.rand(batch_size, input_channels,
-                                    width, height)
+                        inputs = torch.rand(batch_size, input_channels, width,
+                                            height)
                         kernel = torch.rand(output_channels, input_channels,
-                                    kernel_size, kernel_size)
+                                            kernel_size, kernel_size)
                         _test_conv2d(inputs, kernel)
