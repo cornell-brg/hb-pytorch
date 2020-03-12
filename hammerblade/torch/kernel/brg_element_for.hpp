@@ -12,18 +12,6 @@
 #include <initializer_list>
 
 // =========================================================
-// Element-wise for
-// We would like the synatx to be like this:
-// __attribute__ ((noinline))  int tensorlib_add(bsg_tensor_t* c_p,
-//                                               bsg_tensor_t* a_p,
-//                                               bsg_tensor_t* b_p,
-//                                               float* alpha) {
-//   brg_tile_element_wise_for<float*>(c_p, a_p, b_p, [&]() {
-//      *c = *a + alpha * (*b);
-//   });
-// }
-
-// =========================================================
 // Device Tensor that comes from TensorIterator, in which its
 // strides are measured in **bytes**
 //
@@ -55,6 +43,10 @@ class BRGIteratorTensor {
         assert(dims == 1);
       }
 
+    uint32_t numel() {
+      return N;
+    }
+
     BRGIteratorTensor& operator ++ (int) {
       data += strides;
       cur_loc++;
@@ -67,5 +59,33 @@ class BRGIteratorTensor {
     }
 
 };
+
+// =========================================================
+// Element-wise for
+// We would like the synatx to be like this:
+// __attribute__ ((noinline))  int tensorlib_add(bsg_tensor_t* c_p,
+//                                               bsg_tensor_t* a_p,
+//                                               bsg_tensor_t* b_p,
+//                                               float* alpha) {
+//   brg_tile_element_wise_for<float*>(c_p, a_p, b_p, [&]() {
+//      *c = *a + alpha * (*b);
+//   });
+// }
+
+template <typename T, typename F>
+inline void brg_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
+                                 bsg_tensor_t* _t2, F functor) {
+  auto res = BRGIteratorTensor<T*>(_t0);
+  auto input = BRGIteratorTensor<T*>(_t1);
+  auto other = BRGIteratorTensor<T*>(_t2);
+  size_t start = 0;
+  size_t end = res.numel();
+  for (size_t i = start; i < end; i++) {
+    *(*res) = functor(*(*input), *(*other));
+    res++;
+    input++;
+    other++;
+  }
+}
 
 #endif

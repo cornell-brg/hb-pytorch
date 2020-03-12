@@ -12,28 +12,17 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_add(
-          bsg_tensor_t* res,
-          bsg_tensor_t* a,
-          bsg_tensor_t* b,
-          float* alpha) {
-    float _alpha = *alpha;
-    auto _c = BRGIteratorTensor<float*>(res);
-    auto _a = BRGIteratorTensor<float*>(a);
-    auto _b = BRGIteratorTensor<float*>(b);
-    // Calculate elements per tile
-    uint32_t len_per_tile = res->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    uint32_t start = len_per_tile * __bsg_id;
-    uint32_t   end = start + len_per_tile;
-    end = (end > res->N)  ? res->N : end;
+          bsg_tensor_t* t0_p,
+          bsg_tensor_t* t1_p,
+          bsg_tensor_t* t2_p,
+          float* _alpha) {
+    float alpha = *_alpha;
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    // Element-wise add
-    for (int i = start; i < end; i++) {
-        *(*_c) = *(*_a) + _alpha * (*(*_b));
-        _c++;
-        _a++;
-        _b++;
-    }
+    brg_element_wise_for<float>(t0_p, t1_p, t2_p,
+        [&](float a, float b) {
+          return a + alpha * b;
+        });
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
     return 0;
