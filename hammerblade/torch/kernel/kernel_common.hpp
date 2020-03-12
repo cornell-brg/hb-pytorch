@@ -10,6 +10,8 @@
 // included.
 #define BSG_TILE_GROUP_X_DIM 1
 #define BSG_TILE_GROUP_Y_DIM 1
+#define bsg_tiles_X BSG_TILE_GROUP_X_DIM
+#define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
 #include "bsg_manycore.h"
 #include "bsg_set_tile_x_y.h"
 // #include "bsg_tile_group_barrier.h"
