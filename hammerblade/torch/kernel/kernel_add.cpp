@@ -19,7 +19,7 @@ extern "C" {
     float alpha = *_alpha;
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    brg_element_wise_for<float>(t0_p, t1_p, t2_p,
+    brg_element_wise_for(t0_p, t1_p, t2_p,
         [&](float a, float b) {
           return a + alpha * b;
         });

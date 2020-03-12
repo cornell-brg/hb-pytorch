@@ -7,6 +7,7 @@
 #define _BRG_ELEMENT_FOR_HPP
 
 #include <cassert>
+#include <map>
 #include <math.h>
 #include <bsg_tensor.hpp>
 #include <initializer_list>
@@ -61,20 +62,62 @@ class BRGIteratorTensor {
 };
 
 // =========================================================
+// Helper function to get the argument type of lambda function
+//
+// Creazy meta-programming in here ...
+// Please refer to https://stackoverflow.com/questions/28105371/
+// is-it-possible-to-figure-out-the-parameter-type-and-return-type-of-a-polymorphic
+// and
+// http://coliru.stacked-crooked.com/a/e19151a5c245d7c3
+
+namespace function_traits {
+  //--------------------------
+  // for lambda and functors
+  //--------------------------
+  template <typename T>
+  struct traits : public traits<decltype(&T::operator())>{};
+
+  template <typename ClassType, typename ReturnType, typename... Args>
+  struct traits<ReturnType(ClassType::*)(Args...) const> {
+    using result_type = ReturnType;
+    template <size_t i> struct arg {
+        using type = typename std::tuple_element<i, std::tuple<Args...>>::type;
+    };
+  };
+
+  //--------------------------
+  // for function pointers
+  //--------------------------
+  template <typename ReturnType, typename... Args>
+  struct traits<ReturnType(*)(Args...)> : public traits<ReturnType(Args...)>{};
+
+  template <typename ReturnType, typename... Args>
+  struct traits<ReturnType(Args...)> {
+    using result_type = ReturnType;
+    template <size_t i> struct arg {
+        using type = typename std::tuple_element<i, std::tuple<Args...>>::type;
+    };
+  };
+}
+
+// =========================================================
 // Element-wise for
 // We would like the synatx to be like this:
 // __attribute__ ((noinline))  int tensorlib_add(bsg_tensor_t* c_p,
 //                                               bsg_tensor_t* a_p,
 //                                               bsg_tensor_t* b_p,
 //                                               float* alpha) {
-//   brg_tile_element_wise_for<float*>(c_p, a_p, b_p, [&]() {
-//      *c = *a + alpha * (*b);
-//   });
+//    brg_element_wise_for(t0_p, t1_p, t2_p,
+//        [&](float a, float b) {
+//          return a + alpha * b;
+//        });
 // }
 
-template <typename T, typename F>
+template <class FetchFunctor>
 inline void brg_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
-                                 bsg_tensor_t* _t2, F functor) {
+                                 bsg_tensor_t* _t2, FetchFunctor functor) {
+  using f = function_traits::traits<decltype(functor)>;
+  using T = typename f::template arg<0>::type;
   auto res = BRGIteratorTensor<T*>(_t0);
   auto input = BRGIteratorTensor<T*>(_t1);
   auto other = BRGIteratorTensor<T*>(_t2);
