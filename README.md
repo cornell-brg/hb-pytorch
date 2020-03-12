@@ -13,7 +13,7 @@ This work aims to port PyTorch to HammerBlade.
     `python3.6 -m venv ./venv_pytorch`
     `python3.6 -m venv ./venv_pytorch`
  - Install dependencies
-    `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest`
+    `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja`
  - Init pytorch third party dependencies
     `git submodule update --init --recursive`
  - Setup building environment variables. You need to edit `hb-pytorch/setup_cosim_build_env.sh` and set `BSG_MANYCORE_DIR` to `<bsg_bladerunner>/bsg_replicant/libraries`
