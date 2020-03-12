@@ -14,11 +14,19 @@ ifeq ($(wildcard $(COSIM_EXE)),)
 endif
 
 help:
-	echo ""
+	@echo "regression:"
+	@echo "    Run pytest regression on $(SCRIPT_DIR)/tests direcotry"
+	@echo ""
+	@echo "kernel.riscv:"
+	@echo "    Build the device binary with suite of kernel implementations"
+	@echo "    in $(KERNEL_DIR)."
+	@echo "kernel.dis:"
+	@echo "    Output disassembly of kernel binary to standard out."
 
+.PHONY: regression
 regression: kernel.riscv
 	$(COSIM_EXE) +ntb_random_seed_automatic \
-		+c_args="$(SCRIPT_DIR) $(SCRIPT)" +trace \
+		+c_args="$(SCRIPT_DIR) $(SCRIPT)" \
 		2>&1 | tee regression.log
 
 # Include BSG Manycore's builddefs
