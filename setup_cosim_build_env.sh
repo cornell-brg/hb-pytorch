@@ -1,6 +1,7 @@
 # setup brg sdh pytorch building env
 echo "  Setting up PyTorch building environment ... "
 echo "  Make sure you enabled devtoolset-8!"
+echo "  Make sure correct Python environemnt is set!"
 echo ""
 
 # setup pytorch building options
@@ -35,6 +36,9 @@ then
 else
   export BSG_MANYCORE_DIR=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries
 fi
+
+# Build COSIM runtime library and simulation executable
+make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/python test_loader
 
 export HB_KERNEL_DIR=$DIR/hammerblade/torch/kernel.riscv
 
