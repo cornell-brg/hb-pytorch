@@ -4,6 +4,7 @@
 //====================================================================
 
 #include <kernel_common.hpp>
+#include <brg_element_for.hpp>
 
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
@@ -15,15 +16,10 @@ extern "C" {
           bsg_tensor_t* a,
           bsg_tensor_t* b,
           float* alpha) {
-    // Get strides
-    uint32_t _c_strides = *(uint32_t*)((intptr_t)res->strides);
-    uint32_t _a_strides = *(uint32_t*)((intptr_t)a->strides);
-    uint32_t _b_strides = *(uint32_t*)((intptr_t)b->strides);
-    // Get starting elements of tensor data
-    intptr_t _c = (intptr_t)res->data;
-    intptr_t _a = (intptr_t)a->data;
-    intptr_t _b = (intptr_t)b->data;
     float _alpha = *alpha;
+    auto _c = BRGIteratorTensor<float*>(res);
+    auto _a = BRGIteratorTensor<float*>(a);
+    auto _b = BRGIteratorTensor<float*>(b);
     // Calculate elements per tile
     uint32_t len_per_tile = res->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
     uint32_t start = len_per_tile * __bsg_id;
@@ -33,10 +29,10 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
     // Element-wise add
     for (int i = start; i < end; i++) {
-        *(float*)(_c) = *(float*)(_a) + (_alpha * *(float*)(_b));
-        _c += _c_strides;
-        _a += _a_strides;
-        _b += _b_strides;
+        *(*_c) = *(*_a) + _alpha * (*(*_b));
+        _c++;
+        _a++;
+        _b++;
     }
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
