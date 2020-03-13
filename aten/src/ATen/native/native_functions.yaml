@@ -502,6 +502,7 @@
   dispatch:
     CPU: bernoulli_scalar_cpu_
     CUDA: bernoulli_scalar_cuda_
+    HammerBlade: bernoulli_scalar_hb_
   supports_named_tensor: True
 
 # This out-of-place version isn't used explicitly, but needed by jit.
