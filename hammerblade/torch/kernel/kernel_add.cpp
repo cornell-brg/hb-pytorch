@@ -14,14 +14,14 @@ extern "C" {
           bsg_tensor_t* t0_p,
           bsg_tensor_t* t1_p,
           bsg_tensor_t* t2_p,
-          float* _alpha) {
-    float alpha = *_alpha;
+          float* alpha_p) {
+    float alpha = *alpha_p;
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
     brg_tile_element_wise_for(t0_p, t1_p, t2_p,
-        [&](float a, float b) {
-          return a + alpha * b;
-        });
+      [&](float a, float b) {
+        return a + alpha * b;
+    });
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
     return 0;

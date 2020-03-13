@@ -4,31 +4,21 @@
 //====================================================================
 
 #include <kernel_common.hpp>
+#include <cmath>
 
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_abs(
-          bsg_tensor_t* res,
-          bsg_tensor_t* a,
-          float* value) {
-    // Convert uint32_t pointers to correct types
-    float*    _c = (float*)((intptr_t)res->data);
-    float*    _a = (float*)((intptr_t)a->data);
-    // Calculate elements per tile
-    uint32_t len_per_tile = res->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    uint32_t start = len_per_tile * __bsg_id;
-    uint32_t   end = start + len_per_tile;
-    end = (end > res->N)  ? res->N : end;
+          bsg_tensor_t* t0_p,
+          bsg_tensor_t* t1_p,
+          float* value_p) {
+    // value is *NOT* used here.
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    // Element-wise abs
-    for (int i = start; i < end; i++) {
-        if (_a[i] < 0) {
-            _c[i] = 0 - _a[i];
-        } else {
-            _c[i] = _a[i];
-        }
-    }
+    brg_tile_element_wise_for(t0_p, t1_p,
+      [&](float a) {
+        return abs(a);
+    });
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
     return 0;

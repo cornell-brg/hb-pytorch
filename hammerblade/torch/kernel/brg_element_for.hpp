@@ -76,6 +76,7 @@ class BRGIteratorTensor {
 // is-it-possible-to-figure-out-the-parameter-type-and-return-type-of-a-polymorphic
 // and
 // http://coliru.stacked-crooked.com/a/e19151a5c245d7c3
+//==========================================================
 
 namespace function_traits {
   //--------------------------
@@ -108,7 +109,7 @@ namespace function_traits {
 }
 
 // =========================================================
-// Element-wise for
+// Element-wise for -- Binary ops
 //
 // This function iterates over all elements, starting from element 0
 //
@@ -122,6 +123,7 @@ namespace function_traits {
 //          return a + alpha * b;
 //        });
 // }
+//==========================================================
 
 template <class FetchFunctor>
 inline void brg_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
@@ -151,9 +153,68 @@ inline void brg_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
 }
 
 // =========================================================
-// Element-wise for
+// Element-wise for -- Unary ops
+//==========================================================
+
+template <class FetchFunctor>
+inline void brg_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
+                                 FetchFunctor functor) {
+  //--------------------------------------------------
+  // get the type of frist argument of lambda function
+  //-------------------------------------------------
+  using f = function_traits::traits<decltype(functor)>;
+  using T = typename f::template arg<0>::type;
+  //-----------------
+  // wrap bsg_tensors
+  //-----------------
+  auto res = BRGIteratorTensor<T*>(_t0);
+  auto input = BRGIteratorTensor<T*>(_t1);
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  size_t start = 0;
+  size_t end = res.numel();
+  for (size_t i = start; i < end; i++) {
+    *(*res) = functor(*(*input));
+    res++;
+    input++;
+  }
+}
+
+// =========================================================
+// Element-wise for -- Nullary ops
+//==========================================================
+
+template <class FetchFunctor>
+inline void brg_element_wise_for(bsg_tensor_t* _t0,
+                                 FetchFunctor functor) {
+  //--------------------------------------------------
+  // get the type of frist argument of lambda function
+  //-------------------------------------------------
+  using f = function_traits::traits<decltype(functor)>;
+  using T = typename f::template arg<0>::type;
+  //-----------------
+  // wrap bsg_tensors
+  //-----------------
+  auto res = BRGIteratorTensor<T*>(_t0);
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  size_t start = 0;
+  size_t end = res.numel();
+  for (size_t i = start; i < end; i++) {
+    *(*res) = functor();
+    res++;
+  }
+}
+
+
+
+// =========================================================
+// Tile Element-wise for -- Binary ops
 //
 // This function calculates the per tile range automatically
+//==========================================================
 
 template <class FetchFunctor>
 inline void brg_tile_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
@@ -185,6 +246,66 @@ inline void brg_tile_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
 }
 
 
+// =========================================================
+// Tile Element-wise for -- Unary ops
+//==========================================================
+
+template <class FetchFunctor>
+inline void brg_tile_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
+                                      FetchFunctor functor) {
+  //--------------------------------------------------
+  // get the type of frist argument of lambda function
+  //-------------------------------------------------
+  using f = function_traits::traits<decltype(functor)>;
+  using T = typename f::template arg<0>::type;
+  //--------------------------------------
+  // calculate start and end for this tile
+  //--------------------------------------
+  size_t len_per_tile = _t0->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
+  size_t start = len_per_tile * __bsg_id;
+  size_t end = start + len_per_tile;
+  end = (end > _t0->N)  ? _t0->N : end;
+  //-----------------
+  // wrap bsg_tensors
+  //-----------------
+  auto res = BRGIteratorTensor<T*>(_t0, start);
+  auto input = BRGIteratorTensor<T*>(_t1, start);
+  for (size_t i = start; i < end; i++) {
+    *(*res) = functor(*(*input));
+    res++;
+    input++;
+  }
+}
+
+
+// =========================================================
+// Tile Element-wise for -- Nullary ops
+//==========================================================
+
+template <class FetchFunctor>
+inline void brg_tile_element_wise_for(bsg_tensor_t* _t0,
+                                      FetchFunctor functor) {
+  //--------------------------------------------------
+  // get the type of frist argument of lambda function
+  //-------------------------------------------------
+  using f = function_traits::traits<decltype(functor)>;
+  using T = typename f::template arg<0>::type;
+  //--------------------------------------
+  // calculate start and end for this tile
+  //--------------------------------------
+  size_t len_per_tile = _t0->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
+  size_t start = len_per_tile * __bsg_id;
+  size_t end = start + len_per_tile;
+  end = (end > _t0->N)  ? _t0->N : end;
+  //-----------------
+  // wrap bsg_tensors
+  //-----------------
+  auto res = BRGIteratorTensor<T*>(_t0, start);
+  for (size_t i = start; i < end; i++) {
+    *(*res) = functor();
+    res++;
+  }
+}
 
 
 #endif
