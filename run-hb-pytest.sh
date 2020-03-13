@@ -9,4 +9,4 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
-make -C $DIR/hammerblade/torch clean test_loader.cosim.log
+make -C $DIR/hammerblade/torch clean regression
