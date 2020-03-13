@@ -49,6 +49,9 @@ class BRGIteratorTensor {
       return N;
     }
 
+    //-----------------
+    // post increment
+    //-----------------
     BRGIteratorTensor& operator ++ (int) {
       data += strides;
       cur_loc++;
@@ -56,6 +59,9 @@ class BRGIteratorTensor {
       return *this;
     }
 
+    //-----------------------------------
+    // *accessor, just like c++ iterators
+    //-----------------------------------
     T operator*() {
       return (T)(intptr_t)data;
     }
@@ -120,11 +126,20 @@ namespace function_traits {
 template <class FetchFunctor>
 inline void brg_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
                                  bsg_tensor_t* _t2, FetchFunctor functor) {
+  //--------------------------------------------------
+  // get the type of frist argument of lambda function
+  //-------------------------------------------------
   using f = function_traits::traits<decltype(functor)>;
   using T = typename f::template arg<0>::type;
+  //-----------------
+  // wrap bsg_tensors
+  //-----------------
   auto res = BRGIteratorTensor<T*>(_t0);
   auto input = BRGIteratorTensor<T*>(_t1);
   auto other = BRGIteratorTensor<T*>(_t2);
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
   size_t start = 0;
   size_t end = res.numel();
   for (size_t i = start; i < end; i++) {
@@ -143,12 +158,21 @@ inline void brg_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
 template <class FetchFunctor>
 inline void brg_tile_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
                                       bsg_tensor_t* _t2, FetchFunctor functor) {
+  //--------------------------------------------------
+  // get the type of frist argument of lambda function
+  //-------------------------------------------------
   using f = function_traits::traits<decltype(functor)>;
   using T = typename f::template arg<0>::type;
+  //--------------------------------------
+  // calculate start and end for this tile
+  //--------------------------------------
   size_t len_per_tile = _t0->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
   size_t start = len_per_tile * __bsg_id;
   size_t end = start + len_per_tile;
   end = (end > _t0->N)  ? _t0->N : end;
+  //-----------------
+  // wrap bsg_tensors
+  //-----------------
   auto res = BRGIteratorTensor<T*>(_t0, start);
   auto input = BRGIteratorTensor<T*>(_t1, start);
   auto other = BRGIteratorTensor<T*>(_t2, start);
