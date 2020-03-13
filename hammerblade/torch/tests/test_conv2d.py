@@ -45,10 +45,54 @@ def test_conv2d_4():
     """
     Multi-batch, multi-channel
     """
-    kernel = torch.rand(5, 3, 3, 3)
+    kernel = torch.rand(3, 3, 3, 3)
     inputs = torch.rand(2, 3, 5, 5)
     padding = (1, 2)
     stride = (1, 2)
+
+    _test_conv2d(inputs, kernel, padding, stride)
+
+def test_conv2d_5():
+    """
+    Multiple pads
+    """
+    kernel = torch.rand(1, 3, 3, 3)
+    inputs = torch.rand(1, 3, 5, 5)
+    padding = 2
+    stride = 1
+
+    _test_conv2d(inputs, kernel, padding, stride)
+
+def test_conv2d_6():
+    """
+    Multiple pads and strides
+    """
+    kernel = torch.rand(2, 3, 3, 3)
+    inputs = torch.rand(2, 3, 5, 5)
+    padding = 2
+    stride = 2
+
+    _test_conv2d(inputs, kernel, padding, stride)
+
+def test_conv2d_7():
+    """
+    Kernel size equal to image size
+    """
+    kernel = torch.rand(2, 3, 5, 5)
+    inputs = torch.rand(2, 3, 5, 5)
+    padding = 1
+    stride = 1
+
+    _test_conv2d(inputs, kernel, padding, stride)
+
+def test_conv2d_8():
+    """
+    Large padding
+    """
+    kernel = torch.rand(2, 3, 3, 3)
+    inputs = torch.rand(2, 3, 5, 5)
+    padding = 3
+    stride = 3
 
     _test_conv2d(inputs, kernel, padding, stride)
 
