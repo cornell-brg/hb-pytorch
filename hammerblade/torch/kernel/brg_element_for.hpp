@@ -41,6 +41,7 @@ class BRGIteratorTensor {
       data((intptr_t) t->data),
       cur_loc(start_loc) {
         assert(cur_loc < N);
+        data += start_loc * strides;
         assert(dims == 1);
       }
 
@@ -102,6 +103,9 @@ namespace function_traits {
 
 // =========================================================
 // Element-wise for
+//
+// This function iterates over all elements, starting from element 0
+//
 // We would like the synatx to be like this:
 // __attribute__ ((noinline))  int tensorlib_add(bsg_tensor_t* c_p,
 //                                               bsg_tensor_t* a_p,
@@ -130,5 +134,33 @@ inline void brg_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
     other++;
   }
 }
+
+// =========================================================
+// Element-wise for
+//
+// This function calculates the per tile range automatically
+
+template <class FetchFunctor>
+inline void brg_tile_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
+                                      bsg_tensor_t* _t2, FetchFunctor functor) {
+  using f = function_traits::traits<decltype(functor)>;
+  using T = typename f::template arg<0>::type;
+  size_t len_per_tile = _t0->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
+  size_t start = len_per_tile * __bsg_id;
+  size_t end = start + len_per_tile;
+  end = (end > _t0->N)  ? _t0->N : end;
+  auto res = BRGIteratorTensor<T*>(_t0, start);
+  auto input = BRGIteratorTensor<T*>(_t1, start);
+  auto other = BRGIteratorTensor<T*>(_t2, start);
+  for (size_t i = start; i < end; i++) {
+    *(*res) = functor(*(*input), *(*other));
+    res++;
+    input++;
+    other++;
+  }
+}
+
+
+
 
 #endif

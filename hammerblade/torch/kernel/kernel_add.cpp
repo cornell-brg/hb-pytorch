@@ -4,7 +4,6 @@
 //====================================================================
 
 #include <kernel_common.hpp>
-#include <brg_element_for.hpp>
 
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
@@ -19,7 +18,7 @@ extern "C" {
     float alpha = *_alpha;
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    brg_element_wise_for(t0_p, t1_p, t2_p,
+    brg_tile_element_wise_for(t0_p, t1_p, t2_p,
         [&](float a, float b) {
           return a + alpha * b;
         });
