@@ -1,5 +1,7 @@
 import torch
 import torch.nn.functional as F
+import os
+import pytest
 
 def _test_conv2d(inputs, kernel, padding=1, stride=1):
     inputs_hb = inputs.hammerblade()
@@ -50,6 +52,7 @@ def test_conv2d_4():
 
     _test_conv2d(inputs, kernel, padding, stride)
 
+@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') == None, reason="Prohibitively slow on cosim")
 def test_conv2d_batch_input_output():
     """
     Combinations of batch, input and output channel sizes
@@ -66,6 +69,7 @@ def test_conv2d_batch_input_output():
                                     kernel_size)
                 _test_conv2d(inputs, kernel)
 
+@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') == None, reason="Prohibitively slow on cosim")
 def test_conv2d_width_height_kernel():
     """
     Combinations of width, height and kernel_size
@@ -82,6 +86,7 @@ def test_conv2d_width_height_kernel():
                                     kernel_size)
                 _test_conv2d(inputs, kernel)
 
+@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') == None, reason="Prohibitively slow on cosim")
 def test_conv2d_width_height_kernel_pad_stride():
     """
     Combinations of width, height, kernel_size, padding and stride
