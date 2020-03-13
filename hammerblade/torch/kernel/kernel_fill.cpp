@@ -13,7 +13,8 @@ extern "C" {
     float value = *value_p;
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    // Element-wise value filling
+    // even though here a is *NOT* used, we need this
+    // parameter for tpye inference
     brg_tile_element_wise_for(t0_p, [&](float a = 0.0f) {
       return value;
     });
