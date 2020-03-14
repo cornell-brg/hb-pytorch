@@ -6,6 +6,11 @@ KERNEL_DIR       := $(shell git rev-parse --show-toplevel)/hammerblade/torch/ker
 SCRIPT_DIR       := $(shell git rev-parse --show-toplevel)/hammerblade/torch/
 SCRIPT           := pytest_runner
 
+# Disable CADENV to resolve related errors in BSG_MANYCORE. We don't need
+# CADENV here, as we only import RISC-V GCC buildefs and are not building
+# CAD related things.
+export IGNORE_CADENV := 1
+
 ifeq ($(wildcard $(COSIM_EXE)),)
   $(error Error: COSIM executable missing in \
     $(BRG_BSG_BLADERUNNER_DIR)/bsg_replicant/testbenches/python. \
@@ -37,7 +42,7 @@ INCS := -I$(KERNEL_DIR)
 KERNEL_CSRCS   := $(notdir $(wildcard $(KERNEL_DIR)/*.c))
 KERNEL_CPPSRCS := $(notdir $(wildcard $(KERNEL_DIR)/*.cpp))
 KERNEL_OBJS    := $(patsubst %.c,%.o,$(KERNEL_CSRCS)) \
-							    $(patsubst %.cpp,%.o,$(KERNEL_CPPSRCS))
+                  $(patsubst %.cpp,%.o,$(KERNEL_CPPSRCS))
 
 $(KERNEL_CSRCS): %.c : $(KERNEL_DIR)/%.c
 	cp $^ $@
