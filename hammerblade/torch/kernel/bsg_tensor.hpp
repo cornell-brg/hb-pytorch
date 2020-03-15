@@ -44,24 +44,25 @@ typedef struct {
 // Device Tensor classes
 //
 // Wrapper classes around device tensor structs to provide
-// convenience operations. This runs on a tiny RISC-V processor 
-// on the device, so be careful about using dynamic memory 
+// convenience operations. This runs on a tiny RISC-V processor
+// on the device, so be careful about using dynamic memory
 // allocation.
 // =========================================================
 
+template <typename DT>
 class BSGTensor {
   private:
     uint32_t N;
     uint32_t dims;
     uint32_t* strides;
-    float* data;
+    DT* data;
 
   public:
     BSGTensor(bsg_tensor_t* t) :
       N(t->N),
       dims(t->dims),
       strides((uint32_t*) ((intptr_t) t->strides)),
-      data((float*) ((intptr_t) t->data)) {}
+      data((DT*) ((intptr_t) t->data)) {}
 
     int size() {
       return N;
@@ -85,7 +86,7 @@ class BSGTensor {
     }
 
     template<typename... T>
-    float& operator()(T... indices) {
+    DT& operator()(T... indices) {
       std::initializer_list<uint32_t> iarray = {indices...};
 
       if(iarray.size() != dims) {
