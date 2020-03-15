@@ -30,7 +30,11 @@ class BRGIteratorTensor {
     uint32_t N;
     uint32_t dims;
     uint32_t strides;
+#ifdef HB_EMUL
+    uint64_t data;
+#else
     uint32_t data;
+#endif
     uint32_t cur_loc;
 
   public:
