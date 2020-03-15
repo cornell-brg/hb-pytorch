@@ -1,5 +1,7 @@
 import torch
 import torch.nn.functional as F
+import os
+import pytest
 
 def _test_conv2d(inputs, kernel, padding=1, stride=1):
     inputs_hb = inputs.hammerblade()
@@ -43,13 +45,58 @@ def test_conv2d_4():
     """
     Multi-batch, multi-channel
     """
-    kernel = torch.rand(5, 3, 3, 3)
+    kernel = torch.rand(3, 3, 3, 3)
     inputs = torch.rand(2, 3, 5, 5)
     padding = (1, 2)
     stride = (1, 2)
 
     _test_conv2d(inputs, kernel, padding, stride)
 
+def test_conv2d_5():
+    """
+    Multiple pads
+    """
+    kernel = torch.rand(1, 3, 3, 3)
+    inputs = torch.rand(1, 3, 5, 5)
+    padding = 2
+    stride = 1
+
+    _test_conv2d(inputs, kernel, padding, stride)
+
+def test_conv2d_6():
+    """
+    Multiple pads and strides
+    """
+    kernel = torch.rand(2, 3, 3, 3)
+    inputs = torch.rand(2, 3, 5, 5)
+    padding = 2
+    stride = 2
+
+    _test_conv2d(inputs, kernel, padding, stride)
+
+def test_conv2d_7():
+    """
+    Kernel size equal to image size
+    """
+    kernel = torch.rand(2, 3, 5, 5)
+    inputs = torch.rand(2, 3, 5, 5)
+    padding = 1
+    stride = 1
+
+    _test_conv2d(inputs, kernel, padding, stride)
+
+def test_conv2d_8():
+    """
+    Large padding
+    """
+    kernel = torch.rand(2, 3, 3, 3)
+    inputs = torch.rand(2, 3, 5, 5)
+    padding = 3
+    stride = 3
+
+    _test_conv2d(inputs, kernel, padding, stride)
+
+@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Prohibitively slow on cosim")
 def test_conv2d_batch_input_output():
     """
     Combinations of batch, input and output channel sizes
@@ -66,6 +113,7 @@ def test_conv2d_batch_input_output():
                                     kernel_size)
                 _test_conv2d(inputs, kernel)
 
+@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Prohibitively slow on cosim")
 def test_conv2d_width_height_kernel():
     """
     Combinations of width, height and kernel_size
@@ -82,6 +130,7 @@ def test_conv2d_width_height_kernel():
                                     kernel_size)
                 _test_conv2d(inputs, kernel)
 
+@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Prohibitively slow on cosim")
 def test_conv2d_width_height_kernel_pad_stride():
     """
     Combinations of width, height, kernel_size, padding and stride

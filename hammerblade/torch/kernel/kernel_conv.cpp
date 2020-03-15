@@ -4,7 +4,6 @@
 //====================================================================
 
 #include <kernel_common.hpp>
-#include <iostream>
 
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
