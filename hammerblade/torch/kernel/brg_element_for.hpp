@@ -59,7 +59,6 @@ class BRGIteratorTensor {
     BRGIteratorTensor& operator ++ (int) {
       data += strides;
       cur_loc++;
-      assert(cur_loc < N);
       return *this;
     }
 
@@ -67,6 +66,7 @@ class BRGIteratorTensor {
     // *accessor, just like c++ iterators
     //-----------------------------------
     T operator*() {
+      assert(cur_loc < N);
       return (T)(intptr_t)data;
     }
 
