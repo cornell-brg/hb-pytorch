@@ -311,5 +311,47 @@ inline void brg_tile_element_wise_for(bsg_tensor_t* _t0,
   }
 }
 
+// =========================================================
+// BRG for
+// =========================================================
+// functor takes in current index
+
+template <class FetchFunctor>
+inline void brg_for(size_t numel, FetchFunctor functor) {
+  //--------------------------------------
+  // calculate start and end for this tile
+  //--------------------------------------
+  size_t start = 0;
+  size_t end = numel;
+  //-----------------
+  // loop
+  //----------------
+  for (size_t i = start; i < end; i++) {
+    functor(i);
+  }
+}
+
+// =========================================================
+// BRG tile for
+// =========================================================
+// functor takes in current index
+
+template <class FetchFunctor>
+inline void brg_tile_for(size_t numel, FetchFunctor functor) {
+  //--------------------------------------
+  // calculate start and end for this tile
+  //--------------------------------------
+  size_t len_per_tile = numel / (bsg_tiles_X * bsg_tiles_Y) + 1;
+  size_t start = len_per_tile * __bsg_id;
+  size_t end = start + len_per_tile;
+  end = (end > numel)  ? numel : end;
+  //-----------------
+  // loop
+  //----------------
+  for (size_t i = start; i < end; i++) {
+    functor(i);
+  }
+}
+
 
 #endif

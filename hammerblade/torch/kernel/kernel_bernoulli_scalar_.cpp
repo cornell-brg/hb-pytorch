@@ -9,35 +9,30 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_bernoulli_scalar_(
-          bsg_tensor_t* self,
-          bsg_tensor_t* seed,
-          float* p) {
-    // Convert uint32_t pointers to correct types
-    float* _self = (float*)((intptr_t)self->data);
-    uint32_t _seed = *(uint32_t*)((intptr_t)seed->data);
-    float _p = *p;
-    // Calculate elements per tile
-    uint32_t len_per_tile = self->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    uint32_t start = len_per_tile * __bsg_id;
-    uint32_t   end = start + len_per_tile;
-    end = (end > self->N)  ? self->N : end;
+          bsg_tensor_t* _self,
+          bsg_tensor_t* _seed,
+          float* _p) {
+    // Unwrap common seed
+    uint32_t seed = *(uint32_t*)((intptr_t)_seed->data);
+    float p = *_p;
+    auto self = BSGTensor<float>(_self);
     // RNG
     std::default_random_engine generator;
-    generator.seed(_seed + __bsg_id);
+    generator.seed(seed + __bsg_id);
     std::uniform_real_distribution<float> distribution(0.0, 1.0);
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
     // bernoulli
-    for (int i = start; i < end; i++) {
-      float rand = distribution(generator);
-      if (rand < _p) {
-        // 0
-        _self[i] = 0.0f;
-      } else {
-        // 1
-        _self[i] = 1.0f;
-      }
-    }
+    brg_tile_for(self.numel(), [&](size_t i) {
+        float rand = distribution(generator);
+        if (rand < p) {
+          // 0
+          self(i) = 0.0f;
+        } else {
+          // 1
+          self(i) = 1.0f;
+        }
+    });
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
     return 0;

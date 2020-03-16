@@ -64,7 +64,7 @@ class BSGTensor {
       strides((uint32_t*) ((intptr_t) t->strides)),
       data((DT*) ((intptr_t) t->data)) {}
 
-    int size() {
+    int numel() {
       return N;
     }
 
@@ -119,7 +119,7 @@ class BSGVector {
     BSGVector(bsg_vector_t* v) :
       N(v->N), data((T*) ((intptr_t) v->data)) {}
 
-    uint32_t size() {
+    uint32_t numel() {
       return N;
     }
 
