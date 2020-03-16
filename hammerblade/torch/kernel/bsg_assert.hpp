@@ -5,12 +5,8 @@
 #ifndef _BSG_ASSERT_HPP
 #define _BSG_ASSERT_HPP
 
-inline void bsg_assert(bool cond) {
-  if (!cond) {
-    bsg_printf("assert failed at %s:%d\n", __FILE__, __LINE__);
-    bsg_fail();
-  }
-  return;
-}
+#define bsg_assert(cond) if (!(cond)) {                                          \
+    bsg_printf("assert failed at %s:%d\n", __FILE__, __LINE__);                \
+    bsg_fail();}
 
 #endif
