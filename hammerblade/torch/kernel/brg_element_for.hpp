@@ -6,7 +6,6 @@
 #ifndef _BRG_ELEMENT_FOR_HPP
 #define _BRG_ELEMENT_FOR_HPP
 
-#include <cassert>
 #include <map>
 #include <math.h>
 #include <initializer_list>
