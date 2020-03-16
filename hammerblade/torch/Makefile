@@ -58,6 +58,7 @@ kernel.riscv: $(KERNEL_OBJS)
 clean:
 	-rm -rf stack.info.* *.log *.csv ucli.key
 	-rm -rf *.o *.riscv
+	-rm -rf *.rvo *.vpd
 	-rm -rf $(BSG_MANYCORE_LIB) $(KERNEL_CSRCS) $(KERNEL_CPPSRCS)
 	-rm -rf $(KERNEL_DIR)/*.rvo
 	-rm -rf $(KERNEL_DIR)/*.gcc.log
