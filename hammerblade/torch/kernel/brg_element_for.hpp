@@ -9,8 +9,9 @@
 #include <cassert>
 #include <map>
 #include <math.h>
-#include <bsg_tensor.hpp>
 #include <initializer_list>
+#include <bsg_assert.hpp>
+#include <bsg_tensor.hpp>
 
 // =========================================================
 // Device Tensor that comes from TensorIterator, in which its
@@ -44,9 +45,9 @@ class BRGIteratorTensor {
       strides(*(uint32_t*)((intptr_t) t->strides)),
       data((intptr_t) t->data),
       cur_loc(start_loc) {
-        assert(cur_loc < N);
+        bsg_assert(cur_loc < N);
         data += start_loc * strides;
-        assert(dims == 1);
+        bsg_assert(dims == 1);
       }
 
     uint32_t numel() {
@@ -66,7 +67,7 @@ class BRGIteratorTensor {
     // *accessor, just like c++ iterators
     //-----------------------------------
     T operator*() {
-      assert(cur_loc < N);
+      bsg_assert(cur_loc < N);
       return (T)(intptr_t)data;
     }
 

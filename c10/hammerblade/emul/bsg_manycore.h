@@ -1,6 +1,7 @@
 #ifndef _BSG_MANYCORE_H
 #define _BSG_MANYCORE_H
 
+#include <cassert>
 #include <cstdio>
 #include <cstdarg>
 
@@ -41,5 +42,7 @@ static inline void bsg_cuda_print_stat_kernel_start() {
 static inline void bsg_cuda_print_stat_kernel_end() {
   return;
 }
+
+#define bsg_fail() assert (1==0 /* bsg_fail is called */)
 
 #endif // _BSG_MANYCORE_H
