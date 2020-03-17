@@ -1,14 +1,19 @@
+// ======================================================================
+// HammerBlade Offloading
+//
+// Author: Bandhav Veluri, Lin Cheng
+// ======================================================================
+
 #include <ATen/native/hammerblade/Offload.h>
 
 namespace at {
 namespace native {
 
-/* ---------------------------------------------------------------------
-* Helper functions
-* Adapted from bespoke-silicon-group/pytorch branch hb_pytorch
-* Author: Bandhav Veluri, Lin Cheng
-* ----------------------------------------------------------------------*/
+//----------------------------------
+// Device data management routines
+//----------------------------------
 
+// Creates a tensor from raw data
 static eva_t create_device_tensor(uint32_t N, uint32_t dims,
                                   const int64_t* strides,
                                   const void* data,
@@ -54,6 +59,7 @@ static eva_t create_device_tensor(uint32_t N, uint32_t dims,
   return tensor;
 }
 
+// Creates a device tensor from PyTorch tensor
 static eva_t create_device_tensor(const Tensor& tensor,
                                   std::vector<eva_t> device_ptrs) {
   uint32_t N = (uint32_t) tensor.numel();
@@ -64,6 +70,7 @@ static eva_t create_device_tensor(const Tensor& tensor,
   return create_device_tensor(N, dims, strides, data, device_ptrs);
 }
 
+// Creates a device vector from PyTorch IntArrayRef
 static eva_t create_device_vector(IntArrayRef arr_ref, bool input,
                                   std::vector<eva_t> device_ptrs) {
   uint32_t N = arr_ref.size();
@@ -98,6 +105,7 @@ static eva_t create_device_vector(IntArrayRef arr_ref, bool input,
   return vec_d;
 }
 
+// Creates a device scalar
 template<typename T>
 static eva_t create_device_scalar(T alpha) {
   eva_t alpha_d;
@@ -111,7 +119,7 @@ static eva_t create_device_scalar(T alpha) {
   return alpha_d;
 }
 
-
+// Frees device pointers
 static void cleanup_device(std::vector<eva_t> args, std::vector<eva_t> ptrs) {
   for(int i=0; i<ptrs.size(); i++) {
     c10::hammerblade::device_free(ptrs[i]);
@@ -122,14 +130,11 @@ static void cleanup_device(std::vector<eva_t> args, std::vector<eva_t> ptrs) {
 }
 
 
- /* -------------------------------------------------------------------------
- * Offloading wrapper
- * --------------------------------------------------------------------------*/
+//----------------------------------
+// Kernel offloading routines
+//----------------------------------
 
-//=======================================================================
 // Offloading operations that have tensors and scalars as arguments
-//=======================================================================
-
 void offload_tensor_scalar_impl(std::vector<Tensor> tensors, std::vector<Scalar> scalars,
                                 const char* kernel) {
 
@@ -169,10 +174,7 @@ void offload_tensor_scalar_impl(std::vector<Tensor> tensors, std::vector<Scalar>
 
 }
 
-//=======================================================================
 // Offloading operations that use TensorIterator
-//=======================================================================
-
 void offload_iterator_op_impl(TensorIterator& iter, Scalar alpha,
     const char* kernel, uint32_t ntensors) {
 
@@ -211,7 +213,6 @@ void offload_iterator_op_impl(TensorIterator& iter, Scalar alpha,
 #define HB_OFFLOAD_BINARY_OP(iter, alpha, kernel) offload_iterator_op_impl(iter, alpha, kernel, 3)
 
 // Overload for the 2 Scalar case
-
 void offload_iterator_op_impl(TensorIterator& iter, Scalar alpha, Scalar beta,
     const char* kernel, uint32_t ntensors) {
 
@@ -250,10 +251,7 @@ void offload_iterator_op_impl(TensorIterator& iter, Scalar alpha, Scalar beta,
 #define HB_OFFLOAD_UNARY_OP_2S(iter, beta, alpha, kernel) offload_iterator_op_impl(iter, beta, alpha, kernel, 2)
 #define HB_OFFLOAD_BINARY_OP_2S(iter, beta, alpha, kernel) offload_iterator_op_impl(iter, beta, alpha, kernel, 3)
 
-//=======================================================================
 // Offload routine for binary operations
-//=======================================================================
-
 void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel) {
   TORCH_INTERNAL_ASSERT(iter.ntensors() == 3); // output, input1, and input2
 
@@ -275,10 +273,7 @@ void offload_op_binary(TensorIterator& iter, Scalar alpha, const char* kernel) {
   HB_OFFLOAD_BINARY_OP(iter, alpha, kernel);
 }
 
-//=======================================================================
 // Offload routine for unary operations
-//=======================================================================
-
 void offload_op_unary(TensorIterator& iter, Scalar alpha, const char* kernel) {
   TORCH_INTERNAL_ASSERT(iter.ntensors() == 2); // output and input1
 
@@ -301,10 +296,7 @@ void offload_op_unary(TensorIterator& iter, Scalar alpha, const char* kernel) {
 
 }
 
-//=======================================================================
 // Offload routine for nullary operations
-//=======================================================================
-
 void offload_op_nullary(TensorIterator& iter, Scalar alpha, const char* kernel) {
   TORCH_INTERNAL_ASSERT(iter.ntensors() == 1); // output
 
@@ -327,11 +319,7 @@ void offload_op_nullary(TensorIterator& iter, Scalar alpha, const char* kernel) 
 
 }
 
-//=======================================================================
-// Offload routine for binary operations
-//=======================================================================
-// Overload for the 2 Scalar case
-
+// Offload routine for 2 scalar binary operations
 void offload_op_binary(TensorIterator& iter, Scalar beta, Scalar alpha, const char* kernel) {
   TORCH_INTERNAL_ASSERT(iter.ntensors() == 3); // output, input1, and input2
 
@@ -353,11 +341,7 @@ void offload_op_binary(TensorIterator& iter, Scalar beta, Scalar alpha, const ch
   HB_OFFLOAD_BINARY_OP_2S(iter, beta, alpha, kernel);
 }
 
-//=======================================================================
-// Offload routine for unary operations
-//=======================================================================
-// Overload for the 2 Scalar case
-
+// Offload routine for 2 Scalar unary operations
 void offload_op_unary(TensorIterator& iter, Scalar beta, Scalar alpha, const char* kernel) {
   TORCH_INTERNAL_ASSERT(iter.ntensors() == 2); // output and input1
 
@@ -380,12 +364,9 @@ void offload_op_unary(TensorIterator& iter, Scalar beta, Scalar alpha, const cha
 
 }
 
-//=======================================================================
-// Offload routine for nullary operations
-//=======================================================================
-// Overload for the 2 Scalar case
-
-void offload_op_nullary(TensorIterator& iter, Scalar beta, Scalar alpha, const char* kernel) {
+// Offload routine for 2 Scalar nullary operations
+void offload_op_nullary(TensorIterator& iter, Scalar beta, Scalar alpha,
+                        const char* kernel) {
   TORCH_INTERNAL_ASSERT(iter.ntensors() == 1); // output
 
   for (int arg = 0; arg < iter.ntensors(); arg++) {
@@ -407,10 +388,7 @@ void offload_op_nullary(TensorIterator& iter, Scalar beta, Scalar alpha, const c
 
 }
 
-//=======================================================================
 // Offload routine for device to device transfers
-//=======================================================================
-
 void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
   std::vector<eva_t> device_args;
 
@@ -421,10 +399,7 @@ void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
   c10::hammerblade::offload_kernel("tensorlib_memcpy", device_args);
 }
 
-//=======================================================================
 // Offload routine convolution forward pass
-//=======================================================================
-
 void offload_convolution_forward(Tensor& output, const Tensor& input,
     const Tensor& weight, IntArrayRef padding, IntArrayRef stride,
     IntArrayRef dilation, int64_t groups) {
@@ -464,10 +439,7 @@ void offload_convolution_forward(Tensor& output, const Tensor& input,
   cleanup_device(device_args, device_ptrs);
 }
 
-//=======================================================================
 // Offload routine for covolution bias addition
-//=======================================================================
-
 void offload_convolution_add_bias(const Tensor& output, const Tensor& bias) {
   std::vector<eva_t> device_args;
   std::vector<eva_t> device_ptrs;
