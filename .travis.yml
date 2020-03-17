@@ -102,7 +102,7 @@ jobs:
               # Enable emulation layer
               - export USE_HB_EMUL=1
               # Build and install pytorch
-              - python setup.py install
+              - python setup.py develop
               # Check torch
               - pip list
               # Run pytests
