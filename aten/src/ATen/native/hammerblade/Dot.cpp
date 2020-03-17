@@ -19,7 +19,7 @@ Tensor dot_hb(const Tensor& self, const Tensor& other) {
   }
   auto sum = at::empty({}, other.options());
 
-  HB_OFFLOAD_TENSOR_KERNEL(sum, self, other, "tensorlib_dot");
+  hb_offload_kernel(sum, self, other, "tensorlib_dot");
 
   return sum;
 }
