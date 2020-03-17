@@ -40,9 +40,13 @@ SET_TARGET_PROPERTIES(shm PROPERTIES
 TARGET_LINK_LIBRARIES(shm torch c10)
 
 if(USE_HB)
-  message(STATUS "Building with HammerBlade, --allow-shlib-undefined flag is added")
-  message(STATUS "This could potentially be dangerous.")
-  set_target_properties(torch_shm_manager PROPERTIES LINK_OPTIONS -Wl,--allow-shlib-undefined)
+  if(USE_HB_EMUL)
+    message(STATUS "Building with HammerBlade Emulation Mode, --allow-shlib-undefined flag is *NOT* added")
+  else()
+    message(STATUS "Building with HammerBlade, --allow-shlib-undefined flag is added")
+    message(STATUS "This could potentially be dangerous.")
+    set_target_properties(torch_shm_manager PROPERTIES LINK_OPTIONS -Wl,--allow-shlib-undefined)
+  endif()
 endif()
 
 if(UNIX AND NOT APPLE)
