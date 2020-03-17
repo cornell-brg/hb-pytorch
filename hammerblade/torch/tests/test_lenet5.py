@@ -90,7 +90,7 @@ def test(net, loader, loss_func):
 
 def test_lenet5_forward_1():
     net = LeNet5()
-    net_hb = net.hammerblade()
+    net_hb = LeNet5().hammerblade()
 
     data = torch.rand(1, 1, 32, 32)
     data_hb = data.hammerblade()
