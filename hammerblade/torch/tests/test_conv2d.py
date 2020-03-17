@@ -10,7 +10,7 @@ import pytest
 def _test_conv2d(inputs, kernel, padding=1, stride=1, bias=None):
     inputs_hb = inputs.hammerblade()
     kernel_hb = kernel.hammerblade()
-    bias_hb = bias.hammerblade()
+    bias_hb = None if bias is None else bias.hammerblade()
 
     conv_result_hb = F.conv2d(inputs_hb, kernel_hb,
                               padding=padding, stride=stride, bias=bias_hb)
