@@ -1,23 +1,25 @@
 //====================================================================
-// sigmoid kernel
-// 03/09/2020 YOUR NAME HERE Lin Cheng (YOU EMAIL HERE, lc873@cornell.edu)
+// Sigmoid kernel
+// 03/17/2020 Lin Cheng (lc873@cornell.edu)
 //====================================================================
 
 #include <kernel_common.hpp>
+#include <cmath>
 
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_sigmoid(
-          bsg_tensor_t* res,
-          bsg_tensor_t* input,
-          float* alpha) {
+          bsg_tensor_t* t0_p,
+          bsg_tensor_t* t1_p,
+          float* _alpha_p) {
     // NOTE: alpha is not used here, but we have it on the
     //       argument list so we can re-use offloading
     //       functions
-    // TODO: Convert uint32_t pointers to correct types
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    // TODO: Implement addmm
+    brg_tile_element_wise_for(t0_p, t1_p, [&](float input) {
+      return (1.0f / (1.0f + std::exp((-input))));
+    });
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
     return 0;
