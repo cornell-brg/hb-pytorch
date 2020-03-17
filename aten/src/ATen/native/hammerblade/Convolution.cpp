@@ -157,8 +157,7 @@ void hb_convolution_add_bias_(CheckedFrom c, const TensorArg& output,
     return;
   }
 
-  // offload_convolution_add_bias(*output, *bias);
-  TORCH_CHECK(false, "Implement offload_convolution_add_bias.");
+  offload_convolution_add_bias(*output, *bias);
 }
 
 

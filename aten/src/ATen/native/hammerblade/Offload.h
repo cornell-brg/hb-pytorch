@@ -101,5 +101,7 @@ void offload_convolution_forward(Tensor& output, const Tensor& input,
     const Tensor& weight, IntArrayRef padding, IntArrayRef stride,
     IntArrayRef dilation, int64_t groups);
 
+void offload_convolution_add_bias(const Tensor& output, const Tensor& ibias);
+
 } // namespace native
 } // namespace at

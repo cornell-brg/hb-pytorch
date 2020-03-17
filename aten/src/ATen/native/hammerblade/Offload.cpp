@@ -421,6 +421,10 @@ void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
   c10::hammerblade::offload_kernel("tensorlib_memcpy", device_args);
 }
 
+//=======================================================================
+// Offload routine convolution forward pass
+//=======================================================================
+
 void offload_convolution_forward(Tensor& output, const Tensor& input,
     const Tensor& weight, IntArrayRef padding, IntArrayRef stride,
     IntArrayRef dilation, int64_t groups) {
@@ -457,6 +461,21 @@ void offload_convolution_forward(Tensor& output, const Tensor& input,
 
   c10::hammerblade::offload_kernel(
       "tensorlib_convolution_forward", device_args);
+  cleanup_device(device_args, device_ptrs);
+}
+
+//=======================================================================
+// Offload routine for covolution bias addition
+//=======================================================================
+
+void offload_convolution_add_bias(const Tensor& output, const Tensor& bias) {
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+  device_args.push_back(create_device_tensor(output, device_ptrs));
+  device_args.push_back(create_device_tensor(bias, device_ptrs));
+
+  c10::hammerblade::offload_kernel(
+      "tensorlib_convolution_add_bias", device_args);
   cleanup_device(device_args, device_ptrs);
 }
 
