@@ -106,5 +106,5 @@ jobs:
               # Check torch
               - pip list
               # Run pytests
-              - cd hammerblade/torch/tests
-              - python -m pytest -v .
+              - cd hammerblade/torch/
+              - python pytest_runner.py
