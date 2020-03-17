@@ -88,7 +88,6 @@ def test(net, loader, loss_func):
             test_loss, num_correct, len(loader.dataset), test_accuracy
   ))
 
-@pytest.mark.skip(reason = "Not implemented yet.")
 def test_lenet5_forward_1():
     net = LeNet5()
     net_hb = LeNet5().hammerblade()

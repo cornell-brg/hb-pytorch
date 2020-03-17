@@ -71,8 +71,41 @@ extern "C" {
     return 0;
   }
 
+  __attribute__ ((noinline))  int tensorlib_convolution_add_bias(
+          bsg_tensor_t* output,
+          bsg_tensor_t* bias) {
+    auto y = (float*) ((intptr_t) output->data);
+    auto y_strides = (uint32_t*) ((intptr_t) output->strides);
+    auto b = (float*) ((intptr_t) bias->data);
+
+    auto N = output->N;                // total number of elements in the output
+    auto out_ch_stride = y_strides[1]; // output channel stride
+    auto nb = bias->N;                 // number of elements in the bias
+
+    // Calculate elements per tile
+    uint32_t len_per_tile = N / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    uint32_t start = len_per_tile * __bsg_id;
+    uint32_t end = start + len_per_tile;
+    end = (end > N)  ? N : end;
+
+    // Start profiling
+    bsg_cuda_print_stat_kernel_start();
+
+    for(int i = start; i < end; ++i) {
+      float bias = b[(i / out_ch_stride) % nb];
+      y[i] += bias;
+    }
+
+    // End profiling
+    bsg_cuda_print_stat_kernel_end();
+    return 0;
+  }
+
   HB_EMUL_REG_KERNEL(tensorlib_convolution_forward,
      bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
      bsg_vector_t*, bsg_vector_t*);
+
+  HB_EMUL_REG_KERNEL(tensorlib_convolution_add_bias,
+     bsg_tensor_t*, bsg_tensor_t*);
 
 }
