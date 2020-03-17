@@ -31,7 +31,11 @@ void offload_tensor_scalar_impl(std::vector<Tensor> tensors, std::vector<Scalar>
 // hb_offload_kernel
 //
 // Tensors args, Scalar args, kernel name
-//=============================================
+//==============================================
+
+//----------------------------------------------
+// 0-3 tensors + 0 scalar
+//----------------------------------------------
 
 inline void hb_offload_kernel(const char* kernel) {
   std::vector<Tensor> args;
@@ -71,6 +75,57 @@ inline void hb_offload_kernel(Tensor t0, Tensor t1, Tensor t2, Tensor t3,
   args.push_back(t2);
   args.push_back(t3);
   std::vector<Scalar> scalars;
+  offload_tensor_scalar_impl(args, scalars, kernel);
+}
+
+//----------------------------------------------
+// 0-3 tensors + 1 scalar
+//----------------------------------------------
+
+inline void hb_offload_kernel(Scalar s0, const char* kernel) {
+  std::vector<Tensor> args;
+  std::vector<Scalar> scalars;
+  scalars.push_back(s0);
+  offload_tensor_scalar_impl(args, scalars, kernel);
+}
+
+inline void hb_offload_kernel(Tensor t0, Scalar s0, const char* kernel) {
+  std::vector<Tensor> args;
+  args.push_back(t0);
+  std::vector<Scalar> scalars;
+  scalars.push_back(s0);
+  offload_tensor_scalar_impl(args, scalars, kernel);
+}
+
+inline void hb_offload_kernel(Tensor t0, Tensor t1, Scalar s0, const char* kernel) {
+  std::vector<Tensor> args;
+  args.push_back(t0);
+  args.push_back(t1);
+  std::vector<Scalar> scalars;
+  scalars.push_back(s0);
+  offload_tensor_scalar_impl(args, scalars, kernel);
+}
+
+inline void hb_offload_kernel(Tensor t0, Tensor t1, Tensor t2, Scalar s0,
+                              const char* kernel) {
+  std::vector<Tensor> args;
+  args.push_back(t0);
+  args.push_back(t1);
+  args.push_back(t2);
+  std::vector<Scalar> scalars;
+  scalars.push_back(s0);
+  offload_tensor_scalar_impl(args, scalars, kernel);
+}
+
+inline void hb_offload_kernel(Tensor t0, Tensor t1, Tensor t2, Tensor t3,
+                              Scalar s0, const char* kernel) {
+  std::vector<Tensor> args;
+  args.push_back(t0);
+  args.push_back(t1);
+  args.push_back(t2);
+  args.push_back(t3);
+  std::vector<Scalar> scalars;
+  scalars.push_back(s0);
   offload_tensor_scalar_impl(args, scalars, kernel);
 }
 

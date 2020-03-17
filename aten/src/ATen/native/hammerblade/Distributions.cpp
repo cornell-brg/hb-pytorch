@@ -4,8 +4,6 @@
 #include <ATen/native/Distributions.h>
 #include <ATen/native/hammerblade/Offload.h>
 
-#include <iostream>
-
 namespace at { namespace native {
 
 // ======================================================
@@ -33,16 +31,8 @@ Tensor& bernoulli_scalar_hb_(Tensor& self, double p, Generator* gen) {
                                       hammerblade::detail::getDefaultHammerBladeGenerator());
     auto p_scalar = Scalar(p);
     auto seed_tensor = hammerblade_common_seed_to_tensor(generator->random());
-    // do arguments manually
-    std::vector<Tensor> tensors;
-    tensors.push_back(self);
-    tensors.push_back(seed_tensor);
-    std::vector<Scalar> scalars;
-    scalars.push_back(p_scalar);
 
-    std::cout << "scalar type = " << self.scalar_type() << std::endl;
-
-    offload_tensor_scalar_impl(tensors, scalars, "tensorlib_bernoulli_scalar_");
+    hb_offload_kernel(self, seed_tensor, p_scalar, "tensorlib_bernoulli_scalar_");
   });
   return self;
 }
