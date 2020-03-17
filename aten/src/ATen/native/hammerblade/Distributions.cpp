@@ -20,8 +20,7 @@ namespace at { namespace native {
 Tensor hammerblade_common_seed_to_tensor(uint32_t seed = 42) {
   uint32_t upper = (uint32_t)(seed << 16);
   auto tensor = at::empty({}, at::TensorOptions(at::kHAMMERBLADE).dtype(at::kInt));
-  uint32_t* data = (uint32_t*)(tensor.data_ptr());
-  *data = upper;
+  c10::hammerblade::memcpy_host_to_device(tensor.data_ptr(), (void*)&upper, sizeof(uint32_t));
   return tensor;
 }
 
@@ -33,7 +32,6 @@ Tensor& bernoulli_scalar_hb_(Tensor& self, double p, Generator* gen) {
     HammerBladeGenerator* generator = get_generator_or_default<HammerBladeGenerator>(gen,
                                       hammerblade::detail::getDefaultHammerBladeGenerator());
     auto p_scalar = Scalar(p);
-    //auto common_seed = generator->next_wrapped_seed(); //at::empty({}, at::TensorOptions(at::kHAMMERBLADE).dtype(at::kInt));
     auto seed_tensor = hammerblade_common_seed_to_tensor(generator->random());
     // do arguments manually
     std::vector<Tensor> tensors;
