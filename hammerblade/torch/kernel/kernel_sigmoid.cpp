@@ -10,11 +10,7 @@ extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_sigmoid(
           bsg_tensor_t* t0_p,
-          bsg_tensor_t* t1_p,
-          float* _alpha_p) {
-    // NOTE: alpha is not used here, but we have it on the
-    //       argument list so we can re-use offloading
-    //       functions
+          bsg_tensor_t* t1_p) {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
     brg_tile_element_wise_for(t0_p, t1_p, [&](float input) {
@@ -25,7 +21,7 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_sigmoid, bsg_tensor_t*, bsg_tensor_t*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_sigmoid, bsg_tensor_t*, bsg_tensor_t*)
 
 }
 

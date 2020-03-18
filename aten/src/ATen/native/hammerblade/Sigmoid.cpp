@@ -9,7 +9,7 @@ namespace {
 
 static void sigmoid_kernel_hb(TensorIterator& iter) {
   AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "sigmoid_hb", [&]() {
-      offload_op_unary(iter, Scalar(0), "tensorlib_sigmoid");
+      offload_op_unary(iter, "tensorlib_sigmoid");
       });
 }
 
