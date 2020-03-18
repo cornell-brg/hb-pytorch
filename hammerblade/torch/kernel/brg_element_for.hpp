@@ -46,7 +46,6 @@ class BRGIteratorTensor {
       cur_loc(start_loc) {
         bsg_assert(cur_loc < N);
         data += start_loc * strides;
-        bsg_assert(dims == 1);
       }
 
     uint32_t numel() {
