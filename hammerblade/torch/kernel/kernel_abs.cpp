@@ -15,7 +15,7 @@ extern "C" {
     // value is *NOT* used here.
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    brg_tile_element_wise_for(t0_p, t1_p,
+    brg_tile_elementwise_for(t0_p, t1_p,
       [&](float a) {
         return abs(a);
     });

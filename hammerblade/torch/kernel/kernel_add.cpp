@@ -18,7 +18,7 @@ extern "C" {
     float alpha = *alpha_p;
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    brg_tile_element_wise_for(t0_p, t1_p, t2_p,
+    brg_tile_elementwise_for(t0_p, t1_p, t2_p,
       [&](float a, float b) {
         return a + alpha * b;
     });
