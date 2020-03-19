@@ -280,7 +280,7 @@
     HammerBlade: add
     SparseCPU: add_sparse
     SparseCUDA: add_sparse
-    SparseHammerBlade: add_sparse
+#    SparseHammerBlade: add_sparse
     MkldnnCPU: mkldnn_add
   supports_named_tensor: True
 
@@ -302,6 +302,7 @@
     HammerBlade: add_out
     SparseCPU: add_out_sparse_cpu
     SparseCUDA: add_out_sparse_cuda
+ #   SparseHammerBlade: add_out_sparse_hammerblade
     MkldnnCPU: mkldnn_add_out
   supports_named_tensor: True
 
@@ -1858,7 +1859,7 @@
     HammerBlade: mul
     SparseCPU: mul_sparse
     SparseCUDA: mul_sparse
-    SparseHammerBlade: mul_sparse
+#    SparseHammerBlade: mul_sparse
     MkldnnCPU: mkldnn_mul
   supports_named_tensor: True
 
@@ -1870,7 +1871,7 @@
     HammerBlade: mul_
     SparseCPU: mul_sparse_
     SparseCUDA: mul_sparse_
-    SparseHammerBlade: mul_sparse_
+#    SparseHammerBlade: mul_sparse_
     MkldnnCPU: mkldnn_mul_
   supports_named_tensor: True
 
@@ -1881,7 +1882,7 @@
     HammerBlade: mul_out
     SparseCPU: mul_out_sparse_cpu
     SparseCUDA: mul_out_sparse_cuda
-    SparseHammerBlade: mul_out_sparse_hammerblade
+ #  SparseHammerBlade: mul_out_sparse_hammerblade
     MkldnnCPU: mkldnn_mul_out
   supports_named_tensor: True
 
@@ -1915,7 +1916,7 @@
   variants: method
 
 - func: narrow_copy(Tensor self, int dim, int start, int length) -> Tensor
-  use_c10_dispatcher: full
+
   variants: method
   dispatch:
     CPU: narrow_copy_dense
@@ -3042,7 +3043,7 @@
     HammerBlade: sub
     SparseCPU: sub_sparse
     SparseCUDA: sub_sparse
-    SparseHammerBlade: sub_sparse
+ #   SparseHammerBlade: sub_sparse
   supports_named_tensor: True
 
 - func: sub_.Tensor(Tensor(a!) self, Tensor other, *, Scalar alpha=1) -> Tensor(a!)
@@ -3281,7 +3282,7 @@
   dispatch:
     SparseCPU: sparse_to_dense
     SparseCUDA: sparse_to_dense
-    SparseHammerBlade: sparse_to_dense
+#    SparseHammerBlade: sparse_to_dense
     MkldnnCPU: mkldnn_to_dense
   requires_tensor: True
 
@@ -3349,7 +3350,7 @@
   dispatch:
     SparseCPU: coalesce_sparse_cpu
     SparseCUDA: coalesce_sparse_cuda
-    SparseHammerBlade: coalesce_sparse_hammerblade
+#    SparseHammerBlade: coalesce_sparse_hammerblade
   requires_tensor: True
 
 
@@ -3504,7 +3505,7 @@
 
 - func: q_per_channel_scales(Tensor self) -> Tensor
   variants: function, method
-  dispatch:
+
     QuantizedCPU: q_per_channel_scales_quant
 
 - func: q_per_channel_zero_points(Tensor self) -> Tensor
