@@ -12,7 +12,26 @@ void offload_max_pool2d_with_indices(
     Tensor& indices, int kH, int kW,
     int dH, int dW, int padH, int padW,
     int dilationH, int dilationW) {
-  TORCH_CHECK(false, "Offload max_pool2d.");
+  TORCH_CHECK(dilationH == 1 && dilationW == 1, 
+              "Dilated max_pool2d is not by HB yet.");
+
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+  device_args.push_back(create_device_tensor(output, device_ptrs));
+  device_args.push_back(create_device_tensor(input, device_ptrs));
+  device_args.push_back(create_device_tensor(indices, device_ptrs));
+  device_args.push_back(create_device_scalar<int>(kH));
+  device_args.push_back(create_device_scalar<int>(kW));
+  device_args.push_back(create_device_scalar<int>(dH));
+  device_args.push_back(create_device_scalar<int>(dW));
+  device_args.push_back(create_device_scalar<int>(padH));
+  device_args.push_back(create_device_scalar<int>(padW));
+  device_args.push_back(create_device_scalar<int>(dilationH));
+  device_args.push_back(create_device_scalar<int>(dilationW));
+
+  c10::hammerblade::offload_kernel(
+      "tensorlib_max_pool2d", device_args);
+  cleanup_device(device_args, device_ptrs);
 }
 
 void max_pool2d_with_indices_out_hb_template(
