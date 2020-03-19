@@ -29,11 +29,12 @@ extern "C" {
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_max_pool2d,
-    output,
-    input,
-    indices,
-    kH, kW,
-    dH, dW,
-    padH, padW,
-    dilationH, dilationW);
+    bsg_tensor_t*,
+    bsg_tensor_t*,
+    bsg_tensor_t*,
+    int*, int*,
+    int*, int*,
+    int*, int*,
+    int*, int*);
+
 }
