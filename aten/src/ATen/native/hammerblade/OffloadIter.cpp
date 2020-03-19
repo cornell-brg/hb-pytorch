@@ -26,14 +26,34 @@ void offload_iterator_op_impl(TensorIterator& iter, std::vector<Scalar> scalars,
     std::vector<eva_t> device_args;
     std::vector<eva_t> device_ptrs;
 
+    // buffer for changing strides layout
+    int64_t *local_strides = (int64_t*) malloc(iter.ndim() * sizeof(int64_t));
+    if(!local_strides) {
+      AT_ERROR("Failed to allocate space for tmp strides on host");
+    }
+
     // Allocate device tensors and copy the data
     for(int i=0; i<iter.ntensors(); i++) {
+      // ------------------------------
+      // strides of iter are stored as:
+      // dim0: tensor0, tensor1, tensor2
+      // dim1: tensor0, tensor1, tensor2
+      // ------------------------------
+      // we want per tensor strides:
+      // tensor0: dim0, dim1
+      // ------------------------------
+      for(int j=0; j<iter.ndim(); j++) {
+        local_strides[j] = (uint32_t)strides[i + j * ntensors];
+      }
       // Iterate over all tensors to create
       // corresponding tensors on the device.
       eva_t device_arg = create_device_tensor(n, iter.ndim(),
-          &strides[i], data[i], device_ptrs);
+          (const int64_t*)local_strides, data[i], device_ptrs);
       device_args.push_back(device_arg);
     }
+
+    // free strides buffer
+    free(local_strides);
 
     // Allocate device scalars and copy the data
     for(int i=0; i<scalars.size(); i++) {
