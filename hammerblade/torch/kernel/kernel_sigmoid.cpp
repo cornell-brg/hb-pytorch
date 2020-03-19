@@ -13,9 +13,7 @@ extern "C" {
           bsg_tensor_t* t1_p) {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    brg_tile_element_wise_for(t0_p, t1_p, [&](float input) {
-      return (1.0f / (1.0f + std::exp((-input))));
-    });
+    // TODO: Implement Sigmoid
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
     return 0;

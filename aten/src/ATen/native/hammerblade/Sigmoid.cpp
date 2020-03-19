@@ -8,9 +8,12 @@ namespace at { namespace native {
 namespace {
 
 static void sigmoid_kernel_hb(TensorIterator& iter) {
-  AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "sigmoid_hb", [&]() {
-      offload_op_unary(iter, "tensorlib_sigmoid");
-      });
+
+  TORCH_CHECK(false, "sigmoid_kernel_hb not implemented");
+  // TODO: implement the host code for sigmoid kernel
+  //       you may refer to add_kernel_hb in
+  //       aten/src/ATen/native/hammerblade/AddSub.cpp
+  //       as an example
 }
 
 } // anonymous namespace
