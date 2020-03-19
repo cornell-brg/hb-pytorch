@@ -7,6 +7,14 @@ namespace at {
 namespace native {
 namespace { // anonumous
 
+void offload_max_pool2d_with_indices(
+    Tensor& output, const Tensor& input,
+    Tensor& indices, int kH, int kW,
+    int dH, int dW, int padH, int padW,
+    int dilationH, int dilationW) {
+  TORCH_CHECK(false, "Offload max_pool2d.");
+}
+
 void max_pool2d_with_indices_out_hb_template(
            Tensor& output,
            Tensor& indices,
@@ -78,13 +86,12 @@ void max_pool2d_with_indices_out_hb_template(
   const int count = safe_downcast<int, int64_t>(output.numel());
 
   AT_DISPATCH_FLOAT_TYPE_ONLY(input.scalar_type(),
-    "max_pool2d_with_indices_out_cuda_frame",
+    "max_pool2d_with_indices_out_hb_frame",
     [&] {
-      scalar_t *output_data = output.data_ptr<scalar_t>();
-      scalar_t *input_data = input.data_ptr<scalar_t>();
-      int64_t *indices_data = indices.data_ptr<int64_t>();
-
-      TORCH_CHECK(false, "Offload maxpool2d.");
+      offload_max_pool2d_with_indices(
+        output, input, indices,
+        kH, kW, dH, dW, padH, padW,
+        dilationH, dilationW);
     }
   );
 
