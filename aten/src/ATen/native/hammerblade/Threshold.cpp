@@ -2,7 +2,6 @@
 #include <ATen/hammerblade/HammerBladeContext.h>
 #include <ATen/native/TensorIterator.h>
 #include <ATen/native/Activation.h>
-#include <ATen/native/hammerblade/Offload.h>
 
 namespace at { namespace native {
 namespace {
@@ -13,10 +12,11 @@ static void threshold_kernel_hb(
     Scalar threshold_scalar,
     Scalar value_scalar) {
 
-  AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "threshold_hb", [&]() {
-      offload_op_binary(
-          iter, threshold_scalar, value_scalar, "tensorlib_threshold");
-      });
+  TORCH_CHECK(false, "threshold_kernel_hb not implemented");
+    //TODO: implement the host code for threshold kernel
+    //      you may refer to add_kernel_hb in
+    //      aten/src/ATen/native/hammerblade/AddSub.cpp
+    //      as an example
 
 }
 
