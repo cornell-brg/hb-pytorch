@@ -1586,6 +1586,7 @@
   dispatch:
     CPU: log_softmax_cpu
     CUDA: log_softmax_cuda
+    HammerBlade: log_softmax_hb
 
 - func: _log_softmax_backward_data(Tensor grad_output, Tensor output, int dim, Tensor self) -> Tensor
   use_c10_dispatcher: full
