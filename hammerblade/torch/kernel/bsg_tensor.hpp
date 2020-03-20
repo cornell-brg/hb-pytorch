@@ -8,6 +8,7 @@
 
 #include <math.h>
 #include <initializer_list>
+#include <bsg_assert.hpp>
 
 // =========================================================
 // Device Tensor structs
@@ -69,10 +70,7 @@ class BSGTensor {
     }
 
     uint32_t dim(uint32_t d) {
-      if(d >= dims) {
-        bsg_printf("BSGTensor error: dimesnion must be less than %d\n",
-            dims);
-      }
+      bsg_assert(d < dims);
 
       uint32_t dim;
 
@@ -89,10 +87,16 @@ class BSGTensor {
     DT& operator()(T... indices) {
       std::initializer_list<uint32_t> iarray = {indices...};
 
-      if(iarray.size() != dims) {
-        bsg_printf("BSGTensor error: number of indices must be %d, given %d\n",
-            dims, iarray.size());
+      // special case where we have a 0-dim tensor
+      if(dims == 0) {
+        bsg_assert(iarray.size() == 1);
+        for(auto index : iarray) {
+          bsg_assert(index == 0);
+        }
+        return data[0];
       }
+
+      bsg_assert(iarray.size() == dims);
 
       uint32_t offset = 0;
       uint32_t s = 0;
@@ -101,9 +105,7 @@ class BSGTensor {
         s++;
       }
 
-      if(offset >= N) {
-        bsg_printf("BSGTensor error: index out of bounds\n");
-      }
+      bsg_assert(offset < N);
 
       return data[offset];
     }
