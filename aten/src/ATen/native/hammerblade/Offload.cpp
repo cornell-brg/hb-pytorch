@@ -4,6 +4,7 @@
 // Author: Bandhav Veluri, Lin Cheng
 // ======================================================================
 
+#include <ATen/native/TensorIterator.h>
 #include <ATen/native/hammerblade/Offload.h>
 
 namespace at {
@@ -62,6 +63,11 @@ void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
   device_args.push_back(create_device_scalar(n));
 
   c10::hammerblade::offload_kernel("tensorlib_memcpy", device_args);
+}
+
+// Offload routine for device to device transfers when input is an iter
+void offload_memcpy(TensorIterator& iter) {
+  offload_op_unary(iter, "tensorlib_copy_hb_to_hb");
 }
 
 // Offload routine convolution forward pass

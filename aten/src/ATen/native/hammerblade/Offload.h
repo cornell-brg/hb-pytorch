@@ -18,6 +18,7 @@ namespace native {
 //==============================================
 
 void offload_memcpy(eva_t dest, eva_t src, uint32_t n);
+void offload_memcpy(TensorIterator& iter);
 
 //==============================================
 // Offloading helper which takes a list of tensors

@@ -29,7 +29,7 @@ static bool copy_requires_temporaries(TensorIterator& iter) {
 }
 
 static void copy_hb_to_hb(TensorIterator& iter, bool non_blocking) {
-  offload_op_unary(iter, "tensorlib_copy_hb_to_hb");
+  offload_memcpy(iter);
 }
 
 static void copy_cpu_to_hb(TensorIterator& iter, bool non_blocking) {
