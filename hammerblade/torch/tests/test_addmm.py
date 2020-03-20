@@ -5,7 +5,7 @@ Unit tests for torch.addmm kernel
 import torch
 import pytest
 
-@pytest.mark.skip(reason="not yet implemented")
+#@pytest.mark.skip(reason="not yet implemented")
 def test_torch_addmm_1():
     M = torch.ones(2, 3)
     M_h = M.hammerblade()
