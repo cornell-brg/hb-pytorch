@@ -21,8 +21,6 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    exit(1);
-
     // End profiling
     bsg_cuda_print_stat_kernel_end();
     return 0;
