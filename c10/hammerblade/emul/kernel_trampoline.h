@@ -34,8 +34,9 @@ typedef struct _kernel_registry_ {
     }
 } kernel_registry;
 
-#define HB_GET_MACRO(_1,_2,_3,_4,_5,_6,NAME,...) NAME
-#define HB_EMUL_REG_KERNEL(...) HB_GET_MACRO(__VA_ARGS__, HB_EMUL_REG_KERNEL_6ARGS,                   \
+#define HB_GET_MACRO(_1,_2,_3,_4,_5,_6,_7,NAME,...) NAME
+#define HB_EMUL_REG_KERNEL(...) HB_GET_MACRO(__VA_ARGS__, HB_EMUL_REG_KERNEL_7ARGS,                   \
+                                                          HB_EMUL_REG_KERNEL_6ARGS,                   \
                                                           HB_EMUL_REG_KERNEL_5ARGS,                   \
                                                           HB_EMUL_REG_KERNEL_4ARGS,                   \
                                                           HB_EMUL_REG_KERNEL_3ARGS,                   \
@@ -112,6 +113,25 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at3 arg3 = (at3)((intptr_t)_arg3);                                                                \
     at4 arg4 = (at4)((intptr_t)_arg4);                                                                \
     return kernel(arg0, arg1, arg2, arg3, arg4);                                                      \
+}                                                                                                     \
+kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
+
+#define HB_EMUL_REG_KERNEL_7ARGS(kernel, at0, at1, at2, at3, at4, at5)                                \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+    assert (argc == 6);                                                                               \
+    uint64_t _arg0 = argv[0];                                                                         \
+    uint64_t _arg1 = argv[1];                                                                         \
+    uint64_t _arg2 = argv[2];                                                                         \
+    uint64_t _arg3 = argv[3];                                                                         \
+    uint64_t _arg4 = argv[4];                                                                         \
+    uint64_t _arg5 = argv[5];                                                                         \
+    at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
+    at1 arg1 = (at1)((intptr_t)_arg1);                                                                \
+    at2 arg2 = (at2)((intptr_t)_arg2);                                                                \
+    at3 arg3 = (at3)((intptr_t)_arg3);                                                                \
+    at4 arg4 = (at4)((intptr_t)_arg4);                                                                \
+    at5 arg5 = (at5)((intptr_t)_arg5);                                                                \
+    return kernel(arg0, arg1, arg2, arg3, arg4, arg5);                                                \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 

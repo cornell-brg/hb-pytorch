@@ -1,6 +1,7 @@
 #include <ATen/ATen.h>
 #include <ATen/hammerblade/HammerBladeContext.h>
 #include <ATen/native/hammerblade/Offload.h>
+#include <ATen/ExpandUtils.h>
 
 namespace at { namespace native {
 
@@ -30,10 +31,21 @@ Tensor addmm_hb(
 
   TORCH_CHECK(mat1.size(1) == mat2.size(0), "Argument #3: Expected dim 0 size ", mat1.size(1), ", got ", mat2.size(0));
 
-  Tensor b_res;
-  std::tie(b_res) = expand_size(self, {mat1.size(0), mat2.size(1)}, "addmm_out"); 
-  Tensor result = at::empty({}, b_res.options());
-  offload_tensor_scalar_impl(result, self, mat1, mat2, beta, alpha, "tensorlib_addmm");
+  Tensor b_self;
+  std::tie(b_self) = expand_size(self, {mat1.size(0), mat2.size(1)}, "addmm_out"); 
+  Tensor result = at::empty({b_self.size(0), b_self.size(1)}, b_self.options());
+
+  std::vector<Tensor> tensors;
+  tensors.push_back(result);
+  tensors.push_back(b_self);
+  tensors.push_back(mat1);
+  tensors.push_back(mat2);
+
+  std::vector<Scalar> scalars;
+  scalars.push_back(beta);
+  scalars.push_back(alpha);
+
+  offload_tensor_scalar_impl(tensors, scalars, "tensorlib_addmm");
 
   return result;  
 }

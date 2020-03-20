@@ -70,7 +70,7 @@ class BSGTensor {
 
     uint32_t dim(uint32_t d) {
       if(d >= dims) {
-        bsg_printf("BSGTensor error: dimesnion must be less than %d\n",
+        bsg_printf("BSGTensor error: dimension must be less than %d\n",
             dims);
       }
 
