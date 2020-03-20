@@ -4,6 +4,7 @@
 //====================================================================
 
 #include <kernel_common.hpp>
+#include <float.h>
 
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
@@ -22,12 +23,11 @@ extern "C" {
     auto x = BSGTensor<float>(input);
     auto ind = BSGTensor<long long>(indices);
 
-    // Conv2d parameters
+    // max_pool2d parameters
     auto N = y.dim(0); // number of minibatches
-    auto Cout = y.dim(1); // number of output channels
+    auto C = y.dim(1); // number of channels
     auto Hout = y.dim(2);
     auto Wout = y.dim(3);
-    auto Cin = x.dim(1); // number of input channels
     auto Hin = x.dim(2);
     auto Win = x.dim(3);
     auto Kh = *kH;
@@ -42,29 +42,30 @@ extern "C" {
 
     // Preliminary single tile implementation
     //
-    // Grows O(^5) with image size:
-    //   N x Cout x Cin x H x W
+    // Grows O(^4) with image size:
+    //   N x C x H x W
     //   Kernel loops are constant-time
     if(__bsg_id == 0) {
       for(uint32_t n = 0; n < N; ++n)
-        for(uint32_t co = 0; co < Cout; ++co)
+        for(uint32_t c = 0; c < C; ++c)
           for(uint32_t yh = 0; yh < Hout; ++yh)
             for(uint32_t yw = 0; yw < Wout; ++yw)
-              for(uint32_t ci = 0; ci < Cin; ++ci)
-                for(uint32_t kh = 0; kh < Kh; ++kh)
-                  for(uint32_t kw = 0; kw < Kw; ++kw) {
-                    int32_t xh = Sh * yh - Ph + kh;
-                    int32_t xw = Sw * yw - Pw + kw;
+              for(uint32_t kh = 0; kh < Kh; ++kh)
+                for(uint32_t kw = 0; kw < Kw; ++kw) {
+                  if((kh + kw) == 0) {
+                    y(n, c, yh, yw) = FLT_MIN;
+                  }
 
-                    if((ci + kh + kw) == 0) {
-                      y(n, co, yh, yw) = x(n, ci, xh, xw);
-                    } else if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                      if(x(n, ci, xh, xw) > y(n, co, yh, yw)) {
-                        y(n, co, yh, yw) = x(n, ci, xh, xw);
-                        ind(n, co, yh, yw) = (long long) xh * Win + xw;
-                      }
+                  int32_t xh = Sh * yh - Ph + kh;
+                  int32_t xw = Sw * yw - Pw + kw;
+
+                  if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+                    if(x(n, c, xh, xw) > y(n, c, yh, yw)) {
+                      y(n, c, yh, yw) = x(n, c, xh, xw);
+                      ind(n, c, yh, yw) = (long long) (xh * Win + xw);
                     }
                   }
+                }
     }
 
     // End profiling
