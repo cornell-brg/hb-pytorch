@@ -1,3 +1,9 @@
+// ======================================================================
+// HammerBlade Offloading
+//
+// Author: Bandhav Veluri, Lin Cheng
+// ======================================================================
+
 #include <ATen/native/hammerblade/Offload.h>
 
 namespace at {
@@ -7,10 +13,7 @@ namespace native {
  * Offloading wrapper
  * --------------------------------------------------------------------------*/
 
-//=======================================================================
 // Offloading operations that have tensors and scalars as arguments
-//=======================================================================
-
 void offload_tensor_scalar_impl(std::vector<Tensor> tensors, std::vector<Scalar> scalars,
                                 const char* kernel) {
 
@@ -50,10 +53,7 @@ void offload_tensor_scalar_impl(std::vector<Tensor> tensors, std::vector<Scalar>
 
 }
 
-//=======================================================================
 // Offload routine for device to device transfers
-//=======================================================================
-
 void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
   std::vector<eva_t> device_args;
 
@@ -64,6 +64,7 @@ void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
   c10::hammerblade::offload_kernel("tensorlib_memcpy", device_args);
 }
 
+// Offload routine convolution forward pass
 void offload_convolution_forward(Tensor& output, const Tensor& input,
     const Tensor& weight, IntArrayRef padding, IntArrayRef stride,
     IntArrayRef dilation, int64_t groups) {
@@ -100,6 +101,18 @@ void offload_convolution_forward(Tensor& output, const Tensor& input,
 
   c10::hammerblade::offload_kernel(
       "tensorlib_convolution_forward", device_args);
+  cleanup_device(device_args, device_ptrs);
+}
+
+// Offload routine for covolution bias addition
+void offload_convolution_add_bias(const Tensor& output, const Tensor& bias) {
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+  device_args.push_back(create_device_tensor(output, device_ptrs));
+  device_args.push_back(create_device_tensor(bias, device_ptrs));
+
+  c10::hammerblade::offload_kernel(
+      "tensorlib_convolution_add_bias", device_args);
   cleanup_device(device_args, device_ptrs);
 }
 
