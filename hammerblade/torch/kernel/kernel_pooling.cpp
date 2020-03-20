@@ -20,7 +20,7 @@ extern "C" {
           int* dilationH, int* dilationW) {
     auto y = BSGTensor<float>(output);
     auto x = BSGTensor<float>(input);
-    auto ind = BSGTensor<int>(indices);
+    auto ind = BSGTensor<long long>(indices);
 
     // Conv2d parameters
     auto N = y.dim(0); // number of minibatches
@@ -61,6 +61,7 @@ extern "C" {
                     } else if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
                       if(x(n, ci, xh, xw) > y(n, co, yh, yw)) {
                         y(n, co, yh, yw) = x(n, ci, xh, xw);
+                        ind(n, co, yh, yw) = (long long) xh * Win + xw;
                       }
                     }
                   }
