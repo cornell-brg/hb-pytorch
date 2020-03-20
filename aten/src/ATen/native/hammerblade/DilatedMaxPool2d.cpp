@@ -20,14 +20,14 @@ void offload_max_pool2d_with_indices(
   device_args.push_back(create_device_tensor(output, device_ptrs));
   device_args.push_back(create_device_tensor(input, device_ptrs));
   device_args.push_back(create_device_tensor(indices, device_ptrs));
-  device_args.push_back(create_device_scalar<int>(kH));
-  device_args.push_back(create_device_scalar<int>(kW));
-  device_args.push_back(create_device_scalar<int>(dH));
-  device_args.push_back(create_device_scalar<int>(dW));
-  device_args.push_back(create_device_scalar<int>(padH));
-  device_args.push_back(create_device_scalar<int>(padW));
-  device_args.push_back(create_device_scalar<int>(dilationH));
-  device_args.push_back(create_device_scalar<int>(dilationW));
+  device_args.push_back(create_device_scalar(kH));
+  device_args.push_back(create_device_scalar(kW));
+  device_args.push_back(create_device_scalar(dH));
+  device_args.push_back(create_device_scalar(dW));
+  device_args.push_back(create_device_scalar(padH));
+  device_args.push_back(create_device_scalar(padW));
+  device_args.push_back(create_device_scalar(dilationH));
+  device_args.push_back(create_device_scalar(dilationW));
 
   c10::hammerblade::offload_kernel(
       "tensorlib_max_pool2d", device_args);
@@ -140,7 +140,6 @@ std::tuple<Tensor, Tensor> max_pool2d_with_indices_hb(
     padding,
     dilation,
     ceil_mode);
-  TORCH_CHECK(false, "Implement HB maxpool2d.");
   return std::tuple<Tensor, Tensor>(output, indices);
 }
 
