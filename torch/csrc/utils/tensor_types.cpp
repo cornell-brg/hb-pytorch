@@ -22,6 +22,7 @@ static const char* backend_to_string(const at::Backend& backend) {
     case at::Backend::HammerBlade: return "torch.hammerblade";
     case at::Backend::SparseCPU: return "torch.sparse";
     case at::Backend::SparseCUDA: return "torch.cuda.sparse";
+    case at::Backend::SparseHammerBlade: return "torch.hammerblade.sparse";
     // We split complex into its own backend, but keeping it the same here for now
     case at::Backend::ComplexCPU: return "torch";
     case at::Backend::ComplexCUDA: return "torch.cuda";
@@ -88,7 +89,7 @@ at::DeprecatedTypeProperties* type_from_string(const std::string& str) {
 std::vector<std::pair<Backend, ScalarType>> all_declared_types() {
   std::vector<std::pair<Backend, ScalarType>> ret;
   // can't easily iterate over enum classes
-  std::vector<Backend> backends = { Backend::CPU, Backend::CUDA, Backend::HammerBlade, Backend::SparseCPU, Backend::SparseCUDA };
+  std::vector<Backend> backends = { Backend::CPU, Backend::CUDA, Backend::HammerBlade, Backend::SparseCPU, Backend::SparseCUDA, Backend::SparseHammerBlade };
   std::vector<ScalarType> scalar_types = { ScalarType::Byte, ScalarType::Char, ScalarType::Double, ScalarType::Float,
                                            ScalarType::Int, ScalarType::Long, ScalarType::Short, ScalarType::Half,
                                            ScalarType::Bool, ScalarType::BFloat16};

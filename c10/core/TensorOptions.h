@@ -375,6 +375,8 @@ struct C10_API TensorOptions {
             return TensorTypeId::SparseCPUTensorId;
           case DeviceType::CUDA:
             return TensorTypeId::SparseCUDATensorId;
+          case DeviceType::HAMMERBLADE:
+            return TensorTypeId::SparseHammerBladeTensorId;
           case DeviceType::HIP:
             return TensorTypeId::SparseHIPTensorId;
           default:
@@ -578,6 +580,8 @@ inline DeviceType computeDeviceType(TensorTypeId tid) {
     return DeviceType::CPU;
   } else if (tid == TensorTypeId::SparseCUDATensorId) {
     return DeviceType::CUDA;
+  } else if (tid == TensorTypeId::SparseHammerBladeTensorId) {
+    return DeviceType::HAMMERBLADE;
   } else if (tid == TensorTypeId::SparseHIPTensorId) {
     return DeviceType::HIP;
   } else if (tid == TensorTypeId::MkldnnCPUTensorId) {

@@ -32,7 +32,7 @@ echo "  hb-pytorch lives in $DIR"
 # setup cudalite runtime and pytorch kernel binary paths
 if [ -z "$BRG_BSG_BLADERUNNER_DIR" ]
 then
-  export BSG_MANYCORE_DIR="<path-to-your-cudalite-cosim-runtime>"
+  export BSG_MANYCORE_DIR="/work/shared/users/staff/zz546/bsg_bladerunner/bsg_replicant/libraries"
 else
   export BSG_MANYCORE_DIR=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries
 fi
