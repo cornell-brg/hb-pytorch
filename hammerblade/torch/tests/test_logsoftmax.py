@@ -6,14 +6,15 @@ Unit tests for log_softmax operator
 import torch
 import torch.nn.functional as F
 
-def test_log_softmax_1():
-    x = torch.rand(2, 3)
+def _test_log_softmax(x, dim):
     x_hb = x.hammerblade()
 
-    y = F.log_softmax(x, dim=1)
-    print(y)
+    y = F.log_softmax(x, dim)
+    y_hb = F.log_softmax(x_hb, dim)
 
-    y_hb = F.log_softmax(x_hb, dim=1)
-    print(y_hb)
+    assert torch.allclose(y, y_hb.cpu())
 
-    assert(y, y_hb.cpu())
+def test_log_softmax_1():
+    x = torch.rand(2, 3)
+    dim = 1
+    _test_log_softmax(x, dim)
