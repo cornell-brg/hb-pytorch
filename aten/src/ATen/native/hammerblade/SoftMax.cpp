@@ -12,8 +12,7 @@ Tensor log_softmax_hb(const Tensor& input_, const int64_t dim_,
       "softmax with half to float conversion is not supported on HB");
 
   auto input = input_.contiguous();
-  Tensor output = at::native::empty_like(input,
-                                         LEGACY_CONTIGUOUS_MEMORY_FORMAT);
+  Tensor output = at::empty(input.sizes(), input.options());
   int64_t dim = maybe_wrap_dim(dim_, input.dim());
 
   if (input.numel() == 0) {
