@@ -22,8 +22,8 @@ extern "C" {
     int64_t dim = *dim_;
     uint32_t dimStride = in_strides[dim];
 
-    // A group here is the set of all dimensions lower than `dim`. So, number 
-    // of elements per group, groupSize, is equal to the stride of the dimension 
+    // A group here is the set of all dimensions lower than `dim`. So, number
+    // of elements per group, groupSize, is equal to the stride of the dimension
     // `dim - 1`.
     //
     // Granularity is equal to the size of the group. log_softmax is typically
@@ -50,18 +50,23 @@ extern "C" {
         /*****************************************************
          * LogSoftMax numerically stable simplification
          *
-         * log_softmax(xi) = log(exp(xi) / (sigma(exp(xi))))
-         *                 = xi - log(sigma(exp(xi)))
+         * log_softmax(xi) = log(exp(xi) / (sigma_i(exp(xi))))
+         *                 = xi - log(sigma_i(exp(xi)))
          *****************************************************/
 
-        // Compute log(sigma(exp(xi))
-        float log_exp_sum = 0.0f;
-        for(uint32_t i = start_ind; i < dimsPerGroup; i += dimStride) {
-          log_exp_sum += exp(in[i]);
+        // Compute sigma_i(exp(xi))
+        float exp_sum = 0.0f;
+        for(uint32_t i = start_ind;
+            i < (start_ind + dimsPerGroup * dimStride);
+            i += dimStride) {
+          exp_sum += exp(in[i]);
         }
 
-        for(uint32_t i = start_ind; i < dimsPerGroup; i += dimStride) {
-          out[i] += in[i] - log(log_exp_sum);
+        // Compute log_softmax
+        for(uint32_t i = start_ind;
+            i < (start_ind + dimsPerGroup * dimStride);
+            i += dimStride) {
+          out[i] = in[i] - log(exp_sum);
         }
       }
     }
