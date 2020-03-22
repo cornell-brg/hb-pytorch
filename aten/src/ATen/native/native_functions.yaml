@@ -3392,6 +3392,7 @@
   dispatch:
     SparseCPU: _coalesced_sparse_
     SparseCUDA: _coalesced_sparse_
+    SparseHammerBlade: _coalesced_sparse_
   requires_tensor: True
   device_guard: False
 
