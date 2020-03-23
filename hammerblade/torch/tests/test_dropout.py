@@ -2,8 +2,11 @@
 Tests on torch.nn.Dropout
 03/16/2020 Lin Cheng (lc873@cornell.edu)
 """
+
 import torch
 import torch.nn as nn
+from hypothesis import given
+from .hypothesis_test_util import HypothesisUtil as hu
 
 def test_torch_nn_dropout_1():
     dropout = nn.Dropout(0.5)
@@ -45,6 +48,20 @@ def test_torch_nn_dropout_3():
 def test_torch_nn_dropout_4():
     dropout = nn.Dropout(0.25)
     x = torch.randn(10).hammerblade()
+    x_d = dropout(x)
+    assert x_d.device == torch.device("hammerblade")
+    x_d = x_d.cpu()
+    x = x.cpu()
+    i = 0
+    while(i < x.numel()):
+        assert (torch.allclose(x_d[i], x[i] * (1 / 0.75)) or x_d[i] == 0)
+        i += 1
+    assert not torch.allclose(x_d, x)
+
+@given(tensor=hu.tensor(nonzero=True, min_value=3))
+def test_torch_nn_dropout_hypothesis(tensor):
+    dropout = nn.Dropout(0.25)
+    x = torch.tensor(tensor).hammerblade()
     x_d = dropout(x)
     assert x_d.device == torch.device("hammerblade")
     x_d = x_d.cpu()

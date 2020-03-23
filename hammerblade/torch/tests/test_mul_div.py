@@ -4,7 +4,6 @@ Feb 09, 2020
 Lin Cheng
 """
 
-from __future__ import absolute_import
 import torch
 import hypothesis.strategies as st
 from math import isnan
