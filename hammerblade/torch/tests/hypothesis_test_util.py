@@ -36,9 +36,9 @@ def elements_of_type(dtype=np.float32, filter_=None):
     return elems if filter_ is None else elems.filter(filter_)
 
 
-def arrays(dims, dtype=np.float32, elements=None):
+def arrays(dims, dtype=np.float32, elements=None, filter_=None):
     if elements is None:
-        elements = elements_of_type(dtype)
+        elements = elements_of_type(dtype, filter_)
     return hypothesis.extra.numpy.arrays(
         dtype,
         dims,
@@ -68,10 +68,15 @@ class HypothesisUtil():
                max_dim=4,
                dtype=np.float32,
                elements=None,
+               nonzero=False,
                **kwargs):
         dims_ = st.lists(dims(**kwargs), min_size=min_dim, max_size=max_dim)
-        return dims_.flatmap(
-            lambda dims: arrays(dims, dtype, elements))
+        if nonzero:
+            return dims_.flatmap(
+                lambda dims: arrays(dims, dtype, elements, filter_=(lambda x: x!=0)))
+        else:
+            return dims_.flatmap(
+                lambda dims: arrays(dims, dtype, elements))
 
 
     @staticmethod
@@ -80,13 +85,26 @@ class HypothesisUtil():
 
 
     @staticmethod
-    def tensors(n, min_dim=1, max_dim=4, dtype=np.float32, elements=None, **kwargs):
+    def tensors(n,
+                min_dim=1,
+                max_dim=4,
+                dtype=np.float32,
+                elements=None,
+                nonzero=False,
+                **kwargs):
         dims_ = st.lists(dims(**kwargs), min_size=min_dim, max_size=max_dim)
-        return dims_.flatmap(
-            lambda dims: st.lists(
-                arrays(dims, dtype, elements),
-                min_size=n,
-                max_size=n))
+        if nonzero:
+            return dims_.flatmap(
+                lambda dims: st.lists(
+                  arrays(dims, dtype, elements, filter_=(lambda x: x!=0)),
+                    min_size=n,
+                    max_size=n))
+        else:
+            return dims_.flatmap(
+                lambda dims: st.lists(
+                    arrays(dims, dtype, elements),
+                    min_size=n,
+                    max_size=n))
 
 
     @staticmethod
