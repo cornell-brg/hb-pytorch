@@ -2,7 +2,7 @@
 
 --------------------------------------------------------------------------------
 
-# PyTorch HammerBlade Port ![Travis status](https://travis-ci.com/cornell-brg/hb-pytorch.svg?branch=master)
+# PyTorch HammerBlade Port <a href="https://travis-ci.com/github/cornell-brg/hb-pytorch" rel="Travis">![Travis status](https://travis-ci.com/cornell-brg/hb-pytorch.svg?branch=master)</a>
 This work aims to port PyTorch to HammerBlade.
 
 ### How to build PyTorch to use COSIM
@@ -10,7 +10,6 @@ This work aims to port PyTorch to HammerBlade.
  - Clone hb-pytorch repo
     `git clone -b hb-device git@github.com:cornell-brg/hb-pytorch.git`
  - Create python virtual environment
-    `python3.6 -m venv ./venv_pytorch`
     `python3.6 -m venv ./venv_pytorch`
  - Install dependencies
     `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja`
