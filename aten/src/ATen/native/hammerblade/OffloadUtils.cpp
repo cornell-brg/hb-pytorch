@@ -58,6 +58,8 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
 
 eva_t create_device_tensor(const Tensor& tensor,
                                   std::vector<eva_t> device_ptrs) {
+  TORCH_CHECK(tensor.is_contiguous(), "HammerBlade expects contiguous tensor")
+
   uint32_t N = (uint32_t) tensor.numel();
   uint32_t dims = (uint32_t) tensor.dim();
   const int64_t* strides = (const int64_t*) tensor.strides().data();
