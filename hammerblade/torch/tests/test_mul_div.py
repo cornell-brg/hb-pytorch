@@ -6,7 +6,7 @@ Lin Cheng
 
 import torch
 import hypothesis.strategies as st
-from math import isnan
+from math import isnan, isinf
 from hypothesis import assume, given
 from .hypothesis_test_util import HypothesisUtil as hu
 
@@ -79,6 +79,7 @@ def test_mul_with_scalar():
 @given(tensor=hu.tensor(), scalar=st.floats(width=32))
 def test_mul_with_scalar_hypothesis(tensor, scalar):
     assume(not isnan(scalar))
+    assume(not isinf(scalar))
     def mul_scalar(inputs):
         tensor, scalar = inputs
         return tensor * scalar
@@ -154,6 +155,7 @@ def test_div_with_scalar():
 def test_div_with_scalar_hypothesis(tensor, scalar):
     assume(scalar != 0)
     assume(not isnan(scalar))
+    assume(not isinf(scalar))
     def div_scalar(inputs):
         tensor, scalar = inputs
         return tensor / scalar

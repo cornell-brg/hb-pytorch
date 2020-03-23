@@ -5,7 +5,8 @@ Lin Cheng
 """
 
 import torch
-from hypothesis import given
+from math import isnan, isinf
+from hypothesis import assume, given
 import hypothesis.strategies as st
 from .hypothesis_test_util import HypothesisUtil as hu
 
@@ -89,8 +90,10 @@ def test_add_with_scalar():
     assert y_h.device == torch.device("hammerblade")
     assert torch.equal(y_h.cpu(), y)
 
-@given(tensor=hu.tensor(), scalar=st.floats(min_value=-1024.0, max_value=1024.0, width=32))
+@given(tensor=hu.tensor(), scalar=st.floats(width=32))
 def test_add_with_scalar_hypothesis(tensor, scalar):
+    assume(not isnan(scalar))
+    assume(not isinf(scalar))
     def add_scalar(inputs):
         tensor, scalar = inputs
         return tensor + scalar
@@ -162,8 +165,10 @@ def test_sub_with_scalar():
     assert y_h.device == torch.device("hammerblade")
     assert torch.equal(y_h.cpu(), y)
 
-@given(tensor=hu.tensor(), scalar=st.floats(min_value=-1024.0, max_value=1024.0, width=32))
+@given(tensor=hu.tensor(), scalar=st.floats(width=32))
 def test_sub_with_scalar_hypothesis(tensor, scalar):
+    assume(not isnan(scalar))
+    assume(not isinf(scalar))
     def sub_scalar(inputs):
         tensor, scalar = inputs
         return tensor - scalar
