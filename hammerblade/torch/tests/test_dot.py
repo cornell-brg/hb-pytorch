@@ -2,8 +2,11 @@
 Unit tests for torch.dot kernel
 03/06/2020 Lin Cheng (lc873@cornell.edu)
 """
+
 import torch
 import pytest
+from hypothesis import given
+from .hypothesis_test_util import HypothesisUtil as hu
 
 def test_torch_dot_1():
     x = torch.ones(10)
@@ -32,3 +35,10 @@ def test_torch_dot_mismatching_shape_F():
     x = torch.ones(10).hammerblade()
     y = torch.ones(5).hammerblade()
     torch.dot(x, y)
+
+@given(inputs=hu.tensors1d(n=2))
+def test_torch_dot_hypothesis(inputs):
+    def dot(inputs):
+        x1, x2 = inputs
+        return x1.dot(x2)
+    hu.assert_hb_checks(dot, inputs)

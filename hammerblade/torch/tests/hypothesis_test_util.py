@@ -54,11 +54,9 @@ def move_to_cpu(tensor):
 
 
 def assert_equal(output1, output2):
-    assert len(output1) == len(output2)
-    for i in range(len(output1)):
-        o1 = move_to_cpu(output1[i])
-        o2 = move_to_cpu(output2[i])
-        assert torch.allclose(o1, o2)
+    o1 = move_to_cpu(output1)
+    o2 = move_to_cpu(output2)
+    assert torch.allclose(o1, o2)
 
 
 class HypothesisUtil():
@@ -81,7 +79,7 @@ class HypothesisUtil():
 
     @staticmethod
     def tensor1d(min_len=1, max_len=64, dtype=np.float32, elements=None):
-        return tensor(1, 1, dtype, elements, min_value=min_len, max_value=max_len)
+        return HypothesisUtil.tensor(1, 1, dtype, elements, min_value=min_len, max_value=max_len)
 
 
     @staticmethod
@@ -109,7 +107,7 @@ class HypothesisUtil():
 
     @staticmethod
     def tensors1d(n, min_len=1, max_len=64, dtype=np.float32, elements=None):
-        return tensors(
+        return HypothesisUtil.tensors(
             n, 1, 1, dtype, elements, min_value=min_len, max_value=max_len
         )
 
@@ -129,6 +127,5 @@ class HypothesisUtil():
             inputs_c.append(torch.tensor(input))
         outputs_cpu = op(inputs_c)
         outputs_hb = op(inputs_h)
-        for output in outputs_hb:
-            assert output.device == torch.device("hammerblade")
+        assert outputs_hb.device == torch.device("hammerblade")
         assert_equal(outputs_cpu, outputs_hb)
