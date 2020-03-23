@@ -26,13 +26,14 @@ def dims(min_value=1, max_value=5):
 def elements_of_type(dtype=np.float32, filter_=None):
     elems = None
     if dtype is np.float32:
-        elems = st.floats(min_value=-1.0, max_value=1.0, width=32)
+        elems = st.floats(min_value=-128.0, max_value=128.0, width=32)
     # elif dtype is np.int32:
     #     elems = st.integers(min_value=0, max_value=2 ** 31 - 1)
     # elif dtype is np.bool:
     #     elems = st.booleans()
     else:
         raise ValueError("Unexpected dtype without elements provided")
+    elems = elems.filter(lambda x: x > 0.0001 or x < -0.0001)
     return elems if filter_ is None else elems.filter(filter_)
 
 
@@ -78,8 +79,8 @@ class HypothesisUtil():
 
 
     @staticmethod
-    def tensor1d(min_len=1, max_len=64, dtype=np.float32, elements=None):
-        return HypothesisUtil.tensor(1, 1, dtype, elements, min_value=min_len, max_value=max_len)
+    def tensor1d(min_len=1, max_len=64, dtype=np.float32, elements=None, nonzero=False):
+        return HypothesisUtil.tensor(1, 1, dtype, elements, nonzero, min_value=min_len, max_value=max_len)
 
 
     @staticmethod
@@ -106,9 +107,9 @@ class HypothesisUtil():
 
 
     @staticmethod
-    def tensors1d(n, min_len=1, max_len=64, dtype=np.float32, elements=None):
+    def tensors1d(n, min_len=1, max_len=64, dtype=np.float32, elements=None, nonzero=False):
         return HypothesisUtil.tensors(
-            n, 1, 1, dtype, elements, min_value=min_len, max_value=max_len
+            n, 1, 1, dtype, elements, nonzero, min_value=min_len, max_value=max_len
         )
 
 

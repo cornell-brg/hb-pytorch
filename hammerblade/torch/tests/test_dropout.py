@@ -58,9 +58,9 @@ def test_torch_nn_dropout_4():
         i += 1
     assert not torch.allclose(x_d, x)
 
-@given(tensor=hu.tensor(nonzero=True, min_value=3))
-def test_torch_nn_dropout_hypothesis(tensor):
-    dropout = nn.Dropout(0.25)
+@given(tensor=hu.tensor1d(nonzero=True, min_len=5))
+def test_torch_nn_dropout_hypothesis_1d(tensor):
+    dropout = nn.Dropout(0.5)
     x = torch.tensor(tensor).hammerblade()
     x_d = dropout(x)
     assert x_d.device == torch.device("hammerblade")
@@ -68,6 +68,6 @@ def test_torch_nn_dropout_hypothesis(tensor):
     x = x.cpu()
     i = 0
     while(i < x.numel()):
-        assert (torch.allclose(x_d[i], x[i] * (1 / 0.75)) or x_d[i] == 0)
+        assert (torch.allclose(x_d[i], x[i] * (1 / 0.5)) or x_d[i] == 0)
         i += 1
     assert not torch.allclose(x_d, x)

@@ -48,6 +48,8 @@ typedef struct {
 // convenience operations. This runs on a tiny RISC-V processor
 // on the device, so be careful about using dynamic memory
 // allocation.
+//
+// XXX: we are assuming that a Tensor must be *contiguous*
 // =========================================================
 
 template <typename DT>
@@ -94,6 +96,13 @@ class BSGTensor {
           bsg_assert(index == 0);
         }
         return data[0];
+      }
+
+      // special case where we want linear indexing
+      if(iarray.size() == 1) {
+        for(auto index : iarray) {
+          return data[index];
+        }
       }
 
       bsg_assert(iarray.size() == dims);
