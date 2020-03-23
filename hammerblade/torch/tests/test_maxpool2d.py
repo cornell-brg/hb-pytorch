@@ -5,15 +5,13 @@ Unit tests for maxpool2d operator
 
 import torch
 import torch.nn.functional as F
-import os
-import pytest
 
 def _test_max_pool2d(x, kernel_size, stride=None, padding=1):
     x_hb = x.hammerblade()
 
     y, r = F.max_pool2d(x, kernel_size, stride, padding, return_indices=True)
-    y_hb, r_hb =  F.max_pool2d(x_hb, kernel_size, stride, padding,
-                               return_indices=True)
+    y_hb, r_hb = F.max_pool2d(x_hb, kernel_size, stride, padding,
+                              return_indices=True)
 
     assert torch.allclose(y, y_hb.cpu())
     assert torch.equal(r, r_hb.cpu())
