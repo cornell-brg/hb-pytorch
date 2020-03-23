@@ -502,6 +502,7 @@
   dispatch:
     CPU: bernoulli_scalar_cpu_
     CUDA: bernoulli_scalar_cuda_
+    HammerBlade: bernoulli_scalar_hb_
   supports_named_tensor: True
 
 # This out-of-place version isn't used explicitly, but needed by jit.
@@ -1068,6 +1069,7 @@
   dispatch:
     CPU: empty_strided_cpu
     CUDA: empty_strided_cuda
+    HammerBlade: empty_strided_hb
 
 - func: erf(Tensor self) -> Tensor
   use_c10_dispatcher: full
@@ -2988,6 +2990,7 @@
   dispatch:
     CPU: clone
     CUDA: clone
+    HammerBlade: clone
     SparseCPU: clone_sparse
     SparseCUDA: clone_sparse
     MkldnnCPU: mkldnn_clone

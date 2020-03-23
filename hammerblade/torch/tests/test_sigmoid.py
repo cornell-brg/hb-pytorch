@@ -14,7 +14,7 @@ def test_torch_nn_sigmoid_1():
     x_sig = sigmoid(x)
     x_h_sig = sigmoid(x_h)
     assert x_h_sig.device == torch.device("hammerblade")
-    assert torch.equal(x_h_sig.cpu(), x_sig)
+    assert torch.allclose(x_h_sig.cpu(), x_sig)
 
 @pytest.mark.skip(reason="not yet implemented")
 def test_torch_nn_sigmoid_2():
@@ -24,7 +24,7 @@ def test_torch_nn_sigmoid_2():
     x_sig = sigmoid(x)
     x_h_sig = sigmoid(x_h)
     assert x_h_sig.device == torch.device("hammerblade")
-    assert torch.equal(x_h_sig.cpu(), x_sig)
+    assert torch.allclose(x_h_sig.cpu(), x_sig)
 
 @pytest.mark.skip(reason="not yet implemented")
 def test_torch_nn_sigmoid_3():
@@ -34,4 +34,4 @@ def test_torch_nn_sigmoid_3():
     x_sig = sigmoid(x)
     x_h_sig = sigmoid(x_h)
     assert x_h_sig.device == torch.device("hammerblade")
-    assert torch.equal(x_h_sig.cpu(), x_sig)
+    assert torch.allclose(x_h_sig.cpu(), x_sig)

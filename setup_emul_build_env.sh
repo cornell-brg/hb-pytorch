@@ -4,7 +4,7 @@ echo "  Make sure you enabled devtoolset-8!"
 echo ""
 
 # setup pytorch building options
-export REL_WITH_DEB_INFO=1
+export DEBUG=1
 export BUILD_TEST=0
 export USE_CUDA=0
 export USE_CUDNN=0

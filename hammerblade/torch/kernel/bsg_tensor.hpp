@@ -8,6 +8,7 @@
 
 #include <math.h>
 #include <initializer_list>
+#include <bsg_assert.hpp>
 
 // =========================================================
 // Device Tensor structs
@@ -44,34 +45,32 @@ typedef struct {
 // Device Tensor classes
 //
 // Wrapper classes around device tensor structs to provide
-// convenience operations. This runs on a tiny RISC-V processor 
-// on the device, so be careful about using dynamic memory 
+// convenience operations. This runs on a tiny RISC-V processor
+// on the device, so be careful about using dynamic memory
 // allocation.
 // =========================================================
 
+template <typename DT>
 class BSGTensor {
   private:
     uint32_t N;
     uint32_t dims;
     uint32_t* strides;
-    float* data;
+    DT* data;
 
   public:
     BSGTensor(bsg_tensor_t* t) :
       N(t->N),
       dims(t->dims),
       strides((uint32_t*) ((intptr_t) t->strides)),
-      data((float*) ((intptr_t) t->data)) {}
+      data((DT*) ((intptr_t) t->data)) {}
 
-    int size() {
+    int numel() {
       return N;
     }
 
     uint32_t dim(uint32_t d) {
-      if(d >= dims) {
-        bsg_printf("BSGTensor error: dimesnion must be less than %d\n",
-            dims);
-      }
+      bsg_assert(d < dims);
 
       uint32_t dim;
 
@@ -85,13 +84,19 @@ class BSGTensor {
     }
 
     template<typename... T>
-    float& operator()(T... indices) {
+    DT& operator()(T... indices) {
       std::initializer_list<uint32_t> iarray = {indices...};
 
-      if(iarray.size() != dims) {
-        bsg_printf("BSGTensor error: number of indices must be %d, given %d\n",
-            dims, iarray.size());
+      // special case where we have a 0-dim tensor
+      if(dims == 0) {
+        bsg_assert(iarray.size() == 1);
+        for(auto index : iarray) {
+          bsg_assert(index == 0);
+        }
+        return data[0];
       }
+
+      bsg_assert(iarray.size() == dims);
 
       uint32_t offset = 0;
       uint32_t s = 0;
@@ -100,9 +105,7 @@ class BSGTensor {
         s++;
       }
 
-      if(offset >= N) {
-        bsg_printf("BSGTensor error: index out of bounds\n");
-      }
+      bsg_assert(offset < N);
 
       return data[offset];
     }
@@ -118,7 +121,7 @@ class BSGVector {
     BSGVector(bsg_vector_t* v) :
       N(v->N), data((T*) ((intptr_t) v->data)) {}
 
-    uint32_t size() {
+    uint32_t numel() {
       return N;
     }
 

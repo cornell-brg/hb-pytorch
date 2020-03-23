@@ -5,27 +5,12 @@
 #endif
 
 #include <ATen/ATen.h>
-#include <ATen/CPUGenerator.h>
-#include <ATen/Utils.h>
 #include <ATen/Dispatch.h>
-#include <ATen/NativeFunctions.h>
-#include <c10/core/ScalarType.h>
-#include <c10/util/Deprecated.h>
-#include <ATen/native/Resize.h>
 #include <ATen/native/TensorFactories.h>
 #include <c10/core/TensorOptions.h>
-#include <TH/THAllocator.h>
-#include <ATen/detail/CUDAHooksInterface.h>
 #include <c10/util/Exception.h>
-#include <ATen/NamedTensorUtils.h>
-#include <ATen/core/EnableNamedTensor.h>
 #include <ATen/hammerblade/HammerBladeContext.h>
-
-#include <algorithm>
-#include <cctype>
-#include <cmath>
-#include <cstddef>
-#include <string>
+#include <ATen/native/hammerblade/Resize.h>
 
 namespace at {
 namespace native {
@@ -56,6 +41,12 @@ Tensor empty_hb(IntArrayRef size, const TensorOptions& options, c10::optional<c1
   auto memory_format = optional_memory_format.value_or(MemoryFormat::Contiguous);
   tensor.unsafeGetTensorImpl()->empty_tensor_restride(memory_format);
   return tensor;
+}
+
+Tensor empty_strided_hb(IntArrayRef size, IntArrayRef stride, const TensorOptions& options) {
+  auto t = at::native::empty_hb({0}, options);
+  at::native::resize_impl_hb_(t.unsafeGetTensorImpl(), size, stride);
+  return t;
 }
 
 }} // at::native

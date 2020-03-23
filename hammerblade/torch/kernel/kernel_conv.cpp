@@ -16,9 +16,9 @@ extern "C" {
           bsg_tensor_t* weight,
           bsg_vector_t* padding,
           bsg_vector_t* strides) {
-    auto y = BSGTensor(output);
-    auto x = BSGTensor(input);
-    auto w = BSGTensor(weight);
+    auto y = BSGTensor<float>(output);
+    auto x = BSGTensor<float>(input);
+    auto w = BSGTensor<float>(weight);
     auto p = BSGVector<uint32_t>(padding);
     auto s = BSGVector<uint32_t>(strides);
 
