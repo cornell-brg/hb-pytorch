@@ -3,7 +3,12 @@ BRG tests on PyTorch => tests of real offloading kernels
 Feb 09, 2020
 Lin Cheng
 """
+
+from __future__ import absolute_import
 import torch
+from hypothesis import assume, given, settings, HealthCheck
+import hypothesis.strategies as st
+from .hypothesis_test_util import HypothesisUtil as hu
 
 # test of adding two tensors
 
@@ -50,6 +55,13 @@ def test_elementwise_add_4():
     y_c = y_h.cpu()
     assert y_h.device == torch.device("hammerblade")
     assert torch.equal(y_c, y)
+
+@given(inputs=hu.tensors(n=2))
+def test_elementwise_add_hypothesis(inputs):
+    def elementwise_add(inputs):
+        assert len(inputs) == 2
+        return inputs[0] + inputs[1]
+    hu.assert_hb_checks(elementwise_add, inputs)
 
 def test_elementwise_in_place_add():
     x1 = torch.rand(16, 32)
