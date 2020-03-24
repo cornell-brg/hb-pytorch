@@ -5,7 +5,7 @@ Tests on torch.nn.Dropout
 
 import torch
 import torch.nn as nn
-from hypothesis import given
+from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
 def test_torch_nn_dropout_1():
@@ -84,6 +84,7 @@ def test_torch_nn_dropout_6():
         i += 1
     assert not torch.allclose(x_d, x)
 
+@settings(deadline=None)
 @given(tensor=hu.tensor1d(nonzero=True, min_len=5))
 def test_torch_nn_dropout_hypothesis_1d(tensor):
     dropout = nn.Dropout(0.5)

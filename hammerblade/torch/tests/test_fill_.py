@@ -6,7 +6,7 @@ Unit tests for torch.fill_ kernel
 import torch
 import hypothesis.strategies as st
 from math import isnan, isinf
-from hypothesis import assume, given
+from hypothesis import assume, given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
 def test_torch_fill_1():
@@ -25,6 +25,7 @@ def test_torch_fill_2():
     assert x_h.device == torch.device("hammerblade")
     assert torch.equal(x_h.cpu(), x)
 
+@settings(deadline=None)
 @given(tensor=hu.tensor(), scalar=st.floats(width=32))
 def test_torch_fill_hypothesis(tensor, scalar):
     assume(scalar != 0)

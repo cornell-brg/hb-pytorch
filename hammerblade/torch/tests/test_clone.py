@@ -5,7 +5,7 @@ Tests on torch.clone (copy_hb_to_hb kernel)
 
 import torch
 import hypothesis.strategies as st
-from hypothesis import given
+from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
 def test_torch_clone_1():
@@ -29,6 +29,7 @@ def test_torch_clone_3():
     assert x is not y
     assert torch.equal(x.cpu(), y.cpu())
 
+@settings(deadline=None)
 @given(tensor=hu.tensor())
 def test_torch_clone_hypothesis(tensor):
     x = torch.tensor(tensor).hammerblade()

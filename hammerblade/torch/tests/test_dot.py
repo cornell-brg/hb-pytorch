@@ -5,7 +5,7 @@ Unit tests for torch.dot kernel
 
 import torch
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
 def test_torch_dot_1():
@@ -36,6 +36,7 @@ def test_torch_dot_mismatching_shape_F():
     y = torch.ones(5).hammerblade()
     torch.dot(x, y)
 
+@settings(deadline=None)
 @given(inputs=hu.tensors1d(n=2))
 def test_torch_dot_hypothesis(inputs):
     def dot(inputs):

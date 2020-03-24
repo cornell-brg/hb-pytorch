@@ -6,7 +6,7 @@ Lin Cheng
 
 import torch
 from math import isnan, isinf
-from hypothesis import assume, given
+from hypothesis import assume, given, settings
 import hypothesis.strategies as st
 from .hypothesis_test_util import HypothesisUtil as hu
 
@@ -56,6 +56,7 @@ def test_elementwise_add_4():
     assert y_h.device == torch.device("hammerblade")
     assert torch.equal(y_c, y)
 
+@settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_elementwise_add_hypothesis(inputs):
     def elementwise_add(inputs):
@@ -74,6 +75,7 @@ def test_elementwise_in_place_add():
     x1_h_c = x1_h.cpu()
     assert torch.equal(x1_h_c, x1)
 
+@settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_elementwise_in_place_add_hypothesis(inputs):
     def elementwise_add(inputs):
@@ -90,6 +92,7 @@ def test_add_with_scalar():
     assert y_h.device == torch.device("hammerblade")
     assert torch.equal(y_h.cpu(), y)
 
+@settings(deadline=None)
 @given(tensor=hu.tensor(), scalar=st.floats(width=32))
 def test_add_with_scalar_hypothesis(tensor, scalar):
     assume(not isnan(scalar))
@@ -131,6 +134,7 @@ def test_elementwise_sub_4():
     assert z_h.device == torch.device("hammerblade")
     assert torch.equal(z_h.cpu(), z)
 
+@settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_elementwise_sub_hypothesis(inputs):
     def elementwise_sub(inputs):
@@ -149,6 +153,7 @@ def test_elementwise_in_place_sub():
     x1_h_c = x1_h.cpu()
     assert torch.equal(x1_h_c, x1)
 
+@settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_elementwise_in_place_sub_hypothesis(inputs):
     def elementwise_sub(inputs):
@@ -165,6 +170,7 @@ def test_sub_with_scalar():
     assert y_h.device == torch.device("hammerblade")
     assert torch.equal(y_h.cpu(), y)
 
+@settings(deadline=None)
 @given(tensor=hu.tensor(), scalar=st.floats(width=32))
 def test_sub_with_scalar_hypothesis(tensor, scalar):
     assume(not isnan(scalar))
