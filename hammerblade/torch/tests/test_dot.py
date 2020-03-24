@@ -24,6 +24,16 @@ def test_torch_dot_2():
     assert x_h.device == torch.device("hammerblade")
     assert torch.equal(x_h.cpu(), x)
 
+def test_torch_dot_non_contiguous():
+    x = torch.tensor([1.])
+    x_h = x.hammerblade()
+    x = x.expand(10)
+    x_h = x_h.expand(10)
+    x = x.dot(x)
+    x_h = x_h.dot(x_h)
+    assert x_h.device == torch.device("hammerblade")
+    assert torch.equal(x_h.cpu(), x)
+
 @pytest.mark.xfail
 def test_torch_dot_different_device_F():
     x = torch.ones(10)

@@ -92,15 +92,15 @@ class BSGTensor {
       }
 
       // special case where we want linear indexing
+      // when dims != 1
       // XXX: this tensor has to be contiguous
-      if(iarray.size() == 1) {
+      if(iarray.size() == 1 && dims != 1) {
         for(auto index : iarray) {
           return data[index];
         }
       }
 
       bsg_assert(iarray.size() == dims);
-
       uint32_t offset = 0;
       uint32_t s = 0;
       for(auto index : iarray) {

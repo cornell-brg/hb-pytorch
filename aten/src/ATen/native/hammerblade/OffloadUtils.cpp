@@ -80,7 +80,9 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
 
 eva_t create_device_tensor(const Tensor& tensor,
                                   std::vector<eva_t> device_ptrs) {
-  TORCH_CHECK(tensor.is_contiguous(), "HammerBlade expects contiguous tensor")
+  if(!tensor.is_contiguous()) {
+    AT_WARN("Offloading non contiguous plain tensor. Make sure you are expecting this!");
+  }
 
   uint32_t N = (uint32_t) tensor.numel();
   uint32_t dims = (uint32_t) tensor.dim();
