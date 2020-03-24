@@ -279,13 +279,14 @@ static inline Backend backendToHammerBlade(Backend b) {
       return Backend::HammerBlade;
     case Backend::SparseCPU:
       return Backend::SparseHammerBlade;
+    case Backend::SparseHammerBlade:
+      return Backend::HammerBlade;
+    case Backend::HammerBlade:
     case Backend::CUDA:
     case Backend::HIP:
-    case Backend::HammerBlade:
     case Backend::MSNPU:
     case Backend::XLA:
     case Backend::SparseCUDA:
-    case Backend::SparseHammerBlade:
     case Backend::SparseHIP:
       AT_ERROR("Backends other than CPU -> HammerBlade is not supported");
     case Backend::Undefined:
