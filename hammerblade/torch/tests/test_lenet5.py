@@ -87,18 +87,31 @@ def test(net, loader, loss_func):
         test_loss, num_correct, len(loader.dataset), test_accuracy
     ))
 
-@pytest.mark.skip(reason="Not implemented yet.")
-def test_lenet5_forward_1():
+@torch.no_grad()
+def test_lenet5_inference_1():
+    # Instatiate CNN model with random weights
     net = LeNet5()
+
+    # Create a model on HB
     net_hb = LeNet5().hammerblade()
 
-    data = torch.rand(1, 1, 32, 32)
-    data_hb = data.hammerblade()
+    # Copy exact same weights from CPU model to HB model
+    net_hb.load_state_dict(net.state_dict())
 
-    output = net.forward(data)
-    output_hb = net_hb.forward(data_hb)
+    # Random 32x32 image
+    image = torch.rand(1, 1, 32, 32)
 
-    assert torch.allclose(output, output_hb.cpu())
+    # Create a copy of above image on HB
+    image_hb = image.hammerblade()
+
+    # Inference on CPU
+    output = net.forward(image)
+
+    # Inference on HB
+    output_hb = net_hb.forward(image_hb)
+
+    # Compare the result
+    assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
 
 @pytest.mark.skip(reason="Not implented for HB yet.")
 def test_lenet5_mnist():
