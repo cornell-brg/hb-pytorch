@@ -1,3 +1,4 @@
+#include <ATen/native/Pool.h>
 #include <ATen/native/hammerblade/OffloadDef.h>
 #include <ATen/native/hammerblade/OffloadUtils.h>
 
@@ -24,7 +25,7 @@ static void copy_strides_or_sizes(eva_t tensor_strides, const int64_t* strides, 
 
   // populate local_strides/sizes
   for(int i=0; i<dims; i++) {
-    local_strides[i] = (uint32_t)strides[i];
+    local_strides[i] = safe_downcast<uint32_t, int64_t>(strides[i]);
   }
 
   // copy strides/sizes
