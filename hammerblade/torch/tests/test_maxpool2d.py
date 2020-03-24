@@ -14,7 +14,7 @@ def _test_max_pool2d(x, kernel_size, stride=None, padding=1):
                               return_indices=True)
 
     assert torch.allclose(y, y_hb.cpu())
-    assert torch.equal(r, r_hb.cpu())
+    assert torch.equal(r.type(torch.int), r_hb.cpu())
 
 def test_max_pool2d_1():
     x = torch.rand(1, 1, 5, 5)

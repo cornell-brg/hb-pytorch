@@ -130,7 +130,7 @@ std::tuple<Tensor, Tensor> max_pool2d_with_indices_hb(
   bool ceil_mode)
 {
   Tensor output = at::empty({0}, input.options());
-  Tensor indices = at::empty({0}, input.options().dtype(kLong));
+  Tensor indices = at::empty({0}, input.options().dtype(kInt));
   max_pool2d_with_indices_out_hb_template(
     output,
     indices,
