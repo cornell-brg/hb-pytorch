@@ -2,6 +2,7 @@
 Tests on torch.contiguous
 03/18/2020 Lin Cheng (lc873@cornell.edu)
 """
+
 import torch
 
 # These tensors are already contiguous
