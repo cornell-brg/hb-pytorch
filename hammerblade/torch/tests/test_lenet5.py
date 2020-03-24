@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import pytest
+import torchvision
 
 # Network
 class LeNet5(nn.Module):
@@ -43,12 +44,14 @@ class LeNet5(nn.Module):
         return x
 
 # Train routine
-def train(net, loader, epochs, optimizer, loss_func):
+def train(net, loader, epochs, optimizer, loss_func, hb=False):
     print('Training {} for {} epoch(s)...\n'.format(type(net).__name__, epochs))
     for epoch in range(epochs):
         losses = []
 
         for batch_idx, (data, labels) in enumerate(loader, 0):
+            if hb:
+                data, labels = data.hammerblade(), labels.hammerblade()
             batch_size = len(data)
             optimizer.zero_grad()
             outputs = net(data)
@@ -70,15 +73,19 @@ def train(net, loader, epochs, optimizer, loss_func):
 # Test routine
 @pytest.mark.skip(reason="Not a pytest test, this is CNN test routine.")
 @torch.no_grad()
-def test(net, loader, loss_func):
+def test(net, loader, loss_func, hb=False):
     test_loss = 0.0
     num_correct = 0
 
     for batch_idx, (data, labels) in enumerate(loader, 0):
+        if hb:
+            data, labels = data.hammerblade(), labels.hammerblade()
         output = net(data)
         loss = loss_func(output, labels)
         pred = output.max(1)[1]
         num_correct += pred.eq(labels.view_as(pred)).sum().item()
+
+        if batch_idx == 100: break
 
     test_loss /= len(loader.dataset)
     test_accuracy = 100. * (num_correct / len(loader.dataset))
@@ -87,9 +94,8 @@ def test(net, loader, loss_func):
         test_loss, num_correct, len(loader.dataset), test_accuracy
     ))
 
-@torch.no_grad()
 def test_lenet5_inference_1():
-    # Instatiate CNN model with random weights
+    # Create a model on CPU with random weights
     net = LeNet5()
 
     # Create a model on HB
@@ -113,10 +119,10 @@ def test_lenet5_inference_1():
     # Compare the result
     assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
 
-@pytest.mark.skip(reason="Not implented for HB yet.")
-def test_lenet5_mnist():
+@pytest.mark.skip(reason="Runs slow: fast dummy inference test implemented above.")
+def test_lenet5_inference_mnist():
     """
-    Tests one epoch of train and test on LeNet-5 with MNIST dataset.
+    Trains the CNN on CPU, loads the model to HB to test inference
     """
     # Model
     BATCH_SIZE = 32
@@ -139,18 +145,39 @@ def test_lenet5_mnist():
         root='./data/mnist', train=True, download=True, transform=transforms
     )
     trainloader = torch.utils.data.DataLoader(
-        trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2
+        trainset, batch_size=BATCH_SIZE, shuffle=True
     )
 
     testset = torchvision.datasets.MNIST(
         root='./data/mnist', train=False, download=True, transform=transforms
     )
     testloader = torch.utils.data.DataLoader(
-        testset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2
+        testset, batch_size=BATCH_SIZE, shuffle=False
     )
 
     # Train
     train(net, trainloader, EPOCHS, optimizer, loss_func)
 
-    # Test
-    test(net, testloader, loss_func)
+    # Create a model on HB
+    net_hb = LeNet5().hammerblade()
+
+    # Copy exact same weights from CPU model to HB model
+    net_hb.load_state_dict(net.state_dict())
+
+    # Random 32x32 image
+    image = torch.rand(1, 1, 32, 32)
+
+    # Create a copy of above image on HB
+    image_hb = image.hammerblade()
+
+    # Inference on CPU
+    output = net.forward(image)
+
+    # Inference on HB
+    output_hb = net_hb.forward(image_hb)
+
+    # Compare the result
+    assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
+
+if __name__ == "__main__":
+    test_lenet5_inference_mnist()

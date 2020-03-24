@@ -40,7 +40,7 @@
 #include <stdio.h>
 #endif
 
-#define DEBUG 1
+#define DEBUG 0
 
 // print out a warning to stderr to remind us that we are
 // running emulation layer
