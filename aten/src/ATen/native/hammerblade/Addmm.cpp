@@ -19,10 +19,6 @@ Tensor addmm_hb(
   //                                                  cosn char*)
   //      which is defined in Offload.h for kernel offloading
 
-  if (self.dim() != mat1.dim() || self.dim() != mat2.dim() || mat1.dim() != mat2.dim()) {
-    AT_ERROR("All matrices must be of the same dimension; got ", self.dim(), "D, ", mat1.dim(), "D, ", mat2.dim(), "D tensors");
-  }
-
   if ( (self.scalar_type() != ScalarType::Float)
     || (mat1.scalar_type() != ScalarType::Float)
     || (mat2.scalar_type() != ScalarType::Float) ) {
