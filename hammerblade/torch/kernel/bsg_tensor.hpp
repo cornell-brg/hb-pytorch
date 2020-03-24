@@ -25,9 +25,11 @@ typedef struct {
   uint32_t dims;
 #ifdef HB_EMUL
   uint64_t strides;
+  uint64_t sizes;
   uint64_t data;
 #else
   uint32_t strides;
+  uint32_t sizes;
   uint32_t data;
 #endif
 } bsg_tensor_t;
@@ -58,6 +60,7 @@ class BSGTensor {
     uint32_t N;
     uint32_t dims;
     uint32_t* strides;
+    uint32_t* sizes;
     DT* data;
 
   public:
@@ -65,6 +68,7 @@ class BSGTensor {
       N(t->N),
       dims(t->dims),
       strides((uint32_t*) ((intptr_t) t->strides)),
+      sizes((uint32_t*) ((intptr_t) t->sizes)),
       data((DT*) ((intptr_t) t->data)) {}
 
     int numel() {
@@ -81,6 +85,8 @@ class BSGTensor {
       } else {
         dim = strides[d-1] / strides[d];
       }
+
+      bsg_assert(dim == sizes[d]);
 
       return dim;
     }

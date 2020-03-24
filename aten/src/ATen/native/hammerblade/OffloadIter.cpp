@@ -48,7 +48,7 @@ void offload_iterator_op_impl(TensorIterator& iter, std::vector<Scalar> scalars,
       // Iterate over all tensors to create
       // corresponding tensors on the device.
       eva_t device_arg = create_device_tensor(n, iter.ndim(),
-          (const int64_t*)local_strides, data[i], device_ptrs);
+          (const int64_t*)local_strides, NULL, data[i], device_ptrs);
       device_args.push_back(device_arg);
     }
 

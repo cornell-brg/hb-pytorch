@@ -18,6 +18,7 @@ namespace native {
 
 eva_t create_device_tensor(uint32_t N, uint32_t dims,
                                   const int64_t* strides,
+                                  const int64_t* sizes,
                                   const void* data,
                                   std::vector<eva_t>& device_ptrs);
 
