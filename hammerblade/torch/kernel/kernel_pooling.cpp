@@ -21,7 +21,7 @@ extern "C" {
           int* dilationH, int* dilationW) {
     auto y = BSGTensor<float>(output);
     auto x = BSGTensor<float>(input);
-    auto ind = BSGTensor<long long>(indices);
+    auto ind = BSGTensor<int>(indices);
 
     // max_pool2d parameters
     auto N = y.dim(0); // number of minibatches
@@ -62,7 +62,7 @@ extern "C" {
                   if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
                     if(x(n, c, xh, xw) > y(n, c, yh, yw)) {
                       y(n, c, yh, yw) = x(n, c, xh, xw);
-                      ind(n, c, yh, yw) = (long long) (xh * Win + xw);
+                      ind(n, c, yh, yw) = xh * Win + xw;
                     }
                   }
                 }
