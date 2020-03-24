@@ -7,7 +7,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import pytest
-import torchvision
 
 # Network
 class LeNet5(nn.Module):
@@ -124,6 +123,8 @@ def test_lenet5_inference_mnist():
     """
     Trains the CNN on CPU, loads the model to HB to test inference
     """
+    import torchvision
+
     # Model
     BATCH_SIZE = 32
     LEARNING_RATE = 0.02
