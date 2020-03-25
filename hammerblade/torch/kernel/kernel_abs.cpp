@@ -10,9 +10,7 @@ extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_abs(
           bsg_tensor_t* t0_p,
-          bsg_tensor_t* t1_p,
-          float* value_p) {
-    // value is *NOT* used here.
+          bsg_tensor_t* t1_p) {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
     brg_tile_elementwise_for(t0_p, t1_p,
@@ -24,6 +22,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_abs, bsg_tensor_t*, bsg_tensor_t*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_abs, bsg_tensor_t*, bsg_tensor_t*)
 
 }

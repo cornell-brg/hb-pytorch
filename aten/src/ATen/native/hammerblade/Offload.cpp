@@ -15,7 +15,8 @@ namespace native {
  * --------------------------------------------------------------------------*/
 
 // Offloading operations that have tensors and scalars as arguments
-void offload_tensor_scalar_impl(std::vector<Tensor> tensors, std::vector<Scalar> scalars,
+void offload_tensor_scalar_impl(std::vector<Tensor> tensors,
+                                std::vector<eva_t> device_scalars,
                                 const char* kernel) {
 
   // Device pointers to tensors on the device
@@ -34,10 +35,10 @@ void offload_tensor_scalar_impl(std::vector<Tensor> tensors, std::vector<Scalar>
     // NOTE: here we are assuming all strides need to be copied.
   }
 
-  // Allocate device scalars and copy the data
-  for(int i=0; i<scalars.size(); i++) {
-    auto alpha = scalars[i];
-    device_args.push_back(create_device_scalar(alpha.to<float>()));
+  // Add device_scalars to argument lists
+  for(int i=0; i<device_scalars.size(); i++) {
+    auto alpha = device_scalars[i];
+    device_args.push_back(alpha);
   }
 
   c10::hammerblade::offload_kernel(kernel, device_args);

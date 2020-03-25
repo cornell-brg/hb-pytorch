@@ -38,10 +38,10 @@ Tensor& bernoulli_scalar_hb_(Tensor& self, double p, Generator* gen) {
   AT_DISPATCH_FLOAT_TYPE_ONLY(self.scalar_type(), "bernoulli_scalar_hb_", [&]() {
     HammerBladeGenerator* generator = get_generator_or_default<HammerBladeGenerator>(gen,
                                       hammerblade::detail::getDefaultHammerBladeGenerator());
-    auto p_scalar = Scalar(p);
+    float p_float = safe_downcast<float, double>(p);
     auto seed_tensor = hammerblade_common_seed_to_tensor(generator->random());
 
-    hb_offload_kernel(self, seed_tensor, p_scalar, "tensorlib_bernoulli_scalar_");
+    hb_offload_kernel(self, seed_tensor, p_float, "tensorlib_bernoulli_scalar_");
   });
   return self;
 }
