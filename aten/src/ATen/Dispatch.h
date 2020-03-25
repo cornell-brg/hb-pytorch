@@ -8,7 +8,7 @@
 
 #define AT_PRIVATE_CASE_TYPE(enum_type, type, ...) \
   case enum_type: {                                \
-    using scalar_t = type;                         \
+    using scalar_t C10_UNUSED = type;              \
     return __VA_ARGS__();                          \
   }
 

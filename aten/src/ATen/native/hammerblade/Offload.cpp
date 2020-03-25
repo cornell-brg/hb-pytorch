@@ -62,58 +62,5 @@ void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
 void offload_memcpy(TensorIterator& iter) {
   offload_op_unary(iter, "tensorlib_copy_hb_to_hb");
 }
-
-// Offload routine convolution forward pass
-void offload_convolution_forward(Tensor& output, const Tensor& input,
-    const Tensor& weight, IntArrayRef padding, IntArrayRef stride,
-    IntArrayRef dilation, int64_t groups) {
-
-  // Dimension check
-  TORCH_CHECK(output.dim() == 4, "Only 2d convolution supported now.");
-
-  // Dilation check
-  bool dilation_check = true;
-  for(auto d : dilation) {
-    if(d != 1) {
-      TORCH_WARN("dilation[i] = ", d);
-      dilation_check = false;
-      break;
-    }
-  }
-  TORCH_CHECK(dilation_check,
-        "dilation = ", dilation,
-        " is not supported by HB yet.",
-        " Make sure dilation is all ones.");
-
-  // Groups check
-  TORCH_CHECK(groups == 1,
-      "Grouped convolution not supported by HB yet."
-      " Make sure groups = 1.");
-
-  std::vector<eva_t> device_args;
-  std::vector<eva_t> device_ptrs;
-  device_args.push_back(create_device_tensor(output, device_ptrs));
-  device_args.push_back(create_device_tensor(input, device_ptrs));
-  device_args.push_back(create_device_tensor(weight, device_ptrs));
-  device_args.push_back(create_device_vector(padding, true, device_ptrs));
-  device_args.push_back(create_device_vector(stride, true, device_ptrs));
-
-  c10::hammerblade::offload_kernel(
-      "tensorlib_convolution_forward", device_args);
-  cleanup_device(device_args, device_ptrs);
-}
-
-// Offload routine for covolution bias addition
-void offload_convolution_add_bias(const Tensor& output, const Tensor& bias) {
-  std::vector<eva_t> device_args;
-  std::vector<eva_t> device_ptrs;
-  device_args.push_back(create_device_tensor(output, device_ptrs));
-  device_args.push_back(create_device_tensor(bias, device_ptrs));
-
-  c10::hammerblade::offload_kernel(
-      "tensorlib_convolution_add_bias", device_args);
-  cleanup_device(device_args, device_ptrs);
-}
-
 } // namespace native
 } // namespace at

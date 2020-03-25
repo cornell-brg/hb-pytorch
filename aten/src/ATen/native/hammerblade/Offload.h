@@ -130,15 +130,5 @@ inline void hb_offload_kernel(Tensor t0, Tensor t1, Tensor t2, Tensor t3,
   offload_tensor_scalar_impl(args, scalars, kernel);
 }
 
-//==============================================
-// conv offloader
-//==============================================
-
-void offload_convolution_forward(Tensor& output, const Tensor& input,
-    const Tensor& weight, IntArrayRef padding, IntArrayRef stride,
-    IntArrayRef dilation, int64_t groups);
-
-void offload_convolution_add_bias(const Tensor& output, const Tensor& ibias);
-
 } // namespace native
 } // namespace at

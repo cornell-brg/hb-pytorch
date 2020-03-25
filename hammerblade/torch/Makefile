@@ -53,7 +53,7 @@ $(KERNEL_CPPSRCS): %.cpp : $(KERNEL_DIR)/%.cpp
 kernel.riscv: $(SPMD_COMMON_OBJECTS) $(BSG_MANYCORE_LIB) crt.o
 kernel.riscv: $(KERNEL_OBJS)
 	$(RISCV_LINK) $(KERNEL_OBJS) $(SPMD_COMMON_OBJECTS) \
-		-L. -l:$(BSG_MANYCORE_LIB) -o $@ $(RISCV_LINK_OPTS)
+		-L. -l:$(BSG_MANYCORE_LIB) -o $@ $(filter-out -nostdlib,$(RISCV_LINK_OPTS))
 
 clean:
 	-rm -rf stack.info.* *.log *.csv ucli.key
