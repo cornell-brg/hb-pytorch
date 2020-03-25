@@ -51,12 +51,12 @@ static void nll_loss_out_frame_hb(
     hb_offload_kernel(output, total_weight, input_contiguous,
                       target_contiguous, weight_float,
                       reduction_u32, ignore_index_u32,
-                      "tensorlib_nllloss_weight");
+                      "tensorlib_lossnll_weight");
   } else {
     hb_offload_kernel(output, total_weight, input_contiguous,
                       target_contiguous,
                       reduction_u32, ignore_index_u32,
-                      "tensorlib_nllloss");
+                      "tensorlib_lossnll");
   }
 
 }

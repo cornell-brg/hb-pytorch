@@ -10,7 +10,7 @@
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_nllloss_weight(
+  __attribute__ ((noinline))  int tensorlib_lossnll_weight(
           bsg_tensor_t* output_p,
           bsg_tensor_t* total_weight_p,
           bsg_tensor_t* input_p,
@@ -83,11 +83,11 @@ extern "C" {
 
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_nllloss_weight, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
+  HB_EMUL_REG_KERNEL(tensorlib_lossnll_weight, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
                      bsg_tensor_t*, bsg_tensor_t*, uint32_t*, uint32_t*)
 
 
-  __attribute__ ((noinline))  int tensorlib_nllloss(
+  __attribute__ ((noinline))  int tensorlib_lossnll(
           bsg_tensor_t* output_p,
           bsg_tensor_t* total_weight_p,
           bsg_tensor_t* input_p,
@@ -160,7 +160,7 @@ extern "C" {
 
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_nllloss, bsg_tensor_t*, bsg_tensor_t*,
+  HB_EMUL_REG_KERNEL(tensorlib_lossnll, bsg_tensor_t*, bsg_tensor_t*,
                      bsg_tensor_t*, bsg_tensor_t*, uint32_t*, uint32_t*)
 
 }
