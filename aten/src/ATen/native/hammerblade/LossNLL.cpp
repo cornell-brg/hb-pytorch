@@ -3,8 +3,6 @@
 #include <ATen/hammerblade/HammerBladeContext.h>
 #include <ATen/native/hammerblade/Offload.h>
 
-#include <iostream>
-
 namespace at {
 namespace native {
 
@@ -15,6 +13,10 @@ namespace {
 // source tensor unmodified.
 inline Tensor optional_contiguous(const Tensor& source) {
   return source.defined() ? source.contiguous() : source;
+}
+
+inline Tensor optional_to_float(const Tensor& source) {
+  return source.defined() ? source.to(at::kFloat) : source;
 }
 
 
@@ -30,6 +32,7 @@ static void nll_loss_out_frame_hb(
   const auto n_dims = input.dim();
   // convert to int32, and contiguous tensors
   auto weight_contiguous = optional_contiguous(weight);
+  auto weight_float = optional_to_float(weight_contiguous);
   auto input_contiguous = input.contiguous();
   auto target_contiguous = target.to(at::kInt).contiguous();
 
@@ -44,20 +47,12 @@ static void nll_loss_out_frame_hb(
   uint32_t reduction_u32 = safe_downcast<uint32_t, int64_t>(reduction);
   uint32_t ignore_index_u32 = safe_downcast<uint32_t, int64_t>(ignore_index_u32);
 
-  // Start offloading
-  // Inputs1:
-  // input, target, output, total_weight
-  // Inputs2:
-  // input, target, output, weight, total_weight
-
-  if (weight_contiguous.defined()) {
-    // Inputs2
+  if (weight_float.defined()) {
     hb_offload_kernel(output, total_weight, input_contiguous,
-                      target_contiguous, weight_contiguous,
+                      target_contiguous, weight_float,
                       reduction_u32, ignore_index_u32,
                       "tensorlib_nllloss_weight");
   } else {
-    // Inputs1
     hb_offload_kernel(output, total_weight, input_contiguous,
                       target_contiguous,
                       reduction_u32, ignore_index_u32,
