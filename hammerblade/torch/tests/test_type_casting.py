@@ -1,9 +1,10 @@
 """
 Tests on torch.to (copy_hb_to_hb kernel)
-03/18/2020 Lin Cheng (lc873@cornell.edu)
+03/25/2020 Lin Cheng (lc873@cornell.edu)
 """
 
 import torch
+import pytest
 import hypothesis.strategies as st
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu

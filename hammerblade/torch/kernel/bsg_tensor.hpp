@@ -78,6 +78,10 @@ class BSGTensor {
       return sizes[d];
     }
 
+    uint32_t ndim() {
+      return dims;
+    }
+
     template<typename... T>
     DT& operator()(T... indices) {
       std::initializer_list<uint32_t> iarray = {indices...};

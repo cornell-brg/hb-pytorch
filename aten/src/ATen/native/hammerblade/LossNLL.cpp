@@ -1,5 +1,9 @@
 #include <ATen/ATen.h>
 #include <ATen/Dispatch.h>
+#include <ATen/hammerblade/HammerBladeContext.h>
+#include <ATen/native/hammerblade/Offload.h>
+
+#include <iostream>
 
 namespace at {
 namespace native {
@@ -13,14 +17,7 @@ inline Tensor optional_contiguous(const Tensor& source) {
   return source.defined() ? source.contiguous() : source;
 }
 
-// Returns the address of the first element of a tensor
-// or nullptr if the tensor is undefined.
-template <typename scalar_t>
-inline scalar_t* optional_data(const Tensor& source) {
-  return source.defined() ? source.data_ptr<scalar_t>() : nullptr;
-}
 
-template <typename scalar_t>
 static void nll_loss_out_frame_hb(
     Tensor& output,
     Tensor& total_weight,
@@ -29,100 +26,44 @@ static void nll_loss_out_frame_hb(
     const Tensor& weight,
     int64_t reduction,
     int64_t ignore_index) {
+
   const auto n_dims = input.dim();
-  const auto n_classes = input.size(-1);
-
-  scalar_t* total_weight_data = total_weight.data_ptr<scalar_t>();
-  *total_weight_data = 0;
-
+  // convert to int32, and contiguous tensors
   auto weight_contiguous = optional_contiguous(weight);
-  const scalar_t* weight_data = optional_data<scalar_t>(weight_contiguous);
+  auto input_contiguous = input.contiguous();
+  auto target_contiguous = target.to(at::kInt).contiguous();
 
-  if (reduction == Reduction::None && n_dims == 2) {
+  if (n_dims == 1 || reduction != Reduction::None) {
+    // produce scalar output when reducing or input is 1d
+    output.resize_({});
+  } else {
     const auto batch_size = input.size(0);
     output.resize_({batch_size});
-
-    auto input_acc = input.accessor<scalar_t, 2>();
-    auto target_acc = target.accessor<int64_t, 1>();
-    auto output_acc = output.accessor<scalar_t, 1>();
-
-    for (auto i = 0; i < batch_size; i++) {
-      const auto cur_target = target_acc[i];
-
-      if (cur_target == ignore_index) {
-        output_acc[i] = 0;
-        continue;
-      }
-
-      TORCH_CHECK_INDEX(
-          cur_target >= 0 && cur_target < n_classes,
-          "Target ",
-          cur_target,
-          " is out of bounds.");
-
-      scalar_t cur_weight = weight_data != nullptr ? weight_data[cur_target]
-                                                   : static_cast<scalar_t>(1);
-      output_acc[i] = -input_acc[i][cur_target] * cur_weight;
-    }
-
-    return;
   }
 
-  // produce scalar output when reducing or input is 1d
-  output.resize_({});
+  uint32_t reduction_u32 = safe_downcast<uint32_t, int64_t>(reduction);
+  uint32_t ignore_index_u32 = safe_downcast<uint32_t, int64_t>(ignore_index_u32);
 
-  auto input_contiguous = input.contiguous();
-  auto target_contiguous = target.contiguous();
+  // Start offloading
+  // Inputs1:
+  // input, target, output, total_weight
+  // Inputs2:
+  // input, target, output, weight, total_weight
 
-  const scalar_t* input_data = input_contiguous.data_ptr<scalar_t>();
-  const int64_t* target_data = target_contiguous.data_ptr<int64_t>();
-
-  scalar_t output_val = 0;
-  scalar_t total_weight_val = 0;
-
-  if (input.dim() == 1) {
-    const auto cur_target = target_data[0];
-    if (cur_target != ignore_index) {
-      TORCH_CHECK_INDEX(
-          cur_target >= 0 && cur_target < n_classes,
-          "Target ",
-          cur_target,
-          " is out of bounds.");
-      total_weight_val =
-          weight_data ? weight_data[cur_target] : static_cast<scalar_t>(1);
-      output_val = -input_data[cur_target] * total_weight_val;
-    }
-  } else if (input.dim() == 2) {
-    const auto batch_size = input.size(0);
-    TORCH_CHECK(target.size(0) == batch_size);
-    const auto n_target = input.size(1);
-
-    for (int64_t i = 0; i < batch_size; i++) {
-      const auto cur_target = target_data[i];
-      if (cur_target != ignore_index) {
-        TORCH_CHECK_INDEX(
-            cur_target >= 0 && cur_target < n_classes,
-            "Target ",
-            cur_target,
-            " is out of bounds.");
-
-        scalar_t cur_weight =
-            weight_data ? weight_data[cur_target] : static_cast<scalar_t>(1);
-        total_weight_val += cur_weight;
-        output_val -= input_data[i * n_target + cur_target] * cur_weight;
-      }
-    }
+  if (weight_contiguous.defined()) {
+    // Inputs2
+    hb_offload_kernel(output, total_weight, input_contiguous,
+                      target_contiguous, weight_contiguous,
+                      reduction_u32, ignore_index_u32,
+                      "tensorlib_nllloss_weight");
+  } else {
+    // Inputs1
+    hb_offload_kernel(output, total_weight, input_contiguous,
+                      target_contiguous,
+                      reduction_u32, ignore_index_u32,
+                      "tensorlib_nllloss");
   }
 
-  if (reduction == Reduction::Mean &&
-      (total_weight_val != 0 || input.numel() == 0)) {
-    // allow NaN result for total_weight_val == 0 case, see #15870
-    output_val /= total_weight_val;
-  }
-
-  // write result to output tensors
-  *output.data_ptr<scalar_t>() = output_val;
-  *total_weight_data = total_weight_val;
 }
 
 void nll_loss_forward_out_hb_template(
@@ -160,7 +101,7 @@ void nll_loss_forward_out_hb_template(
 
   AT_DISPATCH_FLOAT_TYPE_ONLY(input.scalar_type(), "nll_loss_out_frame_hb",
       [&] {
-        nll_loss_out_frame_hb<scalar_t>(
+        nll_loss_out_frame_hb(
             output,
             total_weight,
             input,
