@@ -109,7 +109,7 @@ extern "C" {
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_lossnll_weight, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
-                     bsg_tensor_t*, bsg_tensor_t*, uint32_t*, uint32_t*)
+                     bsg_tensor_t*, bsg_tensor_t*, uint32_t*, int32_t*)
 
 
   __attribute__ ((noinline))  int tensorlib_lossnll(
@@ -133,6 +133,6 @@ extern "C" {
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_lossnll, bsg_tensor_t*, bsg_tensor_t*,
-                     bsg_tensor_t*, bsg_tensor_t*, uint32_t*, uint32_t*)
+                     bsg_tensor_t*, bsg_tensor_t*, uint32_t*, int32_t*)
 
 }
