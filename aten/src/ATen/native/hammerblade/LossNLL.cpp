@@ -45,17 +45,17 @@ static void nll_loss_out_frame_hb(
   }
 
   uint32_t reduction_u32 = safe_downcast<uint32_t, int64_t>(reduction);
-  uint32_t ignore_index_u32 = safe_downcast<uint32_t, int64_t>(ignore_index_u32);
+  int32_t ignore_index_i32 = safe_downcast<int32_t, int64_t>(ignore_index);
 
   if (weight_float.defined()) {
     hb_offload_kernel(output, total_weight, input_contiguous,
                       target_contiguous, weight_float,
-                      reduction_u32, ignore_index_u32,
+                      reduction_u32, ignore_index_i32,
                       "tensorlib_lossnll_weight");
   } else {
     hb_offload_kernel(output, total_weight, input_contiguous,
                       target_contiguous,
-                      reduction_u32, ignore_index_u32,
+                      reduction_u32, ignore_index_i32,
                       "tensorlib_lossnll");
   }
 

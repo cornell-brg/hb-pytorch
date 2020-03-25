@@ -6,8 +6,6 @@
 #include <kernel_common.hpp>
 #include <hb_reduction.hpp>
 
-#include <iostream>
-
 template<typename F>
 static int tensorlib_lossnll_impl(
         bsg_tensor_t* output_p,
@@ -15,7 +13,7 @@ static int tensorlib_lossnll_impl(
         bsg_tensor_t* input_p,
         bsg_tensor_t* target_p,
         uint32_t*     reduction_p,
-        uint32_t*     ignore_index_p,
+        int32_t*     ignore_index_p,
         F weight) {
 
   BSGTensor<float> output(output_p);
@@ -23,7 +21,7 @@ static int tensorlib_lossnll_impl(
   BSGTensor<float> input(input_p);
   BSGTensor<int> target(target_p);
   uint32_t reduction = *reduction_p;
-  uint32_t ignore_index = *ignore_index_p;
+  int32_t ignore_index = *ignore_index_p;
 
   const auto n_classes = input.dim(1);
   const auto batch_size = input.dim(0);
@@ -93,7 +91,7 @@ extern "C" {
           bsg_tensor_t* target_p,
           bsg_tensor_t* weight_p,
           uint32_t*     reduction_p,
-          uint32_t*     ignore_index_p) {
+          int32_t*     ignore_index_p) {
 
     BSGTensor<float> weight(weight_p);
     tensorlib_lossnll_impl(output_p,
@@ -120,7 +118,7 @@ extern "C" {
           bsg_tensor_t* input_p,
           bsg_tensor_t* target_p,
           uint32_t*     reduction_p,
-          uint32_t*     ignore_index_p) {
+          int32_t*     ignore_index_p) {
 
     tensorlib_lossnll_impl(output_p,
                            total_weight_p,
