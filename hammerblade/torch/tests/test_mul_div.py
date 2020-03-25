@@ -45,6 +45,7 @@ def test_elementwise_mul_4():
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_elementwise_mul_hypothesis(inputs):
+
     def elementwise_mul(inputs):
         assert len(inputs) == 2
         return inputs[0] * inputs[1]
@@ -64,6 +65,7 @@ def test_elementwise_in_place_mul():
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_elementwise_in_place_mul_hypothesis(inputs):
+
     def elementwise_mul(inputs):
         x1, x2 = inputs
         x1.mul_(x2)
@@ -83,6 +85,7 @@ def test_mul_with_scalar():
 def test_mul_with_scalar_hypothesis(tensor, scalar):
     assume(not isnan(scalar))
     assume(not isinf(scalar))
+
     def mul_scalar(inputs):
         tensor, scalar = inputs
         return tensor * scalar
@@ -123,6 +126,7 @@ def test_elementwise_div_4():
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2, nonzero=True))
 def test_elementwise_div_hypothesis(inputs):
+
     def elementwise_div(inputs):
         assert len(inputs) == 2
         return inputs[0] / inputs[1]
@@ -142,6 +146,7 @@ def test_elementwise_in_place_div():
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2, nonzero=True))
 def test_elementwise_in_place_div_hypothesis(inputs):
+
     def elementwise_div(inputs):
         x1, x2 = inputs
         x1.div_(x2)
@@ -162,6 +167,7 @@ def test_div_with_scalar_hypothesis(tensor, scalar):
     assume(scalar != 0)
     assume(not isnan(scalar))
     assume(not isinf(scalar))
+
     def div_scalar(inputs):
         tensor, scalar = inputs
         return tensor / scalar

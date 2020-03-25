@@ -5,9 +5,6 @@ Tests on torch.to (copy_hb_to_hb kernel)
 
 import torch
 import pytest
-import hypothesis.strategies as st
-from hypothesis import given, settings
-from .hypothesis_test_util import HypothesisUtil as hu
 
 def test_torch_to_long_to_int_1():
     x = torch.ones(10, dtype=torch.long)

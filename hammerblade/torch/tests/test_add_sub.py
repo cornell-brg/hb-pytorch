@@ -59,6 +59,7 @@ def test_elementwise_add_4():
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_elementwise_add_hypothesis(inputs):
+
     def elementwise_add(inputs):
         assert len(inputs) == 2
         return inputs[0] + inputs[1]
@@ -78,6 +79,7 @@ def test_elementwise_in_place_add():
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_elementwise_in_place_add_hypothesis(inputs):
+
     def elementwise_add(inputs):
         x1, x2 = inputs
         x1.add_(x2)
@@ -97,6 +99,7 @@ def test_add_with_scalar():
 def test_add_with_scalar_hypothesis(tensor, scalar):
     assume(not isnan(scalar))
     assume(not isinf(scalar))
+
     def add_scalar(inputs):
         tensor, scalar = inputs
         return tensor + scalar
@@ -137,6 +140,7 @@ def test_elementwise_sub_4():
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_elementwise_sub_hypothesis(inputs):
+
     def elementwise_sub(inputs):
         assert len(inputs) == 2
         return inputs[0] - inputs[1]
@@ -156,6 +160,7 @@ def test_elementwise_in_place_sub():
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_elementwise_in_place_sub_hypothesis(inputs):
+
     def elementwise_sub(inputs):
         x1, x2 = inputs
         x1.sub_(x2)
@@ -175,6 +180,7 @@ def test_sub_with_scalar():
 def test_sub_with_scalar_hypothesis(tensor, scalar):
     assume(not isnan(scalar))
     assume(not isinf(scalar))
+
     def sub_scalar(inputs):
         tensor, scalar = inputs
         return tensor - scalar

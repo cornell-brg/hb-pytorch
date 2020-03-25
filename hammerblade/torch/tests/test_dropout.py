@@ -60,7 +60,7 @@ def test_torch_nn_dropout_4():
 
 def test_torch_nn_dropout_5():
     dropout = nn.Dropout(0.25)
-    x = torch.randn(2,3).hammerblade()
+    x = torch.randn(2, 3).hammerblade()
     x_d = dropout(x)
     assert x_d.device == torch.device("hammerblade")
     x_d = x_d.cpu().flatten()
@@ -73,7 +73,7 @@ def test_torch_nn_dropout_5():
 
 def test_torch_nn_dropout_6():
     dropout = nn.Dropout(0.25)
-    x = torch.randn(4,5).hammerblade()
+    x = torch.randn(4, 5).hammerblade()
     x_d = dropout(x)
     assert x_d.device == torch.device("hammerblade")
     x_d = x_d.cpu().flatten()

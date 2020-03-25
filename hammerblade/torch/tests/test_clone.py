@@ -4,7 +4,6 @@ Tests on torch.clone (copy_hb_to_hb kernel)
 """
 
 import torch
-import hypothesis.strategies as st
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 

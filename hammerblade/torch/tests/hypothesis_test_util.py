@@ -4,7 +4,6 @@ helper functions adapted from caffe2/python/hypothesis_test_util.py
 """
 
 import torch
-import copy
 import hypothesis
 import hypothesis.extra.numpy
 import hypothesis.strategies as st
@@ -72,7 +71,7 @@ class HypothesisUtil():
         dims_ = st.lists(dims(**kwargs), min_size=min_dim, max_size=max_dim)
         if nonzero:
             return dims_.flatmap(
-                lambda dims: arrays(dims, dtype, elements, filter_=(lambda x: x!=0)))
+                lambda dims: arrays(dims, dtype, elements, filter_=(lambda x: x != 0)))
         else:
             return dims_.flatmap(
                 lambda dims: arrays(dims, dtype, elements))
@@ -94,16 +93,10 @@ class HypothesisUtil():
         dims_ = st.lists(dims(**kwargs), min_size=min_dim, max_size=max_dim)
         if nonzero:
             return dims_.flatmap(
-                lambda dims: st.lists(
-                  arrays(dims, dtype, elements, filter_=(lambda x: x!=0)),
-                    min_size=n,
-                    max_size=n))
+                lambda dims: st.lists(arrays(dims, dtype, elements, filter_=(lambda x: x != 0)), min_size=n, max_size=n))
         else:
             return dims_.flatmap(
-                lambda dims: st.lists(
-                    arrays(dims, dtype, elements),
-                    min_size=n,
-                    max_size=n))
+                lambda dims: st.lists(arrays(dims, dtype, elements), min_size=n, max_size=n))
 
 
     @staticmethod
