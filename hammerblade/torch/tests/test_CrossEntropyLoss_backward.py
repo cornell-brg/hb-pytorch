@@ -107,4 +107,3 @@ def test_torch_nn_CrossEntropyLoss_none_back_2():
     output.backward(grad)
     output_h.backward(grad.hammerblade())
     assert torch.allclose(input.grad, input_h.grad)
-
