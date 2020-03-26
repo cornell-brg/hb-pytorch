@@ -1594,6 +1594,7 @@
   dispatch:
     CPU: log_softmax_backward_cpu
     CUDA: log_softmax_backward_cuda
+    HammerBlade: log_softmax_backward_hb
 
 - func: logsumexp(Tensor self, int[1] dim, bool keepdim=False) -> Tensor
   supports_named_tensor: True
