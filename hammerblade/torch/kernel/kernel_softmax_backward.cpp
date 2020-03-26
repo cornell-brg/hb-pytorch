@@ -54,6 +54,9 @@ extern "C" {
               exp(output_data[d * dim_stride]) * sum;
 
         });
+
+    return 0;
+
   }
 
     HB_EMUL_REG_KERNEL(tensorlib_log_softmax_backward,
