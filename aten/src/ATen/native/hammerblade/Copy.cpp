@@ -53,8 +53,9 @@ static void copy_kernel_hammerblade(TensorIterator& iter, bool non_blocking) {
 
   // Since this copy kernel is FAKE ...
   // In reality we need to be able to copy between tensors with different dtypes
-  TORCH_INTERNAL_ASSERT(iter.dtype(0) == iter.dtype(1),
-      "So far HammerBlade copy kernel can only handle tensors with same dtype");
+  TORCH_INTERNAL_ASSERT((iter.dtype(0) == iter.dtype(1)) || (iter.dtype(0) == at::kInt && iter.dtype(1) == at::kLong),
+      "So far HammerBlade copy kernel can only handle tensors with same dtype"
+      "or casting from Long to Int");
 
   Device dst_device = iter.device(0);
   Device src_device = iter.device(1);
