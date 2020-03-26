@@ -1,5 +1,5 @@
 """
-Tests on torch.nn.NLLLoss
+Tests on torch.nn.CrossEntropyLoss
 03/25/2020 Lin Cheng (lc873@cornell.edu)
 """
 
