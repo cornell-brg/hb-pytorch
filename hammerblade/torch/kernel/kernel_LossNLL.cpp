@@ -13,13 +13,13 @@ static int tensorlib_lossnll_impl(
         bsg_tensor_t* input_p,
         bsg_tensor_t* target_p,
         uint32_t*     reduction_p,
-        int32_t*     ignore_index_p,
-        F weight) {
+        int32_t*      ignore_index_p,
+        F             weight) {
 
   BSGTensor<float> output(output_p);
   BSGTensor<float> total_weight(total_weight_p);
   BSGTensor<float> input(input_p);
-  BSGTensor<int> target(target_p);
+  BSGTensor<int>   target(target_p);
   uint32_t reduction = *reduction_p;
   int32_t ignore_index = *ignore_index_p;
 
@@ -28,20 +28,22 @@ static int tensorlib_lossnll_impl(
   const auto n_dims = input.ndim();
 
   if(reduction == Reduction::None && n_dims == 2) {
-    for (auto i = 0; i < batch_size; i++) {
-      const auto cur_target = target(i);
+    brg_tile_for(batch_size,
+        [&](size_t i) {
+          const auto cur_target = target(i);
+          if (cur_target == ignore_index) {
+            output(i) = 0;
+          } else {
+            bsg_assert(cur_target >= 0 && cur_target < n_classes);
+            const float cur_weight = weight(cur_target);
+            output(i) = -input(i, cur_target) * cur_weight;
+          }
+        });
 
-      if (cur_target == ignore_index) {
-        output(i) = 0;
-        continue;
-      }
+    return 0;
+  }
 
-      bsg_assert(cur_target >= 0 && cur_target < n_classes);
-
-      float cur_weight = weight(cur_target);
-      output(i) = -input(i, cur_target) * cur_weight;
-    }
-
+  if (__bsg_id != 0) {
     return 0;
   }
 
@@ -62,7 +64,7 @@ static int tensorlib_lossnll_impl(
 
       if (cur_target != ignore_index) {
         bsg_assert(cur_target >= 0 && cur_target < n_classes);
-        float cur_weight = weight(cur_target);
+        const float cur_weight = weight(cur_target);
         total_weight_val += cur_weight;
         output_val -= input(i, cur_target) * cur_weight;
       }
@@ -91,7 +93,7 @@ extern "C" {
           bsg_tensor_t* target_p,
           bsg_tensor_t* weight_p,
           uint32_t*     reduction_p,
-          int32_t*     ignore_index_p) {
+          int32_t*      ignore_index_p) {
 
     BSGTensor<float> weight(weight_p);
     tensorlib_lossnll_impl(output_p,
@@ -118,7 +120,7 @@ extern "C" {
           bsg_tensor_t* input_p,
           bsg_tensor_t* target_p,
           uint32_t*     reduction_p,
-          int32_t*     ignore_index_p) {
+          int32_t*      ignore_index_p) {
 
     tensorlib_lossnll_impl(output_p,
                            total_weight_p,
