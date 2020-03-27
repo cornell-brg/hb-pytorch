@@ -4,42 +4,54 @@ Tests on torch.nn.LogSoftMax backward
 """
 
 import torch
-import torch.nn as nn
+import torch.nn.functional as F
 import numpy as np
 
-def test_torch_nn_LogSoftMax_back_1():
-    m = nn.LogSoftmax(dim=1)
-    loss = nn.NLLLoss(reduction='mean')
-    input = torch.tensor([[-3.5164, -1.9673, -4.7514, -0.2075, -4.6912],
-                         [-2.9321, -1.5085, -0.8699, -1.4016, -2.8089],
-                         [-2.6460, -1.9800, -1.4818, -1.8358, -0.9057]],
-                         requires_grad=True)
-    input_h = torch.tensor([[-3.5164, -1.9673, -4.7514, -0.2075, -4.6912],
-                           [-2.9321, -1.5085, -0.8699, -1.4016, -2.8089],
-                           [-2.6460, -1.9800, -1.4818, -1.8358, -0.9057]],
-                           requires_grad=True)
-    target = torch.tensor([1, 0, 4])
-    output = loss(m(input), target)
-    logsoftmax = m(input_h.hammerblade())
-    assert logsoftmax.device == torch.device("hammerblade")
-    output_h = loss(logsoftmax.cpu(), target)
-    assert torch.allclose(output, output_h)
-    output.backward()
-    output_h.backward()
-    assert torch.allclose(input.grad, input_h.grad)
+torch.manual_seed(42)
+np.random.seed(42)
 
-def test_torch_nn_LogSoftMax_back_2():
-    m = nn.LogSoftmax(dim=1)
-    loss = nn.NLLLoss(reduction='mean')
-    init = np.random.rand(3, 5)
-    input = torch.tensor(init, dtype=torch.float, requires_grad=True)
-    input_h = torch.tensor(init, dtype=torch.float, requires_grad=True)
-    target = torch.tensor([1, 0, 4])
-    output = loss(m(input), target)
-    logsoftmax = m(input_h.hammerblade())
-    assert logsoftmax.device == torch.device("hammerblade")
-    output_h = loss(logsoftmax.cpu(), target)
-    assert torch.allclose(output, output_h)
-    output.backward()
-    output_h.backward()
-    assert torch.allclose(input.grad, input_h.grad)
+def _test_log_softmax_back(init, dim):
+    x = torch.tensor(init, dtype=torch.float, requires_grad=True)
+    x_hb = torch.tensor(init, dtype=torch.float, requires_grad=True)
+
+    y = F.log_softmax(x, dim)
+    y_hb = F.log_softmax(x_hb.hammerblade(), dim)
+
+    assert y_hb.device == torch.device("hammerblade")
+    assert torch.allclose(y, y_hb.cpu(), atol=1e-7)
+
+    y.backward(y * -1.0)
+    y_hb.backward(y_hb * -1.0)
+
+    assert torch.allclose(x.grad, x_hb.grad, atol=1e-6)
+
+def test_log_softmax_back_1():
+    init = np.random.rand(2, 3)
+    dim = 1
+    _test_log_softmax_back(init, dim)
+
+def test_log_softmax_back_2():
+    init = np.random.rand(2, 3)
+    dim = 0
+    _test_log_softmax_back(init, dim)
+
+def test_log_softmax_back_3():
+    init = np.random.rand(5)
+    dim = 0
+    _test_log_softmax_back(init, dim)
+
+def test_log_softmax_back_4():
+    init = np.random.rand(1, 6)
+    dim = 1
+    _test_log_softmax_back(init, dim)
+
+def test_log_softmax_back_5():
+    init = np.random.rand(1, 6)
+    dim = 0
+    _test_log_softmax_back(init, dim)
+
+def test_log_softmax_back_6():
+    init = np.random.rand(2, 3, 3, 5)
+
+    for dim in range(4):
+        _test_log_softmax_back(init, dim)
