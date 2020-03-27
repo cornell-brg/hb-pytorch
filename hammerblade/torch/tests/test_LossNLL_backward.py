@@ -25,6 +25,8 @@ def test_torch_nn_NLLLoss_mean_back_1():
     assert torch.allclose(output, output_h.cpu())
     output.backward()
     output_h.backward()
+    assert input.grad is not None
+    assert input_h.grad is not None
     assert torch.allclose(input.grad, input_h.grad)
 
 def test_torch_nn_NLLLoss_mean_back_2():
@@ -40,6 +42,8 @@ def test_torch_nn_NLLLoss_mean_back_2():
     assert torch.allclose(output, output_h.cpu())
     output.backward()
     output_h.backward()
+    assert input.grad is not None
+    assert input_h.grad is not None
     assert torch.allclose(input.grad, input_h.grad)
 
 def test_torch_nn_NLLLoss_sum_back_1():
@@ -60,6 +64,8 @@ def test_torch_nn_NLLLoss_sum_back_1():
     assert torch.allclose(output, output_h.cpu())
     output.backward()
     output_h.backward()
+    assert input.grad is not None
+    assert input_h.grad is not None
     assert torch.allclose(input.grad, input_h.grad)
 
 def test_torch_nn_NLLLoss_sum_back_2():
@@ -75,6 +81,8 @@ def test_torch_nn_NLLLoss_sum_back_2():
     assert torch.allclose(output, output_h.cpu())
     output.backward()
     output_h.backward()
+    assert input.grad is not None
+    assert input_h.grad is not None
     assert torch.allclose(input.grad, input_h.grad)
 
 def test_torch_nn_NLLLoss_none_back_1():
@@ -96,6 +104,8 @@ def test_torch_nn_NLLLoss_none_back_1():
     assert torch.allclose(output, output_h.cpu())
     output.backward(grad)
     output_h.backward(grad.hammerblade())
+    assert input.grad is not None
+    assert input_h.grad is not None
     assert torch.allclose(input.grad, input_h.grad)
 
 def test_torch_nn_NLLLoss_none_back_2():
@@ -112,4 +122,6 @@ def test_torch_nn_NLLLoss_none_back_2():
     assert torch.allclose(output, output_h.cpu())
     output.backward(grad)
     output_h.backward(grad.hammerblade())
+    assert input.grad is not None
+    assert input_h.grad is not None
     assert torch.allclose(input.grad, input_h.grad)

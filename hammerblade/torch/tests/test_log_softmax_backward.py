@@ -23,6 +23,8 @@ def _test_log_softmax_back(init, dim):
     y.backward(y * -1.0)
     y_hb.backward(y_hb * -1.0)
 
+    assert x.grad is not None
+    assert x_hb.grad is not None
     assert torch.allclose(x.grad, x_hb.grad, atol=1e-6)
 
 def test_log_softmax_back_1():
