@@ -15,11 +15,11 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_log_softmax(
           bsg_tensor_t* output,
           bsg_tensor_t* input,
-          int64_t* dim_) {
+          int32_t* dim_) {
     float* in = (float*) ((intptr_t) input->data);
     float* out = (float*) ((intptr_t) output->data);
     uint32_t* in_strides = (uint32_t*) ((intptr_t) input->strides);
-    int64_t dim = *dim_;
+    int32_t dim = *dim_;
     uint32_t dimStride = in_strides[dim];
 
     // A group here is the set of all dimensions lower than `dim`. So, number
@@ -77,6 +77,6 @@ extern "C" {
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_log_softmax,
-     bsg_tensor_t*, bsg_tensor_t*, int64_t*);
+     bsg_tensor_t*, bsg_tensor_t*, int32_t*);
 
 }

@@ -1,15 +1,14 @@
 """
-Tests on torch.nn.NLLLoss backward
-03/26/2020 Lin Cheng (lc873@cornell.edu)
+Tests on torch.nn.CrossEntropyLoss backward
+03/25/2020 Lin Cheng (lc873@cornell.edu)
 """
 
 import torch
 import torch.nn as nn
 import numpy as np
 
-def test_torch_nn_NLLLoss_mean_back_1():
-    m = nn.LogSoftmax(dim=1)
-    loss = nn.NLLLoss(reduction='mean')
+def test_torch_nn_CrossEntropyLoss_mean_back_1():
+    loss = nn.CrossEntropyLoss(reduction='mean')
     input = torch.tensor([[-3.5164, -1.9673, -4.7514, -0.2075, -4.6912],
                          [-2.9321, -1.5085, -0.8699, -1.4016, -2.8089],
                          [-2.6460, -1.9800, -1.4818, -1.8358, -0.9057]],
@@ -19,8 +18,8 @@ def test_torch_nn_NLLLoss_mean_back_1():
                            [-2.6460, -1.9800, -1.4818, -1.8358, -0.9057]],
                            requires_grad=True)
     target = torch.tensor([1, 0, 4])
-    output = loss(m(input), target)
-    output_h = loss(m(input_h).hammerblade(), target.hammerblade())
+    output = loss(input, target)
+    output_h = loss(input_h.hammerblade(), target.hammerblade())
     assert output_h.device == torch.device("hammerblade")
     assert torch.allclose(output, output_h.cpu())
     output.backward()
@@ -29,15 +28,14 @@ def test_torch_nn_NLLLoss_mean_back_1():
     assert input_h.grad is not None
     assert torch.allclose(input.grad, input_h.grad)
 
-def test_torch_nn_NLLLoss_mean_back_2():
-    m = nn.LogSoftmax(dim=1)
-    loss = nn.NLLLoss(reduction='mean')
+def test_torch_nn_CrossEntropyLoss_mean_back_2():
+    loss = nn.CrossEntropyLoss(reduction='mean')
     init = np.random.rand(3, 5)
     input = torch.tensor(init, dtype=torch.float, requires_grad=True)
     input_h = torch.tensor(init, dtype=torch.float, requires_grad=True)
     target = torch.tensor([1, 0, 4])
-    output = loss(m(input), target)
-    output_h = loss(m(input_h).hammerblade(), target.hammerblade())
+    output = loss(input, target)
+    output_h = loss(input_h.hammerblade(), target.hammerblade())
     assert output_h.device == torch.device("hammerblade")
     assert torch.allclose(output, output_h.cpu())
     output.backward()
@@ -46,9 +44,8 @@ def test_torch_nn_NLLLoss_mean_back_2():
     assert input_h.grad is not None
     assert torch.allclose(input.grad, input_h.grad)
 
-def test_torch_nn_NLLLoss_sum_back_1():
-    m = nn.LogSoftmax(dim=1)
-    loss = nn.NLLLoss(reduction='sum')
+def test_torch_nn_CrossEntropyLoss_sum_back_1():
+    loss = nn.CrossEntropyLoss(reduction='sum')
     input = torch.tensor([[-3.5164, -1.9673, -4.7514, -0.2075, -4.6912],
                          [-2.9321, -1.5085, -0.8699, -1.4016, -2.8089],
                          [-2.6460, -1.9800, -1.4818, -1.8358, -0.9057]],
@@ -58,8 +55,8 @@ def test_torch_nn_NLLLoss_sum_back_1():
                            [-2.6460, -1.9800, -1.4818, -1.8358, -0.9057]],
                            requires_grad=True)
     target = torch.tensor([1, 0, 4])
-    output = loss(m(input), target)
-    output_h = loss(m(input_h).hammerblade(), target.hammerblade())
+    output = loss(input, target)
+    output_h = loss(input_h.hammerblade(), target.hammerblade())
     assert output_h.device == torch.device("hammerblade")
     assert torch.allclose(output, output_h.cpu())
     output.backward()
@@ -68,15 +65,14 @@ def test_torch_nn_NLLLoss_sum_back_1():
     assert input_h.grad is not None
     assert torch.allclose(input.grad, input_h.grad)
 
-def test_torch_nn_NLLLoss_sum_back_2():
-    m = nn.LogSoftmax(dim=1)
-    loss = nn.NLLLoss(reduction='sum')
+def test_torch_nn_CrossEntropyLoss_sum_back_2():
+    loss = nn.CrossEntropyLoss(reduction='sum')
     init = np.random.rand(3, 5)
     input = torch.tensor(init, dtype=torch.float, requires_grad=True)
     input_h = torch.tensor(init, dtype=torch.float, requires_grad=True)
     target = torch.tensor([1, 0, 4])
-    output = loss(m(input), target)
-    output_h = loss(m(input_h).hammerblade(), target.hammerblade())
+    output = loss(input, target)
+    output_h = loss(input_h.hammerblade(), target.hammerblade())
     assert output_h.device == torch.device("hammerblade")
     assert torch.allclose(output, output_h.cpu())
     output.backward()
@@ -85,9 +81,8 @@ def test_torch_nn_NLLLoss_sum_back_2():
     assert input_h.grad is not None
     assert torch.allclose(input.grad, input_h.grad)
 
-def test_torch_nn_NLLLoss_none_back_1():
-    m = nn.LogSoftmax(dim=1)
-    loss = nn.NLLLoss(reduction='none')
+def test_torch_nn_CrossEntropyLoss_none_back_1():
+    loss = nn.CrossEntropyLoss(reduction='none')
     input = torch.tensor([[-3.5164, -1.9673, -4.7514, -0.2075, -4.6912],
                          [-2.9321, -1.5085, -0.8699, -1.4016, -2.8089],
                          [-2.6460, -1.9800, -1.4818, -1.8358, -0.9057]],
@@ -98,8 +93,8 @@ def test_torch_nn_NLLLoss_none_back_1():
                            requires_grad=True)
     target = torch.tensor([1, 0, 4])
     grad = torch.tensor([1., 2., 3.])
-    output = loss(m(input), target)
-    output_h = loss(m(input_h).hammerblade(), target.hammerblade())
+    output = loss(input, target)
+    output_h = loss(input_h.hammerblade(), target.hammerblade())
     assert output_h.device == torch.device("hammerblade")
     assert torch.allclose(output, output_h.cpu())
     output.backward(grad)
@@ -108,16 +103,15 @@ def test_torch_nn_NLLLoss_none_back_1():
     assert input_h.grad is not None
     assert torch.allclose(input.grad, input_h.grad)
 
-def test_torch_nn_NLLLoss_none_back_2():
-    m = nn.LogSoftmax(dim=1)
-    loss = nn.NLLLoss(reduction='none')
+def test_torch_nn_CrossEntropyLoss_none_back_2():
+    loss = nn.CrossEntropyLoss(reduction='none')
     init = np.random.rand(3, 5)
     input = torch.tensor(init, dtype=torch.float, requires_grad=True)
     input_h = torch.tensor(init, dtype=torch.float, requires_grad=True)
     target = torch.tensor([1, 0, 4])
     grad = torch.tensor([1., 2., 3.])
-    output = loss(m(input), target)
-    output_h = loss(m(input_h).hammerblade(), target.hammerblade())
+    output = loss(input, target)
+    output_h = loss(input_h.hammerblade(), target.hammerblade())
     assert output_h.device == torch.device("hammerblade")
     assert torch.allclose(output, output_h.cpu())
     output.backward(grad)

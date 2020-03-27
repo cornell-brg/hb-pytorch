@@ -59,7 +59,7 @@ static int tensorlib_lossnll_impl(
     }
   } else if (n_dims == 2) {
     bsg_assert(target.dim(0) == batch_size);
-    for (int64_t i = 0; i < batch_size; i++) {
+    for (size_t i = 0; i < batch_size; i++) {
       const auto cur_target = target(i);
 
       if (cur_target != ignore_index) {
