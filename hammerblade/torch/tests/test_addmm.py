@@ -3,9 +3,7 @@ Unit tests for torch.addmm kernel
 03/09/2020 Lin Cheng (lc873@cornell.edu)
 """
 import torch
-import pytest
 
-#@pytest.mark.skip(reason="not yet implemented")
 def test_torch_addmm_1():
     M = torch.ones(2, 3)
     M_h = M.hammerblade()
@@ -18,7 +16,6 @@ def test_torch_addmm_1():
     assert out_h.device == torch.device("hammerblade")
     assert torch.equal(out_h.cpu(), out)
 
-#@pytest.mark.skip(reason="not yet implemented")
 # 1x1 matrices
 def test_torch_addmm_2():
     M = torch.randn(1, 1)
