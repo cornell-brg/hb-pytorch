@@ -17,8 +17,10 @@ def _test_conv2d(inputs, kernel, padding=1, stride=1, bias=None):
     conv_result = F.conv2d(inputs, kernel,
                            padding=padding, stride=stride, bias=bias)
 
+    # test forward
     assert torch.allclose(conv_result, conv_result_hb.cpu())
 
+    # test backward
     if inputs.requires_grad:
         grad = torch.rand(conv_result.shape)
         grad_hb = grad.hammerblade()
@@ -206,3 +208,6 @@ def test_conv2d_width_height_kernel_pad_stride():
                         kernel = torch.rand(output_channels, input_channels,
                                             kernel_size, kernel_size)
                         _test_conv2d(inputs, kernel)
+
+if __name__ == "__main__":
+    test_conv2d_1()
