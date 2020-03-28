@@ -137,6 +137,13 @@ extern "C" {
     //   N x Cout x Cin x H x W
     //   Kernel loops are constant-time
     if(__bsg_id == 0) {
+      // init input grads
+      for(uint32_t n = 0; n < N; ++n)
+        for(uint32_t ci = 0; ci < Cin; ++ci)
+          for(uint32_t xh = 0; xh < Hin; ++xh)
+            for(uint32_t xw = 0; xw < Win; ++xw)
+              x(n, ci, xh, xw) = 0.0;
+
       for(uint32_t n = 0; n < N; ++n)
         for(uint32_t co = 0; co < Cout; ++co)
           for(uint32_t yh = 0; yh < Hout; ++yh)
@@ -146,10 +153,6 @@ extern "C" {
                   for(uint32_t kw = 0; kw < Kw; ++kw) {
                     int32_t xh = Sh * yh - Ph + kh;
                     int32_t xw = Sw * yw - Pw + kw;
-
-                    if((ci + kh + kw) == 0) {
-                      x(n, ci, xh, xw) = 0.0;
-                    }
 
                     if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
                       x(n, ci, xh, xw) += y(n, co, yh, yw) * w(co, ci, kh, kw);
