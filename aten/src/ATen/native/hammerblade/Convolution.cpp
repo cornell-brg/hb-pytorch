@@ -8,9 +8,9 @@ namespace native {
 namespace { // anonymous
 
 void hb_convolution_arg_check(
-    Tensor& output, IntArrayRef dilation, int64_t groups) {
+    int64_t output_dims, IntArrayRef dilation, int64_t groups) {
   // Dimension check
-  TORCH_CHECK(output.dim() == 4, "Only 2d convolution supported now.");
+  TORCH_CHECK(output_dims == 4, "Only 2d convolution supported now.");
 
   // Dilation check
   bool dilation_check = true;
@@ -164,7 +164,7 @@ Tensor hb_convolution_forward(
 
   Tensor weight_contig = weight->contiguous();
 
-  hb_convolution_arg_check(output_t, dilation, groups);
+  hb_convolution_arg_check(output->dim(), dilation, groups);
 
   std::vector<eva_t> device_args;
   std::vector<eva_t> device_ptrs;
@@ -195,6 +195,28 @@ void hb_convolution_add_bias_(CheckedFrom c, const TensorArg& output,
   hb_offload_kernel(*output, *bias, "tensorlib_convolution_add_bias");
 }
 
+Tensor hb_convolution_backward_input(
+    CheckedFrom c,
+    IntArrayRef input_size, const TensorArg& grad_output, const TensorArg& weight,
+    IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation, int64_t groups)
+{
+  checkAllSameType(c, {grad_output, weight});
+  checkAllSameHB(c, {grad_output, weight});
+
+  auto grad_input_t = at::empty(input_size, grad_output->options());
+
+  // Avoid "grad_input" when this is being used as transposed convolution
+  TensorArg grad_input{ grad_input_t, "result", 0 };
+  convolution_shape_check(c, grad_input, weight, grad_output, padding, stride, dilation, groups);
+
+  // See #4500
+  Tensor weight_contig = weight->contiguous(grad_output->suggest_memory_format());
+
+  hb_convolution_arg_check(grad_output->dim(), dilation, groups);
+
+  TORCH_CHECK(false, "hb_convolution_backward_input: offloading not implemented");
+  return *grad_input;
+}
 
 } // anonymous namespace
 
@@ -225,9 +247,14 @@ Tensor hb_convolution(
 }
 
 Tensor hb_convolution_backward_input(
-    IntArrayRef input_size, const at::Tensor& grad_output, const at::Tensor& weight,
+    IntArrayRef input_size, const at::Tensor& grad_output_t, const at::Tensor& weight_t,
     IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation, int64_t groups) {
-  AT_ERROR("hb_convolution_backward_input: not implemented yet.");
+  TensorArg grad_output{ grad_output_t, "grad_output", 1 },
+            weight{ weight_t, "weight", 2 };
+  return hb_convolution_backward_input(
+      "hb_convolution_backward_input",
+      input_size, grad_output, weight,
+      padding, stride, dilation, groups);
 }
 
 Tensor hb_convolution_backward_weight(
