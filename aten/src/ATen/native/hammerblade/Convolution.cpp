@@ -241,4 +241,59 @@ Tensor hb_convolution(
   return output_t;
 }
 
+Tensor hb_convolution_backward_input(
+    IntArrayRef input_size, const at::Tensor& grad_output, const at::Tensor& weight,
+    IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation, int64_t groups) {
+  AT_ERROR("hb_convolution_backward_input: not implemented yet.");
+}
+
+Tensor hb_convolution_backward_weight(
+    IntArrayRef weight_size, const at::Tensor& grad_output, const at::Tensor& input,
+    IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation, int64_t groups) {
+  AT_ERROR("hb_convolution_backward_weight: not implemented yet.");
+}
+
+Tensor hb_convolution_backward_bias(
+    const at::Tensor& grad_output) {
+  AT_ERROR("hb_convolution_backward_bias: not implemented yet.");
+}
+
+std::tuple<at::Tensor,at::Tensor,at::Tensor> hb_convolution_backward(
+    const at::Tensor& input, const at::Tensor& grad_output,
+    const at::Tensor& weight, IntArrayRef padding, IntArrayRef stride,
+    IntArrayRef dilation, int64_t groups,
+    std::array<bool,3> output_mask) {
+  Tensor grad_output = grad_output_t.contiguous();
+
+  Tensor grad_input, grad_weight, grad_bias;
+  if (input.numel() == 0) {
+    if (output_mask[0]) {
+      grad_input = at::empty(input.sizes(), input.options());
+    }
+    if (output_mask[1]) {
+      grad_weight = at::zeros(weight.sizes(), weight.options());
+    }
+    if (output_mask[2]) {
+      grad_bias = at::zeros({grad_output.size(1)}, grad_output.options());
+    }
+  } else {
+    if (output_mask[0]) {
+      grad_input = at::hb_convolution_backward_input(
+          input.sizes(), grad_output, weight, padding,
+          stride, dilation, groups);
+    }
+    if (output_mask[1]) {
+      grad_weight = at::hb_convolution_backward_weight(
+          weight.sizes(), grad_output, input, padding,
+          stride, dilation, groups);
+    }
+    if (output_mask[2]) {
+      grad_bias = at::hb_convolution_backward_bias(grad_output);
+    }
+  }
+
+  return std::tuple<Tensor,Tensor,Tensor>{
+    grad_input, grad_weight, grad_bias};
+}
+
 }} // namespace at::native
