@@ -74,7 +74,9 @@ class BSGTensor {
     }
 
     uint32_t dim(uint32_t d) {
-      bsg_assert(d < dims);
+      bsg_assert_msg(d < dims,
+                     "error: dimesnion must be less than %d\n",
+                     dims);
       return sizes[d];
     }
 
@@ -88,9 +90,11 @@ class BSGTensor {
 
       // special case where we have a 0-dim tensor
       if(dims == 0) {
-        bsg_assert(iarray.size() == 1);
+        bsg_assert_msg(iarray.size() == 1,
+                       "error: expected only one argument with 0-dim tensor\n");
         for(auto index : iarray) {
-          bsg_assert(index == 0);
+          bsg_assert_msg(index == 0,
+                         "error: index must be 0 0-dim tensor\n");
         }
         return data[0];
       }
@@ -104,7 +108,9 @@ class BSGTensor {
         }
       }
 
-      bsg_assert(iarray.size() == dims);
+      bsg_assert_msg(iarray.size() == dims,
+                     "error: expected dims=%d arguments but got %d\n",
+                     dims, iarray.size());
       uint32_t offset = 0;
       uint32_t s = 0;
       for(auto index : iarray) {
@@ -112,7 +118,7 @@ class BSGTensor {
         s++;
       }
 
-      bsg_assert_msg(offset < N, "N=%d but accessed %d", N, offset);
+      bsg_assert_msg(offset < N, "error: N=%d but accessed %d\n", N, offset);
 
       return data[offset];
     }
