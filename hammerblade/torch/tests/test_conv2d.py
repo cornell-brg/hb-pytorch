@@ -6,10 +6,11 @@ import torch
 import torch.nn.functional as F
 import os
 import pytest
+import hbutils
 
 def _test_conv2d(inputs, kernel, padding=1, stride=1, bias=None):
-    inputs_hb = inputs.hammerblade()
-    kernel_hb = kernel.hammerblade()
+    inputs_hb = hbutils._hb_tensor_from_cpu_with_grad(inputs)
+    kernel_hb = hbutils._hb_tensor_from_cpu_with_grad(kernel)
     bias_hb = None if bias is None else bias.hammerblade()
 
     conv_result_hb = F.conv2d(inputs_hb, kernel_hb,
@@ -28,8 +29,8 @@ def _test_conv2d(inputs, kernel, padding=1, stride=1, bias=None):
         conv_result.backward(grad)
         conv_result_hb.backward(grad_hb)
 
-        assert torch.allclose(inputs.grad, inputs_hb.grad)
-        assert torch.allclose(kernel.grad, kernel_hb.grad)
+        assert torch.allclose(inputs.grad, inputs_hb.grad.cpu())
+        assert torch.allclose(kernel.grad, kernel_hb.grad.cpu())
 
 def test_conv2d_1():
     """
