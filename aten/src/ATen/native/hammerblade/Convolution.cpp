@@ -210,11 +210,22 @@ Tensor hb_convolution_backward_input(
   convolution_shape_check(c, grad_input, weight, grad_output, padding, stride, dilation, groups);
 
   // See #4500
-  Tensor weight_contig = weight->contiguous(grad_output->suggest_memory_format());
+  Tensor weight_contig = weight->contiguous();
 
   hb_convolution_arg_check(grad_output->dim(), dilation, groups);
 
-  TORCH_CHECK(false, "hb_convolution_backward_input: offloading not implemented");
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+  device_args.push_back(create_device_tensor(*grad_input, device_ptrs));
+  device_args.push_back(create_device_tensor(*grad_output, device_ptrs));
+  device_args.push_back(create_device_tensor(weight_contig, device_ptrs));
+  device_args.push_back(create_device_vector(padding, true, device_ptrs));
+  device_args.push_back(create_device_vector(stride, true, device_ptrs));
+
+  c10::hammerblade::offload_kernel(
+      "tensorlib_convolution_backward_input", device_args);
+  cleanup_device(device_args, device_ptrs);
+
   return *grad_input;
 }
 
