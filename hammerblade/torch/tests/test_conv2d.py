@@ -19,12 +19,22 @@ def _test_conv2d(inputs, kernel, padding=1, stride=1, bias=None):
 
     assert torch.allclose(conv_result, conv_result_hb.cpu())
 
+    if inputs.requires_grad:
+        grad = torch.rand(conv_result.shape)
+        grad_hb = grad.hammerblade()
+
+        conv_result.backward(grad)
+        conv_result_hb.backward(grad_hb)
+
+        assert torch.allclose(inputs.grad, input_hb.grad)
+        assert torch.allclose(kernel.grad, kernel_hb.grad)
+
 def test_conv2d_1():
     """
     Single batch, single channel
     """
-    kernel = torch.rand(1, 1, 3, 3)
-    inputs = torch.rand(1, 1, 5, 5)
+    kernel = torch.rand(1, 1, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 1, 5, 5, requires_grad=True)
 
     _test_conv2d(inputs, kernel)
 
