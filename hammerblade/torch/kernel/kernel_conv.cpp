@@ -110,7 +110,30 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    bsg_assert(false);
+    // End profiling
+    bsg_cuda_print_stat_kernel_end();
+    return 0;
+  }
+
+  __attribute__ ((noinline))  int tensorlib_convolution_backward_weight(
+          bsg_tensor_t* grad_weight,
+          bsg_tensor_t* grad_output,
+          bsg_tensor_t* input,
+          bsg_vector_t* padding,
+          bsg_vector_t* strides) {
+    // Start profiling
+    bsg_cuda_print_stat_kernel_start();
+
+    // End profiling
+    bsg_cuda_print_stat_kernel_end();
+    return 0;
+  }
+
+  __attribute__ ((noinline))  int tensorlib_convolution_backward_bias(
+          bsg_tensor_t* grad_bias,
+          bsg_tensor_t* grad_output) {
+    // Start profiling
+    bsg_cuda_print_stat_kernel_start();
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
@@ -127,5 +150,12 @@ extern "C" {
   HB_EMUL_REG_KERNEL(tensorlib_convolution_backward_input,
      bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
      bsg_vector_t*, bsg_vector_t*);
+
+  HB_EMUL_REG_KERNEL(tensorlib_convolution_backward_weight,
+     bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
+     bsg_vector_t*, bsg_vector_t*);
+
+  HB_EMUL_REG_KERNEL(tensorlib_convolution_backward_bias,
+     bsg_tensor_t*, bsg_tensor_t*);
 
 }
