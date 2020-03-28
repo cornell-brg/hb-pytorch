@@ -229,6 +229,38 @@ Tensor hb_convolution_backward_input(
   return *grad_input;
 }
 
+Tensor hb_convolution_backward_weight(
+    CheckedFrom c,
+    IntArrayRef weight_size, const TensorArg& grad_output, const TensorArg& input,
+    IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation, int64_t groups)
+{
+  checkAllSameType(c, {grad_output, input});
+  checkAllSameHB(c, {grad_output, input});
+
+  auto grad_weight_t = at::empty(weight_size, grad_output->options());
+
+  // For uniformity with everything else, although it seems grad_weight
+  // would be unambiguous too.
+  TensorArg grad_weight{ grad_weight_t, "result", 0 };
+  convolution_shape_check(c, input, grad_weight, grad_output, padding, stride, dilation, groups);
+
+  hb_convolution_arg_check(grad_output->dim(), dilation, groups);
+
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+  device_args.push_back(create_device_tensor(*grad_weight, device_ptrs));
+  device_args.push_back(create_device_tensor(*grad_output, device_ptrs));
+  device_args.push_back(create_device_tensor(*input, device_ptrs));
+  device_args.push_back(create_device_vector(padding, true, device_ptrs));
+  device_args.push_back(create_device_vector(stride, true, device_ptrs));
+
+  c10::hammerblade::offload_kernel(
+      "tensorlib_convolution_backward_weight", device_args);
+  cleanup_device(device_args, device_ptrs);
+
+  return grad_weight_t;
+}
+
 } // anonymous namespace
 
 Tensor hb_convolution_transpose(
@@ -269,14 +301,24 @@ Tensor hb_convolution_backward_input(
 }
 
 Tensor hb_convolution_backward_weight(
-    IntArrayRef weight_size, const at::Tensor& grad_output, const at::Tensor& input,
+    IntArrayRef weight_size, const at::Tensor& grad_output_t, const at::Tensor& input_t,
     IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation, int64_t groups) {
-  AT_ERROR("hb_convolution_backward_weight: not implemented yet.");
+  TensorArg grad_output{ grad_output_t, "grad_output", 1 },
+            input{ input_t, "input", 2 };
+  return hb_convolution_backward_weight(
+      "hb_convolution_backward_weight",
+      weight_size, grad_output, input,
+      padding, stride, dilation, groups);
 }
 
 Tensor hb_convolution_backward_bias(
     const at::Tensor& grad_output) {
-  AT_ERROR("hb_convolution_backward_bias: not implemented yet.");
+  auto grad_bias = at::empty(
+                        { grad_output.size(output_channels_dim) }, grad_output.options());
+
+  hb_offload_kernel(grad_bias, grad_output, "tensorlib_convolution_backward_bias");
+
+  return grad_bias;
 }
 
 std::tuple<at::Tensor,at::Tensor,at::Tensor> hb_convolution_backward(

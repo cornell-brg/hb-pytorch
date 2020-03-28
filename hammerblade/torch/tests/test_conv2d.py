@@ -28,7 +28,7 @@ def _test_conv2d(inputs, kernel, padding=1, stride=1, bias=None):
         conv_result.backward(grad)
         conv_result_hb.backward(grad_hb)
 
-        assert torch.allclose(inputs.grad, input_hb.grad)
+        assert torch.allclose(inputs.grad, inputs_hb.grad)
         assert torch.allclose(kernel.grad, kernel_hb.grad)
 
 def test_conv2d_1():
