@@ -14,7 +14,7 @@ def test_torch_addmm_1():
     out = torch.addmm(M, mat1, mat2)
     out_h = torch.addmm(M_h, mat1_h, mat2_h)
     assert out_h.device == torch.device("hammerblade")
-    assert torch.equal(out_h.cpu(), out)
+    assert torch.allclose(out_h.cpu(), out)
 
 # 1x1 matrices
 def test_torch_addmm_2():
@@ -27,7 +27,7 @@ def test_torch_addmm_2():
     out = torch.addmm(M, mat1, mat2)
     out_h = torch.addmm(M_h, mat1_h, mat2_h)
     assert out_h.device == torch.device("hammerblade")
-    assert torch.equal(out_h.cpu(), out)
+    assert torch.allclose(out_h.cpu(), out)
 
 # broadcast self to result
 def test_torch_addmm_3():
@@ -40,19 +40,19 @@ def test_torch_addmm_3():
     out = torch.addmm(M, mat1, mat2)
     out_h = torch.addmm(M_h, mat1_h, mat2_h)
     assert out_h.device == torch.device("hammerblade")
-    assert torch.equal(out_h.cpu(), out)
+    assert torch.allclose(out_h.cpu(), out)
 
 # bigger matrix
 def test_torch_addmm_4():
-    M = torch.randn(123, 456)
+    M = torch.randn(32, 64)
     M_h = M.hammerblade()
-    mat1 = torch.randn(123, 987)
+    mat1 = torch.randn(32, 72)
     mat1_h = mat1.hammerblade()
-    mat2 = torch.randn(987, 456)
+    mat2 = torch.randn(72, 64)
     mat2_h = mat2.hammerblade()
     out = torch.addmm(M, mat1, mat2)
     out_h = torch.addmm(M_h, mat1_h, mat2_h)
     assert out_h.device == torch.device("hammerblade")
-    assert torch.equal(out_h.cpu(), out)
+    assert torch.allclose(out_h.cpu(), out)
 
 
