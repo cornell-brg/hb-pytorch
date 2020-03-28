@@ -112,7 +112,7 @@ class BSGTensor {
         s++;
       }
 
-      bsg_assert(offset < N);
+      bsg_assert_msg(offset < N, "N=%d but accessed %d", N, offset);
 
       return data[offset];
     }

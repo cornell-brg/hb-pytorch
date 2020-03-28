@@ -5,8 +5,13 @@
 #ifndef _BSG_ASSERT_HPP
 #define _BSG_ASSERT_HPP
 
-#define bsg_assert(cond) if (!(cond)) {                                          \
-    bsg_printf("assert failed at %s:%d\n", __FILE__, __LINE__);                \
+#define bsg_assert(cond) if (!(cond)) {                       \
+    bsg_printf("assert failed at %s:%d", __FILE__, __LINE__); \
+    bsg_fail();}
+
+#define bsg_assert_msg(cond, fmt, ...) if (!(cond)) {         \
+    bsg_printf("assert failed at %s:%d", __FILE__, __LINE__); \
+    bsg_printf(fmt,##__VA_ARGS__);                            \
     bsg_fail();}
 
 #endif
