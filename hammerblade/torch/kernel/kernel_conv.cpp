@@ -101,11 +101,31 @@ extern "C" {
     return 0;
   }
 
+  __attribute__ ((noinline))  int tensorlib_convolution_backward_input(
+          bsg_tensor_t* grad_input,
+          bsg_tensor_t* grad_output,
+          bsg_tensor_t* weight,
+          bsg_vector_t* padding,
+          bsg_vector_t* strides) {
+    // Start profiling
+    bsg_cuda_print_stat_kernel_start();
+
+    bsg_assert(false);
+
+    // End profiling
+    bsg_cuda_print_stat_kernel_end();
+    return 0;
+  }
+
   HB_EMUL_REG_KERNEL(tensorlib_convolution_forward,
      bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
      bsg_vector_t*, bsg_vector_t*);
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_add_bias,
      bsg_tensor_t*, bsg_tensor_t*);
+
+  HB_EMUL_REG_KERNEL(tensorlib_convolution_backward_input,
+     bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
+     bsg_vector_t*, bsg_vector_t*);
 
 }
