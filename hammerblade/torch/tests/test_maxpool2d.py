@@ -37,7 +37,7 @@ def test_max_pool2d_2():
     """
     All elements same
     """
-    x = torch.ones(1, 1, 5, 5)
+    x = torch.ones(1, 1, 5, 5, requires_grad=True)
     kernel_size = 3
     stride = 2
     padding = 0
@@ -47,7 +47,7 @@ def test_max_pool2d_3():
     """
     Multi channel
     """
-    x = torch.rand(1, 3, 5, 5)
+    x = torch.rand(1, 3, 5, 5, requires_grad=True)
     kernel_size = 3
     stride = 2
     padding = 0
@@ -57,7 +57,7 @@ def test_max_pool2d_4():
     """
     Multi batch multi channel
     """
-    x = torch.rand(2, 3, 5, 5)
+    x = torch.rand(2, 3, 5, 5, requires_grad=True)
     kernel_size = 3
     stride = 2
     padding = 0
@@ -67,7 +67,7 @@ def test_max_pool2d_5():
     """
     Multi batch multi channel padding
     """
-    x = torch.rand(2, 3, 5, 5)
+    x = torch.rand(2, 3, 5, 5, requires_grad=True)
     kernel_size = 2
     stride = 2
     padding = 1
@@ -77,7 +77,7 @@ def test_max_pool2d_6():
     """
     Multi batch multi channel assymentric kernel
     """
-    x = torch.rand(2, 2, 10, 10)
+    x = torch.rand(2, 2, 10, 10, requires_grad=True)
     kernel_size = (6, 7)
     stride = 2
     padding = 2
@@ -87,7 +87,7 @@ def test_max_pool2d_7():
     """
     Multi batch multi channel assymentric
     """
-    x = torch.rand(2, 2, 10, 10)
+    x = torch.rand(2, 2, 10, 10, requires_grad=True)
     kernel_size = (7, 6)
     stride = (1, 2)
     padding = (2, 3)
