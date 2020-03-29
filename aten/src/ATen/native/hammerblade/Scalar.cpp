@@ -17,6 +17,7 @@ Scalar _local_scalar_dense_hb(const Tensor& self) {
         void* dataptr = self.data_ptr();
         c10::hammerblade::memcpy_device_to_host((void*)value, dataptr, sizeof(scalar_t));
         r = Scalar(*value);
+        free(value);
       });
   return r;
 }
