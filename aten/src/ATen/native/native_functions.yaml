@@ -3642,6 +3642,7 @@
   dispatch:
     CPU: _local_scalar_dense_cpu
     CUDA: _local_scalar_dense_cuda
+    HammerBlade: _local_scalar_dense_hb
   variants: function
   supports_named_tensor: True
 
