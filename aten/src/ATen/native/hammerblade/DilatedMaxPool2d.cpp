@@ -189,26 +189,24 @@ void max_pool2d_with_indices_backward_out_hb_template(
   gradInput.resize_as_(input);
   gradInput.contiguous();
 
-  TORCH_CHECK(false, "max_pool2d_backward: offloading not implemented.");
+  AT_DISPATCH_FLOAT_TYPE_ONLY(input.scalar_type(),
+    "max_pool2d_with_indices_backward",
+    [&] {
+      std::vector<eva_t> device_args;
+      std::vector<eva_t> device_ptrs;
+      device_args.push_back(create_device_tensor(gradInput, device_ptrs));
+      device_args.push_back(create_device_tensor(gradOutput, device_ptrs));
+      device_args.push_back(create_device_tensor(indices, device_ptrs));
+      device_args.push_back(create_device_tensor(input_, device_ptrs));
+      device_args.push_back(create_device_vector(kernel_size, true, device_ptrs));
+      device_args.push_back(create_device_vector(padding, true, device_ptrs));
+      device_args.push_back(create_device_vector(stride, true, device_ptrs));
 
-  //AT_DISPATCH_FLOAT_TYPE_ONLY(input.scalar_type(),
-  //  "max_pool2d_with_indices_backward",
-  //  [&] {
-  //    std::vector<eva_t> device_args;
-  //    std::vector<eva_t> device_ptrs;
-  //    device_args.push_back(create_device_tensor(gradInput, device_ptrs));
-  //    device_args.push_back(create_device_tensor(gradOutput, device_ptrs));
-  //    device_args.push_back(create_device_tensor(indices, device_ptrs));
-  //    device_args.push_back(create_device_tensor(input_, device_ptrs));
-  //    device_args.push_back(create_device_vector(kernel_size, true, device_ptrs));
-  //    device_args.push_back(create_device_vector(padding, true, device_ptrs));
-  //    device_args.push_back(create_device_vector(stride, true, device_ptrs));
-
-  //    c10::hammerblade::offload_kernel(
-  //        "tensorlib_max_pool2d_backward", device_args);
-  //    cleanup_device(device_args, device_ptrs);
-  //  }
-  //);
+      c10::hammerblade::offload_kernel(
+          "tensorlib_max_pool2d_backward", device_args);
+      cleanup_device(device_args, device_ptrs);
+    }
+  );
 }
 
 } // anonymous
