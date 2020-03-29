@@ -50,6 +50,7 @@ $(KERNEL_CSRCS): %.c : $(KERNEL_DIR)/%.c
 $(KERNEL_CPPSRCS): %.cpp : $(KERNEL_DIR)/%.cpp
 	cp $^ $@
 
+kernel.riscv: LINK_SCRIPT=$(SCRIPT_DIR)/hb_pytorch_link.ld
 kernel.riscv: $(SPMD_COMMON_OBJECTS) $(BSG_MANYCORE_LIB) crt.o
 kernel.riscv: $(KERNEL_OBJS)
 	$(RISCV_LINK) $(KERNEL_OBJS) $(SPMD_COMMON_OBJECTS) \
