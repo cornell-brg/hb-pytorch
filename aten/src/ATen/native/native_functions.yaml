@@ -5948,6 +5948,7 @@
   dispatch:
     CPU: max_pool2d_with_indices_backward_cpu
     CUDA: max_pool2d_with_indices_backward_cuda
+    HammerBlade: max_pool2d_with_indices_backward_hb
 
 # Return: (Tensor output, Tensor indices)
 - func: max_pool3d_with_indices.out(Tensor self, int[3] kernel_size, int[3] stride=[], int[3] padding=0, int[3] dilation=1, bool ceil_mode=False, *, Tensor(a!) out, Tensor(b!) indices) -> (Tensor(a!), Tensor(b!))
