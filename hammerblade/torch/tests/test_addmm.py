@@ -29,6 +29,7 @@ def test_torch_addmm_2():
     assert out_h.device == torch.device("hammerblade")
     assert torch.allclose(out_h.cpu(), out)
 
+@pytest.mark.skip(reason="not yet implemented")
 # broadcast self to result
 def test_torch_addmm_3():
     M = torch.randn(1, 3)
@@ -42,6 +43,7 @@ def test_torch_addmm_3():
     assert out_h.device == torch.device("hammerblade")
     assert torch.allclose(out_h.cpu(), out)
 
+@pytest.mark.skip(reason="not yet implemented")
 # bigger matrix
 def test_torch_addmm_4():
     M = torch.randn(32, 64)
@@ -55,4 +57,21 @@ def test_torch_addmm_4():
     assert out_h.device == torch.device("hammerblade")
     assert torch.allclose(out_h.cpu(), out)
 
+
+def test_torch_addmm_5():
+    M = torch.tensor([[1.,1.],[1.,1.]])
+    M_h = M.hammerblade()
+    mat1 = torch.tensor([[1.,2.],[3.,4.]])
+    mat1_h = mat1.hammerblade()
+    mat2 = torch.tensor([[5.,6.],[7.,8.]])
+    mat2_h = mat2.hammerblade()
+    out = torch.addmm(M, mat1, mat2)
+    out_h = torch.addmm(M_h, mat1_h, mat2_h)
+
+    print('expected')
+    print(out)
+    print('actual')
+    print(out_h.cpu())
+    assert out_h.device == torch.device("hammerblade")
+    assert torch.equal(out_h.cpu(), out)
 
