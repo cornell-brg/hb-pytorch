@@ -5,7 +5,7 @@ Tests on torch.mm
 import torch
 import pytest
 
-@pytest.mark.skip(reason="not yet implemented")
+#@pytest.mark.skip(reason="not yet implemented")
 def test_torch_mm_1():
     mat1 = torch.ones(2, 3)
     mat2 = torch.ones(3, 3)
@@ -16,7 +16,7 @@ def test_torch_mm_1():
     assert out_h.device == torch.device("hammerblade")
     assert torch.allclose(out_h.cpu(), out)
 
-@pytest.mark.skip(reason="not yet implemented")
+#@pytest.mark.skip(reason="not yet implemented")
 def test_torch_mm_2():
     mat1 = torch.randn(2, 3)
     mat2 = torch.randn(3, 3)
@@ -27,8 +27,8 @@ def test_torch_mm_2():
     assert out_h.device == torch.device("hammerblade")
     assert torch.allclose(out_h.cpu(), out)
 
-#@pytest.mark.xfail
-@pytest.mark.skip(reason="not yet implemented")
+@pytest.mark.xfail
+#@pytest.mark.skip(reason="not yet implemented")
 def test_torch_mm_mismatching_shape_F():
     mat1 = torch.randn(2, 2)
     mat2 = torch.randn(3, 3)
@@ -36,7 +36,7 @@ def test_torch_mm_mismatching_shape_F():
     mat2_h = mat2.hammerblade()
     out_h = torch.mm(mat1_h, mat2_h)
 
-@pytest.mark.skip(reason="not yet implemented")
+#@pytest.mark.skip(reason="not yet implemented")
 def test_torch_mm_transpose_1():
     mat1 = torch.randn(3, 4)
     mat2 = torch.randn(3, 5)
