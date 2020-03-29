@@ -24,7 +24,7 @@ def _test_max_pool2d(x, kernel_size, stride=None, padding=1):
         y.backward(grad)
         y_hb.backward(grad_hb)
 
-        torch.allclose(x.grad, x_hb.grad.cpu())
+        assert torch.equal(x.grad, x_hb.grad.cpu())
 
 def test_max_pool2d_1():
     x = torch.rand(1, 1, 5, 5, requires_grad=True)
