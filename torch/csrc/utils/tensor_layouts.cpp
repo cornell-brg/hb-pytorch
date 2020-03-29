@@ -33,6 +33,7 @@ void initializeLayouts() {
   }
   registerLayoutObject((THPLayout*)sparse_coo_layout, at::Backend::SparseCPU);
   registerLayoutObject((THPLayout*)sparse_coo_layout, at::Backend::SparseCUDA);
+  registerLayoutObject((THPLayout*)sparse_coo_layout, at::Backend::SparseHammerBlade);
 
   PyObject *mkldnn_layout = THPLayout_New(at::Layout::Mkldnn, "torch._mkldnn");
   Py_INCREF(mkldnn_layout);

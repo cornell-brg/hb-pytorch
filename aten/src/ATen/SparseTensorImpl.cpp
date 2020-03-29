@@ -11,6 +11,8 @@ namespace {
       return kCPU;
     } else if (type_set.has(TensorTypeId::SparseCUDATensorId)) {
       return kCUDA;
+    } else if (type_set.has(TensorTypeId::SparseHammerBladeTensorId)) {
+      return kHAMMERBLADE;
     } else {
       AT_ERROR("Cannot construct SparseTensor with non-sparse tensor type ID ", type_set);
     }

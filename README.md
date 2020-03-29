@@ -2,7 +2,7 @@
 
 --------------------------------------------------------------------------------
 
-# PyTorch HammerBlade Port ![Travis status](https://travis-ci.com/cornell-brg/hb-pytorch.svg?branch=master)
+# PyTorch HammerBlade Port <a href="https://travis-ci.com/github/cornell-brg/hb-pytorch" rel="Travis">![Travis status](https://travis-ci.com/cornell-brg/hb-pytorch.svg?branch=master)</a>
 This work aims to port PyTorch to HammerBlade.
 
 ### How to build PyTorch to use COSIM
@@ -11,9 +11,8 @@ This work aims to port PyTorch to HammerBlade.
     `git clone -b hb-device git@github.com:cornell-brg/hb-pytorch.git`
  - Create python virtual environment
     `python3.6 -m venv ./venv_pytorch`
-    `python3.6 -m venv ./venv_pytorch`
  - Install dependencies
-    `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja`
+    `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis`
  - Init pytorch third party dependencies
     `git submodule update --init --recursive`
  - Setup building environment variables. You need to edit `hb-pytorch/setup_cosim_build_env.sh` and set `BSG_MANYCORE_DIR` to `<bsg_bladerunner>/bsg_replicant/libraries`
@@ -27,7 +26,7 @@ This work aims to port PyTorch to HammerBlade.
     `python3.6 -m venv ./venv_pytorch`
     `python3.6 -m venv ./venv_pytorch`
  - Install dependencies
-    `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest`
+    `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja`
  - Init pytorch third party dependencies
     `git submodule update --init --recursive`
  - Setup building environment variables.

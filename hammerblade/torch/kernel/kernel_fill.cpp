@@ -15,7 +15,7 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
     // even though here a is *NOT* used, we need this
     // parameter for tpye inference
-    brg_tile_element_wise_for(t0_p, [&](float a = 0.0f) {
+    brg_tile_elementwise_for(t0_p, [&](float a = 0.0f) {
       return value;
     });
     //   End profiling

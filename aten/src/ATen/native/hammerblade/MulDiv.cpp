@@ -11,13 +11,13 @@ namespace {
 
 void mul_kernel_hb(TensorIterator& iter) {
   AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "mul_hb", [&]() {
-      offload_op_binary(iter, 1.0, "tensorlib_mul");
+      offload_op_binary(iter, "tensorlib_mul");
       });
 }
 
 void div_kernel_hb(TensorIterator& iter) {
   AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "div_hb", [&]() {
-      offload_op_binary(iter, 1.0, "tensorlib_div");
+      offload_op_binary(iter, "tensorlib_div");
       });
 }
 

@@ -121,7 +121,7 @@ namespace function_traits {
 //                                               bsg_tensor_t* a_p,
 //                                               bsg_tensor_t* b_p,
 //                                               float* alpha) {
-//    brg_element_wise_for(t0_p, t1_p, t2_p,
+//    brg_elementwise_for(t0_p, t1_p, t2_p,
 //        [&](float a, float b) {
 //          return a + alpha * b;
 //        });
@@ -129,7 +129,7 @@ namespace function_traits {
 //==========================================================
 
 template <class FetchFunctor>
-inline void brg_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
+inline void brg_elementwise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
                                  bsg_tensor_t* _t2, FetchFunctor functor) {
   //--------------------------------------------------
   // get the type of frist argument of lambda function
@@ -160,7 +160,7 @@ inline void brg_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
 //==========================================================
 
 template <class FetchFunctor>
-inline void brg_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
+inline void brg_elementwise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
                                  FetchFunctor functor) {
   //--------------------------------------------------
   // get the type of frist argument of lambda function
@@ -189,7 +189,7 @@ inline void brg_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
 //==========================================================
 
 template <class FetchFunctor>
-inline void brg_element_wise_for(bsg_tensor_t* _t0,
+inline void brg_elementwise_for(bsg_tensor_t* _t0,
                                  FetchFunctor functor) {
   //--------------------------------------------------
   // get the type of frist argument of lambda function
@@ -220,7 +220,7 @@ inline void brg_element_wise_for(bsg_tensor_t* _t0,
 //==========================================================
 
 template <class FetchFunctor>
-inline void brg_tile_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
+inline void brg_tile_elementwise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
                                       bsg_tensor_t* _t2, FetchFunctor functor) {
   //--------------------------------------------------
   // get the type of frist argument of lambda function
@@ -254,7 +254,7 @@ inline void brg_tile_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
 //==========================================================
 
 template <class FetchFunctor>
-inline void brg_tile_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
+inline void brg_tile_elementwise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
                                       FetchFunctor functor) {
   //--------------------------------------------------
   // get the type of frist argument of lambda function
@@ -286,7 +286,7 @@ inline void brg_tile_element_wise_for(bsg_tensor_t* _t0, bsg_tensor_t* _t1,
 //==========================================================
 
 template <class FetchFunctor>
-inline void brg_tile_element_wise_for(bsg_tensor_t* _t0,
+inline void brg_tile_elementwise_for(bsg_tensor_t* _t0,
                                       FetchFunctor functor) {
   //--------------------------------------------------
   // get the type of frist argument of lambda function

@@ -25,7 +25,7 @@ namespace c10 {
  * or "SparseCUDA"; backend in torch.backends is something like "MKL" or
  * "CUDNN".
  */
-enum class Backend { CPU, CUDA, HIP, HammerBlade, SparseCPU, SparseCUDA, SparseHIP, MSNPU, XLA, QuantizedCPU, ComplexCPU, ComplexCUDA, Undefined, MkldnnCPU, NumOptions };
+enum class Backend { CPU, CUDA, HIP, HammerBlade, SparseCPU, SparseCUDA, SparseHammerBlade, SparseHIP, MSNPU, XLA, QuantizedCPU, ComplexCPU, ComplexCUDA, Undefined, MkldnnCPU, NumOptions };
 
 static inline Backend toSparse(Backend b) {
   switch (b) {
@@ -36,7 +36,7 @@ static inline Backend toSparse(Backend b) {
     case Backend::HIP:
       return Backend::SparseHIP;
     case Backend::HammerBlade:
-      throw std::runtime_error("HammerBlade supports dense tensor only");
+      return Backend::SparseHammerBlade;
     case Backend::SparseCPU:
       return Backend::SparseCPU;
     case Backend::SparseCUDA:
@@ -66,6 +66,8 @@ static inline Backend toDense(Backend b) {
       return Backend::CPU;
     case Backend::SparseCUDA:
       return Backend::CUDA;
+    case Backend::SparseHammerBlade:
+      return Backend::HammerBlade;
     case Backend::SparseHIP:
       return Backend::HIP;
     case Backend::QuantizedCPU:
@@ -96,6 +98,8 @@ static inline Backend tensorTypeIdToBackend(TensorTypeId t) {
     return Backend::SparseCPU;
   } else if (t == TensorTypeId::SparseCUDATensorId) {
     return Backend::SparseCUDA;
+  } else if (t == TensorTypeId::SparseHammerBladeTensorId) {
+    return Backend::SparseHammerBlade;
   } else if (t == TensorTypeId::SparseHIPTensorId) {
     return Backend::SparseHIP;
   } else if (t == TensorTypeId::MkldnnCPUTensorId) {
@@ -131,6 +135,8 @@ static inline TensorTypeId backendToTensorTypeId(Backend b) {
       return TensorTypeId::SparseCPUTensorId;
     case Backend::SparseCUDA:
       return TensorTypeId::SparseCUDATensorId;
+    case Backend::SparseHammerBlade:
+      return TensorTypeId::SparseHammerBladeTensorId;
     case Backend::SparseHIP:
       return TensorTypeId::SparseHIPTensorId;
     case Backend::MkldnnCPU:
@@ -166,6 +172,8 @@ static inline DeviceType backendToDeviceType(Backend b) {
       return DeviceType::CPU;
     case Backend::SparseCUDA:
       return DeviceType::CUDA;
+    case Backend::SparseHammerBlade:
+      return DeviceType::HAMMERBLADE;
     case Backend::SparseHIP:
       return DeviceType::HIP;
     case Backend::MkldnnCPU:
@@ -194,6 +202,8 @@ static inline Backend backendToCPU(Backend b) {
     case Backend::SparseCPU:
       return Backend::SparseCPU;
     case Backend::SparseCUDA:
+      return Backend::SparseCPU;
+    case Backend::SparseHammerBlade:
       return Backend::SparseCPU;
     case Backend::SparseHIP:
       return Backend::SparseCPU;
@@ -233,6 +243,8 @@ static inline Backend backendToCUDA(Backend b) {
       return Backend::Undefined;
     case Backend::HammerBlade:
       AT_ERROR("HammerBlade -> CUDA is not supported");
+    case Backend::SparseHammerBlade:
+      AT_ERROR("SparseHammerBlade -> CUDA and SparseCUDA is not supported");
     default:
       AT_ERROR("Unknown backend");
   }
@@ -254,6 +266,8 @@ static inline Backend backendToHIP(Backend b) {
       return Backend::Undefined;
     case Backend::HammerBlade:
       AT_ERROR("HammerBlade -> HIP is not supported");
+    case Backend::SparseHammerBlade:
+      AT_ERROR("SparseHammerBlade -> HIP and SparseHIP is not supported");
     default:
       AT_ERROR("Unknown backend");
   }
@@ -263,12 +277,15 @@ static inline Backend backendToHammerBlade(Backend b) {
   switch (b) {
     case Backend::CPU:
       return Backend::HammerBlade;
+    case Backend::SparseCPU:
+      return Backend::SparseHammerBlade;
+    case Backend::SparseHammerBlade:
+      return Backend::HammerBlade;
+    case Backend::HammerBlade:
     case Backend::CUDA:
     case Backend::HIP:
-    case Backend::HammerBlade:
     case Backend::MSNPU:
     case Backend::XLA:
-    case Backend::SparseCPU:
     case Backend::SparseCUDA:
     case Backend::SparseHIP:
       AT_ERROR("Backends other than CPU -> HammerBlade is not supported");
@@ -298,6 +315,8 @@ static inline const char* toString(Backend b) {
       return "SparseCPU";
     case Backend::SparseCUDA:
       return "SparseCUDA";
+    case Backend::SparseHammerBlade:
+      return "SparseHammerBlade";
     case Backend::SparseHIP:
       return "SparseHIP";
     case Backend::MkldnnCPU:
@@ -317,6 +336,7 @@ static inline bool isSparse(Backend b) {
   switch (b) {
     case Backend::SparseCPU:
     case Backend::SparseCUDA:
+    case Backend::SparseHammerBlade:
     case Backend::SparseHIP:
       return true;
     default:

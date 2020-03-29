@@ -8,6 +8,7 @@
 
 #include <math.h>
 #include <initializer_list>
+#include <bsg_assert.hpp>
 
 // =========================================================
 // Device Tensor structs
@@ -24,9 +25,11 @@ typedef struct {
   uint32_t dims;
 #ifdef HB_EMUL
   uint64_t strides;
+  uint64_t sizes;
   uint64_t data;
 #else
   uint32_t strides;
+  uint32_t sizes;
   uint32_t data;
 #endif
 } bsg_tensor_t;
@@ -55,6 +58,7 @@ class BSGTensor {
     uint32_t N;
     uint32_t dims;
     uint32_t* strides;
+    uint32_t* sizes;
     DT* data;
 
   public:
@@ -62,6 +66,7 @@ class BSGTensor {
       N(t->N),
       dims(t->dims),
       strides((uint32_t*) ((intptr_t) t->strides)),
+      sizes((uint32_t*) ((intptr_t) t->sizes)),
       data((DT*) ((intptr_t) t->data)) {}
 
     int numel() {
@@ -69,31 +74,37 @@ class BSGTensor {
     }
 
     uint32_t dim(uint32_t d) {
-      if(d >= dims) {
-        bsg_printf("BSGTensor error: dimension must be less than %d\n",
-            dims);
-      }
+      bsg_assert(d < dims);
+      return sizes[d];
+    }
 
-      uint32_t dim;
-
-      if(d == 0) {
-        dim =  N / strides[0];
-      } else {
-        dim = strides[d-1] / strides[d];
-      }
-
-      return dim;
+    uint32_t ndim() {
+      return dims;
     }
 
     template<typename... T>
     DT& operator()(T... indices) {
       std::initializer_list<uint32_t> iarray = {indices...};
 
-      if(iarray.size() != dims) {
-        bsg_printf("BSGTensor error: number of indices must be %d, given %d\n",
-            dims, iarray.size());
+      // special case where we have a 0-dim tensor
+      if(dims == 0) {
+        bsg_assert(iarray.size() == 1);
+        for(auto index : iarray) {
+          bsg_assert(index == 0);
+        }
+        return data[0];
       }
 
+      // special case where we want linear indexing
+      // when dims != 1
+      // XXX: this tensor has to be contiguous
+      if(iarray.size() == 1 && dims != 1) {
+        for(auto index : iarray) {
+          return data[index];
+        }
+      }
+
+      bsg_assert(iarray.size() == dims);
       uint32_t offset = 0;
       uint32_t s = 0;
       for(auto index : iarray) {
@@ -101,9 +112,7 @@ class BSGTensor {
         s++;
       }
 
-      if(offset >= N) {
-        bsg_printf("BSGTensor error: index out of bounds\n");
-      }
+      bsg_assert(offset < N);
 
       return data[offset];
     }

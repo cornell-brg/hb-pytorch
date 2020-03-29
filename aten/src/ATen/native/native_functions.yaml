@@ -1020,6 +1020,7 @@
     MkldnnCPU: empty_mkldnn
     SparseCPU: empty_sparse
     SparseCUDA: empty_sparse
+    SparseHammerBlade: empty_sparse
 
 - func: new_empty(Tensor self, int[] size, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor
   variants: method
@@ -1586,12 +1587,14 @@
   dispatch:
     CPU: log_softmax_cpu
     CUDA: log_softmax_cuda
+    HammerBlade: log_softmax_hb
 
 - func: _log_softmax_backward_data(Tensor grad_output, Tensor output, int dim, Tensor self) -> Tensor
   use_c10_dispatcher: full
   dispatch:
     CPU: log_softmax_backward_cpu
     CUDA: log_softmax_backward_cuda
+    HammerBlade: log_softmax_backward_hb
 
 - func: logsumexp(Tensor self, int[1] dim, bool keepdim=False) -> Tensor
   supports_named_tensor: True
@@ -3298,6 +3301,7 @@
   dispatch:
     SparseCPU: sparse_dim_sparse
     SparseCUDA: sparse_dim_sparse
+    SparseHammerBlade: sparse_dim_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3308,6 +3312,7 @@
   dispatch:
     SparseCPU: sparse_dim_sparse
     SparseCUDA: sparse_dim_sparse
+    SparseHammerBlade: sparse_dim_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3318,6 +3323,7 @@
   dispatch:
     SparseCPU: dense_dim_sparse
     SparseCUDA: dense_dim_sparse
+    SparseHammerBlade: dense_dim_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3328,6 +3334,7 @@
   dispatch:
     SparseCPU: dense_dim_sparse
     SparseCUDA: dense_dim_sparse
+    SparseHammerBlade: dense_dim_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3338,6 +3345,7 @@
   dispatch:
     SparseCPU: _nnz_sparse
     SparseCUDA: _nnz_sparse
+    SparseHammerBlade: _nnz_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3357,6 +3365,7 @@
   dispatch:
     SparseCPU: is_coalesced_sparse
     SparseCUDA: is_coalesced_sparse
+    SparseHammerBlade: is_coalesced_sparse
   requires_tensor: True
   device_guard: False
   supports_named_tensor: True
@@ -3367,6 +3376,7 @@
   dispatch:
     SparseCPU: _indices_sparse
     SparseCUDA: _indices_sparse
+    SparseHammerBlade: _indices_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3375,6 +3385,7 @@
   dispatch:
     SparseCPU: _values_sparse
     SparseCUDA: _values_sparse
+    SparseHammerBlade: _values_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3386,6 +3397,7 @@
   dispatch:
     SparseCPU: _coalesced_sparse_
     SparseCUDA: _coalesced_sparse_
+    SparseHammerBlade: _coalesced_sparse_
   requires_tensor: True
   device_guard: False
 
@@ -3394,6 +3406,7 @@
   dispatch:
     SparseCPU: indices_sparse
     SparseCUDA: indices_sparse
+    SparseHammerBlade: indices_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3402,6 +3415,7 @@
   dispatch:
     SparseCPU: values_sparse
     SparseCUDA: values_sparse
+    SparseHammerBlade: values_sparse
   requires_tensor: True
   device_guard: False
 
@@ -3424,6 +3438,7 @@
   dispatch:
     SparseCPU: copy_sparse_
     SparseCUDA: copy_sparse_
+    SparseHammerBlade: copy_sparse_
   requires_tensor: True
 
 - func: unbind.int(Tensor(a) self, int dim=0) -> Tensor(a)[]
@@ -3610,6 +3625,7 @@
   dispatch:
     CPU: _local_scalar_dense_cpu
     CUDA: _local_scalar_dense_cuda
+    HammerBlade: _local_scalar_dense_hb
   variants: function
   supports_named_tensor: True
 
@@ -5341,24 +5357,28 @@
   dispatch:
     CPU: nll_loss_forward_out_cpu
     CUDA: legacy::cuda::_thnn_nll_loss_forward_out
+    HammerBlade: nll_loss_forward_out_hb
 
 - func: nll_loss_forward(Tensor self, Tensor target, Tensor? weight, int reduction, int ignore_index) -> (Tensor output, Tensor total_weight)
   python_module: nn
   dispatch:
     CPU: nll_loss_forward_cpu
     CUDA: legacy::cuda::_thnn_nll_loss_forward
+    HammerBlade: nll_loss_forward_hb
 
 - func: nll_loss_backward.grad_input(Tensor grad_output, Tensor self, Tensor target, Tensor? weight, int reduction, int ignore_index, Tensor total_weight, *, Tensor(a!) grad_input) -> Tensor(a!)
   python_module: nn
   dispatch:
     CPU: nll_loss_backward_out_cpu
     CUDA: legacy::cuda::_thnn_nll_loss_backward_out
+    HammerBlade: nll_loss_backward_out_hb
 
 - func: nll_loss_backward(Tensor grad_output, Tensor self, Tensor target, Tensor? weight, int reduction, int ignore_index, Tensor total_weight) -> Tensor
   python_module: nn
   dispatch:
     CPU: nll_loss_backward_cpu
     CUDA: legacy::cuda::_thnn_nll_loss_backward
+    HammerBlade: nll_loss_backward_hb
 
 - func: nll_loss2d.out(Tensor self, Tensor target, Tensor? weight=None, int reduction=Mean, int ignore_index=-100, *, Tensor(a!) out) -> Tensor(a!)
   python_module: nn
@@ -5896,6 +5916,7 @@
   dispatch:
     CPU: max_pool2d_with_indices_cpu
     CUDA: max_pool2d_with_indices_cuda
+    HammerBlade: max_pool2d_with_indices_hb
 
 - func: max_pool2d_with_indices_backward.grad_input(Tensor grad_output, Tensor self, int[2] kernel_size, int[2] stride, int[2] padding, int[2] dilation, bool ceil_mode, Tensor indices, *, Tensor(a!) grad_input) -> Tensor(a!)
   python_module: nn

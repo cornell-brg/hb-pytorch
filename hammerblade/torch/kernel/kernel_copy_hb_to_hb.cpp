@@ -17,8 +17,8 @@ extern "C" {
           bsg_tensor_t* t1_p) {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    brg_tile_element_wise_for(t0_p, t1_p,
-      [&](float a) {
+    brg_tile_elementwise_for(t0_p, t1_p,
+      [&](uint32_t a) {
         return a;
     });
     //   End profiling

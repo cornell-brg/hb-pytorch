@@ -1,16 +1,21 @@
+"""
+Unit tests for conv2d operator
+03/11/2020 Bandhav Veluri
+"""
 import torch
 import torch.nn.functional as F
 import os
 import pytest
 
-def _test_conv2d(inputs, kernel, padding=1, stride=1):
+def _test_conv2d(inputs, kernel, padding=1, stride=1, bias=None):
     inputs_hb = inputs.hammerblade()
     kernel_hb = kernel.hammerblade()
+    bias_hb = None if bias is None else bias.hammerblade()
 
     conv_result_hb = F.conv2d(inputs_hb, kernel_hb,
-                              padding=padding, stride=stride)
+                              padding=padding, stride=stride, bias=bias_hb)
     conv_result = F.conv2d(inputs, kernel,
-                           padding=padding, stride=stride)
+                           padding=padding, stride=stride, bias=bias)
 
     assert torch.allclose(conv_result, conv_result_hb.cpu())
 
@@ -95,6 +100,48 @@ def test_conv2d_8():
     stride = 3
 
     _test_conv2d(inputs, kernel, padding, stride)
+
+def test_conv2d_bias_1():
+    """
+    Conv2d bias single output channel
+    """
+    kernel = torch.rand(1, 1, 3, 3)
+    inputs = torch.rand(1, 1, 5, 5)
+    bias = torch.rand(1)
+
+    _test_conv2d(inputs, kernel, bias=bias)
+
+def test_conv2d_bias_2():
+    """
+    Conv2d bias multi-output channel
+    """
+    kernel = torch.rand(3, 1, 3, 3)
+    inputs = torch.rand(1, 1, 5, 5)
+    bias = torch.rand(3)
+
+    _test_conv2d(inputs, kernel, bias=bias)
+
+def test_conv2d_bias_3():
+    """
+    Conv2d bias multi-input multi-output channel
+    """
+    kernel = torch.rand(3, 2, 3, 3)
+    inputs = torch.rand(1, 2, 5, 5)
+    bias = torch.rand(3)
+
+    _test_conv2d(inputs, kernel, bias=bias)
+
+def test_conv2d_bias_4():
+    """
+    Conv2d bias with striding and padding
+    """
+    kernel = torch.rand(3, 2, 3, 3)
+    inputs = torch.rand(1, 2, 5, 5)
+    padding = (2, 3)
+    stride = (1, 2)
+    bias = torch.rand(3)
+
+    _test_conv2d(inputs, kernel, padding, stride, bias)
 
 @pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Prohibitively slow on cosim")
 def test_conv2d_batch_input_output():
