@@ -14,9 +14,21 @@ extern "C" {
           float* _threshold_scalar_p,
           float* _value_scalar_p) {
     // TODO: Convert uint32_t pointers to correct types
+    float threshod = *_threshold_scalar_p;
+    float value    = *_value_scalar_p;
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
     // TODO: Implement threshold
+
+      brg_tile_elementwise_for(t0_p, t1_p, t2_p,
+      [&](float self, float other) {
+        if (self <= threshold) {
+          return value;
+        } else {
+          return other;
+        }
+    });
+
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
     return 0;
