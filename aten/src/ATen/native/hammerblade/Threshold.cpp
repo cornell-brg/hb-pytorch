@@ -13,12 +13,14 @@ static void threshold_kernel_hb(
     Scalar threshold_scalar,
     Scalar value_scalar) {
 
-  TORCH_CHECK(false, "threshold_kernel_hb not implemented");
+    //TORCH_CHECK(false, "threshold_kernel_hb not implemented");
     //TODO: implement the host code for threshold kernel
     //      you may refer to add_kernel_hb in
     //      aten/src/ATen/native/hammerblade/AddSub.cpp
     //      as an example
-
+    AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "threshold_hb", [&]() {
+        offload_op_binary(iter, threshold_scalar, value_scalar, "tensorlib_threshold");
+        });
 }
 
 } // anonymous namespace
