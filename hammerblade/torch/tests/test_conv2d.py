@@ -11,8 +11,7 @@ import hbutils
 def _test_conv2d(inputs, kernel, padding=1, stride=1, bias=None):
     inputs_hb = hbutils.init_hb_tensor(inputs)
     kernel_hb = hbutils.init_hb_tensor(kernel)
-    bias_hb = None if bias is None else \
-                hbutils.init_hb_tensor(bias)
+    bias_hb = None if bias is None else hbutils.init_hb_tensor(bias)
 
     conv_result_hb = F.conv2d(inputs_hb, kernel_hb,
                               padding=padding, stride=stride, bias=bias_hb)
