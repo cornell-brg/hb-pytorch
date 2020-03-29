@@ -5,9 +5,10 @@ Unit tests for maxpool2d operator
 
 import torch
 import torch.nn.functional as F
+import hbutils
 
 def _test_max_pool2d(x, kernel_size, stride=None, padding=1):
-    x_hb = x.hammerblade()
+    x_hb = hbutils.init_hb_tensor(x)
 
     y, r = F.max_pool2d(x, kernel_size, stride, padding, return_indices=True)
     y_hb, r_hb = F.max_pool2d(x_hb, kernel_size, stride, padding,
@@ -16,8 +17,17 @@ def _test_max_pool2d(x, kernel_size, stride=None, padding=1):
     assert torch.allclose(y, y_hb.cpu())
     assert torch.equal(r.type(torch.int), r_hb.cpu())
 
+    if x.requires_grad:
+        grad = torch.rand(y.shape)
+        grad_hb = grad.hammerblade()
+
+        y.backward(grad)
+        y_hb.backward(grad_hb)
+
+        torch.allclose(x.grad, x_hb.grad.cpu())
+
 def test_max_pool2d_1():
-    x = torch.rand(1, 1, 5, 5)
+    x = torch.rand(1, 1, 5, 5, requires_grad=True)
     kernel_size = 3
     stride = 2
     padding = 0
