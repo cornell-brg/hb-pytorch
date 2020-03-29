@@ -5,7 +5,7 @@
 
 #include <kernel_common.hpp>
 #include <cmath>
-#define BLOCK_DIM 10 // sqrt(4KB/4 byte/4 data matrix) * (2/3) prevent loading too much due to offset
+#define BLOCK_DIM 10 // sqrt(4KB/4 byte/4 data matrix) = 15 max 
 
 extern "C" {
 
@@ -51,10 +51,10 @@ extern "C" {
     bsg_printf("m2_num_blk_per_col %d\n", m2_num_blk_per_col);
 
     // calculate dimensions of the last row and col block in each matrix
-    int m1_last_blk_dim_x = r1 % BLOCK_DIM; // x dimension of last block of mat1
-    int m1_last_blk_dim_y = c1 % BLOCK_DIM; // y dimension of last block of mat1
-    int m2_last_blk_dim_x = r2 % BLOCK_DIM; // x dimension of last block of mat2
-    int m2_last_blk_dim_y = c2 % BLOCK_DIM; // y dimension of last block of mat2
+    int m1_last_blk_dim_x = c1 % BLOCK_DIM == 0 ? BLOCK_DIM : c1 % BLOCK_DIM; // x dimension of last block of mat1
+    int m1_last_blk_dim_y = r1 % BLOCK_DIM == 0 ? BLOCK_DIM : r1 % BLOCK_DIM; // y dimension of last block of mat1
+    int m2_last_blk_dim_x = c2 % BLOCK_DIM == 0 ? BLOCK_DIM : c2 % BLOCK_DIM; // x dimension of last block of mat2
+    int m2_last_blk_dim_y = r2 % BLOCK_DIM == 0 ? BLOCK_DIM : r2 % BLOCK_DIM; // y dimension of last block of mat2
 
     bsg_printf("m1_last_blk_dim_x %d\n", m1_last_blk_dim_x);
     bsg_printf("m1_last_blk_dim_y %d\n", m1_last_blk_dim_y);
@@ -68,18 +68,23 @@ extern "C" {
             int res_dim_y = rr == m1_num_blk_per_row - 1 ? m1_last_blk_dim_y : BLOCK_DIM;
             int res_dim_x = rc == m2_num_blk_per_col - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
 
-            bsg_printf("-----------------rr %d rc %d\n", rr, rc);
-            bsg_printf("res_dim_y %d res_dim_x %d\n", res_dim_y, res_dim_x);
+//            bsg_printf("\n-----------------rr %d rc %d\n", rr, rc);
+//            bsg_printf("res_dim_y %d res_dim_x %d\n", res_dim_y, res_dim_x);
 
             // initialize scratchpad result
-            float sp_result[res_dim_y][res_dim_x] = {0};
+            float sp_result[res_dim_y][res_dim_x] = {};
+            for (int i = 0; i < res_dim_y; i++) {
+                for (int j = 0; j < res_dim_x; j++) {
+//                    bsg_printf("init sp_result[i][j] %f\n", sp_result[i][j]);
+                }
+            }
 
             // load self into scratchpad
             float sp_self[res_dim_y][res_dim_x];
             for (int i = 0; i < res_dim_y; i++) {
                 for (int j = 0; j < res_dim_x; j++) {
                     sp_self[i][j] = self(rr * res_dim_y + i, rc * res_dim_x + j);
-                    bsg_printf("sp_self[i][j] %f\n", sp_self[i][j]);
+//                    bsg_printf("sp_self[i][j] %f\n", sp_self[i][j]);
                 }
             }
 
@@ -88,8 +93,12 @@ extern "C" {
             // and blocks of mat2 in col rc
             for (int mat1x = 0, mat2y = 0; mat1x < m1_num_blk_per_col && mat2y < m2_num_blk_per_row; mat1x++, mat2y++) {
                 assert(mat1x == mat2y);
+
+//                bsg_printf("\n====rr %d mat1x %d mat2y %d rc %d\n", rr, mat1x, mat2y, rc);
                 // calculate current block dimensions
                 int mid_dim = mat1x == m1_num_blk_per_col - 1 ? m1_last_blk_dim_x : BLOCK_DIM;
+
+//                bsg_printf("mid_dim %d\n", mid_dim);
 
                 // load mat1 and mat2 into scratchpad
                 float sp_mat1[res_dim_y][mid_dim];
@@ -97,15 +106,15 @@ extern "C" {
 
                 for (int i = 0; i < res_dim_y; i++) {
                     for (int j = 0; j < mid_dim; j++) {
-                        sp_mat1[i][j] = mat1(rr * res_dim_y + i, mat1x * mid_dim + j);
-                        bsg_printf("sp_mat1[i][j] %f\n", sp_mat1[i][j]);
+                        sp_mat1[i][j] = mat1(rr * BLOCK_DIM + i, mat1x * BLOCK_DIM + j);
+//                        bsg_printf("i=%d , j=%d, sp_mat1[i][j] %f\n", rr*BLOCK_DIM+i, mat1x*BLOCK_DIM+j, sp_mat1[i][j]);
                     }
                 }
 
                 for (int i = 0; i < mid_dim; i++) {
                     for (int j = 0; j < res_dim_x; j++) {
-                        sp_mat2[i][j] = mat2(mat2y * mid_dim + i, rc * res_dim_x + j);
-                        bsg_printf("sp_mat2[i][j] %f\n", sp_mat2[i][j]);
+                        sp_mat2[i][j] = mat2(mat2y * BLOCK_DIM + i, rc * BLOCK_DIM + j);
+//                        bsg_printf("i=%d, j=%d, sp_mat2[i][j] %f\n", mat2y*BLOCK_DIM+i, rc*BLOCK_DIM+j, sp_mat2[i][j]);
                     }
                 }
 
@@ -113,36 +122,36 @@ extern "C" {
                 for (int i = 0; i < res_dim_y; i++) {
                     for (int j = 0; j < res_dim_x; j++) {
                         for (int k = 0; k < mid_dim; k++) {
-                            sp_result[i][j] += sp_mat1[i][k] * sp_mat2[k][j];
-                            bsg_printf("sp_result[i][j] %f\n", sp_result[i][j]);
+                            sp_result[i][j] += sp_mat1[i][k] * sp_mat2[k][j]; 
                         }
+//                        bsg_printf("sp_result[i][j] %f\n", sp_result[i][j]);
                     }
                 }
 
 
             }
+
             // result = beta * self + alpha * (mat1 X mat2)
             for (int i = 0; i < res_dim_y; i++) {
                 for (int j = 0; j < res_dim_x; j++) {
                     sp_result[i][j] *= alpha;
                     sp_result[i][j] += beta * sp_self[i][j];
-                    bsg_printf("final sp_result[i][j] %f\n", sp_result[i][j]);
+//                    bsg_printf("final sp_result[i][j] %f\n", sp_result[i][j]);
                 }
             }
-
 
             // copy this block back into DRAM
             for (int i = 0; i < res_dim_y; i++) {
                 for (int j = 0; j < res_dim_x; j++) {
-                    //result(rr * res_dim_y + i, rc * res_dim_x + j) = sp_result[i][j];
-                    result(i, j) = sp_result[i][j];
-                    bsg_printf("result(i,j) %f\n", result(i,j));
+                    result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i][j];
+//                    bsg_printf("result(i,j) %f\n", result(i,j));
                 }
             }
 
 
         }
     }
+
 
     // v1: naive version, single tile, access DRAM elm by elm
 /*
