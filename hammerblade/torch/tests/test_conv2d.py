@@ -49,8 +49,8 @@ def test_conv2d_2():
     """
     Single batch, multi-channel
     """
-    kernel = torch.rand(1, 2, 3, 3)
-    inputs = torch.rand(1, 2, 5, 5)
+    kernel = torch.rand(1, 2, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 2, 5, 5, requires_grad=True)
 
     _test_conv2d(inputs, kernel)
 
@@ -58,8 +58,8 @@ def test_conv2d_3():
     """
     Multi-batch, single channel
     """
-    kernel = torch.rand(2, 1, 3, 3)
-    inputs = torch.rand(1, 1, 5, 5)
+    kernel = torch.rand(2, 1, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 1, 5, 5, requires_grad=True)
 
     _test_conv2d(inputs, kernel)
 
@@ -67,8 +67,8 @@ def test_conv2d_4():
     """
     Multi-batch, multi-channel
     """
-    kernel = torch.rand(3, 3, 3, 3)
-    inputs = torch.rand(2, 3, 5, 5)
+    kernel = torch.rand(3, 3, 3, 3, requires_grad=True)
+    inputs = torch.rand(2, 3, 5, 5, requires_grad=True)
     padding = (1, 2)
     stride = (1, 2)
 
@@ -78,8 +78,8 @@ def test_conv2d_5():
     """
     Multiple pads
     """
-    kernel = torch.rand(1, 3, 3, 3)
-    inputs = torch.rand(1, 3, 5, 5)
+    kernel = torch.rand(1, 3, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 3, 5, 5, requires_grad=True)
     padding = 2
     stride = 1
 
@@ -89,8 +89,8 @@ def test_conv2d_6():
     """
     Multiple pads and strides
     """
-    kernel = torch.rand(2, 3, 3, 3)
-    inputs = torch.rand(2, 3, 5, 5)
+    kernel = torch.rand(2, 3, 3, 3, requires_grad=True)
+    inputs = torch.rand(2, 3, 5, 5, requires_grad=True)
     padding = 2
     stride = 2
 
@@ -100,8 +100,8 @@ def test_conv2d_7():
     """
     Kernel size equal to image size
     """
-    kernel = torch.rand(2, 3, 5, 5)
-    inputs = torch.rand(2, 3, 5, 5)
+    kernel = torch.rand(2, 3, 5, 5, requires_grad=True)
+    inputs = torch.rand(2, 3, 5, 5, requires_grad=True)
     padding = 1
     stride = 1
 
@@ -111,8 +111,8 @@ def test_conv2d_8():
     """
     Large padding
     """
-    kernel = torch.rand(2, 3, 3, 3)
-    inputs = torch.rand(2, 3, 5, 5)
+    kernel = torch.rand(2, 3, 3, 3, requires_grad=True)
+    inputs = torch.rand(2, 3, 5, 5, requires_grad=True)
     padding = 3
     stride = 3
 
@@ -122,9 +122,9 @@ def test_conv2d_bias_1():
     """
     Conv2d bias single output channel
     """
-    kernel = torch.rand(1, 1, 3, 3)
-    inputs = torch.rand(1, 1, 5, 5)
-    bias = torch.rand(1)
+    kernel = torch.rand(1, 1, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 1, 5, 5, requires_grad=True)
+    bias = torch.rand(1, requires_grad=True)
 
     _test_conv2d(inputs, kernel, bias=bias)
 
@@ -132,9 +132,9 @@ def test_conv2d_bias_2():
     """
     Conv2d bias multi-output channel
     """
-    kernel = torch.rand(3, 1, 3, 3)
-    inputs = torch.rand(1, 1, 5, 5)
-    bias = torch.rand(3)
+    kernel = torch.rand(3, 1, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 1, 5, 5, requires_grad=True)
+    bias = torch.rand(3, requires_grad=True)
 
     _test_conv2d(inputs, kernel, bias=bias)
 
@@ -142,9 +142,9 @@ def test_conv2d_bias_3():
     """
     Conv2d bias multi-input multi-output channel
     """
-    kernel = torch.rand(3, 2, 3, 3)
-    inputs = torch.rand(1, 2, 5, 5)
-    bias = torch.rand(3)
+    kernel = torch.rand(3, 2, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 2, 5, 5, requires_grad=True)
+    bias = torch.rand(3, requires_grad=True)
 
     _test_conv2d(inputs, kernel, bias=bias)
 
@@ -152,11 +152,11 @@ def test_conv2d_bias_4():
     """
     Conv2d bias with striding and padding
     """
-    kernel = torch.rand(3, 2, 3, 3)
-    inputs = torch.rand(1, 2, 5, 5)
+    kernel = torch.rand(3, 2, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 2, 5, 5, requires_grad=True)
     padding = (2, 3)
     stride = (1, 2)
-    bias = torch.rand(3)
+    bias = torch.rand(3, requires_grad=True)
 
     _test_conv2d(inputs, kernel, padding, stride, bias)
 
@@ -215,4 +215,4 @@ def test_conv2d_width_height_kernel_pad_stride():
                         _test_conv2d(inputs, kernel)
 
 if __name__ == "__main__":
-    test_conv2d_1()
+    test_conv2d_2()
