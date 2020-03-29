@@ -198,9 +198,12 @@ void max_pool2d_with_indices_backward_out_hb_template(
       device_args.push_back(create_device_tensor(gradOutput, device_ptrs));
       device_args.push_back(create_device_tensor(indices, device_ptrs));
       device_args.push_back(create_device_tensor(input_, device_ptrs));
-      device_args.push_back(create_device_vector(kernel_size, true, device_ptrs));
-      device_args.push_back(create_device_vector(padding, true, device_ptrs));
-      device_args.push_back(create_device_vector(stride, true, device_ptrs));
+      device_args.push_back(create_device_scalar(kH));
+      device_args.push_back(create_device_scalar(kW));
+      device_args.push_back(create_device_scalar(dH));
+      device_args.push_back(create_device_scalar(dW));
+      device_args.push_back(create_device_scalar(padH));
+      device_args.push_back(create_device_scalar(padW));
 
       c10::hammerblade::offload_kernel(
           "tensorlib_max_pool2d_backward", device_args);
