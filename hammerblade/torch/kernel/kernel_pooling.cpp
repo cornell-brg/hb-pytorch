@@ -73,6 +73,22 @@ extern "C" {
     return 0;
   }
 
+  __attribute__ ((noinline))  int tensorlib_max_pool2d_backward(
+          bsg_tensor_t* gradInput,
+          bsg_tensor_t* gradOutput,
+          bsg_tensor_t* indices,
+          bsg_tensor_t* input,
+          bsg_vector_t* kernel_size,
+          bsg_vector_t* padding,
+          bsg_vector_t* stride) {
+    // Start profiling
+    bsg_cuda_print_stat_kernel_start();
+
+    // End profiling
+    bsg_cuda_print_stat_kernel_end();
+    return 0;
+  }
+
   HB_EMUL_REG_KERNEL(tensorlib_max_pool2d,
     bsg_tensor_t*,
     bsg_tensor_t*,
@@ -81,5 +97,9 @@ extern "C" {
     int*, int*,
     int*, int*,
     int*, int*);
+
+  HB_EMUL_REG_KERNEL(tensorlib_max_pool2d_backward,
+    bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
+    bsg_vector_t*, bsg_vector_t*, bsg_vector_t*);
 
 }
