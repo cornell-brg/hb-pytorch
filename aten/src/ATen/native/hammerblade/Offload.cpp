@@ -171,7 +171,6 @@ void offload_tensor_scalar_impl(std::vector<Tensor> tensors,
 
 }
 
-<<<<<<< HEAD
 //=========================================================================== 
 // Offloading operations that use TensorIterator
 void offload_iterator_op_impl(TensorIterator& iter, Scalar alpha,
