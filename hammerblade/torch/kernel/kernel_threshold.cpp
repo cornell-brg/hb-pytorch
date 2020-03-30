@@ -1,6 +1,7 @@
 //====================================================================
 // threshold kernel
-// 03/19/2020 YOUR NAME HERE Lin Cheng (YOU EMAIL HERE, lc873@cornell.edu)
+// 03/19/2020 Lin Cheng (lc873@cornell.edu)
+// 03/29/2020 Angela Zou (az292@cornell.edu)
 //====================================================================
 
 #include <kernel_common.hpp>

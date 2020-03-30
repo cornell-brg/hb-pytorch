@@ -1,7 +1,7 @@
 """
 Tests on torch.nn.relu (threshold kernel)
 03/09/2020 Lin Cheng (lc873@cornell.edu)
-03/29/2020 Angela Zou
+03/29/2020 Angela Zou (az292@cornell.edu)
 """
 
 import torch
