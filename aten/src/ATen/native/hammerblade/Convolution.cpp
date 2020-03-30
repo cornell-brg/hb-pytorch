@@ -146,6 +146,21 @@ Tensor hb_convolution_forward(
   return *output;
 }
 
+// In-place!
+void hb_convolution_add_bias_(CheckedFrom c, const TensorArg& output, 
+                              const TensorArg& bias) {
+  checkAllSameType(c, {output, bias});
+  checkAllSameHB(c, {output, bias});
+  checkSize(c, bias, { output->size(output_channels_dim) });
+
+  if (output.tensor.numel() == 0) {
+    return;
+  }
+
+  offload_convolution_add_bias(*output, *bias);
+}
+
+
 } // anonymous namespace
 
 Tensor hb_convolution_transpose(
@@ -169,9 +184,7 @@ Tensor hb_convolution(
   auto output_t = hb_convolution_forward(
     c, input, weight, padding, stride, dilation, groups);
   if (bias->defined()) {
-    // TODO: HB_TODO_VB hb_convolution_add_bias_
-    // hb_convolution_add_bias_(c, { output_t, "result", 0 }, bias);
-    TORCH_CHECK(false, "hb_convolution: adding bias not implemented yet!");
+    hb_convolution_add_bias_(c, { output_t, "result", 0 }, bias);
   }
   return output_t;
 }
