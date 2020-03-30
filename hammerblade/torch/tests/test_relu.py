@@ -52,10 +52,10 @@ def test_elementwise_torch_nn_relu_hypothesis(tensors, scalars):
         assert len(scalars) == 2
         tensor_self, tensor_others = tensors
         threshold, value = scalars
-        if (tensor_self <= threshold)
-        return value
-        else 
-        return others
+        if (tensor_self <= threshold):
+            return value
+        else:
+            return others
     hu.assert_hb_checks(elementwise_torch_nn_relu, [tensors, scalars])
 
 
