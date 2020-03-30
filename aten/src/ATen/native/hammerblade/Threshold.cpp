@@ -19,7 +19,9 @@ static void threshold_kernel_hb(
     //      aten/src/ATen/native/hammerblade/AddSub.cpp
     //      as an example
     AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "threshold_hb", [&]() {
-        offload_op_binary(iter, threshold_scalar, value_scalar, "tensorlib_threshold");
+        offload_op_binary(iter, threshold_scalar.to<scalar_t>(),
+                          value_scalar.to<scalar_t>(),
+                          "tensorlib_threshold");
         });
 }
 
