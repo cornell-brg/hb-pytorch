@@ -3,7 +3,6 @@ Unit tests for torch.addmm kernel
 03/09/2020 Lin Cheng (lc873@cornell.edu)
 """
 import torch
-# import pytest
 
 def test_torch_addmm_1():
     M = torch.ones(2, 3)
@@ -30,7 +29,6 @@ def test_torch_addmm_2():
     assert out_h.device == torch.device("hammerblade")
     assert torch.allclose(out_h.cpu(), out)
 
-# @pytest.mark.skip(reason="not yet implemented")
 # broadcast self to result
 def test_torch_addmm_3():
     M = torch.randn(1, 3)
@@ -48,7 +46,6 @@ def test_torch_addmm_3():
     assert out_h.device == torch.device("hammerblade")
     assert torch.allclose(out_h.cpu(), out)
 
-# @pytest.mark.skip(reason="not yet implemented")
 # bigger matrix
 def test_torch_addmm_4():
     M = torch.randn(1, 1)
@@ -63,7 +60,6 @@ def test_torch_addmm_4():
     assert torch.allclose(out_h.cpu(), out, 1e-07, 1e-04)
     # doesn't pass unless tune up tolerance
 
-# @pytest.mark.skip(reason="not yet implemented")
 # directed test with given numbers
 def test_torch_addmm_5():
     M = torch.tensor([[1., 1., 1.]])
