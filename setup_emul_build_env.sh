@@ -16,6 +16,7 @@ export USE_DISTRIBUTED=0
 export USE_OPENMP=0
 export ATEN_THREADING=NATIVE
 export CFLAGS='-fuse-ld=gold'
+export OMP_NUM_THREADS=1
 
 # enable emulation layer building
 export USE_HB_EMUL=1
