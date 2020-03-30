@@ -7,7 +7,6 @@ Tests on torch.nn.relu (threshold kernel)
 import torch
 import torch.nn as nn
 import pytest
-from math import isnan, isinf
 from hypothesis import assume, given, settings
 import hypothesis.strategies as st
 from .hypothesis_test_util import HypothesisUtil as hu
@@ -51,16 +50,20 @@ def test_torch_nn_relu_4():
     assert x_h_relu.device == torch.device("hammerblade")
     assert torch.equal(x_h_relu.cpu(), x_relu)
 
-@given(tensors=hu.tensors(n=2), 
+@given(tensors=hu.tensors(n=3), 
     threshold=st.floats(width=32), 
     value=st.floats(width=32))
 def test_elementwise_torch_nn_relu_hypothesis(tensors, threshold, value):
     def elementwise_torch_nn_relu(inputs):
         tensors, threshold, value = inputs
-        if (tensors[0] <= threshold):
-            return value
-        else:
-            return tensors[1]
+        tensor_self = tensors[0]
+        tensor_other = tensors[1]
+        tensor_res = tensors[2]
+        for element_self, element_other, element_res in zip(tensor_self, tensor_other, tensor_res):      
+            if (element_self <= threshold):
+                element_res = value
+            else:
+                element_res = tensor_other
     hu.assert_hb_checks(elementwise_torch_nn_relu, [tensors, threshold, value])
 
 
