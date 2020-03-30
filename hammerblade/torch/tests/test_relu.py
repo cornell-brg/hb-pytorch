@@ -57,4 +57,3 @@ def _test_torch_relu_check(tensor_self):
 @given(tensor=hu.tensor())
 def test_elementwise_torch_nn_relu_hypothesis(tensor):
     _test_torch_relu_check(tensor)
-
