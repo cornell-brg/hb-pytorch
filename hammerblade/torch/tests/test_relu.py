@@ -3,11 +3,11 @@ Tests on torch.nn.relu (threshold kernel)
 03/09/2020 Lin Cheng (lc873@cornell.edu)
 03/29/2020 Angela Zou
 """
+from __future__ import absolute_import
 import torch
 import torch.nn as nn
 import pytest
-from __future__ import absolute_import
-from hypothesis import given
+from hypothesis import given, assume, settings
 import hypothesis.strategies as st
 from .hypothesis_test_util import HypothesisUtil as hu
 
