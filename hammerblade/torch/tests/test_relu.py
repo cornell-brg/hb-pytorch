@@ -6,6 +6,7 @@ Tests on torch.nn.relu (threshold kernel)
 import torch
 import torch.nn as nn
 import pytest
+from __future__ import absolute_import
 from hypothesis import given
 import hypothesis.strategies as st
 from .hypothesis_test_util import HypothesisUtil as hu
