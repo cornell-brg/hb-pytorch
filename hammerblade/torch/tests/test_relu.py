@@ -35,3 +35,22 @@ def test_torch_nn_relu_3():
     x_h_relu = relu(x_h)
     assert x_h_relu.device == torch.device("hammerblade")
     assert torch.equal(x_h_relu.cpu(), x_relu)
+
+def test_torch_nn_relu_4():
+    x = torch.randn(3, 4, 5)
+    x_h = x.hammerblade()
+    relu = nn.ReLU()
+    x_relu = relu(x)
+    x_h_relu = relu(x_h)
+    assert x_h_relu.device == torch.device("hammerblade")
+    assert torch.equal(x_h_relu.cpu(), x_relu)
+
+# @given(inputs=hu.tensors(n=2))
+# def test_elementwise_torch_nn_relu_hypothesis(inputs):
+#     def elementwise_torch_nn_relu(inputs):
+#         assert len(inputs) == 2
+#         return inputs[0] - inputs[1]
+#     hu.assert_hb_checks(elementwise_torch_nn_relu, inputs)
+
+
+
