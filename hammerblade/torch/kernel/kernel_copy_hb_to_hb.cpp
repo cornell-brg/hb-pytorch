@@ -18,7 +18,7 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
     brg_tile_elementwise_for(t0_p, t1_p,
-      [&](float a) {
+      [&](uint32_t a) {
         return a;
     });
     //   End profiling

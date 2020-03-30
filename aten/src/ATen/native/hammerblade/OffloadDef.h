@@ -22,6 +22,7 @@ typedef struct {
   uint32_t N;    // Number of elements in the tensor
   uint32_t dims; // Number of dimensions
   eva_t strides; // Pointer to stride vector; number of strides = dims
+  eva_t sizes;   // Pointer to sizes vector; number of sizes = dims
   eva_t data;    // Pointer to raw data
 } hb_mc_tensor_t;
 

@@ -7,6 +7,31 @@ namespace native {
 
 namespace { // anonymous
 
+void hb_convolution_arg_check(
+    int64_t output_dims, IntArrayRef dilation, int64_t groups) {
+  // Dimension check
+  TORCH_CHECK(output_dims == 4, "Only 2d convolution supported now.");
+
+  // Dilation check
+  bool dilation_check = true;
+  for(auto d : dilation) {
+    if(d != 1) {
+      TORCH_WARN("dilation[i] = ", d);
+      dilation_check = false;
+      break;
+    }
+  }
+  TORCH_CHECK(dilation_check,
+        "dilation = ", dilation,
+        " is not supported by HB yet.",
+        " Make sure dilation is all ones.");
+
+  // Groups check
+  TORCH_CHECK(groups == 1,
+      "Grouped convolution not supported by HB yet."
+      " Make sure groups = 1.");
+}
+
 constexpr int input_batch_size_dim = 0;  // also grad_input
 constexpr int input_channels_dim = 1;
 constexpr int output_batch_size_dim = 0;  // also grad_output
@@ -139,9 +164,19 @@ Tensor hb_convolution_forward(
 
   Tensor weight_contig = weight->contiguous();
 
-  offload_convolution_forward(
-      output_t, *input, *weight,
-      padding, stride, dilation, groups);
+  hb_convolution_arg_check(output->dim(), dilation, groups);
+
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+  device_args.push_back(create_device_tensor(output_t, device_ptrs));
+  device_args.push_back(create_device_tensor(*input, device_ptrs));
+  device_args.push_back(create_device_tensor(*weight, device_ptrs));
+  device_args.push_back(create_device_vector(padding, true, device_ptrs));
+  device_args.push_back(create_device_vector(stride, true, device_ptrs));
+
+  c10::hammerblade::offload_kernel(
+      "tensorlib_convolution_forward", device_args);
+  cleanup_device(device_args, device_ptrs);
 
   return *output;
 }
@@ -157,9 +192,74 @@ void hb_convolution_add_bias_(CheckedFrom c, const TensorArg& output,
     return;
   }
 
-  offload_convolution_add_bias(*output, *bias);
+  hb_offload_kernel(*output, *bias, "tensorlib_convolution_add_bias");
 }
 
+Tensor hb_convolution_backward_input(
+    CheckedFrom c,
+    IntArrayRef input_size, const TensorArg& grad_output, const TensorArg& weight,
+    IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation, int64_t groups)
+{
+  checkAllSameType(c, {grad_output, weight});
+  checkAllSameHB(c, {grad_output, weight});
+
+  auto grad_input_t = at::empty(input_size, grad_output->options());
+
+  // Avoid "grad_input" when this is being used as transposed convolution
+  TensorArg grad_input{ grad_input_t, "result", 0 };
+  convolution_shape_check(c, grad_input, weight, grad_output, padding, stride, dilation, groups);
+
+  // See #4500
+  Tensor weight_contig = weight->contiguous();
+
+  hb_convolution_arg_check(grad_output->dim(), dilation, groups);
+
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+  device_args.push_back(create_device_tensor(*grad_input, device_ptrs));
+  device_args.push_back(create_device_tensor(*grad_output, device_ptrs));
+  device_args.push_back(create_device_tensor(weight_contig, device_ptrs));
+  device_args.push_back(create_device_vector(padding, true, device_ptrs));
+  device_args.push_back(create_device_vector(stride, true, device_ptrs));
+
+  c10::hammerblade::offload_kernel(
+      "tensorlib_convolution_backward_input", device_args);
+  cleanup_device(device_args, device_ptrs);
+
+  return *grad_input;
+}
+
+Tensor hb_convolution_backward_weight(
+    CheckedFrom c,
+    IntArrayRef weight_size, const TensorArg& grad_output, const TensorArg& input,
+    IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation, int64_t groups)
+{
+  checkAllSameType(c, {grad_output, input});
+  checkAllSameHB(c, {grad_output, input});
+
+  auto grad_weight_t = at::empty(weight_size, grad_output->options());
+
+  // For uniformity with everything else, although it seems grad_weight
+  // would be unambiguous too.
+  TensorArg grad_weight{ grad_weight_t, "result", 0 };
+  convolution_shape_check(c, input, grad_weight, grad_output, padding, stride, dilation, groups);
+
+  hb_convolution_arg_check(grad_output->dim(), dilation, groups);
+
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+  device_args.push_back(create_device_tensor(*grad_weight, device_ptrs));
+  device_args.push_back(create_device_tensor(*grad_output, device_ptrs));
+  device_args.push_back(create_device_tensor(*input, device_ptrs));
+  device_args.push_back(create_device_vector(padding, true, device_ptrs));
+  device_args.push_back(create_device_vector(stride, true, device_ptrs));
+
+  c10::hammerblade::offload_kernel(
+      "tensorlib_convolution_backward_weight", device_args);
+  cleanup_device(device_args, device_ptrs);
+
+  return grad_weight_t;
+}
 
 } // anonymous namespace
 
@@ -187,6 +287,76 @@ Tensor hb_convolution(
     hb_convolution_add_bias_(c, { output_t, "result", 0 }, bias);
   }
   return output_t;
+}
+
+Tensor hb_convolution_backward_input(
+    IntArrayRef input_size, const at::Tensor& grad_output_t, const at::Tensor& weight_t,
+    IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation, int64_t groups) {
+  TensorArg grad_output{ grad_output_t, "grad_output", 1 },
+            weight{ weight_t, "weight", 2 };
+  return hb_convolution_backward_input(
+      "hb_convolution_backward_input",
+      input_size, grad_output, weight,
+      padding, stride, dilation, groups);
+}
+
+Tensor hb_convolution_backward_weight(
+    IntArrayRef weight_size, const at::Tensor& grad_output_t, const at::Tensor& input_t,
+    IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation, int64_t groups) {
+  TensorArg grad_output{ grad_output_t, "grad_output", 1 },
+            input{ input_t, "input", 2 };
+  return hb_convolution_backward_weight(
+      "hb_convolution_backward_weight",
+      weight_size, grad_output, input,
+      padding, stride, dilation, groups);
+}
+
+Tensor hb_convolution_backward_bias(
+    const at::Tensor& grad_output) {
+  auto grad_bias = at::empty(
+                        { grad_output.size(output_channels_dim) }, grad_output.options());
+
+  hb_offload_kernel(grad_bias, grad_output, "tensorlib_convolution_backward_bias");
+
+  return grad_bias;
+}
+
+std::tuple<at::Tensor,at::Tensor,at::Tensor> hb_convolution_backward(
+    const at::Tensor& input, const at::Tensor& grad_output_t,
+    const at::Tensor& weight, IntArrayRef padding, IntArrayRef stride,
+    IntArrayRef dilation, int64_t groups,
+    std::array<bool,3> output_mask) {
+  Tensor grad_output = grad_output_t.contiguous();
+
+  Tensor grad_input, grad_weight, grad_bias;
+  if (input.numel() == 0) {
+    if (output_mask[0]) {
+      grad_input = at::empty(input.sizes(), input.options());
+    }
+    if (output_mask[1]) {
+      grad_weight = at::zeros(weight.sizes(), weight.options());
+    }
+    if (output_mask[2]) {
+      grad_bias = at::zeros({grad_output.size(1)}, grad_output.options());
+    }
+  } else {
+    if (output_mask[0]) {
+      grad_input = at::hb_convolution_backward_input(
+          input.sizes(), grad_output, weight, padding,
+          stride, dilation, groups);
+    }
+    if (output_mask[1]) {
+      grad_weight = at::hb_convolution_backward_weight(
+          weight.sizes(), grad_output, input, padding,
+          stride, dilation, groups);
+    }
+    if (output_mask[2]) {
+      grad_bias = at::hb_convolution_backward_bias(grad_output);
+    }
+  }
+
+  return std::tuple<Tensor,Tensor,Tensor>{
+    grad_input, grad_weight, grad_bias};
 }
 
 }} // namespace at::native

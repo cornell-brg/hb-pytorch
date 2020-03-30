@@ -10,7 +10,7 @@ namespace {
 
 static void abs_kernel_hb(TensorIterator& iter) {
   AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "abs_hb", [&]() {
-      offload_op_unary(iter, Scalar(), "tensorlib_abs");
+      offload_op_unary(iter, "tensorlib_abs");
       });
 }
 

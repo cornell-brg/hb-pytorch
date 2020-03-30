@@ -86,6 +86,7 @@ FILE(GLOB native_quantized_hip_hip "native/quantized/hip/*.hip")
 FILE(GLOB native_quantized_hip_cpp "native/quantized/hip/*.cpp")
 
 FILE(GLOB native_hammerblade_cpp "native/hammerblade/*.cpp")
+FILE(GLOB native_sparse_hammerblade_cpp "native/sparse/hammerblade/*.cpp")
 
 add_subdirectory(quantized)
 set(all_cpu_cpp ${base_cpp} ${ATen_CORE_SRCS} ${native_cpp} ${native_sparse_cpp} ${native_quantized_cpp} ${native_mkl_cpp} ${native_mkldnn_cpp} ${generated_cpp} ${core_generated_cpp} ${ATen_CPU_SRCS} ${ATen_QUANTIZED_SRCS} ${cpu_kernel_cpp})
@@ -110,7 +111,7 @@ endif()
 # endif()
 
 if(USE_HB)
-  set(all_cpu_cpp ${all_cpu_cpp} ${hammerblade_cpp} ${native_hammerblade_cpp} ${hammerblade_generated_cpp})
+  set(all_cpu_cpp ${all_cpu_cpp} ${hammerblade_cpp} ${native_hammerblade_cpp} ${native_sparse_hammerblade_cpp} ${hammerblade_generated_cpp})
 endif()
 
 if(USE_CUDA AND USE_ROCM)
