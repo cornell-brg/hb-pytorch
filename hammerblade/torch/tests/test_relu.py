@@ -1,10 +1,14 @@
 """
 Tests on torch.nn.relu (threshold kernel)
 03/09/2020 Lin Cheng (lc873@cornell.edu)
+03/29/2020 Angela Zou
 """
 import torch
 import torch.nn as nn
 import pytest
+from hypothesis import given
+import hypothesis.strategies as st
+from .hypothesis_test_util import HypothesisUtil as hu
 
 # @pytest.mark.skip(reason="not yet implemented")
 def test_torch_nn_relu_1():
