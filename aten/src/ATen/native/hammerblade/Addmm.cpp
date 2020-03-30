@@ -21,6 +21,8 @@ Tensor addmm_hb(
 
   using scalar_t = float;
 
+  TORCH_CHECK(mat1.dim() == 2 && mat2.dim() == 2, "2D matrices expected, got ", mat1.dim(), " and ", mat2.dim(), " tensors");
+
   TORCH_CHECK(mat1.size(1) == mat2.size(0), "Argument #3: Expected dim 0 size ", mat1.size(1), ", got ", mat2.size(0));
 
   Tensor b_self;
