@@ -57,10 +57,10 @@ def test_torch_nn_relu_4():
 def test_elementwise_torch_nn_relu_hypothesis(tensors, threshold, value):
     def elementwise_torch_nn_relu(inputs):
         tensors, threshold, value = inputs
-        if (tensor[0] <= threshold):
+        if (tensors[0] <= threshold):
             return value
         else:
-            return tensor[1]
+            return tensors[1]
     hu.assert_hb_checks(elementwise_torch_nn_relu, [tensors, threshold, value])
 
 
