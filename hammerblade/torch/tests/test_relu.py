@@ -50,21 +50,12 @@ def test_torch_nn_relu_4():
     assert x_h_relu.device == torch.device("hammerblade")
     assert torch.equal(x_h_relu.cpu(), x_relu)
 
-@given(tensors=hu.tensors(n=3), 
-    threshold=st.floats(width=32), 
-    value=st.floats(width=32))
-def test_elementwise_torch_nn_relu_hypothesis(tensors, threshold, value):
-    def elementwise_torch_nn_relu(inputs):
-        tensors, threshold, value = inputs
-        tensor_self = tensors[0]
-        tensor_other = tensors[1]
-        tensor_res = tensors[2]
-        for element_self, element_other, element_res in zip(tensor_self, tensor_other, tensor_res):      
-            if (element_self <= threshold):
-                element_res = value
-            else:
-                element_res = tensor_other
-    hu.assert_hb_checks(elementwise_torch_nn_relu, [tensors, threshold, value])
+def _test_torch_relu_check(tensor_self):
+    tensor_self_hb = torch.tensor(tensor_self).hammerblade()
+    result_hb      = torch.relu(tensor_self_hb)
+    assert result_hb.device == torch.device("hammerblade")
+    assert torch.allclose(result_hb.cpu(), torch.relu(torch.tensor(tensor_self)))
 
-
-
+@given(tensor=hu.tensor())
+def test_elementwise_torch_nn_relu_hypothesis(tensor):
+    _test_torch_relu_check(tensor);
