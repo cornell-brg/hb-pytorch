@@ -6,9 +6,7 @@ Tests on torch.nn.relu (threshold kernel)
 
 import torch
 import torch.nn as nn
-import pytest
-from hypothesis import assume, given, settings
-import hypothesis.strategies as st
+from hypothesis import given
 from .hypothesis_test_util import HypothesisUtil as hu
 
 # @pytest.mark.skip(reason="not yet implemented")
@@ -52,7 +50,7 @@ def test_torch_nn_relu_4():
 
 def _test_torch_relu_check(tensor_self):
     tensor_self_hb = torch.tensor(tensor_self).hammerblade()
-    result_hb      = torch.relu(tensor_self_hb)
+    result_hb = torch.relu(tensor_self_hb)
     assert result_hb.device == torch.device("hammerblade")
     assert torch.allclose(result_hb.cpu(), torch.relu(torch.tensor(tensor_self)))
 
