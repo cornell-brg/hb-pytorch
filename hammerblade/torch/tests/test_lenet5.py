@@ -154,6 +154,12 @@ def test_lenet5_train_1():
     # Compare the result
     assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
 
+    # Compare weight gradients
+    for param, param_hb in zip(net.parameters(), net_hb.parameters()):
+        # iterate in reversed order so that this fails at earliest failure
+        # during backprop
+        assert torch.allclose(param.grad, param_hb.grad.cpu(), atol=1e-7)
+
     # Compare input gradients
     assert torch.allclose(image.grad, image_hb.grad.cpu(), atol=1e-7)
 
