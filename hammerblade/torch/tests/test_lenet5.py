@@ -118,6 +118,41 @@ def test_lenet5_inference_1():
     # Compare the result
     assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
 
+def test_lenet5_train_1():
+    # Create a model on CPU with random weights
+    net = LeNet5()
+
+    # Create a model on HB
+    net_hb = LeNet5().hammerblade()
+
+    # Copy exact same weights from CPU model to HB model
+    net_hb.load_state_dict(net.state_dict())
+
+    # Random 32x32 image
+    image = torch.rand(1, 1, 32, 32)
+
+    # Create a copy of above image on HB
+    image_hb = image.hammerblade()
+
+    # Inference on CPU
+    output = net.forward(image)
+
+    # Inference on HB
+    output_hb = net_hb.forward(image_hb)
+
+    # Random gradients on CPU and HB
+    grad = torch.rand(output.shape)
+    grad_hb = grad.hammerblade()
+
+    # Backprop on CPU
+    output.backward(grad)
+
+    # Backprop on HB
+    output_hb.backward(grad_hb)
+
+    # Compare the result
+    assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
+
 @pytest.mark.skip(reason="Runs slow: fast dummy inference test implemented above.")
 def test_lenet5_inference_mnist():
     """
