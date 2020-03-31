@@ -11,6 +11,7 @@ torch.manual_seed(42)
 
 def _test_torch_nn_CrossEntropyLoss_back(loss, input, target):
     input_h = hbutils.init_hb_tensor(input)
+    assert input_h is not input
     output = loss(input, target)
     output_h = loss(input_h, target.hammerblade())
     assert output_h.device == torch.device("hammerblade")
@@ -19,6 +20,7 @@ def _test_torch_nn_CrossEntropyLoss_back(loss, input, target):
     output_h.backward()
     assert input.grad is not None
     assert input_h.grad is not None
+    assert input.grad is not input_h.grad
     assert torch.allclose(input.grad, input_h.grad.cpu())
 
 def test_torch_nn_CrossEntropyLoss_mean_back():
