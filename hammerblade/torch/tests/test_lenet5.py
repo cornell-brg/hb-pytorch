@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import pytest
+import hbutils
 
 # Network
 class LeNet5(nn.Module):
@@ -129,10 +130,10 @@ def test_lenet5_train_1():
     net_hb.load_state_dict(net.state_dict())
 
     # Random 32x32 image
-    image = torch.rand(1, 1, 32, 32)
+    image = torch.rand(1, 1, 32, 32, requires_grad=True)
 
     # Create a copy of above image on HB
-    image_hb = image.hammerblade()
+    image_hb = hbutils.init_hb_tensor(image)
 
     # Inference on CPU
     output = net.forward(image)
@@ -152,6 +153,9 @@ def test_lenet5_train_1():
 
     # Compare the result
     assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
+
+    # Compare input gradients
+    assert torch.allclose(image.grad, image_hb.grad.cpu(), atol=1e-7)
 
 @pytest.mark.skip(reason="Runs slow: fast dummy inference test implemented above.")
 def test_lenet5_inference_mnist():
@@ -216,4 +220,4 @@ def test_lenet5_inference_mnist():
     assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
 
 if __name__ == "__main__":
-    test_lenet5_inference_mnist()
+    test_lenet5_train_1()
