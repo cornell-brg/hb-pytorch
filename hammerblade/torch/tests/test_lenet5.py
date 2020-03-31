@@ -119,7 +119,7 @@ def test_lenet5_inference_1():
     # Compare the result
     assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
 
-def test_lenet5_train_1():
+def test_lenet5_backprop_1():
     # Create a model on CPU with random weights
     net = LeNet5()
 
@@ -226,4 +226,4 @@ def test_lenet5_inference_mnist():
     assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
 
 if __name__ == "__main__":
-    test_lenet5_train_1()
+    test_lenet5_backprop_1()
