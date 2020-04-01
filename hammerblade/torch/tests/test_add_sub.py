@@ -10,6 +10,8 @@ from hypothesis import assume, given, settings
 import hypothesis.strategies as st
 from .hypothesis_test_util import HypothesisUtil as hu
 
+torch.manual_seed(42)
+
 # test of adding two tensors
 
 def _test_add(x1, x2):

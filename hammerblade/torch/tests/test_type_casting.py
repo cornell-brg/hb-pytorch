@@ -6,6 +6,8 @@ Tests on torch.to (copy_hb_to_hb kernel)
 import torch
 import pytest
 
+torch.manual_seed(42)
+
 def test_torch_to_long_to_int_1():
     x = torch.ones(10, dtype=torch.long)
     assert x.type() == 'torch.LongTensor'

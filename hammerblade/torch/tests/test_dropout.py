@@ -8,6 +8,8 @@ import torch.nn as nn
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
+torch.manual_seed(42)
+
 def _test_torch_nn_dropout(x, p):
     dropout = nn.Dropout(p)
     h = x.hammerblade()

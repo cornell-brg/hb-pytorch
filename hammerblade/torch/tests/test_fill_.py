@@ -9,6 +9,8 @@ from math import isnan, isinf
 from hypothesis import assume, given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
+torch.manual_seed(42)
+
 def _test_torch_fill(x, s):
     h = x.hammerblade()
     x.fill_(s)

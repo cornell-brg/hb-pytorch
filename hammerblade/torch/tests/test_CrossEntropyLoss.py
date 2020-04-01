@@ -6,6 +6,8 @@ Tests on torch.nn.CrossEntropyLoss
 import torch
 import torch.nn as nn
 
+torch.manual_seed(42)
+
 def _test_torch_nn_CrossEntropyLoss(loss, input, target):
     output = loss(input, target)
     output_h = loss(input.hammerblade(), target.hammerblade())

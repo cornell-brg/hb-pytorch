@@ -5,6 +5,8 @@ Tests on torch.contiguous
 
 import torch
 
+torch.manual_seed(42)
+
 def _test_torch_contiguous(x):
     y = x.contiguous()
     assert y.device == torch.device("hammerblade")

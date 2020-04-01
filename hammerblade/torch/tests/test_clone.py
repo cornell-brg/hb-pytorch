@@ -7,6 +7,8 @@ import torch
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
+torch.manual_seed(42)
+
 def _test_torch_clone(x):
     y = x.clone()
     assert y.device == torch.device("hammerblade")

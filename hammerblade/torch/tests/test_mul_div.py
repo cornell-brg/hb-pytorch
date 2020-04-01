@@ -10,6 +10,8 @@ from math import isnan, isinf
 from hypothesis import assume, given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
+torch.manual_seed(42)
+
 def _test_mul(x1, x2):
     h1 = x1.hammerblade()
     h2 = x2.hammerblade()

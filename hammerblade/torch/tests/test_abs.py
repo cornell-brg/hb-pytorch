@@ -4,6 +4,8 @@ Unit tests for torch.abs kernel
 """
 import torch
 
+torch.manual_seed(42)
+
 def _test_torch_asb(x):
     h = x.hammerblade()
     abs_x = x.abs()
