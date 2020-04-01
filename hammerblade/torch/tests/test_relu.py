@@ -6,7 +6,7 @@ Tests on torch.nn.relu (threshold kernel)
 
 import torch
 import torch.nn as nn
-from hypothesis import given
+from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
 def test_torch_nn_relu_1():
@@ -51,6 +51,7 @@ def _test_torch_relu_check(tensor_self):
     assert result_hb.device == torch.device("hammerblade")
     assert torch.allclose(result_hb.cpu(), torch.relu(torch.tensor(tensor_self)))
 
+@settings(deadline=None)
 @given(tensor=hu.tensor())
 def test_elementwise_torch_nn_relu_hypothesis(tensor):
     _test_torch_relu_check(tensor)
