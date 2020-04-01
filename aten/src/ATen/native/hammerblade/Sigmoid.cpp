@@ -9,11 +9,22 @@ namespace {
 
 static void sigmoid_kernel_hb(TensorIterator& iter) {
 
-  TORCH_CHECK(false, "sigmoid_kernel_hb not implemented");
+  //TORCH_CHECK(false, "sigmoid_kernel_hb not implemented");
   // TODO: implement the host code for sigmoid kernel
   //       you may refer to add_kernel_hb in
   //       aten/src/ATen/native/hammerblade/AddSub.cpp
   //       as an example
+  std::cout << "inside the host code and before dispatch!\n" << std::endl;
+  
+  hb_offload_kernel(iter, "tensorlib_sigmoid");
+
+//  AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "sigmoid_hb", [&](){
+//	hb_offload_kernel(iter, "tensorlib_sigmoid");
+//	});
+
+
+  std::cout << "successfully called the device!\n" << std::endl;
+
 }
 
 } // anonymous namespace
