@@ -28,5 +28,5 @@ def test_torch_tensor_item_3():
 
 @pytest.mark.xfail
 def test_torch_tensor_item_F():
-     x = torch.ones(10)
-     _test_torch_tensor_item(x)
+    x = torch.ones(10)
+    _test_torch_tensor_item(x)
