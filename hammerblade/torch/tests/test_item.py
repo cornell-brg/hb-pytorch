@@ -7,6 +7,8 @@ import math
 import torch
 import pytest
 
+torch.manual_seed(42)
+
 def _test_torch_tensor_item(tensor):
     h = tensor.hammerblade()
     scalar = h.item()
