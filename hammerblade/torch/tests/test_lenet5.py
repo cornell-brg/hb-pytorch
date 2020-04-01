@@ -34,6 +34,7 @@ class LeNet5(nn.Module):
             nn.Linear(120, 84),
             nn.ReLU(),
             nn.Linear(84, 10),
+            hbutils.PrintLayer(),
             nn.LogSoftmax(dim=-1),
         )
 
@@ -93,31 +94,6 @@ def test(net, loader, loss_func, hb=False):
     print('Test set: Average loss={:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, num_correct, len(loader.dataset), test_accuracy
     ))
-
-def test_lenet5_inference_1():
-    # Create a model on CPU with random weights
-    net = LeNet5()
-
-    # Create a model on HB
-    net_hb = LeNet5().hammerblade()
-
-    # Copy exact same weights from CPU model to HB model
-    net_hb.load_state_dict(net.state_dict())
-
-    # Random 32x32 image
-    image = torch.rand(1, 1, 32, 32)
-
-    # Create a copy of above image on HB
-    image_hb = image.hammerblade()
-
-    # Inference on CPU
-    output = net.forward(image)
-
-    # Inference on HB
-    output_hb = net_hb.forward(image_hb)
-
-    # Compare the result
-    assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
 
 def test_lenet5_backprop_1():
     # Create a model on CPU with random weights
