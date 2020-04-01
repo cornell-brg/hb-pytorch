@@ -104,22 +104,3 @@ class HypothesisUtil():
         return HypothesisUtil.tensors(
             n, 1, 1, dtype, elements, nonzero, min_value=min_len, max_value=max_len
         )
-
-
-    # ===========================
-    # Result comparison
-    # ===========================
-
-    # run the same op on both cpu and HB
-    @staticmethod
-    def assert_hb_checks(op, inputs):
-        inputs_h = []
-        for input in inputs:
-            inputs_h.append(torch.tensor(input).hammerblade())
-        inputs_c = []
-        for input in inputs:
-            inputs_c.append(torch.tensor(input))
-        outputs_cpu = op(inputs_c)
-        outputs_hb = op(inputs_h)
-        assert outputs_hb.device == torch.device("hammerblade")
-        assert_equal(outputs_cpu, outputs_hb)
