@@ -15,7 +15,7 @@ export USE_QNNPACK=0
 export USE_DISTRIBUTED=0
 export USE_OPENMP=0
 export ATEN_THREADING=NATIVE
-export CFLAGS='-fuse-ld=gold'
+export CFLAGS='-fuse-ld=ld'
 
 # enable emulation layer building
 export USE_HB_EMUL=1
