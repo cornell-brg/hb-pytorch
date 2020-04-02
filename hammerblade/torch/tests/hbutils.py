@@ -15,13 +15,14 @@ class CheckLayer(nn.Module):
         super(CheckLayer, self).__init__()
 
     def forward(self, x):
-        if x.is_hammerblade:
-            assert CheckLayer.fwd is not None, "Forward must be called on CPU first"
-            assert torch.allclose(CheckLayer.fwd, x.cpu()) is True, \
-                    "hbutils.CheckLayer failed:\n" + \
-                    "CPU output:\n" + str(CheckLayer.fwd) + "\n"\
-                    "HB output:\n" + str(x) + "\n"
-        else:
-            CheckLayer.fwd = x.clone()
+        with torch.no_grad():
+            if x.is_hammerblade:
+                assert CheckLayer.fwd is not None, "Forward must be called on CPU first"
+                assert torch.allclose(CheckLayer.fwd, x.cpu(), atol=1e-7) is True, \
+                        "hbutils.CheckLayer failed:\n" + \
+                        "CPU output:\n" + str(CheckLayer.fwd) + "\n"\
+                        "HB output:\n" + str(x) + "\n"
+            else:
+                CheckLayer.fwd = x.clone()
 
         return x
