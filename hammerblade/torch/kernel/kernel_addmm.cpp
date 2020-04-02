@@ -5,7 +5,6 @@
 
 #include <kernel_common.hpp>
 #include <cmath>
-#define BLOCK_DIM 10 // sqrt(4KB/4 byte/4 data matrix) = 15 max 
 
 extern "C" {
 
@@ -124,8 +123,9 @@ extern "C" {
         }
 
 
-        // v1: naive version, single tile, access DRAM elm by elm
 /*
+        // v1: naive version, single tile, access DRAM elm by elm
+  
         int r1 = mat1.dim(0);
         int c1 = mat1.dim(1);
         int r2 = mat2.dim(0);
@@ -135,6 +135,8 @@ extern "C" {
         for (i = 0; i < r1; i++) {
             for (j = 0; j < c2; j++) {
                 for (k = 0; k < c1; k++) {
+                    if(k == 0) 
+                      result(i, j) = 0.0f;
                     result(i, j) += mat1(i, k) * mat2(k, j);
                 }
                 result(i, j) *= alpha;
