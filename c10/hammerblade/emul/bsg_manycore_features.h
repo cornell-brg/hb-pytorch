@@ -28,7 +28,11 @@
 #ifndef BSG_MANYCORE_FEATURES_H
 #define BSG_MANYCORE_FEATURES_H
 // <features.h> sorts out many of these defines based on compile time flags (e.g. -std=c++11)
-#include <features.h>
+// #include <features.h>
+#define _BSG_SOURCE
+#define _DEFAULT_SOURCE
+#define _XOPEN_SOURCE 600
+
 // check _BSG_SOURCE
 #ifndef _BSD_SOURCE
 #ifndef _DEFAULT_SOURCE
