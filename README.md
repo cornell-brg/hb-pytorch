@@ -24,7 +24,7 @@ This work aims to port PyTorch to HammerBlade.
 
 - Clone this repository:
 
-      git clone -b hb-device git@github.com:cornell-brg/hb-pytorch.git
+      git clone git@github.com:cornell-brg/hb-pytorch.git
 
 - Create a [Python virtual environment][venv]:
 
