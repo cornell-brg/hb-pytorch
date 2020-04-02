@@ -50,7 +50,7 @@ extern "C" {
                 HB_MC_COORDINATE_MAX = 32
         } hb_mc_coordinate_limit_t;
 
-        typedef uint32_t hb_mc_idx_t;
+        typedef uint8_t hb_mc_idx_t;
 
         typedef struct __hb_mc_coordinate_t{
                 hb_mc_idx_t x;
