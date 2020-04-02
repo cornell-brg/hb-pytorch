@@ -34,7 +34,6 @@ class LeNet5(nn.Module):
             nn.Linear(120, 84),
             nn.ReLU(),
             nn.Linear(84, 10),
-            hbutils.PrintLayer(),
             nn.LogSoftmax(dim=-1),
         )
 
