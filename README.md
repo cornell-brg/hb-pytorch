@@ -26,10 +26,10 @@ This work aims to port PyTorch to HammerBlade.
 
       git clone -b hb-device git@github.com:cornell-brg/hb-pytorch.git
 
-- Create a Python virtual environment:
+- Create a [Python virtual environment][venv]:
 
-      python3.6 -m venv ./venv_pytorch
-      python3.6 -m venv ./venv_pytorch
+      python3 -m venv ./venv_pytorch
+      source ./venv_pytorch/bin/activate
 
 - Install some dependencies:
 
@@ -46,6 +46,8 @@ This work aims to port PyTorch to HammerBlade.
 - Build PyTorch. This step can take up to 15 minutes:
 
      python setup.py develop
+
+[venv]: https://docs.python.org/3/tutorial/venv.html
 
 ### Run Pytests
  - Goto hb-pytorch directory
