@@ -150,3 +150,12 @@ def test_torch_sum_28():
     sum_ = torch.sum(h, (0, 2), keepdim=True)
     assert sum_.device == torch.device("hammerblade")
     assert torch.allclose(sum_.cpu(), torch.sum(x, (0, 2), keepdim=True))
+
+def test_torch_sum_29():
+    x = torch.rand(2, 3, 4, 5)
+    _test_torch_sum(x)
+
+def test_torch_sum_30():
+    x = torch.rand(2, 3, 4, 5)
+    for dim in range(4):
+        _test_torch_sum(x, dim=dim)
