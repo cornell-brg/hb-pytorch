@@ -17,7 +17,7 @@ class CheckLayer(nn.Module):
     def forward(self, x):
         with torch.no_grad():
             if x.is_hammerblade:
-                assert CheckLayer.fwd is not None, "Forward must be called on CPU first"
+                assert CheckLayer.fwd is not None, "Forward must be called on CPU model first"
                 assert torch.allclose(CheckLayer.fwd, x.cpu(), atol=1e-7) is True, \
                         "hbutils.CheckLayer failed:\n" + \
                         "CPU output:\n" + str(CheckLayer.fwd) + "\n"\
