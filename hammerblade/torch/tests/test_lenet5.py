@@ -9,6 +9,8 @@ import torch.nn as nn
 import pytest
 import hbutils
 
+torch.manual_seed(42)
+
 # Network
 class LeNet5(nn.Module):
     """
@@ -116,6 +118,9 @@ def test_lenet5_backprop_1():
     # Inference on HB
     output_hb = net_hb.forward(image_hb)
 
+    # Compare the result
+    assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
+
     # Random gradients on CPU and HB
     grad = torch.rand(output.shape)
     grad_hb = grad.hammerblade()
@@ -125,9 +130,6 @@ def test_lenet5_backprop_1():
 
     # Backprop on HB
     output_hb.backward(grad_hb)
-
-    # Compare the result
-    assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
 
     # Compare weight gradients
     for param, param_hb in zip(net.parameters(), net_hb.parameters()):
