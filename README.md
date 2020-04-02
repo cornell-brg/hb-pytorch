@@ -41,7 +41,7 @@ This work aims to port PyTorch to HammerBlade.
 
 - Setup building environment variables:
 
-      cd hb-pytorch && source setup_emul_build_env.sh
+      source setup_emul_build_env.sh
 
 - Build PyTorch. This step can take up to 15 minutes:
 
