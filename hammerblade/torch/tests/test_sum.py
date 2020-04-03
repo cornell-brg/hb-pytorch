@@ -163,3 +163,14 @@ def test_torch_sum_30():
 def test_torch_sum_31():
     x = torch.rand(1, 10)
     _test_torch_sum(x, dim=0)
+
+def test_torch_sum_32():
+    x = torch.tensor([[1.]])
+    h = x.hammerblade()
+    x = x.expand(1, 10)
+    h = h.expand(1, 10)
+    assert h.device == torch.device("hammerblade")
+    assert not h.is_contiguous()
+    sum_ = torch.sum(h, 0, keepdim=True)
+    assert sum_.device == torch.device("hammerblade")
+    assert torch.allclose(sum_.cpu(), torch.sum(x, 0, keepdim=True))
