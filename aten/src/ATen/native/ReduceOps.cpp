@@ -349,8 +349,13 @@ Tensor &mean_out_cpu_gpu(Tensor &result, const Tensor &self, IntArrayRef dim,
 
   auto iter = make_reduction("mean", result, self, dim, keepdim, dtype);
   if (iter.numel() == 0) {
-    result.fill_(std::numeric_limits<double>::quiet_NaN());
+    if (self.device().is_hammerblade()) {
+      result.fill_(std::numeric_limits<float>::quiet_NaN());
+    } else {
+      result.fill_(std::numeric_limits<double>::quiet_NaN());
+    }
   } else {
+    result.zero_();
     mean_stub(iter.device_type(), iter);
   }
   return result;
