@@ -47,7 +47,13 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
                              F1 reduce, F2 project) {
   switch(ndim) {
     case 1:
-      bsg_assert_msg(false, "1d case should be handled by reduction_simple");
+      // There is this corner case, in which each output is produced by only
+      // one input element
+      bsg_assert_msg(out.numel() == in.numel(),
+                     "This case should be handled by reduction_simple?");
+      brg_tile_for(out.numel(), [&](size_t n) {
+        out(n) = project(in(n));
+      });
       break;
     case 2:
       if(num_reduction_dim == 1) {
