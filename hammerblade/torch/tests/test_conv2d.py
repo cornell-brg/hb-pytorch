@@ -8,6 +8,8 @@ import os
 import pytest
 import hbutils
 
+torch.manual_seed(42)
+
 def _test_conv2d(inputs, kernel, padding=1, stride=1, bias=None):
     inputs_hb = hbutils.init_hb_tensor(inputs)
     kernel_hb = hbutils.init_hb_tensor(kernel)

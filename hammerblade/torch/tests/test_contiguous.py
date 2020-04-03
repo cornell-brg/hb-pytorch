@@ -19,6 +19,11 @@ def test_torch_contiguous_1():
     x = torch.ones(10)
     _test_torch_contiguous(x)
 
+# These tensors are already contiguous
+def test_torch_contiguous_1():
+    x = torch.ones(10).hammerblade()
+    _test_torch_contiguous(x)
+
 def test_torch_contiguous_2():
     x = torch.randn(10)
     _test_torch_contiguous(x)

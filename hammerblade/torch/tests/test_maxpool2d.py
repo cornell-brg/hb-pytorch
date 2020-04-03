@@ -7,6 +7,8 @@ import torch
 import torch.nn.functional as F
 import hbutils
 
+torch.manual_seed(42)
+
 def _test_max_pool2d(x, kernel_size, stride=None, padding=1):
     x_hb = hbutils.init_hb_tensor(x)
 

@@ -6,6 +6,8 @@ Bandhav Veluri
 
 import torch
 
+torch.manual_seed(42)
+
 def test_view_1():
     x1 = torch.rand(2, 3)
     x1_h = x1.hammerblade()
