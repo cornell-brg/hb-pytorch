@@ -165,6 +165,10 @@ def test_torch_sum_31():
     _test_torch_sum(x, dim=0)
 
 def test_torch_sum_32():
+    x = torch.rand(1, 3, 4)
+    _test_torch_sum(x, dim=0)
+
+def test_torch_sum_33():
     x = torch.tensor([[1.]])
     h = x.hammerblade()
     x = x.expand(1, 10)
