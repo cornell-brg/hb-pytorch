@@ -159,3 +159,7 @@ def test_torch_sum_30():
     x = torch.rand(2, 3, 4, 5)
     for dim in range(4):
         _test_torch_sum(x, dim=dim)
+
+def test_torch_sum_31():
+    x = torch.rand(1, 10)
+    _test_torch_sum(x, dim=0)
