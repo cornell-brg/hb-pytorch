@@ -8,21 +8,36 @@ def init_hb_tensor(input_t):
     return input_t.hammerblade().clone().detach().requires_grad_(
         input_t.requires_grad)
 
+class CheckLayerFunction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x, cpu_fwd):
+        if x.is_hammerblade:
+            print("Running HB")
+            assert cpu_fwd is not None, \
+                    "Forward must be called on CPU model first"
+            assert torch.allclose(cpu_fwd, x.cpu(), atol=1e-7) is True, \
+                    "hbutils.CheckLayer failed:\n" + \
+                    "CPU output:\n" + str(cpu_fwd) + "\n" \
+                    "HB output:\n" + str(x) + "\n"
+        else:
+            print("Running CPU")
+            cpu_fwd = x.clone()
+
+        return x, cpu_fwd
+
+    @staticmethod
+    def backward(ctx, x, cpu_fwd):
+        return x, cpu_fwd
+
 class CheckLayer(nn.Module):
-    fwd = None
+    cpu_fwd = None
+    cpu_bkwd = None
 
     def __init__(self):
         super(CheckLayer, self).__init__()
 
     def forward(self, x):
-        with torch.no_grad():
-            if x.is_hammerblade:
-                assert CheckLayer.fwd is not None, "Forward must be called on CPU model first"
-                assert torch.allclose(CheckLayer.fwd, x.cpu(), atol=1e-7) is True, \
-                        "hbutils.CheckLayer failed:\n" + \
-                        "CPU output:\n" + str(CheckLayer.fwd) + "\n"\
-                        "HB output:\n" + str(x) + "\n"
-            else:
-                CheckLayer.fwd = x.clone()
-
+        x, CheckLayer.cpu_fwd = CheckLayerFunction.apply(x, CheckLayer.cpu_fwd)
+        if x.is_hammerblade:
+            CheckLayer.cpu_fwd = None
         return x
