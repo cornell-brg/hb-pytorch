@@ -260,6 +260,7 @@ Tensor& sum_out(Tensor& result, const Tensor& self, IntArrayRef dim,
   if (iter.numel() == 0) {
     result.zero_();
   } else {
+    result.zero_();
     sum_stub(iter.device_type(), iter);
   }
   return result;
