@@ -21,18 +21,34 @@ This work aims to port PyTorch to HammerBlade.
     `python setup.py install`
 
 ### How to build PyTorch with Emulation Layer
-    `git clone -b hb-device git@github.com:cornell-brg/hb-pytorch.git`
- - Create python virtual environment
-    `python3.6 -m venv ./venv_pytorch`
-    `python3.6 -m venv ./venv_pytorch`
- - Install dependencies
-    `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja`
- - Init pytorch third party dependencies
-    `git submodule update --init --recursive`
- - Setup building environment variables.
-    `cd hb-pytorch && source setup_emul_build_env.sh`
- - Build pytorch. This step can take up to 15 minutes
-    `python setup.py develop`
+
+- Clone this repository:
+
+      git clone git@github.com:cornell-brg/hb-pytorch.git
+
+- Create a [Python virtual environment][venv]:
+
+      python3 -m venv ./venv_pytorch
+      source ./venv_pytorch/bin/activate
+
+- Install some dependencies:
+
+      pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja
+
+- Init PyTorch third party dependencies:
+
+      git submodule update --init --recursive
+
+- Setup building environment variables:
+
+      source setup_emul_build_env.sh
+
+- Build PyTorch. This step can take up to 15 minutes:
+
+      python setup.py develop
+
+[venv]: https://docs.python.org/3/tutorial/venv.html
+
 ### Run Pytests
  - Goto hb-pytorch directory
     `cd hb-pytorch/hammerblade/torch`
