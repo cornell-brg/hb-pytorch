@@ -1678,7 +1678,6 @@
   dispatch:
     CPU: mean_cpu_gpu
     CUDA: mean_cpu_gpu
-    HammerBlade: mean_cpu_gpu
     QuantizedCPU: quantized_mean_cpu
 
 - func: mean.dim(Tensor self, int[1] dim, bool keepdim=False, *, ScalarType? dtype=None) -> Tensor
@@ -1687,7 +1686,6 @@
   dispatch:
     CPU: mean_cpu_gpu
     CUDA: mean_cpu_gpu
-    HammerBlade: mean_cpu_gpu
     QuantizedCPU: quantized_mean_cpu
 
 - func: mean.out(Tensor self, int[1] dim, bool keepdim=False, *, ScalarType? dtype=None, Tensor(a!) out) -> Tensor(a!)
@@ -1695,7 +1693,6 @@
   dispatch:
     CPU: mean_out_cpu_gpu
     CUDA: mean_out_cpu_gpu
-    HammerBlade: mean_out_cpu_gpu
     QuantizedCPU: quantized_mean_out_cpu
 
 - func: mean.names_dim(Tensor self, Dimname[1] dim, bool keepdim=False, *, ScalarType? dtype=None) -> Tensor
@@ -3645,6 +3642,7 @@
   dispatch:
     CPU: _local_scalar_dense_cpu
     CUDA: _local_scalar_dense_cuda
+    HammerBlade: _local_scalar_dense_hb
   variants: function
   supports_named_tensor: True
 
