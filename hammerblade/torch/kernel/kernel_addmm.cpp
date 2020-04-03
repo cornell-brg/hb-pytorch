@@ -59,7 +59,7 @@ extern "C" {
                 int res_dim_x = rc == m2_num_blk_per_col - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
 
                 // initialize scratchpad result
-                float sp_result[res_dim_y][res_dim_x] = {};
+                float sp_result[res_dim_y][res_dim_x];
                 for (int i = 0; i < res_dim_y; i++) {
                     for (int j = 0; j < res_dim_x; j++) {
                     }
