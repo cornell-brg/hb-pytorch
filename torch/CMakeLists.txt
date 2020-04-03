@@ -210,7 +210,7 @@ if (USE_HB)
       ${TORCH_SRC_DIR}/csrc/hammerblade/Module.cpp
       ${TORCH_SRC_DIR}/csrc/hammerblade/python_comm.cpp
       )
-    list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS USE_HB _XOPEN_SOURCE=500)
+    list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS USE_HB)
 endif()
 
 if (USE_ROCM)
