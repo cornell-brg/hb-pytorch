@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import pytest
 import hbutils
+import os
 
 torch.manual_seed(42)
 
@@ -46,7 +47,7 @@ class LeNet5(nn.Module):
         return x
 
 # Train routine
-def train(net, loader, epochs, optimizer, loss_func, hb=False):
+def train(net, loader, optimizer, loss_func, epochs, batches=None, hb=False):
     print('Training {} for {} epoch(s)...\n'.format(type(net).__name__, epochs))
     for epoch in range(epochs):
         losses = []
@@ -62,11 +63,14 @@ def train(net, loader, epochs, optimizer, loss_func, hb=False):
             loss.backward()
             optimizer.step()
 
-            if (batch_idx % 1000) == 0:
+            if (batches is None and batch_idx % 1000 == 0) or \
+                (batches is not None and batch_idx < batches):
                 print('epoch {} : [{}/{} ({:.0f}%)]\tLoss={:.6f}'.format(
-                    epoch, batch_idx * batch_size, len(loader.dataset),
+                    epoch, (batch_idx + 1) * batch_size, len(loader.dataset),
                     100. * (batch_idx / len(loader)), loss.item()
                 ))
+            else:
+                break
 
         print('epoch {} : Average Loss={:.6f}\n'.format(
             epoch, np.mean(losses)
@@ -145,22 +149,18 @@ def test_lenet5_backprop_1():
     assert torch.allclose(image.grad, image_hb.grad.cpu(), atol=1e-7)
 
 @pytest.mark.skip(reason="Runs slow: fast backprop test implemented above.")
-def test_lenet5_inference_mnist():
+def test_lenet5_train_mnist():
     """
     Trains the CNN on CPU, loads the model to HB to test inference
     """
     import torchvision
 
     # Model
-    BATCH_SIZE = 32
+    BATCH_SIZE = 1
     LEARNING_RATE = 0.02
     MOMENTUM = 0.9
     EPOCHS = 1
-    net = LeNet5()
-    optimizer = torch.optim.SGD(
-        net.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM
-    )
-    loss_func = nn.CrossEntropyLoss()
+    BATCHES = 1
 
     # Data
     transforms = torchvision.transforms.Compose([
@@ -182,29 +182,24 @@ def test_lenet5_inference_mnist():
         testset, batch_size=BATCH_SIZE, shuffle=False
     )
 
-    # Train
-    train(net, trainloader, EPOCHS, optimizer, loss_func)
+    net = LeNet5()
+    optimizer = torch.optim.SGD(
+        net.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM
+    )
 
-    # Create a model on HB
     net_hb = LeNet5().hammerblade()
-
-    # Copy exact same weights from CPU model to HB model
     net_hb.load_state_dict(net.state_dict())
+    optimizer_hb = torch.optim.SGD(
+        net_hb.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM
+    )
 
-    # Random 32x32 image
-    image = torch.rand(1, 1, 32, 32)
+    loss_func = nn.CrossEntropyLoss()
 
-    # Create a copy of above image on HB
-    image_hb = image.hammerblade()
+    # Train on CPU
+    train(net, trainloader, optimizer, loss_func, EPOCHS, BATCHES)
 
-    # Inference on CPU
-    output = net.forward(image)
-
-    # Inference on HB
-    output_hb = net_hb.forward(image_hb)
-
-    # Compare the result
-    assert torch.allclose(output, output_hb.cpu(), atol=1e-7)
+    # Train on HB
+    train(net_hb, trainloader, optimizer_hb, loss_func, EPOCHS, BATCHES, hb=True)
 
 if __name__ == "__main__":
-    test_lenet5_backprop_1()
+    test_lenet5_train_mnist()
