@@ -4,7 +4,7 @@
 //====================================================================
 
 #include <kernel_common.hpp>
-#include <float.h>
+#include <limits>
 
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
@@ -49,13 +49,11 @@ extern "C" {
       for(uint32_t n = 0; n < N; ++n)
         for(uint32_t c = 0; c < C; ++c)
           for(uint32_t yh = 0; yh < Hout; ++yh)
-            for(uint32_t yw = 0; yw < Wout; ++yw)
+            for(uint32_t yw = 0; yw < Wout; ++yw) {
+              y(n, c, yh, yw) = std::numeric_limits<float>::lowest();
+
               for(uint32_t kh = 0; kh < Kh; ++kh)
                 for(uint32_t kw = 0; kw < Kw; ++kw) {
-                  if((kh + kw) == 0) {
-                    y(n, c, yh, yw) = FLT_MIN;
-                  }
-
                   int32_t xh = Sh * yh - Ph + kh;
                   int32_t xw = Sw * yw - Pw + kw;
 
@@ -66,6 +64,7 @@ extern "C" {
                     }
                   }
                 }
+            }
     }
 
     // End profiling
