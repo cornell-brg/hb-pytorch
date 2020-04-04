@@ -62,6 +62,7 @@ extern "C" {
                 float sp_result[res_dim_y][res_dim_x];
                 for (int i = 0; i < res_dim_y; i++) {
                     for (int j = 0; j < res_dim_x; j++) {
+                        sp_result[i][j] = 0.0f;
                     }
                 }
 
