@@ -96,6 +96,7 @@ def test(net, loader, loss_func, hb=False):
         test_loss, num_correct, len(loader.dataset), test_accuracy
     ))
 
+@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Slow on cosim")
 def test_lenet5_backprop_1():
     # Create a model on CPU with random weights
     net = LeNet5()
@@ -143,7 +144,7 @@ def test_lenet5_backprop_1():
     # Compare input gradients
     assert torch.allclose(image.grad, image_hb.grad.cpu(), atol=1e-7)
 
-@pytest.mark.skip(reason="Runs slow: fast dummy inference test implemented above.")
+@pytest.mark.skip(reason="Runs slow: fast backprop test implemented above.")
 def test_lenet5_inference_mnist():
     """
     Trains the CNN on CPU, loads the model to HB to test inference
