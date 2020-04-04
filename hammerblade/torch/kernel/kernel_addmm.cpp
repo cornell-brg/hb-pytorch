@@ -5,6 +5,7 @@
 
 #include <kernel_common.hpp>
 #include <cmath>
+#define BLOCK_DIM 10 // sqrt(4KB/4 byte/4 data matrix) = 15 max
 
 extern "C" {
 
