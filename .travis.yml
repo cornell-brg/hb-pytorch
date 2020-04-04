@@ -35,7 +35,6 @@ install:
     # Install Python requirements
     - pip install --upgrade pip setuptools twine
     - pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest hypothesis
-    - pip install --no-deps torchvision
     - pip list
 
 #------------------------------------------------------------------------
