@@ -85,7 +85,7 @@ class BSGTensor {
     }
 
     template<typename... T>
-    DT& operator()(T... indices) {
+    DT& operator[](T... indices) {
       std::initializer_list<uint32_t> iarray = {indices...};
 
       // special case where we have a 0-dim tensor

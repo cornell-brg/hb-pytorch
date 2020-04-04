@@ -50,7 +50,7 @@ extern "C" {
         for(uint32_t c = 0; c < C; ++c)
           for(uint32_t yh = 0; yh < Hout; ++yh)
             for(uint32_t yw = 0; yw < Wout; ++yw) {
-              y(n, c, yh, yw) = std::numeric_limits<float>::lowest();
+              y[n, c, yh, yw] = std::numeric_limits<float>::lowest();
 
               for(uint32_t kh = 0; kh < Kh; ++kh)
                 for(uint32_t kw = 0; kw < Kw; ++kw) {
@@ -58,9 +58,9 @@ extern "C" {
                   int32_t xw = Sw * yw - Pw + kw;
 
                   if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                    if(x(n, c, xh, xw) > y(n, c, yh, yw)) {
-                      y(n, c, yh, yw) = x(n, c, xh, xw);
-                      ind(n, c, yh, yw) = xh * Win + xw;
+                    if(x[n, c, xh, xw] > y[n, c, yh, yw]) {
+                      y[n, c, yh, yw] = x[n, c, xh, xw];
+                      ind[n, c, yh, yw] = xh * Win + xw;
                     }
                   }
                 }
@@ -106,16 +106,16 @@ extern "C" {
         for(uint32_t c = 0; c < C; ++c)
           for(uint32_t xh = 0; xh < Hin; ++xh)
             for(uint32_t xw = 0; xw < Win; ++xw)
-              x(n, c, xh, xw) = 0.0f;
+              x[n, c, xh, xw] = 0.0f;
 
       for(uint32_t n = 0; n < N; ++n)
         for(uint32_t c = 0; c < C; ++c)
           for(uint32_t yh = 0; yh < Hout; ++yh)
             for(uint32_t yw = 0; yw < Wout; ++yw) {
-              int32_t xh = ind(n, c, yh, yw) / Win;
-              int32_t xw = ind(n, c, yh, yw) % Win;
+              int32_t xh = ind[n, c, yh, yw] / Win;
+              int32_t xw = ind[n, c, yh, yw] % Win;
 
-              x(n, c, xh, xw) += y(n, c, yh, yw);
+              x[n, c, xh, xw] += y[n, c, yh, yw];
             }
     }
 

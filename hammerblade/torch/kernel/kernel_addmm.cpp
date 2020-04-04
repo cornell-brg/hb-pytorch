@@ -67,7 +67,7 @@ extern "C" {
                 float sp_self[res_dim_y][res_dim_x];
                 for (int i = 0; i < res_dim_y; i++) {
                     for (int j = 0; j < res_dim_x; j++) {
-                        sp_self[i][j] = self(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j);
+                        sp_self[i][j] = self[rr * BLOCK_DIM + i, rc * BLOCK_DIM + j];
                     }
                 }
 
@@ -86,13 +86,13 @@ extern "C" {
 
                     for (int i = 0; i < res_dim_y; i++) {
                         for (int j = 0; j < mid_dim; j++) {
-                            sp_mat1[i][j] = mat1(rr * BLOCK_DIM + i, mat1x * BLOCK_DIM + j);
+                            sp_mat1[i][j] = mat1[rr * BLOCK_DIM + i, mat1x * BLOCK_DIM + j];
                         }
                     }
 
                     for (int i = 0; i < mid_dim; i++) {
                         for (int j = 0; j < res_dim_x; j++) {
-                            sp_mat2[i][j] = mat2(mat2y * BLOCK_DIM + i, rc * BLOCK_DIM + j);
+                            sp_mat2[i][j] = mat2[mat2y * BLOCK_DIM + i, rc * BLOCK_DIM + j];
                         }
                     }
 
@@ -117,7 +117,7 @@ extern "C" {
                 // copy this block back into DRAM
                 for (int i = 0; i < res_dim_y; i++) {
                     for (int j = 0; j < res_dim_x; j++) {
-                        result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i][j];
+                        result[rr * BLOCK_DIM + i, rc * BLOCK_DIM + j] = sp_result[i][j];
                     }
                 }
             }
@@ -138,10 +138,10 @@ extern "C" {
                 for (k = 0; k < c1; k++) {
                     if(k == 0) 
                       result(i, j) = 0.0f;
-                    result(i, j) += mat1(i, k) * mat2(k, j);
+                    result[i, j] += mat1[i, k] * mat2[k, j];
                 }
-                result(i, j) *= alpha;
-                result(i, j) += beta * self(i, j);
+                result[i, j] *= alpha;
+                result[i, j] += beta * self[i, j];
             }
         }
 */

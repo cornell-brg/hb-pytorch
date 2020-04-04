@@ -30,13 +30,13 @@ static int tensorlib_lossnll_impl(
   if(reduction == Reduction::None && n_dims == 2) {
     brg_tile_for(batch_size,
         [&](size_t i) {
-          const auto cur_target = target(i);
+          const auto cur_target = target[i];
           if (cur_target == ignore_index) {
-            output(i) = 0;
+            output[i] = 0;
           } else {
             bsg_assert(cur_target >= 0 && cur_target < n_classes);
             const float cur_weight = weight(cur_target);
-            output(i) = -input(i, cur_target) * cur_weight;
+            output[i] = -input[i, cur_target] * cur_weight;
           }
         });
 
@@ -51,22 +51,22 @@ static int tensorlib_lossnll_impl(
   float total_weight_val = 0;
 
   if (n_dims == 1) {
-    const auto cur_target = target(0);
+    const auto cur_target = target[0];
     if (cur_target != ignore_index) {
       bsg_assert(cur_target >= 0 && cur_target < n_classes);
       total_weight_val = weight(cur_target);
-      output_val = -input(cur_target) * total_weight_val;
+      output_val = -input[cur_target] * total_weight_val;
     }
   } else if (n_dims == 2) {
     bsg_assert(target.dim(0) == batch_size);
     for (size_t i = 0; i < batch_size; i++) {
-      const auto cur_target = target(i);
+      const auto cur_target = target[i];
 
       if (cur_target != ignore_index) {
         bsg_assert(cur_target >= 0 && cur_target < n_classes);
         const float cur_weight = weight(cur_target);
         total_weight_val += cur_weight;
-        output_val -= input(i, cur_target) * cur_weight;
+        output_val -= input[i, cur_target] * cur_weight;
       }
     }
   }
@@ -76,8 +76,8 @@ static int tensorlib_lossnll_impl(
     output_val /= total_weight_val;
   }
 
-  output(0) = output_val;
-  total_weight(0) = total_weight_val;
+  output[0] = output_val;
+  total_weight[0] = total_weight_val;
 
   return 0;
 
@@ -103,7 +103,7 @@ extern "C" {
                            reduction_p,
                            ignore_index_p,
                            [&](int i) {
-                             return weight(i);
+                             return weight[i];
                            });
 
     return 0;

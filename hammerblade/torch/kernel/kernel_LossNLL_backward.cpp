@@ -34,43 +34,43 @@ static int tensorlib_lossnll_backward_impl(
     bsg_assert(grad_output.ndim() == 1 && grad_output.dim(0) == batch_size);
     brg_tile_for(batch_size,
         [&](size_t i) {
-          const auto cur_target = target(i);
+          const auto cur_target = target[i];
           if (cur_target != ignore_index) {
             const float cur_weight = weight(cur_target);
-            grad_input(i, cur_target) = -cur_weight * grad_output(i);
+            grad_input[i, cur_target] = -cur_weight * grad_output[i];
           }
         });
     return 0;
   }
 
-  const float total_weight_value = total_weight(0);
+  const float total_weight_value = total_weight[0];
   if (total_weight_value <= 0) {
     return 0;
   }
 
   bsg_assert(grad_output.ndim() <= 1 && grad_output.numel() == 1);
-  const float grad_output_value = grad_output(0);
+  const float grad_output_value = grad_output[0];
 
   if (n_dims == 1 && __bsg_id == 0) {
-    const auto cur_target = target(0);
+    const auto cur_target = target[0];
     if (cur_target != ignore_index) {
       bsg_assert(cur_target >= 0 && cur_target < n_classes);
-      grad_input(cur_target) = -weight(cur_target);
-      grad_input(cur_target) *= grad_output_value;
+      grad_input[cur_target] = -weight(cur_target);
+      grad_input[cur_target] *= grad_output_value;
     }
   } else if (n_dims == 2) {
     bsg_assert(target.dim(0) == batch_size);
     brg_tile_for(batch_size,
         [&](size_t i) {
-          const auto cur_target = target(i);
+          const auto cur_target = target[i];
 
           if (cur_target != ignore_index) {
             bsg_assert(cur_target >= 0 && cur_target < n_classes);
             const float cur_weight = weight(cur_target);
-            grad_input(i, cur_target) = -cur_weight * grad_output_value;
+            grad_input[i, cur_target] = -cur_weight * grad_output_value;
 
             if (reduction == Reduction::Mean) {
-              grad_input(i, cur_target) /= total_weight_value;
+              grad_input[i, cur_target] /= total_weight_value;
             }
           }
         });
