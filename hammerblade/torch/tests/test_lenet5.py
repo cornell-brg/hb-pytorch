@@ -131,11 +131,14 @@ def test_lenet5_backprop_1():
     # Backprop on HB
     output_hb.backward(grad_hb)
 
-    # Compare weight gradients
-    for param, param_hb in zip(net.parameters(), net_hb.parameters()):
+    # Compare weight gradients in reversed order to know the first point of error
+    named_parameters = reversed(list(net.named_parameters()))
+    parameters_hb = reversed(list(net_hb.parameters()))
+    for (name, param), param_hb in zip(named_parameters, parameters_hb):
         # iterate in reversed order so that this fails at earliest failure
         # during backprop
-        assert torch.allclose(param.grad, param_hb.grad.cpu(), atol=1e-7)
+        assert torch.allclose(param.grad, param_hb.grad.cpu(), atol=1e-7), \
+            name + " value mismatch"
 
     # Compare input gradients
     assert torch.allclose(image.grad, image_hb.grad.cpu(), atol=1e-7)
