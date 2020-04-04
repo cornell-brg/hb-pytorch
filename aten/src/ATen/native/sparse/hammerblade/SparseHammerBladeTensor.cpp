@@ -4,7 +4,6 @@
 #include <ATen/native/hammerblade/Offload.h>
 
 #include <ATen/SparseTensorUtils.h>
-//#include <ATen/cuda/CUDAUtils.h>
 
 namespace at { namespace native {
 
@@ -45,6 +44,11 @@ Tensor& add_out_dense_sparse_hb(Tensor& r, const Tensor& dense, const SparseTens
   TORCH_CHECK(dense.sizes().equals(sparse_.sizes()), "add: expected 'self' and 'other' to have same size, but self has size ", dense.sizes(), " while other has size ", sparse_.sizes(), " (FYI: dense-sparse addition does not currently support broadcasting)");
   TORCH_CHECK(sparse_._indices().dtype() == at::kInt, "The Data type of the Sparse Tensor on HammerBlade should be Int32 !");
   IntTensor indices = sparse_._indices();
+  TORCH_CHECK(indices.dtype() == at::kInt, "Data type of indices on HB must be int32 !");
+  if(r.numel() != dense.numel()) {
+    AT_ERROR("Tensor size mismatch, got result=", r.numel(), "dense=", dense.numel());
+  }
+  if (!is_same_tensor(r, dense)) r.copy_(dense);
 //  int64_t num_of_rows = sparse_.size(0);
 //  int64_t nnz = sparse_.nnz();
 //  IntTensor row_indices = indices.select(0, 0);

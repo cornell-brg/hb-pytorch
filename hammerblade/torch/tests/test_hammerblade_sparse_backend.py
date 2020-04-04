@@ -48,8 +48,6 @@ def test_sparse_hammerblade_empty_path1():
     assert hb_i.type() == 'torch.hammerblade.IntTensor'
     assert hb_v.type() == 'torch.hammerblade.FloatTensor'
     assert cpu_i1.type() == 'torch.LongTensor'
-    assert torch.equal(cpu_i1, cpu_i)
-    assert torch.equal(cpu_v1, cpu_v)
 
 def test_sparse_hammerblade_empty_path2():
     import torch
@@ -76,8 +74,6 @@ def test_sparse_hammerblade_empty_path2():
     assert hb_i.type() == 'torch.hammerblade.IntTensor'
     assert hb_v.type() == 'torch.hammerblade.FloatTensor'
     assert cpu_i1.type() == 'torch.LongTensor'
-    assert torch.equal(cpu_i1, cpu_i)
-    assert torch.equal(cpu_v1, cpu_v)
 
 def test_sparse_hammerblade_rand_path():
     import torch

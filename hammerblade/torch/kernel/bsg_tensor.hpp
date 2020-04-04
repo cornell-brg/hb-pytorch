@@ -85,7 +85,7 @@ class BSGTensor {
     }
 
     uint32_t stride(uint32_t d) {
-      return *(strides + d);
+      return strides[d];
     }
 
     template<typename... T>

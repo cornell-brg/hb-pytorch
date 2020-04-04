@@ -292,7 +292,7 @@
     HammerBlade: add_
     SparseCPU: add_sparse_
     SparseCUDA: add_sparse_
-    SparseHammerBlade: add_sparse
+    SparseHammerBlade: add_sparse_
     MkldnnCPU: mkldnn_add_
   supports_named_tensor: True
 

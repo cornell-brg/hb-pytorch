@@ -23,21 +23,21 @@ extern "C" {
     auto indices = BSGTensor<int>(_indices);
     auto values = BSGTensor<int>(_values); 
     
-    size_t len_per_tile = _values->N / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    size_t len_per_tile = values.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
     size_t start = len_per_tile * __bsg_id;
     size_t end = start + len_per_tile;
-    end = (end > _values->N)  ? _values->N : end;
+    end = (end > values.numel())  ? values.numel() : end;
 
     bsg_cuda_print_stat_kernel_start();
 
-    for (int i = start; i < end; i++) {
+    for (uint32_t i = start; i < end; i++) {
       uint32_t offset = 0;
       uint32_t coo = i;
       for(uint32_t d = 0; d < dense.ndim(); d++) {
         offset = offset + indices(coo) * dense.stride(d);
         coo = coo + indices.stride(0);
       }
-      result(offset) = dense(offset)  + values(i);
+      result(offset) = indices(offset) + values(i);
     }
 
     bsg_cuda_print_stat_kernel_end();   
