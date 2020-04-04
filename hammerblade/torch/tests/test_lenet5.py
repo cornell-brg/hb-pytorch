@@ -64,7 +64,7 @@ def train(net, loader, optimizer, loss_func, epochs, batches=None, hb=False):
             optimizer.step()
 
             if (batches is None and batch_idx % 1000 == 0) or \
-                (batches is not None and batch_idx < batches):
+                    (batches is not None and batch_idx < batches):
                 print('epoch {} : [{}/{} ({:.0f}%)]\tLoss={:.6f}'.format(
                     epoch, (batch_idx + 1) * batch_size, len(loader.dataset),
                     100. * (batch_idx / len(loader)), loss.item()
@@ -91,7 +91,8 @@ def test(net, loader, loss_func, hb=False):
         pred = output.max(1)[1]
         num_correct += pred.eq(labels.view_as(pred)).sum().item()
 
-        if batch_idx == 100: break
+        if batch_idx == 100:
+            break
 
     test_loss /= len(loader.dataset)
     test_accuracy = 100. * (num_correct / len(loader.dataset))
