@@ -148,7 +148,7 @@ def test_lenet5_backprop_1():
     # Compare input gradients
     assert torch.allclose(image.grad, image_hb.grad.cpu(), atol=1e-7)
 
-@pytest.mark.skip(reason="Runs slow: fast backprop test implemented above.")
+@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Slow on cosim")
 def test_lenet5_train_mnist():
     """
     Trains the CNN on CPU, loads the model to HB to test inference
@@ -156,11 +156,11 @@ def test_lenet5_train_mnist():
     import torchvision
 
     # Model
-    BATCH_SIZE = 1
+    BATCH_SIZE = 16
     LEARNING_RATE = 0.02
     MOMENTUM = 0.9
     EPOCHS = 1
-    BATCHES = 1
+    BATCHES = 2
 
     # Data
     transforms = torchvision.transforms.Compose([
@@ -200,6 +200,12 @@ def test_lenet5_train_mnist():
 
     # Train on HB
     train(net_hb, trainloader, optimizer_hb, loss_func, EPOCHS, BATCHES, hb=True)
+
+    # Test state dicts
+    for param in net.state_dict().keys():
+        value = net.state_dict()[param]
+        value_hb = net_hb.state_dict()[param]
+        torch.allclose(value, value_hb.cpu(), atol=1e-7)
 
 if __name__ == "__main__":
     test_lenet5_train_mnist()
