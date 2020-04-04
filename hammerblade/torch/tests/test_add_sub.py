@@ -22,12 +22,12 @@ def _test_add(x1, x2):
     y_c = x1 + x2
     y_h = h1 + h2
     assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_c, y_h.cpu())
+    assert torch.allclose(y_c, y_h.cpu())
     # inplace
     x1.add_(x2)
     h1.add_(h2)
     assert h1.device == torch.device("hammerblade")
-    assert torch.equal(x1, h1.cpu())
+    assert torch.allclose(x1, h1.cpu())
 
 def test_add_1():
     x = torch.ones(1, 10)
@@ -61,7 +61,7 @@ def test_add_with_scalar():
     y_c = x + 5
     y_h = h + 5
     assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_h.cpu(), y_c)
+    assert torch.allclose(y_h.cpu(), y_c)
 
 @settings(deadline=None)
 @given(tensor=hu.tensor(), scalar=st.floats(width=32))
@@ -74,7 +74,7 @@ def test_add_with_scalar_hypothesis(tensor, scalar):
     y_c = x + scalar
     y_h = h + scalar
     assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_h.cpu(), y_c)
+    assert torch.allclose(y_h.cpu(), y_c)
 
 def _test_sub(x1, x2):
     h1 = x1.hammerblade()
@@ -84,12 +84,12 @@ def _test_sub(x1, x2):
     y_c = x1 - x2
     y_h = h1 - h2
     assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_c, y_h.cpu())
+    assert torch.allclose(y_c, y_h.cpu())
     # inplace
     x1.sub_(x2)
     h1.sub_(h2)
     assert h1.device == torch.device("hammerblade")
-    assert torch.equal(x1, h1.cpu())
+    assert torch.allclose(x1, h1.cpu())
 
 def test_sub_1():
     x = torch.ones(1, 10)
@@ -123,7 +123,7 @@ def test_sub_with_scalar():
     y_c = x - 5
     y_h = h - 5
     assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_h.cpu(), y_c)
+    assert torch.allclose(y_h.cpu(), y_c)
 
 @settings(deadline=None)
 @given(tensor=hu.tensor(), scalar=st.floats(width=32))
@@ -136,4 +136,4 @@ def test_sub_with_scalar_hypothesis(tensor, scalar):
     y_c = x - scalar
     y_h = h - scalar
     assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_h.cpu(), y_c)
+    assert torch.allclose(y_h.cpu(), y_c)
