@@ -280,6 +280,7 @@
     HammerBlade: add
     SparseCPU: add_sparse
     SparseCUDA: add_sparse
+    SparseHammerBlade: add_sparse
     MkldnnCPU: mkldnn_add
   supports_named_tensor: True
 
@@ -291,6 +292,7 @@
     HammerBlade: add_
     SparseCPU: add_sparse_
     SparseCUDA: add_sparse_
+    SparseHammerBlade: add_sparse
     MkldnnCPU: mkldnn_add_
   supports_named_tensor: True
 
@@ -301,6 +303,7 @@
     HammerBlade: add_out
     SparseCPU: add_out_sparse_cpu
     SparseCUDA: add_out_sparse_cuda
+    SparseHammerBlade: add_out_sparse_hb
     MkldnnCPU: mkldnn_add_out
   supports_named_tensor: True
 
@@ -3060,6 +3063,7 @@
     HammerBlade: sub_out
     SparseCPU: sub_out_sparse
     SparseCUDA: sub_out_sparse
+    SparseHammerBlade: sub_out_sparse
   supports_named_tensor: True
 
 - func: sub.Tensor(Tensor self, Tensor other, *, Scalar alpha=1) -> Tensor
@@ -3071,6 +3075,7 @@
     HammerBlade: sub
     SparseCPU: sub_sparse
     SparseCUDA: sub_sparse
+    SparseHammerBlade: sub_sparse
   supports_named_tensor: True
 
 - func: sub_.Tensor(Tensor(a!) self, Tensor other, *, Scalar alpha=1) -> Tensor(a!)
@@ -3081,6 +3086,7 @@
     HammerBlade: sub_
     SparseCPU: sub_sparse_
     SparseCUDA: sub_sparse_
+    SparseHammerBlade: sub_sparse_
   supports_named_tensor: True
 
 # For C++ only, until we have conversion from C++ numbers to Tensor

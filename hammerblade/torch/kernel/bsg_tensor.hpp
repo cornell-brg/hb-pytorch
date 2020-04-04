@@ -84,6 +84,10 @@ class BSGTensor {
       return dims;
     }
 
+    uint32_t stride(uint32_t d) {
+      return *(strides + d);
+    }
+
     template<typename... T>
     DT& operator()(T... indices) {
       std::initializer_list<uint32_t> iarray = {indices...};
