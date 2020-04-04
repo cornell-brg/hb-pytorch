@@ -19,7 +19,6 @@ extern "C" {
 
     if (__bsg_id == 0) {
 
-        // TODO: Convert uint32_t pointers to correct types
         auto self = BSGTensor<float>(_self);
         auto mat1 = BSGTensor<float>(_mat1);
         auto mat2 = BSGTensor<float>(_mat2);
@@ -29,8 +28,6 @@ extern "C" {
 
         // Start profiling
         bsg_cuda_print_stat_kernel_start();
-
-        // TODO: Implement addmm
 
         // v2: single tile, use blocking
         int r1 = mat1.dim(0);
@@ -70,7 +67,7 @@ extern "C" {
                 float sp_self[res_dim_y][res_dim_x];
                 for (int i = 0; i < res_dim_y; i++) {
                     for (int j = 0; j < res_dim_x; j++) {
-                        sp_self[i][j] = self(rr * res_dim_y + i, rc * res_dim_x + j);
+                        sp_self[i][j] = self(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j);
                     }
                 }
 
