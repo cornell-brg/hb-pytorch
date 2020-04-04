@@ -122,11 +122,6 @@ class BSGTensor {
 
       return data[offset];
     }
-
-    DT& operator[](uint32_t n) {
-      bsg_assert_msg(n < N, "error: N=%d but accessed %d\n", N, n);
-      return data[n];
-    }
 };
 
 template<typename T>
