@@ -16,7 +16,7 @@ def _test_torch_dot(x1, x2):
     y_c = x1.dot(x2)
     y_h = h1.dot(h2)
     assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_h.cpu(), y_c)
+    assert torch.allclose(y_h.cpu(), y_c)
 
 def test_torch_dot_1():
     x = torch.ones(10)
@@ -35,7 +35,7 @@ def test_torch_dot_non_contiguous():
     x = x.dot(x)
     x_h = x_h.dot(x_h)
     assert x_h.device == torch.device("hammerblade")
-    assert torch.equal(x_h.cpu(), x)
+    assert torch.allclose(x_h.cpu(), x)
 
 @pytest.mark.xfail
 def test_torch_dot_different_device_F():
