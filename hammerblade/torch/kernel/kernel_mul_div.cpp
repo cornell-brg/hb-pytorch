@@ -27,7 +27,7 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_mul, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_mul, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 
 
   __attribute__ ((noinline))  int tensorlib_div(
@@ -50,6 +50,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_div, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_div, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 
 }

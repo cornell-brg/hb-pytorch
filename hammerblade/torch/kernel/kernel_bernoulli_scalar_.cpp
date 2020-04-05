@@ -9,8 +9,8 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_bernoulli_scalar_(
-          bsg_tensor_t* _self,
-          bsg_tensor_t* _seed,
+          hb_tensor_t* _self,
+          hb_tensor_t* _seed,
           float* _p) {
     // Unwrap common seed
     uint32_t seed = *(uint32_t*)((intptr_t)_seed->data);
@@ -39,7 +39,7 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_bernoulli_scalar_, bsg_tensor_t*,
-                     bsg_tensor_t*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_bernoulli_scalar_, hb_tensor_t*,
+                     hb_tensor_t*, float*)
 
 }

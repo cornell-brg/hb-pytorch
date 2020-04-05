@@ -8,10 +8,10 @@
 
 template<typename F>
 static int tensorlib_lossnll_impl(
-        bsg_tensor_t* output_p,
-        bsg_tensor_t* total_weight_p,
-        bsg_tensor_t* input_p,
-        bsg_tensor_t* target_p,
+        hb_tensor_t* output_p,
+        hb_tensor_t* total_weight_p,
+        hb_tensor_t* input_p,
+        hb_tensor_t* target_p,
         uint32_t*     reduction_p,
         int32_t*      ignore_index_p,
         F             weight) {
@@ -87,11 +87,11 @@ extern "C" {
 
 
   __attribute__ ((noinline))  int tensorlib_lossnll_weight(
-          bsg_tensor_t* output_p,
-          bsg_tensor_t* total_weight_p,
-          bsg_tensor_t* input_p,
-          bsg_tensor_t* target_p,
-          bsg_tensor_t* weight_p,
+          hb_tensor_t* output_p,
+          hb_tensor_t* total_weight_p,
+          hb_tensor_t* input_p,
+          hb_tensor_t* target_p,
+          hb_tensor_t* weight_p,
           uint32_t*     reduction_p,
           int32_t*      ignore_index_p) {
 
@@ -110,15 +110,15 @@ extern "C" {
 
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_lossnll_weight, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
-                     bsg_tensor_t*, bsg_tensor_t*, uint32_t*, int32_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_lossnll_weight, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+                     hb_tensor_t*, hb_tensor_t*, uint32_t*, int32_t*)
 
 
   __attribute__ ((noinline))  int tensorlib_lossnll(
-          bsg_tensor_t* output_p,
-          bsg_tensor_t* total_weight_p,
-          bsg_tensor_t* input_p,
-          bsg_tensor_t* target_p,
+          hb_tensor_t* output_p,
+          hb_tensor_t* total_weight_p,
+          hb_tensor_t* input_p,
+          hb_tensor_t* target_p,
           uint32_t*     reduction_p,
           int32_t*      ignore_index_p) {
 
@@ -134,7 +134,7 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_lossnll, bsg_tensor_t*, bsg_tensor_t*,
-                     bsg_tensor_t*, bsg_tensor_t*, uint32_t*, int32_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_lossnll, hb_tensor_t*, hb_tensor_t*,
+                     hb_tensor_t*, hb_tensor_t*, uint32_t*, int32_t*)
 
 }

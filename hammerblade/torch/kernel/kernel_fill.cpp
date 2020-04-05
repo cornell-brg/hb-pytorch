@@ -8,7 +8,7 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_fill(
-          bsg_tensor_t* t0_p,
+          hb_tensor_t* t0_p,
           float* value_p) {
     auto res = BSGTensor<float>(t0_p);
     float value = *value_p;
@@ -24,6 +24,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_fill, bsg_tensor_t*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_fill, hb_tensor_t*, float*)
 
 }

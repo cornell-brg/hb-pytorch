@@ -10,10 +10,10 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_addmm(
-          bsg_tensor_t* _result,
-          bsg_tensor_t* _self,
-          bsg_tensor_t* _mat1,
-          bsg_tensor_t* _mat2,
+          hb_tensor_t* _result,
+          hb_tensor_t* _self,
+          hb_tensor_t* _mat1,
+          hb_tensor_t* _mat2,
           float* _beta,
           float* _alpha) {
 
@@ -152,7 +152,7 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_addmm, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_addmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, float*, float*)
 
 }
 

@@ -11,9 +11,9 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_convolution_forward(
-          bsg_tensor_t* output,
-          bsg_tensor_t* input,
-          bsg_tensor_t* weight,
+          hb_tensor_t* output,
+          hb_tensor_t* input,
+          hb_tensor_t* weight,
           bsg_vector_t* padding,
           bsg_vector_t* strides) {
     auto y = HBTensor<float>(output);
@@ -72,8 +72,8 @@ extern "C" {
   }
 
   __attribute__ ((noinline))  int tensorlib_convolution_add_bias(
-          bsg_tensor_t* output,
-          bsg_tensor_t* bias) {
+          hb_tensor_t* output,
+          hb_tensor_t* bias) {
     auto y = (float*) ((intptr_t) output->data);
     auto y_strides = (uint32_t*) ((intptr_t) output->strides);
     auto b = (float*) ((intptr_t) bias->data);
@@ -102,9 +102,9 @@ extern "C" {
   }
 
   __attribute__ ((noinline))  int tensorlib_convolution_backward_input(
-          bsg_tensor_t* grad_input,
-          bsg_tensor_t* grad_output,
-          bsg_tensor_t* weight,
+          hb_tensor_t* grad_input,
+          hb_tensor_t* grad_output,
+          hb_tensor_t* weight,
           bsg_vector_t* padding,
           bsg_vector_t* strides) {
     auto x = HBTensor<float>(grad_input);
@@ -166,9 +166,9 @@ extern "C" {
   }
 
   __attribute__ ((noinline))  int tensorlib_convolution_backward_weight(
-          bsg_tensor_t* grad_weight,
-          bsg_tensor_t* grad_output,
-          bsg_tensor_t* input,
+          hb_tensor_t* grad_weight,
+          hb_tensor_t* grad_output,
+          hb_tensor_t* input,
           bsg_vector_t* padding,
           bsg_vector_t* strides) {
     auto x = HBTensor<float>(input);
@@ -230,8 +230,8 @@ extern "C" {
   }
 
   __attribute__ ((noinline))  int tensorlib_convolution_backward_bias(
-          bsg_tensor_t* grad_bias,
-          bsg_tensor_t* grad_output) {
+          hb_tensor_t* grad_bias,
+          hb_tensor_t* grad_output) {
     auto gb = HBTensor<float>(grad_bias);
     auto y = HBTensor<float>(grad_output);
 
@@ -261,21 +261,21 @@ extern "C" {
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_forward,
-     bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
+     hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
      bsg_vector_t*, bsg_vector_t*);
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_add_bias,
-     bsg_tensor_t*, bsg_tensor_t*);
+     hb_tensor_t*, hb_tensor_t*);
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_backward_input,
-     bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
+     hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
      bsg_vector_t*, bsg_vector_t*);
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_backward_weight,
-     bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
+     hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
      bsg_vector_t*, bsg_vector_t*);
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_backward_bias,
-     bsg_tensor_t*, bsg_tensor_t*);
+     hb_tensor_t*, hb_tensor_t*);
 
 }

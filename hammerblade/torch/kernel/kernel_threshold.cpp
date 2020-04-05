@@ -9,9 +9,9 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_threshold(
-          bsg_tensor_t* t0_p,
-          bsg_tensor_t* t1_p,
-          bsg_tensor_t* t2_p,
+          hb_tensor_t* t0_p,
+          hb_tensor_t* t1_p,
+          hb_tensor_t* t2_p,
           float* _threshold_scalar_p,
           float* _value_scalar_p) {
     auto c = BSGTensor<float>(t0_p);
@@ -36,7 +36,7 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_threshold, bsg_tensor_t*, bsg_tensor_t*,
-                     bsg_tensor_t*, float*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_threshold, hb_tensor_t*, hb_tensor_t*,
+                     hb_tensor_t*, float*, float*)
 
 }

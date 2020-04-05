@@ -13,9 +13,9 @@ extern "C" {
   //====================================================================
 
   __attribute__ ((noinline))  int tensorlib_log_softmax_backward(
-          bsg_tensor_t* grad_input_p,
-          bsg_tensor_t* grad_p,
-          bsg_tensor_t* output_p,
+          hb_tensor_t* grad_input_p,
+          hb_tensor_t* grad_p,
+          hb_tensor_t* output_p,
           int32_t*      dim_p) {
 
     HBTensor<float> grad(grad_p);
@@ -58,7 +58,7 @@ extern "C" {
   }
 
     HB_EMUL_REG_KERNEL(tensorlib_log_softmax_backward,
-        bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
+        hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
         int32_t*);
 
 }
