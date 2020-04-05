@@ -15,7 +15,7 @@
 #include "bsg_manycore.h"
 #include "bsg_set_tile_x_y.h"
 // #include "bsg_tile_group_barrier.h"
-#include "bsg_tensor.hpp"
+#include "hb_tensor.hpp"
 #include <bsg_assert.hpp>
 #include <hb_parallel_for.hpp>
 
