@@ -11,14 +11,19 @@ extern "C" {
           bsg_tensor_t* t0_p,
           bsg_tensor_t* t1_p,
           bsg_tensor_t* t2_p) {
-    // Start profiling
+    auto c = BSGTensor<float>(t0_p);
+    auto a = BSGTensor<float>(t1_p);
+    auto b = BSGTensor<float>(t2_p);
+
     bsg_cuda_print_stat_kernel_start();
-    brg_tile_elementwise_for(t0_p, t1_p, t2_p,
+
+    hb_tile_elementwise_for(c, a, b,
         [&](float a, float b) {
           return a * b;
         });
-    //   End profiling
+
     bsg_cuda_print_stat_kernel_end();
+
     return 0;
   }
 
@@ -29,14 +34,19 @@ extern "C" {
           bsg_tensor_t* t0_p,
           bsg_tensor_t* t1_p,
           bsg_tensor_t* t2_p) {
-    // Start profiling
+    auto c = BSGTensor<float>(t0_p);
+    auto a = BSGTensor<float>(t1_p);
+    auto b = BSGTensor<float>(t2_p);
+
     bsg_cuda_print_stat_kernel_start();
-    brg_tile_elementwise_for(t0_p, t1_p, t2_p,
+
+    hb_tile_elementwise_for(c, a, b,
       [&](float a, float b) {
         return a / b;
     });
-    //   End profiling
+
     bsg_cuda_print_stat_kernel_end();
+
     return 0;
   }
 

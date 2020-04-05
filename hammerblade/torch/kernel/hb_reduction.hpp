@@ -1,7 +1,7 @@
 #ifndef _HB_REDUCTION_H
 #define _HB_REDUCTION_H
 
-#include <brg_element_for.hpp>
+#include <hb_elementwise_for.hpp>
 
 //====================================================================
 // Reduction mode used in LossNLL and other loss functions
