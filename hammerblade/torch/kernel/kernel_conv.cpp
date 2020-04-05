@@ -54,14 +54,14 @@ extern "C" {
                 for(uint32_t kh = 0; kh < Kh; ++kh)
                   for(uint32_t kw = 0; kw < Kw; ++kw) {
                     if((ci + kh + kw) == 0) {
-                      y[n, co, yh, yw] = 0.0;
+                      y[{n, co, yh, yw}] = 0.0;
                     }
 
                     int32_t xh = Sh * yh - Ph + kh;
                     int32_t xw = Sw * yw - Pw + kw;
 
                     if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                      y[n, co, yh, yw] += x[n, ci, xh, xw] * w[co, ci, kh, kw];
+                      y[{n, co, yh, yw}] += x[{n, ci, xh, xw}] * w[{co, ci, kh, kw}];
                     } // else 0
                   }
     }
@@ -142,7 +142,7 @@ extern "C" {
         for(uint32_t ci = 0; ci < Cin; ++ci)
           for(uint32_t xh = 0; xh < Hin; ++xh)
             for(uint32_t xw = 0; xw < Win; ++xw)
-              x[n, ci, xh, xw] = 0.0;
+              x[{n, ci, xh, xw}] = 0.0;
 
       for(uint32_t n = 0; n < N; ++n)
         for(uint32_t co = 0; co < Cout; ++co)
@@ -155,7 +155,7 @@ extern "C" {
                     int32_t xw = Sw * yw - Pw + kw;
 
                     if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                      x[n, ci, xh, xw] += y[n, co, yh, yw] * w[co, ci, kh, kw];
+                      x[{n, ci, xh, xw}] += y[{n, co, yh, yw}] * w[{co, ci, kh, kw}];
                     } // else 0
                   }
     }
@@ -206,7 +206,7 @@ extern "C" {
         for(uint32_t co = 0; co < Cout; ++co)
           for(uint32_t kh = 0; kh < Kh; ++kh)
             for(uint32_t kw = 0; kw < Kw; ++kw)
-              w[co, ci, kh, kw] = 0.0f;
+              w[{co, ci, kh, kw}] = 0.0f;
 
       for(uint32_t n = 0; n < N; ++n)
         for(uint32_t co = 0; co < Cout; ++co)
@@ -219,7 +219,7 @@ extern "C" {
                     int32_t xw = Sw * yw - Pw + kw;
 
                     if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                      w[co, ci, kh, kw] += y[n, co, yh, yw] * x[n, ci, xh, xw];
+                      w[{co, ci, kh, kw}] += y[{n, co, yh, yw}] * x[{n, ci, xh, xw}];
                     } // else 0
                   }
     }
@@ -249,9 +249,9 @@ extern "C" {
           for(uint32_t yh = 0; yh < Hout; ++yh)
             for(uint32_t yw = 0; yw < Wout; ++yw) {
               if((n + yh + yw) == 0)
-                gb[co] = 0.0f;
+                gb[{co}] = 0.0f;
 
-              gb[co] += y[n, co, yh, yw];
+              gb[{co}] += y[{n, co, yh, yw}];
             }
     }
 

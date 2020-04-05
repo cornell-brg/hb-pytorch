@@ -52,7 +52,7 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
       bsg_assert_msg(out.numel() == in.numel(),
                      "This case should be handled by reduction_simple?");
       brg_tile_for(out.numel(), [&](size_t n) {
-        out[n] = project(in[n]);
+        out[{n}] = project(in[{n}]);
       });
       break;
     case 2:
@@ -63,9 +63,9 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
           // reduction result init to 0
           scalar_t result = 0;
           for(size_t d = 0; d < elements_per_output; d++) {
-            reduce(result, in[d, n]);
+            reduce(result, in[{d, n}]);
           }
-          out[0, n] = project(result);
+          out[{0, n}] = project(result);
         });
       } else {
         bsg_assert_msg(false, "Invalid number of reduction dims");
@@ -81,9 +81,9 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
           uint32_t dim1 = n / in.dim(2);
           uint32_t dim2 = n % in.dim(2);
           for(size_t d = 0; d < elements_per_output; d++) {
-            reduce(result, in[d, dim1, dim2]);
+            reduce(result, in[{d, dim1, dim2}]);
           }
-          out[0, dim1, dim2] = project(result);
+          out[{0, dim1, dim2}] = project(result);
         });
       } else if(num_reduction_dim == 2) {
         // 3D input -- 2 reduction dim
@@ -94,9 +94,9 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
           for(size_t d = 0; d < elements_per_output; d++) {
             uint32_t dim0 = d / in.dim(1);
             uint32_t dim1 = d % in.dim(1);
-            reduce(result, in[dim0, dim1, n]);
+            reduce(result, in[{dim0, dim1, n}]);
           }
-          out[0, 0, n] = project(result);
+          out[{0, 0, n}] = project(result);
         });
       } else {
         bsg_assert_msg(false, "Invalid number of reduction dims");

@@ -19,11 +19,11 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
     // Partial dot product sum
     brg_tile_for(a.numel(), [&](size_t i) {
-        sum += a[i] * b[i];
+        sum += a[{i}] * b[{i}];
     });
     // XXX: this operation should be atomic and consider the case in which
     // there are more than 1 tile
-    c[0] = sum;
+    c[{0}] = sum;
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
     return 0;

@@ -28,10 +28,10 @@ extern "C" {
         if (rand > p) {
           // 0
           // see ./aten/src/ATen/native/Dropout.cpp:55:  noise.bernoulli_(1 - p);
-          self[i] = 0.0f;
+          self[{i}] = 0.0f;
         } else {
           // 1
-          self[i] = 1.0f;
+          self[{i}] = 1.0f;
         }
     });
     //   End profiling
