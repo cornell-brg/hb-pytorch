@@ -86,7 +86,7 @@ class HBTensor {
     }
 
     uint32_t dim(uint32_t d) {
-      bsg_assert_msg(d < dims,
+      hb_assert_msg(d < dims,
                      "error: dimesnion must be less than %d\n",
                      dims);
       return sizes[d];
@@ -102,10 +102,10 @@ class HBTensor {
 
       // special case where we have a 0-dim tensor
       if(dims == 0) {
-        bsg_assert_msg(iarray.size() == 1,
+        hb_assert_msg(iarray.size() == 1,
                        "error: expected only one argument with 0-dim tensor\n");
         for(auto index : iarray) {
-          bsg_assert_msg(index == 0,
+          hb_assert_msg(index == 0,
                          "error: index must be 0 0-dim tensor\n");
         }
         return data[0];
@@ -120,7 +120,7 @@ class HBTensor {
         }
       }
 
-      bsg_assert_msg(iarray.size() == dims,
+      hb_assert_msg(iarray.size() == dims,
                      "error: expected dims=%d arguments but got %d\n",
                      dims, iarray.size());
       uint32_t offset = 0;
@@ -130,7 +130,7 @@ class HBTensor {
         s++;
       }
 
-      bsg_assert_msg(offset < N, "error: N=%d but accessed %d\n", N, offset);
+      hb_assert_msg(offset < N, "error: N=%d but accessed %d\n", N, offset);
 
       return data[offset];
     }

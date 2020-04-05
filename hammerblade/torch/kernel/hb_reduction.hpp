@@ -113,7 +113,7 @@ inline void binary_reduction(HBTensor<scalar_t>out,
     case 1:
       // There is this corner case, in which each output is produced by only
       // one input element
-      bsg_assert_msg(out.numel() == in.numel(),
+      hb_assert_msg(out.numel() == in.numel(),
                      "This case should be handled by reduction_simple?");
       hb_parallel_for(out.numel(), [&](size_t n) {
         out(n) = project(in(n));
@@ -132,7 +132,7 @@ inline void binary_reduction(HBTensor<scalar_t>out,
           out(0, n) = project(result);
         });
       } else {
-        bsg_assert_msg(false, "Invalid number of reduction dims");
+        hb_assert_msg(false, "Invalid number of reduction dims");
       }
       break;
     case 3:
@@ -163,11 +163,11 @@ inline void binary_reduction(HBTensor<scalar_t>out,
           out(0, 0, n) = project(result);
         });
       } else {
-        bsg_assert_msg(false, "Invalid number of reduction dims");
+        hb_assert_msg(false, "Invalid number of reduction dims");
       }
       break;
     default:
-      bsg_assert_msg(false, "Invalid number of dims for reduction kernel");
+      hb_assert_msg(false, "Invalid number of dims for reduction kernel");
   }
 }
 

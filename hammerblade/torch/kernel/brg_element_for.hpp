@@ -44,7 +44,7 @@ class BRGIteratorTensor {
       strides(*(uint32_t*)((intptr_t) t->strides)),
       data((intptr_t) t->data),
       cur_loc(start_loc) {
-        bsg_assert(cur_loc < N);
+        hb_assert(cur_loc < N);
         data += start_loc * strides;
       }
 
@@ -65,7 +65,7 @@ class BRGIteratorTensor {
     // *accessor, just like c++ iterators
     //-----------------------------------
     T operator*() {
-      bsg_assert(cur_loc < N);
+      hb_assert(cur_loc < N);
       return (T)(intptr_t)data;
     }
 
