@@ -41,14 +41,7 @@ void offload_iterator_op_impl(TensorIterator& iter, std::vector<eva_t> device_sc
   for(int i=0; i<iter.ntensors(); i++) {
 
     auto iter_strides = iter.strides(i);
-    // ------------------------------
-    // strides of iter are stored as:
-    // dim0: tensor0, tensor1, tensor2
-    // dim1: tensor0, tensor1, tensor2
-    // ------------------------------
-    // we want per tensor strides:
-    // tensor0: dim0, dim1
-    // ------------------------------
+    // XXX: strides are measured in bytes
     for(int j=0; j<iter.ndim(); j++) {
       local_strides[j] = (int64_t)iter_strides[j];
     }
