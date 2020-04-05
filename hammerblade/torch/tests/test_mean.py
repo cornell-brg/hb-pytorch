@@ -161,6 +161,25 @@ def test_torch_mean_30():
     for dim in range(4):
         _test_torch_mean(x, dim=dim)
 
+def test_torch_mean_31():
+    x = torch.rand(1, 10)
+    _test_torch_mean(x, dim=0)
+
+def test_torch_mean_32():
+    x = torch.rand(1, 3, 4)
+    _test_torch_mean(x, dim=0)
+
+def test_torch_mean_33():
+    x = torch.tensor([[1.]])
+    h = x.hammerblade()
+    x = x.expand(1, 10)
+    h = h.expand(1, 10)
+    assert h.device == torch.device("hammerblade")
+    assert not h.is_contiguous()
+    mean_ = torch.mean(h, 0, keepdim=True)
+    assert mean_.device == torch.device("hammerblade")
+    assert torch.allclose(mean_.cpu(), torch.mean(x, 0, keepdim=True))
+
 def test_torch_mean_nan():
     x = torch.tensor([])
     h = x.hammerblade()
