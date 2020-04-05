@@ -9,7 +9,7 @@
 #include <map>
 #include <math.h>
 #include <initializer_list>
-#include <bsg_assert.hpp>
+#include <hb_assert.hpp>
 #include <hb_tensor.hpp>
 
 // =========================================================
