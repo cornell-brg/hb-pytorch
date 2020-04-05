@@ -18,7 +18,7 @@ extern "C" {
           bsg_tensor_t* output_p,
           int32_t*      dim_p) {
 
-    BSGTensor<float> grad(grad_p);
+    HBTensor<float> grad(grad_p);
     int32_t dim = *dim_p;
 
     int32_t outer_size = 1;

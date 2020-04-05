@@ -19,9 +19,9 @@ extern "C" {
           int* sH, int* sW,
           int* padH, int* padW,
           int* dilationH, int* dilationW) {
-    auto y = BSGTensor<float>(output);
-    auto x = BSGTensor<float>(input);
-    auto ind = BSGTensor<int>(indices);
+    auto y = HBTensor<float>(output);
+    auto x = HBTensor<float>(input);
+    auto ind = HBTensor<int>(indices);
 
     // max_pool2d parameters
     auto N = y.dim(0); // number of minibatches
@@ -80,9 +80,9 @@ extern "C" {
           int* kH, int* kW,
           int* sH, int* sW,
           int* padH, int* padW) {
-    auto y = BSGTensor<float>(gradOutput);
-    auto x = BSGTensor<float>(gradInput);
-    auto ind = BSGTensor<int>(indices);
+    auto y = HBTensor<float>(gradOutput);
+    auto x = HBTensor<float>(gradInput);
+    auto ind = HBTensor<int>(indices);
 
     // max_pool2d parameters
     auto N = y.dim(0); // number of minibatches

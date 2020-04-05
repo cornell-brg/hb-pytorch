@@ -19,10 +19,10 @@ extern "C" {
 
     if (__bsg_id == 0) {
 
-        auto self = BSGTensor<float>(_self);
-        auto mat1 = BSGTensor<float>(_mat1);
-        auto mat2 = BSGTensor<float>(_mat2);
-        auto result = BSGTensor<float>(_result);
+        auto self = HBTensor<float>(_self);
+        auto mat1 = HBTensor<float>(_mat1);
+        auto mat2 = HBTensor<float>(_mat2);
+        auto result = HBTensor<float>(_result);
         float beta = *_beta;
         float alpha = *_alpha;
 

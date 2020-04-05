@@ -16,9 +16,9 @@ extern "C" {
           bsg_tensor_t* weight,
           bsg_vector_t* padding,
           bsg_vector_t* strides) {
-    auto y = BSGTensor<float>(output);
-    auto x = BSGTensor<float>(input);
-    auto w = BSGTensor<float>(weight);
+    auto y = HBTensor<float>(output);
+    auto x = HBTensor<float>(input);
+    auto w = HBTensor<float>(weight);
     auto p = BSGVector<uint32_t>(padding);
     auto s = BSGVector<uint32_t>(strides);
 
@@ -107,9 +107,9 @@ extern "C" {
           bsg_tensor_t* weight,
           bsg_vector_t* padding,
           bsg_vector_t* strides) {
-    auto x = BSGTensor<float>(grad_input);
-    auto y = BSGTensor<float>(grad_output);
-    auto w = BSGTensor<float>(weight);
+    auto x = HBTensor<float>(grad_input);
+    auto y = HBTensor<float>(grad_output);
+    auto w = HBTensor<float>(weight);
     auto p = BSGVector<uint32_t>(padding);
     auto s = BSGVector<uint32_t>(strides);
 
@@ -171,9 +171,9 @@ extern "C" {
           bsg_tensor_t* input,
           bsg_vector_t* padding,
           bsg_vector_t* strides) {
-    auto x = BSGTensor<float>(input);
-    auto y = BSGTensor<float>(grad_output);
-    auto w = BSGTensor<float>(grad_weight);
+    auto x = HBTensor<float>(input);
+    auto y = HBTensor<float>(grad_output);
+    auto w = HBTensor<float>(grad_weight);
     auto p = BSGVector<uint32_t>(padding);
     auto s = BSGVector<uint32_t>(strides);
 
@@ -232,8 +232,8 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_convolution_backward_bias(
           bsg_tensor_t* grad_bias,
           bsg_tensor_t* grad_output) {
-    auto gb = BSGTensor<float>(grad_bias);
-    auto y = BSGTensor<float>(grad_output);
+    auto gb = HBTensor<float>(grad_bias);
+    auto y = HBTensor<float>(grad_output);
 
     auto N = y.dim(0); // number of minibatches
     auto Cout = y.dim(1); // number of output channels
