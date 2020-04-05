@@ -14,8 +14,8 @@ extern "C" {
           hb_tensor_t* output,
           hb_tensor_t* input,
           hb_tensor_t* weight,
-          bsg_vector_t* padding,
-          bsg_vector_t* strides) {
+          hb_vector_t* padding,
+          hb_vector_t* strides) {
     auto y = HBTensor<float>(output);
     auto x = HBTensor<float>(input);
     auto w = HBTensor<float>(weight);
@@ -105,8 +105,8 @@ extern "C" {
           hb_tensor_t* grad_input,
           hb_tensor_t* grad_output,
           hb_tensor_t* weight,
-          bsg_vector_t* padding,
-          bsg_vector_t* strides) {
+          hb_vector_t* padding,
+          hb_vector_t* strides) {
     auto x = HBTensor<float>(grad_input);
     auto y = HBTensor<float>(grad_output);
     auto w = HBTensor<float>(weight);
@@ -169,8 +169,8 @@ extern "C" {
           hb_tensor_t* grad_weight,
           hb_tensor_t* grad_output,
           hb_tensor_t* input,
-          bsg_vector_t* padding,
-          bsg_vector_t* strides) {
+          hb_vector_t* padding,
+          hb_vector_t* strides) {
     auto x = HBTensor<float>(input);
     auto y = HBTensor<float>(grad_output);
     auto w = HBTensor<float>(grad_weight);
@@ -262,18 +262,18 @@ extern "C" {
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_forward,
      hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
-     bsg_vector_t*, bsg_vector_t*);
+     hb_vector_t*, hb_vector_t*);
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_add_bias,
      hb_tensor_t*, hb_tensor_t*);
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_backward_input,
      hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
-     bsg_vector_t*, bsg_vector_t*);
+     hb_vector_t*, hb_vector_t*);
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_backward_weight,
      hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
-     bsg_vector_t*, bsg_vector_t*);
+     hb_vector_t*, hb_vector_t*);
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_backward_bias,
      hb_tensor_t*, hb_tensor_t*);
