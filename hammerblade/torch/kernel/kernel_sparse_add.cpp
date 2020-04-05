@@ -11,7 +11,8 @@ extern "C" {
           bsg_tensor_t* _result,
           bsg_tensor_t* _dense,
           bsg_tensor_t* _indices,
-          bsg_tensor_t* _values) {
+          bsg_tensor_t* _values,
+          float* _alpha) {
  
 //    uint32_t _r_strides = *(uint32_t*)((intptr_t)res->strides);
 //    uint32_t _d_strides = *(uint32_t*)((intptr_t)d->strides);
@@ -21,7 +22,8 @@ extern "C" {
     auto result = BSGTensor<float>(_result);
     auto dense = BSGTensor<float>(_dense);
     auto indices = BSGTensor<int>(_indices);
-    auto values = BSGTensor<int>(_values); 
+    auto values = BSGTensor<float>(_values);
+    float alpha= *_alpha; 
     
     size_t len_per_tile = values.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
     size_t start = len_per_tile * __bsg_id;
@@ -37,14 +39,14 @@ extern "C" {
         offset = offset + indices(coo) * dense.stride(d);
         coo = coo + indices.stride(0);
       }
-      result(offset) = indices(offset) + values(i);
+      result(offset) = result(offset) + alpha * values(i);
     }
 
     bsg_cuda_print_stat_kernel_end();   
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_dense_sparse_add, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_dense_sparse_add, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*)
 }
 
 

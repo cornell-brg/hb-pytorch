@@ -55,7 +55,8 @@ Tensor& add_out_dense_sparse_hb(Tensor& r, const Tensor& dense, const SparseTens
 //  IntTensor col_indices = indices.select(0, 1);
 //  IntTensor csr = _to_csr_int(const IntTensor& row_indices, num_of_rows, nnz);
   Tensor values = sparse_._values();
-  hb_offload_kernel(r, dense, indices, values, "tensorlib_dense_sparse_add");
+  using scalar_t = float;
+  hb_offload_kernel(r, dense, indices, values, value.to<scalar_t>(), "tensorlib_dense_sparse_add");
   return r;
 }
 
