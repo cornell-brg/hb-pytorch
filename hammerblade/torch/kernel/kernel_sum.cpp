@@ -13,8 +13,8 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_sum(
-          bsg_tensor_t* out_,
-          bsg_tensor_t* in_,
+          hb_tensor_t* out_,
+          hb_tensor_t* in_,
           uint32_t* num_reduction_dim_p) {
     auto out = HBTensor<float>(out_);
     auto in = HBTensor<float>(in_);
@@ -44,6 +44,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_sum, bsg_tensor_t*, bsg_tensor_t*, uint32_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_sum, hb_tensor_t*, hb_tensor_t*, uint32_t*)
 
 }

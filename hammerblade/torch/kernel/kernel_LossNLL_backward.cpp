@@ -8,11 +8,11 @@
 
 template<typename F>
 static int tensorlib_lossnll_backward_impl(
-       bsg_tensor_t* grad_input_p,
-       bsg_tensor_t* grad_output_p,
-       bsg_tensor_t* input_p,
-       bsg_tensor_t* target_p,
-       bsg_tensor_t* total_weight_p,
+       hb_tensor_t* grad_input_p,
+       hb_tensor_t* grad_output_p,
+       hb_tensor_t* input_p,
+       hb_tensor_t* target_p,
+       hb_tensor_t* total_weight_p,
        uint32_t*     reduction_p,
        int32_t*      ignore_index_p,
        F             weight) {
@@ -83,12 +83,12 @@ static int tensorlib_lossnll_backward_impl(
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_lossnll_backward_weight(
-          bsg_tensor_t* grad_input_p,
-          bsg_tensor_t* grad_output_p,
-          bsg_tensor_t* input_p,
-          bsg_tensor_t* target_p,
-          bsg_tensor_t* weight_p,
-          bsg_tensor_t* total_weight_p,
+          hb_tensor_t* grad_input_p,
+          hb_tensor_t* grad_output_p,
+          hb_tensor_t* input_p,
+          hb_tensor_t* target_p,
+          hb_tensor_t* weight_p,
+          hb_tensor_t* total_weight_p,
           uint32_t*     reduction_p,
           int32_t*      ignore_index_p) {
 
@@ -108,17 +108,17 @@ extern "C" {
 
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_lossnll_backward_weight, bsg_tensor_t*,
-                     bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
-                     bsg_tensor_t*, bsg_tensor_t*, uint32_t*,
+  HB_EMUL_REG_KERNEL(tensorlib_lossnll_backward_weight, hb_tensor_t*,
+                     hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+                     hb_tensor_t*, hb_tensor_t*, uint32_t*,
                      int32_t*);
 
   __attribute__ ((noinline))  int tensorlib_lossnll_backward(
-          bsg_tensor_t* grad_input_p,
-          bsg_tensor_t* grad_output_p,
-          bsg_tensor_t* input_p,
-          bsg_tensor_t* target_p,
-          bsg_tensor_t* total_weight_p,
+          hb_tensor_t* grad_input_p,
+          hb_tensor_t* grad_output_p,
+          hb_tensor_t* input_p,
+          hb_tensor_t* target_p,
+          hb_tensor_t* total_weight_p,
           uint32_t*     reduction_p,
           int32_t*      ignore_index_p) {
 
@@ -137,8 +137,8 @@ extern "C" {
 
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_lossnll_backward, bsg_tensor_t*,
-                     bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
-                     bsg_tensor_t*, uint32_t*, int32_t*);
+  HB_EMUL_REG_KERNEL(tensorlib_lossnll_backward, hb_tensor_t*,
+                     hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+                     hb_tensor_t*, uint32_t*, int32_t*);
 
 }

@@ -32,7 +32,7 @@ typedef struct {
   uint32_t sizes;
   uint32_t data;
 #endif
-} bsg_tensor_t;
+} hb_tensor_t;
 
 typedef struct {
   uint32_t N;
@@ -62,7 +62,7 @@ class HBTensor {
     DT* data;
 
   public:
-    HBTensor(bsg_tensor_t* t) :
+    HBTensor(hb_tensor_t* t) :
       N(t->N),
       dims(t->dims),
       strides((uint32_t*) ((intptr_t) t->strides)),

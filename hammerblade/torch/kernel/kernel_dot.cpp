@@ -8,9 +8,9 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_dot(
-          bsg_tensor_t* _c,
-          bsg_tensor_t* _a,
-          bsg_tensor_t* _b) {
+          hb_tensor_t* _c,
+          hb_tensor_t* _a,
+          hb_tensor_t* _b) {
     auto c = HBTensor<float>(_c);
     auto a = HBTensor<float>(_a);
     auto b = HBTensor<float>(_b);
@@ -29,6 +29,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_dot, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_dot, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 
 }

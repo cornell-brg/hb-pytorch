@@ -8,13 +8,13 @@
 //
 // kernel:
 // int  __attribute__ ((noinline)) tensorlib_add(
-//        bsg_tensor_t* res,
-//        bsg_tensor_t* a,
-//        bsg_tensor_t* b,
+//        hb_tensor_t* res,
+//        hb_tensor_t* a,
+//        hb_tensor_t* b,
 //        float* alpha)
 //
 // registration:
-// HB_EMUL_REG_KERNEL(tensorlib_add, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*)
+// HB_EMUL_REG_KERNEL(tensorlib_add, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, float*)
 //
 // We always include this header, even if we are compiling for cosim
 
