@@ -16,10 +16,10 @@ static int tensorlib_lossnll_impl(
         int32_t*      ignore_index_p,
         F             weight) {
 
-  BSGTensor<float> output(output_p);
-  BSGTensor<float> total_weight(total_weight_p);
-  BSGTensor<float> input(input_p);
-  BSGTensor<int>   target(target_p);
+  HBTensor<float> output(output_p);
+  HBTensor<float> total_weight(total_weight_p);
+  HBTensor<float> input(input_p);
+  HBTensor<int>   target(target_p);
   uint32_t reduction = *reduction_p;
   int32_t ignore_index = *ignore_index_p;
 
@@ -95,7 +95,7 @@ extern "C" {
           uint32_t*     reduction_p,
           int32_t*      ignore_index_p) {
 
-    BSGTensor<float> weight(weight_p);
+    HBTensor<float> weight(weight_p);
     tensorlib_lossnll_impl(output_p,
                            total_weight_p,
                            input_p,

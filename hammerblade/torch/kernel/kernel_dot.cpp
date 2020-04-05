@@ -11,9 +11,9 @@ extern "C" {
           bsg_tensor_t* _c,
           bsg_tensor_t* _a,
           bsg_tensor_t* _b) {
-    auto c = BSGTensor<float>(_c);
-    auto a = BSGTensor<float>(_a);
-    auto b = BSGTensor<float>(_b);
+    auto c = HBTensor<float>(_c);
+    auto a = HBTensor<float>(_a);
+    auto b = HBTensor<float>(_b);
     float sum = 0.0f;
     // Start profiling
     bsg_cuda_print_stat_kernel_start();

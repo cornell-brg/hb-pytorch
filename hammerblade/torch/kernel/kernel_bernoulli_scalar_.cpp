@@ -15,7 +15,7 @@ extern "C" {
     // Unwrap common seed
     uint32_t seed = *(uint32_t*)((intptr_t)_seed->data);
     float p = *_p;
-    auto self = BSGTensor<float>(_self);
+    auto self = HBTensor<float>(_self);
     // RNG
     std::default_random_engine generator;
     generator.seed(seed + __bsg_id);

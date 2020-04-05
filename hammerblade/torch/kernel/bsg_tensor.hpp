@@ -53,7 +53,7 @@ typedef struct {
 // =========================================================
 
 template <typename DT>
-class BSGTensor {
+class HBTensor {
   private:
     uint32_t N;
     uint32_t dims;
@@ -62,7 +62,7 @@ class BSGTensor {
     DT* data;
 
   public:
-    BSGTensor(bsg_tensor_t* t) :
+    HBTensor(bsg_tensor_t* t) :
       N(t->N),
       dims(t->dims),
       strides((uint32_t*) ((intptr_t) t->strides)),

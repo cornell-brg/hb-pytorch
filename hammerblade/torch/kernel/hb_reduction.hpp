@@ -99,8 +99,8 @@ inline void binary_reduction_simple(BSGTensor<scalar_t> out,
 }
 
 template<typename scalar_t, typename F1, typename F2>
-inline void binary_reduction(BSGTensor<scalar_t>out,
-                             BSGTensor<scalar_t>in,
+inline void binary_reduction(HBTensor<scalar_t>out,
+                             HBTensor<scalar_t>in,
                              uint32_t ndim, uint32_t num_reduction_dim,
                              uint32_t elements_per_output,
                              F1 reduce, F2 project) {

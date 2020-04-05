@@ -16,8 +16,8 @@ extern "C" {
           bsg_tensor_t* out_,
           bsg_tensor_t* in_,
           uint32_t* num_reduction_dim_p) {
-    auto out = BSGTensor<float>(out_);
-    auto in = BSGTensor<float>(in_);
+    auto out = HBTensor<float>(out_);
+    auto in = HBTensor<float>(in_);
     uint32_t num_reduction_dim = *num_reduction_dim_p;
     auto ndim = in.ndim();
 
