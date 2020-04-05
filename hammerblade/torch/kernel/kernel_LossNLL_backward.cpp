@@ -48,13 +48,13 @@ static int tensorlib_lossnll_backward_impl(
     return 0;
   }
 
-  bsg_assert(grad_output.ndim() <= 1 && grad_output.numel() == 1);
+  hb_assert(grad_output.ndim() <= 1 && grad_output.numel() == 1);
   const float grad_output_value = grad_output(0);
 
   if (n_dims == 1 && __bsg_id == 0) {
     const auto cur_target = target(0);
     if (cur_target != ignore_index) {
-      bsg_assert(cur_target >= 0 && cur_target < n_classes);
+      hb_assert(cur_target >= 0 && cur_target < n_classes);
       grad_input(cur_target) = -weight(cur_target);
       grad_input(cur_target) *= grad_output_value;
     }
@@ -65,7 +65,7 @@ static int tensorlib_lossnll_backward_impl(
           const auto cur_target = target(i);
 
           if (cur_target != ignore_index) {
-            bsg_assert(cur_target >= 0 && cur_target < n_classes);
+            hb_assert(cur_target >= 0 && cur_target < n_classes);
             const float cur_weight = weight(cur_target);
             grad_input(i, cur_target) = -cur_weight * grad_output_value;
 

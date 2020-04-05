@@ -34,7 +34,7 @@ extern "C" {
         int c1 = mat1.dim(1);
         int r2 = mat2.dim(0);
         int c2 = mat2.dim(1);
-        bsg_assert(c1 == r2);
+        hb_assert(c1 == r2);
 
         // calculate number of row and col blocks in each matrix
         int m1_num_blk_per_row = (r1 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m1 per row
@@ -75,7 +75,7 @@ extern "C" {
                 // only care about blocks of mat1 in row rr
                 // and blocks of mat2 in col rc
                 for (int mat1x = 0, mat2y = 0; mat1x < m1_num_blk_per_col && mat2y < m2_num_blk_per_row; mat1x++, mat2y++) {
-                    bsg_assert(mat1x == mat2y);
+                    hb_assert(mat1x == mat2y);
 
                     // calculate current block dimensions
                     int mid_dim = mat1x == m1_num_blk_per_col - 1 ? m1_last_blk_dim_x : BLOCK_DIM;
