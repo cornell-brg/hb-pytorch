@@ -355,7 +355,6 @@ Tensor &mean_out_cpu_gpu(Tensor &result, const Tensor &self, IntArrayRef dim,
       result.fill_(std::numeric_limits<double>::quiet_NaN());
     }
   } else {
-    result.zero_();
     mean_stub(iter.device_type(), iter);
   }
   return result;
