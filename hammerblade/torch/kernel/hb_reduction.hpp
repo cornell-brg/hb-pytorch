@@ -39,12 +39,76 @@ enum Reduction {
 // 4D input -- 3 reduction dim
 // 4D input -- 4 reduction dim -- trivial
 
+// Trivial case -- reduce to 1 output
+
+template<typename scalar_t, typename F1, typename F2>
+inline void binary_reduction_simple(BSGTensor<scalar_t> out,
+                                    BSGTensor<scalar_t> in,
+                                    F1 reduce, F2 project) {
+  bsg_assert_msg(out.numel() == 1, "reduction_simple only handles trivial case");
+
+  if(__bsg_id == 0) {
+
+    char* data[2];
+    data[0] = out.data_ptr();
+    data[1] = in.data_ptr();
+
+    //-----------------------------
+    // partial_result
+    //-----------------------------
+    scalar_t result = 0;
+
+    // is_trivial_1d
+    if(in.ndim() == 1) {
+
+
+      //-----------------------------
+      // collect metadata
+      //-----------------------------
+      uint32_t strides[2];
+      strides[0] = (out.get_strides())[0];
+      strides[1] = (in.get_strides())[0];
+
+      //-----------------------------
+      // iterating over all elementes
+      //-----------------------------
+      size_t start = 0;
+      size_t end = in.numel();
+      for (size_t idx = start; idx < end; idx++) {
+        // XXX: when offloading through reduction path, strides are measured in numel
+        scalar_t* in_dp = (scalar_t*)(data[1] + strides[1] * idx * sizeof(scalar_t));
+        reduce(result, *in_dp);
+      }
+    } else {
+      //-----------------------------
+      // iterating over all elementes
+      //-----------------------------
+      size_t start = 0;
+      size_t end = in.numel();
+      for (size_t idx = start; idx < end; idx++) {
+        // XXX: when offloading through reduction path, strides are measured in numel
+        scalar_t* in_dp = (scalar_t*)(data[1] + offset_calc(idx, in) * sizeof(scalar_t));
+        reduce(result, *in_dp);
+      }
+    }
+
+    // produce final result
+    scalar_t* out_dp = (scalar_t*)(data[0]);
+    *out_dp = project(result);
+  }
+}
+
 template<typename scalar_t, typename F1, typename F2>
 inline void binary_reduction(BSGTensor<scalar_t>out,
                              BSGTensor<scalar_t>in,
                              uint32_t ndim, uint32_t num_reduction_dim,
                              uint32_t elements_per_output,
                              F1 reduce, F2 project) {
+  if(out.numel() == 1) {
+    binary_reduction_simple(out, in, reduce, project);
+    return;
+  }
+
   switch(ndim) {
     case 1:
       // There is this corner case, in which each output is produced by only

@@ -19,6 +19,7 @@ extern "C" {
     auto input = BSGTensor<uint32_t>(t1_p);
 
     bsg_cuda_print_stat_kernel_start();
+
     hb_tile_elementwise_for(res, input,
       [](uint32_t a) {
         return a;
