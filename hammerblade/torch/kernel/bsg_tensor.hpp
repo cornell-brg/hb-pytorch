@@ -41,7 +41,7 @@ typedef struct {
 #else
   uint32_t data;
 #endif
-} bsg_vector_t;
+} hb_vector_t;
 
 // =========================================================
 // Device Tensor classes
@@ -143,7 +143,7 @@ class BSGVector {
     T* data;
 
   public:
-    BSGVector(bsg_vector_t* v) :
+    BSGVector(hb_vector_t* v) :
       N(v->N), data((T*) ((intptr_t) v->data)) {}
 
     uint32_t numel() {
