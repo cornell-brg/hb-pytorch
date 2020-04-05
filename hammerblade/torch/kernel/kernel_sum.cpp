@@ -23,11 +23,8 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    // there could be more than 1 dims
-    uint32_t elements_to_collect = in.dim(0);
-    for(auto i = 1; i < num_reduction_dim; i++) {
-      elements_to_collect *= in.dim(i);
-    }
+    uint32_t elements_to_collect =
+      calc_elements_per_output(out, in, num_reduction_dim);
 
     auto reduce = [](float& partial_result, float input) {
                     partial_result += input;
