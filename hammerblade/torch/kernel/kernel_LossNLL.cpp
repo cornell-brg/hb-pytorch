@@ -28,7 +28,7 @@ static int tensorlib_lossnll_impl(
   const auto n_dims = input.ndim();
 
   if(reduction == Reduction::None && n_dims == 2) {
-    brg_tile_for(batch_size,
+    hb_tile_for(batch_size,
         [&](size_t i) {
           const auto cur_target = target(i);
           if (cur_target == ignore_index) {

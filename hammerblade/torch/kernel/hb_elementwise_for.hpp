@@ -3,8 +3,8 @@
 // 03/12/2020 Lin Cheng (lc873@cornell.edu)
 //====================================================================
 
-#ifndef _BRG_ELEMENT_FOR_HPP
-#define _BRG_ELEMENT_FOR_HPP
+#ifndef _HB_ELEMENTWISE_FOR_HPP
+#define _HB_ELEMENTWISE_FOR_HPP
 
 #include <map>
 #include <math.h>
@@ -325,12 +325,12 @@ inline void hb_tile_elementwise_for(BSGTensor<scalar_t> res,
 }
 
 // =========================================================
-// BRG for
+// HB for
 // =========================================================
 // functor takes in current index
 
 template <class FetchFunctor>
-inline void brg_for(size_t numel, FetchFunctor functor) {
+inline void hb_for(size_t numel, FetchFunctor functor) {
   //--------------------------------------
   // calculate start and end for this tile
   //--------------------------------------
@@ -345,12 +345,12 @@ inline void brg_for(size_t numel, FetchFunctor functor) {
 }
 
 // =========================================================
-// BRG tile for
+// HB tile for
 // =========================================================
 // functor takes in current index
 
 template <class FetchFunctor>
-inline void brg_tile_for(size_t numel, FetchFunctor functor) {
+inline void hb_tile_for(size_t numel, FetchFunctor functor) {
   //--------------------------------------
   // calculate start and end for this tile
   //--------------------------------------

@@ -35,7 +35,7 @@ extern "C" {
     float* gradOutput_data_base = (float*)grad_p->data;
     float* output_data_base = (float*)output_p->data;
 
-    brg_tile_for(outer_size * inner_size,
+    hb_tile_for(outer_size * inner_size,
         [&](size_t i) {
 
           int32_t outer_idx = i / inner_size;
