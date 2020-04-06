@@ -12,9 +12,9 @@ import pytest
 
 torch.manual_seed(42)
 
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Multilayer Preception for MNIST
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Dropout set to 0 so the backward is deterministic
 
 class MLPModel(nn.Module):
@@ -36,9 +36,9 @@ class MLPModel(nn.Module):
     def forward(self, x):
       return self.mnist(x)
 
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Forward pass
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 @pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Slow on cosim")
 def test_mlp_inference():
@@ -58,18 +58,18 @@ def test_mlp_inference():
     image_hb = hbutils.init_hb_tensor(image)
 
     # inference on CPU
-    output_cpu = model_cpu(image.view(-1, 28*28))
+    output_cpu = model_cpu(image.view(-1, 28 * 28))
 
     # inference on HammerBlade
-    output_hb = model_hb(image_hb.view(-1, 28*28))
+    output_hb = model_hb(image_hb.view(-1, 28 * 28))
 
     # check outputs
     assert output_hb.device == torch.device("hammerblade")
     assert torch.allclose(output_cpu, output_hb.cpu(), atol=1e-06)
 
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Backward pass
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 @pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Slow on cosim")
 def test_mlp_backprop():
@@ -89,10 +89,10 @@ def test_mlp_backprop():
     image_hb = hbutils.init_hb_tensor(image)
 
     # inference on CPU
-    output_cpu = model_cpu(image.view(-1, 28*28))
+    output_cpu = model_cpu(image.view(-1, 28 * 28))
 
     # inference on HammerBlade
-    output_hb = model_hb(image_hb.view(-1, 28*28))
+    output_hb = model_hb(image_hb.view(-1, 28 * 28))
 
     # check outputs
     assert output_hb.device == torch.device("hammerblade")
