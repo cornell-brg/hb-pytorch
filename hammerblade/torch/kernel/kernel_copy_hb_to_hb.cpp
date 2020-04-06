@@ -20,7 +20,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tile_elementwise_for(res, input,
+    hb_parallel_foreach(res, input,
       [](uint32_t a) {
         return a;
     });

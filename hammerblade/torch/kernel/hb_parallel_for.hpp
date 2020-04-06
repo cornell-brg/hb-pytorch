@@ -3,8 +3,8 @@
 // 03/12/2020 Lin Cheng (lc873@cornell.edu)
 //====================================================================
 
-#ifndef _HB_ELEMENTWISE_FOR_HPP
-#define _HB_ELEMENTWISE_FOR_HPP
+#ifndef _HB_PARALLEL_FOR_HPP
+#define _HB_PARALLEL_FOR_HPP
 
 #include <map>
 #include <math.h>
@@ -35,7 +35,7 @@ inline uint32_t offset_calc(uint32_t idx, BSGTensor<scalar_t> tensor) {
 // =========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_elementwise_for(BSGTensor<scalar_t> res,
+inline void hb_foreach(BSGTensor<scalar_t> res,
                                BSGTensor<scalar_t> input,
                                BSGTensor<scalar_t> other,
                                F functor) {
@@ -89,7 +89,7 @@ inline void hb_elementwise_for(BSGTensor<scalar_t> res,
 // =========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_elementwise_for(BSGTensor<scalar_t> res,
+inline void hb_foreach(BSGTensor<scalar_t> res,
                                BSGTensor<scalar_t> input,
                                F functor) {
   char* data[2];
@@ -137,7 +137,7 @@ inline void hb_elementwise_for(BSGTensor<scalar_t> res,
 // =========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_elementwise_for(BSGTensor<scalar_t> res,
+inline void hb_foreach(BSGTensor<scalar_t> res,
                                F functor) {
   char* data[1];
   data[0] = res.data_ptr();
@@ -181,7 +181,7 @@ inline void hb_elementwise_for(BSGTensor<scalar_t> res,
 //==========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_tile_elementwise_for(BSGTensor<scalar_t> res,
+inline void hb_parallel_foreach(BSGTensor<scalar_t> res,
                                BSGTensor<scalar_t> input,
                                BSGTensor<scalar_t> other,
                                F functor) {
@@ -244,7 +244,7 @@ inline void hb_tile_elementwise_for(BSGTensor<scalar_t> res,
 //==========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_tile_elementwise_for(BSGTensor<scalar_t> res,
+inline void hb_parallel_foreach(BSGTensor<scalar_t> res,
                                BSGTensor<scalar_t> input,
                                F functor) {
   char* data[2];
@@ -300,7 +300,7 @@ inline void hb_tile_elementwise_for(BSGTensor<scalar_t> res,
 //==========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_tile_elementwise_for(BSGTensor<scalar_t> res,
+inline void hb_parallel_foreach(BSGTensor<scalar_t> res,
                                F functor) {
   char* data[1];
   data[0] = res.data_ptr();
@@ -368,7 +368,7 @@ inline void hb_for(size_t numel, FetchFunctor functor) {
 // functor takes in current index
 
 template <class FetchFunctor>
-inline void hb_tile_for(size_t numel, FetchFunctor functor) {
+inline void hb_parallel_for(size_t numel, FetchFunctor functor) {
   //--------------------------------------
   // calculate start and end for this tile
   //--------------------------------------

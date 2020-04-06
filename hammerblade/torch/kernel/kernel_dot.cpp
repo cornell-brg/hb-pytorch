@@ -18,7 +18,7 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
     // Partial dot product sum
-    hb_tile_for(a.numel(), [&](size_t i) {
+    hb_parallel_for(a.numel(), [&](size_t i) {
         sum += a(i) * b(i);
     });
     // XXX: this operation should be atomic and consider the case in which

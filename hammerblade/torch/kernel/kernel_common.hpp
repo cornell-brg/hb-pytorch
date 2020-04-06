@@ -17,7 +17,7 @@
 // #include "bsg_tile_group_barrier.h"
 #include "bsg_tensor.hpp"
 #include <bsg_assert.hpp>
-#include <hb_elementwise_for.hpp>
+#include <hb_parallel_for.hpp>
 
 //====================================================================
 // HammerBlade kernel emulation

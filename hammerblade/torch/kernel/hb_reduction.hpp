@@ -1,7 +1,7 @@
 #ifndef _HB_REDUCTION_H
 #define _HB_REDUCTION_H
 
-#include <hb_elementwise_for.hpp>
+#include <hb_parallel_for.hpp>
 
 //====================================================================
 // Reduction mode used in LossNLL and other loss functions
@@ -115,7 +115,7 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
       // one input element
       bsg_assert_msg(out.numel() == in.numel(),
                      "This case should be handled by reduction_simple?");
-      hb_tile_for(out.numel(), [&](size_t n) {
+      hb_parallel_for(out.numel(), [&](size_t n) {
         out(n) = project(in(n));
       });
       break;
@@ -123,7 +123,7 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
       if(num_reduction_dim == 1) {
         // 2D input -- 1 reduction dim
         // parallelize over output elements
-        hb_tile_for(out.numel(), [&](size_t n) {
+        hb_parallel_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
           scalar_t result = 0;
           for(size_t d = 0; d < elements_per_output; d++) {
@@ -139,7 +139,7 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
       if(num_reduction_dim == 1) {
         // 3D input -- 1 reduction dim
         // parallelize over output elements
-        hb_tile_for(out.numel(), [&](size_t n) {
+        hb_parallel_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
           scalar_t result = 0;
           uint32_t dim1 = n / in.dim(2);
@@ -152,7 +152,7 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
       } else if(num_reduction_dim == 2) {
         // 3D input -- 2 reduction dim
         // parallelize over output elements
-        hb_tile_for(out.numel(), [&](size_t n) {
+        hb_parallel_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
           scalar_t result = 0;
           for(size_t d = 0; d < elements_per_output; d++) {

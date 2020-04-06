@@ -23,7 +23,7 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
     // bernoulli
-    hb_tile_for(self.numel(), [&](size_t i) {
+    hb_parallel_for(self.numel(), [&](size_t i) {
         float rand = distribution(generator);
         if (rand > p) {
           // 0

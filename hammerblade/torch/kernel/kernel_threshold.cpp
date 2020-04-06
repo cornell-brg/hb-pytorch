@@ -22,7 +22,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tile_elementwise_for(c, a, b,
+    hb_parallel_foreach(c, a, b,
       [&](float self, float other) {
         if (self <= threshold) {
           return value;
