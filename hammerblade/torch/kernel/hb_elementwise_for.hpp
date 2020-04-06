@@ -208,6 +208,9 @@ inline void hb_tile_elementwise_for(BSGTensor<scalar_t> res,
     size_t start = len_per_tile * __bsg_id;
     size_t end = start + len_per_tile;
     end = (end > res.numel())  ? res.numel() : end;
+    data[0] += strides[0] * start;
+    data[1] += strides[1] * start;
+    data[2] += strides[2] * start;
     for (size_t idx = start; idx < end; idx++) {
       scalar_t* res_dp = (scalar_t*)(data[0]);
       scalar_t* input_dp = (scalar_t*)(data[1]);
@@ -265,6 +268,8 @@ inline void hb_tile_elementwise_for(BSGTensor<scalar_t> res,
     size_t start = len_per_tile * __bsg_id;
     size_t end = start + len_per_tile;
     end = (end > res.numel())  ? res.numel() : end;
+    data[0] += strides[0] * start;
+    data[1] += strides[1] * start;
     for (size_t idx = start; idx < end; idx++) {
       scalar_t* res_dp = (scalar_t*)(data[0]);
       scalar_t* input_dp = (scalar_t*)(data[1]);
@@ -316,6 +321,7 @@ inline void hb_tile_elementwise_for(BSGTensor<scalar_t> res,
     size_t start = len_per_tile * __bsg_id;
     size_t end = start + len_per_tile;
     end = (end > res.numel())  ? res.numel() : end;
+    data[0] += strides[0] * start;
     for (size_t idx = start; idx < end; idx++) {
       scalar_t* res_dp = (scalar_t*)(data[0]);
       *res_dp = functor();
