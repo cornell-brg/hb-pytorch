@@ -9,14 +9,14 @@
 #include <map>
 #include <math.h>
 #include <initializer_list>
-#include <bsg_assert.hpp>
-#include <bsg_tensor.hpp>
+#include <hb_assert.hpp>
+#include <hb_tensor.hpp>
 
 // =========================================================
 // Linear index to offset
 // =========================================================
 template<typename scalar_t>
-inline uint32_t offset_calc(uint32_t idx, BSGTensor<scalar_t> tensor) {
+inline uint32_t offset_calc(uint32_t idx, HBTensor<scalar_t> tensor) {
   uint32_t* strides = tensor.get_strides();
   uint32_t* sizes = tensor.get_sizes();
   uint32_t factor = 1;
@@ -35,9 +35,9 @@ inline uint32_t offset_calc(uint32_t idx, BSGTensor<scalar_t> tensor) {
 // =========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_foreach(BSGTensor<scalar_t> res,
-                               BSGTensor<scalar_t> input,
-                               BSGTensor<scalar_t> other,
+inline void hb_foreach(HBTensor<scalar_t> res,
+                               HBTensor<scalar_t> input,
+                               HBTensor<scalar_t> other,
                                F functor) {
   char* data[3];
   data[0] = res.data_ptr();
@@ -89,8 +89,8 @@ inline void hb_foreach(BSGTensor<scalar_t> res,
 // =========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_foreach(BSGTensor<scalar_t> res,
-                               BSGTensor<scalar_t> input,
+inline void hb_foreach(HBTensor<scalar_t> res,
+                               HBTensor<scalar_t> input,
                                F functor) {
   char* data[2];
   data[0] = res.data_ptr();
@@ -137,7 +137,7 @@ inline void hb_foreach(BSGTensor<scalar_t> res,
 // =========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_foreach(BSGTensor<scalar_t> res,
+inline void hb_foreach(HBTensor<scalar_t> res,
                                F functor) {
   char* data[1];
   data[0] = res.data_ptr();
@@ -181,9 +181,9 @@ inline void hb_foreach(BSGTensor<scalar_t> res,
 //==========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_parallel_foreach(BSGTensor<scalar_t> res,
-                               BSGTensor<scalar_t> input,
-                               BSGTensor<scalar_t> other,
+inline void hb_parallel_foreach(HBTensor<scalar_t> res,
+                               HBTensor<scalar_t> input,
+                               HBTensor<scalar_t> other,
                                F functor) {
   char* data[3];
   data[0] = res.data_ptr();
@@ -244,8 +244,8 @@ inline void hb_parallel_foreach(BSGTensor<scalar_t> res,
 //==========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_parallel_foreach(BSGTensor<scalar_t> res,
-                               BSGTensor<scalar_t> input,
+inline void hb_parallel_foreach(HBTensor<scalar_t> res,
+                               HBTensor<scalar_t> input,
                                F functor) {
   char* data[2];
   data[0] = res.data_ptr();
@@ -300,7 +300,7 @@ inline void hb_parallel_foreach(BSGTensor<scalar_t> res,
 //==========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_parallel_foreach(BSGTensor<scalar_t> res,
+inline void hb_parallel_foreach(HBTensor<scalar_t> res,
                                F functor) {
   char* data[1];
   data[0] = res.data_ptr();

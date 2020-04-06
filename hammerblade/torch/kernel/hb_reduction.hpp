@@ -42,10 +42,10 @@ enum Reduction {
 // Trivial case -- reduce to 1 output
 
 template<typename scalar_t, typename F1, typename F2>
-inline void binary_reduction_simple(BSGTensor<scalar_t> out,
-                                    BSGTensor<scalar_t> in,
+inline void binary_reduction_simple(HBTensor<scalar_t> out,
+                                    HBTensor<scalar_t> in,
                                     F1 reduce, F2 project) {
-  bsg_assert_msg(out.numel() == 1, "reduction_simple only handles trivial case");
+  hb_assert_msg(out.numel() == 1, "reduction_simple only handles trivial case");
 
   if(__bsg_id == 0) {
 
