@@ -61,10 +61,13 @@ inline void hb_elementwise_for(BSGTensor<scalar_t> res,
     size_t start = 0;
     size_t end = res.numel();
     for (size_t idx = start; idx < end; idx++) {
-      scalar_t* res_dp = (scalar_t*)(data[0] + strides[0] * idx);
-      scalar_t* input_dp = (scalar_t*)(data[1] + strides[1] * idx);
-      scalar_t* other_dp = (scalar_t*)(data[2] + strides[2] * idx);
+      scalar_t* res_dp = (scalar_t*)(data[0]);
+      scalar_t* input_dp = (scalar_t*)(data[1]);
+      scalar_t* other_dp = (scalar_t*)(data[2]);
       *res_dp = functor(*input_dp, *other_dp);
+      data[0] += strides[0];
+      data[1] += strides[1];
+      data[2] += strides[2];
     }
   } else {
     //-----------------------------
@@ -109,9 +112,11 @@ inline void hb_elementwise_for(BSGTensor<scalar_t> res,
     size_t start = 0;
     size_t end = res.numel();
     for (size_t idx = start; idx < end; idx++) {
-      scalar_t* res_dp = (scalar_t*)(data[0] + strides[0] * idx);
-      scalar_t* input_dp = (scalar_t*)(data[1] + strides[1] * idx);
+      scalar_t* res_dp = (scalar_t*)(data[0]);
+      scalar_t* input_dp = (scalar_t*)(data[1]);
       *res_dp = functor(*input_dp);
+      data[0] += strides[0];
+      data[1] += strides[1];
     }
   } else {
     //-----------------------------
@@ -152,8 +157,9 @@ inline void hb_elementwise_for(BSGTensor<scalar_t> res,
     size_t start = 0;
     size_t end = res.numel();
     for (size_t idx = start; idx < end; idx++) {
-      scalar_t* res_dp = (scalar_t*)(data[0] + strides[0] * idx);
+      scalar_t* res_dp = (scalar_t*)(data[0]);
       *res_dp = functor();
+      data[0] += strides[0];
     }
   } else {
     //-----------------------------
@@ -203,10 +209,13 @@ inline void hb_tile_elementwise_for(BSGTensor<scalar_t> res,
     size_t end = start + len_per_tile;
     end = (end > res.numel())  ? res.numel() : end;
     for (size_t idx = start; idx < end; idx++) {
-      scalar_t* res_dp = (scalar_t*)(data[0] + strides[0] * idx);
-      scalar_t* input_dp = (scalar_t*)(data[1] + strides[1] * idx);
-      scalar_t* other_dp = (scalar_t*)(data[2] + strides[2] * idx);
+      scalar_t* res_dp = (scalar_t*)(data[0]);
+      scalar_t* input_dp = (scalar_t*)(data[1]);
+      scalar_t* other_dp = (scalar_t*)(data[2]);
       *res_dp = functor(*input_dp, *other_dp);
+      data[0] += strides[0];
+      data[1] += strides[1];
+      data[2] += strides[2];
     }
   } else {
     //-----------------------------
@@ -257,9 +266,11 @@ inline void hb_tile_elementwise_for(BSGTensor<scalar_t> res,
     size_t end = start + len_per_tile;
     end = (end > res.numel())  ? res.numel() : end;
     for (size_t idx = start; idx < end; idx++) {
-      scalar_t* res_dp = (scalar_t*)(data[0] + strides[0] * idx);
-      scalar_t* input_dp = (scalar_t*)(data[1] + strides[1] * idx);
+      scalar_t* res_dp = (scalar_t*)(data[0]);
+      scalar_t* input_dp = (scalar_t*)(data[1]);
       *res_dp = functor(*input_dp);
+      data[0] += strides[0];
+      data[1] += strides[1];
     }
   } else {
     //-----------------------------
@@ -306,8 +317,9 @@ inline void hb_tile_elementwise_for(BSGTensor<scalar_t> res,
     size_t end = start + len_per_tile;
     end = (end > res.numel())  ? res.numel() : end;
     for (size_t idx = start; idx < end; idx++) {
-      scalar_t* res_dp = (scalar_t*)(data[0] + strides[0] * idx);
+      scalar_t* res_dp = (scalar_t*)(data[0]);
       *res_dp = functor();
+      data[0] += strides[0];
     }
   } else {
     //-----------------------------
