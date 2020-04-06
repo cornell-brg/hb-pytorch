@@ -69,6 +69,18 @@ class BSGTensor {
       sizes((uint32_t*) ((intptr_t) t->sizes)),
       data((DT*) ((intptr_t) t->data)) {}
 
+    char* data_ptr() {
+      return (char*)data;
+    }
+
+    uint32_t* get_strides() {
+      return strides;
+    }
+
+    uint32_t* get_sizes() {
+      return sizes;
+    }
+
     int numel() {
       return N;
     }
