@@ -13,8 +13,8 @@ extern "C" {
   //====================================================================
 
   __attribute__ ((noinline))  int tensorlib_log_softmax(
-          bsg_tensor_t* output,
-          bsg_tensor_t* input,
+          hb_tensor_t* output,
+          hb_tensor_t* input,
           int32_t* dim_) {
     float* in = (float*) ((intptr_t) input->data);
     float* out = (float*) ((intptr_t) output->data);
@@ -77,6 +77,6 @@ extern "C" {
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_log_softmax,
-     bsg_tensor_t*, bsg_tensor_t*, int32_t*);
+     hb_tensor_t*, hb_tensor_t*, int32_t*);
 
 }

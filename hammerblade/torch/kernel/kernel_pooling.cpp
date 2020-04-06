@@ -12,16 +12,16 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_max_pool2d(
-          bsg_tensor_t* output,
-          bsg_tensor_t* input,
-          bsg_tensor_t* indices,
+          hb_tensor_t* output,
+          hb_tensor_t* input,
+          hb_tensor_t* indices,
           int* kH, int* kW,
           int* sH, int* sW,
           int* padH, int* padW,
           int* dilationH, int* dilationW) {
-    auto y = BSGTensor<float>(output);
-    auto x = BSGTensor<float>(input);
-    auto ind = BSGTensor<int>(indices);
+    auto y = HBTensor<float>(output);
+    auto x = HBTensor<float>(input);
+    auto ind = HBTensor<int>(indices);
 
     // max_pool2d parameters
     auto N = y.dim(0); // number of minibatches
@@ -73,16 +73,16 @@ extern "C" {
   }
 
   __attribute__ ((noinline))  int tensorlib_max_pool2d_backward(
-          bsg_tensor_t* gradInput,
-          bsg_tensor_t* gradOutput,
-          bsg_tensor_t* indices,
-          bsg_tensor_t* input,
+          hb_tensor_t* gradInput,
+          hb_tensor_t* gradOutput,
+          hb_tensor_t* indices,
+          hb_tensor_t* input,
           int* kH, int* kW,
           int* sH, int* sW,
           int* padH, int* padW) {
-    auto y = BSGTensor<float>(gradOutput);
-    auto x = BSGTensor<float>(gradInput);
-    auto ind = BSGTensor<int>(indices);
+    auto y = HBTensor<float>(gradOutput);
+    auto x = HBTensor<float>(gradInput);
+    auto ind = HBTensor<int>(indices);
 
     // max_pool2d parameters
     auto N = y.dim(0); // number of minibatches
@@ -125,17 +125,17 @@ extern "C" {
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_max_pool2d,
-    bsg_tensor_t*,
-    bsg_tensor_t*,
-    bsg_tensor_t*,
+    hb_tensor_t*,
+    hb_tensor_t*,
+    hb_tensor_t*,
     int*, int*,
     int*, int*,
     int*, int*,
     int*, int*);
 
   HB_EMUL_REG_KERNEL(tensorlib_max_pool2d_backward,
-    bsg_tensor_t*, bsg_tensor_t*,
-    bsg_tensor_t*, bsg_tensor_t*,
+    hb_tensor_t*, hb_tensor_t*,
+    hb_tensor_t*, hb_tensor_t*,
     int*, int*,
     int*, int*,
     int*, int*);

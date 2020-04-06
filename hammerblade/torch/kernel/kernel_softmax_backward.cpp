@@ -13,12 +13,12 @@ extern "C" {
   //====================================================================
 
   __attribute__ ((noinline))  int tensorlib_log_softmax_backward(
-          bsg_tensor_t* grad_input_p,
-          bsg_tensor_t* grad_p,
-          bsg_tensor_t* output_p,
+          hb_tensor_t* grad_input_p,
+          hb_tensor_t* grad_p,
+          hb_tensor_t* output_p,
           int32_t*      dim_p) {
 
-    BSGTensor<float> grad(grad_p);
+    HBTensor<float> grad(grad_p);
     int32_t dim = *dim_p;
 
     int32_t outer_size = 1;
@@ -35,7 +35,7 @@ extern "C" {
     float* gradOutput_data_base = (float*)grad_p->data;
     float* output_data_base = (float*)output_p->data;
 
-    hb_tile_for(outer_size * inner_size,
+    hb_parallel_for(outer_size * inner_size,
         [&](size_t i) {
 
           int32_t outer_idx = i / inner_size;
@@ -58,7 +58,7 @@ extern "C" {
   }
 
     HB_EMUL_REG_KERNEL(tensorlib_log_softmax_backward,
-        bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*,
+        hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
         int32_t*);
 
 }

@@ -11,18 +11,18 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_add(
-          bsg_tensor_t* t0_p,
-          bsg_tensor_t* t1_p,
-          bsg_tensor_t* t2_p,
+          hb_tensor_t* t0_p,
+          hb_tensor_t* t1_p,
+          hb_tensor_t* t2_p,
           float* alpha_p) {
-    auto c = BSGTensor<float>(t0_p);
-    auto a = BSGTensor<float>(t1_p);
-    auto b = BSGTensor<float>(t2_p);
+    auto c = HBTensor<float>(t0_p);
+    auto a = HBTensor<float>(t1_p);
+    auto b = HBTensor<float>(t2_p);
     float alpha = *alpha_p;
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tile_elementwise_for(c, a, b,
+    hb_parallel_foreach(c, a, b,
       [&](float a, float b) {
         return a + alpha * b;
     });
@@ -32,6 +32,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_add, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_add, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, float*)
 
 }

@@ -13,14 +13,14 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_copy_hb_to_hb(
-          bsg_tensor_t* t0_p,
-          bsg_tensor_t* t1_p) {
-    auto res = BSGTensor<uint32_t>(t0_p);
-    auto input = BSGTensor<uint32_t>(t1_p);
+          hb_tensor_t* t0_p,
+          hb_tensor_t* t1_p) {
+    auto res = HBTensor<uint32_t>(t0_p);
+    auto input = HBTensor<uint32_t>(t1_p);
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tile_elementwise_for(res, input,
+    hb_parallel_foreach(res, input,
       [](uint32_t a) {
         return a;
     });
@@ -30,6 +30,6 @@ extern "C" {
 
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_copy_hb_to_hb, bsg_tensor_t*, bsg_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_copy_hb_to_hb, hb_tensor_t*, hb_tensor_t*)
 
 }
