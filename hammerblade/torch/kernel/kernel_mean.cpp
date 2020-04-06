@@ -13,11 +13,11 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_mean(
-          bsg_tensor_t* out_,
-          bsg_tensor_t* in_,
+          hb_tensor_t* out_,
+          hb_tensor_t* in_,
           uint32_t* num_reduction_dim_p) {
-    auto out = BSGTensor<float>(out_);
-    auto in = BSGTensor<float>(in_);
+    auto out = HBTensor<float>(out_);
+    auto in = HBTensor<float>(in_);
     uint32_t num_reduction_dim = *num_reduction_dim_p;
     auto ndim = in.ndim();
 
@@ -41,6 +41,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_mean, bsg_tensor_t*, bsg_tensor_t*, uint32_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_mean, hb_tensor_t*, hb_tensor_t*, uint32_t*)
 
 }

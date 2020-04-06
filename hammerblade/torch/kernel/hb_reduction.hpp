@@ -19,8 +19,8 @@ enum Reduction {
 //====================================================================
 
 template<typename scalar_t>
-inline uint32_t calc_elements_per_output(BSGTensor<scalar_t> out,
-                                         BSGTensor<scalar_t> in,
+inline uint32_t calc_elements_per_output(HBTensor<scalar_t> out,
+                                         HBTensor<scalar_t> in,
                                          uint32_t num_reduction_dim) {
   // corner case: iterator appears to be 1d but generating n outputs
   //              1 input element per output
