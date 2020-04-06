@@ -10,7 +10,7 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_fill(
           hb_tensor_t* t0_p,
           float* value_p) {
-    auto res = BSGTensor<float>(t0_p);
+    auto res = HBTensor<float>(t0_p);
     float value = *value_p;
 
     bsg_cuda_print_stat_kernel_start();

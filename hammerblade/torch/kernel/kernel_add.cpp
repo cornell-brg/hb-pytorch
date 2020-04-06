@@ -15,9 +15,9 @@ extern "C" {
           hb_tensor_t* t1_p,
           hb_tensor_t* t2_p,
           float* alpha_p) {
-    auto c = BSGTensor<float>(t0_p);
-    auto a = BSGTensor<float>(t1_p);
-    auto b = BSGTensor<float>(t2_p);
+    auto c = HBTensor<float>(t0_p);
+    auto a = HBTensor<float>(t1_p);
+    auto b = HBTensor<float>(t2_p);
     float alpha = *alpha_p;
 
     bsg_cuda_print_stat_kernel_start();

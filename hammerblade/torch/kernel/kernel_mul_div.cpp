@@ -8,12 +8,12 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_mul(
-          bsg_tensor_t* t0_p,
-          bsg_tensor_t* t1_p,
-          bsg_tensor_t* t2_p) {
-    auto c = BSGTensor<float>(t0_p);
-    auto a = BSGTensor<float>(t1_p);
-    auto b = BSGTensor<float>(t2_p);
+          hb_tensor_t* t0_p,
+          hb_tensor_t* t1_p,
+          hb_tensor_t* t2_p) {
+    auto c = HBTensor<float>(t0_p);
+    auto a = HBTensor<float>(t1_p);
+    auto b = HBTensor<float>(t2_p);
 
     bsg_cuda_print_stat_kernel_start();
 
@@ -31,12 +31,12 @@ extern "C" {
 
 
   __attribute__ ((noinline))  int tensorlib_div(
-          bsg_tensor_t* t0_p,
-          bsg_tensor_t* t1_p,
-          bsg_tensor_t* t2_p) {
-    auto c = BSGTensor<float>(t0_p);
-    auto a = BSGTensor<float>(t1_p);
-    auto b = BSGTensor<float>(t2_p);
+          hb_tensor_t* t0_p,
+          hb_tensor_t* t1_p,
+          hb_tensor_t* t2_p) {
+    auto c = HBTensor<float>(t0_p);
+    auto a = HBTensor<float>(t1_p);
+    auto b = HBTensor<float>(t2_p);
 
     bsg_cuda_print_stat_kernel_start();
 

@@ -14,9 +14,9 @@ extern "C" {
           hb_tensor_t* t2_p,
           float* _threshold_scalar_p,
           float* _value_scalar_p) {
-    auto c = BSGTensor<float>(t0_p);
-    auto a = BSGTensor<float>(t1_p);
-    auto b = BSGTensor<float>(t2_p);
+    auto c = HBTensor<float>(t0_p);
+    auto a = HBTensor<float>(t1_p);
+    auto b = HBTensor<float>(t2_p);
     float threshold = *_threshold_scalar_p;
     float value    = *_value_scalar_p;
 
