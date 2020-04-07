@@ -9,29 +9,6 @@ namespace at { namespace native {
 
 using namespace at::sparse;
 
-IntTensor _to_csr_int(const Tensor& dense, const IntTensor& rowIndices, int64_t dim, int64_t nnz) {
-  IntTensor csr = native::zeros({dim+1}, kInt);
-
-  int32_t* indices = rowIndices.data_ptr<int32_t>();
-  
-  if (nnz > 0) {
-    auto csr_accessor = csr.accessor<int32_t, 1>();
-      // Convert the sparse matrix to CSR format
-    at::parallel_for(0, nnz, 10000, [&](int64_t start, int64_t end) {
-      int64_t h, hp0, hp1;
-      for (auto i = start; i < end; i++) {
-        hp0 = indices[i];
-        hp1 = (i+1 == nnz) ?  dim : indices[i+1];
-        if (hp0 != hp1) for (h = hp0; h < hp1; h++) {
-          csr_accessor[h+1] = i+1;
-        }
-      }
-    });
-  }
-
-  return csr;
-}
-
 //We do not going to support csr for element-wise sparse tensor operation
 Tensor& add_out_dense_sparse_hb(Tensor& r, const Tensor& dense, const SparseTensor& sparse_, Scalar value) {
   AT_ASSERT(!r.is_sparse());
@@ -60,7 +37,7 @@ Tensor& add_out_dense_sparse_hb(Tensor& r, const Tensor& dense, const SparseTens
   return r;
 }
 
-SparseTensor & add_out_sparse_hb(SparseTensor& r, const SparseTensor& t, const SparseTensor& src, Scalar value) {
+SparseTensor& add_out_sparse_hb(SparseTensor& r, const SparseTensor& t, const SparseTensor& src, Scalar value) {
   if (!t.is_sparse()) {
     return add_out_dense_sparse_hb(r, t, src, value);
   }

@@ -1855,6 +1855,7 @@
     HammerBlade: mm_hb
     SparseCPU: _sparse_mm
     SparseCUDA: _sparse_mm
+    SparseHammerBlade: _sparse_mm_hb
   supports_named_tensor: True
 
 - func: mm.out(Tensor self, Tensor mat2, *, Tensor(a!) out) -> Tensor(a!)
