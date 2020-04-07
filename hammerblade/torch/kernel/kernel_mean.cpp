@@ -1,6 +1,6 @@
 //====================================================================
-// Sum reduction kernel
-// 03/30/2020 Bandhav Veluri and Lin Cheng
+// Mean reduction kernel
+// 04/03/2020 Lin Cheng
 //====================================================================
 
 #include <kernel_common.hpp>
@@ -12,7 +12,7 @@
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_sum(
+  __attribute__ ((noinline))  int tensorlib_mean(
           hb_tensor_t* out_,
           hb_tensor_t* in_,
           uint32_t* num_reduction_dim_p) {
@@ -30,8 +30,8 @@ extern "C" {
                     partial_result += input;
                   };
 
-    auto project = [](float result) {
-                    return result;
+    auto project = [&](float result) {
+                    return result / elements_to_collect;
                    };
 
     binary_reduction(out, in, ndim, num_reduction_dim,
@@ -41,6 +41,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_sum, hb_tensor_t*, hb_tensor_t*, uint32_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_mean, hb_tensor_t*, hb_tensor_t*, uint32_t*)
 
 }
