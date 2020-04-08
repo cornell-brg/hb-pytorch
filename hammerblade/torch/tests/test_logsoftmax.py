@@ -5,8 +5,13 @@ Unit tests for log_softmax operator
 
 import torch
 import torch.nn.functional as F
+import random
+import pytest
+from hypothesis import given, settings
+from .hypothesis_test_util import HypothesisUtil as hu
 
 torch.manual_seed(42)
+random.seed(42)
 
 def _test_log_softmax(x, dim):
     x_hb = x.hammerblade()
@@ -45,4 +50,19 @@ def test_log_softmax_6():
     x = torch.rand(2, 3, 3, 5)
 
     for dim in range(4):
+        _test_log_softmax(x, dim)
+
+@pytest.mark.skip(reason="known failure #61")
+def test_log_softmax_large_1d():
+    x = torch.tensor([88.72284])
+    dim = 0
+    _test_log_softmax(x, dim)
+
+@pytest.mark.skip(reason="known failure #61")
+@settings(deadline=None)
+@given(tensor=hu.tensor())
+def test_log_softmax_hypothesis(tensor):
+    x = torch.tensor(tensor)
+
+    for dim in range(x.dim()):
         _test_log_softmax(x, dim)
