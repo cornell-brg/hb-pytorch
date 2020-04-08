@@ -4,20 +4,25 @@ Unit tests for torch.mean
 """
 
 import torch
+import random
+from hypothesis import given, settings
+import hypothesis.strategies as st
+from .hypothesis_test_util import HypothesisUtil as hu
 from math import isnan
 
 torch.manual_seed(42)
+random.seed(42)
 
 def _test_torch_mean(tensor, dim=None, keepdim=False):
     tensor_h = tensor.hammerblade()
     if dim is None:
         mean_ = torch.mean(tensor_h)
         assert mean_.device == torch.device("hammerblade")
-        assert torch.allclose(mean_.cpu(), torch.mean(tensor))
+        assert torch.allclose(mean_.cpu(), torch.mean(tensor), atol=1e-06)
     else:
         mean_ = torch.mean(tensor_h, dim, keepdim=keepdim)
         assert mean_.device == torch.device("hammerblade")
-        assert torch.allclose(mean_.cpu(), torch.mean(tensor, dim, keepdim=keepdim))
+        assert torch.allclose(mean_.cpu(), torch.mean(tensor, dim, keepdim=keepdim), atol=1e-06)
 
 def test_torch_mean_1():
     x = torch.ones(10)
@@ -187,3 +192,19 @@ def test_torch_mean_nan():
     assert isnan(h.mean())
     assert h.mean().device == torch.device("hammerblade")
     assert h.mean().dtype == torch.float32
+
+@settings(deadline=None)
+@given(tensor=hu.tensor())
+def test_torch_mean_hypothesis(tensor):
+    x = torch.tensor(tensor)
+    _test_torch_mean(x)
+    for dim in range(x.dim()):
+        _test_torch_mean(x, dim=dim)
+
+@settings(deadline=None)
+@given(tensor=hu.tensor(min_dim=3, max_dim=3))
+def test_torch_mean_hypothesis_3d(tensor):
+    x = torch.tensor(tensor)
+    _test_torch_mean(x, dim=(0, 1))
+    _test_torch_mean(x, dim=(1, 2))
+    _test_torch_mean(x, dim=(0, 2))

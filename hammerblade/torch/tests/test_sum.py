@@ -4,19 +4,24 @@ Unit tests for torch.sum
 """
 
 import torch
+import random
+from hypothesis import given, settings
+import hypothesis.strategies as st
+from .hypothesis_test_util import HypothesisUtil as hu
 
 torch.manual_seed(42)
+random.seed(42)
 
 def _test_torch_sum(tensor, dim=None, keepdim=False):
     tensor_h = tensor.hammerblade()
     if dim is None:
         sum_ = torch.sum(tensor_h)
         assert sum_.device == torch.device("hammerblade")
-        assert torch.allclose(sum_.cpu(), torch.sum(tensor))
+        assert torch.allclose(sum_.cpu(), torch.sum(tensor), atol=1e-06)
     else:
         sum_ = torch.sum(tensor_h, dim, keepdim=keepdim)
         assert sum_.device == torch.device("hammerblade")
-        assert torch.allclose(sum_.cpu(), torch.sum(tensor, dim, keepdim=keepdim))
+        assert torch.allclose(sum_.cpu(), torch.sum(tensor, dim, keepdim=keepdim), atol=1e-06)
 
 def test_torch_sum_1():
     x = torch.ones(10)
@@ -178,3 +183,19 @@ def test_torch_sum_33():
     sum_ = torch.sum(h, 0, keepdim=True)
     assert sum_.device == torch.device("hammerblade")
     assert torch.allclose(sum_.cpu(), torch.sum(x, 0, keepdim=True))
+
+@settings(deadline=None)
+@given(tensor=hu.tensor())
+def test_torch_sum_hypothesis(tensor):
+    x = torch.tensor(tensor)
+    _test_torch_sum(x)
+    for dim in range(x.dim()):
+        _test_torch_sum(x, dim=dim)
+
+@settings(deadline=None)
+@given(tensor=hu.tensor(min_dim=3, max_dim=3))
+def test_torch_sum_hypothesis_3d(tensor):
+    x = torch.tensor(tensor)
+    _test_torch_sum(x, dim=(0, 1))
+    _test_torch_sum(x, dim=(1, 2))
+    _test_torch_sum(x, dim=(0, 2))
