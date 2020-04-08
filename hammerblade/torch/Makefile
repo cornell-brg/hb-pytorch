@@ -27,11 +27,17 @@ help:
 	@echo "    in $(KERNEL_DIR)."
 	@echo "kernel.dis:"
 	@echo "    Output disassembly of kernel binary to standard out."
+	@echo "Flags:"
+	@echo "		 TRACE=1: dumps execution trace to vanilla.log"
+
+ifeq ($(TRACE),1)
+	COSIM_DEBUG += +trace
+endif
 
 .PHONY: regression
 regression: kernel.riscv
 	$(COSIM_EXE) +ntb_random_seed_automatic \
-		+c_args="$(SCRIPT_DIR) $(SCRIPT)" \
+		+c_args="$(SCRIPT_DIR) $(SCRIPT)" +trace \
 		2>&1 | tee regression.log
 
 # Include BSG Manycore's builddefs
