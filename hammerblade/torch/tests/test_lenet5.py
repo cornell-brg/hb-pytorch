@@ -6,11 +6,13 @@ Test on a small CNN
 import numpy as np
 import torch
 import torch.nn as nn
+import random
 import pytest
 import hbutils
 import os
 
 torch.manual_seed(42)
+random.seed(42)
 
 # Network
 class LeNet5(nn.Module):

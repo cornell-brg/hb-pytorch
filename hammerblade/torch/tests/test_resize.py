@@ -5,8 +5,10 @@ Bandhav Veluri
 """
 
 import torch
+import random
 
 torch.manual_seed(42)
+random.seed(42)
 
 def test_resize_1():
     x1 = torch.rand(2, 3)

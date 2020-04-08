@@ -7,10 +7,12 @@ import os
 import copy
 import torch
 import torch.nn as nn
+import random
 import hbutils
 import pytest
 
 torch.manual_seed(42)
+random.seed(42)
 
 # -------------------------------------------------------------------------
 # Multilayer Preception for MNIST

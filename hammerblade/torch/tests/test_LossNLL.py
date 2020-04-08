@@ -5,8 +5,10 @@ Tests on torch.nn.NLLLoss
 
 import torch
 import torch.nn as nn
+import random
 
 torch.manual_seed(42)
+random.seed(42)
 
 def _test_torch_nn_NLLLoss(loss, input, target):
     m = nn.LogSoftmax(dim=1)

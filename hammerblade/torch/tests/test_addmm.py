@@ -3,8 +3,12 @@ Unit tests for torch.addmm kernel
 03/09/2020 Lin Cheng (lc873@cornell.edu)
 """
 import torch
+import random
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
+
+torch.manual_seed(42)
+random.seed(42)
 
 # helper function for testing
 def _test_torch_addmm(M, mat1, mat2, rel_tol=1e-05, abs_tol=1e-08):

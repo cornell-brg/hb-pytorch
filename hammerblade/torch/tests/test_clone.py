@@ -4,10 +4,12 @@ Tests on torch.clone (copy_hb_to_hb kernel)
 """
 
 import torch
+import random
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
 torch.manual_seed(42)
+random.seed(42)
 
 def _test_torch_clone(x):
     y = x.clone()
