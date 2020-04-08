@@ -5,7 +5,7 @@ Unit tests for torch.tensor.item
 
 import math
 import torch
-import torch
+import random
 import pytest
 
 torch.manual_seed(42)
