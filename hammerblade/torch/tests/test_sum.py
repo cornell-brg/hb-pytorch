@@ -6,7 +6,6 @@ Unit tests for torch.sum
 import torch
 import random
 from hypothesis import given, settings
-import hypothesis.strategies as st
 from .hypothesis_test_util import HypothesisUtil as hu
 
 torch.manual_seed(42)

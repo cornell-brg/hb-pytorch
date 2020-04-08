@@ -6,7 +6,6 @@ Unit tests for torch.mean
 import torch
 import random
 from hypothesis import given, settings
-import hypothesis.strategies as st
 from .hypothesis_test_util import HypothesisUtil as hu
 from math import isnan
 
