@@ -26,23 +26,13 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef BSG_MANYCORE_FEATURES_H
-#define BSG_MANYCORE_FEATURES_H
-// <features.h> sorts out many of these defines based on compile time flags (e.g. -std=c++11)
-#include <features.h>
-// check _BSG_SOURCE
-#ifndef _BSD_SOURCE
-#ifndef _DEFAULT_SOURCE
-#error "_BSG_SOURCE and _DEFAULT_SOURCE not defined: required for bsg_manycore_runtime"
-#endif
-#endif
 
-// check _XOPEN_SOURCE
-#ifndef _XOPEN_SOURCE
-#error "_XOPEN_SOURCE not defined: required for bsg_manycore_runtime"
-#else
-#if _XOPEN_SOURCE < 500
-#error "_XOPEN_SOURCE < 500: bsg_manycore_runtime requires _XOPEN_SOURCE >= 500"
-#endif
-#endif
+/*
+ * In the "real" manycore libraries, this header includes <features.h> and
+ * checks the _BSD_SOURCE and _XOPEN_SOURCE macros to enable certain Unix
+ * compatibility features. We do not need these checks for emulation, so this
+ * header is empty. The file still exists, however, so we can avoid modifying
+ * the manycore to remove the includes.
+ */
 
 #endif

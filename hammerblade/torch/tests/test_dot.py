@@ -4,25 +4,30 @@ Unit tests for torch.dot kernel
 """
 
 import torch
+import random
 import pytest
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
+torch.manual_seed(42)
+random.seed(42)
+
+def _test_torch_dot(x1, x2):
+    h1 = x1.hammerblade()
+    h2 = x2.hammerblade()
+    y_c = x1.dot(x2)
+    y_h = h1.dot(h2)
+    assert y_h.device == torch.device("hammerblade")
+    assert torch.allclose(y_h.cpu(), y_c)
+
 def test_torch_dot_1():
     x = torch.ones(10)
-    x_h = x.hammerblade()
-    x = x.dot(x)
-    x_h = x_h.dot(x_h)
-    assert x_h.device == torch.device("hammerblade")
-    assert torch.equal(x_h.cpu(), x)
+    _test_torch_dot(x, x)
 
 def test_torch_dot_2():
-    x = torch.randn(10)
-    x_h = x.hammerblade()
-    x = x.dot(x)
-    x_h = x_h.dot(x_h)
-    assert x_h.device == torch.device("hammerblade")
-    assert torch.equal(x_h.cpu(), x)
+    x1 = torch.randn(10)
+    x2 = torch.randn(10)
+    _test_torch_dot(x1, x2)
 
 def test_torch_dot_non_contiguous():
     x = torch.tensor([1.])
@@ -32,7 +37,7 @@ def test_torch_dot_non_contiguous():
     x = x.dot(x)
     x_h = x_h.dot(x_h)
     assert x_h.device == torch.device("hammerblade")
-    assert torch.equal(x_h.cpu(), x)
+    assert torch.allclose(x_h.cpu(), x)
 
 @pytest.mark.xfail
 def test_torch_dot_different_device_F():
@@ -49,7 +54,6 @@ def test_torch_dot_mismatching_shape_F():
 @settings(deadline=None)
 @given(inputs=hu.tensors1d(n=2))
 def test_torch_dot_hypothesis(inputs):
-    def dot(inputs):
-        x1, x2 = inputs
-        return x1.dot(x2)
-    hu.assert_hb_checks(dot, inputs)
+    x1 = torch.tensor(inputs[0])
+    x2 = torch.tensor(inputs[1])
+    _test_torch_dot(x1, x2)

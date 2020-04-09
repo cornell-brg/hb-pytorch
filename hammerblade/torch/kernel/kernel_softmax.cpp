@@ -1,6 +1,7 @@
 #include <kernel_common.hpp>
 #include <stdint.h>
 #include <cmath>
+#include <limits>
 
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
@@ -8,68 +9,82 @@
 extern "C" {
 
   //====================================================================
-  // LogSoftMax kernel
+  // LogSoftmax kernel
   // 03/20/2020 Bandhav Veluri
+  //
+  // Since softmax is defined over a vector, computation can be split into
+  // independent computations on individual vectors. And, though, output
+  // dimensions have to match those of input, computation doesn't need to
+  // explicitly index dimensions other than `dim`. All dimensions above and
+  // below can be iterated flat. For example:
+  //
+  // log_softmax(2x3x3x4x3 tensor, dim=2)
+  //
+  // can be simplified to,
+  //
+  // log_softmax(6x3x12 tensor, dim=2)
+  //
+  // Similarly, any dimension input tensor can be reduced into a 3-d tensor
+  // with an outer dimension, softmax dimension and inner dimension. In
+  // the example above, length of outer dimension = 6, length of softmax
+  // dimension = 3 and lenght of inner dimension = 12.
   //====================================================================
 
   __attribute__ ((noinline))  int tensorlib_log_softmax(
-          bsg_tensor_t* output,
-          bsg_tensor_t* input,
-          int64_t* dim_) {
-    float* in = (float*) ((intptr_t) input->data);
-    float* out = (float*) ((intptr_t) output->data);
-    uint32_t* in_strides = (uint32_t*) ((intptr_t) input->strides);
-    int64_t dim = *dim_;
-    uint32_t dimStride = in_strides[dim];
+          hb_tensor_t* out_,
+          hb_tensor_t* in_,
+          int32_t* dim_) {
+    float* in_data = (float*) ((intptr_t) in_->data);
+    float* out_data = (float*) ((intptr_t) out_->data);
+    uint32_t* in_strides = (uint32_t*) ((intptr_t) in_->strides);
+    uint32_t* in_sizes = (uint32_t*) ((intptr_t) in_->sizes);
+    int32_t dim = *dim_;
 
-    // A group here is the set of all dimensions lower than `dim`. So, number
-    // of elements per group, groupSize, is equal to the stride of the dimension
-    // `dim - 1`.
-    //
-    // Granularity is equal to the size of the group. log_softmax is typically
-    // called on the last dimension, in which case, granularity is pretty small
-    // achieving fine-grained parallelism.
-    uint32_t groupSize = (dim == 0) ? input->N : in_strides[dim-1];
-    uint32_t numGroups = input->N / groupSize;
-    uint32_t dimsPerGroup = groupSize / dimStride;
+    // Number of vectors to be softmaxed over.
+    uint32_t num_softmax_axes = in_->N / in_sizes[dim];
 
-    // Calculate groups per tile
-    uint32_t groups_per_tile = numGroups / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    uint32_t start_group = groups_per_tile * __bsg_id;
-    uint32_t end_group = start_group + groups_per_tile;
-    end_group = (end_group > numGroups)  ? numGroups : end_group;
+    // Outer dimension stride
+    uint32_t outer_stride = in_sizes[dim] * in_strides[dim];
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    for(int group = start_group; group < end_group; ++group) {
-      // Iterate over lower dimensions
-      for(uint32_t ld = 0; ld < dimStride; ++ld) {
-        uint32_t start_ind = group * groupSize + ld;
+    hb_parallel_for(num_softmax_axes, [&](size_t n) {
+        uint32_t outer_index = n / in_strides[dim];
+        uint32_t inner_index = n % in_strides[dim];
+        uint32_t offset = outer_index * outer_stride + inner_index;
 
-        /*****************************************************
-         * LogSoftMax numerically stable simplification
-         *
-         * log_softmax(xi) = log(exp(xi) / (sigma_i(exp(xi))))
-         *                 = xi - log(sigma_i(exp(xi)))
-         *****************************************************/
+        // ----------------------------------------------------
+        // LogSoftMax numerically stable simplification
+        //
+        // log_softmax(xi)
+        //    = log(exp(xi) / (sigma_i(exp(xi))))
+        //    = log(exp(xi - xmax) / (sigma_i(exp(xi - xmax))))
+        //    = (xi - xmax) - log(sigma_i(exp(xi - xmax)))
+        // ----------------------------------------------------
+
+        // Compute xmax
+        float xmax = std::numeric_limits<float>::lowest();
+        for(uint32_t i = 0; i < in_sizes[dim]; ++i) {
+          uint32_t index = offset + i * in_strides[dim];
+          if(xmax < in_data[index]) {
+            xmax = in_data[index];
+          }
+        }
 
         // Compute sigma_i(exp(xi))
         float exp_sum = 0.0f;
-        for(uint32_t i = start_ind;
-            i < (start_ind + dimsPerGroup * dimStride);
-            i += dimStride) {
-          exp_sum += exp(in[i]);
+        for(uint32_t i = 0; i < in_sizes[dim]; ++i) {
+          uint32_t index = offset + i * in_strides[dim];
+          exp_sum += exp(in_data[index] - xmax);
         }
 
         // Compute log_softmax
-        for(uint32_t i = start_ind;
-            i < (start_ind + dimsPerGroup * dimStride);
-            i += dimStride) {
-          out[i] = in[i] - log(exp_sum);
+        for(uint32_t i = 0; i < in_sizes[dim]; ++i) {
+          uint32_t index = offset + i * in_strides[dim];
+          out_data[index] = in_data[index] - xmax - log(exp_sum);
         }
-      }
-    }
+    });
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
@@ -77,6 +92,6 @@ extern "C" {
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_log_softmax,
-     bsg_tensor_t*, bsg_tensor_t*, int64_t*);
+     hb_tensor_t*, hb_tensor_t*, int32_t*);
 
 }

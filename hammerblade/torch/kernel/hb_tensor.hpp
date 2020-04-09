@@ -8,7 +8,7 @@
 
 #include <math.h>
 #include <initializer_list>
-#include <bsg_assert.hpp>
+#include <hb_assert.hpp>
 
 // =========================================================
 // Device Tensor structs
@@ -32,7 +32,7 @@ typedef struct {
   uint32_t sizes;
   uint32_t data;
 #endif
-} bsg_tensor_t;
+} hb_tensor_t;
 
 typedef struct {
   uint32_t N;
@@ -41,7 +41,7 @@ typedef struct {
 #else
   uint32_t data;
 #endif
-} bsg_vector_t;
+} hb_vector_t;
 
 // =========================================================
 // Device Tensor classes
@@ -53,7 +53,7 @@ typedef struct {
 // =========================================================
 
 template <typename DT>
-class BSGTensor {
+class HBTensor {
   private:
     uint32_t N;
     uint32_t dims;
@@ -62,19 +62,33 @@ class BSGTensor {
     DT* data;
 
   public:
-    BSGTensor(bsg_tensor_t* t) :
+    HBTensor(hb_tensor_t* t) :
       N(t->N),
       dims(t->dims),
       strides((uint32_t*) ((intptr_t) t->strides)),
       sizes((uint32_t*) ((intptr_t) t->sizes)),
       data((DT*) ((intptr_t) t->data)) {}
 
+    char* data_ptr() {
+      return (char*)data;
+    }
+
+    uint32_t* get_strides() {
+      return strides;
+    }
+
+    uint32_t* get_sizes() {
+      return sizes;
+    }
+
     int numel() {
       return N;
     }
 
     uint32_t dim(uint32_t d) {
-      bsg_assert(d < dims);
+      hb_assert_msg(d < dims,
+                     "error: dimesnion must be less than %d\n",
+                     dims);
       return sizes[d];
     }
 
@@ -88,9 +102,11 @@ class BSGTensor {
 
       // special case where we have a 0-dim tensor
       if(dims == 0) {
-        bsg_assert(iarray.size() == 1);
+        hb_assert_msg(iarray.size() == 1,
+                       "error: expected only one argument with 0-dim tensor\n");
         for(auto index : iarray) {
-          bsg_assert(index == 0);
+          hb_assert_msg(index == 0,
+                         "error: index must be 0 0-dim tensor\n");
         }
         return data[0];
       }
@@ -104,7 +120,9 @@ class BSGTensor {
         }
       }
 
-      bsg_assert(iarray.size() == dims);
+      hb_assert_msg(iarray.size() == dims,
+                     "error: expected dims=%d arguments but got %d\n",
+                     dims, iarray.size());
       uint32_t offset = 0;
       uint32_t s = 0;
       for(auto index : iarray) {
@@ -112,7 +130,7 @@ class BSGTensor {
         s++;
       }
 
-      bsg_assert(offset < N);
+      hb_assert_msg(offset < N, "error: N=%d but accessed %d\n", N, offset);
 
       return data[offset];
     }
@@ -125,7 +143,7 @@ class BSGVector {
     T* data;
 
   public:
-    BSGVector(bsg_vector_t* v) :
+    BSGVector(hb_vector_t* v) :
       N(v->N), data((T*) ((intptr_t) v->data)) {}
 
     uint32_t numel() {

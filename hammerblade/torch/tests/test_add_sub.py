@@ -5,183 +5,137 @@ Lin Cheng
 """
 
 import torch
+import random
 from math import isnan, isinf
 from hypothesis import assume, given, settings
 import hypothesis.strategies as st
 from .hypothesis_test_util import HypothesisUtil as hu
 
+torch.manual_seed(42)
+random.seed(42)
+
 # test of adding two tensors
 
-def test_elementwise_add_1():
-    x1 = torch.ones(1, 10)
-    x2 = torch.ones(1, 10)
-    y = x1 + x2
-    x1_h = x1.hammerblade()
-    x2_h = x2.hammerblade()
-    y_h = x1_h + x2_h
-    y_c = y_h.cpu()
+def _test_add(x1, x2):
+    h1 = x1.hammerblade()
+    h2 = x2.hammerblade()
+    assert h1 is not x1
+    assert h2 is not x2
+    y_c = x1 + x2
+    y_h = h1 + h2
     assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_c, y)
+    assert torch.allclose(y_c, y_h.cpu())
+    # inplace
+    x1.add_(x2)
+    h1.add_(h2)
+    assert h1.device == torch.device("hammerblade")
+    assert torch.allclose(x1, h1.cpu())
 
-def test_elementwise_add_2():
+def test_add_1():
+    x = torch.ones(1, 10)
+    _test_add(x, x)
+
+def test_add_2():
     x1 = torch.ones(4, 5)
     x2 = torch.ones(4, 5)
-    y = x1 + x2
-    x1_h = x1.hammerblade()
-    x2_h = x2.hammerblade()
-    y_h = x1_h + x2_h
-    y_c = y_h.cpu()
-    assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_c, y)
+    _test_add(x1, x2)
 
-def test_elementwise_add_3():
+def test_add_3():
     x1 = torch.rand(1, 128)
     x2 = torch.rand(1, 128)
-    y = x1 + x2
-    x1_h = x1.hammerblade()
-    x2_h = x2.hammerblade()
-    y_h = x1_h + x2_h
-    y_c = y_h.cpu()
-    assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_c, y)
+    _test_add(x1, x2)
 
-def test_elementwise_add_4():
+def test_add_4():
     x1 = torch.rand(16, 32)
     x2 = torch.rand(16, 32)
-    y = x1 + x2
-    x1_h = x1.hammerblade()
-    x2_h = x2.hammerblade()
-    y_h = x1_h + x2_h
-    y_c = y_h.cpu()
-    assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_c, y)
+    _test_add(x1, x2)
 
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
-def test_elementwise_add_hypothesis(inputs):
-
-    def elementwise_add(inputs):
-        assert len(inputs) == 2
-        return inputs[0] + inputs[1]
-    hu.assert_hb_checks(elementwise_add, inputs)
-
-def test_elementwise_in_place_add():
-    x1 = torch.rand(16, 32)
-    x2 = torch.rand(16, 32)
-    x1_h = x1.hammerblade()
-    x2_h = x2.hammerblade()
-    x1.add_(x2)
-    x1_h.add_(x2_h)
-    assert x1_h.device == torch.device("hammerblade")
-    x1_h_c = x1_h.cpu()
-    assert torch.equal(x1_h_c, x1)
-
-@settings(deadline=None)
-@given(inputs=hu.tensors(n=2))
-def test_elementwise_in_place_add_hypothesis(inputs):
-
-    def elementwise_add(inputs):
-        x1, x2 = inputs
-        x1.add_(x2)
-        return x1
-    hu.assert_hb_checks(elementwise_add, inputs)
+def test_add_hypothesis(inputs):
+    x1 = torch.tensor(inputs[0])
+    x2 = torch.tensor(inputs[1])
+    _test_add(x1, x2)
 
 def test_add_with_scalar():
-    x = torch.rand(16)
-    x_h = x.hammerblade()
-    y = x + 5
-    y_h = x_h + 5
+    x = torch.ones(16)
+    h = x.hammerblade()
+    y_c = x + 5
+    y_h = h + 5
     assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_h.cpu(), y)
+    assert torch.allclose(y_h.cpu(), y_c)
 
 @settings(deadline=None)
 @given(tensor=hu.tensor(), scalar=st.floats(width=32))
 def test_add_with_scalar_hypothesis(tensor, scalar):
     assume(not isnan(scalar))
     assume(not isinf(scalar))
+    assume(abs(scalar) > 1e-05)
+    x = torch.tensor(tensor)
+    h = x.hammerblade()
+    y_c = x + scalar
+    y_h = h + scalar
+    assert y_h.device == torch.device("hammerblade")
+    assert torch.allclose(y_h.cpu(), y_c)
 
-    def add_scalar(inputs):
-        tensor, scalar = inputs
-        return tensor + scalar
-    hu.assert_hb_checks(add_scalar, [tensor, scalar])
+def _test_sub(x1, x2):
+    h1 = x1.hammerblade()
+    h2 = x2.hammerblade()
+    assert h1 is not x1
+    assert h2 is not x2
+    y_c = x1 - x2
+    y_h = h1 - h2
+    assert y_h.device == torch.device("hammerblade")
+    assert torch.allclose(y_c, y_h.cpu())
+    # inplace
+    x1.sub_(x2)
+    h1.sub_(h2)
+    assert h1.device == torch.device("hammerblade")
+    assert torch.allclose(x1, h1.cpu())
 
-def test_elementwise_sub_1():
+def test_sub_1():
     x = torch.ones(1, 10)
-    y = torch.ones(1, 10)
-    z = x - y
-    z_h = x.hammerblade() - y.hammerblade()
-    assert z_h.device == torch.device("hammerblade")
-    assert torch.equal(z_h.cpu(), z)
+    _test_sub(x, x)
 
-def test_elementwise_sub_2():
-    x = torch.ones(4, 5)
-    y = torch.ones(4, 5)
-    z = x - y
-    z_h = x.hammerblade() - y.hammerblade()
-    assert z_h.device == torch.device("hammerblade")
-    assert torch.equal(z_h.cpu(), z)
+def test_sub_2():
+    x1 = torch.ones(4, 5)
+    x2 = torch.ones(4, 5)
+    _test_sub(x1, x2)
 
-def test_elementwise_sub_3():
-    x = torch.rand(1, 128)
-    y = torch.rand(1, 128)
-    z = x - y
-    z_h = x.hammerblade() - y.hammerblade()
-    assert z_h.device == torch.device("hammerblade")
-    assert torch.equal(z_h.cpu(), z)
+def test_sub_3():
+    x1 = torch.rand(1, 128)
+    x2 = torch.rand(1, 128)
+    _test_sub(x1, x2)
 
-def test_elementwise_sub_4():
-    x = torch.rand(16, 32)
-    y = torch.rand(16, 32)
-    z = x - y
-    z_h = x.hammerblade() - y.hammerblade()
-    assert z_h.device == torch.device("hammerblade")
-    assert torch.equal(z_h.cpu(), z)
-
-@settings(deadline=None)
-@given(inputs=hu.tensors(n=2))
-def test_elementwise_sub_hypothesis(inputs):
-
-    def elementwise_sub(inputs):
-        assert len(inputs) == 2
-        return inputs[0] - inputs[1]
-    hu.assert_hb_checks(elementwise_sub, inputs)
-
-def test_elementwise_in_place_sub():
+def test_sub_4():
     x1 = torch.rand(16, 32)
     x2 = torch.rand(16, 32)
-    x1_h = x1.hammerblade()
-    x2_h = x2.hammerblade()
-    x1.sub_(x2)
-    x1_h.sub_(x2_h)
-    assert x1_h.device == torch.device("hammerblade")
-    x1_h_c = x1_h.cpu()
-    assert torch.equal(x1_h_c, x1)
+    _test_sub(x1, x2)
 
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
-def test_elementwise_in_place_sub_hypothesis(inputs):
-
-    def elementwise_sub(inputs):
-        x1, x2 = inputs
-        x1.sub_(x2)
-        return x1
-    hu.assert_hb_checks(elementwise_sub, inputs)
+def test_sub_hypothesis(inputs):
+    x1 = torch.tensor(inputs[0])
+    x2 = torch.tensor(inputs[1])
+    _test_sub(x1, x2)
 
 def test_sub_with_scalar():
-    x = torch.rand(16)
-    x_h = x.hammerblade()
-    y = x - 5
-    y_h = x_h - 5
+    x = torch.ones(16)
+    h = x.hammerblade()
+    y_c = x - 5
+    y_h = h - 5
     assert y_h.device == torch.device("hammerblade")
-    assert torch.equal(y_h.cpu(), y)
+    assert torch.allclose(y_h.cpu(), y_c)
 
 @settings(deadline=None)
 @given(tensor=hu.tensor(), scalar=st.floats(width=32))
 def test_sub_with_scalar_hypothesis(tensor, scalar):
     assume(not isnan(scalar))
     assume(not isinf(scalar))
-
-    def sub_scalar(inputs):
-        tensor, scalar = inputs
-        return tensor - scalar
-    hu.assert_hb_checks(sub_scalar, [tensor, scalar])
+    assume(abs(scalar) > 1e-05)
+    x = torch.tensor(tensor)
+    h = x.hammerblade()
+    y_c = x - scalar
+    y_h = h - scalar
+    assert y_h.device == torch.device("hammerblade")
+    assert torch.allclose(y_h.cpu(), y_c)

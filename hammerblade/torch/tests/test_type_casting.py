@@ -4,7 +4,11 @@ Tests on torch.to (copy_hb_to_hb kernel)
 """
 
 import torch
+import random
 import pytest
+
+torch.manual_seed(42)
+random.seed(42)
 
 def test_torch_to_long_to_int_1():
     x = torch.ones(10, dtype=torch.long)
@@ -36,7 +40,7 @@ def test_torch_to_long_to_int_3():
     assert int_h.device == torch.device("hammerblade")
     assert torch.equal(int_x, int_h.cpu())
 
-@pytest.mark.skip(reason="known bug")
+@pytest.mark.skip(reason="known bug #24")
 def test_torch_to_int_to_long_1():
     x = torch.ones(10, dtype=torch.int)
     assert x.type() == 'torch.IntTensor'

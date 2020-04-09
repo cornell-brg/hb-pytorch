@@ -4,27 +4,47 @@ Unit tests for conv2d operator
 """
 import torch
 import torch.nn.functional as F
+import random
 import os
 import pytest
+import hbutils
+
+torch.manual_seed(42)
+random.seed(42)
 
 def _test_conv2d(inputs, kernel, padding=1, stride=1, bias=None):
-    inputs_hb = inputs.hammerblade()
-    kernel_hb = kernel.hammerblade()
-    bias_hb = None if bias is None else bias.hammerblade()
+    inputs_hb = hbutils.init_hb_tensor(inputs)
+    kernel_hb = hbutils.init_hb_tensor(kernel)
+    bias_hb = None if bias is None else hbutils.init_hb_tensor(bias)
 
     conv_result_hb = F.conv2d(inputs_hb, kernel_hb,
                               padding=padding, stride=stride, bias=bias_hb)
     conv_result = F.conv2d(inputs, kernel,
                            padding=padding, stride=stride, bias=bias)
 
+    # test forward
     assert torch.allclose(conv_result, conv_result_hb.cpu())
+
+    # test backward
+    if inputs.requires_grad:
+        grad = torch.rand(conv_result.shape)
+        grad_hb = grad.hammerblade()
+
+        conv_result.backward(grad)
+        conv_result_hb.backward(grad_hb)
+
+        assert torch.allclose(inputs.grad, inputs_hb.grad.cpu())
+        assert torch.allclose(kernel.grad, kernel_hb.grad.cpu())
+
+        if bias is not None:
+            assert torch.allclose(bias.grad, bias_hb.grad.cpu())
 
 def test_conv2d_1():
     """
     Single batch, single channel
     """
-    kernel = torch.rand(1, 1, 3, 3)
-    inputs = torch.rand(1, 1, 5, 5)
+    kernel = torch.rand(1, 1, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 1, 5, 5, requires_grad=True)
 
     _test_conv2d(inputs, kernel)
 
@@ -32,8 +52,8 @@ def test_conv2d_2():
     """
     Single batch, multi-channel
     """
-    kernel = torch.rand(1, 2, 3, 3)
-    inputs = torch.rand(1, 2, 5, 5)
+    kernel = torch.rand(1, 2, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 2, 5, 5, requires_grad=True)
 
     _test_conv2d(inputs, kernel)
 
@@ -41,8 +61,8 @@ def test_conv2d_3():
     """
     Multi-batch, single channel
     """
-    kernel = torch.rand(2, 1, 3, 3)
-    inputs = torch.rand(1, 1, 5, 5)
+    kernel = torch.rand(2, 1, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 1, 5, 5, requires_grad=True)
 
     _test_conv2d(inputs, kernel)
 
@@ -50,8 +70,8 @@ def test_conv2d_4():
     """
     Multi-batch, multi-channel
     """
-    kernel = torch.rand(3, 3, 3, 3)
-    inputs = torch.rand(2, 3, 5, 5)
+    kernel = torch.rand(3, 3, 3, 3, requires_grad=True)
+    inputs = torch.rand(2, 3, 5, 5, requires_grad=True)
     padding = (1, 2)
     stride = (1, 2)
 
@@ -61,8 +81,8 @@ def test_conv2d_5():
     """
     Multiple pads
     """
-    kernel = torch.rand(1, 3, 3, 3)
-    inputs = torch.rand(1, 3, 5, 5)
+    kernel = torch.rand(1, 3, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 3, 5, 5, requires_grad=True)
     padding = 2
     stride = 1
 
@@ -72,8 +92,8 @@ def test_conv2d_6():
     """
     Multiple pads and strides
     """
-    kernel = torch.rand(2, 3, 3, 3)
-    inputs = torch.rand(2, 3, 5, 5)
+    kernel = torch.rand(2, 3, 3, 3, requires_grad=True)
+    inputs = torch.rand(2, 3, 5, 5, requires_grad=True)
     padding = 2
     stride = 2
 
@@ -83,8 +103,8 @@ def test_conv2d_7():
     """
     Kernel size equal to image size
     """
-    kernel = torch.rand(2, 3, 5, 5)
-    inputs = torch.rand(2, 3, 5, 5)
+    kernel = torch.rand(2, 3, 5, 5, requires_grad=True)
+    inputs = torch.rand(2, 3, 5, 5, requires_grad=True)
     padding = 1
     stride = 1
 
@@ -94,8 +114,8 @@ def test_conv2d_8():
     """
     Large padding
     """
-    kernel = torch.rand(2, 3, 3, 3)
-    inputs = torch.rand(2, 3, 5, 5)
+    kernel = torch.rand(2, 3, 3, 3, requires_grad=True)
+    inputs = torch.rand(2, 3, 5, 5, requires_grad=True)
     padding = 3
     stride = 3
 
@@ -105,9 +125,9 @@ def test_conv2d_bias_1():
     """
     Conv2d bias single output channel
     """
-    kernel = torch.rand(1, 1, 3, 3)
-    inputs = torch.rand(1, 1, 5, 5)
-    bias = torch.rand(1)
+    kernel = torch.rand(1, 1, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 1, 5, 5, requires_grad=True)
+    bias = torch.rand(1, requires_grad=True)
 
     _test_conv2d(inputs, kernel, bias=bias)
 
@@ -115,9 +135,9 @@ def test_conv2d_bias_2():
     """
     Conv2d bias multi-output channel
     """
-    kernel = torch.rand(3, 1, 3, 3)
-    inputs = torch.rand(1, 1, 5, 5)
-    bias = torch.rand(3)
+    kernel = torch.rand(3, 1, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 1, 5, 5, requires_grad=True)
+    bias = torch.rand(3, requires_grad=True)
 
     _test_conv2d(inputs, kernel, bias=bias)
 
@@ -125,9 +145,9 @@ def test_conv2d_bias_3():
     """
     Conv2d bias multi-input multi-output channel
     """
-    kernel = torch.rand(3, 2, 3, 3)
-    inputs = torch.rand(1, 2, 5, 5)
-    bias = torch.rand(3)
+    kernel = torch.rand(3, 2, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 2, 5, 5, requires_grad=True)
+    bias = torch.rand(3, requires_grad=True)
 
     _test_conv2d(inputs, kernel, bias=bias)
 
@@ -135,11 +155,11 @@ def test_conv2d_bias_4():
     """
     Conv2d bias with striding and padding
     """
-    kernel = torch.rand(3, 2, 3, 3)
-    inputs = torch.rand(1, 2, 5, 5)
+    kernel = torch.rand(3, 2, 3, 3, requires_grad=True)
+    inputs = torch.rand(1, 2, 5, 5, requires_grad=True)
     padding = (2, 3)
     stride = (1, 2)
-    bias = torch.rand(3)
+    bias = torch.rand(3, requires_grad=True)
 
     _test_conv2d(inputs, kernel, padding, stride, bias)
 
@@ -196,3 +216,6 @@ def test_conv2d_width_height_kernel_pad_stride():
                         kernel = torch.rand(output_channels, input_channels,
                                             kernel_size, kernel_size)
                         _test_conv2d(inputs, kernel)
+
+if __name__ == "__main__":
+    test_conv2d_2()

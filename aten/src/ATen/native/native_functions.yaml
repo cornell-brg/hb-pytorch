@@ -1594,6 +1594,7 @@
   dispatch:
     CPU: log_softmax_backward_cpu
     CUDA: log_softmax_backward_cuda
+    HammerBlade: log_softmax_backward_hb
 
 - func: logsumexp(Tensor self, int[1] dim, bool keepdim=False) -> Tensor
   supports_named_tensor: True
@@ -1816,6 +1817,23 @@
 - func: hb_convolution(Tensor self, Tensor weight, Tensor? bias, int[] padding, int[] stride, int[] dilation, int groups) -> Tensor
   dispatch:
     HammerBlade: hb_convolution
+
+- func: hb_convolution_backward_input(int[] self_size, Tensor grad_output, Tensor weight, int[] padding, int[] stride, int[] dilation, int groups) -> Tensor
+  dispatch:
+    HammerBlade: hb_convolution_backward_input
+
+- func: hb_convolution_backward(Tensor self, Tensor grad_output, Tensor weight, int[] padding, int[] stride, int[] dilation, int groups, bool[3] output_mask) -> (Tensor, Tensor, Tensor)
+  dispatch:
+    HammerBlade: hb_convolution_backward
+
+- func: hb_convolution_backward_bias(Tensor grad_output) -> Tensor
+  use_c10_dispatcher: full
+  dispatch:
+    HammerBlade: hb_convolution_backward_bias
+
+- func: hb_convolution_backward_weight(int[] weight_size, Tensor grad_output, Tensor self, int[] padding, int[] stride, int[] dilation, int groups) -> Tensor
+  dispatch:
+    HammerBlade: hb_convolution_backward_weight
 
 - func: miopen_rnn(Tensor input, Tensor[] weight, int weight_stride0, Tensor hx, Tensor? cx, int mode, int hidden_size, int num_layers, bool batch_first, float dropout, bool train, bool bidirectional, int[] batch_sizes, Tensor? dropout_state) -> (Tensor, Tensor, Tensor, Tensor, Tensor)
   dispatch:
@@ -3627,6 +3645,7 @@
   dispatch:
     CPU: _local_scalar_dense_cpu
     CUDA: _local_scalar_dense_cuda
+    HammerBlade: _local_scalar_dense_hb
   variants: function
   supports_named_tensor: True
 
@@ -5930,6 +5949,7 @@
   dispatch:
     CPU: max_pool2d_with_indices_backward_cpu
     CUDA: max_pool2d_with_indices_backward_cuda
+    HammerBlade: max_pool2d_with_indices_backward_hb
 
 # Return: (Tensor output, Tensor indices)
 - func: max_pool3d_with_indices.out(Tensor self, int[3] kernel_size, int[3] stride=[], int[3] padding=0, int[3] dilation=1, bool ceil_mode=False, *, Tensor(a!) out, Tensor(b!) indices) -> (Tensor(a!), Tensor(b!))

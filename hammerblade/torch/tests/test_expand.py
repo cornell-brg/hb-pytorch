@@ -2,7 +2,12 @@
 Tests on torch.contiguous
 03/18/2020 Lin Cheng (lc873@cornell.edu)
 """
+
 import torch
+import random
+
+torch.manual_seed(42)
+random.seed(42)
 
 def test_torch_expand_1():
     x = torch.tensor([[1.], [2.], [3.]])
