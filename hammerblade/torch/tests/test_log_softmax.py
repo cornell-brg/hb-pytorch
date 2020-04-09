@@ -6,7 +6,6 @@ Unit tests for log_softmax operator
 import torch
 import torch.nn.functional as F
 import random
-import pytest
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
