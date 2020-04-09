@@ -15,8 +15,6 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    // TODO: Implement Sigmoid
-
     brg_elementwise_for(t0_p, t1_p, 
 	[&](float a){
 	a = expf(-a);
