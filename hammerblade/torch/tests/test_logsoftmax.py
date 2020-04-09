@@ -52,13 +52,11 @@ def test_log_softmax_6():
     for dim in range(4):
         _test_log_softmax(x, dim)
 
-@pytest.mark.skip(reason="known failure #61")
 def test_log_softmax_large_1d():
     x = torch.tensor([88.72284])
     dim = 0
     _test_log_softmax(x, dim)
 
-@pytest.mark.skip(reason="known failure #61")
 @settings(deadline=None)
 @given(tensor=hu.tensor())
 def test_log_softmax_hypothesis(tensor):
