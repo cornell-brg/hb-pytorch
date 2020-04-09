@@ -14,11 +14,11 @@ extern "C" {
   //
   // Since softmax is defined over a vector, computation can be split into
   // independent computations on individual vectors. And, though, output
-  // dimensions have to match those of input, computation doesn't need to 
-  // explicitly index dimensions other than `dim`. All dimensions above and 
+  // dimensions have to match those of input, computation doesn't need to
+  // explicitly index dimensions other than `dim`. All dimensions above and
   // below can be iterated flat. For example:
   //
-  // log_softmax(2x3x3x4x3 tensor, dim=2) 
+  // log_softmax(2x3x3x4x3 tensor, dim=2)
   //
   // can be simplified to,
   //
@@ -56,7 +56,7 @@ extern "C" {
         // ----------------------------------------------------
         // LogSoftMax numerically stable simplification
         //
-        // log_softmax(xi) 
+        // log_softmax(xi)
         //    = log(exp(xi) / (sigma_i(exp(xi))))
         //    = log(exp(xi - xmax) / (sigma_i(exp(xi - xmax))))
         //    = (xi - xmax) - log(sigma_i(exp(xi - xmax)))
