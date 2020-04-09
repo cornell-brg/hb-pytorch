@@ -9,7 +9,7 @@
 extern "C" {
 
   //====================================================================
-  // LogSoftMax kernel
+  // LogSoftmax kernel
   // 03/20/2020 Bandhav Veluri
   //
   // Since softmax is defined over a vector, computation can be split into
@@ -52,6 +52,7 @@ extern "C" {
     hb_parallel_for(num_softmax_axes, [&](size_t n) {
         uint32_t outer_index = n / in_strides[dim];
         uint32_t inner_index = n % in_strides[dim];
+        uint32_t offset = outer_index * outer_stride + inner_index;
 
         // ----------------------------------------------------
         // LogSoftMax numerically stable simplification
@@ -62,12 +63,10 @@ extern "C" {
         //    = (xi - xmax) - log(sigma_i(exp(xi - xmax)))
         // ----------------------------------------------------
 
-        // Calculate xmax
+        // Compute xmax
         float xmax = std::numeric_limits<float>::lowest();
         for(uint32_t i = 0; i < in_sizes[dim]; ++i) {
-          uint32_t index = outer_index * outer_stride
-                             + i * in_strides[dim]
-                             + inner_index;
+          uint32_t index = offset + i * in_strides[dim];
           if(xmax < in_data[index]) {
             xmax = in_data[index];
           }
@@ -76,17 +75,13 @@ extern "C" {
         // Compute sigma_i(exp(xi))
         float exp_sum = 0.0f;
         for(uint32_t i = 0; i < in_sizes[dim]; ++i) {
-          uint32_t index = outer_index * outer_stride
-                             + i * in_strides[dim]
-                             + inner_index;
+          uint32_t index = offset + i * in_strides[dim];
           exp_sum += exp(in_data[index] - xmax);
         }
 
         // Compute log_softmax
         for(uint32_t i = 0; i < in_sizes[dim]; ++i) {
-          uint32_t index = outer_index * outer_stride
-                             + i * in_strides[dim]
-                             + inner_index;
+          uint32_t index = offset + i * in_strides[dim];
           out_data[index] = in_data[index] - xmax - log(exp_sum);
         }
     });
