@@ -12,20 +12,23 @@ extern "C" {
           hb_tensor_t* t0_p,
           hb_tensor_t* t1_p) {
 
-    // Start profiling
-    bsg_cuda_print_stat_kernel_start();
+  auto inp = HBTensor<float>(t0_p);
+  auto res = HBTensor<float>(t1_p);
 
-    brg_elementwise_for(t0_p, t1_p, 
-	[&](float a){
-	a = expf(-a);
-	a = 1 + a;
-	a = 1/a;
-	return a;
-    });	
+    // Start profiling
+  bsg_cuda_print_stat_kernel_start();
+
+  hb_parallel_foreach(inp, res, 
+    [&](float a){
+    a = expf(-a);
+    a = 1 + a;
+    a = 1/a;
+    return a;
+  });	
         
-    //   End profiling
-    bsg_cuda_print_stat_kernel_end();
-    return 0;
+  //   End profiling
+  bsg_cuda_print_stat_kernel_end();
+  return 0;
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_sigmoid, hb_tensor_t*, hb_tensor_t*)
