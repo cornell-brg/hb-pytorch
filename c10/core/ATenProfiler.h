@@ -15,7 +15,12 @@ namespace c10 {
 class ATenProfiler {
 public:
   ATenProfiler() = default;
-  ~ATenProfiler() { print(); }
+  ~ATenProfiler() {
+#ifdef PROFILE_ATEN
+    print();
+#else
+#endif
+  }
 
   void add_log(const std::vector<std::string>& stack, std::chrono::microseconds time);
 
