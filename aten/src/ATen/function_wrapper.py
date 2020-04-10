@@ -47,7 +47,7 @@ ${return_type} ${api_name}(${type_method_formals});
 """)
 LEGACY_TH_DEFINITION_BROADCAST = CodeTemplate("""\
 ${return_type} ${api_name}(${type_method_formals}) {
-c10::ATenProfilerLog();
+c10::LogATenKernel();
 #ifdef BUILD_NAMEDTENSOR
     ${named_guard_declaration}
 #endif
@@ -63,7 +63,7 @@ ${return_type} ${method_prefix_derived}${api_name}(${type_method_formals});
 """)
 LEGACY_TH_DEFINITION = CodeTemplate("""\
 ${return_type} ${method_prefix_derived}${api_name}(${type_method_formals}) {
-c10::ATenProfilerLog();
+c10::LogATenKernel();
 #ifdef BUILD_NAMEDTENSOR
     ${named_guard_declaration}
 #endif
@@ -96,7 +96,7 @@ ${return_type} ${api_name}(${type_method_formals});
 
 NATIVE_DISPATCH_DEFINITION_DEFAULT = CodeTemplate("""\
 ${return_type} ${api_name}(${type_method_formals}) {
-c10::ATenProfilerLog();
+c10::LogATenKernel();
 #ifdef BUILD_NAMEDTENSOR
     ${named_guard_declaration}
 #endif
@@ -107,7 +107,7 @@ c10::ATenProfilerLog();
 
 NATIVE_DISPATCH_DEFINITION_BACKEND = CodeTemplate("""\
 ${return_type} ${api_name}(${type_method_formals}) {
-c10::ATenProfilerLog();
+c10::LogATenKernel();
 #ifdef BUILD_NAMEDTENSOR
     ${named_guard_declaration}
 #endif
