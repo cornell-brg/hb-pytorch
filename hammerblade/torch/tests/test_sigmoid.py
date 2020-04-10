@@ -41,6 +41,6 @@ def _test_torch_sigmoid_check(tensor_self):
     assert torch.allclose(result_hb.cpu(), torch.sigmoid(torch.tensor(tensor_self)))
 
 @settings(deadline=None)
-@given(tensor = hu.tensor())
+@given(tensor=hu.tensor())
 def test_elementwise_torch_sigmoid_hypothesis(tensor):
     _test_torch_sigmoid_check(tensor)
