@@ -15,19 +15,19 @@ namespace c10 {
 class ATenProfiler {
 public:
   ATenProfiler() = default;
-  ~ATenProfiler() {
-#ifdef PROFILE_ATEN
-    print();
-#else
-#endif
-  }
-
+  ~ATenProfiler() = default;
   void add_log(const std::vector<std::string>& stack, std::chrono::microseconds time);
+  void profiling_start();
+  void profiling_end();
 
 private:
-  void print();
   std::map<std::vector<std::string>, std::chrono::microseconds> dict;
+  std::chrono::time_point<std::chrono::high_resolution_clock> start;
+  void print();
 };
+
+C10_API void aten_profiler_start();
+C10_API void aten_profiler_end();
 
 struct C10_API ATenProfilerLog {
 public:

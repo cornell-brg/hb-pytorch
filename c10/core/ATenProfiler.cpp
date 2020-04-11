@@ -13,11 +13,7 @@ void ATenProfiler::print()
   using std::chrono::microseconds;
   using namespace std;
 
-  cout << endl << endl;
-  cout << "==========================================================================" << endl;
-  cout << " ATen profile results" << endl;
-  cout << "==========================================================================" << endl;
-  cout << setw(340) << std::left << "Fucntion" << "   " << "Time" << endl;
+  cerr << setw(240) << std::left << "Fucntion" << "   " << "Time" << endl;
   double total_time = 0.0;
   for (const auto& p : dict) {
     double ms = p.second.count() / 1000.0;
@@ -38,9 +34,9 @@ void ATenProfiler::print()
       name += "|- ";
     }
     name += stack.back();
-    cout << setw(340) << std::left << name << "   " << ms / 1000.0 << " s" << endl;
+    cerr << setw(240) << std::left << name << "   " << ms / 1000.0 << " s" << endl;
   }
-  cout << setw(340) << std::left << "total:" << "   " << total_time / 1000.0 << " s" << endl;
+  cerr << setw(240) << std::left << "Aggregated total:" << "   " << total_time / 1000.0 << " s" << endl;
 }
 
 void ATenProfiler::add_log(const std::vector<std::string>& stack, std::chrono::microseconds time) {
@@ -50,6 +46,53 @@ void ATenProfiler::add_log(const std::vector<std::string>& stack, std::chrono::m
     dict[stack] = time;
   }
 }
+
+void ATenProfiler::profiling_start() {
+#ifdef PROFILE_ATEN
+  std::cerr << "==========================================================================" << std::endl;
+  std::cerr << " ATen profiler collecting ..." << std::endl;
+  std::cerr << "==========================================================================" << std::endl;
+  // clear the dict when entering ROI
+  g_curr_call_stack.clear();
+  dict.clear();
+  // mark current time
+  start = std::chrono::high_resolution_clock::now();
+#else
+  std::cerr << "Warning: ATen profiler is invoked "
+            << "but PyTorch is not built with profiling capability"
+            << std::endl;
+#endif
+  return;
+}
+
+void ATenProfiler::profiling_end() {
+#ifdef PROFILE_ATEN
+  auto delta = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
+  std::cerr << std::endl << std::endl;
+  std::cerr << "==========================================================================" << std::endl;
+  std::cerr << " ATen profile results" << std::endl;
+  std::cerr << "==========================================================================" << std::endl;
+  std::cerr << std::setw(240) << std::left << " Total time in ROI:" << "   "
+            << delta.count() / 1000000.0 << " s" << std::endl;
+  std::cerr << "==========================================================================" << std::endl;
+  print();
+#endif
+  return;
+}
+
+
+
+void aten_profiler_start() {
+  g_aten_profiler.profiling_start();
+  return;
+}
+
+void aten_profiler_end() {
+  g_aten_profiler.profiling_end();
+  return;
+}
+
+
 
 ATenProfilerLog::ATenProfilerLog(const std::string& func_name)
   : start(std::chrono::high_resolution_clock::now())
