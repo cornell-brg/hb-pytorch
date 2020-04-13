@@ -21,18 +21,34 @@ This work aims to port PyTorch to HammerBlade.
     `python setup.py install`
 
 ### How to build PyTorch with Emulation Layer
-    `git clone -b hb-device git@github.com:cornell-brg/hb-pytorch.git`
- - Create python virtual environment
-    `python3.6 -m venv ./venv_pytorch`
-    `python3.6 -m venv ./venv_pytorch`
- - Install dependencies
-    `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja`
- - Init pytorch third party dependencies
-    `git submodule update --init --recursive`
- - Setup building environment variables.
-    `cd hb-pytorch && source setup_emul_build_env.sh`
- - Build pytorch. This step can take up to 15 minutes
-    `python setup.py develop`
+
+- Clone this repository:
+
+      git clone git@github.com:cornell-brg/hb-pytorch.git
+
+- Create a [Python virtual environment][venv]:
+
+      python3 -m venv ./venv_pytorch
+      source ./venv_pytorch/bin/activate
+
+- Install some dependencies:
+
+      pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis
+
+- Init PyTorch third party dependencies:
+
+      git submodule update --init --recursive
+
+- Setup building environment variables:
+
+      source setup_emul_build_env.sh
+
+- Build PyTorch. This step can take up to 15 minutes:
+
+      python setup.py develop
+
+[venv]: https://docs.python.org/3/tutorial/venv.html
+
 ### Run Pytests
  - Goto hb-pytorch directory
     `cd hb-pytorch/hammerblade/torch`
@@ -76,3 +92,22 @@ dispatch:
  8. Make sure everything pass on Emulation layer, and write more tests. Then you are ready to create a PR!
  9. Make sure your code works on COSIM.
  10. Optimizations, like parallelization etc.
+
+ ### Kernel Development Tips
+ 1. Maintaining two clones, one for emulation and one for cosim (eg., `hb-pytorch/` and `hb-pytorch-cosim/`), eases
+ the burden of cosim evaluation. This requires two separate pytorch environments as well (eg., `venv_pytorch` and `venv_pytorch_cosim`).
+
+ 2. Ideally, you would only ever need to run once, to debug an issue. Use `gdb` extensively with emulation.
+```
+$ gdb python
+(gdb) b tensorlib_sigmoid
+(gdb) r -m pytest test_sigmoid.py
+```
+Linking would become a bottleneck when running in tight loop. As a result, `gdb` could save a lot of time compared to printf debugging.
+
+ 3. Sometimes new cpp files are not taken into account by cmake. Since kernel authors would only ever need to add new files
+ either to `aten/src/Aten/native` or `hammerblade/torch/` running following command might solve the failure:
+```
+touch aten/src/ATen/CMakeLists.txt # New host code sources
+touch c10/hammerblade/CMakeLists.txt # New device code sources
+```

@@ -25,8 +25,9 @@ extern "C" {
     // bernoulli
     brg_tile_for(self.numel(), [&](size_t i) {
         float rand = distribution(generator);
-        if (rand < p) {
+        if (rand > p) {
           // 0
+          // see ./aten/src/ATen/native/Dropout.cpp:55:  noise.bernoulli_(1 - p);
           self(i) = 0.0f;
         } else {
           // 1
