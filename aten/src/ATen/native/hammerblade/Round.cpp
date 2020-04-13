@@ -15,7 +15,7 @@ static void round_kernel_hb(TensorIterator& iter) {
 
   AT_DISPATCH_FLOAT_TYPE_ONLY(
     iter.dtype(), //not used, but here anyway
-    "round_out", //binds name in yaml to dispatch(?)
+    "round_hb", //binds name round to hammerblade
       [&]() {//anonymous function that captures & passes all variables (ie iter) by reference ([&])
         offload_op_unary(iter, "tensorlib_round");
       });
@@ -23,7 +23,7 @@ static void round_kernel_hb(TensorIterator& iter) {
 
 } // anonymous namespace
 
-//when we call python's round_stub, use round_stubround_kernel_hb
+//when we call python's round_stub on device, use round_stubround_kernel_hb
 REGISTER_HAMMERBLADE_DISPATCH(round_stub, &round_kernel_hb);
 
 }} // namespace at::native
