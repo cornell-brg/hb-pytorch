@@ -137,13 +137,13 @@ class HBTensor {
 };
 
 template<typename T>
-class BSGVector {
+class HBVector {
   private:
     uint32_t N;
     T* data;
 
   public:
-    BSGVector(hb_vector_t* v) :
+    HBVector(hb_vector_t* v) :
       N(v->N), data((T*) ((intptr_t) v->data)) {}
 
     uint32_t numel() {
