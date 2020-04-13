@@ -39,11 +39,31 @@ void ATenProfiler::print()
   cerr << setw(180) << std::left << "Aggregated total:" << "   " << total_time / 1000.0 << " s" << endl;
 }
 
+void ATenProfiler::print_unimpl_kernel() {
+  using namespace std;
+
+  std::cerr << "==========================================================================" << std::endl;
+  std::cerr << " Native kernels that are used but not implemented for HammerBlade:" << std::endl;
+  std::cerr << "==========================================================================" << std::endl;
+  cerr << setw(180) << std::left << "Fucntion" << "   " << "Times" << endl;
+  for (const auto& k : unimpl_kernel) {
+    cerr << setw(180) << std::left << k.first << "   " << k.second << endl;
+  }
+}
+
 void ATenProfiler::add_log(const std::vector<std::string>& stack, std::chrono::microseconds time) {
   if (dict.find(stack) != dict.end()) {
     dict[stack] += time;
   } else {
     dict[stack] = time;
+  }
+}
+
+void ATenProfiler::add_kernel_log(const std::string& kernel) {
+  if (unimpl_kernel.find(kernel) != unimpl_kernel.end()) {
+    unimpl_kernel[kernel] += 1;
+  } else {
+    unimpl_kernel[kernel] = 1;
   }
 }
 
@@ -55,8 +75,10 @@ void ATenProfiler::profiling_start() {
   // clear the dict when entering ROI
   g_curr_call_stack.clear();
   dict.clear();
+  unimpl_kernel.clear();
   // mark current time
   start = std::chrono::high_resolution_clock::now();
+  in_roi = true;
 #else
   std::cerr << "Warning: ATen profiler is invoked "
             << "but PyTorch is not built with profiling capability"
@@ -67,6 +89,7 @@ void ATenProfiler::profiling_start() {
 
 void ATenProfiler::profiling_end() {
 #ifdef PROFILE_ATEN
+  in_roi = false;
   auto delta = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
   std::cerr << std::endl << std::endl;
   std::cerr << "==========================================================================" << std::endl;
@@ -77,9 +100,11 @@ void ATenProfiler::profiling_end() {
   std::cerr << "==========================================================================" << std::endl;
   print();
 #endif
+#ifdef PROFILE_UNIMPL
+  print_unimpl_kernel();
+#endif
   return;
 }
-
 
 
 void aten_profiler_start() {
@@ -92,6 +117,13 @@ void aten_profiler_end() {
   return;
 }
 
+bool is_in_aten_profiler_roi() {
+  return g_aten_profiler.in_roi;
+}
+
+void log_unimpl_kernel(const std::string& kernel) {
+  g_aten_profiler.add_kernel_log(kernel);
+}
 
 
 ATenProfilerLog::ATenProfilerLog(const std::string& func_name)
