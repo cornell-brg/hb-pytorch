@@ -38,6 +38,8 @@ else:
     import glob
     targets = glob.glob(current_path + "/tests/test_*.py")
 
+targets.sort()
+
 print()
 print(" files collected by pytest runner:")
 print()
