@@ -3,8 +3,8 @@
 // 03/09/2020 Bandhav Veluri and Lin Cheng (lc873@cornell.edu)
 //====================================================================
 
-#ifndef _BSG_TENSOR_HPP
-#define _BSG_TENSOR_HPP
+#ifndef _HB_TENSOR_HPP
+#define _HB_TENSOR_HPP
 
 #include <math.h>
 #include <initializer_list>
@@ -155,4 +155,4 @@ class BSGVector {
     }
 };
 
-#endif // _BSG_TENSOR_HPP
+#endif // _HB_TENSOR_HPP
