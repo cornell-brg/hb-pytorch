@@ -8,7 +8,7 @@ import hypothesis
 import hypothesis.extra.numpy
 import hypothesis.strategies as st
 import numpy as np
-
+import os
 
 def is_travis():
     return 'TRAVIS' in os.environ
@@ -25,7 +25,10 @@ def dims(min_value=1, max_value=5):
 def elements_of_type(dtype=np.float32, filter_=None):
     elems = None
     if dtype is np.float32:
-        elems = st.floats(min_value=-2.0, max_value=2.0, width=32)
+        if is_travis():
+            elems = st.floats(min_value=-2.0, max_value=2.0, width=32)
+        else:
+            elems = st.floats(min_value=-128.0, max_value=128.0, width=32)
     # elif dtype is np.int32:
     #     elems = st.integers(min_value=0, max_value=2 ** 31 - 1)
     # elif dtype is np.bool:
