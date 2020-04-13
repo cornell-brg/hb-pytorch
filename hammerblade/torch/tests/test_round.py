@@ -14,7 +14,7 @@ def _test_torch_round(x): #x is a torch.Tensor
     # assert torch.equal(round_h.cpu(), round_x)
 
 def test_torch_round_1():
-    x = torch.Tensor([.5,2.2,3.4,4.4555,4.55])
+    x = torch.Tensor([.5,2.2,3.4,4.4555,4.501])
     _test_torch_round(x)
     print(x)
 
