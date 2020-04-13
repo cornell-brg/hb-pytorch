@@ -13,7 +13,7 @@ void ATenProfiler::print()
   using std::chrono::microseconds;
   using namespace std;
 
-  cerr << setw(240) << std::left << "Fucntion" << "   " << "Time" << endl;
+  cerr << setw(180) << std::left << "Fucntion" << "   " << "Time" << endl;
   double total_time = 0.0;
   for (const auto& p : dict) {
     double ms = p.second.count() / 1000.0;
@@ -34,9 +34,9 @@ void ATenProfiler::print()
       name += "|- ";
     }
     name += stack.back();
-    cerr << setw(240) << std::left << name << "   " << ms / 1000.0 << " s" << endl;
+    cerr << setw(180) << std::left << name << "   " << ms / 1000.0 << " s" << endl;
   }
-  cerr << setw(240) << std::left << "Aggregated total:" << "   " << total_time / 1000.0 << " s" << endl;
+  cerr << setw(180) << std::left << "Aggregated total:" << "   " << total_time / 1000.0 << " s" << endl;
 }
 
 void ATenProfiler::add_log(const std::vector<std::string>& stack, std::chrono::microseconds time) {
@@ -72,7 +72,7 @@ void ATenProfiler::profiling_end() {
   std::cerr << "==========================================================================" << std::endl;
   std::cerr << " ATen profile results" << std::endl;
   std::cerr << "==========================================================================" << std::endl;
-  std::cerr << std::setw(240) << std::left << " Total time in ROI:" << "   "
+  std::cerr << std::setw(180) << std::left << " Total time in ROI:" << "   "
             << delta.count() / 1000000.0 << " s" << std::endl;
   std::cerr << "==========================================================================" << std::endl;
   print();
