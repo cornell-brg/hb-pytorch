@@ -35,8 +35,9 @@ extern "C" {
     for (uint32_t i = start; i < end; i++) {
       for(uint32_t dense_col = 0; dense_col < n; dense_col++) {
         for (uint32_t col_index = csr(i); col_index < csr(i+1); col_index++) {
-          uint32_t result_index = i * n + dense_col;
-          result(result_index) = result(result_index) + values(col_index) * dense(indices(col_index + indices.stride(0)) * n + dense_col);
+         //  uint32_t result_index = i * n + dense_col;
+         //  result(result_index) = result(result_index) + values(col_index) * dense(indices(col_index + indices.stride(0)) * n + dense_col);
+          result(i, dense_col) = result(i, dense_col) + values(col_index) * dense(indices(1, col_index), dense_col);
         }
       }   
     }  
