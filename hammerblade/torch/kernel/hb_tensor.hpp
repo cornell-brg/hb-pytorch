@@ -52,8 +52,81 @@ typedef struct {
 // allocation.
 // =========================================================
 
-template <typename DT>
+template <typename DT, int32_t NDIM = -1>
 class HBTensor {
+  private:
+    uint32_t N;
+    uint32_t dims;
+    uint32_t* strides;
+    uint32_t* sizes;
+    DT* data;
+
+  public:
+    HBTensor(hb_tensor_t* t) :
+      N(t->N),
+      dims(t->dims),
+      strides((uint32_t*) ((intptr_t) t->strides)),
+      sizes((uint32_t*) ((intptr_t) t->sizes)),
+      data((DT*) ((intptr_t) t->data)) {
+        hb_assert_msg(t->dims == NDIM,
+                      "error: expected %dD tensor but found %dD tensor!"
+                      " Might be problem with offloading, or wrong template"
+                      " parameter provided in the kernel.\n",
+                      NDIM, t->dims);
+      }
+
+    char* data_ptr() {
+      return (char*)data;
+    }
+
+    uint32_t* get_strides() {
+      return strides;
+    }
+
+    uint32_t* get_sizes() {
+      return sizes;
+    }
+
+    int numel() {
+      return N;
+    }
+
+    uint32_t dim(uint32_t d) {
+      hb_assert_msg(d < NDIM,
+                    "error: dimesnion must be less than %d\n",
+                    dims);
+      return sizes[d];
+    }
+
+    uint32_t ndim() {
+      return dims;
+    }
+
+    template<typename... T>
+    DT& operator()(T... indices) {
+      std::initializer_list<uint32_t> iarray = {indices...};
+
+      hb_assert_msg(iarray.size() == NDIM,
+                    "error: expected dims=%d arguments but got %d\n",
+                    NDIM, iarray.size());
+
+      uint32_t offset = 0;
+      uint32_t s = 0;
+      for(auto index : iarray) {
+        offset += (index * strides[s]);
+        s++;
+      }
+
+      hb_assert_msg(offset < N,
+                    "error: N=%d but accessed %d\n",
+                    N, offset);
+
+      return data[offset];
+    }
+};
+
+template <typename DT>
+class HBTensor<DT, -1> {
   private:
     uint32_t N;
     uint32_t dims;
