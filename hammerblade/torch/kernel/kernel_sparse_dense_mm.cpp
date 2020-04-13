@@ -10,13 +10,13 @@ extern "C" {
   __attribute__ ((noinline)) int tensorlib_sparse_dense_mm(
     bsg_tensor_t* _result,
     bsg_tensor_t* _csr_hb,
-    bsg_tensor_t* _col_indices,
+    bsg_tensor_t* _indices,
     bsg_tensor_t* _values,
     bsg_tensor_t* _dense) {
     
     auto result = BSGTensor<float>(_result);
     auto csr = BSGTensor<int>(_csr_hb);
-    auto col_indices = BSGTensor<int>(_col_indices);
+    auto indices = BSGTensor<int>(_indices);
     auto values = BSGTensor<float>(_values);
     auto dense = BSGTensor<float>(_dense);
     // result(m, n) = sparse(m, k) * dense (k, n) 
@@ -36,7 +36,7 @@ extern "C" {
       for(uint32_t dense_col = 0; dense_col < n; dense_col++) {
         for (uint32_t col_index = csr(i); col_index < csr(i+1); col_index++) {
           uint32_t result_index = i * n + dense_col;
-          result(result_index) = result(result_index) + values(col_index) * dense(col_indices(col_index) * n + dense_col);
+          result(result_index) = result(result_index) + values(col_index) * dense(indices(col_index + indices.stride(0)) * n + dense_col);
         }
       }   
     }  
