@@ -37,7 +37,7 @@ def test_torch_addmm_broadcast():
 
 # bigger matrix
 def test_torch_addmm_big_rand():
-    _test_torch_addmm(torch.randn(1, 1), torch.randn(78, 56), torch.randn(56, 39), rel_tol=1e-04, abs_tol=1e-06)
+    _test_torch_addmm(torch.randn(1, 1), torch.rand(78, 56), torch.rand(56, 39), rel_tol=1e-04, abs_tol=1e-06)
 
 # directed test with given numbers
 def test_torch_addmm_directed():
