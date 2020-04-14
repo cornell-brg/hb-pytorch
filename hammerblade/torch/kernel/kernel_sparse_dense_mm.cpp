@@ -51,5 +51,5 @@ extern "C" {
     return 0;
   }  
 
-  HB_EMUL_REG_KERNEL(tensorlib_sparse_dense_mm, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_sparse_dense_mm, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*)
 }
