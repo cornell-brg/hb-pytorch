@@ -1202,6 +1202,7 @@
 - func: floor.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
   dispatch:
+    HammerBlade: floor_out
     CPU: floor_out
     CUDA: floor_out
 
