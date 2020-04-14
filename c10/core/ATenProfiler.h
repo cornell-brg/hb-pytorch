@@ -47,6 +47,7 @@ extern ATenProfiler g_aten_profiler;
 extern std::vector<std::string> g_curr_call_stack;
 
 #define LogATenKernel() ATenProfilerLog log(__PRETTY_FUNCTION__);
+#define LogATenKernelWithName(aten_profiler_kernel_name) ATenProfilerLog log(aten_profiler_kernel_name);
 
 }
 
