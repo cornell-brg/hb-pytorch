@@ -227,14 +227,14 @@ inline void Dispatcher::callBoxed(const OperatorHandle& op, Stack* stack) const 
 inline const KernelFunction& Dispatcher::dispatch_(const DispatchTable& dispatchTable, const ska::flat_hash_map<TensorTypeId, KernelFunction>& backendFallbackKernels, c10::optional<TensorTypeId> dispatchKey) {
 
 #ifdef PROFILE_UNIMPL
-    if (c10::is_in_aten_profiler_roi()) {
-      auto HBKernel = dispatchTable.lookup(c10::TensorTypeId::HammerBladeTensorId);
-      auto HBFallbackKernel = backendFallbackKernels.find(c10::TensorTypeId::HammerBladeTensorId);
-      auto catchallKernel = dispatchTable.lookupCatchallKernel();
-      if (HBKernel == nullptr && HBFallbackKernel == backendFallbackKernels.end() && catchallKernel == nullptr) {
-        c10::log_unimpl_kernel(dispatchTable.operatorName());
-      }
+  if (c10::is_in_aten_profiler_roi()) {
+    auto HBKernel = dispatchTable.lookup(c10::TensorTypeId::HammerBladeTensorId);
+    auto HBFallbackKernel = backendFallbackKernels.find(c10::TensorTypeId::HammerBladeTensorId);
+    auto catchallKernel = dispatchTable.lookupCatchallKernel();
+    if (HBKernel == nullptr && HBFallbackKernel == backendFallbackKernels.end() && catchallKernel == nullptr) {
+      c10::log_unimpl_kernel(dispatchTable.operatorName());
     }
+  }
 #endif
 
   if (C10_LIKELY(dispatchKey.has_value())) {

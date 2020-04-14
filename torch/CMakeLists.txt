@@ -263,6 +263,14 @@ if (USE_NCCL)
     list(APPEND TORCH_PYTHON_LINK_LIBRARIES __caffe2_nccl)
 endif()
 
+if (PROFILE_ATEN)
+  list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS PROFILE_ATEN)
+endif()
+
+if(PROFILE_UNIMPL)
+  list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS PROFILE_UNIMPL)
+endif()
+
 # In the most recent CMake versions, a new 'TRANSFORM' subcommand of 'list' allows much of the boilerplate of defining the lists
 # of type stub files to be omitted.
 # For comptability with older CMake versions, we omit it for now, but leave it as a comment in case comptability with the older
