@@ -1,7 +1,7 @@
 #ifndef _HB_REDUCTION_H
 #define _HB_REDUCTION_H
 
-#include <brg_element_for.hpp>
+#include <hb_parallel_for.hpp>
 
 //====================================================================
 // Reduction mode used in LossNLL and other loss functions
@@ -13,6 +13,27 @@ enum Reduction {
   Sum,              // Sum losses
   END
 };
+
+//====================================================================
+// Calculate how many input elements to produce one output
+//====================================================================
+
+template<typename scalar_t>
+inline uint32_t calc_elements_per_output(HBTensor<scalar_t> out,
+                                         HBTensor<scalar_t> in,
+                                         uint32_t num_reduction_dim) {
+  // corner case: iterator appears to be 1d but generating n outputs
+  //              1 input element per output
+  if(in.ndim() == 1 && out.numel() == in.numel()) {
+    return 1;
+  }
+  // there could be more than 1 dims
+  uint32_t elements_to_collect = in.dim(0);
+  for(auto i = 1; i < num_reduction_dim; i++) {
+    elements_to_collect *= in.dim(i);
+  }
+  return elements_to_collect;
+}
 
 //====================================================================
 // Binary reductions -- sum, mean, etc.
@@ -39,19 +60,83 @@ enum Reduction {
 // 4D input -- 3 reduction dim
 // 4D input -- 4 reduction dim -- trivial
 
+// Trivial case -- reduce to 1 output
+
 template<typename scalar_t, typename F1, typename F2>
-inline void binary_reduction(BSGTensor<scalar_t>out,
-                             BSGTensor<scalar_t>in,
+inline void binary_reduction_simple(HBTensor<scalar_t> out,
+                                    HBTensor<scalar_t> in,
+                                    F1 reduce, F2 project) {
+  hb_assert_msg(out.numel() == 1, "reduction_simple only handles trivial case");
+
+  if(__bsg_id == 0) {
+
+    char* data[2];
+    data[0] = out.data_ptr();
+    data[1] = in.data_ptr();
+
+    //-----------------------------
+    // partial_result
+    //-----------------------------
+    scalar_t result = 0;
+
+    // is_trivial_1d
+    if(in.ndim() == 1) {
+
+
+      //-----------------------------
+      // collect metadata
+      //-----------------------------
+      uint32_t strides[2];
+      strides[0] = (out.get_strides())[0];
+      strides[1] = (in.get_strides())[0];
+
+      //-----------------------------
+      // iterating over all elementes
+      //-----------------------------
+      size_t start = 0;
+      size_t end = in.numel();
+      for (size_t idx = start; idx < end; idx++) {
+        // XXX: when offloading through reduction path, strides are measured in numel
+        scalar_t* in_dp = (scalar_t*)(data[1] + strides[1] * idx * sizeof(scalar_t));
+        reduce(result, *in_dp);
+      }
+    } else {
+      //-----------------------------
+      // iterating over all elementes
+      //-----------------------------
+      size_t start = 0;
+      size_t end = in.numel();
+      for (size_t idx = start; idx < end; idx++) {
+        // XXX: when offloading through reduction path, strides are measured in numel
+        scalar_t* in_dp = (scalar_t*)(data[1] + offset_calc(idx, in) * sizeof(scalar_t));
+        reduce(result, *in_dp);
+      }
+    }
+
+    // produce final result
+    scalar_t* out_dp = (scalar_t*)(data[0]);
+    *out_dp = project(result);
+  }
+}
+
+template<typename scalar_t, typename F1, typename F2>
+inline void binary_reduction(HBTensor<scalar_t>out,
+                             HBTensor<scalar_t>in,
                              uint32_t ndim, uint32_t num_reduction_dim,
                              uint32_t elements_per_output,
                              F1 reduce, F2 project) {
+  if(out.numel() == 1) {
+    binary_reduction_simple(out, in, reduce, project);
+    return;
+  }
+
   switch(ndim) {
     case 1:
       // There is this corner case, in which each output is produced by only
       // one input element
-      bsg_assert_msg(out.numel() == in.numel(),
+      hb_assert_msg(out.numel() == in.numel(),
                      "This case should be handled by reduction_simple?");
-      brg_tile_for(out.numel(), [&](size_t n) {
+      hb_parallel_for(out.numel(), [&](size_t n) {
         out(n) = project(in(n));
       });
       break;
@@ -59,7 +144,7 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
       if(num_reduction_dim == 1) {
         // 2D input -- 1 reduction dim
         // parallelize over output elements
-        brg_tile_for(out.numel(), [&](size_t n) {
+        hb_parallel_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
           scalar_t result = 0;
           for(size_t d = 0; d < elements_per_output; d++) {
@@ -68,14 +153,14 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
           out(0, n) = project(result);
         });
       } else {
-        bsg_assert_msg(false, "Invalid number of reduction dims");
+        hb_assert_msg(false, "Invalid number of reduction dims");
       }
       break;
     case 3:
       if(num_reduction_dim == 1) {
         // 3D input -- 1 reduction dim
         // parallelize over output elements
-        brg_tile_for(out.numel(), [&](size_t n) {
+        hb_parallel_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
           scalar_t result = 0;
           uint32_t dim1 = n / in.dim(2);
@@ -88,7 +173,7 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
       } else if(num_reduction_dim == 2) {
         // 3D input -- 2 reduction dim
         // parallelize over output elements
-        brg_tile_for(out.numel(), [&](size_t n) {
+        hb_parallel_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
           scalar_t result = 0;
           for(size_t d = 0; d < elements_per_output; d++) {
@@ -99,11 +184,11 @@ inline void binary_reduction(BSGTensor<scalar_t>out,
           out(0, 0, n) = project(result);
         });
       } else {
-        bsg_assert_msg(false, "Invalid number of reduction dims");
+        hb_assert_msg(false, "Invalid number of reduction dims");
       }
       break;
     default:
-      bsg_assert_msg(false, "Invalid number of dims for reduction kernel");
+      hb_assert_msg(false, "Invalid number of dims for reduction kernel");
   }
 }
 

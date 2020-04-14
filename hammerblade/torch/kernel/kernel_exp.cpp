@@ -9,11 +9,13 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_exp(
-          bsg_tensor_t* t0_p,
-          bsg_tensor_t* t1_p) {
+          hb_tensor_t* t0_p,
+          hb_tensor_t* t1_p) {
+    auto res = HBTensor<float>(t0_p);
+    auto input = HBTensor<float>(t1_p);
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    brg_tile_elementwise_for(t0_p, t1_p,
+    hb_parallel_foreach(res, input,
       [&](float a) {
         return exp(a);
     });

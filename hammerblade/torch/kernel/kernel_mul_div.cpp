@@ -8,38 +8,48 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_mul(
-          bsg_tensor_t* t0_p,
-          bsg_tensor_t* t1_p,
-          bsg_tensor_t* t2_p) {
-    // Start profiling
+          hb_tensor_t* t0_p,
+          hb_tensor_t* t1_p,
+          hb_tensor_t* t2_p) {
+    auto c = HBTensor<float>(t0_p);
+    auto a = HBTensor<float>(t1_p);
+    auto b = HBTensor<float>(t2_p);
+
     bsg_cuda_print_stat_kernel_start();
-    brg_tile_elementwise_for(t0_p, t1_p, t2_p,
+
+    hb_parallel_foreach(c, a, b,
         [&](float a, float b) {
           return a * b;
         });
-    //   End profiling
+
     bsg_cuda_print_stat_kernel_end();
+
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_mul, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_mul, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 
 
   __attribute__ ((noinline))  int tensorlib_div(
-          bsg_tensor_t* t0_p,
-          bsg_tensor_t* t1_p,
-          bsg_tensor_t* t2_p) {
-    // Start profiling
+          hb_tensor_t* t0_p,
+          hb_tensor_t* t1_p,
+          hb_tensor_t* t2_p) {
+    auto c = HBTensor<float>(t0_p);
+    auto a = HBTensor<float>(t1_p);
+    auto b = HBTensor<float>(t2_p);
+
     bsg_cuda_print_stat_kernel_start();
-    brg_tile_elementwise_for(t0_p, t1_p, t2_p,
+
+    hb_parallel_foreach(c, a, b,
       [&](float a, float b) {
         return a / b;
     });
-    //   End profiling
+
     bsg_cuda_print_stat_kernel_end();
+
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_div, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_div, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 
 }

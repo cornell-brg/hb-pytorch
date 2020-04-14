@@ -10,19 +10,19 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_addmm(
-          bsg_tensor_t* _result,
-          bsg_tensor_t* _self,
-          bsg_tensor_t* _mat1,
-          bsg_tensor_t* _mat2,
+          hb_tensor_t* _result,
+          hb_tensor_t* _self,
+          hb_tensor_t* _mat1,
+          hb_tensor_t* _mat2,
           float* _beta,
           float* _alpha) {
 
     if (__bsg_id == 0) {
 
-        auto self = BSGTensor<float>(_self);
-        auto mat1 = BSGTensor<float>(_mat1);
-        auto mat2 = BSGTensor<float>(_mat2);
-        auto result = BSGTensor<float>(_result);
+        auto self = HBTensor<float>(_self);
+        auto mat1 = HBTensor<float>(_mat1);
+        auto mat2 = HBTensor<float>(_mat2);
+        auto result = HBTensor<float>(_result);
         float beta = *_beta;
         float alpha = *_alpha;
 
@@ -34,7 +34,7 @@ extern "C" {
         int c1 = mat1.dim(1);
         int r2 = mat2.dim(0);
         int c2 = mat2.dim(1);
-        bsg_assert(c1 == r2);
+        hb_assert(c1 == r2);
 
         // calculate number of row and col blocks in each matrix
         int m1_num_blk_per_row = (r1 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m1 per row
@@ -75,7 +75,7 @@ extern "C" {
                 // only care about blocks of mat1 in row rr
                 // and blocks of mat2 in col rc
                 for (int mat1x = 0, mat2y = 0; mat1x < m1_num_blk_per_col && mat2y < m2_num_blk_per_row; mat1x++, mat2y++) {
-                    bsg_assert(mat1x == mat2y);
+                    hb_assert(mat1x == mat2y);
 
                     // calculate current block dimensions
                     int mid_dim = mat1x == m1_num_blk_per_col - 1 ? m1_last_blk_dim_x : BLOCK_DIM;
@@ -152,7 +152,7 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_addmm, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_addmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, float*, float*)
 
 }
 

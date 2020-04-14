@@ -5,9 +5,11 @@ Tests on torch.nn.CrossEntropyLoss backward
 
 import torch
 import torch.nn as nn
+import random
 import hbutils
 
 torch.manual_seed(42)
+random.seed(42)
 
 def _test_torch_nn_CrossEntropyLoss_back(loss, input, target):
     input_h = hbutils.init_hb_tensor(input)

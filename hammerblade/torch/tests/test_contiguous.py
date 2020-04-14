@@ -4,8 +4,10 @@ Tests on torch.contiguous
 """
 
 import torch
+import random
 
 torch.manual_seed(42)
+random.seed(42)
 
 def _test_torch_contiguous(x):
     h = x.hammerblade()
