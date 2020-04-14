@@ -6,7 +6,6 @@
 #include <c10/util/Exception.h>
 #include <type_traits>
 #include <typeinfo>
-#include <iostream>
 
 // Implements instruction set specific function dispatch.
 //
