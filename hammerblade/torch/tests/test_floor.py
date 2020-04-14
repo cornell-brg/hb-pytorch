@@ -28,4 +28,3 @@ def test_torch_floor_3():
 def test_torch_floor_4():
     x = torch.randn(10)
     _test_torch_floor_check(x)
-    
