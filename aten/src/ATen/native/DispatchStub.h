@@ -5,7 +5,6 @@
 #include <c10/core/ATenProfiler.h>
 #include <c10/util/Exception.h>
 #include <type_traits>
-#include <typeinfo>
 
 // Implements instruction set specific function dispatch.
 //
