@@ -19,7 +19,7 @@ export OMP_NUM_THREADS=1
 
 # Use gold if it's available for faster linking.
 if which gold >/dev/null 2>&1 ; then
-    export CFLAGS='-fuse-ld=gold'
+    export CFLAGS='-fuse-ld=ld'
 fi
 
 # enable emulation layer building
