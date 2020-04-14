@@ -9,13 +9,13 @@ extern "C" {
 
   __attribute__ ((noinline)) int tensorlib_sparse_dense_mm(
     bsg_tensor_t* _result,
-    bsg_tensor_t* _csr_hb,
+/*    bsg_tensor_t* _csr_hb, */
     bsg_tensor_t* _indices,
     bsg_tensor_t* _values,
     bsg_tensor_t* _dense) {
     
     auto result = BSGTensor<float>(_result);
-    auto csr = BSGTensor<int>(_csr_hb);
+//    auto csr = BSGTensor<int>(_csr_hb);  //CSR mode
     auto indices = BSGTensor<int>(_indices);
     auto values = BSGTensor<float>(_values);
     auto dense = BSGTensor<float>(_dense);
@@ -23,6 +23,7 @@ extern "C" {
     uint32_t m = result.dim(0);
     uint32_t k = dense.dim(0);
     uint32_t n = dense.dim(1);
+    uint32_t v = values.numel();
 
     size_t len_per_tile = m  / (bsg_tiles_X * bsg_tiles_Y) + 1;
     size_t start = len_per_tile * __bsg_id;
@@ -34,10 +35,14 @@ extern "C" {
    
     for (uint32_t i = start; i < end; i++) {
       for(uint32_t dense_col = 0; dense_col < n; dense_col++) {
-        for (uint32_t col_index = csr(i); col_index < csr(i+1); col_index++) {
+//      for (uint32_t col_index = csr(i); col_index < csr(i+1); col_index++) { //CSR MODE
          //  uint32_t result_index = i * n + dense_col;
          //  result(result_index) = result(result_index) + values(col_index) * dense(indices(col_index + indices.stride(0)) * n + dense_col);
-          result(i, dense_col) = result(i, dense_col) + values(col_index) * dense(indices(1, col_index), dense_col);
+        for(uint32_t j = 0; j < v; j++) {   // COO mode
+          if(indices(0, j) == i) {
+            result(i, dense_col)    = result(i, dense_col) + values(j) * dense(indices(1, j), dense_col);
+          }
+          //  result(i, dense_col)    = result(i, dense_col) + values(col_index) * dense(indices(1, col_index), dense_col); //CSR mode
         }
       }   
     }  

@@ -53,16 +53,16 @@ Tensor _sparse_mm_hb(const SparseTensor& sparse, const Tensor& dense) {
   TORCH_CHECK(indices.dtype() == at::kInt, "Indices on HammerBlade should be int32");
 //  IntTensor colIndices = indices.select(0, 1);
 //  TORCH_CHECK(colIndices.is_hammerblade(), "colIndices show be HammerBlade Tensor");
-  IntTensor rowIndices = indices.select(0, 0);
-  IntTensor csr = _to_csr_int(rowIndices, dim, nnz);
-  IntTensor csr_hb = at::empty({csr.size(0)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kInt)});
-  csr_hb.copy_(csr);
+//  IntTensor rowIndices = indices.select(0, 0);
+//  IntTensor csr = _to_csr_int(rowIndices, dim, nnz);
+//  IntTensor csr_hb = at::empty({csr.size(0)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kInt)});
+//  csr_hb.copy_(csr);
   
   Tensor values = sparse._values();
 
   Tensor result = at::zeros({sparse.size(0), dense.size(1)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
 
-  hb_offload_kernel(result, csr_hb, indices, values, dense, "tensorlib_sparse_dense_mm");
+  hb_offload_kernel(result, indices, values, dense, "tensorlib_sparse_dense_mm");
   return result;
 }
    
