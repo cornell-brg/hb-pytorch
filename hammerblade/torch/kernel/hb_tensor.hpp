@@ -52,81 +52,8 @@ typedef struct {
 // allocation.
 // =========================================================
 
-template <typename DT, int32_t NDIM = -1>
-class HBTensor {
-  private:
-    uint32_t N;
-    uint32_t dims;
-    uint32_t* strides;
-    uint32_t* sizes;
-    DT* data;
-
-  public:
-    HBTensor(hb_tensor_t* t) :
-      N(t->N),
-      dims(t->dims),
-      strides((uint32_t*) ((intptr_t) t->strides)),
-      sizes((uint32_t*) ((intptr_t) t->sizes)),
-      data((DT*) ((intptr_t) t->data)) {
-        hb_assert_msg(t->dims == NDIM,
-                      "error: expected %dD tensor but found %dD tensor!"
-                      " Might be problem with offloading, or wrong template"
-                      " parameter provided in the kernel.\n",
-                      NDIM, t->dims);
-      }
-
-    char* data_ptr() {
-      return (char*)data;
-    }
-
-    uint32_t* get_strides() {
-      return strides;
-    }
-
-    uint32_t* get_sizes() {
-      return sizes;
-    }
-
-    int numel() {
-      return N;
-    }
-
-    uint32_t dim(uint32_t d) {
-      hb_assert_msg(d < NDIM,
-                    "error: dimesnion must be less than %d\n",
-                    dims);
-      return sizes[d];
-    }
-
-    uint32_t ndim() {
-      return dims;
-    }
-
-    template<typename... T>
-    DT& operator()(T... indices) {
-      std::initializer_list<uint32_t> iarray = {indices...};
-
-      hb_assert_msg(iarray.size() == NDIM,
-                    "error: expected dims=%d arguments but got %d\n",
-                    NDIM, iarray.size());
-
-      uint32_t offset = 0;
-      uint32_t s = 0;
-      for(auto index : iarray) {
-        offset += (index * strides[s]);
-        s++;
-      }
-
-      hb_assert_msg(offset < N,
-                    "error: N=%d but accessed %d\n",
-                    N, offset);
-
-      return data[offset];
-    }
-};
-
 template <typename DT>
-class HBTensor<DT, -1> {
+class HBTensor {
   private:
     uint32_t N;
     uint32_t dims;
@@ -160,8 +87,8 @@ class HBTensor<DT, -1> {
 
     uint32_t dim(uint32_t d) {
       hb_assert_msg(d < dims,
-                     "error: dimesnion must be less than %d\n",
-                     dims);
+                    "error: dimesnion must be less than %d\n",
+                    dims);
       return sizes[d];
     }
 
@@ -169,33 +96,31 @@ class HBTensor<DT, -1> {
       return dims;
     }
 
+    // Special case where we want linear, 0-d
+    // and 1-d tensor indexing.
+    //
+    // XXX: The tensor has to be contiguous if
+    // it's >1-d tensor.
+    DT& operator()(uint32_t index) {
+      hb_assert_msg(index < N,
+                    "error: N=%d but accessed %d\n",
+                    N, index);
+      if(dims != 1) {
+        return data[index];
+      } else {
+        // Explicitly calculate data index to handle
+        // non-contiguous 1-d tensors.
+        return data[index * strides[0]];
+      }
+    }
+
     template<typename... T>
-    DT& operator()(T... indices) {
-      std::initializer_list<uint32_t> iarray = {indices...};
-
-      // special case where we have a 0-dim tensor
-      if(dims == 0) {
-        hb_assert_msg(iarray.size() == 1,
-                       "error: expected only one argument with 0-dim tensor\n");
-        for(auto index : iarray) {
-          hb_assert_msg(index == 0,
-                         "error: index must be 0 0-dim tensor\n");
-        }
-        return data[0];
-      }
-
-      // special case where we want linear indexing
-      // when dims != 1
-      // XXX: this tensor has to be contiguous
-      if(iarray.size() == 1 && dims != 1) {
-        for(auto index : iarray) {
-          return data[index];
-        }
-      }
+    DT& operator()(uint32_t index0, T... indices) {
+      std::initializer_list<uint32_t> iarray = {index0, indices...};
 
       hb_assert_msg(iarray.size() == dims,
-                     "error: expected dims=%d arguments but got %d\n",
-                     dims, iarray.size());
+                    "error: expected dims=%d arguments but got %d\n",
+                    dims, iarray.size());
       uint32_t offset = 0;
       uint32_t s = 0;
       for(auto index : iarray) {
@@ -203,11 +128,14 @@ class HBTensor<DT, -1> {
         s++;
       }
 
-      hb_assert_msg(offset < N, "error: N=%d but accessed %d\n", N, offset);
+      hb_assert_msg(offset < N,
+                    "error: N=%d but accessed %d\n",
+                    N, offset);
 
       return data[offset];
     }
 };
+
 
 template<typename T>
 class HBVector {
