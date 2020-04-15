@@ -13,7 +13,7 @@ void ATenProfiler::print()
   using std::chrono::microseconds;
   using namespace std;
 
-  cerr << setw(180) << std::left << "Fucntion" << "   " << "Time" << endl;
+  cerr << setw(180) << std::left << "Function" << "   " << "Time" << endl;
   double total_time = 0.0;
   for (const auto& p : dict) {
     double ms = p.second.count() / 1000.0;
@@ -45,7 +45,7 @@ void ATenProfiler::print_unimpl_kernel() {
   std::cerr << "==========================================================================" << std::endl;
   std::cerr << " Native kernels that are used but not implemented for HammerBlade:" << std::endl;
   std::cerr << "==========================================================================" << std::endl;
-  cerr << setw(180) << std::left << "Fucntion" << "   " << "Times" << endl;
+  cerr << setw(180) << std::left << "Function" << "   " << "Times" << endl;
   for (const auto& k : unimpl_kernel) {
     cerr << setw(180) << std::left << k.first << "   " << k.second << endl;
   }
