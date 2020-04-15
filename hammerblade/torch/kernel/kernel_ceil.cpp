@@ -15,7 +15,7 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
     brg_tile_elementwise_for(t0_p, t1_p,
       [&](float a) { //anonymous function for ceiling. Does the ceiling operation for every element in the tile.
-        return ceil(a);
+        return ceil(a); // returns ceiling of argument.
     });
     bsg_cuda_print_stat_kernel_end();
     return 0;
