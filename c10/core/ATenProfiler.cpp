@@ -111,7 +111,7 @@ void ATenProfiler::profiling_end() {
 
 // ============================================================================
 
-void aten_profiler_in_parallel_region() {
+bool aten_profiler_in_parallel_region() {
 #ifdef _OPENMP
   return omp_in_parallel();
 #else
