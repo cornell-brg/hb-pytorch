@@ -2,7 +2,7 @@
 
 #include <map>
 #include <vector>
-#ifdef AT_PARALLEL_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
