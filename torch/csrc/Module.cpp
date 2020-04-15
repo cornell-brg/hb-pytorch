@@ -18,6 +18,7 @@
 #include <ATen/Utils.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <c10/core/ATenProfiler.h>
 
 #include <torch/csrc/THP.h>
 #include <torch/csrc/DynamicTypes.h>
@@ -515,6 +516,16 @@ PyObject *THPModule_supportedQEngines(PyObject */* unused */)
   return list.release();
 }
 
+static PyObject * THPModule_atenProfilerStart(PyObject *module, PyObject *noargs) {
+  c10::aten_profiler_start();
+  Py_RETURN_NONE;
+}
+
+static PyObject * THPModule_atenProfilerEnd(PyObject *module, PyObject *noargs) {
+  c10::aten_profiler_end();
+  Py_RETURN_NONE;
+}
+
 //NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 static PyMethodDef TorchMethods[] = {
   {"_initExtension",  (PyCFunction)THPModule_initExtension,   METH_O,       nullptr},
@@ -555,6 +566,8 @@ static PyMethodDef TorchMethods[] = {
   {"_get_qengine", (PyCFunction)THPModule_qEngine, METH_NOARGS, nullptr},
   {"_set_qengine", (PyCFunction)THPModule_setQEngine, METH_O, nullptr},
   {"_supported_qengines", (PyCFunction)THPModule_supportedQEngines, METH_NOARGS, nullptr},
+  {"aten_profiler_start", (PyCFunction)THPModule_atenProfilerStart, METH_NOARGS,  nullptr},
+  {"aten_profiler_end",   (PyCFunction)THPModule_atenProfilerEnd,   METH_NOARGS,  nullptr},
   {nullptr, nullptr, 0, nullptr}
 };
 
