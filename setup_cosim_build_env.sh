@@ -7,10 +7,11 @@ echo ""
 # setup pytorch building options
 export REL_WITH_DEB_INFO=1
 export BUILD_TEST=0
+export USE_MKL=0
+export USE_MKLDNN=0
 export USE_CUDA=0
 export USE_CUDNN=0
 export USE_FBGEMM=0
-export USE_MKLDNN=0
 export USE_NNPACK=0
 export USE_QNNPACK=0
 export USE_DISTRIBUTED=0

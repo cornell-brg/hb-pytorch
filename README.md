@@ -111,3 +111,18 @@ Linking would become a bottleneck when running in tight loop. As a result, `gdb`
 touch aten/src/ATen/CMakeLists.txt # New host code sources
 touch c10/hammerblade/CMakeLists.txt # New device code sources
 ```
+
+### Native Profiling Tools
+To enable native execution time profiling, edit `CMakeList.txt` and set `PROFILE_ATEN` to `ON`.
+
+To enable unimplemented HammerBlade kernel discovery, edit `CMakeList.txt` and set `PROFILE_UNIMPL` to `ON`. Warning: `PROFILE_UNIMPL` should be disabled to get more accurate execution time profiling.
+
+Region of interest (ROI) should be marked with `torch.aten_profiler_start()` and `torch.aten_profiler_end()`. For example
+```python
+import torch
+
+torch.aten_profiler_start()
+x = torch.randn(10)
+y = x + x
+torch.aten_profiler_end()
+```
