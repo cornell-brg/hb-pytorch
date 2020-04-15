@@ -2,6 +2,9 @@
 
 #include <map>
 #include <vector>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 namespace c10 {
 
@@ -106,6 +109,15 @@ void ATenProfiler::profiling_end() {
   return;
 }
 
+// ============================================================================
+
+bool aten_profiler_in_parallel_region() {
+#ifdef _OPENMP
+  return omp_in_parallel();
+#else
+  return false;
+#endif
+}
 
 void aten_profiler_start() {
   g_aten_profiler.profiling_start();
@@ -129,14 +141,18 @@ void log_unimpl_kernel(const std::string& kernel) {
 ATenProfilerLog::ATenProfilerLog(const std::string& func_name)
   : start(std::chrono::high_resolution_clock::now())
 {
-  g_curr_call_stack.push_back(func_name);
+  if (!aten_profiler_in_parallel_region()) {
+    g_curr_call_stack.push_back(func_name);
+  }
 }
 
 ATenProfilerLog::~ATenProfilerLog()
 {
-  auto delta = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
-  g_aten_profiler.add_log(g_curr_call_stack, delta);
-  g_curr_call_stack.pop_back();
+  if (!aten_profiler_in_parallel_region()) {
+    auto delta = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
+    g_aten_profiler.add_log(g_curr_call_stack, delta);
+    g_curr_call_stack.pop_back();
+  }
 }
 
 }
