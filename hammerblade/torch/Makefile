@@ -15,8 +15,6 @@ else
   COSIM_EXE := $(COSIM_PYTHON_DIR)/test_loader
 endif
 
-$(info Waves, $(WAVES), $(COSIM_EXE))
-
 COSIM_DEBUG :=
 ifeq ($(TRACE),1)
   # bsg_replicant detail: +trace enables execution trace
