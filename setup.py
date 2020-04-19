@@ -765,6 +765,7 @@ if __name__ == '__main__':
         cmdclass=cmdclass,
         packages=packages,
         entry_points=entry_points,
+        scripts=['torch/bin/python_cosim'],
         install_requires=install_requires,
         package_data={
             'torch': [
