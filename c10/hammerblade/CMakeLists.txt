@@ -64,18 +64,24 @@ else()
   if( NOT DEFINED ENV{HB_KERNEL_DIR})
     message( FATAL_ERROR "HB_KERNEL_DIR not set: Please set HB_KERNEL_DIR to kernel binary location.")
   endif()
-  target_compile_definitions(c10_hammerblade PRIVATE
-                             "-DHB_KERNEL_PATH=${CMAKE_BINARY_DIR}/riscv/kernel.riscv")
-
-  target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_DIR} )
 
   # Kernel binary
   add_custom_target(
     kernel_riscv_exe
-    COMMAND make -f $ENV{HB_KERNEL_DIR}/riscv.mk kernel.riscv
+    COMMAND mkdir -p riscv
+    COMMAND make -C riscv -f $ENV{HB_KERNEL_DIR}/riscv.mk kernel.riscv
+    COMMAND cp riscv/kernel.riscv .
+    COMMAND rm -rf riscv
     DEPENDS $ENV{HB_KERNEL_DIR}/riscv.mk
+    BYPRODUCTS kernel.riscv
     )
+
   add_dependencies(c10_hammerblade kernel_riscv_exe)
+
+  target_compile_definitions(c10_hammerblade PRIVATE
+                             "-DHB_KERNEL_PATH=${CMAKE_BINARY_DIR}/riscv/kernel.riscv")
+
+  target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_DIR} )
 endif()
 
 target_include_directories(
