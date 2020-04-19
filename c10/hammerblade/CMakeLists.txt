@@ -64,7 +64,8 @@ else()
   if( NOT DEFINED ENV{HB_KERNEL_DIR})
     message( FATAL_ERROR "HB_KERNEL_DIR not set: Please set HB_KERNEL_DIR to kernel binary location.")
   endif()
-  target_compile_definitions(c10_hammerblade PRIVATE "-DHB_KERNEL_PATH=$ENV{HB_KERNEL_DIR}")
+  target_compile_definitions(c10_hammerblade PRIVATE
+                             "-DHB_KERNEL_PATH=${CMAKE_BINARY_DIR}/riscv/kernel.riscv")
 
   target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_DIR} )
 
@@ -91,7 +92,8 @@ foreach(file ${C10_HAMMERBLADE_HEADERS})
 endforeach()
 install(FILES ${CMAKE_BINARY_DIR}/c10/hammerblade/impl/hammerblade_cmake_macros.h
   DESTINATION include/c10/hammerblade/impl)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kernel.riscv DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kernel.riscv DESTINATION riscv)
+install(PROGRAMS $ENV{HB_KERNEL_DIR}/python_cosim.sh DESTINATION bin RENAME python_cosim)
 
 if (MSVC AND C10_HAMMERBLADE_BUILD_SHARED_LIBS)
   install(FILES $<TARGET_PDB_FILE:c10_hammerblade> DESTINATION lib OPTIONAL)
