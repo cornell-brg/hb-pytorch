@@ -64,7 +64,7 @@ else()
   if( NOT DEFINED ENV{HB_KERNEL_DIR})
     message( FATAL_ERROR "HB_KERNEL_DIR not set: Please set HB_KERNEL_DIR to kernel binary location.")
   endif()
-  target_compile_definitions(c10_hammerblade PRIVATE "-DHB_KERNEL_DIR=$ENV{HB_KERNEL_DIR}")
+  target_compile_definitions(c10_hammerblade PRIVATE "-DHB_KERNEL_PATH=$ENV{HB_KERNEL_DIR}")
 
   target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_DIR} )
 endif()
