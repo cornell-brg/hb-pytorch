@@ -92,7 +92,11 @@ foreach(file ${C10_HAMMERBLADE_HEADERS})
 endforeach()
 install(FILES ${CMAKE_BINARY_DIR}/c10/hammerblade/impl/hammerblade_cmake_macros.h
   DESTINATION include/c10/hammerblade/impl)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kernel.riscv DESTINATION riscv)
+
+if(NOT USE_HB_EMUL)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kernel.riscv DESTINATION riscv)
+endif()
+
 install(PROGRAMS $ENV{HB_KERNEL_DIR}/python_cosim.sh DESTINATION bin RENAME python_cosim)
 
 if (MSVC AND C10_HAMMERBLADE_BUILD_SHARED_LIBS)
