@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/bash -x
 
 TOPLEVEL=$(git rev-parse --show-toplevel)
 COSIM_PYTHON_DIR=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/python
