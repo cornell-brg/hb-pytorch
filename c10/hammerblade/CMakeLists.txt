@@ -67,6 +67,14 @@ else()
   target_compile_definitions(c10_hammerblade PRIVATE "-DHB_KERNEL_PATH=$ENV{HB_KERNEL_DIR}")
 
   target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_DIR} )
+
+  # Kernel binary
+  add_custom_target(
+    kernel_riscv_exe
+    COMMAND make -f $ENV{HB_KERNEL_DIR}/riscv.mk kernel.riscv
+    DEPENDS $ENV{HB_KERNEL_DIR}/riscv.mk
+    )
+  add_dependencies(c10_hammerblade kernel_riscv_exe)
 endif()
 
 target_include_directories(
@@ -83,6 +91,7 @@ foreach(file ${C10_HAMMERBLADE_HEADERS})
 endforeach()
 install(FILES ${CMAKE_BINARY_DIR}/c10/hammerblade/impl/hammerblade_cmake_macros.h
   DESTINATION include/c10/hammerblade/impl)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kernel.riscv DESTINATION bin)
 
 if (MSVC AND C10_HAMMERBLADE_BUILD_SHARED_LIBS)
   install(FILES $<TARGET_PDB_FILE:c10_hammerblade> DESTINATION lib OPTIONAL)

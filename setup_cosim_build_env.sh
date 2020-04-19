@@ -46,7 +46,7 @@ fi
 # Build COSIM runtime library and simulation executable
 make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/python test_loader
 
-export HB_KERNEL_DIR=$DIR/hammerblade/torch/kernel.riscv
+export HB_KERNEL_DIR=$DIR/hammerblade/torch
 
 echo "  \$BSG_MANYCORE_DIR is set to $BSG_MANYCORE_DIR"
 echo "  \$HB_KERNEL_DIR is set to $HB_KERNEL_DIR"
