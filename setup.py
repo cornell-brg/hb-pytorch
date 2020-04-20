@@ -715,7 +715,12 @@ def configure_extension_build():
         ]
     }
 
-    return extensions, cmdclass, packages, entry_points
+    if not cmake_cache_vars['USE_HB_EMUL']:
+        scripts = ['torch/bin/python_cosim']
+    else:
+        scripts = []
+
+    return extensions, cmdclass, packages, entry_points, scripts
 
 # post run, warnings, printed at the end to make them more visible
 build_update_message = """
@@ -754,7 +759,7 @@ if __name__ == '__main__':
     if RUN_BUILD_DEPS:
         build_deps()
 
-    extensions, cmdclass, packages, entry_points = configure_extension_build()
+    extensions, cmdclass, packages, entry_points, scripts = configure_extension_build()
 
     setup(
         name=package_name,
@@ -765,7 +770,7 @@ if __name__ == '__main__':
         cmdclass=cmdclass,
         packages=packages,
         entry_points=entry_points,
-        scripts=['torch/bin/python_cosim'],
+        scripts=scripts,
         install_requires=install_requires,
         package_data={
             'torch': [
