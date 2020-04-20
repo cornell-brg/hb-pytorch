@@ -78,8 +78,10 @@ else()
 
   add_dependencies(c10_hammerblade kernel_riscv_exe)
 
-  target_compile_definitions(c10_hammerblade PRIVATE
-                             "-DHB_KERNEL_PATH=${CMAKE_BINARY_DIR}/riscv/kernel.riscv")
+  target_compile_definitions(
+    c10_hammerblade PRIVATE
+    "-DHB_KERNEL_PATH=${CMAKE_INSTALL_PREFIX}/riscv/kernel.riscv"
+    )
 
   target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_DIR} )
 endif()
