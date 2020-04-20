@@ -6,9 +6,9 @@ COSIM_PYTHON_EXE=$COSIM_PYTHON_DIR/test_loader
 
 if [[ ! -f $COSIM_PYTHON_EXE ]]
 then
-	echo "Error: cannot find the cosim executable $COSIM_PYTHON_EXE." \
-		   "Make sure to run \"source setup_cosim_build_env.sh\" in $TOPLEVEL" 1>&2
-	exit 1
+  echo "Error: cannot find the cosim executable $COSIM_PYTHON_EXE." \
+       "Make sure to run \"source setup_cosim_build_env.sh\" in $TOPLEVEL" 1>&2
+  exit 1
 fi
 
 # COSIM_PYTHON_EXE is the VCS executable in bladerunner.
