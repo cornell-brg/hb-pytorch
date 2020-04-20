@@ -107,7 +107,6 @@ if(NOT USE_HB_EMUL)
           DESTINATION bin RENAME python_cosim)
 endif()
 
-
 if (MSVC AND C10_HAMMERBLADE_BUILD_SHARED_LIBS)
   install(FILES $<TARGET_PDB_FILE:c10_hammerblade> DESTINATION lib OPTIONAL)
 endif()
