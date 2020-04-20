@@ -12,4 +12,5 @@ then
 fi
 
 # COSIM_PYTHON_EXE is the VCS executable in bladerunner.
-eval "$COSIM_PYTHON_EXE +ntb_random_seed_automatic +c_args=\""$@"\" | grep -v \": instantiating\""
+eval "$COSIM_PYTHON_EXE +ntb_random_seed_automatic +c_args=\""$@"\"" \
+     "| grep -v \": instantiating\|\[.*_PROFILER\]\""
