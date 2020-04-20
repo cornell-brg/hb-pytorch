@@ -11,12 +11,5 @@ then
 	exit 1
 fi
 
-# Absolute path to first command line argument is the script
-# to execute
-SCRIPT_PATH=$(realpath $1)
-
-COSIM_CMD=($COSIM_PYTHON_EXE +ntb_random_seed_automatic +c_args=\"$SCRIPT_PATH\")
-COSIM_CMD=("${COSIM_CMD[@]}" "|" grep -v \": instantiating\")
-
 # COSIM_PYTHON_EXE is the VCS executable in bladerunner.
-eval ${COSIM_CMD[@]}
+eval "$COSIM_PYTHON_EXE +ntb_random_seed_automatic +c_args=\""$@"\" | grep -v \": instantiating\""
