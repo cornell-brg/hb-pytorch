@@ -1119,13 +1119,13 @@
   dispatch:
     CPU: _exp__cpu
     CUDA: _exp__cuda
-    HammerBlade: exp
 
 - func: exp.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
   dispatch:
     CPU: _exp_out_cpu
     CUDA: _exp_out_cuda
+    HammerBlade: _exp_out_hb
 
 - func: expm1(Tensor self) -> Tensor
   use_c10_dispatcher: full

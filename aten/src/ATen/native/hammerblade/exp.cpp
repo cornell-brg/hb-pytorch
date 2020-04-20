@@ -7,7 +7,7 @@
 namespace at { namespace native {
 namespace {
 
-void exp_kernel_hb(TensorIterator& iter) {
+static void exp_kernel_hb(TensorIterator& iter) {
     AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "exp_hb", [&]() {
         offload_op_unary(iter, "tensorlib_exp");
         });
