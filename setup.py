@@ -716,7 +716,7 @@ def configure_extension_build():
     }
 
     if not cmake_cache_vars['USE_HB_EMUL']:
-        scripts = ['torch/bin/python_cosim']
+        scripts = ['torch/bin/pycosim']
     else:
         scripts = []
 
