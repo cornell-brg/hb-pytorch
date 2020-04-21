@@ -15,10 +15,14 @@ This work aims to port PyTorch to HammerBlade.
     `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis`
  - Init pytorch third party dependencies
     `git submodule update --init --recursive`
- - Setup building environment variables. You need to edit `hb-pytorch/setup_cosim_build_env.sh` and set `BSG_MANYCORE_DIR` to `<bsg_bladerunner>/bsg_replicant/libraries`
+ - Setup building environment variables. You need to edit `hb-pytorch/setup_cosim_build_env.sh`
     `cd hb-pytorch && source setup_cosim_build_env.sh`
  - Build pytorch. This step can take up to 15 minutes
-    `python setup.py install`
+    `python setup.py develop`
+ - PyTorch can be used with cosim by running one of the following the executable in place of `python`:
+    - `pycosim`: Runs python with cosim backend
+    - `pycosim.trace`: Enables device instruction trace
+    - `pycosim.wave`: Enbales device instruction trace AND waveform dumps
 
 ### How to build PyTorch with Emulation Layer
 
