@@ -105,6 +105,10 @@ if(NOT USE_HB_EMUL)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kernel.riscv DESTINATION riscv)
   install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.sh
           DESTINATION bin RENAME pycosim)
+  install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.trace.sh
+          DESTINATION bin RENAME pycosim.trace)
+  install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.wave.sh
+          DESTINATION bin RENAME pycosim.wave)
 endif()
 
 if (MSVC AND C10_HAMMERBLADE_BUILD_SHARED_LIBS)

@@ -1,6 +1,6 @@
 #!/usr/bin/bash -x
 
-COSIM_PYTHON_EXE=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch/test_loader
+COSIM_PYTHON_EXE=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch/test_loader.debug
 
 if [[ ! -f $COSIM_PYTHON_EXE ]]
 then
@@ -10,5 +10,5 @@ then
 fi
 
 # COSIM_PYTHON_EXE is the VCS executable in bladerunner.
-eval "$COSIM_PYTHON_EXE +ntb_random_seed_automatic +c_args=\""$@"\"" \
+eval "$COSIM_PYTHON_EXE +ntb_random_seed_automatic +trace +c_args=\""$@"\"" \
      "| grep -v \": instantiating\|\[.*_PROFILER\]\""
