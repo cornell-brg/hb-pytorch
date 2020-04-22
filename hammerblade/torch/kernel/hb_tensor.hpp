@@ -9,6 +9,7 @@
 #include <math.h>
 #include <initializer_list>
 #include <hb_assert.hpp>
+#include <hb_hw_patch.hpp>
 
 // =========================================================
 // Device Tensor structs
@@ -67,7 +68,12 @@ class HBTensor {
       dims(t->dims),
       strides((uint32_t*) ((intptr_t) t->strides)),
       sizes((uint32_t*) ((intptr_t) t->sizes)),
-      data((DT*) ((intptr_t) t->data)) {}
+      data((DT*) ((intptr_t) t->data)) {
+        // WAW HW bug seems to be triggered on a non-bloacking load to
+        // the register holding `sizes` in various kernels. This fix
+        // adds a RAW dependedncy on that register, blocking the load.
+        HB_FIX_WAW_HAZARD(sizes);
+      }
 
     char* data_ptr() {
       return (char*)data;
