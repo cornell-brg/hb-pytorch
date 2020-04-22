@@ -15,7 +15,7 @@ This work aims to port PyTorch to HammerBlade.
     `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis`
  - Init pytorch third party dependencies
     `git submodule update --init --recursive`
- - Setup building environment variables. You need to edit `hb-pytorch/setup_cosim_build_env.sh`
+ - Setup building environment variables.
     `cd hb-pytorch && source setup_cosim_build_env.sh`
  - Build pytorch. This step can take up to 15 minutes
     `python setup.py develop`
