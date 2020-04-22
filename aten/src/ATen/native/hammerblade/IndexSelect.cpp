@@ -7,7 +7,7 @@ namespace at {
 namespace native {
 
 Tensor index_select_hb(const Tensor& self, int64_t dim, const Tensor& index) {
-  
+
   auto ndim = self.dim();
   if (ndim == 0) {
     AT_INDEX_ERROR("index_select() cannot be applied to a 0-dim tensor.");
