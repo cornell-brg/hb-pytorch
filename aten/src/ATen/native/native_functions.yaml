@@ -4532,6 +4532,7 @@
   dispatch:
     CPU: legacy::cpu::_th_index_select
     CUDA: legacy::cuda::_th_index_select
+    HammerBlade: index_select_hb
     SparseCPU: index_select_sparse
     SparseCUDA: index_select_sparse
 
