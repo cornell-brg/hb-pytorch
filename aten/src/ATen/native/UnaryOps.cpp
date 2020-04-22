@@ -303,6 +303,11 @@ Tensor& mvlgamma_(Tensor& self, int64_t p) {
   IMPLEMENT_UNARY_OP_OUT_INPLACE(op, cpu, CPU)                         \
   IMPLEMENT_UNARY_OP_OUT_INPLACE(op, cuda, CUDA)
 
+#define IMPLEMENT_UNARY_OP_VEC_HB(op)                                \
+  IMPLEMENT_UNARY_OP_CORE(op)                                          \
+  IMPLEMENT_UNARY_OP_OUT_INPLACE(op, cpu, CPU)                         \
+  IMPLEMENT_UNARY_OP_OUT_INPLACE(op, hb, HAMMERBLADE)
+
 IMPLEMENT_UNARY_OP_VEC(angle)
 IMPLEMENT_UNARY_OP_VEC(real)
 IMPLEMENT_UNARY_OP_VEC(imag)
@@ -313,7 +318,8 @@ IMPLEMENT_UNARY_OP_VEC(cosh)
 IMPLEMENT_UNARY_OP_VEC(erf)
 IMPLEMENT_UNARY_OP_VEC(erfc)
 IMPLEMENT_UNARY_OP_VEC_CUDA(erfinv)
-IMPLEMENT_UNARY_OP_VEC(exp)
+// IMPLEMENT_UNARY_OP_VEC(exp)
+IMPLEMENT_UNARY_OP_VEC_HB(exp)
 IMPLEMENT_UNARY_OP_VEC(reciprocal)
 IMPLEMENT_UNARY_OP_VEC(tan)
 IMPLEMENT_UNARY_OP_VEC(tanh)
