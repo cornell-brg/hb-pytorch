@@ -22,4 +22,3 @@ REGISTER_HAMMERBLADE_DISPATCH(addcmul_stub, &addcmul_kernel_hb);
 
 } // namespace native
 } // namespace at
-
