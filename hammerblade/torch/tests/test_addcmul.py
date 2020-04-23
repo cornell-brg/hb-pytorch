@@ -34,7 +34,7 @@ def test_torch_addcmul_2():
 
 @settings(deadline=None)
 @given(tensors=hu.tensors(n=3))
-def test_torch_addcmul_hypothesis(tensor):
+def test_torch_addcmul_hypothesis(tensors):
     t1 = torch.tensor(tensors[0])
     t2 = torch.tensor(tensors[1])
     t3 = torch.tensor(tensors[2])
