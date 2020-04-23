@@ -2,7 +2,7 @@
 
 --------------------------------------------------------------------------------
 
-# PyTorch HammerBlade Port <a href="https://travis-ci.com/github/cornell-brg/hb-pytorch" rel="Travis">![Travis status](https://travis-ci.com/cornell-brg/hb-pytorch.svg?branch=master)</a> ![Lint](https://github.com/cornell-brg/hb-pytorch/workflows/Lint/badge.svg?branch=LeNet-5)
+# PyTorch HammerBlade Port <a href="https://travis-ci.com/github/cornell-brg/hb-pytorch" rel="Travis">![Travis status](https://travis-ci.com/cornell-brg/hb-pytorch.svg?branch=master)</a> ![Lint](https://github.com/cornell-brg/hb-pytorch/workflows/Lint/badge.svg)
 This work aims to port PyTorch to HammerBlade.
 
 ### How to build PyTorch to use COSIM
