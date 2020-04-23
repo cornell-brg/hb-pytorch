@@ -2,6 +2,8 @@
 #include <ATen/native/hammerblade/HammerBladeTensor.h>
 #include <ATen/native/hammerblade/Offload.h>
 
+#include <iostream>
+
 namespace at {
 namespace native {
 
@@ -14,22 +16,18 @@ Tensor embedding_dense_backward_hb(
   auto indices_arg = TensorArg(indices, "indices", 2);
   checkScalarType("embedding_backward", indices_arg, kLong);
 
-  auto indices_contig = indices.contiguous().cpu();
-  auto indices_data = indices_contig.data_ptr<int64_t>();
   int64_t numel = indices.numel();
+  auto indices_contig = indices.to(at::kInt).contiguous();
   auto grad = grad_.contiguous().view({numel, grad_.size(-1)});
   auto grad_weight = at::zeros({num_weights, grad_.size(-1)}, grad_.options());
 
-  // naive implementation
-  for (size_t i=0; i<numel; i++) {
-    if (indices_data[i] != padding_idx) {
-      int64_t k = indices_data[i];
-      if (k >= 0 && k < num_weights) {
-        float scale = 1.0;
-        grad_weight[k].add_(grad[i], scale);
-      }
-    }
-  }
+  int32_t padding_idx_i32 = safe_downcast<int32_t, int64_t>(padding_idx);
+  int32_t num_weights_i32 = safe_downcast<int32_t, int64_t>(num_weights);
+  int32_t output_numel_i32 = safe_downcast<int32_t, int64_t>(grad_.size(-1));
+
+  hb_offload_kernel(grad_weight, grad, indices_contig, padding_idx_i32,
+                    num_weights_i32, output_numel_i32,
+                    "tensorlib_embedding_backward");
 
   return grad_weight;
 }
