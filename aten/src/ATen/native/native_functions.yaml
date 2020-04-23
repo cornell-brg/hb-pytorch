@@ -2205,6 +2205,7 @@
   dispatch:
     CPU: neg_out
     CUDA: neg_out
+    HammerBlade: neg_out
 
 - func: repeat(Tensor self, int[] repeats) -> Tensor
   variants: method  # This is method-only to match the previous tensor API. In the future we could make this a function too.
