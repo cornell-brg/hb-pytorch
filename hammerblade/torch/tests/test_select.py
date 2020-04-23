@@ -23,9 +23,9 @@ def test_select_1():
 def test_select_2():
     x = torch.randn(10)
     for i in range(10):
-      _test_select(x, i)
+        _test_select(x, i)
 
 def test_select_3():
     x = torch.randn(3, 5)
     for i in range(3):
-      _test_select(x, i)
+        _test_select(x, i)

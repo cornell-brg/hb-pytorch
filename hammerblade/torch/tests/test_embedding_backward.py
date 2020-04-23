@@ -29,16 +29,16 @@ def _test_torch_nn_embedding_back(input, padding_idx=None):
     assert torch.allclose(embedding.weight.grad, embedding_h.weight.grad.cpu())
 
 def test_torch_nn_embedding_back_1():
-    input = torch.LongTensor([1,2,4,5])
+    input = torch.LongTensor([1, 2, 4, 5])
     _test_torch_nn_embedding_back(input)
     _test_torch_nn_embedding_back(input, padding_idx=0)
 
 def test_torch_nn_embedding_back_2():
-    input = torch.LongTensor([[1,2,4,5],[4,3,2,9]])
+    input = torch.LongTensor([[1, 2, 4, 5], [4, 3, 2, 9]])
     _test_torch_nn_embedding_back(input)
     _test_torch_nn_embedding_back(input, padding_idx=0)
 
 def test_torch_nn_embedding_back_3():
-    input = torch.LongTensor([[0,2,0,5],[4,0,0,9]])
+    input = torch.LongTensor([[0, 2, 0, 5], [4, 0, 0, 9]])
     _test_torch_nn_embedding_back(input)
     _test_torch_nn_embedding_back(input, padding_idx=0)
