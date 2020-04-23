@@ -23,14 +23,21 @@ Tensor index_select_hb(const Tensor& self, int64_t dim, const Tensor& index) {
   auto numel = index.numel();
   auto result = at::empty(new_sizes, self.options());
 
-  auto index_cpu = index.cpu();
-  int64_t* index_data = index_cpu.data_ptr<int64_t>();
+  // fast path -- we can simply use memcpy
+  if (dim == 0 && self.is_contiguous()) {
+    auto index_int = index.to(at::kInt).contiguous();
 
-  // naive implementation
-  for (size_t i=0; i<numel; i++) {
-    auto dst = at::select(result, dim, i);
-    auto src = at::select(self, dim, index_data[i]);
-    at::native::copy_(dst, src);
+    hb_offload_kernel(self, result, index_int, "tensorlib_index_select");
+  } else {
+    // slow path
+    auto index_cpu = index.cpu();
+    int64_t* index_data = index_cpu.data_ptr<int64_t>();
+
+    for (size_t i=0; i<numel; i++) {
+      auto dst = at::select(result, dim, i);
+      auto src = at::select(self, dim, index_data[i]);
+      at::native::copy_(dst, src);
+    }
   }
 
   return result;
