@@ -90,6 +90,7 @@ void offload_iterator_reduce_op_impl(TensorIterator& iter, const char* kernel) {
 void offload_op_nullary(TensorIterator& iter, const char* kernel);
 void offload_op_unary(TensorIterator& iter, const char* kernel);
 void offload_op_binary(TensorIterator& iter, const char* kernel);
+void offload_op_ternary(TensorIterator& iter, const char* kernel);
 
 //============================================
 // TensorIterator operations with one scalar
@@ -153,6 +154,26 @@ void offload_op_binary(TensorIterator& iter, ST0 alpha,
   scalars.push_back(create_device_scalar(alpha));
 
   offload_iterator_op_impl(iter, scalars, kernel, 3);
+}
+
+template <typename ST0>
+void offload_op_ternary(TensorIterator& iter, ST0 alpha,
+                        const char* kernel) {
+  if (iter.numel() == 0) {
+    return;
+  }
+
+  if (!iter.can_use_32bit_indexing()) {
+    for (auto& sub_iter : iter.with_32bit_indexing()) {
+      offload_op_ternary(sub_iter, alpha, kernel);
+    }
+    return;
+  }
+
+  std::vector<eva_t> scalars;
+  scalars.push_back(create_device_scalar(alpha));
+
+  offload_iterator_op_impl(iter, scalars, kernel, 4);
 }
 
 //============================================
@@ -220,6 +241,27 @@ void offload_op_binary(TensorIterator& iter, ST0 beta,
   scalars.push_back(create_device_scalar(alpha));
 
   offload_iterator_op_impl(iter, scalars, kernel, 3);
+}
+
+template <typename ST0, typename ST1>
+void offload_op_ternary(TensorIterator& iter, ST0 beta,
+                        ST1 alpha, const char* kernel) {
+  if (iter.numel() == 0) {
+    return;
+  }
+
+  if (!iter.can_use_32bit_indexing()) {
+    for (auto& sub_iter : iter.with_32bit_indexing()) {
+      offload_op_ternary(sub_iter, beta, alpha, kernel);
+    }
+    return;
+  }
+
+  std::vector<eva_t> scalars;
+  scalars.push_back(create_device_scalar(beta));
+  scalars.push_back(create_device_scalar(alpha));
+
+  offload_iterator_op_impl(iter, scalars, kernel, 4);
 }
 
 

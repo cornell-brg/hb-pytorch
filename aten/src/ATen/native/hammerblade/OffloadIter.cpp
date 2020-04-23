@@ -70,6 +70,25 @@ void offload_iterator_op_impl(TensorIterator& iter, std::vector<eva_t> device_sc
   iter.cast_outputs();
 }
 
+//=======================================================================
+// Ternary operations
+//=======================================================================
+
+void offload_op_ternary(TensorIterator& iter, const char* kernel) {
+  if (iter.numel() == 0) {
+    return;
+  }
+
+  if (!iter.can_use_32bit_indexing()) {
+    for (auto& sub_iter : iter.with_32bit_indexing()) {
+      offload_op_ternary(sub_iter, kernel);
+    }
+    return;
+  }
+
+  std::vector<eva_t> scalars;
+  offload_iterator_op_impl(iter, scalars, kernel, 4);
+}
 
 //=======================================================================
 // Binary operations
