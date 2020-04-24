@@ -1,6 +1,15 @@
 # See README.md in this directory for more guidance
 
 
+# temporary benchmarking operator
+# Dummy operaotr for testing / internal use
+- func: dummy(Tensor self, Tensor other) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    HammerBlade: dummy_hb
+
+
 # Temporary type cast operators. These are needed to trace type-casts now since
 # Type's are not supported in the IR. Instead, we call down to these
 # specialized operators for each datatype.

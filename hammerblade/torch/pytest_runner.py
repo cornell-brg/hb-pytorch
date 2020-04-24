@@ -49,4 +49,4 @@ print()
 
 # invoke pytest main loop
 #exit(pytest.main(pytest_argv + targets + ['-k torch_addmm_perf']))
-exit(pytest.main(pytest_argv + targets + ['-k torch_addmm_perf']))
+exit(pytest.main(pytest_argv + targets + ['-k torch_dummy_1']))
