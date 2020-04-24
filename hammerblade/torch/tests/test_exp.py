@@ -11,7 +11,7 @@ def _test_torch_exp(x):
     exp_x = x.exp()
     exp_h = h.exp()
     assert exp_h.device == torch.device("hammerblade")
-    assert torch.equal(exp_h.cpu(), exp_x)
+    assert torch.allclose(exp_h.cpu(), exp_x)
 
 def _test_torch_exp_1():
     x = torch.randn(3, 5)
