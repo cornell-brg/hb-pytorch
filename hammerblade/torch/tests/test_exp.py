@@ -13,14 +13,14 @@ def _test_torch_exp(x):
     assert exp_h.device == torch.device("hammerblade")
     assert torch.allclose(exp_h.cpu(), exp_x)
 
-def _test_torch_exp_1():
+def test_torch_exp_1():
     x = torch.randn(3, 5)
     _test_torch_exp(x)
 
-def _test_torch_exp_2():
+def test_torch_exp_2():
     x = torch.ones(10)
     _test_torch_exp(x)
 
-def _test_torch_exp_3():
+def test_torch_exp_3():
     x = torch.zeros(5)
     _test_torch_exp(x)
