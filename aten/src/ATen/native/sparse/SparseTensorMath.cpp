@@ -207,8 +207,14 @@ Tensor add_sparse(const Tensor& self, const Tensor& other, Scalar alpha) {
   // TODO: Why?! Can't we just flip the order here...
   TORCH_CHECK(!(self.is_sparse() && !other.is_sparse()),
               "add(sparse, dense) is not supported. Use add(dense, sparse) instead.");
-  Tensor result = at::empty({0}, self.options());
-  return at::add_out(result, self, other, alpha);  // redispatch!
+  if(self.is_hammerblade()) {
+    Tensor result = at::empty(self.sizes(), self.options());
+    return at::add_out(result, self, other, alpha);  
+  }
+  else {
+    Tensor result = at::empty({0}, self.options());
+    return at::add_out(result, self, other, alpha);  // redispatch!
+  }
 }
 
 Tensor& add_sparse_(Tensor& self, const Tensor& other, Scalar alpha) {

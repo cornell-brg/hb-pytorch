@@ -8,7 +8,7 @@ namespace at { namespace native {
 namespace {
 
 void fill_kernel_hb(TensorIterator& iter, Scalar value_scalar) {
-  AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "fill_hb", [&]() {
+  AT_DISPATCH_FLOAT_AND_INT_TYPE_ONLY(iter.dtype(), "fill_hb", [&]() {
       offload_op_nullary(iter, value_scalar.to<scalar_t>(), "tensorlib_fill");
       });
 }

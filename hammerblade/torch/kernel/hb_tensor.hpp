@@ -76,6 +76,10 @@ class HBTensor {
     uint32_t* get_strides() {
       return strides;
     }
+   
+    uint32_t stride(uint32_t d) {
+      return strides[d];
+    }
 
     uint32_t* get_sizes() {
       return sizes;
