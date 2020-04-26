@@ -11,12 +11,6 @@
 
 #include <kernel_common.hpp>
 
-#define PATH(x) pstr(x)
-#define pstr(x) #x
-static char kernel_json[] = PATH(HB_KERNEL_LOG);
-#undef pstr
-#undef PATH
-
 void kernel_log(const char*);
 void kernel_log(hb_tensor_t* arg);
 void kernel_log(hb_vector_t* arg);
