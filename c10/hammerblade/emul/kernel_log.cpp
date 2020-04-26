@@ -1,14 +1,26 @@
 #include <kernel_common.hpp>
 #include <iostream>
 
+void kernel_log(const char* kernel) {
+  std::cout << "Logging " << kernel << std::endl;
+}
+
 void kernel_log(hb_tensor_t* arg) {
-  std::cout << "kernel log: " << std::endl;
-  for(int i=0; i<arg->N; ++i) {
-    std::cout << ((float*) ((intptr_t) arg->data))[i] << " ";
-  }
-  std::cout << std::endl;
+  std::cout << "  tensor" << std::endl;
+}
+
+void kernel_log(hb_vector_t* arg) {
+  std::cout << "  vector" << std::endl;
 }
 
 void kernel_log(float* arg) {
-  std::cout << "kernel log: " << *arg << std::endl;
+  std::cout << "  float" << std::endl;
+}
+
+void kernel_log(int32_t* arg) {
+  std::cout << "  int32_t" << std::endl;
+}
+
+void kernel_log(uint32_t* arg) {
+  std::cout << "  uint32_t" << std::endl;
 }
