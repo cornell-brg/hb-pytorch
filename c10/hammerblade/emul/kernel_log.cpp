@@ -1,8 +1,8 @@
 #include <kernel_common.hpp>
 #include <iostream>
 
-// A reasonably popular library for json pasrsing
-// and serialization. Inlcuded as a header only library.
+// A popular C++ library for json pasrsing and
+// serialization. Inlcuded as a header only library.
 //
 // Source: https://github.com/nlohmann/json
 // Release: https://github.com/nlohmann/json/releases/tag/v3.7.3
