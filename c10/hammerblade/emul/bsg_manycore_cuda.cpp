@@ -27,6 +27,7 @@
 
 #include <bsg_manycore_cuda.h>  
 #include <bsg_manycore_errno.h>
+#include <kernel_trampoline.h>
 
 #ifdef __cplusplus
 #include <cstring>
