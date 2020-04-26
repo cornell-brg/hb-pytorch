@@ -27,6 +27,18 @@ extern std::vector<std::function<int(uint32_t, uint64_t*)>> enqueued_kernel;
 extern std::vector<uint32_t>  enqueued_argc;
 extern std::vector<uint64_t*> enqueued_argv;
 
+// HB device kernel logger
+#ifdef HB_ENABLE_KERNEL_LOG
+
+extern KernelLogger kernel_call_logger;
+#define LOG_KERNEL_CALL(...) kernel_call_logger.log_kernel_call(__VA_ARGS__)
+
+#else // HB_ENABLE_KERNEL_LOG
+
+#define LOG_KERNEL_CALL(...)
+
+#endif // HB_ENABLE_KERNEL_LOG
+
 void enqueue_kernel(const std::string &kernel, uint32_t argc, uint64_t* argv);
 int execute_kernels();
 
