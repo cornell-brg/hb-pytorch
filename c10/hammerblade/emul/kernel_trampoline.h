@@ -36,9 +36,6 @@ typedef struct _kernel_registry_ {
     }
 } kernel_registry;
 
-#define xstr(s) str(s)
-#define str(s) #s
-
 #define HB_GET_MACRO(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,NAME,...) NAME
 #define HB_EMUL_REG_KERNEL(...) HB_GET_MACRO(__VA_ARGS__, HB_EMUL_REG_KERNEL_12ARGS,                  \
                                                           HB_EMUL_REG_KERNEL_11ARGS,                  \
@@ -106,7 +103,6 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at2 arg2 = (at2)((intptr_t)_arg2);                                                                \
     at3 arg3 = (at3)((intptr_t)_arg3);                                                                \
     int err = kernel(arg0, arg1, arg2, arg3);                                                         \
-    kernel_log(xstr(kernel));                                                                         \
     kernel_log(arg0);                                                                                 \
     kernel_log(arg1);                                                                                 \
     kernel_log(arg2);                                                                                 \
