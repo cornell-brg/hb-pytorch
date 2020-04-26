@@ -30,7 +30,11 @@ target_compile_options(bsg_manycore_runtime.1.0 PRIVATE "-Wno-unused-but-set-var
 # notify the kernel that we are emulating
 target_compile_definitions(bsg_manycore_runtime.1.0 PRIVATE "-DHB_EMUL")
 
+# Kernel call logging
 if(HB_ENABLE_KERNEL_LOG)
+  # Include the nlohmann_json as a header-only library
+  include_directories(${PROJECT_SOURCE_DIR}/third_party/include/nlohmann)
+
   target_compile_definitions(bsg_manycore_runtime.1.0
                              PRIVATE
                              "-DHB_ENABLE_KERNEL_LOG")
