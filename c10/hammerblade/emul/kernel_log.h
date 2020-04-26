@@ -17,7 +17,11 @@ static char kernel_json[] = PATH(HB_KERNEL_LOG);
 #undef pstr
 #undef PATH
 
+void kernel_log(const char*);
 void kernel_log(hb_tensor_t* arg);
+void kernel_log(hb_vector_t* arg);
 void kernel_log(float* arg);
+void kernel_log(int32_t* arg);
+void kernel_log(uint32_t* arg);
 
 #endif // _KERNEL_LOG_H
