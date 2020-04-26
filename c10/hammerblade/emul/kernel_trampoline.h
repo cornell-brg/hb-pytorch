@@ -20,6 +20,7 @@
 #include <functional>
 #include <string>
 #include <bsg_manycore_errno.h>
+#include <kernel_log.h>
 
 extern std::map<std::string, std::function<int(uint32_t, uint64_t*)>> kernelMap;
 extern std::vector<std::function<int(uint32_t, uint64_t*)>> enqueued_kernel;
@@ -101,6 +102,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at1 arg1 = (at1)((intptr_t)_arg1);                                                                \
     at2 arg2 = (at2)((intptr_t)_arg2);                                                                \
     at3 arg3 = (at3)((intptr_t)_arg3);                                                                \
+    kernel_log(arg0);                                                                                 \
     return kernel(arg0, arg1, arg2, arg3);                                                            \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \

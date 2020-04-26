@@ -8,6 +8,7 @@
 
 #include <math.h>
 #include <initializer_list>
+#include <cstdint>
 #include <hb_assert.hpp>
 #include <hb_hw_patch.hpp>
 
