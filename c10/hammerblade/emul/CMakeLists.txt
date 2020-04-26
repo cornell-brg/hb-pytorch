@@ -30,5 +30,11 @@ target_compile_options(bsg_manycore_runtime.1.0 PRIVATE "-Wno-unused-but-set-var
 # notify the kernel that we are emulating
 target_compile_definitions(bsg_manycore_runtime.1.0 PRIVATE "-DHB_EMUL")
 
+if(HB_ENABLE_KERNEL_LOG)
+  target_compile_definitions(bsg_manycore_runtime.1.0
+                             PRIVATE
+                             "-DHB_ENABLE_KERNEL_LOG")
+endif()
+
 # installation
 install(TARGETS bsg_manycore_runtime.1.0 EXPORT Caffe2Targets DESTINATION lib)
