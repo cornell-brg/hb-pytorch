@@ -44,8 +44,18 @@ class KernelLogger {
       on(on),
       log_path(log_path) {}
 
+    void enable() {
+      on = true;
+    }
+
+    void disable() {
+      on = false;
+    }
+
     void log_kernel_call(const char* kernel) {
-      add_kernel(kernel);
+      if(on) {
+        add_kernel(kernel);
+      }
     }
 
     // Primary interface for using this class.
@@ -54,8 +64,10 @@ class KernelLogger {
     // argument.
     template<class T, class... Types>
     void log_kernel_call(const char* kernel, Types... args, T argl) {
-      log_kernel_call(kernel, args...);
-      add_arg(argl);
+      if(on) {
+        log_kernel_call(kernel, args...);
+        add_arg(argl);
+      }
     }
 
   private:
