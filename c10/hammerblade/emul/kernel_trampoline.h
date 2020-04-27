@@ -111,7 +111,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at2 arg2 = (at2)((intptr_t)_arg2);                                                                \
     at3 arg3 = (at3)((intptr_t)_arg3);                                                                \
     int err = kernel(arg0, arg1, arg2, arg3);                                                         \
-    LOG_KERNEL_CALL("##kernel", arg0, arg1, arg2, arg3);                                              \
+    LOG_KERNEL_CALL(#kernel, arg0, arg1, arg2, arg3);                                                 \
     return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
