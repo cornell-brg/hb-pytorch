@@ -105,15 +105,25 @@ class KernelLogger {
 
     // Log tensor arguments
     void add_arg(hb_tensor_t* tensor) {
+      uint32_t N = tensor->N;
+      uint32_t dims = tensor->dims;
+      uint32_t* strides = (uint32_t*) ((intptr_t) tensor->strides);
+      uint32_t* sizes = (uint32_t*) ((intptr_t) tensor->sizes);
+      float* data = (float*) ((intptr_t) tensor->data);
+
+      // Numeber of elements in the memory
+      // This may not be equal to N in non-contiguous tensors
+      uint32_t numel = N == 0 ? 0 : 1;
+      for(int i = 0; i < dims; ++i) {
+        numel *= strides[i] == 0 ? 1 : sizes[i];
+      }
+
       json tensor_json;
-      tensor_json["N"] = tensor->N;
-      tensor_json["dims"] = tensor->dims;
-      tensor_json["strides"] = json_list(
-          tensor->dims, (uint32_t*) ((intptr_t) tensor->strides));
-      tensor_json["sizes"] = json_list(
-          tensor->dims, (uint32_t*) ((intptr_t) tensor->sizes));
-      tensor_json["data"] = json_list(
-          tensor->N, (float*) ((intptr_t) tensor->data));
+      tensor_json["N"] = N;
+      tensor_json["dims"] = dims;
+      tensor_json["strides"] = json_list(dims, strides);
+      tensor_json["sizes"] = json_list(dims, sizes);
+      tensor_json["data"] = json_list(numel, data);
       log_json[curr_kernel].push_back(tensor_json);
     }
 
