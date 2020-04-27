@@ -55,22 +55,20 @@ class KernelLogger {
       on = false;
     }
 
-    void log_kernel_call(const char* kernel) {
-      if(on) {
-        add_kernel(kernel);
-      }
-    }
-
     // Primary interface for using this class.
     //
     // This method recursively calls add_arg over each kernel
     // argument.
-    template<typename... Types, typename T>
-    void log_kernel_call(const char* kernel, Types... args, T argl) {
+    template<class T, class... Types>
+    void log_kernel_call(T arg1, Types... args) {
       if(on) {
-        log_kernel_call(kernel, args...);
-        add_arg(argl);
+        add_arg(arg1);
+        log_kernel_call(args...);
       }
+    }
+
+    void log_kernel_call() {
+      // base case
     }
 
   private:
