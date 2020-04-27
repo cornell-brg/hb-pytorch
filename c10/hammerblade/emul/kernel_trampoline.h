@@ -61,7 +61,9 @@ typedef struct _kernel_registry_ {
 #define HB_EMUL_REG_KERNEL_1ARGS(kernel)                                                              \
 int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
     assert (argc == 0);                                                                               \
-    return kernel();                                                                                  \
+    int err = kernel();                                                                               \
+    LOG_KERNEL_CALL(#kernel);                                                                          \
+    return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
@@ -71,7 +73,9 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     assert (argc == 1);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
-    return kernel(arg0);                                                                              \
+    int err = kernel(arg0);                                                                           \
+    LOG_KERNEL_CALL(#kernel, arg0);                                                                   \
+    return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
@@ -82,7 +86,9 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     uint64_t _arg1 = argv[1];                                                                         \
     at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
     at1 arg1 = (at1)((intptr_t)_arg1);                                                                \
-    return kernel(arg0, arg1);                                                                        \
+    int err = kernel(arg0, arg1);                                                                     \
+    LOG_KERNEL_CALL(#kernel, arg0, arg1);                                                             \
+    return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
@@ -95,7 +101,9 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
     at1 arg1 = (at1)((intptr_t)_arg1);                                                                \
     at2 arg2 = (at2)((intptr_t)_arg2);                                                                \
-    return kernel(arg0, arg1, arg2);                                                                  \
+    int err = kernel(arg0, arg1, arg2);                                                               \
+    LOG_KERNEL_CALL(#kernel, arg0, arg1, arg2);                                                       \
+    return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
@@ -129,7 +137,9 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at2 arg2 = (at2)((intptr_t)_arg2);                                                                \
     at3 arg3 = (at3)((intptr_t)_arg3);                                                                \
     at4 arg4 = (at4)((intptr_t)_arg4);                                                                \
-    return kernel(arg0, arg1, arg2, arg3, arg4);                                                      \
+    int err = kernel(arg0, arg1, arg2, arg3, arg4);                                                   \
+    LOG_KERNEL_CALL(#kernel, arg0, arg1, arg2, arg3, arg4);                                           \
+    return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
@@ -148,7 +158,9 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at3 arg3 = (at3)((intptr_t)_arg3);                                                                \
     at4 arg4 = (at4)((intptr_t)_arg4);                                                                \
     at5 arg5 = (at5)((intptr_t)_arg5);                                                                \
-    return kernel(arg0, arg1, arg2, arg3, arg4, arg5);                                                \
+    int err = kernel(arg0, arg1, arg2, arg3, arg4, arg5);                                             \
+    LOG_KERNEL_CALL(#kernel, arg0, arg1, arg2, arg3, arg4, arg5);                                     \
+    return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
@@ -169,7 +181,9 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at4 arg4 = (at4)((intptr_t)_arg4);                                                                \
     at5 arg5 = (at5)((intptr_t)_arg5);                                                                \
     at6 arg6 = (at6)((intptr_t)_arg6);                                                                \
-    return kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6);                                          \
+    int err = kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6);                                       \
+    LOG_KERNEL_CALL(#kernel, arg0, arg1, arg2, arg3, arg4, arg5, arg6);                               \
+    return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
@@ -192,7 +206,9 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at5 arg5 = (at5)((intptr_t)_arg5);                                                                \
     at6 arg6 = (at6)((intptr_t)_arg6);                                                                \
     at7 arg7 = (at7)((intptr_t)_arg7);                                                                \
-    return kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);                                    \
+    int err = kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);                                 \
+    LOG_KERNEL_CALL(#kernel, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);                         \
+    return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
@@ -217,7 +233,9 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at6 arg6 = (at6)((intptr_t)_arg6);                                                                \
     at7 arg7 = (at7)((intptr_t)_arg7);                                                                \
     at8 arg8 = (at8)((intptr_t)_arg8);                                                                \
-    return kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);                              \
+    int err = kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);                           \
+    LOG_KERNEL_CALL(#kernel, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);                   \
+    return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
@@ -244,7 +262,9 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at7 arg7 = (at7)((intptr_t)_arg7);                                                                \
     at8 arg8 = (at8)((intptr_t)_arg8);                                                                \
     at9 arg9 = (at9)((intptr_t)_arg9);                                                                \
-    return kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);                        \
+    int err = kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);                     \
+    LOG_KERNEL_CALL(#kernel, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);             \
+    return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
@@ -273,7 +293,9 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at8 arg8 = (at8)((intptr_t)_arg8);                                                                \
     at9 arg9 = (at9)((intptr_t)_arg9);                                                                \
     at10 arg10 = (at10)((intptr_t)_arg10);                                                            \
-    return kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);                 \
+    int err = kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);              \
+    LOG_KERNEL_CALL(#kernel, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);      \
+    return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
