@@ -14,8 +14,3 @@ using json = nlohmann::json;
 void KernelLogger::add_kernel(const char* kernel) {
   std::cout << "Logging " << kernel << std::endl;
 }
-
-typename<T>
-void KernelLogger::add_arg(T arg) {
-  std::cout << "  adding arg of type " << typeid(arg).name() << std::endl;
-}
