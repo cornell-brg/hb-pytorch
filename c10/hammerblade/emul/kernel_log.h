@@ -44,8 +44,16 @@ class KernelLogger {
     // Json object for logging
     json log_json;
 
+    // Kernel call currently being logged
+    std::string curr_kernel;
+
   public:
-    KernelLogger(bool on, std::string log_path);
+    KernelLogger(bool on, std::string log_path) :
+      on(on),
+      log_path(log_path) {
+        log_json = json();
+        curr_kernel = "";
+      }
 
     void enable() {
       on = true;
@@ -69,20 +77,27 @@ class KernelLogger {
 
     void log_kernel_call() {
       // base case
+      std::cout << log_json.dump(4) << std::endl;
     }
 
   private:
+    /**
+     * Overloaded method to log all possible
+     * kernel argument types
+     * */
+
     // Starts logging a kernel call
     void add_arg(const char* kernel) {
-      std::cout << "Logging " << kernel << std::endl;
+      log_json[kernel] = nullptr;
+      curr_kernel = kernel;
     }
 
-    // Overloaded method to log all possible
-    // kernel argument types
-    template<typename T>
-    void add_arg(T arg) {
-      std::cout << "  adding arg of type " << typeid(arg).name() << std::endl;
-    }
+    // Logs kernel arguments
+    void add_arg(hb_tensor_t*);
+    void add_arg(hb_vector_t*);
+    void add_arg(float*);
+    void add_arg(int32_t*);
+    void add_arg(uint32_t*);
 };
 
 #endif // _KERNEL_LOG_H_
