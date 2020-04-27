@@ -24,14 +24,7 @@ using json = nlohmann::json;
  * This class provides a single method interface to log arbitrary
  * kernel call thorugh `log_kernel_call` method. `log_kernel_call`
  * accepts variadic arguments and calls a private overloaded
- * routine capable of logging all possible argument types. As of
- * now, possible kernel argument types are:
- *
- * hb_tensor_t*
- * hb_vector_t*
- * float*
- * int32_t*
- * uint32_t*
+ * routine capable of logging all possible argument types.
  */
 class KernelLogger {
   private:
@@ -63,10 +56,12 @@ class KernelLogger {
       on = false;
     }
 
-    // Primary interface for using this class.
-    //
-    // This method recursively calls add_arg over each kernel
-    // argument.
+    /**
+     * Primary interface for using this class.
+     *
+     * This method recursively calls add_arg over each kernel
+     * argument.
+     */
     template<class T, class... Types>
     void log_kernel_call(T arg1, Types... args) {
       if(on) {
@@ -78,13 +73,14 @@ class KernelLogger {
     void log_kernel_call() {
       // base case
       std::cout << log_json.dump(4) << std::endl;
+      curr_kernel = "";
     }
 
   private:
     /**
      * Overloaded method to log all possible
      * kernel argument types
-     * */
+     */
 
     // Starts logging a kernel call
     void add_arg(const char* kernel) {
@@ -95,9 +91,12 @@ class KernelLogger {
     // Logs kernel arguments
     void add_arg(hb_tensor_t*);
     void add_arg(hb_vector_t*);
-    void add_arg(float*);
-    void add_arg(int32_t*);
-    void add_arg(uint32_t*);
+
+    // Generic add_arg to handle standard types
+    template<typename T>
+    void add_arg(T* arg) {
+      log_json[curr_kernel].push_back(*arg);
+    }
 };
 
 #endif // _KERNEL_LOG_H_
