@@ -120,7 +120,7 @@ const std::string ATenProfiler::profiling_dump() {
   double total_time = 0.0;
 
   // raw string dump starts with time in RIO
-  buffer << "time_in_roi" << "," << time_in_roi << std::endl;
+  buffer << "time_in_roi" << ";" << time_in_roi << std::endl;
 
   for (const auto& p : dict) {
     double ms = p.second.count() / 1000.0;
@@ -132,11 +132,11 @@ const std::string ATenProfiler::profiling_dump() {
       continue;
     }
 
-    buffer << stack.back() << "," << ms << std::endl;
+    buffer << stack.back() << ";" << ms << std::endl;
   }
 
   // raw string dump ends with aggregated total
-  buffer << "agg_total" << "," << total_time << std::endl;
+  buffer << "agg_total" << ";" << total_time << std::endl;
 
   // buffer.str() is a temp object that will be destroyed
   // at the end of this expression
