@@ -2,6 +2,7 @@
 
 #include <c10/core/Backend.h>
 #include <c10/core/ScalarType.h>
+#include <c10/core/ATenProfiler.h>
 #include <c10/util/Exception.h>
 #include <type_traits>
 
@@ -65,6 +66,14 @@ struct CAFFE2_API DispatchStub<rT (*)(Args...), T> {
 
   template <typename... ArgTypes>
   rT operator()(DeviceType device_type, ArgTypes&&... args) {
+#ifdef PROFILE_UNIMPL
+    if (!hammerblade_dispatch_ptr) {
+      c10::log_unimpl_kernel(__stubid);
+    }
+#endif
+#ifdef PROFILE_ATEN
+    c10::LogATenKernelWithName(__stubid);
+#endif
     if (device_type == DeviceType::CPU) {
       if (!cpu_dispatch_ptr) {
         cpu_dispatch_ptr = choose_cpu_impl();
@@ -123,6 +132,7 @@ struct CAFFE2_API DispatchStub<rT (*)(Args...), T> {
 #ifdef HAVE_AVX2_CPU_DEFINITION
   static FnPtr AVX2;
 #endif
+  const char* __stubid;
 };
 
 namespace {
@@ -154,12 +164,12 @@ struct RegisterHAMMERBLADEDispatch {
 // adding parentheses and using helper struct to get rid of the parentheses, do
 // not work with MSVC. So do a `using`-declaration if you need to pass in such
 // `fn`, e.g., grid_sampler_2d_backward_cpu_kernel in GridSampleKernel.h.
-#define DECLARE_DISPATCH(fn, name)         \
-  struct name : DispatchStub<fn, name> {   \
-    name() = default;                      \
-    name(const name&) = delete;            \
-    name& operator=(const name&) = delete; \
-  };                                       \
+#define DECLARE_DISPATCH(fn, name)             \
+  struct name : DispatchStub<fn, name> {       \
+    name() { __stubid = __PRETTY_FUNCTION__; } \
+    name(const name&) = delete;                \
+    name& operator=(const name&) = delete;     \
+  };                                           \
   extern CAFFE2_API struct name name
 
 #define DEFINE_DISPATCH(name) struct name name

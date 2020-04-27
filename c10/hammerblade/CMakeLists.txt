@@ -64,7 +64,24 @@ else()
   if( NOT DEFINED ENV{HB_KERNEL_DIR})
     message( FATAL_ERROR "HB_KERNEL_DIR not set: Please set HB_KERNEL_DIR to kernel binary location.")
   endif()
-  target_compile_definitions(c10_hammerblade PRIVATE "-DHB_KERNEL_DIR=$ENV{HB_KERNEL_DIR}")
+
+  # Kernel binary
+  add_custom_target(
+    kernel_riscv_exe
+    COMMAND mkdir -p riscv
+    COMMAND make -C riscv -f $ENV{HB_KERNEL_DIR}/riscv.mk kernel.riscv
+    COMMAND cp riscv/kernel.riscv .
+    COMMAND rm -rf riscv
+    DEPENDS $ENV{HB_KERNEL_DIR}/riscv.mk
+    BYPRODUCTS kernel.riscv
+    )
+
+  add_dependencies(c10_hammerblade kernel_riscv_exe)
+
+  target_compile_definitions(
+    c10_hammerblade PRIVATE
+    "-DHB_KERNEL_PATH=${CMAKE_INSTALL_PREFIX}/riscv/kernel.riscv"
+    )
 
   target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_DIR} )
 endif()
@@ -83,6 +100,16 @@ foreach(file ${C10_HAMMERBLADE_HEADERS})
 endforeach()
 install(FILES ${CMAKE_BINARY_DIR}/c10/hammerblade/impl/hammerblade_cmake_macros.h
   DESTINATION include/c10/hammerblade/impl)
+
+if(NOT USE_HB_EMUL)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kernel.riscv DESTINATION riscv)
+  install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.sh
+          DESTINATION bin RENAME pycosim)
+  install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.trace.sh
+          DESTINATION bin RENAME pycosim.trace)
+  install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.wave.sh
+          DESTINATION bin RENAME pycosim.wave)
+endif()
 
 if (MSVC AND C10_HAMMERBLADE_BUILD_SHARED_LIBS)
   install(FILES $<TARGET_PDB_FILE:c10_hammerblade> DESTINATION lib OPTIONAL)

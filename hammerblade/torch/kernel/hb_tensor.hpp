@@ -3,12 +3,13 @@
 // 03/09/2020 Bandhav Veluri and Lin Cheng (lc873@cornell.edu)
 //====================================================================
 
-#ifndef _BSG_TENSOR_HPP
-#define _BSG_TENSOR_HPP
+#ifndef _HB_TENSOR_HPP
+#define _HB_TENSOR_HPP
 
 #include <math.h>
 #include <initializer_list>
-#include <bsg_assert.hpp>
+#include <hb_assert.hpp>
+#include <hb_hw_patch.hpp>
 
 // =========================================================
 // Device Tensor structs
@@ -32,7 +33,7 @@ typedef struct {
   uint32_t sizes;
   uint32_t data;
 #endif
-} bsg_tensor_t;
+} hb_tensor_t;
 
 typedef struct {
   uint32_t N;
@@ -41,7 +42,7 @@ typedef struct {
 #else
   uint32_t data;
 #endif
-} bsg_vector_t;
+} hb_vector_t;
 
 // =========================================================
 // Device Tensor classes
@@ -53,7 +54,7 @@ typedef struct {
 // =========================================================
 
 template <typename DT>
-class BSGTensor {
+class HBTensor {
   private:
     uint32_t N;
     uint32_t dims;
@@ -62,21 +63,38 @@ class BSGTensor {
     DT* data;
 
   public:
-    BSGTensor(bsg_tensor_t* t) :
+    HBTensor(hb_tensor_t* t) :
       N(t->N),
       dims(t->dims),
       strides((uint32_t*) ((intptr_t) t->strides)),
       sizes((uint32_t*) ((intptr_t) t->sizes)),
-      data((DT*) ((intptr_t) t->data)) {}
+      data((DT*) ((intptr_t) t->data)) {
+        // WAW HW bug seems to be triggered on a non-bloacking load to
+        // the register holding `sizes` in various kernels. This fix
+        // adds a RAW dependedncy on that register, blocking the load.
+        HB_FIX_WAW_HAZARD(sizes);
+      }
+
+    char* data_ptr() {
+      return (char*)data;
+    }
+
+    uint32_t* get_strides() {
+      return strides;
+    }
+
+    uint32_t* get_sizes() {
+      return sizes;
+    }
 
     int numel() {
       return N;
     }
 
     uint32_t dim(uint32_t d) {
-      bsg_assert_msg(d < dims,
-                     "error: dimesnion must be less than %d\n",
-                     dims);
+      hb_assert_msg(d < dims,
+                    "error: dimesnion must be less than %d\n",
+                    dims);
       return sizes[d];
     }
 
@@ -84,33 +102,31 @@ class BSGTensor {
       return dims;
     }
 
+    // Special case where we want linear, 0-d
+    // and 1-d tensor indexing.
+    //
+    // XXX: The tensor has to be contiguous if
+    // it's >1-d tensor.
+    DT& operator()(uint32_t index) {
+      hb_assert_msg(index < N,
+                    "error: N=%d but accessed %d\n",
+                    N, index);
+      if(dims != 1) {
+        return data[index];
+      } else {
+        // Explicitly calculate data index to handle
+        // non-contiguous 1-d tensors.
+        return data[index * strides[0]];
+      }
+    }
+
     template<typename... T>
-    DT& operator()(T... indices) {
-      std::initializer_list<uint32_t> iarray = {indices...};
+    DT& operator()(uint32_t index0, T... indices) {
+      std::initializer_list<uint32_t> iarray = {index0, indices...};
 
-      // special case where we have a 0-dim tensor
-      if(dims == 0) {
-        bsg_assert_msg(iarray.size() == 1,
-                       "error: expected only one argument with 0-dim tensor\n");
-        for(auto index : iarray) {
-          bsg_assert_msg(index == 0,
-                         "error: index must be 0 0-dim tensor\n");
-        }
-        return data[0];
-      }
-
-      // special case where we want linear indexing
-      // when dims != 1
-      // XXX: this tensor has to be contiguous
-      if(iarray.size() == 1 && dims != 1) {
-        for(auto index : iarray) {
-          return data[index];
-        }
-      }
-
-      bsg_assert_msg(iarray.size() == dims,
-                     "error: expected dims=%d arguments but got %d\n",
-                     dims, iarray.size());
+      hb_assert_msg(iarray.size() == dims,
+                    "error: expected dims=%d arguments but got %d\n",
+                    dims, iarray.size());
       uint32_t offset = 0;
       uint32_t s = 0;
       for(auto index : iarray) {
@@ -118,20 +134,23 @@ class BSGTensor {
         s++;
       }
 
-      bsg_assert_msg(offset < N, "error: N=%d but accessed %d\n", N, offset);
+      hb_assert_msg(offset < N,
+                    "error: N=%d but accessed %d\n",
+                    N, offset);
 
       return data[offset];
     }
 };
 
+
 template<typename T>
-class BSGVector {
+class HBVector {
   private:
     uint32_t N;
     T* data;
 
   public:
-    BSGVector(bsg_vector_t* v) :
+    HBVector(hb_vector_t* v) :
       N(v->N), data((T*) ((intptr_t) v->data)) {}
 
     uint32_t numel() {
@@ -143,4 +162,4 @@ class BSGVector {
     }
 };
 
-#endif // _BSG_TENSOR_HPP
+#endif // _HB_TENSOR_HPP

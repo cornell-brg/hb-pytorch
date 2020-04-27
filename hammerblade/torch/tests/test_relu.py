@@ -6,8 +6,12 @@ Tests on torch.nn.relu (threshold kernel)
 
 import torch
 import torch.nn as nn
+import random
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
+
+torch.manual_seed(42)
+random.seed(42)
 
 def test_torch_nn_relu_1():
     x = torch.ones(10)

@@ -636,12 +636,14 @@
   dispatch:
     CPU: _clamp__cpu
     CUDA: _clamp__cuda
+    HammerBlade: _clamp__hb
 
 - func: clamp.out(Tensor self, Scalar? min=None, Scalar? max=None, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
   dispatch:
     CPU: _clamp_out_cpu
     CUDA: _clamp_out_cuda
+    HammerBlade: _clamp_out_hb
 
 - func: clamp_max(Tensor self, Scalar max) -> Tensor
   use_c10_dispatcher: full
@@ -654,12 +656,14 @@
   dispatch:
     CPU: _clamp_max__cpu
     CUDA: _clamp_max__cuda
+    HammerBlade: _clamp_max__hb
 
 - func: clamp_max.out(Tensor self, Scalar max, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
   dispatch:
     CPU: _clamp_max_out_cpu
     CUDA: _clamp_max_out_cuda
+    HammerBlade: _clamp_max_out_hb
 
 - func: clamp_min(Tensor self, Scalar min) -> Tensor
   use_c10_dispatcher: full
@@ -672,12 +676,14 @@
   dispatch:
     CPU: _clamp_min__cpu
     CUDA: _clamp_min__cuda
+    HammerBlade: _clamp_min__hb
 
 - func: clamp_min.out(Tensor self, Scalar min, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
   dispatch:
     CPU: _clamp_min_out_cpu
     CUDA: _clamp_min_out_cuda
+    HammerBlade: _clamp_min_out_hb
 
 - func: cudnn_is_acceptable(Tensor self) -> bool
   use_c10_dispatcher: full
@@ -969,6 +975,7 @@
   dispatch:
     CPU: embedding_dense_backward_cpu
     CUDA: embedding_dense_backward_cuda
+    HammerBlade: embedding_dense_backward_hb
 
 - func: embedding_renorm_(Tensor(a!) self, Tensor indices, float max_norm, float norm_type) -> Tensor(a!)
   dispatch:
@@ -1202,6 +1209,7 @@
 - func: floor.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
   dispatch:
+    HammerBlade: floor_out
     CPU: floor_out
     CUDA: floor_out
 
@@ -2203,6 +2211,7 @@
   dispatch:
     CPU: neg_out
     CUDA: neg_out
+    HammerBlade: neg_out
 
 - func: repeat(Tensor self, int[] repeats) -> Tensor
   variants: method  # This is method-only to match the previous tensor API. In the future we could make this a function too.
@@ -3646,6 +3655,7 @@
   dispatch:
     CPU: _local_scalar_dense_cpu
     CUDA: _local_scalar_dense_cuda
+    HammerBlade: _local_scalar_dense_hb
   variants: function
   supports_named_tensor: True
 
@@ -4531,6 +4541,7 @@
   dispatch:
     CPU: legacy::cpu::_th_index_select
     CUDA: legacy::cuda::_th_index_select
+    HammerBlade: index_select_hb
     SparseCPU: index_select_sparse
     SparseCUDA: index_select_sparse
 

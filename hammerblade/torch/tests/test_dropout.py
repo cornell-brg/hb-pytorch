@@ -5,10 +5,12 @@ Tests on torch.nn.Dropout
 
 import torch
 import torch.nn as nn
+import random
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
 torch.manual_seed(42)
+random.seed(42)
 
 def _test_torch_nn_dropout(x, p):
     dropout = nn.Dropout(p)

@@ -5,39 +5,36 @@
 
 #include <kernel_common.hpp>
 #include <cmath>
-#define BLOCK_DIM 10 // sqrt(4KB/4 byte/4 data matrix) = 15 max 
+#define BLOCK_DIM 10 // sqrt(4KB/4 byte/4 data matrix) = 15 max
 
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_addmm(
-          bsg_tensor_t* _result,
-          bsg_tensor_t* _self,
-          bsg_tensor_t* _mat1,
-          bsg_tensor_t* _mat2,
+          hb_tensor_t* _result,
+          hb_tensor_t* _self,
+          hb_tensor_t* _mat1,
+          hb_tensor_t* _mat2,
           float* _beta,
           float* _alpha) {
 
     if (__bsg_id == 0) {
 
-        // TODO: Convert uint32_t pointers to correct types
-        auto self = BSGTensor<float>(_self);
-        auto mat1 = BSGTensor<float>(_mat1);
-        auto mat2 = BSGTensor<float>(_mat2);
-        auto result = BSGTensor<float>(_result);
+        auto self = HBTensor<float>(_self);
+        auto mat1 = HBTensor<float>(_mat1);
+        auto mat2 = HBTensor<float>(_mat2);
+        auto result = HBTensor<float>(_result);
         float beta = *_beta;
         float alpha = *_alpha;
 
         // Start profiling
         bsg_cuda_print_stat_kernel_start();
 
-        // TODO: Implement addmm
-
         // v2: single tile, use blocking
         int r1 = mat1.dim(0);
         int c1 = mat1.dim(1);
         int r2 = mat2.dim(0);
         int c2 = mat2.dim(1);
-        bsg_assert(c1 == r2);
+        hb_assert(c1 == r2);
 
         // calculate number of row and col blocks in each matrix
         int m1_num_blk_per_row = (r1 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m1 per row
@@ -59,9 +56,10 @@ extern "C" {
                 int res_dim_x = rc == m2_num_blk_per_col - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
 
                 // initialize scratchpad result
-                float sp_result[res_dim_y][res_dim_x] = {};
+                float sp_result[res_dim_y][res_dim_x];
                 for (int i = 0; i < res_dim_y; i++) {
                     for (int j = 0; j < res_dim_x; j++) {
+                        sp_result[i][j] = 0.0f;
                     }
                 }
 
@@ -69,7 +67,7 @@ extern "C" {
                 float sp_self[res_dim_y][res_dim_x];
                 for (int i = 0; i < res_dim_y; i++) {
                     for (int j = 0; j < res_dim_x; j++) {
-                        sp_self[i][j] = self(rr * res_dim_y + i, rc * res_dim_x + j);
+                        sp_self[i][j] = self(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j);
                     }
                 }
 
@@ -77,7 +75,7 @@ extern "C" {
                 // only care about blocks of mat1 in row rr
                 // and blocks of mat2 in col rc
                 for (int mat1x = 0, mat2y = 0; mat1x < m1_num_blk_per_col && mat2y < m2_num_blk_per_row; mat1x++, mat2y++) {
-                    bsg_assert(mat1x == mat2y);
+                    hb_assert(mat1x == mat2y);
 
                     // calculate current block dimensions
                     int mid_dim = mat1x == m1_num_blk_per_col - 1 ? m1_last_blk_dim_x : BLOCK_DIM;
@@ -126,8 +124,9 @@ extern "C" {
         }
 
 
-        // v1: naive version, single tile, access DRAM elm by elm
 /*
+        // v1: naive version, single tile, access DRAM elm by elm
+  
         int r1 = mat1.dim(0);
         int c1 = mat1.dim(1);
         int r2 = mat2.dim(0);
@@ -137,6 +136,8 @@ extern "C" {
         for (i = 0; i < r1; i++) {
             for (j = 0; j < c2; j++) {
                 for (k = 0; k < c1; k++) {
+                    if(k == 0) 
+                      result(i, j) = 0.0f;
                     result(i, j) += mat1(i, k) * mat2(k, j);
                 }
                 result(i, j) *= alpha;
@@ -151,7 +152,7 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_addmm, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, bsg_tensor_t*, float*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_addmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, float*, float*)
 
 }
 

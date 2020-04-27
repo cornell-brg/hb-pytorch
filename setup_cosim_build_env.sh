@@ -7,16 +7,22 @@ echo ""
 # setup pytorch building options
 export REL_WITH_DEB_INFO=1
 export BUILD_TEST=0
+export USE_MKL=0
+export USE_MKLDNN=0
 export USE_CUDA=0
 export USE_CUDNN=0
 export USE_FBGEMM=0
-export USE_MKLDNN=0
 export USE_NNPACK=0
 export USE_QNNPACK=0
 export USE_DISTRIBUTED=0
 export USE_OPENMP=0
 export ATEN_THREADING=NATIVE
-export CFLAGS='-fuse-ld=bfd'
+export OMP_NUM_THREADS=1
+
+# Use gold if it's available for faster linking.
+if which gold >/dev/null 2>&1 ; then
+    export CFLAGS='-fuse-ld=gold'
+fi
 
 # get current directory
 SOURCE="${BASH_SOURCE[0]}"
@@ -38,9 +44,14 @@ else
 fi
 
 # Build COSIM runtime library and simulation executable
+make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch test_loader
+make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch test_loader.debug
+
+# For backward compatibility.
+# Remove this with bsg_bladerunner's next version. Current is v4.0.0.
 make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/python test_loader
 
-export HB_KERNEL_DIR=$DIR/hammerblade/torch/kernel.riscv
+export HB_KERNEL_DIR=$DIR/hammerblade/torch
 
 echo "  \$BSG_MANYCORE_DIR is set to $BSG_MANYCORE_DIR"
 echo "  \$HB_KERNEL_DIR is set to $HB_KERNEL_DIR"

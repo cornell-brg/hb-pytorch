@@ -652,6 +652,14 @@ if (USE_NCCL)
   target_compile_definitions(torch PRIVATE USE_NCCL)
 endif()
 
+if (PROFILE_ATEN)
+  target_compile_definitions(torch PRIVATE PROFILE_ATEN)
+endif()
+
+if (PROFILE_UNIMPL)
+  target_compile_definitions(torch PRIVATE PROFILE_UNIMPL)
+endif()
+
 
 # ==========================================================
 # formerly-libtorch flags

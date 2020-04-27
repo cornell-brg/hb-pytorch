@@ -3,7 +3,11 @@ Tests on torch.mm
 03/10/2020 Lin Cheng (lc873@cornell.edu)
 """
 import torch
+import random
 import pytest
+
+torch.manual_seed(42)
+random.seed(42)
 
 def test_torch_mm_1():
     mat1 = torch.ones(2, 3)

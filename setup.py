@@ -245,7 +245,7 @@ if IS_WINDOWS:
     cmake_python_library = "{}/libs/python{}.lib".format(
         distutils.sysconfig.get_config_var("prefix"),
         distutils.sysconfig.get_config_var("VERSION"))
-    # Fix virtualenv builds 
+    # Fix virtualenv builds
     # TODO: Fix for python < 3.3
     if not os.path.exists(cmake_python_library):
         cmake_python_library = "{}/libs/python{}.lib".format(
@@ -715,7 +715,16 @@ def configure_extension_build():
         ]
     }
 
-    return extensions, cmdclass, packages, entry_points
+    if cmake_cache_vars['USE_HB'] and not cmake_cache_vars['USE_HB_EMUL']:
+        scripts = [
+            'torch/bin/pycosim',
+            'torch/bin/pycosim.trace',
+            'torch/bin/pycosim.wave',
+        ]
+    else:
+        scripts = []
+
+    return extensions, cmdclass, packages, entry_points, scripts
 
 # post run, warnings, printed at the end to make them more visible
 build_update_message = """
@@ -754,7 +763,7 @@ if __name__ == '__main__':
     if RUN_BUILD_DEPS:
         build_deps()
 
-    extensions, cmdclass, packages, entry_points = configure_extension_build()
+    extensions, cmdclass, packages, entry_points, scripts = configure_extension_build()
 
     setup(
         name=package_name,
@@ -765,6 +774,7 @@ if __name__ == '__main__':
         cmdclass=cmdclass,
         packages=packages,
         entry_points=entry_points,
+        scripts=scripts,
         install_requires=install_requires,
         package_data={
             'torch': [

@@ -4,25 +4,6 @@ March 1, 2020
 Zhongyuan Zhao
 """
 
-# First step, initialize en empty sparse tensor on the hammerblade DRAM.
-# def test_sparse_hammerbalde_empty_path1():
-#   import torch
-#   sphb = torch.device("hammerblade")
-#   x = torch.empty((1,128), device=sphb).to_sparse()
-#   assert x.device == sphb
-#   assert x.type() == 'torch.hammerblade.sparse.FloatTensor'
-#   assert x.is_hammerblade
-
-
-# def test_sparse_hammerblade_empty_path2():
-#   import torch
-#   sphb = torch.device("hammerblade")
-#   x = torch.empty((1,128), device="hammerblade").to_sparse()
-#   assert x.device == sphb
-#   assert x.type() == 'torch.hammerblade.sparse.FloatTensor'
-#   assert x.is_hammerblade
-
-
 def test_sparse_hammerblade_empty_path1():
     import torch
 
@@ -43,8 +24,6 @@ def test_sparse_hammerblade_empty_path1():
     assert hb_x.is_hammerblade
     assert hb_i.type() == 'torch.hammerblade.LongTensor'
     assert hb_v.type() == 'torch.hammerblade.FloatTensor'
-    assert torch.equal(hb_i.cpu(), cpu_i)
-    assert torch.equal(hb_v.cpu(), cpu_v)
 
 def test_sparse_hammerblade_empty_path2():
     import torch
@@ -66,8 +45,6 @@ def test_sparse_hammerblade_empty_path2():
     assert hb_x.is_hammerblade
     assert hb_i.type() == 'torch.hammerblade.LongTensor'
     assert hb_v.type() == 'torch.hammerblade.FloatTensor'
-    assert torch.equal(hb_i.cpu(), cpu_i)
-    assert torch.equal(hb_v.cpu(), cpu_v)
 
 def test_sparse_hammerblade_rand_path():
     import torch
