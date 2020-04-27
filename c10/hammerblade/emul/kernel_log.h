@@ -73,7 +73,9 @@ class KernelLogger {
 
   private:
     // Starts logging a kernel call
-    void add_kernel(const char*);
+    void add_arg(const char* kernel) {
+      std::cout << "Logging " << kernel << std::endl;
+    }
 
     // Overloaded method to log all possible
     // kernel argument types
