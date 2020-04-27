@@ -77,6 +77,18 @@ class KernelLogger {
     }
 
   private:
+    // Helper rotuine to convert C++ arry to a JSON list.
+    template<typename T>
+    json json_list(uint32_t N, T* data) {
+      json obj = json::array();
+
+      for(uint32_t i = 0; i < N; ++i) {
+        obj.push_back(data[i]);
+      }
+
+      return obj;
+    }
+
     /**
      * Overloaded method to log all possible
      * kernel argument types
@@ -88,9 +100,28 @@ class KernelLogger {
       curr_kernel = kernel;
     }
 
-    // Logs kernel arguments
-    void add_arg(hb_tensor_t*);
-    void add_arg(hb_vector_t*);
+    // Log tensor arguments
+    void add_arg(hb_tensor_t* tensor) {
+      json tensor_json;
+      tensor_json["N"] = tensor->N;
+      tensor_json["dims"] = tensor->dims;
+      tensor_json["strides"] = json_list(
+          tensor->dims, (uint32_t*) ((intptr_t) tensor->strides));
+      tensor_json["sizes"] = json_list(
+          tensor->dims, (uint32_t*) ((intptr_t) tensor->sizes));
+      tensor_json["data"] = json_list(
+          tensor->N, (float*) ((intptr_t) tensor->data));
+      log_json[curr_kernel].push_back(tensor_json);
+    }
+
+    // Log vector arguments
+    void add_arg(hb_vector_t* vector) {
+      json vector_json;
+      vector_json["N"] = vector->N;
+      vector_json["data"] = json_list(
+          vector->N, (float*) ((intptr_t) vector->data));
+      log_json[curr_kernel].push_back(vector_json);
+    }
 
     // Generic add_arg to handle standard types
     template<typename T>
