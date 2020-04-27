@@ -55,7 +55,7 @@ bool binary_loaded = false;
 
 // HB device kernel logger
 #ifdef HB_ENABLE_KERNEL_LOG
-KernelLogger kernel_call_logger(false, "kernel_log.json", json());
+KernelLogger kernel_call_logger(false, "kernel_log.json");
 #endif
 
 // reset global state so testing is easier

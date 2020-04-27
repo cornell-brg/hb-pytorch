@@ -40,10 +40,7 @@ class KernelLogger {
     json& log_json;
 
   public:
-    KernelLogger(bool on, std::string log_path, json& log_json) :
-      on(on),
-      log_path(log_path),
-      log_json(log_json) {}
+    KernelLogger(bool on, std::string log_path);
 
     void enable() {
       on = true;
@@ -63,7 +60,7 @@ class KernelLogger {
     //
     // This method recursively calls add_arg over each kernel
     // argument.
-    template<class T, class... Types>
+    template<class... Types, class T>
     void log_kernel_call(const char* kernel, Types... args, T argl) {
       if(on) {
         log_kernel_call(kernel, args...);
