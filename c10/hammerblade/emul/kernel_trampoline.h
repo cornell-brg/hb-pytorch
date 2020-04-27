@@ -29,14 +29,10 @@ extern std::vector<uint64_t*> enqueued_argv;
 
 // HB device kernel logger
 #ifdef HB_ENABLE_KERNEL_LOG
-
-extern KernelLogger kernel_call_logger;
-#define LOG_KERNEL_CALL(...) kernel_call_logger.log_kernel_call(__VA_ARGS__)
-
+  extern KernelLogger kernel_call_logger;
+  #define LOG_KERNEL_CALL(...) kernel_call_logger.log_kernel_call(__VA_ARGS__)
 #else // HB_ENABLE_KERNEL_LOG
-
-#define LOG_KERNEL_CALL(...)
-
+  #define LOG_KERNEL_CALL(...)
 #endif // HB_ENABLE_KERNEL_LOG
 
 void enqueue_kernel(const std::string &kernel, uint32_t argc, uint64_t* argv);
@@ -115,6 +111,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
     at2 arg2 = (at2)((intptr_t)_arg2);                                                                \
     at3 arg3 = (at3)((intptr_t)_arg3);                                                                \
     int err = kernel(arg0, arg1, arg2, arg3);                                                         \
+    LOG_KERNEL_CALL("##kernel", arg0, arg1, arg2, arg3);                                              \
     return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
