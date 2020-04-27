@@ -28,6 +28,7 @@
 #include <bsg_manycore_cuda.h>  
 #include <bsg_manycore_errno.h>
 #include <kernel_trampoline.h>
+#include <json.hpp>
 
 #ifdef __cplusplus
 #include <cstring>
@@ -54,7 +55,7 @@ bool binary_loaded = false;
 
 // HB device kernel logger
 #ifdef HB_ENABLE_KERNEL_LOG
-KernelLogger kernel_call_logger(false, "kernel_log.json");
+KernelLogger kernel_call_logger(false, "kernel_log.json", json());
 #endif
 
 // reset global state so testing is easier

@@ -6,11 +6,11 @@
 #ifndef _KERNEL_LOG_H_
 #define _KERNEL_LOG_H_
 
-#include <filesystem>
+#include <string>
 #include <json_fwd.hpp>
 #include <kernel_common.hpp>
+#include <iostream>
 
-using fs = std::filesystem;
 using json = nlohmann::json;
 
 /**
@@ -34,15 +34,16 @@ class KernelLogger {
     bool on;
 
     // Path to log file
-    fs::path log_path;
+    std::string log_path;
 
     // Json object for logging
-    json log_json;
+    json& log_json;
 
   public:
-    KernelLogger(bool on, fs::path log_path) :
+    KernelLogger(bool on, std::string log_path, json& log_json) :
       on(on),
-      log_path(log_path) {}
+      log_path(log_path),
+      log_json(log_json) {}
 
     void enable() {
       on = true;
@@ -76,11 +77,10 @@ class KernelLogger {
 
     // Overloaded method to log all possible
     // kernel argument types
-    void add_arg(hb_tensor_t* arg);
-    void add_arg(hb_vector_t* arg);
-    void add_arg(float* arg);
-    void add_arg(int32_t* arg);
-    void add_arg(uint32_t* arg);
-}
+    template<typename T>
+    void add_arg(T arg) {
+      std::cout << "  adding arg of type " << typeid(arg).name() << std::endl;
+    }
+};
 
-#endif // _KERNEL_LOG_H
+#endif // _KERNEL_LOG_H_
