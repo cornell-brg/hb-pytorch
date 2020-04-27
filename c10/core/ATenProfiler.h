@@ -21,6 +21,8 @@ public:
   void profiling_start();
   void profiling_end();
   const std::string profiling_dump();
+  void print();
+  void print_unimpl_kernel();
   bool in_roi;
   double time_in_roi;
 
@@ -28,8 +30,6 @@ private:
   std::map<std::vector<std::string>, std::chrono::microseconds> dict;
   std::chrono::time_point<std::chrono::high_resolution_clock> start;
   std::map<std::string, long> unimpl_kernel;
-  void print();
-  void print_unimpl_kernel();
 };
 
 C10_API void aten_profiler_start();
@@ -37,6 +37,8 @@ C10_API void aten_profiler_end();
 C10_API const std::string aten_profiler_dump();
 C10_API bool is_in_aten_profiler_roi();
 C10_API void log_unimpl_kernel(const std::string& kernel);
+C10_API void aten_profiler_stack_print();
+C10_API void aten_profiler_unimpl_print();
 
 struct C10_API ATenProfilerLog {
 public:

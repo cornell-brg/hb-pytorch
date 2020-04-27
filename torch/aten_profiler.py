@@ -46,6 +46,7 @@ class ProfilerTopLvlFuncRecord(ProfilerRecord):
         func = "aten::" + func
         self.func = func
 
+
 def enable():
     torch._C._aten_profiler_start()
 
@@ -55,7 +56,13 @@ def disable():
 def raw_dump():
     return torch._C._aten_profiler_dump()
 
-def fancy_print(raw_data=None):
+def stack_print():
+    torch._C._aten_profiler_stack_print()
+
+def unimpl_print():
+    torch._C._aten_profiler_unimpl_print()
+
+def _process_raw_data(raw_data=None):
     if raw_data is None:
         raw_data = torch._C._aten_profiler_dump()
     raw_entries = raw_data.splitlines()
@@ -68,10 +75,39 @@ def fancy_print(raw_data=None):
         entry = ProfilerTopLvlFuncRecord(e)
         entry.calc_percentage(time_in_roi.time_ms)
         entries.append(entry)
+    entries.sort(key=lambda e: e.time_ms, reverse=True)
     entries += [other, time_in_roi]
+
+    return entries
+
+def fancy_print(raw_data=None):
+    entries = _process_raw_data(raw_data)
 
     for e in entries:
         func = e.func
         time = e.time_ms / 1000.0
         percentage = e.percentage
         print(f'{func:30}     {time:.2f} {percentage:.1f}%')
+
+def latex_table(raw_data=None):
+    entries = _process_raw_data(raw_data)
+
+    header = "\\begin{table}[t]\n" \
+             "\\begin{tabular}{lrr}\n" \
+             "\\toprule\n" \
+             "& \\textbf{Time} & \\textbf{Percent} \\\\\n" \
+             "\\textbf{Kernel} & \\textbf{(s)} & \\textbf{of Total} \\\\ \\midrule\n"
+    print(header)
+
+    for e in entries:
+        func = e.func
+        func = func.replace("_", "\\_")
+        time = e.time_ms / 1000.0
+        percentage = e.percentage
+        print(f'\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\')
+
+    footer = "\\bottomrule\n" \
+             "\\end{tabular}\n" \
+             "\\label{tbl-plat}\n" \
+             "\\end{table}\n"
+    print(footer)

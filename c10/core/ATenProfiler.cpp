@@ -73,9 +73,7 @@ void ATenProfiler::add_kernel_log(const std::string& kernel) {
 
 void ATenProfiler::profiling_start() {
 #ifdef PROFILE_ATEN
-  std::cerr << "==========================================================================" << std::endl;
   std::cerr << " ATen profiler collecting ..." << std::endl;
-  std::cerr << "==========================================================================" << std::endl;
   // clear the dict when entering ROI
   g_curr_call_stack.clear();
   dict.clear();
@@ -95,19 +93,8 @@ void ATenProfiler::profiling_end() {
 #ifdef PROFILE_ATEN
   in_roi = false;
   auto delta = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
-  std::cerr << std::endl << std::endl;
-  std::cerr << "==========================================================================" << std::endl;
-  std::cerr << " ATen profile results" << std::endl;
-  std::cerr << "==========================================================================" << std::endl;
-  std::cerr << std::setw(180) << std::left << " Total time in ROI:" << "   "
-            << delta.count() / 1000000.0 << " s" << std::endl;
-  std::cerr << "==========================================================================" << std::endl;
-  print();
   // total time in ROI, measured in ms.
   time_in_roi = delta.count() / 1000.0;
-#endif
-#ifdef PROFILE_UNIMPL
-  print_unimpl_kernel();
 #endif
   return;
 }
@@ -176,6 +163,15 @@ void log_unimpl_kernel(const std::string& kernel) {
   g_aten_profiler.add_kernel_log(kernel);
 }
 
+void aten_profiler_stack_print() {
+  g_aten_profiler.print();
+  return;
+}
+
+void aten_profiler_unimpl_print() {
+  g_aten_profiler.print_unimpl_kernel();
+  return;
+}
 
 ATenProfilerLog::ATenProfilerLog(const std::string& func_name)
   : start(std::chrono::high_resolution_clock::now())

@@ -530,6 +530,16 @@ static PyObject * THPModule_atenProfilerDump(PyObject *module, PyObject *noargs)
   return PyUnicode_FromString(c10::aten_profiler_dump().c_str());
 }
 
+static PyObject * THPModule_atenProfilerStackPrint(PyObject *module, PyObject *noargs) {
+  c10::aten_profiler_stack_print();
+  Py_RETURN_NONE;
+}
+
+static PyObject * THPModule_atenProfilerUnimplPrint(PyObject *module, PyObject *noargs) {
+  c10::aten_profiler_unimpl_print();
+  Py_RETURN_NONE;
+}
+
 //NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 static PyMethodDef TorchMethods[] = {
   {"_initExtension",  (PyCFunction)THPModule_initExtension,   METH_O,       nullptr},
@@ -573,6 +583,8 @@ static PyMethodDef TorchMethods[] = {
   {"_aten_profiler_start", (PyCFunction)THPModule_atenProfilerStart, METH_NOARGS,  nullptr},
   {"_aten_profiler_end",   (PyCFunction)THPModule_atenProfilerEnd,   METH_NOARGS,  nullptr},
   {"_aten_profiler_dump",  (PyCFunction)THPModule_atenProfilerDump,   METH_NOARGS,  nullptr},
+  {"_aten_profiler_stack_print",  (PyCFunction)THPModule_atenProfilerStackPrint,   METH_NOARGS,  nullptr},
+  {"_aten_profiler_unimpl_print",  (PyCFunction)THPModule_atenProfilerUnimplPrint,   METH_NOARGS,  nullptr},
   {nullptr, nullptr, 0, nullptr}
 };
 
