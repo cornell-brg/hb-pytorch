@@ -7,7 +7,7 @@
 #define _KERNEL_LOG_H_
 
 #include <string>
-#include <json_fwd.hpp>
+#include <json.hpp>
 #include <kernel_common.hpp>
 #include <iostream>
 
@@ -37,7 +37,7 @@ class KernelLogger {
     std::string log_path;
 
     // Json object for logging
-    json& log_json;
+    json log_json;
 
   public:
     KernelLogger(bool on, std::string log_path);
@@ -60,7 +60,7 @@ class KernelLogger {
     //
     // This method recursively calls add_arg over each kernel
     // argument.
-    template<class... Types, class T>
+    template<typename... Types, typename T>
     void log_kernel_call(const char* kernel, Types... args, T argl) {
       if(on) {
         log_kernel_call(kernel, args...);

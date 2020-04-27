@@ -11,7 +11,7 @@
 
 using json = nlohmann::json;
 
-KernelLogger(bool on, std::string log_path) :
+KernelLogger::KernelLogger(bool on, std::string log_path) :
   on(on),
   log_path(log_path) {
     log_json = json();
