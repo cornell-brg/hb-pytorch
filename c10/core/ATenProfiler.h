@@ -20,7 +20,9 @@ public:
   void add_kernel_log(const std::string& kernel);
   void profiling_start();
   void profiling_end();
+  const std::string profiling_dump();
   bool in_roi;
+  double time_in_roi;
 
 private:
   std::map<std::vector<std::string>, std::chrono::microseconds> dict;
@@ -32,6 +34,7 @@ private:
 
 C10_API void aten_profiler_start();
 C10_API void aten_profiler_end();
+C10_API const std::string aten_profiler_dump();
 C10_API bool is_in_aten_profiler_roi();
 C10_API void log_unimpl_kernel(const std::string& kernel);
 

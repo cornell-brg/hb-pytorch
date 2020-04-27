@@ -526,6 +526,10 @@ static PyObject * THPModule_atenProfilerEnd(PyObject *module, PyObject *noargs) 
   Py_RETURN_NONE;
 }
 
+static PyObject * THPModule_atenProfilerDump(PyObject *module, PyObject *noargs) {
+  return PyUnicode_FromString(c10::aten_profiler_dump().c_str());
+}
+
 //NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 static PyMethodDef TorchMethods[] = {
   {"_initExtension",  (PyCFunction)THPModule_initExtension,   METH_O,       nullptr},
@@ -568,6 +572,7 @@ static PyMethodDef TorchMethods[] = {
   {"_supported_qengines", (PyCFunction)THPModule_supportedQEngines, METH_NOARGS, nullptr},
   {"aten_profiler_start", (PyCFunction)THPModule_atenProfilerStart, METH_NOARGS,  nullptr},
   {"aten_profiler_end",   (PyCFunction)THPModule_atenProfilerEnd,   METH_NOARGS,  nullptr},
+  {"aten_profiler_dump",  (PyCFunction)THPModule_atenProfilerDump,   METH_NOARGS,  nullptr},
   {nullptr, nullptr, 0, nullptr}
 };
 

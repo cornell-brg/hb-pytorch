@@ -2,6 +2,7 @@
 
 #include <map>
 #include <vector>
+#include <sstream>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -102,11 +103,45 @@ void ATenProfiler::profiling_end() {
             << delta.count() / 1000000.0 << " s" << std::endl;
   std::cerr << "==========================================================================" << std::endl;
   print();
+  // total time in ROI, measured in ms.
+  time_in_roi = delta.count() / 1000.0;
 #endif
 #ifdef PROFILE_UNIMPL
   print_unimpl_kernel();
 #endif
   return;
+}
+
+const std::string ATenProfiler::profiling_dump() {
+
+  using std::chrono::microseconds;
+
+  std::stringstream buffer;
+  double total_time = 0.0;
+
+  // raw string dump starts with time in RIO
+  buffer << "time_in_roi" << "," << time_in_roi << std::endl;
+
+  for (const auto& p : dict) {
+    double ms = p.second.count() / 1000.0;
+    auto& stack = p.first;
+
+    if (stack.size() == 1) {
+      total_time += ms;
+    } else {
+      continue;
+    }
+
+    buffer << stack.back() << "," << ms << std::endl;
+  }
+
+  // raw string dump ends with aggregated total
+  buffer << "agg_total" << "," << total_time << std::endl;
+
+  // buffer.str() is a temp object that will be destroyed
+  // at the end of this expression
+  const std::string data = buffer.str();
+  return data;
 }
 
 // ============================================================================
@@ -127,6 +162,10 @@ void aten_profiler_start() {
 void aten_profiler_end() {
   g_aten_profiler.profiling_end();
   return;
+}
+
+const std::string aten_profiler_dump() {
+  return g_aten_profiler.profiling_dump();
 }
 
 bool is_in_aten_profiler_roi() {
