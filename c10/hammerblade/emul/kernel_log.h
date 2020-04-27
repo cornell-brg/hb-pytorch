@@ -123,6 +123,14 @@ class KernelLogger {
       log_json[curr_kernel].push_back(vector_json);
     }
 
+    void add_arg(void* arg) {
+      // TODO: memcpy?
+    }
+
+    void add_arg(const void* arg) {
+      // TODO: memcpy?
+    }
+
     // Generic add_arg to handle standard types
     template<typename T>
     void add_arg(T* arg) {
