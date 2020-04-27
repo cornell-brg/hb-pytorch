@@ -9,6 +9,7 @@
 
 namespace c10 {
 
+// Global Variables
 ATenProfiler g_aten_profiler;
 std::vector<std::string> g_curr_call_stack;
 
@@ -183,7 +184,7 @@ void aten_profiler_unimpl_print() {
   return;
 }
 
-//=============== Aten Profiler Log Members =======================
+// =============== Aten Profiler Log Members =======================
 
 // Entering a function
 ATenProfilerLog::ATenProfilerLog(const std::string& func_name)
