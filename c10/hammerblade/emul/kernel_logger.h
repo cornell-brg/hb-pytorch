@@ -72,8 +72,11 @@ class KernelLogger {
 
     void log_kernel_call() {
       // base case
-      std::cout << log_json.dump(4) << std::endl;
-      curr_kernel = "";
+      if(on) {
+        std::cout << std::endl << curr_kernel << std::endl;
+        std::cout << log_json[curr_kernel].dump(4) << std::endl;
+        curr_kernel = "";
+      }
     }
 
   private:

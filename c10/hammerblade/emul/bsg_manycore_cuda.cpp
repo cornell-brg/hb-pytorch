@@ -368,5 +368,8 @@ void reset_runtime() {
           }
           device_busy = false;
           binary_loaded = false;
+#ifdef HB_ENABLE_KERNEL_LOG
+          kernel_call_logger.disable();
+#endif
           return HB_MC_SUCCESS;
         }
