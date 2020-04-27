@@ -28,7 +28,6 @@
 #include <bsg_manycore_cuda.h>  
 #include <bsg_manycore_errno.h>
 #include <kernel_trampoline.h>
-#include <json.hpp>
 
 #ifdef __cplusplus
 #include <cstring>

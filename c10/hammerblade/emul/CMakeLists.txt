@@ -33,7 +33,7 @@ target_compile_definitions(bsg_manycore_runtime.1.0 PRIVATE "-DHB_EMUL")
 # Include the nlohmann_json as a header-only library
 target_include_directories(bsg_manycore_runtime.1.0
                            PRIVATE
-                           ${CMAKE_SOURCE_DIR}/third_party/include/nlohmann)
+                           ${CMAKE_SOURCE_DIR}/third_party/include)
 
 # Kernel call logging
 if(HB_ENABLE_KERNEL_LOG)
