@@ -5,9 +5,9 @@ extern "C" {
 
   __attribute__ ((noinline)) int tensorlib_eye(
     hb_tensor_t* output, long* n, long* m) {
-    auto y = HBTensor<float>(output);
-    auto N = *n;
-    auto M = *m;
+    HBTensor<float> y(output);
+    long N = *n;
+    long M = *m;
     // Start profiling
 
     bsg_cuda_print_stat_kernel_start();
