@@ -87,7 +87,8 @@ def fancy_print(raw_data=None):
         func = e.func
         time = e.time_ms / 1000.0
         percentage = e.percentage
-        print(f'{func:30}     {time:.2f} {percentage:.1f}%')
+        print('{func:30}     {time:.2f} {percentage:.1f}%'.format(
+            func=func, time=time, percentage=percentage))
 
 def latex_table(raw_data=None):
     entries = _process_raw_data(raw_data)
@@ -104,7 +105,8 @@ def latex_table(raw_data=None):
         func = func.replace("_", "\\_")
         time = e.time_ms / 1000.0
         percentage = e.percentage
-        print(f'\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\')
+        print('\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\'.format(
+            func=func, time=time, percentage=percentage))
 
     footer = "\\bottomrule\n" \
              "\\end{tabular}\n" \
