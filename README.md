@@ -125,8 +125,23 @@ Region of interest (ROI) should be marked with `torch.aten_profiler_start()` and
 ```python
 import torch
 
-torch.aten_profiler_start()
+# start of ROI
+torch.aten_profiler.enable()
 x = torch.randn(10)
 y = x + x
-torch.aten_profiler_end()
+# end of ROI
+torch.aten_profiler.disable()
+
+# print out top level kernel table
+torch.aten_profiler.fancy_print()
+
+# latex version of the above
+torch.aten_profiler.latex_table()
+
+# print out raw execution time stask
+torch.aten_profiler.stack_print()
+
+# print out unimplemented kernels
+torch.aten_profiler.unimpl_print()
+
 ```
