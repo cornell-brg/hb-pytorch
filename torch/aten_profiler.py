@@ -90,6 +90,17 @@ def fancy_print(raw_data=None):
         print('{func:30}     {time:.2f} {percentage:.1f}%'.format(
             func=func, time=time, percentage=percentage))
 
+def fancy_print_to_file(raw_data=None, filename="profiling.txt"):
+    entries = _process_raw_data(raw_data)
+
+    with open(filename, "w") as file:
+        for e in entries:
+            func = e.func
+            time = e.time_ms / 1000.0
+            percentage = e.percentage
+            file.write('{func:30}     {time:.2f} {percentage:.1f}%\n'.format(
+                func=func, time=time, percentage=percentage))
+
 def latex_table(raw_data=None):
     entries = _process_raw_data(raw_data)
 
