@@ -24,6 +24,9 @@ typedef struct {
   eva_t strides; // Pointer to stride vector; number of strides = dims
   eva_t sizes;   // Pointer to sizes vector; number of sizes = dims
   eva_t data;    // Pointer to raw data
+#ifdef HB_ENABLE_KERNEL_LOG
+  Tensor tensor;
+#endif
 } hb_mc_tensor_t;
 
 //====================================================

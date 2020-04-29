@@ -20,7 +20,10 @@
 #include <functional>
 #include <string>
 #include <bsg_manycore_errno.h>
+
+#ifdef HB_ENABLE_KERNEL_LOG
 #include <kernel_logger.h>
+#endif
 
 extern std::map<std::string, std::function<int(uint32_t, uint64_t*)>> kernelMap;
 extern std::vector<std::function<int(uint32_t, uint64_t*)>> enqueued_kernel;

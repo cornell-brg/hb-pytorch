@@ -12,6 +12,10 @@
 #include <hb_assert.hpp>
 #include <hb_hw_patch.hpp>
 
+#ifdef HB_ENABLE_KERNEL_LOG
+#include <ATen/ATen.h>
+#endif
+
 // =========================================================
 // Device Tensor structs
 //
@@ -25,6 +29,7 @@
 typedef struct {
   uint32_t N;
   uint32_t dims;
+
 #ifdef HB_EMUL
   uint64_t strides;
   uint64_t sizes;
@@ -33,6 +38,11 @@ typedef struct {
   uint32_t strides;
   uint32_t sizes;
   uint32_t data;
+#endif
+
+// Original tensor object on host
+#ifdef HB_ENABLE_KERNEL_LOG
+  at::Tensor tensor;
 #endif
 } hb_tensor_t;
 
