@@ -41,7 +41,7 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
                                   const int64_t* strides,
                                   const int64_t* sizes,
                                   const void* data,
-#if HB_ENABLE_KERNEL_LOG
+#ifdef HB_ENABLE_KERNEL_LOG
                                   const Tensor& host_tensor,
 #endif
                                   std::vector<eva_t>& device_ptrs) {
@@ -58,6 +58,16 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
   // allocate memory for sizes
   tensor_sizes = c10::hammerblade::device_malloc(dims * sizeof(uint32_t));
   device_ptrs.push_back(tensor_sizes);
+
+#ifdef HB_ENABLE_KERNEL_LOG
+  TORCH_WARN("data_ptr: ", host_tensor.data_ptr());
+  TORCH_WARN("storage_ptr: ", host_tensor.storage().data());
+  TORCH_WARN("storage_ptr: ", host_tensor.storage().unsafe_data<float>());
+  TORCH_WARN("storage_offset: ", host_tensor.storage_offset());
+  TORCH_WARN("storage_numel: ", host_tensor.storage().numel());
+  // increment the ref count of host tensor for later use by logger
+  // c10::raw::intrusive_ptr::incref(host_tensor.unsafeGetTensorImpl());
+#endif
 
   // tensor struct on host
   hb_mc_tensor_t tensor_host = {

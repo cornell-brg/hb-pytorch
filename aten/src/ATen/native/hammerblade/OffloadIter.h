@@ -67,7 +67,11 @@ void offload_iterator_reduce_op_impl(TensorIterator& iter, const char* kernel) {
 
     eva_t device_arg = create_device_tensor(
         n, iter.ndim(),
-        (const int64_t*)strides, (const int64_t*)sizes, iter.data_ptr(i), device_ptrs);
+        (const int64_t*)strides, (const int64_t*)sizes, iter.data_ptr(i),
+#ifdef HB_ENABLE_KERNEL_LOG
+        (const Tensor&) iter.tensor(i),
+#endif
+        device_ptrs);
     device_args.push_back(device_arg);
     free(strides);
   }
