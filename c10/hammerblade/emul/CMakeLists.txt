@@ -35,12 +35,5 @@ target_include_directories(bsg_manycore_runtime.1.0
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/third_party/include)
 
-# Kernel call logging
-if(HB_ENABLE_KERNEL_LOG)
-  target_compile_definitions(bsg_manycore_runtime.1.0
-                             PRIVATE
-                             "-DHB_ENABLE_KERNEL_LOG")
-endif()
-
 # installation
 install(TARGETS bsg_manycore_runtime.1.0 EXPORT Caffe2Targets DESTINATION lib)

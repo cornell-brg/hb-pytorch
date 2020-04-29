@@ -116,8 +116,10 @@ class KernelLogger {
       uint32_t* sizes = (uint32_t*) ((intptr_t) tensor->sizes);
       float* data = (float*) ((intptr_t) tensor->data);
 
-      TORCH_WARN("data_ptr: ", tensor->tensor);
-      TORCH_WARN("storage_numel: ", tensor->tensor.storage().numel());
+      //TORCH_WARN("data_ptr: ", tensor->tensor.defined());
+      //TORCH_WARN("storage_numel: ", tensor->tensor.storage().numel());
+
+      // c10::raw::intrusive_ptr::decref(tensor->tensor.unsafeGetTensorImpl());
 
       // Numeber of elements in the memory
       // This may not be equal to N in non-contiguous tensors
