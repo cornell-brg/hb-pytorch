@@ -124,6 +124,24 @@ c10::LogATenKernel();
 }
 """)
 
+NATIVE_DISPATCH_DEFINITION_BACKEND_REDISPATCH = CodeTemplate("""\
+${return_type} ${api_name}(${type_method_formals}) {
+#ifdef PROFILE_ATEN
+c10::LogATenKernel();
+#endif
+#ifdef BUILD_NAMEDTENSOR
+    ${named_guard_declaration}
+#endif
+    ${device_guard_declaration}
+    if(!${redispatch_condition}) {
+        ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
+    } else {
+        ${tensor_boxing}
+        ${return_call} at::native::${alter_method_dispatch}(${alter_actuals});
+    }
+}
+""")
+
 DEFAULT_UNBOXEDONLY_FUNCTION_REGISTRATION = CodeTemplate("""\
 .op(torch::RegisterOperators::options()
   .schema("${schema_string}")
@@ -648,6 +666,10 @@ FunctionOption = TypedDict('FunctionOption', {
     'when_sparse_dispatch': str,
     'with_gil': bool,
     'zero_dim_dispatch_when_scalar': str,
+    'redispatch_condition' : str,
+    'tensor_boxing' : str,
+    'alter_method_dispatch' : str,
+    'alter_actuals' : List[str],
 })
 
 OutputDeclaration = NamedTuple('OutputDeclaration', [
@@ -1784,6 +1806,36 @@ def create_derived(backend_type_env, declarations):
             legacy_th_definitions.append(
                 LEGACY_TH_DEFINITION.substitute(env))
 
+    def process_redispatch_cpu_to_hb(options):
+        # type: (FunctionOption) -> None
+        redispatch_condition = "true"
+        tensor_boxing = ""
+        alter_actuals = []
+
+        # convert formals to boxed actuals
+        non_const_tensor = 0
+        for f in options['formals_list']:
+            if f['type'] == 'Tensor &':
+                tensor_boxing += "auto {0}_hb = at::native::empty_like({0}, at::kHAMMERBLADE);\n".format(r['name'])
+                tensor_boxing += "{0}_hb.copy_({0});\n".format(r['name'])
+                alter_actuals.append(f['name'] + "_hb")
+                non_const_tensor += 1
+            elif f['type'] == 'const Tensor &':
+                alter_actuals.append(f['name'] + ".hammerblade()")
+            else:
+                alter_actuals.append(f['name'])
+        options['tensor_boxing'] = tensor_boxing
+        options['alter_actuals'] = alter_actuals
+        assert len(alter_actuals) == len(options['formals_list'])
+        assert len(options['returns']) == non_const_tensor or non_const_tensor == 0
+
+        # get alternative dispatching dst
+        dispatch = option['type_method_definition_dispatch']
+        alter_method_dispatch = dispatch.get("HammerBlade")
+        assert alter_method_dispatch
+        options['alter_method_dispatch'] = alter_method_dispatch
+
+
     def process_native(option):
         # type: (FunctionOption) -> None
         dispatch = option['type_method_definition_dispatch']
@@ -1797,8 +1849,13 @@ def create_derived(backend_type_env, declarations):
                     type_object_declarations.append(
                         NATIVE_DISPATCH_DECLARATION.substitute(env))
                     option['native_type_method_dispatch'] = native_dispatch
-                    type_object_definitions.append(
-                        NATIVE_DISPATCH_DEFINITION_BACKEND.substitute(env))
+                    if backend == 'CPU' and 'HammerBlade' in option['backend_types']:
+                        process_redispatch_cpu_to_hb(options)
+                        type_object_definitions.append(
+                            NATIVE_DISPATCH_DEFINITION_BACKEND_REDISPATCH.substitute(env))
+                    else:
+                        type_object_definitions.append(
+                            NATIVE_DISPATCH_DEFINITION_BACKEND.substitute(env))
                     if option['use_c10_dispatcher'] == 'full':
                         function_registrations.append(
                             BACKEND_FUNCTION_REGISTRATION.substitute(env))
