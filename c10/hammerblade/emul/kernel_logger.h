@@ -10,6 +10,7 @@
 #error "kernel_logger.h included but HB_ENABLE_KERNEL_LOG not enabled!"
 #endif
 
+#include <ATen/ATen.h>
 #include <string>
 #include <kernel_common.hpp>
 #include <iostream>
@@ -114,6 +115,9 @@ class KernelLogger {
       uint32_t* strides = (uint32_t*) ((intptr_t) tensor->strides);
       uint32_t* sizes = (uint32_t*) ((intptr_t) tensor->sizes);
       float* data = (float*) ((intptr_t) tensor->data);
+
+      TORCH_WARN("data_ptr: ", tensor->tensor);
+      TORCH_WARN("storage_numel: ", tensor->tensor.storage().numel());
 
       // Numeber of elements in the memory
       // This may not be equal to N in non-contiguous tensors
