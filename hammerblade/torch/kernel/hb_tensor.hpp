@@ -42,7 +42,7 @@ typedef struct {
 
 // Original tensor object on host
 #ifdef HB_ENABLE_KERNEL_LOG
-  at::Tensor tensor;
+  const at::Tensor& tensor;
 #endif
 } hb_tensor_t;
 
