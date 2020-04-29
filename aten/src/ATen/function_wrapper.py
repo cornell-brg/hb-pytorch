@@ -1806,34 +1806,35 @@ def create_derived(backend_type_env, declarations):
             legacy_th_definitions.append(
                 LEGACY_TH_DEFINITION.substitute(env))
 
-    def process_redispatch_cpu_to_hb(options):
+    def process_redispatch_cpu_to_hb(option):
         # type: (FunctionOption) -> None
-        redispatch_condition = "true"
+        redispatch_condition = "c10::is_in_aten_profiler_roi()"
         tensor_boxing = ""
         alter_actuals = []
+        option['redispatch_condition'] = redispatch_condition
 
         # convert formals to boxed actuals
         non_const_tensor = 0
-        for f in options['formals_list']:
+        for f in option['formals_list']:
             if f['type'] == 'Tensor &':
-                tensor_boxing += "auto {0}_hb = at::native::empty_like({0}, at::kHAMMERBLADE);\n".format(r['name'])
-                tensor_boxing += "{0}_hb.copy_({0});\n".format(r['name'])
+                tensor_boxing += "auto {0}_hb = at::native::empty_like({0}, at::kHAMMERBLADE);\n".format(f['name'])
+                tensor_boxing += "{0}_hb.copy_({0});\n".format(f['name'])
                 alter_actuals.append(f['name'] + "_hb")
                 non_const_tensor += 1
             elif f['type'] == 'const Tensor &':
                 alter_actuals.append(f['name'] + ".hammerblade()")
             else:
                 alter_actuals.append(f['name'])
-        options['tensor_boxing'] = tensor_boxing
-        options['alter_actuals'] = alter_actuals
-        assert len(alter_actuals) == len(options['formals_list'])
-        assert len(options['returns']) == non_const_tensor or non_const_tensor == 0
+        option['tensor_boxing'] = tensor_boxing
+        option['alter_actuals'] = alter_actuals
+        assert len(alter_actuals) == len(option['formals_list'])
+        assert len(option['returns']) == non_const_tensor or non_const_tensor == 0
 
         # get alternative dispatching dst
         dispatch = option['type_method_definition_dispatch']
         alter_method_dispatch = dispatch.get("HammerBlade")
         assert alter_method_dispatch
-        options['alter_method_dispatch'] = alter_method_dispatch
+        option['alter_method_dispatch'] = alter_method_dispatch
 
 
     def process_native(option):
@@ -1850,7 +1851,7 @@ def create_derived(backend_type_env, declarations):
                         NATIVE_DISPATCH_DECLARATION.substitute(env))
                     option['native_type_method_dispatch'] = native_dispatch
                     if backend == 'CPU' and 'HammerBlade' in option['backend_types']:
-                        process_redispatch_cpu_to_hb(options)
+                        process_redispatch_cpu_to_hb(option)
                         type_object_definitions.append(
                             NATIVE_DISPATCH_DEFINITION_BACKEND_REDISPATCH.substitute(env))
                     else:
