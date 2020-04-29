@@ -41,6 +41,9 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
                                   const int64_t* strides,
                                   const int64_t* sizes,
                                   const void* data,
+#if HB_ENABLE_KERNEL_LOG
+                                  const Tensor& host_tensor,
+#endif
                                   std::vector<eva_t>& device_ptrs) {
 
   eva_t tensor, tensor_strides, tensor_sizes, tensor_data;
@@ -63,6 +66,9 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
     .strides = tensor_strides,
     .sizes = tensor_sizes,
     .data = (eva_t)((intptr_t)data),
+#ifdef HB_ENABLE_KERNEL_LOG
+    .tensor = host_tensor,
+#endif
   };
 
   // copy tensor struct
@@ -91,7 +97,12 @@ eva_t create_device_tensor(const Tensor& tensor,
   const int64_t* sizes = (const int64_t*) tensor.sizes().data();
   const void* data = (const void*) tensor.data_ptr();
 
-  return create_device_tensor(N, dims, strides, sizes, data, device_ptrs);
+  return create_device_tensor(
+      N, dims, strides, sizes, data,
+#ifdef HB_ENABLE_KERNEL_LOG
+      tensor,
+#endif
+      device_ptrs);
 }
 
 //===================================================

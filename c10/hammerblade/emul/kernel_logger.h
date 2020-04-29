@@ -6,6 +6,10 @@
 #ifndef _KERNEL_LOG_H_
 #define _KERNEL_LOG_H_
 
+#ifndef HB_ENABLE_KERNEL_LOG
+#error "kernel_logger.h included but HB_ENABLE_KERNEL_LOG not enabled!"
+#endif
+
 #include <string>
 #include <kernel_common.hpp>
 #include <iostream>
