@@ -279,6 +279,11 @@ for name in dir(_C._VariableFunctions):
 # needs to be after the above ATen bindings so we can overwrite from Python side
 from .functional import *
 
+################################################################################
+# Import aten profiler functions
+################################################################################
+
+import torch.aten_profiler
 
 ################################################################################
 # Remove unnecessary members

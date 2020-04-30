@@ -8,7 +8,13 @@
 
 #include <math.h>
 #include <initializer_list>
+#include <cstdint>
 #include <hb_assert.hpp>
+#include <hb_hw_patch.hpp>
+
+#ifdef HB_ENABLE_KERNEL_LOG
+#include <ATen/ATen.h>
+#endif
 
 // =========================================================
 // Device Tensor structs
@@ -23,6 +29,7 @@
 typedef struct {
   uint32_t N;
   uint32_t dims;
+
 #ifdef HB_EMUL
   uint64_t strides;
   uint64_t sizes;
@@ -31,6 +38,12 @@ typedef struct {
   uint32_t strides;
   uint32_t sizes;
   uint32_t data;
+#endif
+
+// Info about storage objects
+#ifdef HB_ENABLE_KERNEL_LOG
+  float* storage_head;
+  uint32_t storage_numel;
 #endif
 } hb_tensor_t;
 
@@ -67,7 +80,12 @@ class HBTensor {
       dims(t->dims),
       strides((uint32_t*) ((intptr_t) t->strides)),
       sizes((uint32_t*) ((intptr_t) t->sizes)),
-      data((DT*) ((intptr_t) t->data)) {}
+      data((DT*) ((intptr_t) t->data)) {
+        // WAW HW bug seems to be triggered on a non-bloacking load to
+        // the register holding `sizes` in various kernels. This fix
+        // adds a RAW dependedncy on that register, blocking the load.
+        HB_FIX_WAW_HAZARD(sizes);
+      }
 
     char* data_ptr() {
       return (char*)data;

@@ -2,15 +2,20 @@
 
 #include <map>
 #include <vector>
+#include <sstream>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
 namespace c10 {
 
+// Global Variables
 ATenProfiler g_aten_profiler;
 std::vector<std::string> g_curr_call_stack;
 
+// ========= AtenProfiler Members ===========
+
+// Print low level call stack break down
 void ATenProfiler::print()
 {
   using std::chrono::microseconds;
@@ -42,6 +47,7 @@ void ATenProfiler::print()
   cerr << setw(180) << std::left << "Aggregated total:" << "   " << total_time / 1000.0 << " s" << endl;
 }
 
+// Print unimplemented kernels
 void ATenProfiler::print_unimpl_kernel() {
   using namespace std;
 
@@ -54,6 +60,7 @@ void ATenProfiler::print_unimpl_kernel() {
   }
 }
 
+// Add a log entry
 void ATenProfiler::add_log(const std::vector<std::string>& stack, std::chrono::microseconds time) {
   if (dict.find(stack) != dict.end()) {
     dict[stack] += time;
@@ -62,6 +69,7 @@ void ATenProfiler::add_log(const std::vector<std::string>& stack, std::chrono::m
   }
 }
 
+// Add a unimplemented log entry
 void ATenProfiler::add_kernel_log(const std::string& kernel) {
   if (unimpl_kernel.find(kernel) != unimpl_kernel.end()) {
     unimpl_kernel[kernel] += 1;
@@ -70,11 +78,10 @@ void ATenProfiler::add_kernel_log(const std::string& kernel) {
   }
 }
 
+// Mark the beginning of ROI
 void ATenProfiler::profiling_start() {
 #ifdef PROFILE_ATEN
-  std::cerr << "==========================================================================" << std::endl;
   std::cerr << " ATen profiler collecting ..." << std::endl;
-  std::cerr << "==========================================================================" << std::endl;
   // clear the dict when entering ROI
   g_curr_call_stack.clear();
   dict.clear();
@@ -90,26 +97,52 @@ void ATenProfiler::profiling_start() {
   return;
 }
 
+// Mark the end of ROI
 void ATenProfiler::profiling_end() {
 #ifdef PROFILE_ATEN
   in_roi = false;
   auto delta = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
-  std::cerr << std::endl << std::endl;
-  std::cerr << "==========================================================================" << std::endl;
-  std::cerr << " ATen profile results" << std::endl;
-  std::cerr << "==========================================================================" << std::endl;
-  std::cerr << std::setw(180) << std::left << " Total time in ROI:" << "   "
-            << delta.count() / 1000000.0 << " s" << std::endl;
-  std::cerr << "==========================================================================" << std::endl;
-  print();
-#endif
-#ifdef PROFILE_UNIMPL
-  print_unimpl_kernel();
+  // total time in ROI, measured in ms.
+  time_in_roi = delta.count() / 1000.0;
 #endif
   return;
 }
 
-// ============================================================================
+// Convert profiling log to string so we can move it to
+// Python world
+const std::string ATenProfiler::profiling_dump() {
+
+  using std::chrono::microseconds;
+
+  std::stringstream buffer;
+  double total_time = 0.0;
+
+  // raw string dump starts with time in RIO
+  buffer << "time_in_roi" << ";" << time_in_roi << std::endl;
+
+  for (const auto& p : dict) {
+    double ms = p.second.count() / 1000.0;
+    auto& stack = p.first;
+
+    if (stack.size() == 1) {
+      total_time += ms;
+    } else {
+      continue;
+    }
+
+    buffer << stack.back() << ";" << ms << std::endl;
+  }
+
+  // raw string dump ends with aggregated total
+  buffer << "agg_total" << ";" << total_time << std::endl;
+
+  // buffer.str() is a temp object that will be destroyed
+  // at the end of this expression
+  const std::string data = buffer.str();
+  return data;
+}
+
+// =============== c10 API functions ========================
 
 bool aten_profiler_in_parallel_region() {
 #ifdef _OPENMP
@@ -129,6 +162,10 @@ void aten_profiler_end() {
   return;
 }
 
+const std::string aten_profiler_dump() {
+  return g_aten_profiler.profiling_dump();
+}
+
 bool is_in_aten_profiler_roi() {
   return g_aten_profiler.in_roi;
 }
@@ -137,7 +174,19 @@ void log_unimpl_kernel(const std::string& kernel) {
   g_aten_profiler.add_kernel_log(kernel);
 }
 
+void aten_profiler_stack_print() {
+  g_aten_profiler.print();
+  return;
+}
 
+void aten_profiler_unimpl_print() {
+  g_aten_profiler.print_unimpl_kernel();
+  return;
+}
+
+// =============== Aten Profiler Log Members =======================
+
+// Entering a function
 ATenProfilerLog::ATenProfilerLog(const std::string& func_name)
   : start(std::chrono::high_resolution_clock::now())
 {
@@ -146,6 +195,7 @@ ATenProfilerLog::ATenProfilerLog(const std::string& func_name)
   }
 }
 
+// Returning from a function
 ATenProfilerLog::~ATenProfilerLog()
 {
   if (!aten_profiler_in_parallel_region()) {

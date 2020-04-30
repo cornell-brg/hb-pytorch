@@ -131,6 +131,9 @@ option(USE_HB "Use HammerBlade" ON)
 option(USE_HB_EMUL "Use HammerBlade Emulation Layer" ON)
 option(PROFILE_ATEN "Turn on ATen kernel profiling" ON)
 option(PROFILE_UNIMPL "Look for used kernels that are not implemented on HB" OFF)
+cmake_dependent_option(
+  HB_ENABLE_KERNEL_LOG "Enable HammerBlade kernel call logging" OFF
+  "USE_HB_EMUL" OFF)
 option(USE_ROCM "Use ROCm" ON)
 option(CAFFE2_STATIC_LINK_CUDA "Statically link CUDA libraries" OFF)
 cmake_dependent_option(
@@ -397,6 +400,10 @@ endif()
 
 if(USE_PYTORCH_QNNPACK)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PYTORCH_QNNPACK")
+endif()
+
+if(HB_ENABLE_KERNEL_LOG)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHB_ENABLE_KERNEL_LOG")
 endif()
 
 # ---[ Whitelist file if whitelist is specified
