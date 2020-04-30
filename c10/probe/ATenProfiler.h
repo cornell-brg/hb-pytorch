@@ -2,6 +2,7 @@
 
 #include <c10/probe/ProbeMacros.h>
 #include <c10/probe/Unimplemented.h>
+#include <c10/probe/ExecutionTime.h>
 
 #include <map>
 #include <string>
@@ -18,35 +19,28 @@ class ATenProfiler {
 public:
   ATenProfiler() : in_roi(false) {};
   ~ATenProfiler() = default;
-  void add_log(const std::vector<std::string>& stack, std::chrono::microseconds time);
   void profiling_start();
   void profiling_end();
-  const std::string profiling_dump();
-  void print();
   bool in_roi;
-  double time_in_roi;
-
 private:
-  std::map<std::vector<std::string>, std::chrono::microseconds> dict;
-  std::chrono::time_point<std::chrono::high_resolution_clock> start;
+  ExecutionTimeLog* time_in_roi;
 };
 
 C10_PROBE_API void aten_profiler_start();
 C10_PROBE_API void aten_profiler_end();
-C10_PROBE_API const std::string aten_profiler_dump();
 C10_PROBE_API bool is_in_aten_profiler_roi();
-C10_PROBE_API void aten_profiler_stack_print();
 
 struct C10_PROBE_API ATenProfilerLog {
 public:
   ATenProfilerLog(const std::string& func_name);
   ~ATenProfilerLog();
 private:
-  std::chrono::time_point<std::chrono::high_resolution_clock> start;
+  ExecutionTimeLog execution_time_log;
 };
 
 extern ATenProfiler g_aten_profiler;
 extern std::vector<std::string> g_curr_call_stack;
+extern std::vector<std::string> traverse;
 
 #define LogATenKernel() ATenProfilerLog log(__PRETTY_FUNCTION__);
 #define LogATenKernelWithName(aten_profiler_kernel_name) ATenProfilerLog log(aten_profiler_kernel_name);
