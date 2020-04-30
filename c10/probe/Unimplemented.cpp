@@ -1,4 +1,6 @@
 #include <c10/probe/Unimplemented.h>
+#include <iostream>
+#include <iomanip>
 #include <sstream>
 
 namespace c10 {
@@ -29,3 +31,5 @@ void aten_profiler_unimpl_print() {
 void clear_unimpl_kernel() {
   unimpl_kernel.clear();
 }
+
+}} // namespace c10::probe

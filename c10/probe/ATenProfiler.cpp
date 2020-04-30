@@ -57,15 +57,6 @@ void ATenProfiler::add_log(const std::vector<std::string>& stack, std::chrono::m
   }
 }
 
-// Add a unimplemented log entry
-void ATenProfiler::add_kernel_log(const std::string& kernel) {
-  if (unimpl_kernel.find(kernel) != unimpl_kernel.end()) {
-    unimpl_kernel[kernel] += 1;
-  } else {
-    unimpl_kernel[kernel] = 1;
-  }
-}
-
 // Mark the beginning of ROI
 void ATenProfiler::profiling_start() {
   in_roi = true;
