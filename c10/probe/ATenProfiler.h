@@ -56,4 +56,3 @@ extern std::vector<std::string> g_curr_call_stack;
 #define LogATenKernelWithName(aten_profiler_kernel_name) ATenProfilerLog log(aten_profiler_kernel_name);
 
 }} // namespace c10::probe
-

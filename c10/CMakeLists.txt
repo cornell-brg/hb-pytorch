@@ -94,9 +94,7 @@ if(USE_HB)
   add_subdirectory(hammerblade)
 endif()
 
-if(PROFILE_ATEN OR PROFILE_UNIMPL)
-  add_subdirectory(probe)
-endif()
+add_subdirectory(probe)
 
 # ---[ Installation
 # Note: for now, we will put all export path into one single Caffe2Targets group

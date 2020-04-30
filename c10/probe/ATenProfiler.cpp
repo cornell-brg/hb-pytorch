@@ -81,18 +81,26 @@ void ATenProfiler::add_kernel_log(const std::string& kernel) {
 
 // Mark the beginning of ROI
 void ATenProfiler::profiling_start() {
-#ifdef PROFILE_ATEN
-  std::cerr << " ATen profiler collecting ..." << std::endl;
+  in_roi = true;
+#if defined(PROFILE_ATEN) || defined(PROFILE_UNIMPL)
+  std::cerr << " ATen profiler collecting ...";
+# ifdef PROFILE_ATEN
+  std::cerr << " execution time";
   // clear the dict when entering ROI
   g_curr_call_stack.clear();
   dict.clear();
-  unimpl_kernel.clear();
   // mark current time
   start = std::chrono::high_resolution_clock::now();
-  in_roi = true;
+# endif // ifdef PROFILE_ATEN
+# ifdef PROFILE_UNIMPL
+  unimpl_kernel.clear();
+  std::cerr << " unimplemented kernels";
+# endif // ifdef PROFILE_UNIMPL
+  std::cerr << std::endl;
 #else
   std::cerr << "Warning: ATen profiler is invoked "
             << "but PyTorch is not built with profiling capability"
+            << "ROI entry is still marked"
             << std::endl;
 #endif
   return;
@@ -100,8 +108,8 @@ void ATenProfiler::profiling_start() {
 
 // Mark the end of ROI
 void ATenProfiler::profiling_end() {
-#ifdef PROFILE_ATEN
   in_roi = false;
+#ifdef PROFILE_ATEN
   auto delta = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
   // total time in ROI, measured in ms.
   time_in_roi = delta.count() / 1000.0;
