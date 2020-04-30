@@ -1,6 +1,6 @@
 #pragma once
 
-#include <c10/macros/Macros.h>
+#include <c10/probe/ProbeMacros.h>
 
 #include <map>
 #include <string>
@@ -11,6 +11,7 @@
 #include <iostream>
 
 namespace c10 {
+namespace probe {
 
 class ATenProfiler {
 public:
@@ -32,15 +33,15 @@ private:
   std::map<std::string, long> unimpl_kernel;
 };
 
-C10_API void aten_profiler_start();
-C10_API void aten_profiler_end();
-C10_API const std::string aten_profiler_dump();
-C10_API bool is_in_aten_profiler_roi();
-C10_API void log_unimpl_kernel(const std::string& kernel);
-C10_API void aten_profiler_stack_print();
-C10_API void aten_profiler_unimpl_print();
+C10_PROBE_API void aten_profiler_start();
+C10_PROBE_API void aten_profiler_end();
+C10_PROBE_API const std::string aten_profiler_dump();
+C10_PROBE_API bool is_in_aten_profiler_roi();
+C10_PROBE_API void log_unimpl_kernel(const std::string& kernel);
+C10_PROBE_API void aten_profiler_stack_print();
+C10_PROBE_API void aten_profiler_unimpl_print();
 
-struct C10_API ATenProfilerLog {
+struct C10_PROBE_API ATenProfilerLog {
 public:
   ATenProfilerLog(const std::string& func_name);
   ~ATenProfilerLog();
@@ -54,5 +55,5 @@ extern std::vector<std::string> g_curr_call_stack;
 #define LogATenKernel() ATenProfilerLog log(__PRETTY_FUNCTION__);
 #define LogATenKernelWithName(aten_profiler_kernel_name) ATenProfilerLog log(aten_profiler_kernel_name);
 
-}
+}} // namespace c10::probe
 

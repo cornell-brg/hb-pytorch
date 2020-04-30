@@ -15,7 +15,7 @@
 #include <ATen/SparseTensorUtils.h>
 #include <ATen/core/op_registration/op_registration.h>
 #include <ATen/core/EnableNamedTensor.h>
-#include <c10/core/ATenProfiler.h>
+#include <c10/probe/ATenProfiler.h>
 
 namespace at {
 namespace TypeDefault {

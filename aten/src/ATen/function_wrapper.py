@@ -48,7 +48,7 @@ ${return_type} ${api_name}(${type_method_formals});
 LEGACY_TH_DEFINITION_BROADCAST = CodeTemplate("""\
 ${return_type} ${api_name}(${type_method_formals}) {
 #ifdef PROFILE_ATEN
-c10::LogATenKernel();
+c10::probe::LogATenKernel();
 #endif
 #ifdef BUILD_NAMEDTENSOR
     ${named_guard_declaration}
@@ -66,7 +66,7 @@ ${return_type} ${method_prefix_derived}${api_name}(${type_method_formals});
 LEGACY_TH_DEFINITION = CodeTemplate("""\
 ${return_type} ${method_prefix_derived}${api_name}(${type_method_formals}) {
 #ifdef PROFILE_ATEN
-c10::LogATenKernel();
+c10::probe::LogATenKernel();
 #endif
 #ifdef BUILD_NAMEDTENSOR
     ${named_guard_declaration}
@@ -101,7 +101,7 @@ ${return_type} ${api_name}(${type_method_formals});
 NATIVE_DISPATCH_DEFINITION_DEFAULT = CodeTemplate("""\
 ${return_type} ${api_name}(${type_method_formals}) {
 #ifdef PROFILE_ATEN
-c10::LogATenKernel();
+c10::probe::LogATenKernel();
 #endif
 #ifdef BUILD_NAMEDTENSOR
     ${named_guard_declaration}
@@ -114,7 +114,7 @@ c10::LogATenKernel();
 NATIVE_DISPATCH_DEFINITION_BACKEND = CodeTemplate("""\
 ${return_type} ${api_name}(${type_method_formals}) {
 #ifdef PROFILE_ATEN
-c10::LogATenKernel();
+c10::probe::LogATenKernel();
 #endif
 #ifdef BUILD_NAMEDTENSOR
     ${named_guard_declaration}
@@ -127,7 +127,7 @@ c10::LogATenKernel();
 NATIVE_DISPATCH_DEFINITION_BACKEND_REDISPATCH = CodeTemplate("""\
 ${return_type} ${api_name}(${type_method_formals}) {
 #ifdef PROFILE_ATEN
-c10::LogATenKernel();
+c10::probe::LogATenKernel();
 #endif
 #ifdef BUILD_NAMEDTENSOR
     ${named_guard_declaration}

@@ -19,7 +19,7 @@
 #include <c10/util/Optional.h>
 #include <ATen/core/op_registration/op_registration.h>
 #include <ATen/core/EnableNamedTensor.h>
-#include <c10/core/ATenProfiler.h>
+#include <c10/probe/ATenProfiler.h>
 
 #include <cstddef>
 #include <functional>

@@ -1067,6 +1067,10 @@ if(USE_HB)
   target_link_libraries(torch PUBLIC c10_hammerblade)
 endif()
 
+if(PROFILE_ATEN OR PROFILE_UNIMPL)
+  target_link_libraries(torch PUBLIC c10_probe)
+endif()
+
 # ---[ Test binaries.
 if (BUILD_TEST)
   foreach(test_src ${Caffe2_CPU_TEST_SRCS})

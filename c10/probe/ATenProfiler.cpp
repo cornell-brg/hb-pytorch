@@ -1,4 +1,4 @@
-#include <c10/core/ATenProfiler.h>
+#include <c10/probe/ATenProfiler.h>
 
 #include <map>
 #include <vector>
@@ -8,6 +8,7 @@
 #endif
 
 namespace c10 {
+namespace probe {
 
 // Global Variables
 ATenProfiler g_aten_profiler;
@@ -142,7 +143,7 @@ const std::string ATenProfiler::profiling_dump() {
   return data;
 }
 
-// =============== c10 API functions ========================
+// =============== c10 probe API functions ========================
 
 bool aten_profiler_in_parallel_region() {
 #ifdef _OPENMP
@@ -205,4 +206,4 @@ ATenProfilerLog::~ATenProfilerLog()
   }
 }
 
-}
+}} // namespace c10::probe

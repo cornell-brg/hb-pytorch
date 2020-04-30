@@ -18,7 +18,7 @@
 #include <ATen/Utils.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <c10/core/ATenProfiler.h>
+#include <c10/probe/ATenProfiler.h>
 
 #include <torch/csrc/THP.h>
 #include <torch/csrc/DynamicTypes.h>
@@ -517,26 +517,26 @@ PyObject *THPModule_supportedQEngines(PyObject */* unused */)
 }
 
 static PyObject * THPModule_atenProfilerStart(PyObject *module, PyObject *noargs) {
-  c10::aten_profiler_start();
+  c10::probe::aten_profiler_start();
   Py_RETURN_NONE;
 }
 
 static PyObject * THPModule_atenProfilerEnd(PyObject *module, PyObject *noargs) {
-  c10::aten_profiler_end();
+  c10::probe::aten_profiler_end();
   Py_RETURN_NONE;
 }
 
 static PyObject * THPModule_atenProfilerDump(PyObject *module, PyObject *noargs) {
-  return PyUnicode_FromString(c10::aten_profiler_dump().c_str());
+  return PyUnicode_FromString(c10::probe::aten_profiler_dump().c_str());
 }
 
 static PyObject * THPModule_atenProfilerStackPrint(PyObject *module, PyObject *noargs) {
-  c10::aten_profiler_stack_print();
+  c10::probe::aten_profiler_stack_print();
   Py_RETURN_NONE;
 }
 
 static PyObject * THPModule_atenProfilerUnimplPrint(PyObject *module, PyObject *noargs) {
-  c10::aten_profiler_unimpl_print();
+  c10::probe::aten_profiler_unimpl_print();
   Py_RETURN_NONE;
 }
 
