@@ -67,7 +67,7 @@ struct CAFFE2_API DispatchStub<rT (*)(Args...), T> {
   template <typename... ArgTypes>
   rT operator()(DeviceType device_type, ArgTypes&&... args) {
 #ifdef PROFILE_UNIMPL
-    if (!hammerblade_dispatch_ptr) {
+    if (!hammerblade_dispatch_ptr && c10::probe::is_in_aten_profiler_roi()) {
       c10::probe::log_unimpl_kernel(__stubid);
     }
 #endif
