@@ -1821,6 +1821,7 @@
 - func: hb_convolution(Tensor self, Tensor weight, Tensor? bias, int[] padding, int[] stride, int[] dilation, int groups) -> Tensor
   dispatch:
     HammerBlade: hb_convolution
+    SparseHammerBlade: hb_sparse_convolution
 
 - func: hb_convolution_backward_input(int[] self_size, Tensor grad_output, Tensor weight, int[] padding, int[] stride, int[] dilation, int groups) -> Tensor
   dispatch:
