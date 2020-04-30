@@ -114,26 +114,17 @@ class KernelLogger {
       uint32_t dims = tensor->dims;
       uint32_t* strides = (uint32_t*) ((intptr_t) tensor->strides);
       uint32_t* sizes = (uint32_t*) ((intptr_t) tensor->sizes);
-      float* data = (float*) ((intptr_t) tensor->data);
-
-      //TORCH_WARN("data_ptr: ", tensor->tensor.defined());
-      //TORCH_WARN("storage_numel: ", tensor->tensor.storage().numel());
-
-      // c10::raw::intrusive_ptr::decref(tensor->tensor.unsafeGetTensorImpl());
-
-      // Numeber of elements in the memory
-      // This may not be equal to N in non-contiguous tensors
-      uint32_t numel = N == 0 ? 0 : 1;
-      for(int i = 0; i < dims; ++i) {
-        numel *= strides[i] == 0 ? 1 : sizes[i];
-      }
+      uint64_t data_ptr = tensor->data;
+      uint32_t storage_numel = tensor->storage_numel;
 
       json tensor_json;
       tensor_json["N"] = N;
       tensor_json["dims"] = dims;
+      tensor_json["data_ptr"] = data_ptr;
+      tensor_json["storage_head"] = (uint64_t) tensor->storage_head;
       tensor_json["strides"] = json_list(dims, strides);
       tensor_json["sizes"] = json_list(dims, sizes);
-      tensor_json["data"] = json_list(numel, data);
+      tensor_json["storage"] = json_list(storage_numel, tensor->storage_head);
       log_json[curr_kernel].push_back(tensor_json);
     }
 

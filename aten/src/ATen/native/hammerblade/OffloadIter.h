@@ -69,7 +69,8 @@ void offload_iterator_reduce_op_impl(TensorIterator& iter, const char* kernel) {
         n, iter.ndim(),
         (const int64_t*)strides, (const int64_t*)sizes, iter.data_ptr(i),
 #ifdef HB_ENABLE_KERNEL_LOG
-        (const Tensor&) iter.tensor(i),
+        iter.tensor(i).storage().data<float>(),
+        (uint32_t) iter.tensor(i).storage().numel(),
 #endif
         device_ptrs);
     device_args.push_back(device_arg);
