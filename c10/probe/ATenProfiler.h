@@ -3,6 +3,7 @@
 #include <c10/probe/ProbeMacros.h>
 #include <c10/probe/Unimplemented.h>
 #include <c10/probe/ExecutionTime.h>
+#include <c10/probe/Chart.h>
 
 #include <map>
 #include <string>
@@ -40,7 +41,6 @@ private:
 
 extern ATenProfiler g_aten_profiler;
 extern std::vector<std::string> g_curr_call_stack;
-extern std::vector<std::string> traverse;
 
 #define LogATenKernel() ATenProfilerLog log(__PRETTY_FUNCTION__);
 #define LogATenKernelWithName(aten_profiler_kernel_name) ATenProfilerLog log(aten_profiler_kernel_name);

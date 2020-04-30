@@ -13,7 +13,6 @@ namespace probe {
 // Global Variables
 ATenProfiler g_aten_profiler;
 std::vector<std::string> g_curr_call_stack;
-std::vector<std::string> traverse;
 
 // ========= AtenProfiler Members ===========
 
@@ -21,6 +20,15 @@ std::vector<std::string> traverse;
 void ATenProfiler::profiling_start() {
   in_roi = true;
   g_curr_call_stack.clear();
+  // CHART related ROI entrance
+  clear_execution_chart();
+  clear_kernels_of_interest();
+  add_kernels_of_interest("at::Tensor at::TypeDefault::embedding(const at::Tensor&, const at::Tensor&, int64_t, bool, bool)");
+  add_kernels_of_interest("at::Tensor at::TypeDefault::sum(const at::Tensor&, c10::IntArrayRef, bool, c10::optional<c10::ScalarType>)");
+  add_kernels_of_interest("at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)");
+  add_kernels_of_interest("at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)");
+  add_kernels_of_interest("at::Tensor at::TypeDefault::embedding_backward(const at::Tensor&, const at::Tensor&, int64_t, int64_t, bool, bool)");
+  //add_ernels_of_interest("")
 #if defined(PROFILE_ATEN) || defined(PROFILE_UNIMPL)
   std::cerr << " ATen profiler collecting ...";
 # ifdef PROFILE_ATEN
@@ -53,9 +61,7 @@ void ATenProfiler::profiling_end() {
   fake_roi_stack.pop_back();
   delete time_in_roi;
 #endif
-  for (const auto& k : traverse) {
-    std::cerr << k << std::endl;
-  }
+  aten_profiler_execution_chart_print();
   return;
 }
 
@@ -92,9 +98,7 @@ ATenProfilerLog::ATenProfilerLog(const std::string& func_name)
 {
   if (!aten_profiler_in_parallel_region()) {
     g_curr_call_stack.push_back(func_name);
-    if (g_curr_call_stack.size() == 1) {
-      traverse.push_back(func_name);
-    }
+    log_execution_chart(g_curr_call_stack);
   }
 }
 
