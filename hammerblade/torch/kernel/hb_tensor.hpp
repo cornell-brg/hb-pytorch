@@ -40,9 +40,10 @@ typedef struct {
   uint32_t data;
 #endif
 
-// Original tensor object on host
+// Info about storage objects
 #ifdef HB_ENABLE_KERNEL_LOG
-  const at::Tensor& tensor;
+  float* storage_head;
+  uint32_t storage_numel;
 #endif
 } hb_tensor_t;
 

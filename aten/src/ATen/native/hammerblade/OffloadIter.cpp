@@ -50,7 +50,8 @@ void offload_iterator_op_impl(TensorIterator& iter, std::vector<eva_t> device_sc
     eva_t device_arg = create_device_tensor(N, iter.ndim(),
         (const int64_t*)local_strides, (const int64_t*)sizes, iter.data_ptr(i),
 #ifdef HB_ENABLE_KERNEL_LOG
-        (const Tensor&) iter.tensor(i),
+        iter.tensor(i).storage().data<float>(),
+        iter.tensor(i).storage().numel(),
 #endif
         device_ptrs);
     device_args.push_back(device_arg);
