@@ -1808,7 +1808,7 @@ def create_derived(backend_type_env, declarations):
 
     def process_redispatch_cpu_to_hb(option):
         # type: (FunctionOption) -> None
-        redispatch_condition = "c10::is_in_aten_profiler_roi()"
+        redispatch_condition = "false"
         tensor_boxing = ""
         alter_actuals = []
         option['redispatch_condition'] = redispatch_condition
