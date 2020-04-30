@@ -99,7 +99,7 @@ void ATenProfiler::profiling_start() {
   std::cerr << std::endl;
 #else
   std::cerr << "Warning: ATen profiler is invoked "
-            << "but PyTorch is not built with profiling capability"
+            << "but PyTorch is not built with profiling capability "
             << "ROI entry is still marked"
             << std::endl;
 #endif

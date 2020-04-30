@@ -1067,9 +1067,7 @@ if(USE_HB)
   target_link_libraries(torch PUBLIC c10_hammerblade)
 endif()
 
-if(PROFILE_ATEN OR PROFILE_UNIMPL)
-  target_link_libraries(torch PUBLIC c10_probe)
-endif()
+target_link_libraries(torch PUBLIC c10_probe)
 
 # ---[ Test binaries.
 if (BUILD_TEST)
