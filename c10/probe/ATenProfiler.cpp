@@ -48,19 +48,6 @@ void ATenProfiler::print()
   cerr << setw(180) << std::left << "Aggregated total:" << "   " << total_time / 1000.0 << " s" << endl;
 }
 
-// Print unimplemented kernels
-void ATenProfiler::print_unimpl_kernel() {
-  using namespace std;
-
-  std::cerr << "==========================================================================" << std::endl;
-  std::cerr << " Native kernels that are used but not implemented for HammerBlade:" << std::endl;
-  std::cerr << "==========================================================================" << std::endl;
-  cerr << setw(180) << std::left << "Function" << "   " << "Times" << endl;
-  for (const auto& k : unimpl_kernel) {
-    cerr << setw(180) << std::left << k.first << "   " << k.second << endl;
-  }
-}
-
 // Add a log entry
 void ATenProfiler::add_log(const std::vector<std::string>& stack, std::chrono::microseconds time) {
   if (dict.find(stack) != dict.end()) {
@@ -93,7 +80,7 @@ void ATenProfiler::profiling_start() {
   start = std::chrono::high_resolution_clock::now();
 # endif // ifdef PROFILE_ATEN
 # ifdef PROFILE_UNIMPL
-  unimpl_kernel.clear();
+  clear_unimpl_kernel();
   std::cerr << " unimplemented kernels";
 # endif // ifdef PROFILE_UNIMPL
   std::cerr << std::endl;
@@ -179,17 +166,8 @@ bool is_in_aten_profiler_roi() {
   return g_aten_profiler.in_roi;
 }
 
-void log_unimpl_kernel(const std::string& kernel) {
-  g_aten_profiler.add_kernel_log(kernel);
-}
-
 void aten_profiler_stack_print() {
   g_aten_profiler.print();
-  return;
-}
-
-void aten_profiler_unimpl_print() {
-  g_aten_profiler.print_unimpl_kernel();
   return;
 }
 
