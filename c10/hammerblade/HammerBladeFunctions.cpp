@@ -1,6 +1,8 @@
 #include "HammerBladeFunctions.h"
+#include <c10/probe/ATenProfiler.h>
 
 #include <mutex>
+#include <string>
 
 namespace c10 {
 namespace hammerblade {
@@ -60,6 +62,9 @@ void* memcpy_device_to_host(void *dst, const void *src, uint32_t nbytes) {
 
 
 void offload_kernel(const char* kernel, std::vector<eva_t> args) {
+  std::string kernel_str = "offload_kernel_";
+  kernel_str += kernel;
+  c10::probe::LogATenKernelWithName(kernel_str);
 
   eva_t* cuda_argv = (eva_t*) malloc(args.size() * sizeof(eva_t));
   if(!cuda_argv) {

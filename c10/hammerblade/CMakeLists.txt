@@ -43,6 +43,7 @@ endif()
 
 # ---[ Dependency of c10_hammerblade
 target_link_libraries(c10_hammerblade PUBLIC c10)
+target_link_libraries(c10_hammerblade PUBLIC c10_probe)
 
 # Dependency to bsg_manycore
 if(USE_HB_EMUL)

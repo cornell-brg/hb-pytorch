@@ -90,11 +90,11 @@ if(USE_ROCM)
   add_subdirectory(hip)
 endif()
 
+add_subdirectory(probe)
+
 if(USE_HB)
   add_subdirectory(hammerblade)
 endif()
-
-add_subdirectory(probe)
 
 # ---[ Installation
 # Note: for now, we will put all export path into one single Caffe2Targets group
