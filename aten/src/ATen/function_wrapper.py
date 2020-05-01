@@ -1808,7 +1808,7 @@ def create_derived(backend_type_env, declarations):
 
     def process_redispatch_cpu_to_hb(option):
         # type: (FunctionOption) -> None
-        redispatch_condition = "false"
+        redispatch_condition = "c10::probe::is_in_aten_profiler_roi()"
         tensor_boxing = ""
         alter_actuals = []
         option['redispatch_condition'] = redispatch_condition
@@ -1817,12 +1817,11 @@ def create_derived(backend_type_env, declarations):
         non_const_tensor = 0
         for f in option['formals_list']:
             if f['type'] == 'Tensor &':
-                tensor_boxing += "auto {0}_hb = at::native::empty_like({0}, at::kHAMMERBLADE);\n".format(f['name'])
-                tensor_boxing += "{0}_hb.copy_({0});\n".format(f['name'])
+                tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
                 alter_actuals.append(f['name'] + "_hb")
                 non_const_tensor += 1
             elif f['type'] == 'const Tensor &':
-                alter_actuals.append(f['name'] + ".hammerblade()")
+                alter_actuals.append(f['name'] + ".llcopy()")
             else:
                 alter_actuals.append(f['name'])
         option['tensor_boxing'] = tensor_boxing
