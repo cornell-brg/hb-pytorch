@@ -9,7 +9,6 @@ import torch.nn as nn
 import random
 import pytest
 import hbutils
-import os
 
 torch.manual_seed(42)
 random.seed(42)
