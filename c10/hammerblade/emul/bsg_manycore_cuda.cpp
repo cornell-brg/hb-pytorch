@@ -187,11 +187,6 @@ void reset_runtime() {
           if (!binary_loaded) {
             binary_loaded = true;
 
-            // Later add a runtime option to enable kernel call logging
-#ifdef HB_ENABLE_KERNEL_LOG
-            kernel_call_logger.enable();
-#endif
-
             return HB_MC_SUCCESS;
           } else {
             return HB_MC_INITIALIZED_TWICE;
@@ -368,8 +363,5 @@ void reset_runtime() {
           }
           device_busy = false;
           binary_loaded = false;
-#ifdef HB_ENABLE_KERNEL_LOG
-          kernel_call_logger.disable();
-#endif
           return HB_MC_SUCCESS;
         }

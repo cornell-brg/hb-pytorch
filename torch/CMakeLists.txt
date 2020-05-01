@@ -221,6 +221,11 @@ if (NOT USE_HB_EMUL)
     list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS _XOPEN_SOURCE=500)
 endif()
 
+if (HB_ENABLE_KERNEL_LOG)
+  list(APPEND TORCH_PYTHON_INCLUDE_DIRECTORIES "${TORCH_ROOT}/hammerblade/torch/kernel")
+  list(APPEND TORCH_PYTHON_INCLUDE_DIRECTORIES "${TORCH_ROOT}/third_party/include")
+endif()
+
 if (USE_ROCM)
     list(APPEND TORCH_PYTHON_SRCS
       ${TORCH_SRC_DIR}/csrc/cuda/Module.cpp
