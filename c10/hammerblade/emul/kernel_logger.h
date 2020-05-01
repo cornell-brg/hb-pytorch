@@ -10,7 +10,6 @@
 #error "kernel_logger.h included but HB_ENABLE_KERNEL_LOG not enabled!"
 #endif
 
-#include <ATen/ATen.h>
 #include <string>
 #include <kernel_common.hpp>
 #include <fstream>

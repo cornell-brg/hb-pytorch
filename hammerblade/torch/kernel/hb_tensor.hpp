@@ -12,10 +12,6 @@
 #include <hb_assert.hpp>
 #include <hb_hw_patch.hpp>
 
-#ifdef HB_ENABLE_KERNEL_LOG
-#include <ATen/ATen.h>
-#endif
-
 // =========================================================
 // Device Tensor structs
 //
