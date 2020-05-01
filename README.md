@@ -145,3 +145,26 @@ torch.aten_profiler.stack_print()
 torch.aten_profiler.unimpl_print()
 
 ```
+
+### HB Profiling
+
+#### HB Kernel Call Logs
+HB emulation can output a file with the list of kernel calls along with associated data in json format. To enable this:
+
+```python
+import torch
+import torch.hammerblade.kernel_logger as hblog
+
+x = torch.rand(2, 2).hammerblade()
+y = torch.rand(2, 2).hammerblade()
+
+hblog.enable()
+
+print(x + y)
+
+hblog.disable()
+```
+
+That outputs kernel call log to the file `hbKernelCallLog.json`.
+
+
