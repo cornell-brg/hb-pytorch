@@ -132,7 +132,7 @@ option(USE_HB_EMUL "Use HammerBlade Emulation Layer" OFF)
 option(PROFILE_ATEN "Turn on ATen kernel profiling" OFF)
 option(PROFILE_UNIMPL "Look for used kernels that are not implemented on HB" OFF)
 cmake_dependent_option(
-  HB_ENABLE_KERNEL_LOG "Enable HammerBlade kernel call logging" OFF
+  HB_ENABLE_KERNEL_LOG "Enable HammerBlade kernel call logging" ON
   "USE_HB_EMUL" OFF)
 option(USE_ROCM "Use ROCm" ON)
 option(CAFFE2_STATIC_LINK_CUDA "Statically link CUDA libraries" OFF)
