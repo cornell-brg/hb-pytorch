@@ -124,7 +124,7 @@ class KernelLogger {
       tensor_json["storage_head"] = (uint64_t) tensor->storage_head;
       tensor_json["strides"] = json_list(dims, strides);
       tensor_json["sizes"] = json_list(dims, sizes);
-      tensor_json["storage"] = json_list(storage_numel, tensor->storage_head);
+      tensor_json["storage"] = json_list(storage_numel, (float*) tensor->storage_head);
       log_json[curr_kernel].push_back(tensor_json);
     }
 

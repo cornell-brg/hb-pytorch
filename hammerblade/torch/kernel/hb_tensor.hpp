@@ -42,7 +42,7 @@ typedef struct {
 
 // Info about storage objects
 #ifdef HB_ENABLE_KERNEL_LOG
-  float* storage_head;
+  void* storage_head;
   uint32_t storage_numel;
 #endif
 } hb_tensor_t;
