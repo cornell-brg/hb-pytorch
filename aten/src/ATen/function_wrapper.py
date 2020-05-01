@@ -111,6 +111,24 @@ c10::probe::LogATenKernel();
 }
 """)
 
+NATIVE_DISPATCH_DEFINITION_DEFAULT_REDISPATCH = CodeTemplate("""\
+${return_type} ${api_name}(${type_method_formals}) {
+#ifdef PROFILE_ATEN
+c10::probe::LogATenKernel();
+#endif
+#ifdef BUILD_NAMEDTENSOR
+    ${named_guard_declaration}
+#endif
+    ${device_guard_declaration}
+    if(!${redispatch_condition}) {
+      ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
+    } else {
+      ${tensor_boxing}
+      ${return_call} at::native::${native_type_method_dispatch}(${alter_actuals});
+    }
+}
+""")
+
 NATIVE_DISPATCH_DEFINITION_BACKEND = CodeTemplate("""\
 ${return_type} ${api_name}(${type_method_formals}) {
 #ifdef PROFILE_ATEN
@@ -1297,6 +1315,29 @@ def create_generic(top_env, declarations):
                 return NAMEDTENSOR_CHECK.substitute(code=code)
             return code
 
+        def process_redispatch_cpu_to_hb(option):
+            # type: (FunctionOption) -> None
+            redispatch_condition = "c10::probe::is_in_aten_profiler_roi()"
+            tensor_boxing = ""
+            alter_actuals = []
+            option['redispatch_condition'] = redispatch_condition
+
+            # convert formals to boxed actuals
+            non_const_tensor = 0
+            for f in option['formals_list']:
+                if f['type'] == 'Tensor &':
+                    tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
+                    alter_actuals.append(f['name'] + "_hb")
+                    non_const_tensor += 1
+                elif f['type'] == 'const Tensor &':
+                    alter_actuals.append(f['name'] + ".llcopy()")
+                else:
+                    alter_actuals.append(f['name'])
+            option['tensor_boxing'] = tensor_boxing
+            option['alter_actuals'] = alter_actuals
+            assert len(alter_actuals) == len(option['formals_list'])
+            assert len(option['returns']) == non_const_tensor or non_const_tensor == 0
+
         def add_namedtensor_enabled_macro(code):
             # type: (FunctionCode) -> FunctionCode
             return FunctionCode(
@@ -1364,8 +1405,9 @@ def create_generic(top_env, declarations):
         else:
             top_env['type_method_declarations'].append(
                 check_namedtensor_enabled(NATIVE_DISPATCH_DECLARATION.substitute(option)))
+            process_redispatch_cpu_to_hb(option)
             top_env['type_method_definitions'].append(
-                check_namedtensor_enabled(NATIVE_DISPATCH_DEFINITION_DEFAULT.substitute(option)))
+                check_namedtensor_enabled(NATIVE_DISPATCH_DEFINITION_DEFAULT_REDISPATCH.substitute(option)))
             if option['use_c10_dispatcher'] == 'full':
                 top_env['function_registrations'].append(
                     check_namedtensor_enabled(DEFAULT_FUNCTION_REGISTRATION.substitute(option)))
