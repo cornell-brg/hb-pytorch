@@ -25,7 +25,7 @@ typedef struct {
   eva_t sizes;   // Pointer to sizes vector; number of sizes = dims
   eva_t data;    // Pointer to raw data
 #ifdef HB_ENABLE_KERNEL_LOG
-  float* storage_head;
+  void* storage_head;
   uint32_t storage_numel;
 #endif
 } hb_mc_tensor_t;
