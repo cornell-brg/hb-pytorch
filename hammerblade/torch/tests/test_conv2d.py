@@ -5,7 +5,6 @@ Unit tests for conv2d operator
 import torch
 import torch.nn.functional as F
 import random
-import os
 import pytest
 import hbutils
 

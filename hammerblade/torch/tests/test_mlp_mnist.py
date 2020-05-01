@@ -3,7 +3,6 @@ Test on multilayer perceptron MNIST
 04/06/2020 Lin Cheng (lc873@cornell.edu)
 """
 
-import os
 import copy
 import torch
 import torch.nn as nn
