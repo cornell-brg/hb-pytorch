@@ -130,7 +130,7 @@ static struct PyMethodDef _THBPModule_methods[] = {
   {"_hammerblade_enable_kernel_call_logger",
     (PyCFunction)THBPModule_enable_kernel_call_logger, METH_NOARGS, nullptr},
   {"_hammerblade_disable_kernel_call_logger",
-    (PyCFunction)THBPModule_enable_kernel_call_logger, METH_NOARGS, nullptr},
+    (PyCFunction)THBPModule_disable_kernel_call_logger, METH_NOARGS, nullptr},
 #endif
   {nullptr}
 };
