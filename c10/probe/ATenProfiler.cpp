@@ -90,6 +90,10 @@ bool is_in_aten_profiler_roi() {
   return g_aten_profiler.in_roi;
 }
 
+bool is_top_level_kernel() {
+  return (g_curr_call_stack.size() == 1);
+}
+
 // =============== Aten Profiler Log Members =======================
 
 // Entering a function
@@ -98,7 +102,9 @@ ATenProfilerLog::ATenProfilerLog(const std::string& func_name)
 {
   if (!aten_profiler_in_parallel_region()) {
     g_curr_call_stack.push_back(func_name);
-    log_execution_chart(g_curr_call_stack);
+    if (is_top_level_kernel()) {
+      log_execution_chart(func_name);
+    }
   }
 }
 

@@ -1317,7 +1317,7 @@ def create_generic(top_env, declarations):
 
         def process_redispatch_cpu_to_hb(option):
             # type: (FunctionOption) -> None
-            redispatch_condition = "c10::probe::is_in_aten_profiler_roi()"
+            redispatch_condition = "(c10::probe::is_top_level_kernel() && c10::probe::should_redispatch(__PRETTY_FUNCTION__))"
             tensor_boxing = ""
             alter_actuals = []
             option['redispatch_condition'] = redispatch_condition
@@ -1850,7 +1850,7 @@ def create_derived(backend_type_env, declarations):
 
     def process_redispatch_cpu_to_hb(option):
         # type: (FunctionOption) -> None
-        redispatch_condition = "c10::probe::is_in_aten_profiler_roi()"
+        redispatch_condition = "(c10::probe::is_top_level_kernel() && c10::probe::should_redispatch(__PRETTY_FUNCTION__))"
         tensor_boxing = ""
         alter_actuals = []
         option['redispatch_condition'] = redispatch_condition

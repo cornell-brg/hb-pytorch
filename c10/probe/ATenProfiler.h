@@ -30,6 +30,7 @@ private:
 C10_PROBE_API void aten_profiler_start();
 C10_PROBE_API void aten_profiler_end();
 C10_PROBE_API bool is_in_aten_profiler_roi();
+C10_PROBE_API bool is_top_level_kernel();
 
 struct C10_PROBE_API ATenProfilerLog {
 public:
