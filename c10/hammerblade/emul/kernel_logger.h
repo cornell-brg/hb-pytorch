@@ -12,7 +12,6 @@
 
 #include <string>
 #include <kernel_common.hpp>
-#include <fstream>
 
 // A popular C++ library for json pasrsing and
 // serialization. Inlcuded as a header only library.
@@ -35,24 +34,17 @@ class KernelLogger {
     // Runtime setting to enable or disable logging
     bool on;
 
-    // Path to log file
-    std::string log_path;
-
     // Json object for logging
     json log_json;
 
     // Kernel call currently being logged
     std::string curr_kernel;
 
-    std::ofstream log_file;
-
   public:
-    KernelLogger(bool on, std::string log_path) :
-      on(on),
-      log_path(log_path) {
+    KernelLogger(bool on) :
+      on(on){
         log_json = json();
         curr_kernel = "";
-        log_file.open(log_path);
       }
 
     void enable() {
@@ -61,6 +53,15 @@ class KernelLogger {
 
     void disable() {
       on = false;
+    }
+
+    std::string log() {
+      return log_json.dump(4);
+    }
+
+    void clear() {
+      log_json = json();
+      curr_kernel = "";
     }
 
     /**
@@ -80,8 +81,6 @@ class KernelLogger {
     void log_kernel_call() {
       // base case
       if(on) {
-        log_file << std::endl << curr_kernel << std::endl;
-        log_file << log_json[curr_kernel].dump(4) << std::endl;
         curr_kernel = "";
       }
     }
