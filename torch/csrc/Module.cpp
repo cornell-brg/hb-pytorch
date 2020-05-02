@@ -810,6 +810,13 @@ PyObject* initModule() {
 #endif
   ASSERT_TRUE(set_module_attr("has_hammerblade", has_hammerblade));
 
+#ifdef USE_HB_EMUL
+  PyObject *hb_emul_on = Py_True;
+#else
+  PyObject *hb_emul_on = Py_False;
+#endif
+  ASSERT_TRUE(set_module_attr("hb_emul_on", hb_emul_on));
+
   ASSERT_TRUE(set_module_attr("has_mkldnn", at::hasMKLDNN() ? Py_True : Py_False));
 
 #ifdef _GLIBCXX_USE_CXX11_ABI
