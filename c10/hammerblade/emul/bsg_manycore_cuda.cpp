@@ -54,7 +54,7 @@ bool binary_loaded = false;
 
 // HB device kernel logger
 #ifdef HB_ENABLE_KERNEL_LOG
-KernelLogger kernel_call_logger(false, "kernel_log.json");
+KernelLogger kernel_call_logger(false, "hbKernelCallLog.json");
 #endif
 
 // reset global state so testing is easier
@@ -186,11 +186,6 @@ void reset_runtime() {
           }
           if (!binary_loaded) {
             binary_loaded = true;
-
-            // Later add a runtime option to enable kernel call logging
-#ifdef HB_ENABLE_KERNEL_LOG
-            kernel_call_logger.enable();
-#endif
 
             return HB_MC_SUCCESS;
           } else {
@@ -368,8 +363,5 @@ void reset_runtime() {
           }
           device_busy = false;
           binary_loaded = false;
-#ifdef HB_ENABLE_KERNEL_LOG
-          kernel_call_logger.disable();
-#endif
           return HB_MC_SUCCESS;
         }

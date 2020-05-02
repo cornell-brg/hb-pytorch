@@ -42,7 +42,7 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
                                   const int64_t* sizes,
                                   const void* data,
 #ifdef HB_ENABLE_KERNEL_LOG
-                                  float* storage_head,
+                                  void* storage_head,
                                   uint32_t storage_numel,
 #endif
                                   std::vector<eva_t>& device_ptrs) {
@@ -102,7 +102,7 @@ eva_t create_device_tensor(const Tensor& tensor,
   return create_device_tensor(
       N, dims, strides, sizes, data,
 #ifdef HB_ENABLE_KERNEL_LOG
-      tensor.storage().data<float>(),
+      (void*) tensor.storage().data(),
       (uint32_t) tensor.storage().numel(),
 #endif
       device_ptrs);

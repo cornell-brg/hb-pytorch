@@ -5,7 +5,6 @@ Unit tests for conv2d operator
 import torch
 import torch.nn.functional as F
 import random
-import os
 import pytest
 import hbutils
 
@@ -163,7 +162,7 @@ def test_conv2d_bias_4():
 
     _test_conv2d(inputs, kernel, padding, stride, bias)
 
-@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Prohibitively slow on cosim")
+@pytest.mark.skipif(torch.hb_emul_on, reason="Prohibitively slow on cosim")
 def test_conv2d_batch_input_output():
     """
     Combinations of batch, input and output channel sizes
@@ -180,7 +179,7 @@ def test_conv2d_batch_input_output():
                                     kernel_size)
                 _test_conv2d(inputs, kernel)
 
-@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Prohibitively slow on cosim")
+@pytest.mark.skipif(torch.hb_emul_on, reason="Prohibitively slow on cosim")
 def test_conv2d_width_height_kernel():
     """
     Combinations of width, height and kernel_size
@@ -197,7 +196,7 @@ def test_conv2d_width_height_kernel():
                                     kernel_size)
                 _test_conv2d(inputs, kernel)
 
-@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Prohibitively slow on cosim")
+@pytest.mark.skipif(torch.hb_emul_on, reason="Prohibitively slow on cosim")
 def test_conv2d_width_height_kernel_pad_stride():
     """
     Combinations of width, height, kernel_size, padding and stride

@@ -10,10 +10,9 @@
 #error "kernel_logger.h included but HB_ENABLE_KERNEL_LOG not enabled!"
 #endif
 
-#include <ATen/ATen.h>
 #include <string>
 #include <kernel_common.hpp>
-#include <iostream>
+#include <fstream>
 
 // A popular C++ library for json pasrsing and
 // serialization. Inlcuded as a header only library.
@@ -45,12 +44,15 @@ class KernelLogger {
     // Kernel call currently being logged
     std::string curr_kernel;
 
+    std::ofstream log_file;
+
   public:
     KernelLogger(bool on, std::string log_path) :
       on(on),
       log_path(log_path) {
         log_json = json();
         curr_kernel = "";
+        log_file.open(log_path);
       }
 
     void enable() {
@@ -78,8 +80,8 @@ class KernelLogger {
     void log_kernel_call() {
       // base case
       if(on) {
-        std::cout << std::endl << curr_kernel << std::endl;
-        std::cout << log_json[curr_kernel].dump(4) << std::endl;
+        log_file << std::endl << curr_kernel << std::endl;
+        log_file << log_json[curr_kernel].dump(4) << std::endl;
         curr_kernel = "";
       }
     }
@@ -124,7 +126,7 @@ class KernelLogger {
       tensor_json["storage_head"] = (uint64_t) tensor->storage_head;
       tensor_json["strides"] = json_list(dims, strides);
       tensor_json["sizes"] = json_list(dims, sizes);
-      tensor_json["storage"] = json_list(storage_numel, tensor->storage_head);
+      tensor_json["storage"] = json_list(storage_numel, (float*) tensor->storage_head);
       log_json[curr_kernel].push_back(tensor_json);
     }
 
