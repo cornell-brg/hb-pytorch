@@ -67,6 +67,22 @@ PyObject * THBPModule_disable_kernel_call_logger(PyObject *self, PyObject *noarg
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS;
 }
+
+PyObject * THBPModule_log_kernel_call_logger(PyObject *self, PyObject *noargs)
+{
+  HANDLE_TH_ERRORS
+  std::string log = kernel_call_logger.log();
+  return PyUnicode_FromString(log.c_str());
+  END_HANDLE_TH_ERRORS;
+}
+
+PyObject * THBPModule_clear_kernel_call_logger(PyObject *self, PyObject *noargs)
+{
+  HANDLE_TH_ERRORS
+  kernel_call_logger.clear();
+  Py_RETURN_NONE;
+  END_HANDLE_TH_ERRORS;
+}
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -131,6 +147,10 @@ static struct PyMethodDef _THBPModule_methods[] = {
     (PyCFunction)THBPModule_enable_kernel_call_logger, METH_NOARGS, nullptr},
   {"_hammerblade_disable_kernel_call_logger",
     (PyCFunction)THBPModule_disable_kernel_call_logger, METH_NOARGS, nullptr},
+  {"_hammerblade_log_kernel_call_logger",
+    (PyCFunction)THBPModule_log_kernel_call_logger, METH_NOARGS, nullptr},
+  {"_hammerblade_clear_kernel_call_logger",
+    (PyCFunction)THBPModule_clear_kernel_call_logger, METH_NOARGS, nullptr},
 #endif
   {nullptr}
 };
