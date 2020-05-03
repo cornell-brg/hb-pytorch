@@ -9,13 +9,16 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_round(
-          bsg_tensor_t* t0_p, // source tensor
-          bsg_tensor_t* t1_p) { //destination
+          hb_tensor_t* t0_p, // source tensor
+          hb_tensor_t* t1_p) { //destination
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    brg_tile_elementwise_for(t0_p, t1_p,
-      [&](float a) {
+    HBTensor<uint32_t> res = HBTensor<uint32_t>(t0_p);
+    HBTensor<uint32_t> input = HBTensor<uint32_t>(t1_p);
+
+    hb_parallel_foreach(res, input,
+      [](float a) {
         return roundf(a);
     });
 
@@ -24,6 +27,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_round, bsg_tensor_t*, bsg_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_round, hb_tensor_t*, hb_tensor_t*)
 
 }
