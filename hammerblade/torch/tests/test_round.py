@@ -8,12 +8,10 @@ torch.manual_seed(42)
 
 def _test_torch_round(x):
     expected_tensor = x.round()
-    
     h = x.hammerblade()
     got_hb = h.round()
     got_device = got_hb.device
     got_tensor = got_hb.cpu()
-
     assert got_device == torch.device("hammerblade")
     assert torch.equal(got_tensor, expected_tensor)
 
