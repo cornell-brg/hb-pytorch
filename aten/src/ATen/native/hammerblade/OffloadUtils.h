@@ -20,6 +20,10 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
                                   const int64_t* strides,
                                   const int64_t* sizes,
                                   const void* data,
+#ifdef HB_ENABLE_KERNEL_LOG
+                                  void* storage_head,
+                                  uint32_t storage_numel,
+#endif
                                   std::vector<eva_t>& device_ptrs);
 
 eva_t create_device_tensor(const Tensor& tensor,

@@ -27,6 +27,7 @@
 
 #include <bsg_manycore_cuda.h>  
 #include <bsg_manycore_errno.h>
+#include <kernel_trampoline.h>
 
 #ifdef __cplusplus
 #include <cstring>
@@ -50,6 +51,11 @@
 // global variables for states
 bool device_busy = false;
 bool binary_loaded = false;
+
+// HB device kernel logger
+#ifdef HB_ENABLE_KERNEL_LOG
+KernelLogger kernel_call_logger(false, "hbKernelCallLog.json");
+#endif
 
 // reset global state so testing is easier
 void reset_runtime() {
@@ -180,6 +186,7 @@ void reset_runtime() {
           }
           if (!binary_loaded) {
             binary_loaded = true;
+
             return HB_MC_SUCCESS;
           } else {
             return HB_MC_INITIALIZED_TWICE;

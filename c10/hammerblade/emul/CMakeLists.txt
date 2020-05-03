@@ -30,5 +30,10 @@ target_compile_options(bsg_manycore_runtime.1.0 PRIVATE "-Wno-unused-but-set-var
 # notify the kernel that we are emulating
 target_compile_definitions(bsg_manycore_runtime.1.0 PRIVATE "-DHB_EMUL")
 
+# Include the nlohmann_json as a header-only library
+target_include_directories(bsg_manycore_runtime.1.0
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/third_party/include)
+
 # installation
 install(TARGETS bsg_manycore_runtime.1.0 EXPORT Caffe2Targets DESTINATION lib)
