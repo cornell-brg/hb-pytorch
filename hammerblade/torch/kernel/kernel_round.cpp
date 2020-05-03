@@ -9,17 +9,17 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_round(
-          hb_tensor_t* t0_p, // source tensor
+          hb_tensor_t* t0_p, // input tensor
           hb_tensor_t* t1_p) { //destination
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    HBTensor<uint32_t> res = HBTensor<uint32_t>(t0_p);
-    HBTensor<uint32_t> input = HBTensor<uint32_t>(t1_p);
+  auto inp = HBTensor<float>(t0_p);
+  auto res = HBTensor<float>(t1_p);
 
-    hb_parallel_foreach(res, input,
-      [](float a) {
-        return roundf(a);
+    hb_parallel_foreach(inp, res,
+      [&](float a) {
+        return rintf(a);
     });
 
     //   End profiling
