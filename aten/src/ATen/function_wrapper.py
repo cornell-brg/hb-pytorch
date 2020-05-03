@@ -124,7 +124,9 @@ c10::probe::LogATenKernel();
       ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
     } else {
       ${tensor_boxing}
-      ${return_call} at::native::${native_type_method_dispatch}(${alter_actuals});
+      //${return_call} at::native::${native_type_method_dispatch}(${alter_actuals});
+      at::native::${native_type_method_dispatch}(${alter_actuals});
+      TORCH_CHECK(false, "Termination after redispatching");
     }
 }
 """)
@@ -155,7 +157,9 @@ c10::probe::LogATenKernel();
         ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
     } else {
         ${tensor_boxing}
-        ${return_call} at::native::${alter_method_dispatch}(${alter_actuals});
+        //${return_call} at::native::${alter_method_dispatch}(${alter_actuals});
+        at::native::${alter_method_dispatch}(${alter_actuals});
+        TORCH_CHECK(false, "Termination after redispatching");
     }
 }
 """)
