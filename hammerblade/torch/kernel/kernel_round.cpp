@@ -1,6 +1,6 @@
 //====================================================================
 // Element-wise round kernel
-// 04/11/2020 Andrew Pareles (amp342@cornell.edu)
+// 05/03/2020 Andrew Pareles (amp342@cornell.edu)
 //====================================================================
 
 #include <kernel_common.hpp>

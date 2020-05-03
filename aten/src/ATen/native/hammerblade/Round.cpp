@@ -9,13 +9,9 @@ namespace {
 
 
 static void round_kernel_hb(TensorIterator& iter) {  
-  // TODO: replace with 
-  //AT_DISPATCH_FLOATING_TYPES //double, float
-  //AT_DISPATCH_FLOATING_AND_COMPLEX_TYPES // (complex & not) double, float
-
   AT_DISPATCH_FLOAT_TYPE_ONLY(
-    iter.dtype(), //not used, but here anyway
-    "round_hb", //gives it a name
+    iter.dtype(),
+    "round_hb", 
       [&]() {
         offload_op_unary(iter, "tensorlib_round");
       });
