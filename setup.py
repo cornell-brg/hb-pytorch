@@ -387,7 +387,8 @@ def build_deps():
 
 # the list of runtime dependencies required by this built package
 install_requires = ['numpy', 'requests', 'six', 'sklearn', 'tqdm',
-                    'pytest', 'ninja', 'hypothesis']
+                    'pytest', 'ninja', 'hypothesis', 'pyyaml',
+                    'typing']
 
 if sys.version_info <= (2, 7):
     install_requires += ['future', 'typing']
