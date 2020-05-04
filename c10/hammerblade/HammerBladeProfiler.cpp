@@ -83,8 +83,8 @@ std::string HBProfiler::summary() {
 
   for(auto k = profile_log.begin(); k != profile_log.end(); ++k) {
     float percentage =
-      execution_time > 0 ? 
-        100.0 * ((float) k->second[CUMMULATIVE] / (float) execution_time) : 
+      execution_time > 0 ?
+        100.0 * ((float) k->second[CUMMULATIVE] / (float) execution_time) :
         0;
     names.contents.push_back(k->first);
     percents.contents.push_back(percentage);
@@ -92,35 +92,45 @@ std::string HBProfiler::summary() {
     num_calls.contents.push_back(k->second[NUM_CALLS]);
   }
 
+  // Underlines
+  std::stringstream underlines;
+  underlines << std::right << std::setfill('-');
+  underlines << std::setw(names.width() + 2) << "" << "+-";
+  underlines << std::setw(percents.width() + 2) << "" << "+-";
+  underlines << std::setw(cycles.width() + 2) << "" << "+-";
+  underlines << std::setw(num_calls.width() + 2) << "" << "+";
+  underlines << std::setfill(' ') << std::endl;
+
   std::stringstream summary;
   summary << std::endl;
 
+  summary << underlines.str();
+
   // Headers
   summary << std::left;
-  summary << std::setw(names.width() + 2) << names.header;
-  summary << std::setw(percents.width() + 2) << percents.header;
-  summary << std::setw(cycles.width() + 2) << cycles.header;
-  summary << std::setw(num_calls.width() + 2) << num_calls.header;
+  summary << std::setw(names.width() + 2) << names.header << "| ";
+  summary << std::setw(percents.width() + 2) << percents.header << "| ";
+  summary << std::setw(cycles.width() + 2) << cycles.header << "| ";
+  summary << std::setw(num_calls.width() + 2) << num_calls.header << "| ";
   summary << std::endl;
 
-  // Underlines
-  summary << std::right << std::setfill('=');
-  summary << std::setw(names.width() + 2) << ' ';
-  summary << std::setw(percents.width() + 2) << ' ';
-  summary << std::setw(cycles.width() + 2) << ' ';
-  summary << std::setw(num_calls.width() + 2) << ' ';
-  summary << std::setfill(' ') << std::endl;
+  summary << underlines.str();
 
   // Contents
   for(int i = 0; i < profile_log.size(); ++i) {
     summary << std::left;
-    summary << std::setw(names.width() + 2) << names.contents[i];
-    summary << std::setw(percents.width() + 2) << percents.contents[i];
+    summary << std::setw(names.width() + 2)
+            << names.contents[i] << "| ";
+    summary << std::setw(percents.width() + 2)
+            << percents.contents[i] << "| ";
     summary << std::setw(cycles.width() + 2)
-            << to_string(cycles.contents[i] / 1000000) + 'M';
-    summary << std::setw(num_calls.width() + 2) << num_calls.contents[i];
+            << to_string(cycles.contents[i] / 1000000) + 'M' << "| ";
+    summary << std::setw(num_calls.width() + 2)
+            << num_calls.contents[i] << "| ";
     summary << std::endl;
   }
+
+  summary << underlines.str();
 
   return summary.str();
 }
