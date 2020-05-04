@@ -3,7 +3,7 @@
 
 # temporary benchmarking operator
 # Dummy operaotr for testing / internal use
-- func: dummy(Tensor self, Tensor other) -> Tensor
+- func: dummy(Tensor self) -> Tensor
   use_c10_dispatcher: full
   variants: function, method
   dispatch:

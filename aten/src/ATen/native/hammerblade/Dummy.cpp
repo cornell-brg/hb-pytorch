@@ -8,17 +8,15 @@
 namespace at { namespace native {
 
 Tensor dummy_hb(
-    const Tensor& self,
-    const Tensor& other
+    const Tensor& self
 ) {
 
-  TORCH_CHECK(self.dim() == other.dim(), "Shapes of the two input tensors have to be the same");
-
-  // Offloading code here
-
+  if ((self.scalar_type() != ScalarType::Float)) {
+    AT_ERROR("HammerBlade dummy is implemented for Float only");
+  }
   auto result = at::empty({self.size(0)}, self.options());
 
-  hb_offload_kernel(result, self, other, "tensorlib_dummy");
+  hb_offload_kernel(result, self, "tensorlib_dummy");
 
   return result;
 }
