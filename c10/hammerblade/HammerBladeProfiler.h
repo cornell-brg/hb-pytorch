@@ -26,6 +26,9 @@ enum KernelProfileItem {
  * available in cudalite runtime.
  */
 class HBProfiler {
+  // Runtime switch to toggle profiling
+  bool on;
+
   // Cummulative time consumed for executing all kernels
   uint32_t execution_time;
 
@@ -34,7 +37,29 @@ class HBProfiler {
 
   public:
     HBProfiler() : 
+      on(on),
       execution_time(0) {}
+
+    /**
+     * Enable profiler
+     */
+    void enable() {
+      on = true;
+    }
+
+    /**
+     * Disable profiler
+     */
+    void disbale() {
+      on = false;
+    }
+
+    /**
+     * Clear profiler
+     */
+    void clear() {
+      profile_log.clear();
+    }
 
     /**
      * Registers start time of a kernel call.
