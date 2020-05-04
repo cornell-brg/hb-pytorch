@@ -9,6 +9,7 @@
 #include <ATen/hammerblade/HammerBladeContext.h>
 #include <ATen/HammerBladeGenerator.h>
 #include <c10/hammerblade/HammerBladeFunctions.h>
+#include <c10/hammerblade/HammerBladeProfiler.h>
 // #include <c10/hammerblade/HammerBladeCachingAllocator.h>
 
 #include <torch/csrc/hammerblade/THBP.h>
@@ -19,6 +20,8 @@
 #include <torch/csrc/hammerblade/python_comm.h>
 #include <torch/csrc/autograd/generated/variable_factories.h>
 #include <torch/csrc/Generator.h>
+
+extern HBProfiler hb_profiler;
 
 #ifdef HB_ENABLE_KERNEL_LOG
 #include <c10/hammerblade/emul/kernel_logger.h>
@@ -49,6 +52,38 @@ PyObject * THBPModule_set_run_yet_variable_to_false_wrap(PyObject *self, PyObjec
   torch::utils::hammerblade_set_run_yet_variable_to_false();
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
+}
+
+PyObject * THBPModule_enable_profiler(PyObject *self, PyObject *noargs)
+{
+  HANDLE_TH_ERRORS
+  hb_profiler.enable();
+  Py_RETURN_NONE;
+  END_HANDLE_TH_ERRORS;
+}
+
+PyObject * THBPModule_disable_profiler(PyObject *self, PyObject *noargs)
+{
+  HANDLE_TH_ERRORS
+  hb_profiler.disable();
+  Py_RETURN_NONE;
+  END_HANDLE_TH_ERRORS;
+}
+
+PyObject * THBPModule_summary_profiler(PyObject *self, PyObject *noargs)
+{
+  HANDLE_TH_ERRORS
+  std::string log = hb_profiler.summary();
+  return PyUnicode_FromString(log.c_str());
+  END_HANDLE_TH_ERRORS;
+}
+
+PyObject * THBPModule_clear_profiler(PyObject *self, PyObject *noargs)
+{
+  HANDLE_TH_ERRORS
+  hb_profiler.clear();
+  Py_RETURN_NONE;
+  END_HANDLE_TH_ERRORS;
 }
 
 #ifdef HB_ENABLE_KERNEL_LOG
@@ -142,6 +177,14 @@ static struct PyMethodDef _THBPModule_methods[] = {
   {"_hammerblade_getDevice",   (PyCFunction)THBPModule_getDevice_wrap,   METH_NOARGS,  nullptr},
   {"_hammerblade_set_run_yet_variable_to_false",
     (PyCFunction)THBPModule_set_run_yet_variable_to_false_wrap, METH_NOARGS, nullptr},
+  {"_hammerblade_enable_profiler",
+    (PyCFunction)THBPModule_enable_profiler, METH_NOARGS, nullptr},
+  {"_hammerblade_disable_profiler",
+    (PyCFunction)THBPModule_disable_profiler, METH_NOARGS, nullptr},
+  {"_hammerblade_summary_profiler",
+    (PyCFunction)THBPModule_summary_profiler, METH_NOARGS, nullptr},
+  {"_hammerblade_clear_profiler",
+    (PyCFunction)THBPModule_clear_profiler, METH_NOARGS, nullptr},
 #ifdef HB_ENABLE_KERNEL_LOG
   {"_hammerblade_enable_kernel_call_logger",
     (PyCFunction)THBPModule_enable_kernel_call_logger, METH_NOARGS, nullptr},
