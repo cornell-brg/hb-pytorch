@@ -106,18 +106,10 @@ SECTIONS
   } >DMEM_VMA 
 
 
-  .eh_frame.dmem : 
-  AT(LOADADDR(.tbss.dmem) + SIZEOF(.tbss.dmem)) 
-  { 
-    *(.eh_frame) 
-    *(.eh_frame*) 
-  } >DMEM_VMA 
-
-  
   /* striped data */
   /* RISC-V 32 has a 4 byte word size */
   .striped.data.dmem ALIGN(bsg_group_size * 4) : 
-  AT(LOADADDR(.eh_frame.dmem) + SIZEOF(.eh_frame.dmem)) 
+  AT(LOADADDR(.tbss.dmem) + SIZEOF(.tbss.dmem)) 
   {
     _bsg_striped_data_start = . ;
     *(.striped.data)
@@ -177,6 +169,13 @@ SECTIONS
     *(.dram)
     . = ALIGN(4);
   } >DRAM_D_VMA 
+
+
+  /DISCARD/ :
+  {
+    *(.eh_frame)
+    *(.eh_frame*)
+  }
 
   _bsg_dram_d_end_addr = . ;
   _bsg_dram_end_addr = . ;
