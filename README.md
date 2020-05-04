@@ -148,6 +148,37 @@ torch.aten_profiler.unimpl_print()
 
 ### HB Profiling
 
+#### Execution summary
+HammerBlade offloading api also supports profiling the execution time using CUDALite api functions. This can be used as:
+
+```python
+import torch
+import torch.hammerblade.profiler as hbprof
+
+x = torch.rand(2, 3).hammerblade()
+y = torch.rand(2, 3).hammerblade()
+
+# Enables profiling
+hbprof.enable()
+print(x + y)
+print(x * y)
+
+# Prints summary of add and mul kernels
+print(hbprof.summary())
+
+# Disbales profiling: div kernel below won't be profiled
+hbprof.disable()
+print(x / y)
+
+# Clears profiling data structure
+hbprof.clear()
+
+# Enables profiling and only profiles mm kernel
+hbprof.enable()
+print(torch.mm(x, y.t()))
+print(hbprof.summary()
+```
+
 #### HB Kernel Call Logs
 HB emulation can output a file with the list of kernel calls along with associated data in json format. This can be used as:
 
