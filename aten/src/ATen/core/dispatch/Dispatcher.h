@@ -226,7 +226,7 @@ inline void Dispatcher::callBoxed(const OperatorHandle& op, Stack* stack) const 
 
 inline const KernelFunction& Dispatcher::dispatch_(const DispatchTable& dispatchTable, const ska::flat_hash_map<TensorTypeId, KernelFunction>& backendFallbackKernels, c10::optional<TensorTypeId> dispatchKey) {
 
-#ifdef PROFILE_UNIMPL
+#ifdef PROFILE_ATEN
   if (c10::probe::is_in_aten_profiler_roi()) {
     auto HBKernel = dispatchTable.lookup(c10::TensorTypeId::HammerBladeTensorId);
     auto HBFallbackKernel = backendFallbackKernels.find(c10::TensorTypeId::HammerBladeTensorId);

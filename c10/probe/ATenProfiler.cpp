@@ -29,19 +29,12 @@ void ATenProfiler::profiling_start() {
   add_kernels_of_interest("at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)");
   add_kernels_of_interest("at::Tensor at::TypeDefault::embedding_backward(const at::Tensor&, const at::Tensor&, int64_t, int64_t, bool, bool)");
   //add_ernels_of_interest("")
-#if defined(PROFILE_ATEN) || defined(PROFILE_UNIMPL)
-  std::cerr << " ATen profiler collecting ...";
-# ifdef PROFILE_ATEN
-  std::cerr << " execution time";
+#ifdef PROFILE_ATEN
+  std::cerr << " ATen profiler collecting ..." std::endl;
   clear_exeuction_time_dict();
   // mark current time
   time_in_roi = new ExecutionTimeLog();
-# endif // ifdef PROFILE_ATEN
-# ifdef PROFILE_UNIMPL
   clear_unimpl_kernel();
-  std::cerr << " unimplemented kernels";
-# endif // ifdef PROFILE_UNIMPL
-  std::cerr << std::endl;
 #else
   std::cerr << "Warning: ATen profiler is invoked "
             << "but PyTorch is not built with profiling capability "

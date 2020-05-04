@@ -37,10 +37,6 @@ if(PROFILE_ATEN)
   target_compile_definitions(c10_probe PRIVATE PROFILE_ATEN)
 endif()
 
-if(PROFILE_UNIMPL)
-  target_compile_definitions(c10_probe PRIVATE PROFILE_UNIMPL)
-endif()
-
 # Include nlohmann_json
 target_include_directories(c10_probe PRIVATE
                            ${CMAKE_SOURCE_DIR}/third_party/include)
