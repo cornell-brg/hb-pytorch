@@ -4,45 +4,54 @@
 //=================================================================
 
 #include <map>
-#include <string>
 #include <array>
-#include <bsg_manycore_printing.h>
 
 namespace c10 {
 namespace hammerblade {
 
+enum KernelProfileItem {
+  NUM_CALLS,    // number of calls to this kernel
+  CUMMULATIVE,  // cummulative time for executing this kernel
+  START_TIME,   // start time of current kernel call
+  END_TIME,     // end time if current kernel call
+  NUM_ITEMS
+};
+
+/**
+ * HammerBlade Execution Profiler
+ *
+ * Uses cudalite runtime's `bsg_time` api function to aggregate
+ * number of cycles each kernel takes. Can be extended to support
+ * more precise profiling, when new profiling api functions are
+ * available in cudalite runtime.
+ */
 class HBProfiler {
   // Cummulative time consumed for executing all kernels
   uint32_t execution_time;
 
-  // <kernel_name>: {start_time, end_time, cummulative}
-  std::map<std::string, std::array<uint64_t, 3>> profile_log;
+  // <kernel_name>: {<kernel profile items>}
+  std::map<std::string, std::array<uint64_t, NUM_ITEMS>> profile_log;
 
   public:
     HBProfiler() : 
       execution_time(0) {}
 
-    void kernel_start(const char* kernel) {
-      if(profile_log.find(kernel) == profile_log.end()) {
-        profile_log[kernel] = {0, 0, 0};
-      }
+    /**
+     * Registers start time of a kernel call.
+     */
+    void kernel_start(const char* kernel);
 
-      profile_log[kernel][0] = bsg_time();
-    }
+    /**
+     * Registers end time of a kernel call. Must follow
+     * a call to `kernel_start`.
+     */
+    void kernel_end(const char* kernel);
 
-    void kernel_end(const char* kernel) {
-      TORCH_INTERNAL_ASSERT(
-        profile_log.find(kernel) != profile_log.end(),
-        "Can't find the kernel in profiler_log. ",
-        "Please call kernel_start first");
-
-      profile_log[kernel][1] = bsg_time();
-
-      uint64_t kernel_exec_time = profile_log[kernel][1] - 
-                            profile_log[kernel][0];
-      profile_log[kernel][2] += kernel_exec_time;
-      execution_time += kernel_exec_time;
-    }
+    /**
+     * Returns a formatted string with summary of HB execution
+     * until this point.
+     */
+    std::string summary();
 };
 
 }} // namepsace c10::hammerblade
