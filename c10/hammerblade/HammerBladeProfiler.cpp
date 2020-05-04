@@ -49,7 +49,7 @@ namespace hammerblade {
 
 void HBProfiler::kernel_start(const char* kernel) {
   if(profile_log.find(kernel) == profile_log.end()) {
-    profile_log[kernel] = {0};
+    profile_log[kernel].fill(0);
   }
 
   profile_log[kernel][START_TIME] = elapsed_cycles();
@@ -64,8 +64,8 @@ void HBProfiler::kernel_end(const char* kernel) {
   profile_log[kernel][NUM_CALLS] += 1;
   profile_log[kernel][END_TIME] = elapsed_cycles();
 
-  uint64_t kernel_exec_time = profile_log[kernel][1] -
-                                profile_log[kernel][0];
+  uint64_t kernel_exec_time = profile_log[kernel][END_TIME] -
+                                profile_log[kernel][START_TIME];
   profile_log[kernel][CUMMULATIVE] += kernel_exec_time;
   execution_time += kernel_exec_time;
 }
