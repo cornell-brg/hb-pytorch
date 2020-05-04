@@ -31,9 +31,10 @@ class HBProfiler {
     }
 
     void kernel_end(const char* kernel) {
-      TORCH_CHECK(
+      TORCH_INTERNAL_ASSERT(
         profile_log.find(kernel) != profile_log.end(),
-        "Can't find the kernel in the log. Please call kernel_start first");
+        "Can't find the kernel in profiler_log. ",
+        "Please call kernel_start first");
 
       profile_log[kernel][1] = bsg_time();
 
