@@ -82,9 +82,12 @@ std::string HBProfiler::summary() {
   num_calls.header = "Number of Calls";
 
   for(auto k = profile_log.begin(); k != profile_log.end(); ++k) {
+    float percentage =
+      execution_time > 0 ? 
+        100.0 * ((float) k->second[CUMMULATIVE] / (float) execution_time) : 
+        0;
     names.contents.push_back(k->first);
-    percents.contents.push_back(
-        100.0 * ((float) k->second[CUMMULATIVE] / (float) execution_time));
+    percents.contents.push_back(percentage);
     cycles.contents.push_back(k->second[CUMMULATIVE]);
     num_calls.contents.push_back(k->second[NUM_CALLS]);
   }
