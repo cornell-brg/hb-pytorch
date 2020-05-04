@@ -3,6 +3,8 @@
 // 05/03/2020 Bandhav Veluri
 //=================================================================
 
+#pragma once
+
 #include <map>
 #include <array>
 
@@ -37,7 +39,7 @@ class HBProfiler {
 
   public:
     HBProfiler() : 
-      on(on),
+      on(false),
       execution_time(0) {}
 
     /**
@@ -50,7 +52,7 @@ class HBProfiler {
     /**
      * Disable profiler
      */
-    void disbale() {
+    void disable() {
       on = false;
     }
 

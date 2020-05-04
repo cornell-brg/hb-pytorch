@@ -21,7 +21,7 @@
 #include <torch/csrc/autograd/generated/variable_factories.h>
 #include <torch/csrc/Generator.h>
 
-extern HBProfiler hb_profiler;
+extern c10::hammerblade::HBProfiler hb_profiler;
 
 #ifdef HB_ENABLE_KERNEL_LOG
 #include <c10/hammerblade/emul/kernel_logger.h>

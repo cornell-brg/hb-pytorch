@@ -74,6 +74,7 @@ void HBProfiler::kernel_end(const char* kernel) {
   }
 }
 
+__attribute__ ((visibility("default")))
 std::string HBProfiler::summary() {
   SummaryCol<std::string> names;
   SummaryCol<float> percents;

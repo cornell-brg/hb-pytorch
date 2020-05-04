@@ -3,10 +3,10 @@
 
 #include <mutex>
 
+c10::hammerblade::HBProfiler hb_profiler __attribute__ ((visibility ("default")));
+
 namespace c10 {
 namespace hammerblade {
-
-HBProfiler hb_profiler;
 
 namespace {
 static std::once_flag init_flag;
