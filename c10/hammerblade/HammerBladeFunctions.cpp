@@ -1,9 +1,12 @@
 #include "HammerBladeFunctions.h"
+#include "HammerBladeProfiler.h"
 
 #include <mutex>
 
 namespace c10 {
 namespace hammerblade {
+
+HBProfiler hb_profiler;
 
 namespace {
 static std::once_flag init_flag;
@@ -72,7 +75,10 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
 
   C10_HB_CHECK(hb_mc_kernel_enqueue(&_hb_device, _hb_grid_dim, _hb_tg_dim, kernel,
                                     args.size(), cuda_argv));
+
+  hb_profiler.kernel_start(kernel);
   C10_HB_CHECK(hb_mc_device_tile_groups_execute(&_hb_device));
+  hb_profiler.kernel_end(kernel);
 
   free(cuda_argv);
 }
