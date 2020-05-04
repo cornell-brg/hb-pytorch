@@ -90,6 +90,7 @@ std::string HBProfiler::summary() {
   }
 
   std::stringstream summary;
+  summary << std::endl;
 
   // Headers
   summary << std::setw(names.width() + 1) << names.header;
@@ -105,10 +106,7 @@ std::string HBProfiler::summary() {
   summary << std::setw(num_calls.width() + 1) << std::string("=", num_calls.width());
   summary << std::endl;
 
-  std::string summary_string;
-  summary >> summary_string;
-
-  return summary_string;
+  return summary.str();
 }
 
 }} // namespace c10::hammerblade
