@@ -4,6 +4,8 @@
 //=================================================================
 
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include <c10/hammerblade/HammerBladeException.h>
 #include <bsg_manycore_printing.h>
 #include "HammerBladeProfiler.h"
@@ -22,13 +24,13 @@ struct SummaryCol {
   std::string header;
   std::vector<T> contents;
 
-  int print_width() {
+  int width() {
     return header.length();
   }
 };
 
 template<>
-int SummaryCol<std::string>::print_width() {
+int SummaryCol<std::string>::width() {
   int w = header.length();
 
   for(int i = 0; i < contents.size(); ++i) {
@@ -62,7 +64,7 @@ void HBProfiler::kernel_end(const char* kernel) {
   profile_log[kernel][NUM_CALLS] += 1;
   profile_log[kernel][END_TIME] = elapsed_cycles();
 
-  uint64_t kernel_exec_time = profile_log[kernel][1] - 
+  uint64_t kernel_exec_time = profile_log[kernel][1] -
                                 profile_log[kernel][0];
   profile_log[kernel][CUMMULATIVE] += kernel_exec_time;
   execution_time += kernel_exec_time;
@@ -87,9 +89,26 @@ std::string HBProfiler::summary() {
     num_calls.contents.push_back(k->second[NUM_CALLS]);
   }
 
-  std::string summary = ""; 
+  std::stringstream summary;
 
-  return summary;
+  // Headers
+  summary << std::setw(names.width() + 1) << names.header;
+  summary << std::setw(percents.width() + 1) << percents.header;
+  summary << std::setw(cycles.width() + 1) << cycles.header;
+  summary << std::setw(num_calls.width() + 1) << num_calls.header;
+  summary << std::endl;
+
+  // Underlines
+  summary << std::setw(names.width() + 1) << std::string("=", names.width());
+  summary << std::setw(percents.width() + 1) << std::string("=", percents.width());
+  summary << std::setw(cycles.width() + 1) << std::string("=", cycles.width());
+  summary << std::setw(num_calls.width() + 1) << std::string("=", num_calls.width());
+  summary << std::endl;
+
+  std::string summary_string;
+  summary >> summary_string;
+
+  return summary_string;
 }
 
 }} // namespace c10::hammerblade
