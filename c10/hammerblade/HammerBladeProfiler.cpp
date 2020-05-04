@@ -48,26 +48,30 @@ namespace c10 {
 namespace hammerblade {
 
 void HBProfiler::kernel_start(const char* kernel) {
-  if(profile_log.find(kernel) == profile_log.end()) {
-    profile_log[kernel].fill(0);
-  }
+  if(on) {
+    if(profile_log.find(kernel) == profile_log.end()) {
+      profile_log[kernel].fill(0);
+    }
 
-  profile_log[kernel][START_TIME] = elapsed_cycles();
+    profile_log[kernel][START_TIME] = elapsed_cycles();
+  }
 }
 
 void HBProfiler::kernel_end(const char* kernel) {
-  TORCH_INTERNAL_ASSERT(
-    profile_log.find(kernel) != profile_log.end(),
-    "Can't find the kernel in profiler_log. ",
-    "Please call kernel_start first");
+  if(on) {
+    TORCH_INTERNAL_ASSERT(
+      profile_log.find(kernel) != profile_log.end(),
+      "Can't find the kernel in profiler_log. ",
+      "Please call kernel_start first");
 
-  profile_log[kernel][NUM_CALLS] += 1;
-  profile_log[kernel][END_TIME] = elapsed_cycles();
+    profile_log[kernel][NUM_CALLS] += 1;
+    profile_log[kernel][END_TIME] = elapsed_cycles();
 
-  uint64_t kernel_exec_time = profile_log[kernel][END_TIME] -
-                                profile_log[kernel][START_TIME];
-  profile_log[kernel][CUMMULATIVE] += kernel_exec_time;
-  execution_time += kernel_exec_time;
+    uint64_t kernel_exec_time = profile_log[kernel][END_TIME] -
+                                  profile_log[kernel][START_TIME];
+    profile_log[kernel][CUMMULATIVE] += kernel_exec_time;
+    execution_time += kernel_exec_time;
+  }
 }
 
 std::string HBProfiler::summary() {
