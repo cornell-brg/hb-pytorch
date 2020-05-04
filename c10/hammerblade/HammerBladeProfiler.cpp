@@ -95,18 +95,29 @@ std::string HBProfiler::summary() {
   // Headers
   summary << std::left;
   summary << std::setw(names.width() + 2) << names.header;
-  summary << std::left << std::setw(percents.width() + 2) << percents.header;
-  summary << std::left << std::setw(cycles.width() + 2) << cycles.header;
-  summary << std::left << std::setw(num_calls.width() + 2) << num_calls.header;
+  summary << std::setw(percents.width() + 2) << percents.header;
+  summary << std::setw(cycles.width() + 2) << cycles.header;
+  summary << std::setw(num_calls.width() + 2) << num_calls.header;
   summary << std::endl;
 
   // Underlines
-  summary << std::right;
-  summary << std::setw(names.width() + 2) << std::setfill('=') << ' ';
-  summary << std::setw(percents.width() + 2) << std::setfill('=') << ' ';
-  summary << std::setw(cycles.width() + 2) << std::setfill('=') << ' ';
-  summary << std::setw(num_calls.width() + 2) << std::setfill('=') << ' ';
-  summary << std::endl;
+  summary << std::right << std::setfill('=');
+  summary << std::setw(names.width() + 2) << ' ';
+  summary << std::setw(percents.width() + 2) << ' ';
+  summary << std::setw(cycles.width() + 2) << ' ';
+  summary << std::setw(num_calls.width() + 2) << ' ';
+  summary << std::setfill(' ') << std::endl;
+
+  // Contents
+  for(int i = 0; i < profile_log.size(); ++i) {
+    summary << std::left;
+    summary << std::setw(names.width() + 2) << names.contents[i];
+    summary << std::setw(percents.width() + 2) << percents.contents[i];
+    summary << std::setw(cycles.width() + 2)
+            << to_string(cycles.contents[i] / 1000000) + 'M';
+    summary << std::setw(num_calls.width() + 2) << num_calls.contents[i];
+    summary << std::endl;
+  }
 
   return summary.str();
 }
