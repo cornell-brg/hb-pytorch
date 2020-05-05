@@ -13,6 +13,7 @@ ExecutionRoute g_execution_route;
 // ========== ExecutionRoute Member ==========
 
 void ExecutionRoute::reset() {
+  odometer = 0;
   route.clear();
   beacons.clear();
 }
