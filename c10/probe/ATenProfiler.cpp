@@ -20,20 +20,12 @@ std::vector<std::string> g_curr_call_stack;
 void ATenProfiler::profiling_start() {
   in_roi = true;
   g_curr_call_stack.clear();
-  // CHART related ROI entrance
-  clear_execution_chart();
-  clear_kernels_of_interest();
-  add_kernels_of_interest("at::Tensor at::TypeDefault::embedding(const at::Tensor&, const at::Tensor&, int64_t, bool, bool)");
-  add_kernels_of_interest("at::Tensor at::TypeDefault::sum(const at::Tensor&, c10::IntArrayRef, bool, c10::optional<c10::ScalarType>)");
-  add_kernels_of_interest("at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)");
-  add_kernels_of_interest("at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)");
-  add_kernels_of_interest("at::Tensor at::TypeDefault::embedding_backward(const at::Tensor&, const at::Tensor&, int64_t, int64_t, bool, bool)");
-  //add_ernels_of_interest("")
 #ifdef PROFILE_ATEN
   std::cerr << " ATen profiler collecting ..." << std::endl;
   // reset profiler pluggins
   g_unimpl_kernel_profiler.reset();
   g_execution_time_profiler.reset();
+  g_execution_charter.reset();
   // mark current time
   std::vector<std::string> fake_roi_stack;
   fake_roi_stack.push_back("time_in_roi");
@@ -52,8 +44,8 @@ void ATenProfiler::profiling_end() {
   in_roi = false;
 #ifdef PROFILE_ATEN
   delete time_in_roi;
+  g_execution_charter.print();
 #endif
-  aten_profiler_execution_chart_print();
   return;
 }
 
@@ -94,7 +86,7 @@ ATenProfilerLog::ATenProfilerLog(const std::string& func_name) {
     g_curr_call_stack.push_back(func_name);
     execution_time_log = new ExecutionTimeLog(g_curr_call_stack);
     if (is_top_level_kernel()) {
-      log_execution_chart(func_name);
+      g_execution_charter.log(func_name);
     }
   }
 }
