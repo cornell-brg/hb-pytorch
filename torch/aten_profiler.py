@@ -71,6 +71,13 @@ def add_waypoint(signature, redispatch):
     except AttributeError:
         print("PyTorch is not built with profiling")
 
+def set_route_from_json(json):
+    try:
+        for wp in json:
+            torch._C._aten_profiler_add_waypoint(wp['signature'], wp['offload'])
+    except (AttributeError, KeyError):
+        print("Failed to parse route json or PyTorch is not built with profiling")
+
 def raw_dump():
     try:
         return torch._C._aten_profiler_dump()
