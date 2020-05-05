@@ -54,13 +54,22 @@ def disable():
     torch._C._aten_profiler_end()
 
 def raw_dump():
-    return torch._C._aten_profiler_dump()
+    try:
+        return torch._C._aten_profiler_dump()
+    except:
+        print("PyTorch is not built with profiling")
 
 def stack_print():
-    torch._C._aten_profiler_stack_print()
+    try:
+        torch._C._aten_profiler_stack_print()
+    except:
+        print("PyTorch is not built with profiling")
 
 def unimpl_print():
-    torch._C._aten_profiler_unimpl_print()
+    try:
+        torch._C._aten_profiler_unimpl_print()
+    except:
+        print("PyTorch is not built with profiling")
 
 def _process_raw_data(raw_data=None):
     if raw_data is None:
@@ -81,46 +90,55 @@ def _process_raw_data(raw_data=None):
     return entries
 
 def fancy_print(raw_data=None):
-    entries = _process_raw_data(raw_data)
+    try:
+        entries = _process_raw_data(raw_data)
 
-    for e in entries:
-        func = e.func
-        time = e.time_ms / 1000.0
-        percentage = e.percentage
-        print('{func:30}     {time:.2f} {percentage:.1f}%'.format(
-            func=func, time=time, percentage=percentage))
-
-def fancy_print_to_file(raw_data=None, filename="profiling.txt"):
-    entries = _process_raw_data(raw_data)
-
-    with open(filename, "w") as file:
         for e in entries:
             func = e.func
             time = e.time_ms / 1000.0
             percentage = e.percentage
-            file.write('{func:30}     {time:.2f} {percentage:.1f}%\n'.format(
+            print('{func:30}     {time:.2f} {percentage:.1f}%'.format(
                 func=func, time=time, percentage=percentage))
+    except:
+        print("PyTorch is not built with profiling")
+
+def fancy_print_to_file(raw_data=None, filename="profiling.txt"):
+    try:
+        entries = _process_raw_data(raw_data)
+
+        with open(filename, "w") as file:
+            for e in entries:
+                func = e.func
+                time = e.time_ms / 1000.0
+                percentage = e.percentage
+                file.write('{func:30}     {time:.2f} {percentage:.1f}%\n'.format(
+                    func=func, time=time, percentage=percentage))
+    except:
+        print("PyTorch is not built with profiling")
 
 def latex_table(raw_data=None):
-    entries = _process_raw_data(raw_data)
+    try:
+        entries = _process_raw_data(raw_data)
 
-    header = "\\begin{table}[t]\n" \
-             "\\begin{tabular}{lrr}\n" \
-             "\\toprule\n" \
-             "& \\textbf{Time} & \\textbf{Percent} \\\\\n" \
-             "\\textbf{Kernel} & \\textbf{(s)} & \\textbf{of Total} \\\\ \\midrule\n"
-    print(header)
+        header = "\\begin{table}[t]\n" \
+                 "\\begin{tabular}{lrr}\n" \
+                 "\\toprule\n" \
+                 "& \\textbf{Time} & \\textbf{Percent} \\\\\n" \
+                 "\\textbf{Kernel} & \\textbf{(s)} & \\textbf{of Total} \\\\ \\midrule\n"
+        print(header)
 
-    for e in entries:
-        func = e.func
-        func = func.replace("_", "\\_")
-        time = e.time_ms / 1000.0
-        percentage = e.percentage
-        print('\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\'.format(
-            func=func, time=time, percentage=percentage))
+        for e in entries:
+            func = e.func
+            func = func.replace("_", "\\_")
+            time = e.time_ms / 1000.0
+            percentage = e.percentage
+            print('\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\'.format(
+                func=func, time=time, percentage=percentage))
 
-    footer = "\\bottomrule\n" \
-             "\\end{tabular}\n" \
-             "\\label{tbl-plat}\n" \
-             "\\end{table}\n"
-    print(footer)
+        footer = "\\bottomrule\n" \
+                 "\\end{tabular}\n" \
+                 "\\label{tbl-plat}\n" \
+                 "\\end{table}\n"
+        print(footer)
+    except:
+        print("PyTorch is not built with profiling")

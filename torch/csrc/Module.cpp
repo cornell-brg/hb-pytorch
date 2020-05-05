@@ -582,9 +582,11 @@ static PyMethodDef TorchMethods[] = {
   {"_supported_qengines", (PyCFunction)THPModule_supportedQEngines, METH_NOARGS, nullptr},
   {"_aten_profiler_start", (PyCFunction)THPModule_atenProfilerStart, METH_NOARGS,  nullptr},
   {"_aten_profiler_end",   (PyCFunction)THPModule_atenProfilerEnd,   METH_NOARGS,  nullptr},
+#ifdef PROFILE_ATEN
   {"_aten_profiler_dump",  (PyCFunction)THPModule_atenProfilerDump,   METH_NOARGS,  nullptr},
   {"_aten_profiler_stack_print",  (PyCFunction)THPModule_atenProfilerStackPrint,   METH_NOARGS,  nullptr},
   {"_aten_profiler_unimpl_print",  (PyCFunction)THPModule_atenProfilerUnimplPrint,   METH_NOARGS,  nullptr},
+#endif
   {nullptr, nullptr, 0, nullptr}
 };
 
