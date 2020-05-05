@@ -31,9 +31,11 @@ void ATenProfiler::profiling_start() {
   //add_ernels_of_interest("")
 #ifdef PROFILE_ATEN
   std::cerr << " ATen profiler collecting ..." << std::endl;
-  clear_exeuction_time_dict();
+  g_execution_time_profiler.reset();
   // mark current time
-  time_in_roi = new ExecutionTimeLog();
+  std::vector<std::string> fake_roi_stack;
+  fake_roi_stack.push_back("time_in_roi");
+  time_in_roi = new ExecutionTimeLog(fake_roi_stack);
   clear_unimpl_kernel();
 #else
   std::cerr << "Warning: ATen profiler is invoked "
@@ -48,10 +50,6 @@ void ATenProfiler::profiling_start() {
 void ATenProfiler::profiling_end() {
   in_roi = false;
 #ifdef PROFILE_ATEN
-  std::vector<std::string> fake_roi_stack;
-  fake_roi_stack.push_back("time_in_roi");
-  time_in_roi->log_self(fake_roi_stack);
-  fake_roi_stack.pop_back();
   delete time_in_roi;
 #endif
   aten_profiler_execution_chart_print();
@@ -90,11 +88,10 @@ bool is_top_level_kernel() {
 // =============== Aten Profiler Log Members =======================
 
 // Entering a function
-ATenProfilerLog::ATenProfilerLog(const std::string& func_name)
-  : execution_time_log(ExecutionTimeLog())
-{
+ATenProfilerLog::ATenProfilerLog(const std::string& func_name) {
   if (!aten_profiler_in_parallel_region()) {
     g_curr_call_stack.push_back(func_name);
+    execution_time_log = new ExecutionTimeLog(g_curr_call_stack);
     if (is_top_level_kernel()) {
       log_execution_chart(func_name);
     }
@@ -105,7 +102,7 @@ ATenProfilerLog::ATenProfilerLog(const std::string& func_name)
 ATenProfilerLog::~ATenProfilerLog()
 {
   if (!aten_profiler_in_parallel_region()) {
-    execution_time_log.log_self(g_curr_call_stack);
+    delete execution_time_log;
     g_curr_call_stack.pop_back();
   }
 }

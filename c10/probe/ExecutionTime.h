@@ -10,21 +10,31 @@
 namespace c10 {
 namespace probe {
 
+class ExecutionTimeProfiler {
+public:
+  ExecutionTimeProfiler() = default;
+  ~ExecutionTimeProfiler() = default;
+  void reset();
+  void log(const std::vector<std::string>& stack,
+           std::chrono::microseconds time);
+  const std::string str_dump();
+  void stack_print();
+private:
+  std::map<std::vector<std::string>, std::chrono::microseconds> execution_time_dict;
+};
+
 C10_PROBE_API const std::string aten_profiler_dump();
 C10_PROBE_API void aten_profiler_stack_print();
-void log_execution_time(const std::vector<std::string>& stack,
-                        std::chrono::microseconds time);
-void clear_exeuction_time_dict();
 
 struct C10_PROBE_API ExecutionTimeLog {
 public:
-  ExecutionTimeLog();
-  ~ExecutionTimeLog() = default;
-  void log_self(const std::vector<std::string>& stack);
+  ExecutionTimeLog(const std::vector<std::string>& stack);
+  ~ExecutionTimeLog();
 private:
   std::chrono::time_point<std::chrono::high_resolution_clock> start;
+  const std::vector<std::string> stack;
 };
 
-extern std::map<std::vector<std::string>, std::chrono::microseconds> g_execution_time_dict;
+extern ExecutionTimeProfiler g_execution_time_profiler;
 
 }} // namespace c10::probe

@@ -7,22 +7,26 @@
 namespace c10 {
 namespace probe {
 
-std::map<std::vector<std::string>, std::chrono::microseconds> g_execution_time_dict;
+ExecutionTimeProfiler g_execution_time_profiler;
 
-void log_execution_time(const std::vector<std::string>& stack,
-                   std::chrono::microseconds time) {
-  if (g_execution_time_dict.find(stack) != g_execution_time_dict.end()) {
-    g_execution_time_dict[stack] += time;
+// ============ ExecutionTimeProfiler Members ============
+
+void ExecutionTimeProfiler::reset() {
+  execution_time_dict.clear();
+}
+
+void ExecutionTimeProfiler::log(const std::vector<std::string>& stack,
+         std::chrono::microseconds time) {
+  if (execution_time_dict.find(stack) != execution_time_dict.end()) {
+    execution_time_dict[stack] += time;
   } else {
-    g_execution_time_dict[stack] = time;
+    execution_time_dict[stack] = time;
   }
 }
 
-void clear_exeuction_time_dict() {
-  g_execution_time_dict.clear();
-}
+// ============ ExecutionTimeLog Member ============
 
-const std::string aten_profiler_dump() {
+const std::string ExecutionTimeProfiler::str_dump() {
   using std::chrono::microseconds;
   std::stringstream buffer;
   double total_time = 0.0;
@@ -30,10 +34,10 @@ const std::string aten_profiler_dump() {
   std::vector<std::string> fake_roi_stack;
   fake_roi_stack.push_back("time_in_roi");
   buffer << "time_in_roi" << ";"
-         << g_execution_time_dict[fake_roi_stack].count() / 1000.0 << std::endl;
+         << execution_time_dict[fake_roi_stack].count() / 1000.0 << std::endl;
   fake_roi_stack.pop_back();
 
-  for (const auto& p : g_execution_time_dict) {
+  for (const auto& p : execution_time_dict) {
     double ms = p.second.count() / 1000.0;
     auto& stack = p.first;
     if (stack.size() == 1 && stack.back().compare("time_in_roi") != 0) {
@@ -52,13 +56,13 @@ const std::string aten_profiler_dump() {
   return data;
 }
 
-void aten_profiler_stack_print() {
+void ExecutionTimeProfiler::stack_print() {
   using std::chrono::microseconds;
   using namespace std;
   cerr << setw(180) << std::left << "Function" << "   " << "Time" << endl;
   double total_time = 0.0;
 
-  for (const auto& p : g_execution_time_dict) {
+  for (const auto& p : execution_time_dict) {
     double ms = p.second.count() / 1000.0;
     auto& stack = p.first;
     // we concat the call stack to get the name
@@ -79,13 +83,26 @@ void aten_profiler_stack_print() {
   cerr << setw(180) << std::left << "Aggregated total:" << "   " << total_time / 1000.0 << " s" << endl;
 }
 
-ExecutionTimeLog::ExecutionTimeLog()
-  : start(std::chrono::high_resolution_clock::now()) {}
+// ============ ExecutionTimeProfiler C10_API ============
 
-void ExecutionTimeLog::log_self(const std::vector<std::string>& stack) {
+const std::string aten_profiler_dump() {
+  return g_execution_time_profiler.str_dump();
+}
+
+void aten_profiler_stack_print() {
+  g_execution_time_profiler.stack_print();
+}
+
+// ============ ExecutionTimeLog Member ============
+
+ExecutionTimeLog::ExecutionTimeLog(const std::vector<std::string>& stack)
+  : start(std::chrono::high_resolution_clock::now()),
+    stack(stack) {}
+
+ExecutionTimeLog::~ExecutionTimeLog() {
   auto delta = std::chrono::duration_cast<std::chrono::microseconds>
     (std::chrono::high_resolution_clock::now() - start);
-  log_execution_time(stack, delta);
+  g_execution_time_profiler.log(stack, delta);
 }
 
 }} // namespace c10::probe

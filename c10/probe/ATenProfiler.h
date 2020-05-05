@@ -37,7 +37,7 @@ public:
   ATenProfilerLog(const std::string& func_name);
   ~ATenProfilerLog();
 private:
-  ExecutionTimeLog execution_time_log;
+  ExecutionTimeLog* execution_time_log;
 };
 
 extern ATenProfiler g_aten_profiler;
