@@ -65,6 +65,12 @@ def clear_beacon():
     except AttributeError:
         print("PyTorch is not built with profiling")
 
+def add_waypoint(signature, redispatch):
+    try:
+        torch._C._aten_profiler_add_waypoint(signature, redispatch);
+    except AttributeError:
+        print("PyTorch is not built with profiling")
+
 def raw_dump():
     try:
         return torch._C._aten_profiler_dump()

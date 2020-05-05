@@ -558,6 +558,25 @@ static PyObject * THPModule_atenProfilerClearBeacon(PyObject *module, PyObject *
   c10::probe::chart_clear_beacon();
   Py_RETURN_NONE;
 }
+
+static PyObject * THPModule_atenProfilerAddWaypoint(PyObject *_unused, PyObject *args) {
+  PyObject *kernel_signature;
+  PyObject *redispatch;
+  if (!PyArg_ParseTuple(args, "OO", &kernel_signature, &redispatch)) {
+    return nullptr;
+  }
+  HANDLE_TH_ERRORS
+  if (!THPUtils_checkString(kernel_signature)) {
+    THPUtils_setError("waypoint initialization error - expected bytes/string object for kernel signature");
+    return nullptr;
+  }
+  THPUtils_assert(PyBool_Check(redispatch), "waypoint expects a bool, "
+          "but got %s", THPUtils_typename(redispatch));
+  std::string kernel = THPUtils_unpackString(kernel_signature);
+  c10::probe::route_add_waypoint(kernel, (redispatch == Py_True));
+  Py_RETURN_NONE;
+  END_HANDLE_TH_ERRORS
+}
 #endif
 
 //NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
@@ -604,10 +623,11 @@ static PyMethodDef TorchMethods[] = {
   {"_aten_profiler_end",   (PyCFunction)THPModule_atenProfilerEnd,   METH_NOARGS,  nullptr},
 #ifdef PROFILE_ATEN
   {"_aten_profiler_dump",  (PyCFunction)THPModule_atenProfilerDump,   METH_NOARGS,  nullptr},
-  {"_aten_profiler_stack_print",  (PyCFunction)THPModule_atenProfilerStackPrint,   METH_NOARGS,  nullptr},
-  {"_aten_profiler_unimpl_print",  (PyCFunction)THPModule_atenProfilerUnimplPrint,   METH_NOARGS,  nullptr},
-  {"_aten_profiler_add_beacon",  (PyCFunction)THPModule_atenProfilerAddBeacon,   METH_O,       nullptr},
-  {"_aten_profiler_clear_beacon",  (PyCFunction)THPModule_atenProfilerClearBeacon,   METH_NOARGS,  nullptr},
+  {"_aten_profiler_stack_print",  (PyCFunction)THPModule_atenProfilerStackPrint, METH_NOARGS, nullptr},
+  {"_aten_profiler_unimpl_print",  (PyCFunction)THPModule_atenProfilerUnimplPrint, METH_NOARGS, nullptr},
+  {"_aten_profiler_add_beacon",  (PyCFunction)THPModule_atenProfilerAddBeacon, METH_O, nullptr},
+  {"_aten_profiler_clear_beacon",  (PyCFunction)THPModule_atenProfilerClearBeacon, METH_NOARGS, nullptr},
+  {"_aten_profiler_add_waypoint",  (PyCFunction)THPModule_atenProfilerAddWaypoint, METH_VARARGS, nullptr},
 #endif
   {nullptr, nullptr, 0, nullptr}
 };

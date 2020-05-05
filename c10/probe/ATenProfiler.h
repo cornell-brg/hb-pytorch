@@ -4,6 +4,7 @@
 #include <c10/probe/Unimplemented.h>
 #include <c10/probe/ExecutionTime.h>
 #include <c10/probe/Chart.h>
+#include <c10/probe/Route.h>
 
 #include <map>
 #include <string>

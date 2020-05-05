@@ -42,20 +42,6 @@ void ExecutionCharter::print() {
   std::cerr << chart_json.dump(4) << std::endl;
 }
 
-bool ExecutionCharter::should_redispatch(const std::string& kernel) {
-  if (beacons.find(kernel) != beacons.end()) {
-    std::cerr << "at top level kernel " << kernel << std::endl;
-    std::cerr << "should I redispatch? 1/0" << std::endl;
-    int res = 0;
-    std::cin >> res;
-    if (res != 0) {
-      std::cerr << "redispatching..." << std::endl;
-      return true;
-    }
-  }
-  return false;
-}
-
 // ========== ExecutionCharter C10_API ==========
 
 void aten_profiler_execution_chart_print() {
@@ -68,11 +54,6 @@ void chart_add_beacon(const std::string& kernel) {
 
 void chart_clear_beacon() {
   g_execution_charter.clear_beacon();
-}
-
-// hack
-bool should_redispatch(const std::string& kernel) {
-  return g_execution_charter.should_redispatch(kernel);
 }
 
 }} // namespace c10::probe
