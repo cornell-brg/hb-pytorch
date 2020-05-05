@@ -30,7 +30,7 @@ void ATenProfiler::profiling_start() {
   add_kernels_of_interest("at::Tensor at::TypeDefault::embedding_backward(const at::Tensor&, const at::Tensor&, int64_t, int64_t, bool, bool)");
   //add_ernels_of_interest("")
 #ifdef PROFILE_ATEN
-  std::cerr << " ATen profiler collecting ..." std::endl;
+  std::cerr << " ATen profiler collecting ..." << std::endl;
   clear_exeuction_time_dict();
   // mark current time
   time_in_roi = new ExecutionTimeLog();
