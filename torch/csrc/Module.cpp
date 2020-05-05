@@ -526,6 +526,7 @@ static PyObject * THPModule_atenProfilerEnd(PyObject *module, PyObject *noargs) 
   Py_RETURN_NONE;
 }
 
+#ifdef PROFILE_ATEN
 static PyObject * THPModule_atenProfilerDump(PyObject *module, PyObject *noargs) {
   return PyUnicode_FromString(c10::probe::aten_profiler_dump().c_str());
 }
@@ -539,6 +540,25 @@ static PyObject * THPModule_atenProfilerUnimplPrint(PyObject *module, PyObject *
   c10::probe::aten_profiler_unimpl_print();
   Py_RETURN_NONE;
 }
+
+static PyObject * THPModule_atenProfilerAddBeacon(PyObject *_unused, PyObject *kernel_signature)
+{
+  HANDLE_TH_ERRORS
+  if (!THPUtils_checkString(kernel_signature)) {
+    THPUtils_setError("beacon initialization error - expected bytes/string object for kernel signature");
+    return nullptr;
+  }
+  std::string kernel = THPUtils_unpackString(kernel_signature);
+  c10::probe::chart_add_beacon(kernel);
+  Py_RETURN_NONE;
+  END_HANDLE_TH_ERRORS
+}
+
+static PyObject * THPModule_atenProfilerClearBeacon(PyObject *module, PyObject *noargs) {
+  c10::probe::chart_clear_beacon();
+  Py_RETURN_NONE;
+}
+#endif
 
 //NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 static PyMethodDef TorchMethods[] = {
@@ -586,6 +606,8 @@ static PyMethodDef TorchMethods[] = {
   {"_aten_profiler_dump",  (PyCFunction)THPModule_atenProfilerDump,   METH_NOARGS,  nullptr},
   {"_aten_profiler_stack_print",  (PyCFunction)THPModule_atenProfilerStackPrint,   METH_NOARGS,  nullptr},
   {"_aten_profiler_unimpl_print",  (PyCFunction)THPModule_atenProfilerUnimplPrint,   METH_NOARGS,  nullptr},
+  {"_aten_profiler_add_beacon",  (PyCFunction)THPModule_atenProfilerAddBeacon,   METH_O,       nullptr},
+  {"_aten_profiler_clear_beacon",  (PyCFunction)THPModule_atenProfilerClearBeacon,   METH_NOARGS,  nullptr},
 #endif
   {nullptr, nullptr, 0, nullptr}
 };

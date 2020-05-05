@@ -53,6 +53,18 @@ def enable():
 def disable():
     torch._C._aten_profiler_end()
 
+def add_beacon(signature):
+    try:
+        torch._C._aten_profiler_add_beacon(signature)
+    except AttributeError:
+        print("PyTorch is not built with profiling")
+
+def clear_beacon():
+    try:
+        torch._C._aten_profiler_clear_beacon()
+    except AttributeError:
+        print("PyTorch is not built with profiling")
+
 def raw_dump():
     try:
         return torch._C._aten_profiler_dump()

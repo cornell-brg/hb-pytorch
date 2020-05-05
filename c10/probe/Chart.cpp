@@ -13,13 +13,6 @@ ExecutionCharter g_execution_charter;
 
 void ExecutionCharter::reset() {
   execution_chart.clear();
-  beacons.clear();
-  // hack
-  add_beacon("at::Tensor at::TypeDefault::embedding(const at::Tensor&, const at::Tensor&, int64_t, bool, bool)");
-  add_beacon("at::Tensor at::TypeDefault::sum(const at::Tensor&, c10::IntArrayRef, bool, c10::optional<c10::ScalarType>)");
-  add_beacon("at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)");
-  add_beacon("at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)");
-  add_beacon("at::Tensor at::TypeDefault::embedding_backward(const at::Tensor&, const at::Tensor&, int64_t, int64_t, bool, bool)");
 }
 
 void ExecutionCharter::log(const std::string& kernel) {
@@ -30,6 +23,10 @@ void ExecutionCharter::log(const std::string& kernel) {
 
 void ExecutionCharter::add_beacon(const std::string& kernel) {
   beacons[kernel] = true;
+}
+
+void ExecutionCharter::clear_beacon() {
+  beacons.clear();
 }
 
 void ExecutionCharter::print() {
@@ -63,6 +60,14 @@ bool ExecutionCharter::should_redispatch(const std::string& kernel) {
 
 void aten_profiler_execution_chart_print() {
   g_execution_charter.print();
+}
+
+void chart_add_beacon(const std::string& kernel) {
+  g_execution_charter.add_beacon(kernel);
+}
+
+void chart_clear_beacon() {
+  g_execution_charter.clear_beacon();
 }
 
 // hack
