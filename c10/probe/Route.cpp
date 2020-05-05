@@ -1,4 +1,5 @@
 #include <c10/probe/Route.h>
+#include <c10/util/Exception.h>
 
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -35,10 +36,14 @@ void ExecutionRoute::print() {
 bool ExecutionRoute::should_redispatch(const std::string& kernel) {
   if (beacons.find(kernel) != beacons.end()) {
     std::cerr << "at top level kernel " << kernel << std::endl;
+    TORCH_INTERNAL_ASSERT(odometer < route.size(), "ERROR: Route is shorter than execution chart");
+    auto route_kernel = std::get<0>(route[odometer]);
+    auto redispatch = std::get<1>(route[odometer]);
+    TORCH_INTERNAL_ASSERT(route_kernel.compare(kernel) == 0,
+        "ERROR: Route and execution chart disagree. Expect ", route_kernel, " but found ", kernel);
+    odometer++;
     std::cerr << "should I redispatch? 1/0" << std::endl;
-    int res = 0;
-    std::cin >> res;
-    if (res != 0) {
+    if (redispatch) {
       std::cerr << "redispatching..." << std::endl;
       return true;
     }

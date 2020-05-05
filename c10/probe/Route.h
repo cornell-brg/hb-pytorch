@@ -11,13 +11,14 @@ namespace probe {
 
 class ExecutionRoute {
 public:
-  ExecutionRoute() = default;
+  ExecutionRoute() : odometer(0) {}
   ~ExecutionRoute() = default;
   void reset();
   void add_waypoint(const std::string& kernel, bool redispatch);
   void print();
   bool should_redispatch(const std::string& kernel);
 private:
+  size_t odometer;
   std::vector<std::tuple<std::string, bool>> route;
   std::map<std::string, bool> beacons;
 };
