@@ -31,12 +31,13 @@ void ATenProfiler::profiling_start() {
   //add_ernels_of_interest("")
 #ifdef PROFILE_ATEN
   std::cerr << " ATen profiler collecting ..." << std::endl;
+  // reset profiler pluggins
+  g_unimpl_kernel_profiler.reset();
   g_execution_time_profiler.reset();
   // mark current time
   std::vector<std::string> fake_roi_stack;
   fake_roi_stack.push_back("time_in_roi");
   time_in_roi = new ExecutionTimeLog(fake_roi_stack);
-  clear_unimpl_kernel();
 #else
   std::cerr << "Warning: ATen profiler is invoked "
             << "but PyTorch is not built with profiling capability "
