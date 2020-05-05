@@ -1877,6 +1877,7 @@ def create_derived(backend_type_env, declarations):
 
         # get alternative dispatching dst
         dispatch = option['type_method_definition_dispatch']
+        assert isinstance(dispatch, dict)
         alter_method_dispatch = dispatch.get("HammerBlade")
         assert alter_method_dispatch
         option['alter_method_dispatch'] = alter_method_dispatch
