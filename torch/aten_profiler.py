@@ -56,19 +56,19 @@ def disable():
 def raw_dump():
     try:
         return torch._C._aten_profiler_dump()
-    except:
+    except AttributeError:
         print("PyTorch is not built with profiling")
 
 def stack_print():
     try:
         torch._C._aten_profiler_stack_print()
-    except:
+    except AttributeError:
         print("PyTorch is not built with profiling")
 
 def unimpl_print():
     try:
         torch._C._aten_profiler_unimpl_print()
-    except:
+    except AttributeError:
         print("PyTorch is not built with profiling")
 
 def _process_raw_data(raw_data=None):
@@ -99,7 +99,7 @@ def fancy_print(raw_data=None):
             percentage = e.percentage
             print('{func:30}     {time:.2f} {percentage:.1f}%'.format(
                 func=func, time=time, percentage=percentage))
-    except:
+    except AttributeError:
         print("PyTorch is not built with profiling")
 
 def fancy_print_to_file(raw_data=None, filename="profiling.txt"):
@@ -113,7 +113,7 @@ def fancy_print_to_file(raw_data=None, filename="profiling.txt"):
                 percentage = e.percentage
                 file.write('{func:30}     {time:.2f} {percentage:.1f}%\n'.format(
                     func=func, time=time, percentage=percentage))
-    except:
+    except AttributeError:
         print("PyTorch is not built with profiling")
 
 def latex_table(raw_data=None):
@@ -140,5 +140,5 @@ def latex_table(raw_data=None):
                  "\\label{tbl-plat}\n" \
                  "\\end{table}\n"
         print(footer)
-    except:
+    except AttributeError:
         print("PyTorch is not built with profiling")
