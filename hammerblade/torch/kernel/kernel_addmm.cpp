@@ -8,10 +8,8 @@
 
 extern "C" {
 
-    // TODO:
-    // have two versions of compute and dram_to_sp
-    // one without if checks and one with
-
+  // Handles the common case:
+  // Assume dim_y and dim_x are both exactly BLOCK_SIZE
   void compute_simple(
           float* dest,
           float* sp_mat1,
@@ -40,6 +38,8 @@ extern "C" {
     }
 }
 
+  // Handles the common case:
+  // Assume dim_y and dim_x are both exactly BLOCK_SIZE
   void dram_to_sp_simple(
           float* dest,
           float coeff,
@@ -63,6 +63,8 @@ extern "C" {
     }
 }
 
+  // Handles the general case:
+  // dim_y and dim_x can be less than BLOCK_SIZE
   void compute(
           float* dest,
           float* sp_mat1,
@@ -91,6 +93,9 @@ extern "C" {
     }
 }
 
+
+  // Handles the general case:
+  // dim_y and dim_x can be less than BLOCK_SIZE
   void dram_to_sp(
           float* dest,
           float coeff,
@@ -166,9 +171,9 @@ extern "C" {
 
                 // unrolled version
                 float sp_result[res_dim_y * res_dim_x];
-                if (partial_block) {
+                if (partial_block) { // general case
                     dram_to_sp(sp_result, beta, self, res_dim_y, res_dim_x, rr, rc);
-                } else {
+                } else { // common case: res_dim_y == res_dim_x == BLOCK_SIZE
                     dram_to_sp_simple(sp_result, beta, self, res_dim_y, res_dim_x, rr, rc);
                 }
                 // end: unrolled version
@@ -199,11 +204,11 @@ extern "C" {
                     // unrolled version
                     float sp_mat1[res_dim_y * mid_dim];
                     float sp_mat2[mid_dim * res_dim_x];
-                    if (partial_block) {
+                    if (partial_block) { // general case
                         dram_to_sp(sp_mat1, 1.0f, mat1, res_dim_y, mid_dim, rr, mat1x);
                         dram_to_sp(sp_mat2, 1.0f, mat2, mid_dim, res_dim_x, mat2y, rc);
                         compute(sp_result, sp_mat1, sp_mat2, alpha, res_dim_y, res_dim_x, mid_dim);
-                    } else {
+                    } else { // common case: res_dim_y == res_dim_x == BLOCK_SIZE
                         dram_to_sp_simple(sp_mat1, 1.0f, mat1, res_dim_y, mid_dim, rr, mat1x);
                         dram_to_sp_simple(sp_mat2, 1.0f, mat2, mid_dim, res_dim_x, mat2y, rc);
                         compute_simple(sp_result, sp_mat1, sp_mat2, alpha, res_dim_y, res_dim_x, mid_dim);
