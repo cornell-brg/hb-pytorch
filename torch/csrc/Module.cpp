@@ -536,8 +536,7 @@ static PyObject * THPModule_hbProfilerExecTimeRawStack(PyObject *module, PyObjec
 }
 
 static PyObject * THPModule_atenProfilerUnimplPrint(PyObject *module, PyObject *noargs) {
-  c10::probe::aten_profiler_unimpl_print();
-  Py_RETURN_NONE;
+  return PyUnicode_FromString(c10::probe::unimpl_raw_print().c_str());
 }
 
 static PyObject * THPModule_atenProfilerAddBeacon(PyObject *_unused, PyObject *kernel_signature)

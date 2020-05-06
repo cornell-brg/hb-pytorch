@@ -20,19 +20,22 @@ void UnimplKernelProfiler::log(const std::string& kernel) {
   }
 }
 
-void UnimplKernelProfiler::print() {
+const std::string UnimplKernelProfiler::print() {
   using namespace std;
-  std::cerr << "==========================================================================" << std::endl;
-  std::cerr << " Native kernels that are used but not implemented for HammerBlade:" << std::endl;
-  std::cerr << "==========================================================================" << std::endl;
-  cerr << setw(180) << std::left << "Function" << "   " << "Times" << endl;
+  stringstream buffer;
+  buffer << "==========================================================================" << endl;
+  buffer << " Native kernels that are used but not implemented for HammerBlade:" << endl;
+  buffer << "==========================================================================" << endl;
+  buffer << setw(180) << left << "Function" << "   " << "Times" << endl;
   for (const auto& k : unimpl_kernel) {
-    cerr << setw(180) << std::left << k.first << "   " << k.second << endl;
+    buffer << setw(180) << left << k.first << "   " << k.second << endl;
   }
+  const std::string data = buffer.str();
+  return data;
 }
 
-void aten_profiler_unimpl_print() {
-  g_unimpl_kernel_profiler.print();
+const std::string unimpl_raw_print() {
+  return g_unimpl_kernel_profiler.print();
 }
 
 void log_unimpl_kernel(const std::string& kernel) {

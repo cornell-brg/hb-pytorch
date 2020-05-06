@@ -94,7 +94,7 @@ def set_route_from_json(json):
 
 def unimpl_print():
     try:
-        torch._C._hb_profiler_unimpl_print()
+        return torch._C._hb_profiler_unimpl_print()
     except AttributeError:
         print("PyTorch is not built with profiling")
 
