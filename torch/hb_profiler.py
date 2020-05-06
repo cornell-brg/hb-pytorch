@@ -1,5 +1,14 @@
 import torch
 
+class ProfilerStatus:
+
+    def __init__(self):
+        self.is_in_ROI = False
+
+
+profiler_status = ProfilerStatus()
+
+
 class ProfilerRecord:
 
     def __init__(self, raw_entry):
@@ -48,10 +57,15 @@ class ProfilerTopLvlFuncRecord(ProfilerRecord):
 
 
 def enable():
-    torch._C._aten_profiler_start()
+    profiler_status.is_in_ROI = True
+    torch._C._hb_profiler_start()
 
 def disable():
-    torch._C._aten_profiler_end()
+    profiler_status.is_in_ROI = False
+    torch._C._hb_profiler_end()
+
+def is_in_ROI():
+    return profiler_status.is_in_ROI
 
 def add_beacon(signature):
     try:
