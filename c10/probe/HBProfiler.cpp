@@ -60,12 +60,12 @@ bool aten_profiler_in_parallel_region() {
 #endif
 }
 
-void aten_profiler_start() {
+void hb_profiler_start() {
   g_hb_profiler.profiling_start();
   return;
 }
 
-void aten_profiler_end() {
+void hb_profiler_end() {
   g_hb_profiler.profiling_end();
   return;
 }

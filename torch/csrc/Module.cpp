@@ -516,13 +516,13 @@ PyObject *THPModule_supportedQEngines(PyObject */* unused */)
   return list.release();
 }
 
-static PyObject * THPModule_atenProfilerStart(PyObject *module, PyObject *noargs) {
-  c10::probe::aten_profiler_start();
+static PyObject * THPModule_hbProfilerStart(PyObject *module, PyObject *noargs) {
+  c10::probe::hb_profiler_start();
   Py_RETURN_NONE;
 }
 
-static PyObject * THPModule_atenProfilerEnd(PyObject *module, PyObject *noargs) {
-  c10::probe::aten_profiler_end();
+static PyObject * THPModule_hbProfilerEnd(PyObject *module, PyObject *noargs) {
+  c10::probe::hb_profiler_end();
   Py_RETURN_NONE;
 }
 
@@ -619,8 +619,8 @@ static PyMethodDef TorchMethods[] = {
   {"_get_qengine", (PyCFunction)THPModule_qEngine, METH_NOARGS, nullptr},
   {"_set_qengine", (PyCFunction)THPModule_setQEngine, METH_O, nullptr},
   {"_supported_qengines", (PyCFunction)THPModule_supportedQEngines, METH_NOARGS, nullptr},
-  {"_aten_profiler_start", (PyCFunction)THPModule_atenProfilerStart, METH_NOARGS,  nullptr},
-  {"_aten_profiler_end",   (PyCFunction)THPModule_atenProfilerEnd,   METH_NOARGS,  nullptr},
+  {"_hb_profiler_start", (PyCFunction)THPModule_hbProfilerStart, METH_NOARGS,  nullptr},
+  {"_hb_profiler_end",   (PyCFunction)THPModule_hbProfilerEnd,   METH_NOARGS,  nullptr},
 #ifdef PROFILE_ATEN
   {"_aten_profiler_dump",  (PyCFunction)THPModule_atenProfilerDump,   METH_NOARGS,  nullptr},
   {"_aten_profiler_stack_print",  (PyCFunction)THPModule_atenProfilerStackPrint, METH_NOARGS, nullptr},
