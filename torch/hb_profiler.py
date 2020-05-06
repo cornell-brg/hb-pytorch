@@ -92,18 +92,6 @@ def set_route_from_json(json):
     except (AttributeError, KeyError):
         print("Failed to parse route json or PyTorch is not built with profiling")
 
-def raw_dump():
-    try:
-        return torch._C._aten_profiler_dump()
-    except AttributeError:
-        print("PyTorch is not built with profiling")
-
-def stack_print():
-    try:
-        torch._C._aten_profiler_stack_print()
-    except AttributeError:
-        print("PyTorch is not built with profiling")
-
 def unimpl_print():
     try:
         torch._C._aten_profiler_unimpl_print()
@@ -112,7 +100,7 @@ def unimpl_print():
 
 def _process_raw_data(raw_data=None):
     if raw_data is None:
-        raw_data = torch._C._aten_profiler_dump()
+        raw_data = torch._C._hb_profiler_exec_time_fancy_table()
     raw_entries = raw_data.splitlines()
     time_in_roi = ProfilerROIRecord(raw_entries[0])
     agg_total = ProfilerAggTotalRecord(raw_entries[-1])
@@ -128,7 +116,7 @@ def _process_raw_data(raw_data=None):
 
     return entries
 
-def fancy_print(raw_data=None):
+def exec_time_fancy_print(raw_data=None):
     try:
         entries = _process_raw_data(raw_data)
 
@@ -137,13 +125,13 @@ def fancy_print(raw_data=None):
             func = e.func
             time = e.time_ms / 1000.0
             percentage = e.percentage
-            buffer += ('{func:30}     {time:.2f} {percentage:.1f}%'.format(
+            buffer += ('{func:30}     {time:.2f} {percentage:.1f}%\n'.format(
                 func=func, time=time, percentage=percentage))
         return buffer
     except AttributeError:
         print("PyTorch is not built with profiling")
 
-def latex_table(raw_data=None):
+def exec_time_latex_table(raw_data=None):
     try:
         entries = _process_raw_data(raw_data)
 
@@ -169,5 +157,11 @@ def latex_table(raw_data=None):
                  "\\end{table}\n"
         buffer += footer
         return buffer
+    except AttributeError:
+        print("PyTorch is not built with profiling")
+
+def exec_time_raw_stack():
+    try:
+        return torch._C._hb_profiler_exec_time_raw_stack()
     except AttributeError:
         print("PyTorch is not built with profiling")

@@ -18,13 +18,13 @@ public:
   void log(const std::vector<std::string>& stack,
            std::chrono::microseconds time);
   const std::string str_dump();
-  void stack_print();
+  const std::string stack_print();
 private:
   std::map<std::vector<std::string>, std::chrono::microseconds> execution_time_dict;
 };
 
-C10_PROBE_API const std::string aten_profiler_dump();
-C10_PROBE_API void aten_profiler_stack_print();
+C10_PROBE_API const std::string exec_time_fancy_table();
+C10_PROBE_API const std::string exec_time_raw_stack();
 
 struct C10_PROBE_API ExecutionTimeLog {
 public:

@@ -527,13 +527,12 @@ static PyObject * THPModule_hbProfilerEnd(PyObject *module, PyObject *noargs) {
 }
 
 #ifdef PROFILE_ATEN
-static PyObject * THPModule_atenProfilerDump(PyObject *module, PyObject *noargs) {
-  return PyUnicode_FromString(c10::probe::aten_profiler_dump().c_str());
+static PyObject * THPModule_hbProfilerExecTimeFancyTable(PyObject *module, PyObject *noargs) {
+  return PyUnicode_FromString(c10::probe::exec_time_fancy_table().c_str());
 }
 
-static PyObject * THPModule_atenProfilerStackPrint(PyObject *module, PyObject *noargs) {
-  c10::probe::aten_profiler_stack_print();
-  Py_RETURN_NONE;
+static PyObject * THPModule_hbProfilerExecTimeRawStack(PyObject *module, PyObject *noargs) {
+  return PyUnicode_FromString(c10::probe::exec_time_raw_stack().c_str());
 }
 
 static PyObject * THPModule_atenProfilerUnimplPrint(PyObject *module, PyObject *noargs) {
@@ -622,8 +621,8 @@ static PyMethodDef TorchMethods[] = {
   {"_hb_profiler_start", (PyCFunction)THPModule_hbProfilerStart, METH_NOARGS,  nullptr},
   {"_hb_profiler_end",   (PyCFunction)THPModule_hbProfilerEnd,   METH_NOARGS,  nullptr},
 #ifdef PROFILE_ATEN
-  {"_aten_profiler_dump",  (PyCFunction)THPModule_atenProfilerDump,   METH_NOARGS,  nullptr},
-  {"_aten_profiler_stack_print",  (PyCFunction)THPModule_atenProfilerStackPrint, METH_NOARGS, nullptr},
+  {"_hb_profiler_exec_time_fancy_table",  (PyCFunction)THPModule_hbProfilerExecTimeFancyTable,   METH_NOARGS,  nullptr},
+  {"_hb_profiler_exec_time_raw_stack",  (PyCFunction)THPModule_hbProfilerExecTimeRawStack, METH_NOARGS, nullptr},
   {"_aten_profiler_unimpl_print",  (PyCFunction)THPModule_atenProfilerUnimplPrint, METH_NOARGS, nullptr},
   {"_aten_profiler_add_beacon",  (PyCFunction)THPModule_atenProfilerAddBeacon, METH_O, nullptr},
   {"_aten_profiler_clear_beacon",  (PyCFunction)THPModule_atenProfilerClearBeacon, METH_NOARGS, nullptr},

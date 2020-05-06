@@ -56,10 +56,11 @@ const std::string ExecutionTimeProfiler::str_dump() {
   return data;
 }
 
-void ExecutionTimeProfiler::stack_print() {
+const std::string ExecutionTimeProfiler::stack_print() {
   using std::chrono::microseconds;
+  std::stringstream buffer;
   using namespace std;
-  cerr << setw(180) << std::left << "Function" << "   " << "Time" << endl;
+  buffer << setw(180) << std::left << "Function" << "   " << "Time" << endl;
   double total_time = 0.0;
 
   for (const auto& p : execution_time_dict) {
@@ -77,20 +78,22 @@ void ExecutionTimeProfiler::stack_print() {
       name += "|- ";
     }
     name += stack.back();
-    cerr << setw(180) << std::left << name << "   " << ms / 1000.0 << " s" << endl;
+    buffer << setw(180) << std::left << name << "   " << ms / 1000.0 << " s" << endl;
   }
 
-  cerr << setw(180) << std::left << "Aggregated total:" << "   " << total_time / 1000.0 << " s" << endl;
+  buffer << setw(180) << std::left << "Aggregated total:" << "   " << total_time / 1000.0 << " s" << endl;
+  const std::string data = buffer.str();
+  return data;
 }
 
 // ============ ExecutionTimeProfiler C10_API ============
 
-const std::string aten_profiler_dump() {
+const std::string exec_time_fancy_table() {
   return g_execution_time_profiler.str_dump();
 }
 
-void aten_profiler_stack_print() {
-  g_execution_time_profiler.stack_print();
+const std::string exec_time_raw_stack() {
+  return g_execution_time_profiler.stack_print();
 }
 
 // ============ ExecutionTimeLog Member ============
