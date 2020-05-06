@@ -30,8 +30,8 @@ private:
 
 C10_PROBE_API void hb_profiler_start();
 C10_PROBE_API void hb_profiler_end();
-C10_PROBE_API bool is_in_aten_profiler_roi();
-C10_PROBE_API bool is_top_level_kernel();
+C10_PROBE_API bool hb_profiler_is_in_roi();
+C10_PROBE_API bool hb_profiler_is_top_level();
 
 struct C10_PROBE_API HBProfilerLog {
 public:

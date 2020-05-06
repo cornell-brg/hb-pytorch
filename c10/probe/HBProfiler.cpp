@@ -52,7 +52,7 @@ void HBProfiler::profiling_end() {
 
 // =============== c10 probe API functions ========================
 
-bool aten_profiler_in_parallel_region() {
+bool hb_profiler_in_parallel_region() {
 #ifdef _OPENMP
   return omp_in_parallel();
 #else
@@ -70,11 +70,11 @@ void hb_profiler_end() {
   return;
 }
 
-bool is_in_aten_profiler_roi() {
+bool hb_profiler_is_in_roi() {
   return g_hb_profiler.in_roi;
 }
 
-bool is_top_level_kernel() {
+bool hb_profiler_is_top_level() {
   return (g_curr_call_stack.size() == 1);
 }
 
@@ -82,10 +82,10 @@ bool is_top_level_kernel() {
 
 // Entering a function
 HBProfilerLog::HBProfilerLog(const std::string& func_name) {
-  if (!aten_profiler_in_parallel_region()) {
+  if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
     g_curr_call_stack.push_back(func_name);
     execution_time_log = new ExecutionTimeLog(g_curr_call_stack);
-    if (is_top_level_kernel()) {
+    if (hb_profiler_is_top_level()) {
       g_execution_charter.log(func_name);
     }
   }
@@ -94,7 +94,7 @@ HBProfilerLog::HBProfilerLog(const std::string& func_name) {
 // Returning from a function
 HBProfilerLog::~HBProfilerLog()
 {
-  if (!aten_profiler_in_parallel_region()) {
+  if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
     delete execution_time_log;
     g_curr_call_stack.pop_back();
   }
