@@ -571,8 +571,9 @@ static PyObject * THPModule_atenProfilerAddWaypoint(PyObject *_unused, PyObject 
   THPUtils_assert(PyBool_Check(redispatch), "waypoint expects a bool, "
           "but got %s", THPUtils_typename(redispatch));
   std::string kernel = THPUtils_unpackString(kernel_signature);
-  c10::probe::route_add_waypoint(kernel, (redispatch == Py_True));
-  Py_RETURN_NONE;
+  bool res = c10::probe::route_add_waypoint(kernel, (redispatch == Py_True));
+  if (res) Py_RETURN_TRUE;
+  else Py_RETURN_FALSE;
   END_HANDLE_TH_ERRORS
 }
 #endif

@@ -81,14 +81,15 @@ def clear_beacon():
 
 def add_waypoint(signature, redispatch):
     try:
-        torch._C._hb_profiler_route_add_waypoint(signature, redispatch)
+        if not torch._C._hb_profiler_route_add_waypoint(signature, redispatch):
+            print("PyTorch is not built with redispatching")
     except AttributeError:
         print("PyTorch is not built with profiling")
 
 def set_route_from_json(json):
     try:
         for wp in json:
-            torch._C._hb_profiler_route_add_waypoint(wp['signature'], wp['offload'])
+            add_waypoint(wp['signature'], wp['offload'])
     except (AttributeError, KeyError):
         print("Failed to parse route json or PyTorch is not built with profiling")
 

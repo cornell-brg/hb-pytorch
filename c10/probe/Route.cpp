@@ -56,8 +56,13 @@ bool ExecutionRoute::should_redispatch(const std::string& kernel) {
 
 // ========== ExecutionRoute C10_API ==========
 
-void route_add_waypoint(const std::string& kernel, bool redispatch) {
+bool route_add_waypoint(const std::string& kernel, bool redispatch) {
+#ifdef HB_REDISPATCH
   g_execution_route.add_waypoint(kernel, redispatch);
+  return true;
+#else
+  return false;
+#endif
   // hack
   g_execution_route.print();
 }

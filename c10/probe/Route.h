@@ -23,8 +23,15 @@ private:
   std::map<std::string, bool> beacons;
 };
 
-C10_PROBE_API void route_add_waypoint(const std::string& kernel, bool redispatch);
+C10_PROBE_API bool route_add_waypoint(const std::string& kernel, bool redispatch);
 C10_PROBE_API bool should_redispatch(const std::string& kernel);
+C10_PROBE_API inline bool use_hb_redispatch() {
+#ifdef HB_REDISPATCH
+  return true;
+#else
+  return false;
+#endif
+}
 
 extern ExecutionRoute g_execution_route;
 
