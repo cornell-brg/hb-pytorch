@@ -280,6 +280,10 @@ if (PROFILE_ATEN)
   list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS PROFILE_ATEN)
 endif()
 
+if (HB_REDISPATCH)
+  list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS HB_REDISPATCH)
+endif()
+
 # In the most recent CMake versions, a new 'TRANSFORM' subcommand of 'list' allows much of the boilerplate of defining the lists
 # of type stub files to be omitted.
 # For comptability with older CMake versions, we omit it for now, but leave it as a comment in case comptability with the older
