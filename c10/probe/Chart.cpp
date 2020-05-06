@@ -29,7 +29,8 @@ void ExecutionCharter::clear_beacon() {
   beacons.clear();
 }
 
-void ExecutionCharter::print() {
+const std::string ExecutionCharter::print() {
+  std::stringstream buffer;
   json chart_json = json::array();
   for (const auto& k : execution_chart) {
     //std::cerr << k << std::endl;
@@ -39,7 +40,9 @@ void ExecutionCharter::print() {
     kernel_json["offload"] = false;
     chart_json.push_back(kernel_json);
   }
-  std::cerr << chart_json.dump(4) << std::endl;
+  buffer << chart_json.dump(4) << std::endl;
+  const std::string data = buffer.str();
+  return data;
 }
 
 // ========== ExecutionCharter C10_API ==========
@@ -54,6 +57,10 @@ void chart_add_beacon(const std::string& kernel) {
 
 void chart_clear_beacon() {
   g_execution_charter.clear_beacon();
+}
+
+const std::string chart_print() {
+  return g_execution_charter.print();
 }
 
 }} // namespace c10::probe

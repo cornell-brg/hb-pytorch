@@ -172,3 +172,9 @@ def route_print():
         return torch._C._hb_profiler_route_print()
     except AttributeError:
         print("PyTorch is not built with profiling")
+
+def chart_print():
+    try:
+        return torch._C._hb_profiler_chart_print()
+    except AttributeError:
+        print("PyTorch is not built with profiling")
