@@ -1,6 +1,7 @@
 #include <c10/probe/Chart.h>
 
 #include <iostream>
+#include <sstream>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
