@@ -1,7 +1,6 @@
 #include <ATen/native/Pool.h>
 #include <ATen/native/hammerblade/OffloadDef.h>
 #include <ATen/native/hammerblade/OffloadUtils.h>
-#include <iostream>
 
 namespace at {
 namespace native {
@@ -48,11 +47,6 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
 #endif
                                   std::vector<eva_t>& device_ptrs) {
 
-  std::cout << "creating device tensor (";
-  for (auto i = 0; i < dims; i++) {
-    std::cout << sizes[i] << ",";
-  }
-  std::cout << ")" << std::endl;
   eva_t tensor, tensor_strides, tensor_sizes, tensor_data;
 
   // allocate memory for tensor struct
