@@ -111,7 +111,7 @@ void reset_runtime() {
                                                  hb_mc_manycore_id_t id,
                                                  hb_mc_dimension_t dim) {
           EMUL_WARNING();
-          return HB_MC_FAIL;
+          return hb_mc_device_init(device, name, id);
         }
 
 
