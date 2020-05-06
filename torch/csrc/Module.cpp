@@ -18,7 +18,7 @@
 #include <ATen/Utils.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <c10/probe/ATenProfiler.h>
+#include <c10/probe/HBProfiler.h>
 
 #include <torch/csrc/THP.h>
 #include <torch/csrc/DynamicTypes.h>

@@ -1,5 +1,5 @@
 #include "HammerBladeFunctions.h"
-#include <c10/probe/ATenProfiler.h>
+#include <c10/probe/HBProfiler.h>
 
 #include <mutex>
 #include <string>

@@ -1,4 +1,4 @@
-#include <c10/probe/ATenProfiler.h>
+#include <c10/probe/HBProfiler.h>
 
 #include <map>
 #include <vector>
@@ -11,13 +11,13 @@ namespace c10 {
 namespace probe {
 
 // Global Variables
-ATenProfiler g_aten_profiler;
+HBProfiler g_hb_profiler;
 std::vector<std::string> g_curr_call_stack;
 
 // ========= AtenProfiler Members ===========
 
 // Mark the beginning of ROI
-void ATenProfiler::profiling_start() {
+void HBProfiler::profiling_start() {
   in_roi = true;
   g_curr_call_stack.clear();
 #ifdef PROFILE_ATEN
@@ -40,7 +40,7 @@ void ATenProfiler::profiling_start() {
 }
 
 // Mark the end of ROI
-void ATenProfiler::profiling_end() {
+void HBProfiler::profiling_end() {
   in_roi = false;
 #ifdef PROFILE_ATEN
   delete time_in_roi;
@@ -61,17 +61,17 @@ bool aten_profiler_in_parallel_region() {
 }
 
 void aten_profiler_start() {
-  g_aten_profiler.profiling_start();
+  g_hb_profiler.profiling_start();
   return;
 }
 
 void aten_profiler_end() {
-  g_aten_profiler.profiling_end();
+  g_hb_profiler.profiling_end();
   return;
 }
 
 bool is_in_aten_profiler_roi() {
-  return g_aten_profiler.in_roi;
+  return g_hb_profiler.in_roi;
 }
 
 bool is_top_level_kernel() {
@@ -81,7 +81,7 @@ bool is_top_level_kernel() {
 // =============== Aten Profiler Log Members =======================
 
 // Entering a function
-ATenProfilerLog::ATenProfilerLog(const std::string& func_name) {
+HBProfilerLog::HBProfilerLog(const std::string& func_name) {
   if (!aten_profiler_in_parallel_region()) {
     g_curr_call_stack.push_back(func_name);
     execution_time_log = new ExecutionTimeLog(g_curr_call_stack);
@@ -92,7 +92,7 @@ ATenProfilerLog::ATenProfilerLog(const std::string& func_name) {
 }
 
 // Returning from a function
-ATenProfilerLog::~ATenProfilerLog()
+HBProfilerLog::~HBProfilerLog()
 {
   if (!aten_profiler_in_parallel_region()) {
     delete execution_time_log;

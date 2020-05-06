@@ -3,7 +3,7 @@
 #include <ATen/core/dispatch/OperatorEntry.h>
 #include <ATen/core/dispatch/RegistrationHandleRAII.h>
 #include <c10/util/Exception.h>
-#include <c10/probe/ATenProfiler.h>
+#include <c10/probe/HBProfiler.h>
 #include <mutex>
 #include <list>
 
