@@ -132,26 +132,14 @@ def fancy_print(raw_data=None):
     try:
         entries = _process_raw_data(raw_data)
 
+        buffer = ""
         for e in entries:
             func = e.func
             time = e.time_ms / 1000.0
             percentage = e.percentage
-            print('{func:30}     {time:.2f} {percentage:.1f}%'.format(
+            buffer += ('{func:30}     {time:.2f} {percentage:.1f}%'.format(
                 func=func, time=time, percentage=percentage))
-    except AttributeError:
-        print("PyTorch is not built with profiling")
-
-def fancy_print_to_file(raw_data=None, filename="profiling.txt"):
-    try:
-        entries = _process_raw_data(raw_data)
-
-        with open(filename, "w") as file:
-            for e in entries:
-                func = e.func
-                time = e.time_ms / 1000.0
-                percentage = e.percentage
-                file.write('{func:30}     {time:.2f} {percentage:.1f}%\n'.format(
-                    func=func, time=time, percentage=percentage))
+        return buffer
     except AttributeError:
         print("PyTorch is not built with profiling")
 
@@ -159,25 +147,27 @@ def latex_table(raw_data=None):
     try:
         entries = _process_raw_data(raw_data)
 
+        buffer = ""
         header = "\\begin{table}[t]\n" \
                  "\\begin{tabular}{lrr}\n" \
                  "\\toprule\n" \
                  "& \\textbf{Time} & \\textbf{Percent} \\\\\n" \
                  "\\textbf{Kernel} & \\textbf{(s)} & \\textbf{of Total} \\\\ \\midrule\n"
-        print(header)
+        buffer += header
 
         for e in entries:
             func = e.func
             func = func.replace("_", "\\_")
             time = e.time_ms / 1000.0
             percentage = e.percentage
-            print('\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\'.format(
+            buffer += ('\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\'.format(
                 func=func, time=time, percentage=percentage))
 
         footer = "\\bottomrule\n" \
                  "\\end{tabular}\n" \
                  "\\label{tbl-plat}\n" \
                  "\\end{table}\n"
-        print(footer)
+        buffer += footer
+        return buffer
     except AttributeError:
         print("PyTorch is not built with profiling")
