@@ -2,6 +2,7 @@
 #include <c10/util/Exception.h>
 
 #include <iostream>
+#include <sstream>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
@@ -23,7 +24,8 @@ void ExecutionRoute::add_waypoint(const std::string& kernel, bool redispatch) {
   beacons[kernel] = true;
 }
 
-void ExecutionRoute::print() {
+const std::string ExecutionRoute::print() {
+  std::stringstream buffer;
   json chart_json = json::array();
   for (const auto& wp : route) {
     json kernel_json;
@@ -31,7 +33,9 @@ void ExecutionRoute::print() {
     kernel_json["offload"] = std::get<1>(wp);
     chart_json.push_back(kernel_json);
   }
-  std::cerr << chart_json.dump(4) << std::endl;
+  buffer << chart_json.dump(4) << std::endl;
+  const std::string data = buffer.str();
+  return data;
 }
 
 bool ExecutionRoute::should_redispatch(const std::string& kernel) {
@@ -63,12 +67,14 @@ bool route_add_waypoint(const std::string& kernel, bool redispatch) {
 #else
   return false;
 #endif
-  // hack
-  g_execution_route.print();
 }
 
 bool should_redispatch(const std::string& kernel) {
   return g_execution_route.should_redispatch(kernel);
+}
+
+const std::string route_print() {
+  return g_execution_route.print();
 }
 
 }} // namespace c10::probe

@@ -539,6 +539,10 @@ static PyObject * THPModule_atenProfilerUnimplPrint(PyObject *module, PyObject *
   return PyUnicode_FromString(c10::probe::unimpl_raw_print().c_str());
 }
 
+static PyObject * THPModule_atenProfilerRoutePrint(PyObject *module, PyObject *noargs) {
+  return PyUnicode_FromString(c10::probe::route_print().c_str());
+}
+
 static PyObject * THPModule_atenProfilerAddBeacon(PyObject *_unused, PyObject *kernel_signature)
 {
   HANDLE_TH_ERRORS
@@ -627,6 +631,7 @@ static PyMethodDef TorchMethods[] = {
   {"_hb_profiler_chart_add_beacon",  (PyCFunction)THPModule_atenProfilerAddBeacon, METH_O, nullptr},
   {"_hb_profiler_chart_clear_beacon",  (PyCFunction)THPModule_atenProfilerClearBeacon, METH_NOARGS, nullptr},
   {"_hb_profiler_route_add_waypoint",  (PyCFunction)THPModule_atenProfilerAddWaypoint, METH_VARARGS, nullptr},
+  {"_hb_profiler_route_print",  (PyCFunction)THPModule_atenProfilerRoutePrint, METH_NOARGS, nullptr},
 #endif
   {nullptr, nullptr, 0, nullptr}
 };

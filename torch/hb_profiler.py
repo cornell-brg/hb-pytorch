@@ -166,3 +166,9 @@ def exec_time_raw_stack():
         return torch._C._hb_profiler_exec_time_raw_stack()
     except AttributeError:
         print("PyTorch is not built with profiling")
+
+def route_print():
+    try:
+        return torch._C._hb_profiler_route_print()
+    except AttributeError:
+        print("PyTorch is not built with profiling")
