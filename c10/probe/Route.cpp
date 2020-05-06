@@ -35,6 +35,7 @@ void ExecutionRoute::print() {
 }
 
 bool ExecutionRoute::should_redispatch(const std::string& kernel) {
+#ifdef HB_REDISPATCH
   if (beacons.find(kernel) != beacons.end()) {
     std::cerr << "at top level kernel " << kernel << std::endl;
     TORCH_INTERNAL_ASSERT(odometer < route.size(), "ERROR: Route is shorter than execution chart");
@@ -49,6 +50,7 @@ bool ExecutionRoute::should_redispatch(const std::string& kernel) {
       return true;
     }
   }
+#endif
   return false;
 }
 
