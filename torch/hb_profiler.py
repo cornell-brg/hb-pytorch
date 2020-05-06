@@ -69,32 +69,32 @@ def is_in_ROI():
 
 def add_beacon(signature):
     try:
-        torch._C._aten_profiler_add_beacon(signature)
+        torch._C._hb_profiler_chart_add_beacon(signature)
     except AttributeError:
         print("PyTorch is not built with profiling")
 
 def clear_beacon():
     try:
-        torch._C._aten_profiler_clear_beacon()
+        torch._C._hb_profiler_chart_clear_beacon()
     except AttributeError:
         print("PyTorch is not built with profiling")
 
 def add_waypoint(signature, redispatch):
     try:
-        torch._C._aten_profiler_add_waypoint(signature, redispatch)
+        torch._C._hb_profiler_route_add_waypoint(signature, redispatch)
     except AttributeError:
         print("PyTorch is not built with profiling")
 
 def set_route_from_json(json):
     try:
         for wp in json:
-            torch._C._aten_profiler_add_waypoint(wp['signature'], wp['offload'])
+            torch._C._hb_profiler_route_add_waypoint(wp['signature'], wp['offload'])
     except (AttributeError, KeyError):
         print("Failed to parse route json or PyTorch is not built with profiling")
 
 def unimpl_print():
     try:
-        torch._C._aten_profiler_unimpl_print()
+        torch._C._hb_profiler_unimpl_print()
     except AttributeError:
         print("PyTorch is not built with profiling")
 

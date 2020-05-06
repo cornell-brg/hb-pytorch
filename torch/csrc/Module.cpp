@@ -623,10 +623,10 @@ static PyMethodDef TorchMethods[] = {
 #ifdef PROFILE_ATEN
   {"_hb_profiler_exec_time_fancy_table",  (PyCFunction)THPModule_hbProfilerExecTimeFancyTable,   METH_NOARGS,  nullptr},
   {"_hb_profiler_exec_time_raw_stack",  (PyCFunction)THPModule_hbProfilerExecTimeRawStack, METH_NOARGS, nullptr},
-  {"_aten_profiler_unimpl_print",  (PyCFunction)THPModule_atenProfilerUnimplPrint, METH_NOARGS, nullptr},
-  {"_aten_profiler_add_beacon",  (PyCFunction)THPModule_atenProfilerAddBeacon, METH_O, nullptr},
-  {"_aten_profiler_clear_beacon",  (PyCFunction)THPModule_atenProfilerClearBeacon, METH_NOARGS, nullptr},
-  {"_aten_profiler_add_waypoint",  (PyCFunction)THPModule_atenProfilerAddWaypoint, METH_VARARGS, nullptr},
+  {"_hb_profiler_unimpl_print",  (PyCFunction)THPModule_atenProfilerUnimplPrint, METH_NOARGS, nullptr},
+  {"_hb_profiler_chart_add_beacon",  (PyCFunction)THPModule_atenProfilerAddBeacon, METH_O, nullptr},
+  {"_hb_profiler_chart_clear_beacon",  (PyCFunction)THPModule_atenProfilerClearBeacon, METH_NOARGS, nullptr},
+  {"_hb_profiler_route_add_waypoint",  (PyCFunction)THPModule_atenProfilerAddWaypoint, METH_VARARGS, nullptr},
 #endif
   {nullptr, nullptr, 0, nullptr}
 };
