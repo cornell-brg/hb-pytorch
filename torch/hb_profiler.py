@@ -115,14 +115,14 @@ def exec_time_print_tree(root, lvl=0, output=None):
     return "\n".join(output)
 
 # wrap everything, return a tree
-def exec_time_tree(fancy_func=False):
+def exec_time_tree(fancy_func=False, trimming=False):
     data = torch._C._hb_profiler_exec_time_raw_stack()
     data, roi = exec_time_preprocess(data)
     root = exec_time_Node(roi[0], roi[1])
     exec_time_construct_tree_impl(data, root, fancy_func)
-    # simulation time trimming
-    exec_time_apply_trim(root)
-    print(exec_time_print_tree(root))
+    if trimming:
+        # simulation time trimming
+        exec_time_apply_trim(root)
     exec_time_add_other(root)
     exec_time_calc_percentage(root)
     return root
@@ -172,9 +172,9 @@ def unimpl_print():
     except AttributeError:
         print("PyTorch is not built with profiling")
 
-def exec_time_fancy_print(raw_data=None):
+def exec_time_fancy_print(trimming=False):
     try:
-        root = exec_time_tree(fancy_func=True)
+        root = exec_time_tree(fancy_func=True, trimming=trimming)
         buffer = ""
         for e in (root.children + [root]):
             func = e.func
@@ -186,9 +186,9 @@ def exec_time_fancy_print(raw_data=None):
     except AttributeError:
         print("PyTorch is not built with profiling")
 
-def exec_time_latex_table(raw_data=None):
+def exec_time_latex_table(trimming=False):
     try:
-        root = exec_time_tree(fancy_func=True)
+        root = exec_time_tree(fancy_func=True, trimming=trimming)
         buffer = ""
         header = "\\begin{table}[t]\n" \
                  "\\begin{tabular}{lrr}\n" \
@@ -214,9 +214,9 @@ def exec_time_latex_table(raw_data=None):
     except AttributeError:
         print("PyTorch is not built with profiling")
 
-def exec_time_raw_stack():
+def exec_time_raw_stack(trimming=False):
     try:
-        root = exec_time_tree()
+        root = exec_time_tree(trimming=trimming)
         return exec_time_print_tree(root)
     except AttributeError:
         print("PyTorch is not built with profiling")
