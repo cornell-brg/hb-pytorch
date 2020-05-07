@@ -75,9 +75,18 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
     cuda_argv[i] = args[i];
   }
 
+  // create a trim log so we can write logs directly
+  c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
+
   C10_HB_CHECK(hb_mc_kernel_enqueue(&_hb_device, _hb_grid_dim, _hb_tg_dim, kernel,
                                     args.size(), cuda_argv));
   C10_HB_CHECK(hb_mc_device_tile_groups_execute(&_hb_device));
+
+  // write the SIMULATED time to ExecutionTime log
+  std::chrono::microseconds simulated(3154);
+  trim_log->trim_manual_log_exec_time(simulated);
+  // delete trim log
+  delete trim_log;
 
   free(cuda_argv);
 }
