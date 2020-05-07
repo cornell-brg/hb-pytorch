@@ -62,7 +62,7 @@ void* memcpy_device_to_host(void *dst, const void *src, uint32_t nbytes) {
 
 
 void offload_kernel(const char* kernel, std::vector<eva_t> args) {
-  std::string kernel_str = "offload_kernel_";
+  std::string kernel_str = "@OFFLOAD_KERNEL@__";
   kernel_str += kernel;
   c10::probe::LogATenKernelWithName(kernel_str);
 

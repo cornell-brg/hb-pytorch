@@ -67,6 +67,24 @@ def exec_time_construct_tree_impl(data, parent, fancy_func=False):
             global_idx += 1
         exec_time_construct_tree_impl(lower_level, node)
 
+# "Trim" the exec_time tree -> replace offload_kernel time
+# with simulated time
+def exec_time_apply_trim(root):
+    trim_amount = 0.0
+    # this is a func that runs on HB, which needs trimming
+    if root.func.startswith("@OFFLOAD_KERNEL@__"):
+        assert len(root.children) == 1
+        simulated = root.children[0]
+        assert simulated.func == "@TRIM@"
+        trim_amount = simulated.time - root.time
+        root.time += trim_amount
+        return trim_amount
+
+    for kid in root.children:
+        trim_amount += exec_time_apply_trim(kid)
+    root.time += trim_amount
+    return trim_amount
+
 # find other time in ROI
 def exec_time_add_other(root):
     agg_total = 0.0
@@ -102,6 +120,9 @@ def exec_time_tree(fancy_func=False):
     data, roi = exec_time_preprocess(data)
     root = exec_time_Node(roi[0], roi[1])
     exec_time_construct_tree_impl(data, root, fancy_func)
+    # simulation time trimming
+    exec_time_apply_trim(root)
+    print(exec_time_print_tree(root))
     exec_time_add_other(root)
     exec_time_calc_percentage(root)
     return root
