@@ -8,53 +8,6 @@ class ProfilerStatus:
 
 profiler_status = ProfilerStatus()
 
-
-class ProfilerRecord:
-
-    def __init__(self, raw_entry):
-        func, time_ms = raw_entry.split(";")
-        self.func = func
-        self.time_ms = float(time_ms)
-
-    def calc_percentage(self, roi_time_ms):
-        self.percentage = float(self.time_ms) / roi_time_ms * 100.0
-
-
-class ProfilerROIRecord(ProfilerRecord):
-
-    def __init__(self, raw_entry):
-        super().__init__(raw_entry)
-        assert self.func == "time_in_roi"
-        self.func = "Total time in ROI"
-        self.percentage = 100.0
-
-
-class ProfilerAggTotalRecord(ProfilerRecord):
-
-    def __init__(self, raw_entry):
-        super().__init__(raw_entry)
-        assert self.func == "agg_total"
-        self.func = "Aggregate total"
-
-
-class ProfilerOtherRecord(ProfilerRecord):
-
-    def __init__(self, time_in_roi, agg_total):
-        self.func = "Other"
-        self.time_ms = time_in_roi - agg_total
-        self.percentage = self.time_ms / time_in_roi * 100.0
-
-
-class ProfilerTopLvlFuncRecord(ProfilerRecord):
-
-    def __init__(self, raw_entry):
-        super().__init__(raw_entry)
-        func = self.func
-        func = func.split("(")[0]
-        func = func.split("::")[-1]
-        func = "aten::" + func
-        self.func = func
-
 # --------- ExecutionTime Stack Tree -------
 
 class exec_time_Node:
