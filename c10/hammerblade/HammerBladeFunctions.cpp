@@ -50,16 +50,26 @@ void device_free(eva_t data_p) {
 
 
 void* memcpy_host_to_device(void *dst, const void *src, uint32_t nbytes) {
-  hb_mc_dma_htod_t job = {.d_addr=(eva_t)((intptr_t)dst), .h_addr=src, .size=nbytes};
-  //C10_HB_CHECK(hb_mc_device_memcpy(&_hb_device, dst, src, nbytes, HB_MC_MEMCPY_TO_DEVICE));
-  C10_HB_CHECK(hb_mc_device_dma_to_device(&_hb_device, &job, 1));
+  C10_HB_CHECK(hb_mc_device_memcpy(&_hb_device, dst, src, nbytes, HB_MC_MEMCPY_TO_DEVICE));
   return dst;
 }
 
 
 void* memcpy_device_to_host(void *dst, const void *src, uint32_t nbytes) {
+  C10_HB_CHECK(hb_mc_device_memcpy(&_hb_device, dst, src, nbytes, HB_MC_MEMCPY_TO_HOST));
+  return dst;
+}
+
+
+void* DMA_host_to_device(void *dst, const void *src, uint32_t nbytes) {
+  hb_mc_dma_htod_t job = {.d_addr=(eva_t)((intptr_t)dst), .h_addr=src, .size=nbytes};
+  C10_HB_CHECK(hb_mc_device_dma_to_device(&_hb_device, &job, 1));
+  return dst;
+}
+
+
+void* DMA_device_to_host(void *dst, const void *src, uint32_t nbytes) {
   hb_mc_dma_dtoh_t job = {.d_addr=(eva_t)((intptr_t)src), .h_addr=dst, .size=nbytes};
-  //C10_HB_CHECK(hb_mc_device_memcpy(&_hb_device, dst, src, nbytes, HB_MC_MEMCPY_TO_HOST));
   C10_HB_CHECK(hb_mc_device_dma_to_host(&_hb_device, &job, 1));
   return dst;
 }

@@ -35,6 +35,8 @@ C10_HAMMERBLADE_API eva_t device_malloc(size_t nbytes);
 C10_HAMMERBLADE_API void device_free(eva_t data);
 C10_HAMMERBLADE_API void* memcpy_host_to_device(void *dst, const void *src, uint32_t nbytes);
 C10_HAMMERBLADE_API void* memcpy_device_to_host(void *dst, const void *src, uint32_t nbytes);
+C10_HAMMERBLADE_API void* DMA_host_to_device(void *dst, const void *src, uint32_t nbytes);
+C10_HAMMERBLADE_API void* DMA_device_to_host(void *dst, const void *src, uint32_t nbytes);
 C10_HAMMERBLADE_API void offload_kernel(const char* kernel, std::vector<eva_t> args);
 
 }} // namespace c10::hammerblade
