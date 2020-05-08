@@ -7,4 +7,3 @@ def fancy_print():
         return torch._C._hb_profiler_unimpl_print()
     except AttributeError:
         print("PyTorch is not built with profiling")
-
