@@ -14,7 +14,7 @@ def clear_beacon():
     except AttributeError:
         print("PyTorch is not built with profiling")
 
-def print():
+def fancy_print():
     try:
         return torch._C._hb_profiler_chart_print()
     except AttributeError:

@@ -55,7 +55,7 @@ def test_unimpl_1():
     x = torch.randn(100000)
     y = x + x
     torch.hammerblade.profiler.disable()
-    unimpl = torch.hammerblade.profiler.unimpl.print()
+    unimpl = torch.hammerblade.profiler.unimpl.fancy_print()
     assert unimpl.find("aten::normal_") != -1
 
 def test_unimpl_2():
@@ -64,7 +64,7 @@ def test_unimpl_2():
     torch.hammerblade.profiler.enable()
     y = x + x
     torch.hammerblade.profiler.disable()
-    unimpl = torch.hammerblade.profiler.unimpl.print()
+    unimpl = torch.hammerblade.profiler.unimpl.fancy_print()
     assert unimpl.find("aten::normal_") == -1
 
 def test_chart_1():
@@ -77,7 +77,7 @@ def test_chart_1():
     torch.add(M, mat1)
     torch.hammerblade.profiler.disable()
     torch.hammerblade.profiler.chart.clear_beacon()
-    chart = torch.hammerblade.profiler.chart.print()
+    chart = torch.hammerblade.profiler.chart.fancy_print()
     assert chart == "[]\n"
 
 def test_chart_2():
@@ -92,7 +92,7 @@ def test_chart_2():
     torch.addmm(M, mat1, mat2)
     torch.hammerblade.profiler.disable()
     torch.hammerblade.profiler.chart.clear_beacon()
-    chart = torch.hammerblade.profiler.chart.print()
+    chart = torch.hammerblade.profiler.chart.fancy_print()
     golden = """[
     {
         "offload": false,
@@ -123,7 +123,7 @@ def test_route_1():
 """
     data = json.loads(route)
     torch.hammerblade.profiler.route.set_route_from_json(data)
-    _route = torch.hammerblade.profiler.route.print()
+    _route = torch.hammerblade.profiler.route.fancy_print()
     assert _route == route
     torch.hammerblade.profiler.enable()
     torch.addmm(M, mat1, mat2)

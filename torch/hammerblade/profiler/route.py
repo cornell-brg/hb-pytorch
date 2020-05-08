@@ -16,7 +16,7 @@ def set_route_from_json(json):
     except (AttributeError, KeyError):
         print("Failed to parse route json or PyTorch is not built with profiling")
 
-def print():
+def fancy_print():
     try:
         return torch._C._hb_profiler_route_print()
     except AttributeError:
