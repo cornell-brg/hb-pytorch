@@ -280,10 +280,10 @@ for name in dir(_C._VariableFunctions):
 from .functional import *
 
 ################################################################################
-# Import aten profiler functions
+# Import HB profiler functions
 ################################################################################
 
-import torch.aten_profiler
+import torch.hb_profiler
 
 ################################################################################
 # Remove unnecessary members

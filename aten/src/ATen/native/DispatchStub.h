@@ -2,7 +2,7 @@
 
 #include <c10/core/Backend.h>
 #include <c10/core/ScalarType.h>
-#include <c10/core/ATenProfiler.h>
+#include <c10/probe/HBProfiler.h>
 #include <c10/util/Exception.h>
 #include <type_traits>
 
@@ -66,13 +66,11 @@ struct CAFFE2_API DispatchStub<rT (*)(Args...), T> {
 
   template <typename... ArgTypes>
   rT operator()(DeviceType device_type, ArgTypes&&... args) {
-#ifdef PROFILE_UNIMPL
-    if (!hammerblade_dispatch_ptr) {
-      c10::log_unimpl_kernel(__stubid);
-    }
-#endif
 #ifdef PROFILE_ATEN
-    c10::LogATenKernelWithName(__stubid);
+    if (!hammerblade_dispatch_ptr && c10::probe::hb_profiler_is_in_roi()) {
+      c10::probe::log_unimpl_kernel(__stubid);
+    }
+    c10::probe::LogATenKernelWithName(__stubid);
 #endif
     if (device_type == DeviceType::CPU) {
       if (!cpu_dispatch_ptr) {

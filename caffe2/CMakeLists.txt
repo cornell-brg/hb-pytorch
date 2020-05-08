@@ -656,8 +656,8 @@ if (PROFILE_ATEN)
   target_compile_definitions(torch PRIVATE PROFILE_ATEN)
 endif()
 
-if (PROFILE_UNIMPL)
-  target_compile_definitions(torch PRIVATE PROFILE_UNIMPL)
+if (HB_REDISPATCH)
+  target_compile_definitions(torch PRIVATE HB_REDISPATCH)
 endif()
 
 
@@ -1066,6 +1066,8 @@ endif()
 if(USE_HB)
   target_link_libraries(torch PUBLIC c10_hammerblade)
 endif()
+
+target_link_libraries(torch PUBLIC c10_probe)
 
 # ---[ Test binaries.
 if (BUILD_TEST)
