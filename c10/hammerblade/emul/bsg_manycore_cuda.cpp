@@ -52,11 +52,6 @@
 bool device_busy = false;
 bool binary_loaded = false;
 
-// HB device kernel logger
-#ifdef HB_ENABLE_KERNEL_LOG
-KernelLogger kernel_call_logger(false, "hbKernelCallLog.json");
-#endif
-
 // reset global state so testing is easier
 void reset_runtime() {
   device_busy = false;
@@ -116,7 +111,7 @@ void reset_runtime() {
                                                  hb_mc_manycore_id_t id,
                                                  hb_mc_dimension_t dim) {
           EMUL_WARNING();
-          return HB_MC_FAIL;
+          return hb_mc_device_init(device, name, id);
         }
 
 

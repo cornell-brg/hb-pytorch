@@ -202,6 +202,9 @@ EMIT_BUILD_WARNING = False
 RERUN_CMAKE = False
 CMAKE_ONLY = False
 filtered_args = []
+# setup emulation environment variables if requested
+SETUP_EMUL = False
+
 for i, arg in enumerate(sys.argv):
     if arg == '--cmake':
         RERUN_CMAKE = True
@@ -221,6 +224,13 @@ for i, arg in enumerate(sys.argv):
         VERBOSE_SCRIPT = False
     if arg == 'clean':
         RUN_BUILD_DEPS = False
+    # a little trick here: if egg_info / --record appears, that means
+    # we are calling setup.py through pip install
+    if arg == 'egg_info':
+        SETUP_EMUL = True
+        RUN_BUILD_DEPS = False
+    if arg == '--record':
+        SETUP_EMUL = True
     filtered_args.append(arg)
 sys.argv = filtered_args
 
@@ -281,6 +291,30 @@ elif sha != 'Unknown':
 report("Building wheel {}-{}".format(package_name, version))
 
 cmake = CMake()
+
+# setup environment variables for emulation build
+def setup_emul():
+    # here we can't just set DEBUG=1, because build_type is imported
+    # at the beginning of this file ... at that moment DEBUG is unset
+    # and build_type will be release
+    os.environ['CMAKE_BUILD_TYPE'] = 'Debug'
+    os.environ["BUILD_TEST"] = "0"
+    os.environ["USE_MKL"] = "0"
+    os.environ["USE_MKLDNN"] = "0"
+    os.environ["USE_CUDA"] = "0"
+    os.environ["USE_CUDNN"] = "0"
+    os.environ["USE_FBGEMM"] = "0"
+    os.environ["USE_NNPACK"] = "0"
+    os.environ["USE_QNNPACK"] = "0"
+    os.environ["USE_DISTRIBUTED"] = "0"
+    os.environ["USE_OPENMP"] = "0"
+    os.environ["ATEN_THREADING"] = "NATIVE"
+    os.environ["OMP_NUM_THREADS"] = "1"
+    os.environ["USE_HB_EMUL"] = "1"
+    if os.getenv("BSG_MANYCORE_DIR", "") != "":
+        del os.environ["BSG_MANYCORE_DIR"]
+    if os.getenv("HB_KERNEL_DIR", "") != "":
+        del os.environ["HB_KERNEL_DIR"]
 
 # all the work we need to do _before_ setup runs
 def build_deps():
@@ -352,7 +386,9 @@ def build_deps():
 ################################################################################
 
 # the list of runtime dependencies required by this built package
-install_requires = []
+install_requires = ['numpy', 'requests', 'six', 'sklearn', 'tqdm',
+                    'pytest', 'ninja', 'hypothesis', 'pyyaml',
+                    'typing']
 
 if sys.version_info <= (2, 7):
     install_requires += ['future', 'typing']
@@ -759,6 +795,9 @@ if __name__ == '__main__':
         raise SystemExit(core.gen_usage(dist.script_name) + "\nerror: %s" % msg)
     if not ok:
         sys.exit()
+
+    if SETUP_EMUL:
+        setup_emul()
 
     if RUN_BUILD_DEPS:
         build_deps()
