@@ -1,15 +1,5 @@
 import torch
 
-class ProfilerStatus:
-
-    def __init__(self):
-        self.is_in_ROI = False
-
-
-profiler_status = ProfilerStatus()
-
-# --------- ExecutionTime Stack Tree -------
-
 class exec_time_Node:
 
     def __init__(self, func, time, fancy_func=False):
@@ -127,52 +117,9 @@ def exec_time_tree(fancy_func=False, trimming=False):
     exec_time_calc_percentage(root)
     return root
 
-# --------- torch.hb_profiler APIs ---------
+# --------- torch.hb_profiler.exec_time APIs ---------
 
-def enable():
-    profiler_status.is_in_ROI = True
-    torch._C._hb_profiler_start()
-
-def disable():
-    profiler_status.is_in_ROI = False
-    torch._C._hb_profiler_end()
-
-def is_in_ROI():
-    return profiler_status.is_in_ROI
-
-def add_beacon(signature):
-    try:
-        torch._C._hb_profiler_chart_add_beacon(signature)
-    except AttributeError:
-        print("PyTorch is not built with profiling")
-
-def clear_beacon():
-    try:
-        torch._C._hb_profiler_chart_clear_beacon()
-    except AttributeError:
-        print("PyTorch is not built with profiling")
-
-def add_waypoint(signature, redispatch):
-    try:
-        if not torch._C._hb_profiler_route_add_waypoint(signature, redispatch):
-            print("PyTorch is not built with redispatching")
-    except AttributeError:
-        print("PyTorch is not built with profiling")
-
-def set_route_from_json(json):
-    try:
-        for wp in json:
-            add_waypoint(wp['signature'], wp['offload'])
-    except (AttributeError, KeyError):
-        print("Failed to parse route json or PyTorch is not built with profiling")
-
-def unimpl_print():
-    try:
-        return torch._C._hb_profiler_unimpl_print()
-    except AttributeError:
-        print("PyTorch is not built with profiling")
-
-def exec_time_fancy_print(trimming=False):
+def fancy_print(trimming=False):
     try:
         root = exec_time_tree(fancy_func=True, trimming=trimming)
         buffer = ""
@@ -186,7 +133,7 @@ def exec_time_fancy_print(trimming=False):
     except AttributeError:
         print("PyTorch is not built with profiling")
 
-def exec_time_latex_table(trimming=False):
+def latex_table(trimming=False):
     try:
         root = exec_time_tree(fancy_func=True, trimming=trimming)
         buffer = ""
@@ -214,21 +161,9 @@ def exec_time_latex_table(trimming=False):
     except AttributeError:
         print("PyTorch is not built with profiling")
 
-def exec_time_raw_stack(trimming=False):
+def raw_stack(trimming=False):
     try:
         root = exec_time_tree(trimming=trimming)
         return exec_time_print_tree(root)
-    except AttributeError:
-        print("PyTorch is not built with profiling")
-
-def route_print():
-    try:
-        return torch._C._hb_profiler_route_print()
-    except AttributeError:
-        print("PyTorch is not built with profiling")
-
-def chart_print():
-    try:
-        return torch._C._hb_profiler_chart_print()
     except AttributeError:
         print("PyTorch is not built with profiling")
