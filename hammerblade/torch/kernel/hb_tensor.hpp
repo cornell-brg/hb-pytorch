@@ -115,6 +115,7 @@ class HBTensor {
       // when dims != 1
       // XXX: this tensor has to be contiguous
       if(iarray.size() == 1 && dims != 1) {
+      //if(iarray.size() == 1) {
         for(auto index : iarray) {
           return data[index];
         }

@@ -1,5 +1,5 @@
 //====================================================================
-// Dummy kernel for internal testing/benchmarking
+// Blocked Accumulative Sum kernel for internal micro-benchmarking
 // 04/22/2020 Kexin Zheng (kz73@cornell.edu)
 //====================================================================
 
@@ -9,7 +9,7 @@
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_dummy(
+  __attribute__ ((noinline))  int tensorlib_blocked_cum_sum(
           hb_tensor_t* _result,
           hb_tensor_t* _self) {
     auto result = HBTensor<float>(_result);
@@ -148,6 +148,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_dummy, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_blocked_cum_sum, hb_tensor_t*, hb_tensor_t*)
 
 }
