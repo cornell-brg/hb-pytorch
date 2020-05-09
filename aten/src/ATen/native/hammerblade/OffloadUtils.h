@@ -27,10 +27,10 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
                                   std::vector<eva_t>& device_ptrs);
 
 eva_t create_device_tensor(const Tensor& tensor,
-                                  std::vector<eva_t> device_ptrs);
+                           std::vector<eva_t>& device_ptrs);
 
 eva_t create_device_vector(IntArrayRef arr_ref, bool input,
-                                  std::vector<eva_t> device_ptrs);
+                           std::vector<eva_t>& device_ptrs);
 
 void cleanup_device(std::vector<eva_t> args, std::vector<eva_t> ptrs);
 
