@@ -16,7 +16,6 @@ void enqueue_kernel(const std::string &kernel, uint32_t argc, uint64_t* argv) {
   enqueued_argc.push_back(argc);
   enqueued_argv.push_back(argv);
   enqueued_kernel.push_back(kernelMap[kernel]);
-  std::cerr << "Emulation layer enqueued kernel " << kernel << std::endl;
 }
 
 int execute_kernels() {

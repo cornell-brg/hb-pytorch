@@ -78,6 +78,7 @@ void reset_runtime() {
         int hb_mc_device_init (hb_mc_device_t *device,
                                const char *name,
                                hb_mc_manycore_id_t id) {
+          fprintf(stderr, "Emulating CUDALite...\n");
           EMUL_WARNING();
           if (id != 0) {
             return HB_MC_INVALID;
