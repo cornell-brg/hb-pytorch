@@ -61,6 +61,20 @@ void* memcpy_device_to_host(void *dst, const void *src, uint32_t nbytes) {
 }
 
 
+void* DMA_host_to_device(void *dst, const void *src, uint32_t nbytes) {
+  hb_mc_dma_htod_t job = {.d_addr=(eva_t)((intptr_t)dst), .h_addr=src, .size=nbytes};
+  C10_HB_CHECK(hb_mc_device_dma_to_device(&_hb_device, &job, 1));
+  return dst;
+}
+
+
+void* DMA_device_to_host(void *dst, const void *src, uint32_t nbytes) {
+  hb_mc_dma_dtoh_t job = {.d_addr=(eva_t)((intptr_t)src), .h_addr=dst, .size=nbytes};
+  C10_HB_CHECK(hb_mc_device_dma_to_host(&_hb_device, &job, 1));
+  return dst;
+}
+
+
 void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   std::string kernel_str = "offload_kernel_";
   kernel_str += kernel;
