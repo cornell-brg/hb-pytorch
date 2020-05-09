@@ -12,6 +12,7 @@
 #include <c10/hammerblade/HammerBladeDevice.h>
 #include <c10/hammerblade/HammerBladeException.h>
 #include <c10/core/Device.h>
+#include <atomic>
 
 /*
  * inlcude bsg_manycore.h here
@@ -38,5 +39,7 @@ C10_HAMMERBLADE_API void* memcpy_device_to_host(void *dst, const void *src, uint
 C10_HAMMERBLADE_API void* DMA_host_to_device(void *dst, const void *src, uint32_t nbytes);
 C10_HAMMERBLADE_API void* DMA_device_to_host(void *dst, const void *src, uint32_t nbytes);
 C10_HAMMERBLADE_API void offload_kernel(const char* kernel, std::vector<eva_t> args);
+
+extern std::atomic<int> hb_device_status;
 
 }} // namespace c10::hammerblade

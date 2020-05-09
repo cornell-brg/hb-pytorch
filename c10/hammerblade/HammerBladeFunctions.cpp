@@ -1,11 +1,17 @@
 #include "HammerBladeFunctions.h"
 #include <c10/probe/HBProfiler.h>
+#include <c10/util/Exception.h>
 
+#include <atomic>
 #include <mutex>
 #include <string>
 
 namespace c10 {
 namespace hammerblade {
+
+const int IDLE = -1;
+const int IN_USE = -42;
+std::atomic<int> hb_device_status{IDLE};
 
 namespace {
 static std::once_flag init_flag;
@@ -76,6 +82,11 @@ void* DMA_device_to_host(void *dst, const void *src, uint32_t nbytes) {
 
 
 void offload_kernel(const char* kernel, std::vector<eva_t> args) {
+
+  int idle = IDLE;
+  TORCH_CHECK(hb_device_status.compare_exchange_strong(idle, IN_USE),
+      "HB device is already in use");
+
   std::string kernel_str = "offload_kernel_";
   kernel_str += kernel;
   c10::probe::LogATenKernelWithName(kernel_str);
@@ -94,6 +105,11 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   C10_HB_CHECK(hb_mc_device_tile_groups_execute(&_hb_device));
 
   free(cuda_argv);
+
+  int in_use = IN_USE;
+  TORCH_CHECK(hb_device_status.compare_exchange_strong(in_use, IDLE),
+      "HB device is not in use, how is this possible?");
+
 }
 
 
