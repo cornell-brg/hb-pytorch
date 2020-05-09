@@ -12,6 +12,7 @@
 #include <c10/hammerblade/HammerBladeDevice.h>
 #include <c10/hammerblade/HammerBladeException.h>
 #include <c10/core/Device.h>
+#include <atomic>
 
 /*
  * inlcude bsg_manycore.h here
