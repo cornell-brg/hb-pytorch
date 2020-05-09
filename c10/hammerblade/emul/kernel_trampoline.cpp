@@ -44,18 +44,16 @@ int execute_kernels() {
   }
 
   int idle = IDLE;
-  if (!hb_device_status.compare_exchange_strong(idle, IN_USE)) {
-    TORCH_CHECK(false, "HB device is already in use")
-  }
+  TORCH_CHECK(hb_device_status.compare_exchange_strong(idle, IN_USE),
+      "HB device is already in use");
 
   for (int i=0; i<enqueued_kernel.size(); i++) {
     enqueued_kernel[i](enqueued_argc[i], enqueued_argv[i]);
   }
 
   int in_use = IN_USE;
-  if (!hb_device_status.compare_exchange_strong(in_use, IDLE)) {
-    TORCH_CHECK(false, "HB device is not in use, how is this possible?")
-  }
+  TORCH_CHECK(hb_device_status.compare_exchange_strong(in_use, IDLE),
+      "HB device is not in use, how is this possible?");
 
   while (!enqueued_kernel.empty()) {
     enqueued_kernel.pop_back();
