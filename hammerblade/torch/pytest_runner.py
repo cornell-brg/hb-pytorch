@@ -6,7 +6,7 @@ Lin Cheng
 """
 
 # pytest commandline options
-pytest_argv = ["-vs"]
+pytest_argv = ["-v"]
 
 # This is a work around of the bug in which sys.argv is not set
 # when running as embededd script
