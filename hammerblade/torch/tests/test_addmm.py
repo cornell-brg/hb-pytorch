@@ -20,8 +20,20 @@ def _test_torch_addmm(M, mat1, mat2, rel_tol=1e-05, abs_tol=1e-08):
     assert out_h.device == torch.device("hammerblade")
     assert torch.allclose(out_h.cpu(), out, rtol=rel_tol, atol=abs_tol)
 
-def test_torch_addmm_basic():
+def test_torch_addmm_perf():
+    _test_torch_addmm(torch.randn(16, 16), torch.randn(16, 16), torch.randn(16, 16), 1e-03, 1e-06)
+
+def test_torch_addmm_tt():
+    M = torch.tensor([[1., 2., 3.], [4., 5., 6.]])
+    mat1 = torch.tensor([[7., 8., 9.], [10., 11., 12.]])
+    mat2 = torch.tensor([[13., 14., 15.], [16., 17., 18.], [19., 20., 21.]])
+    _test_torch_addmm(M, mat1, mat2)
+
+def test_torch_addmm_basic1():
     _test_torch_addmm(torch.ones(2, 3), torch.ones(2, 3), torch.ones(3, 3))
+
+def test_torch_addmm_basic2():
+    _test_torch_addmm(torch.ones(16, 16), torch.randn(16, 16), torch.ones(16, 16))
 
 # 1x1 matrices
 def test_torch_addmm_1x1():
