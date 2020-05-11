@@ -1119,7 +1119,6 @@
   dispatch:
     CPU: _exp__cpu
     CUDA: _exp__cuda
-    HammerBlade: _exp__hb
 
 - func: exp.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
