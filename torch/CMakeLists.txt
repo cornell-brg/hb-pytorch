@@ -280,8 +280,8 @@ if (PROFILE_ATEN)
   list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS PROFILE_ATEN)
 endif()
 
-if(PROFILE_UNIMPL)
-  list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS PROFILE_UNIMPL)
+if (HB_REDISPATCH)
+  list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS HB_REDISPATCH)
 endif()
 
 # In the most recent CMake versions, a new 'TRANSFORM' subcommand of 'list' allows much of the boilerplate of defining the lists

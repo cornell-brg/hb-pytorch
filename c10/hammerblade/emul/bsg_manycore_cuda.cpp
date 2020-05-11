@@ -78,6 +78,7 @@ void reset_runtime() {
         int hb_mc_device_init (hb_mc_device_t *device,
                                const char *name,
                                hb_mc_manycore_id_t id) {
+          fprintf(stderr, "Emulating CUDALite...\n");
           EMUL_WARNING();
           if (id != 0) {
             return HB_MC_INVALID;
@@ -358,5 +359,70 @@ void reset_runtime() {
           }
           device_busy = false;
           binary_loaded = false;
+          return HB_MC_SUCCESS;
+        }
+
+
+
+
+
+        /**
+         * Copy data using DMA from the host to the device.
+         * @param[in] device  Pointer to device
+         * @param[in] jobs    Vector of host-to-device DMA jobs
+         * @param[in] count   Number of host-to-device jobs
+         */
+        int hb_mc_device_dma_to_device (hb_mc_device_t *device,
+                                        const hb_mc_dma_htod_t *jobs,
+                                        size_t count)
+        {
+          EMUL_WARNING();
+          int err;
+          // for each job...
+          for (size_t i = 0; i < count; i++) {
+            const hb_mc_dma_htod_t *dma = &jobs[i];
+            err = hb_mc_device_memcpy
+                    (device,
+                     (void*)((intptr_t)dma->d_addr),
+                     dma->h_addr,
+                     dma->size,
+                     HB_MC_MEMCPY_TO_DEVICE);
+
+            if (err != HB_MC_SUCCESS) {
+              return err;
+            }
+          }
+          return HB_MC_SUCCESS;
+        }
+
+
+
+
+        /**
+         * Copy data using DMA from the device to the host.
+         * @param[in] device  Pointer to device
+         * @param[in] jobs    Vector of device-to-host DMA jobs
+         * @param[in] count   Number of device-to-host jobs
+         */
+        int hb_mc_device_dma_to_host(hb_mc_device_t *device,
+                                     const hb_mc_dma_dtoh_t *jobs,
+                                     size_t count)
+        {
+          EMUL_WARNING();
+          int err;
+          // for each job...
+          for (size_t i = 0; i < count; i++) {
+            const hb_mc_dma_dtoh_t *dma = &jobs[i];
+            err = hb_mc_device_memcpy
+                    (device,
+                     dma->h_addr,
+                     (void*)((intptr_t)dma->d_addr),
+                     dma->size,
+                     HB_MC_MEMCPY_TO_HOST);
+
+            if (err != HB_MC_SUCCESS) {
+              return err;
+            }
+          }
           return HB_MC_SUCCESS;
         }

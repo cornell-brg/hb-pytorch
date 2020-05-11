@@ -37,7 +37,7 @@ static void copy_cpu_to_hb(TensorIterator& iter, bool non_blocking) {
   void* src = iter.data_ptr(1);
   // hb_mc_device_memcpy takes void* as dst and src
   uint32_t nbytes = iter.numel() * iter.element_size(0);
-  c10::hammerblade::memcpy_host_to_device(dst, src, nbytes);
+  c10::hammerblade::DMA_host_to_device(dst, src, nbytes);
 }
 
 static void copy_hb_to_cpu(TensorIterator& iter, bool non_blocking) {
@@ -45,7 +45,7 @@ static void copy_hb_to_cpu(TensorIterator& iter, bool non_blocking) {
   void* src = iter.data_ptr(1);
   // hb_mc_device_memcpy takes void* as dst and src
   uint32_t nbytes = iter.numel() * iter.element_size(0);
-  c10::hammerblade::memcpy_device_to_host(dst, src, nbytes);
+  c10::hammerblade::DMA_device_to_host(dst, src, nbytes);
 }
 
 static void copy_kernel_hammerblade(TensorIterator& iter, bool non_blocking) {
