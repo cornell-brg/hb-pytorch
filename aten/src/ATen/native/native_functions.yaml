@@ -1137,6 +1137,7 @@
   dispatch:
     CPU: _exp_out_cpu
     CUDA: _exp_out_cuda
+    HammerBlade: _exp_out_hb
 
 - func: expm1(Tensor self) -> Tensor
   use_c10_dispatcher: full
