@@ -132,7 +132,7 @@ option(USE_HB_EMUL "Use HammerBlade Emulation Layer" OFF)
 option(PROFILE_ATEN "Turn on ATen kernel profiling" ON)
 cmake_dependent_option(
   HB_REDISPATCH "Enable conditional redispatch to HB" ON
-  "PROFILE_ATEN" OFF)
+  "PROFILE_ATEN;USE_HB" OFF)
 cmake_dependent_option(
   HB_ENABLE_KERNEL_LOG "Enable HammerBlade kernel call logging" ON
   "USE_HB_EMUL" OFF)

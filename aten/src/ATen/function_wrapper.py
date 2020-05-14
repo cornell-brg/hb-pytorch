@@ -120,6 +120,7 @@ c10::probe::LogATenKernel();
     ${named_guard_declaration}
 #endif
     ${device_guard_declaration}
+#ifdef HB_REDISPATCH
     if(!${redispatch_condition}) {
       ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
     } else {
@@ -128,6 +129,9 @@ c10::probe::LogATenKernel();
       at::native::${native_type_method_dispatch}(${alter_actuals});
       TORCH_CHECK(false, "Termination after redispatching");
     }
+#else
+    ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
+#endif
 }
 """)
 
@@ -153,6 +157,7 @@ c10::probe::LogATenKernel();
     ${named_guard_declaration}
 #endif
     ${device_guard_declaration}
+#ifdef HB_REDISPATCH
     if(!${redispatch_condition}) {
         ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
     } else {
@@ -161,6 +166,9 @@ c10::probe::LogATenKernel();
         at::native::${alter_method_dispatch}(${alter_actuals});
         TORCH_CHECK(false, "Termination after redispatching");
     }
+#else
+    ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
+#endif
 }
 """)
 
