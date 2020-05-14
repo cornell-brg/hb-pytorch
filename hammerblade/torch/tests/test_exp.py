@@ -24,3 +24,7 @@ def test_torch_exp_2():
 def test_torch_exp_3():
     x = torch.zeros(5)
     _test_torch_exp(x)
+
+def test_torch_exp_4():
+    x = torch.Tensor([float('inf')]) 
+    _test_torch_exp(x)
