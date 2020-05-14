@@ -5,3 +5,9 @@ requests
 setuptools
 six
 typing
+cmake
+sklearn
+tqdm
+pytest
+ninja
+hypothesis

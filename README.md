@@ -2,7 +2,7 @@
 
 --------------------------------------------------------------------------------
 
-# PyTorch HammerBlade Port <a href="https://travis-ci.com/github/cornell-brg/hb-pytorch" rel="Travis">![Travis status](https://travis-ci.com/cornell-brg/hb-pytorch.svg?branch=master)</a>
+# PyTorch HammerBlade Port <a href="https://travis-ci.com/github/cornell-brg/hb-pytorch" rel="Travis">![Travis status](https://travis-ci.com/cornell-brg/hb-pytorch.svg?branch=master)</a> ![Lint](https://github.com/cornell-brg/hb-pytorch/workflows/Lint/badge.svg)
 This work aims to port PyTorch to HammerBlade.
 
 ### How to build PyTorch to use COSIM
@@ -15,10 +15,14 @@ This work aims to port PyTorch to HammerBlade.
     `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis`
  - Init pytorch third party dependencies
     `git submodule update --init --recursive`
- - Setup building environment variables. You need to edit `hb-pytorch/setup_cosim_build_env.sh` and set `BSG_MANYCORE_DIR` to `<bsg_bladerunner>/bsg_replicant/libraries`
+ - Setup building environment variables.
     `cd hb-pytorch && source setup_cosim_build_env.sh`
  - Build pytorch. This step can take up to 15 minutes
-    `python setup.py install`
+    `python setup.py develop`
+ - PyTorch can be used with cosim by running one of the following the executable in place of `python`:
+    - `pycosim`: Runs python with cosim backend
+    - `pycosim.trace`: Enables device instruction trace
+    - `pycosim.wave`: Enbales device instruction trace AND waveform dumps
 
 ### How to build PyTorch with Emulation Layer
 
@@ -110,4 +114,71 @@ Linking would become a bottleneck when running in tight loop. As a result, `gdb`
 ```
 touch aten/src/ATen/CMakeLists.txt # New host code sources
 touch c10/hammerblade/CMakeLists.txt # New device code sources
+```
+
+### Native Profiling Tools
+To enable native execution time profiling, edit `CMakeList.txt` and set `PROFILE_ATEN` to `ON`.
+
+To enable unimplemented HammerBlade kernel discovery, edit `CMakeList.txt` and set `PROFILE_UNIMPL` to `ON`. Warning: `PROFILE_UNIMPL` should be disabled to get more accurate execution time profiling.
+
+Region of interest (ROI) should be marked with `torch.aten_profiler_start()` and `torch.aten_profiler_end()`. For example
+```python
+import torch
+
+# start of ROI
+torch.aten_profiler.enable()
+x = torch.randn(10)
+y = x + x
+# end of ROI
+torch.aten_profiler.disable()
+
+# print out top level kernel table
+torch.aten_profiler.fancy_print()
+
+# latex version of the above
+torch.aten_profiler.latex_table()
+
+# print out raw execution time stask
+torch.aten_profiler.stack_print()
+
+# print out unimplemented kernels
+torch.aten_profiler.unimpl_print()
+
+```
+
+### HB Profiling
+
+#### HB Kernel Call Logs
+HB emulation can output a file with the list of kernel calls along with associated data in json format. This can be used as:
+
+```python
+import torch
+import torch.hammerblade.kernel_logger as hblog
+
+x = torch.rand(2, 2).hammerblade()
+y = torch.rand(2, 2).hammerblade()
+
+# Enables the log
+hblog.enable()
+
+print(x + y)
+
+# Disbales the log
+hblog.disable()
+
+# This is excluded from the log
+print(x - y)
+
+# Logs only the tensor add 
+print(hblog.json())
+
+# Clears above operations from the logger
+hblog.clear()
+
+hblog.enable()
+print(x * y)
+hblog.disable()
+
+# Logs only the tensor mul 
+print(hblog.json())
 ```

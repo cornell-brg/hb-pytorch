@@ -48,7 +48,12 @@ void offload_iterator_op_impl(TensorIterator& iter, std::vector<eva_t> device_sc
     // Iterate over all tensors to create
     // corresponding tensors on the device.
     eva_t device_arg = create_device_tensor(N, iter.ndim(),
-        (const int64_t*)local_strides, (const int64_t*)sizes, iter.data_ptr(i), device_ptrs);
+        (const int64_t*)local_strides, (const int64_t*)sizes, iter.data_ptr(i),
+#ifdef HB_ENABLE_KERNEL_LOG
+        iter.tensor(i).storage().data(),
+        iter.tensor(i).storage().numel(),
+#endif
+        device_ptrs);
     device_args.push_back(device_arg);
   }
 
@@ -70,6 +75,25 @@ void offload_iterator_op_impl(TensorIterator& iter, std::vector<eva_t> device_sc
   iter.cast_outputs();
 }
 
+//=======================================================================
+// Ternary operations
+//=======================================================================
+
+void offload_op_ternary(TensorIterator& iter, const char* kernel) {
+  if (iter.numel() == 0) {
+    return;
+  }
+
+  if (!iter.can_use_32bit_indexing()) {
+    for (auto& sub_iter : iter.with_32bit_indexing()) {
+      offload_op_ternary(sub_iter, kernel);
+    }
+    return;
+  }
+
+  std::vector<eva_t> scalars;
+  offload_iterator_op_impl(iter, scalars, kernel, 4);
+}
 
 //=======================================================================
 // Binary operations
