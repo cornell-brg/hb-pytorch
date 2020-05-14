@@ -19,12 +19,11 @@ template<typename scalar_t>
 inline uint32_t offset_calc(uint32_t idx, HBTensor<scalar_t> tensor) {
   uint32_t* strides = tensor.get_strides();
   uint32_t* sizes = tensor.get_sizes();
-  uint32_t factor = 1;
   uint32_t offset = 0;
   for(int32_t i = tensor.ndim() - 1; i >= 0; i--) {
-    uint32_t dimx = (idx / factor) % sizes[i];
+    uint32_t dimx = idx % sizes[i];
+    idx /= sizes[i];
     offset += dimx * strides[i];
-    factor *= sizes[i];
   }
   return offset;
 }
