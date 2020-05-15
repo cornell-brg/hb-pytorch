@@ -149,7 +149,7 @@ def latex_table(trimming=False):
             func = func.replace("_", "\\_")
             time = e.time / 1000.0
             percentage = e.percentage
-            buffer += ('\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\'.format(
+            buffer += ('\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\\n'.format(
                 func=func, time=time, percentage=percentage))
 
         footer = "\\bottomrule\n" \
