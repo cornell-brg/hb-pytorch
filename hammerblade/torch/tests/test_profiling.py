@@ -10,6 +10,7 @@ import pytest
 
 torch.manual_seed(42)
 random.seed(42)
+torch.hammerblade.init()
 
 def test_ROI():
     assert not torch.hb_profiler.is_in_ROI()
@@ -112,11 +113,11 @@ def test_route_1():
     mat2 = torch.randn(3, 3)
     route = """[
     {
-        "offload": false,
+        "offload": true,
         "signature": "at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)"
     },
     {
-        "offload": false,
+        "offload": true,
         "signature": "at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)"
     }
 ]
@@ -125,31 +126,10 @@ def test_route_1():
     torch.hb_profiler.set_route_from_json(data)
     _route = torch.hb_profiler.route_print()
     assert _route == route
+    out1 = torch.addmm(M, mat1, mat2)
+    out1 = out1 + M
     torch.hb_profiler.enable()
-    torch.addmm(M, mat1, mat2)
-    torch.add(M, mat1)
+    out2 = torch.addmm(M, mat1, mat2)
+    out2 = out2 + M
     torch.hb_profiler.disable()
-
-@pytest.mark.xfail
-def test_route_2_F():
-    M = torch.randn(2, 3)
-    mat1 = torch.randn(2, 3)
-    mat2 = torch.randn(3, 3)
-    # TODO: reset route
-    route = """[
-    {
-        "offload": false,
-        "signature": "at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)"
-    },
-    {
-        "offload": false,
-        "signature": "at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)"
-    }
-]
-"""
-    data = json.loads(route)
-    torch.hb_profiler.set_route_from_json(data)
-    torch.hb_profiler.enable()
-    torch.addmm(M, mat1, mat2)
-    torch.addmm(M, mat1, mat2)
-    torch.hb_profiler.disable()
+    assert torch.allclose(out1, out2)
