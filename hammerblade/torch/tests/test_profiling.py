@@ -131,7 +131,7 @@ def test_route_1():
     torch.hammerblade.profiler.disable()
 
 @pytest.mark.xfail
-def test_route_2_F():
+def test_route_2_FF():
     M = torch.randn(2, 3)
     mat1 = torch.randn(2, 3)
     mat2 = torch.randn(3, 3)
