@@ -51,6 +51,9 @@ This work aims to port PyTorch to HammerBlade.
 
       python setup.py develop
 
+- Turn on emulation debug info
+      export HBEMUL_DEBUG=1
+
 [venv]: https://docs.python.org/3/tutorial/venv.html
 
 ### Run Pytests
