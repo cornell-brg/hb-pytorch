@@ -211,6 +211,8 @@ torch.hammerblade.profiler.enable()
 torch.addmm(M, mat1, mat2)
 # end profiling
 torch.hammerblade.profiler.disable()
+# dump chart
+print(torch.hammerblade.profiler.chart.fancy_print())
 ```
 
 The output should be
