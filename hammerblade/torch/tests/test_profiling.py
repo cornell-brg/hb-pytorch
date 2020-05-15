@@ -6,7 +6,6 @@ Unit tests for torch.hb_profiler
 import json
 import torch
 import random
-import pytest
 
 torch.manual_seed(42)
 random.seed(42)
