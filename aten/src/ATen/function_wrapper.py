@@ -1389,7 +1389,7 @@ def create_generic(top_env, declarations):
                         ret_elements.append(returns[r]['name'])
                     else:
                         ret_elements.append("std::get<{0}>(res)".format(r))
-                ret_call = option['return_type'] + "(" + ",".join(ret_elements) + ");"
+                ret_call = 'return ' + option['return_type'] + "(" + ",".join(ret_elements) + ");"
                 option['redispatch_ret_call'] = ret_call
 
         def add_namedtensor_enabled_macro(code):
@@ -1961,7 +1961,7 @@ def create_derived(backend_type_env, declarations):
                     ret_elements.append(returns[r]['name'])
                 else:
                     ret_elements.append("std::get<{0}>(res)".format(r))
-            ret_call = option['return_type'] + "(" + ",".join(ret_elements) + ");"
+            ret_call = 'return ' + option['return_type'] + "(" + ",".join(ret_elements) + ");"
             option['redispatch_ret_call'] = ret_call
 
         # get alternative dispatching dst
