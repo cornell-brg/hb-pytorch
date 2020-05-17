@@ -48,10 +48,6 @@ const std::string ExecutionCharter::print() {
 
 // ========== ExecutionCharter C10_API ==========
 
-void aten_profiler_execution_chart_print() {
-  g_execution_charter.print();
-}
-
 void chart_add_beacon(const std::string& kernel) {
   g_execution_charter.add_beacon(kernel);
 }
