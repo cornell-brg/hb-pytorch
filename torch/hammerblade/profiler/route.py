@@ -12,7 +12,7 @@ def add(signature, redispatch):
 def set_route_from_json(json):
     try:
         for wp in json:
-            add_waypoint(wp['signature'], wp['offload'])
+            add(wp['signature'], wp['offload'])
     except (AttributeError, KeyError):
         print("Failed to parse route json or PyTorch is not built with profiling")
 
