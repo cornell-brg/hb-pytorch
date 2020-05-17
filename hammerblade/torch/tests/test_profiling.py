@@ -127,8 +127,8 @@ def test_route_1():
     assert _route == route
     out1 = torch.addmm(M, mat1, mat2)
     out1 = out1 + M
-    torch.hb_profiler.enable()
+    torch.hammerblade.profiler.enable()
     out2 = torch.addmm(M, mat1, mat2)
     out2 = out2 + M
-    torch.hb_profiler.disable()
+    torch.hammerblade.profiler.disable()
     assert torch.allclose(out1, out2)
