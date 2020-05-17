@@ -205,9 +205,9 @@ mat1 = torch.randn(2, 3)
 mat2 = torch.randn(3, 3)
 
 # reset chart
-torch.hammerblade.profiler.chart.clear_beacon()
+torch.hammerblade.profiler.chart.clear()
 # add signature
-torch.hammerblade.profiler.chart.add_beacon("at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)")
+torch.hammerblade.profiler.chart.add("at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)")
 # turn on profiling
 torch.hammerblade.profiler.enable()
 # run addmm
@@ -215,7 +215,7 @@ torch.addmm(M, mat1, mat2)
 # end profiling
 torch.hammerblade.profiler.disable()
 # dump chart
-print(torch.hammerblade.profiler.chart.fancy_print())
+print(torch.hammerblade.profiler.chart.json())
 ```
 
 The output should be

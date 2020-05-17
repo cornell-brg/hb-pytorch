@@ -71,28 +71,28 @@ def test_chart_1():
     M = torch.randn(2, 3)
     mat1 = torch.randn(2, 3)
     mat2 = torch.randn(3, 3)
-    torch.hammerblade.profiler.chart.clear_beacon()
-    torch.hammerblade.profiler.chart.add_beacon("at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)")
+    torch.hammerblade.profiler.chart.clear()
+    torch.hammerblade.profiler.chart.add("at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)")
     torch.hammerblade.profiler.enable()
     torch.add(M, mat1)
     torch.hammerblade.profiler.disable()
-    torch.hammerblade.profiler.chart.clear_beacon()
-    chart = torch.hammerblade.profiler.chart.fancy_print()
+    torch.hammerblade.profiler.chart.clear()
+    chart = torch.hammerblade.profiler.chart.json()
     assert chart == "[]\n"
 
 def test_chart_2():
     M = torch.randn(2, 3)
     mat1 = torch.randn(2, 3)
     mat2 = torch.randn(3, 3)
-    torch.hammerblade.profiler.chart.clear_beacon()
-    torch.hammerblade.profiler.chart.add_beacon("at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)")
+    torch.hammerblade.profiler.chart.clear()
+    torch.hammerblade.profiler.chart.add("at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)")
     torch.hammerblade.profiler.enable()
     torch.add(M, mat1)
     torch.addmm(M, mat1, mat2)
     torch.addmm(M, mat1, mat2)
     torch.hammerblade.profiler.disable()
-    torch.hammerblade.profiler.chart.clear_beacon()
-    chart = torch.hammerblade.profiler.chart.fancy_print()
+    torch.hammerblade.profiler.chart.clear()
+    chart = torch.hammerblade.profiler.chart.json()
     golden = """[
     {
         "offload": false,
@@ -123,7 +123,7 @@ def test_route_1():
 """
     data = json.loads(route)
     torch.hammerblade.profiler.route.set_route_from_json(data)
-    _route = torch.hammerblade.profiler.route.fancy_print()
+    _route = torch.hammerblade.profiler.route.json()
     assert _route == route
     torch.hammerblade.profiler.enable()
     torch.addmm(M, mat1, mat2)

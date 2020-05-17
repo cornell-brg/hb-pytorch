@@ -2,7 +2,7 @@ import torch
 
 # --------- torch.hb_profiler.route APIs ---------
 
-def add_waypoint(signature, redispatch):
+def add(signature, redispatch):
     try:
         if not torch._C._hb_profiler_route_add_waypoint(signature, redispatch):
             print("PyTorch is not built with redispatching")
@@ -16,7 +16,7 @@ def set_route_from_json(json):
     except (AttributeError, KeyError):
         print("Failed to parse route json or PyTorch is not built with profiling")
 
-def fancy_print():
+def json():
     try:
         return torch._C._hb_profiler_route_print()
     except AttributeError:
