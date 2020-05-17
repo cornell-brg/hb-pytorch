@@ -1,6 +1,6 @@
 """
-Tests on ceil kernel
-05/17/2020 Kofi Efah (kae87)
+Unit Test for kernel_ceil
+Written by Kofi Efah(kae87) 5/17/2020
 """
 import torch
 
@@ -22,9 +22,5 @@ def test_torch_ceil_2():
     _test_torch_ceil_check(x)
 
 def test_torch_ceil_3():
-    x = torch.randn(1)
-    _test_torch_ceil_check(x)
-
-def test_torch_ceil_4():
     x = torch.zeros(10)
     _test_torch_ceil_check(x)

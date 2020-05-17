@@ -23,7 +23,6 @@ private:
   std::map<std::string, bool> beacons;
 };
 
-C10_PROBE_API void aten_profiler_execution_chart_print();
 C10_PROBE_API void chart_add_beacon(const std::string& kernel);
 C10_PROBE_API void chart_clear_beacon();
 C10_PROBE_API const std::string chart_print();

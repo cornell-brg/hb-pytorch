@@ -58,6 +58,8 @@ class ProfilerTopLvlFuncRecord(ProfilerRecord):
 
 def enable():
     profiler_status.is_in_ROI = True
+    if torch._C.get_num_threads() != 1:
+        print("Warning: HBProfiler is thread safe only if OMP is used")
     torch._C._hb_profiler_start()
 
 def disable():

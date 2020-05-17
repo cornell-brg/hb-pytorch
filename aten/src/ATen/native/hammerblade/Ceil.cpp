@@ -17,4 +17,8 @@ static void ceil_kernel_hb(TensorIterator& iter) {
 
 REGISTER_HAMMERBLADE_DISPATCH(ceil_stub, &ceil_kernel_hb);
 
+<<<<<<< HEAD
 }} // namespace at::native
+=======
+}} // namespace at::native
+>>>>>>> fe19cd03ac35b5780c46cd13d8c667ddb5efaf1b

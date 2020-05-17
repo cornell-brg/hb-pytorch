@@ -51,6 +51,9 @@ This work aims to port PyTorch to HammerBlade.
 
       python setup.py develop
 
+- Turn on emulation debug info
+      export HBEMUL_DEBUG=1
+
 [venv]: https://docs.python.org/3/tutorial/venv.html
 
 ### Run Pytests
@@ -117,34 +120,40 @@ touch c10/hammerblade/CMakeLists.txt # New device code sources
 ```
 
 ### Native Profiling Tools
-To enable native execution time profiling, edit `CMakeList.txt` and set `PROFILE_ATEN` to `ON`.
+Native Profiling tools provide ATen operator level info, including per operator execution time break down and unimplemented
+HB operator info.
 
-To enable unimplemented HammerBlade kernel discovery, edit `CMakeList.txt` and set `PROFILE_UNIMPL` to `ON`. Warning: `PROFILE_UNIMPL` should be disabled to get more accurate execution time profiling.
+To enable profiling tools, call `torch.hammerblade.profiler.enable()`
+To disable profiling tools, call `torch.hammerblade.profiler.disable()`
+To test if the profiling tools are currently running, call `torch.hammerblade.profiler.is_in_ROI()`
 
-Region of interest (ROI) should be marked with `torch.aten_profiler_start()` and `torch.aten_profiler_end()`. For example
 ```python
 import torch
 
 # start of ROI
-torch.aten_profiler.enable()
+torch.hammerblade.profiler.enable()
 x = torch.randn(10)
 y = x + x
 # end of ROI
-torch.aten_profiler.disable()
-
-# print out top level kernel table
-torch.aten_profiler.fancy_print()
-
-# latex version of the above
-torch.aten_profiler.latex_table()
-
-# print out raw execution time stask
-torch.aten_profiler.stack_print()
-
-# print out unimplemented kernels
-torch.aten_profiler.unimpl_print()
-
+torch.hammerblade.profiler.disable()
 ```
+
+To read profiling data, call `torch.hammerblade.profiler.stats()`
+By default, this returns a string of per ATen operator execution time (ExecTime) and unimplemented operators (Unimpl).
+One may also pass in a list using KeyArg `key`. Available options are `ExecTime, ExecTime-Latex, ExecTime-Raw, Unimpl`
+
+```python
+import torch
+
+torch.hammerblade.profiler.enable()
+x = torch.randn(10)
+torch.hammerblade.profiler.disable()
+
+print(torch.hammerblade.profiler.stats(key=['ExecTime-Raw'],
+      trimming=True))
+```
+
+Here `trimming` is a "simulated time" correction mechanism.
 
 ### HB Profiling
 
@@ -181,4 +190,72 @@ hblog.disable()
 
 # Logs only the tensor mul 
 print(hblog.json())
+```
+
+#### HB Key Kernel Charting
+`Chart` provides a way to log down the "execution chart" of key kernels in a workload.
+
+To use `Chart`, one needs to register one or more ATen operator signatures.
+
+```python
+import torch
+
+M = torch.randn(2, 3)
+mat1 = torch.randn(2, 3)
+mat2 = torch.randn(3, 3)
+
+# reset chart
+torch.hammerblade.profiler.chart.clear()
+# add signature
+torch.hammerblade.profiler.chart.add("at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)")
+# turn on profiling
+torch.hammerblade.profiler.enable()
+# run addmm
+torch.addmm(M, mat1, mat2)
+# end profiling
+torch.hammerblade.profiler.disable()
+# dump chart
+print(torch.hammerblade.profiler.chart.json())
+```
+
+The output should be
+```json
+[
+    {
+        "offload": false,
+        "signature": "at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)"
+    }
+]
+```
+
+#### HB Key Kernel Redispatching
+One may choose to redispatch a kernel that should run on CPU to HB with `Route`. `Route` takes in the JSON produced by `Chart`. To redispatch a kernel, one just needs to
+change `"offload": false` to `"offload": true`.
+
+```python
+import torch
+
+M = torch.randn(2, 3)
+mat1 = torch.randn(2, 3)
+mat2 = torch.randn(3, 3)
+
+route = """[
+{
+    "offload": false,
+    "signature": "at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)"
+},
+{
+    "offload": true,
+    "signature": "at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)"
+}
+]
+"""
+data = json.loads(route)
+torch.hammerblade.profiler.route.set_route_from_json(data)
+
+torch.hammerblade.profiler.enable()
+torch.addmm(M, mat1, mat2)
+# this add should be redispatch to HB
+torch.add(M, mat1)
+torch.hammerblade.profiler.disable()
 ```

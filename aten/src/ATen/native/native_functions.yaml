@@ -622,7 +622,11 @@
     CPU: ceil_out
     CUDA: ceil_out
     HammerBlade: ceil_out
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> fe19cd03ac35b5780c46cd13d8c667ddb5efaf1b
 - func: chain_matmul(Tensor[] matrices) -> Tensor
   variants: function
 
@@ -1138,6 +1142,7 @@
   dispatch:
     CPU: _exp_out_cpu
     CUDA: _exp_out_cuda
+    HammerBlade: _exp_out_hb
 
 - func: expm1(Tensor self) -> Tensor
   use_c10_dispatcher: full
