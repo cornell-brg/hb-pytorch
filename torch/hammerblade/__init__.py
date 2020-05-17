@@ -93,7 +93,7 @@ class hammerbladeStatus(object):
 
 class HammerBladeError(RuntimeError):
     def __init__(self, code):
-        super(HammerBladeError, self).__init__('({1})'.format(code))
+        super(HammerBladeError, self).__init__('({0})'.format(code))
 
 
 def check_error(res):

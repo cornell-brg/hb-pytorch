@@ -90,6 +90,8 @@ if(USE_ROCM)
   add_subdirectory(hip)
 endif()
 
+add_subdirectory(probe)
+
 if(USE_HB)
   add_subdirectory(hammerblade)
 endif()

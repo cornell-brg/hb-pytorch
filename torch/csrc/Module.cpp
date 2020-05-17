@@ -18,6 +18,7 @@
 #include <ATen/Utils.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <c10/probe/HBProfiler.h>
 
 #include <torch/csrc/THP.h>
 #include <torch/csrc/DynamicTypes.h>
@@ -515,6 +516,72 @@ PyObject *THPModule_supportedQEngines(PyObject */* unused */)
   return list.release();
 }
 
+static PyObject * THPModule_hbProfilerStart(PyObject *module, PyObject *noargs) {
+  c10::probe::hb_profiler_start();
+  Py_RETURN_NONE;
+}
+
+static PyObject * THPModule_hbProfilerEnd(PyObject *module, PyObject *noargs) {
+  c10::probe::hb_profiler_end();
+  Py_RETURN_NONE;
+}
+
+#ifdef PROFILE_ATEN
+static PyObject * THPModule_hbProfilerExecTimeRawStack(PyObject *module, PyObject *noargs) {
+  return PyUnicode_FromString(c10::probe::exec_time_raw_stack().c_str());
+}
+
+static PyObject * THPModule_hbProfilerUnimplPrint(PyObject *module, PyObject *noargs) {
+  return PyUnicode_FromString(c10::probe::unimpl_raw_print().c_str());
+}
+
+static PyObject * THPModule_hbProfilerRoutePrint(PyObject *module, PyObject *noargs) {
+  return PyUnicode_FromString(c10::probe::route_print().c_str());
+}
+
+static PyObject * THPModule_hbProfilerChartPrint(PyObject *module, PyObject *noargs) {
+  return PyUnicode_FromString(c10::probe::chart_print().c_str());
+}
+
+static PyObject * THPModule_hbProfilerAddBeacon(PyObject *_unused, PyObject *kernel_signature)
+{
+  HANDLE_TH_ERRORS
+  if (!THPUtils_checkString(kernel_signature)) {
+    THPUtils_setError("beacon initialization error - expected bytes/string object for kernel signature");
+    return nullptr;
+  }
+  std::string kernel = THPUtils_unpackString(kernel_signature);
+  c10::probe::chart_add_beacon(kernel);
+  Py_RETURN_NONE;
+  END_HANDLE_TH_ERRORS
+}
+
+static PyObject * THPModule_hbProfilerClearBeacon(PyObject *module, PyObject *noargs) {
+  c10::probe::chart_clear_beacon();
+  Py_RETURN_NONE;
+}
+
+static PyObject * THPModule_hbProfilerAddWaypoint(PyObject *_unused, PyObject *args) {
+  PyObject *kernel_signature;
+  PyObject *redispatch;
+  if (!PyArg_ParseTuple(args, "OO", &kernel_signature, &redispatch)) {
+    return nullptr;
+  }
+  HANDLE_TH_ERRORS
+  if (!THPUtils_checkString(kernel_signature)) {
+    THPUtils_setError("waypoint initialization error - expected bytes/string object for kernel signature");
+    return nullptr;
+  }
+  THPUtils_assert(PyBool_Check(redispatch), "waypoint expects a bool, "
+          "but got %s", THPUtils_typename(redispatch));
+  std::string kernel = THPUtils_unpackString(kernel_signature);
+  bool res = c10::probe::route_add_waypoint(kernel, (redispatch == Py_True));
+  if (res) Py_RETURN_TRUE;
+  else Py_RETURN_FALSE;
+  END_HANDLE_TH_ERRORS
+}
+#endif
+
 //NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 static PyMethodDef TorchMethods[] = {
   {"_initExtension",  (PyCFunction)THPModule_initExtension,   METH_O,       nullptr},
@@ -555,6 +622,17 @@ static PyMethodDef TorchMethods[] = {
   {"_get_qengine", (PyCFunction)THPModule_qEngine, METH_NOARGS, nullptr},
   {"_set_qengine", (PyCFunction)THPModule_setQEngine, METH_O, nullptr},
   {"_supported_qengines", (PyCFunction)THPModule_supportedQEngines, METH_NOARGS, nullptr},
+  {"_hb_profiler_start", (PyCFunction)THPModule_hbProfilerStart, METH_NOARGS,  nullptr},
+  {"_hb_profiler_end",   (PyCFunction)THPModule_hbProfilerEnd,   METH_NOARGS,  nullptr},
+#ifdef PROFILE_ATEN
+  {"_hb_profiler_exec_time_raw_stack",  (PyCFunction)THPModule_hbProfilerExecTimeRawStack, METH_NOARGS, nullptr},
+  {"_hb_profiler_unimpl_print",  (PyCFunction)THPModule_hbProfilerUnimplPrint, METH_NOARGS, nullptr},
+  {"_hb_profiler_chart_add_beacon",  (PyCFunction)THPModule_hbProfilerAddBeacon, METH_O, nullptr},
+  {"_hb_profiler_chart_clear_beacon",  (PyCFunction)THPModule_hbProfilerClearBeacon, METH_NOARGS, nullptr},
+  {"_hb_profiler_route_add_waypoint",  (PyCFunction)THPModule_hbProfilerAddWaypoint, METH_VARARGS, nullptr},
+  {"_hb_profiler_route_print",  (PyCFunction)THPModule_hbProfilerRoutePrint, METH_NOARGS, nullptr},
+  {"_hb_profiler_chart_print",  (PyCFunction)THPModule_hbProfilerChartPrint, METH_NOARGS, nullptr},
+#endif
   {nullptr, nullptr, 0, nullptr}
 };
 
@@ -779,6 +857,13 @@ PyObject* initModule() {
   PyObject *has_hammerblade = Py_False;
 #endif
   ASSERT_TRUE(set_module_attr("has_hammerblade", has_hammerblade));
+
+#ifdef USE_HB_EMUL
+  PyObject *hb_emul_on = Py_True;
+#else
+  PyObject *hb_emul_on = Py_False;
+#endif
+  ASSERT_TRUE(set_module_attr("hb_emul_on", hb_emul_on));
 
   ASSERT_TRUE(set_module_attr("has_mkldnn", at::hasMKLDNN() ? Py_True : Py_False));
 
