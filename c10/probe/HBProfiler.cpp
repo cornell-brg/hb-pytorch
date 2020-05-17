@@ -78,7 +78,7 @@ bool hb_profiler_is_top_level() {
   return (g_curr_call_stack.size() == 1);
 }
 
-// =============== Aten Profiler Log Members =======================
+// =============== HBProfilerLog Members =======================
 
 // Entering a function
 HBProfilerLog::HBProfilerLog(const std::string& func_name) {
@@ -98,6 +98,27 @@ HBProfilerLog::~HBProfilerLog()
     delete execution_time_log;
     g_curr_call_stack.pop_back();
   }
+}
+
+// =============== HBProfilerTrimLog Members =======================
+
+// Entering a function
+HBProfilerTrimLog::HBProfilerTrimLog() {
+  if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
+    g_curr_call_stack.push_back("@TRIM@");
+  }
+}
+
+// Returning from a function
+HBProfilerTrimLog::~HBProfilerTrimLog()
+{
+  if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
+    g_curr_call_stack.pop_back();
+  }
+}
+
+void HBProfilerTrimLog::trim_manual_log_exec_time(std::chrono::microseconds simulated) {
+  g_execution_time_profiler.log(g_curr_call_stack, simulated);
 }
 
 }} // namespace c10::probe
