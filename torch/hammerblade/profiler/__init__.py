@@ -5,6 +5,7 @@ import torch.hammerblade.profiler.exec_time
 import torch.hammerblade.profiler.unimpl
 import torch.hammerblade.profiler.chart
 import torch.hammerblade.profiler.route
+import torch.hammerblade.profiler.fallback
 
 class ProfilerStatus:
 

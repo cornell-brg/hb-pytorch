@@ -5,6 +5,7 @@
 #include <c10/probe/ExecutionTime.h>
 #include <c10/probe/Chart.h>
 #include <c10/probe/Route.h>
+#include <c10/probe/Fallback.h>
 
 #include <map>
 #include <string>

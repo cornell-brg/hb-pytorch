@@ -1452,7 +1452,7 @@ TensorList {0}_hb = TensorList({0}_hb_vec);
         def process_fallback_hb_to_cpu(option):
             # type: (FunctionOption) -> None
             option['fallback_warning'] = "std::cerr << \"ATen OP {0} falls back to CPU\" << std::endl;\n".format(option['api_name'])
-            fallback_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_is_top_level())"
+            fallback_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_is_top_level() && c10::probe::fallback_is_enabled())"
             fallback_boxing = ""
             fallback_unboxing = ""
             fallback_actuals = []
@@ -2104,7 +2104,7 @@ TensorList {0}_hb = TensorList({0}_hb_vec);
     def process_fallback_hb_to_cpu(option):
         # type: (FunctionOption) -> None
         option['fallback_warning'] = "std::cerr << \"ATen OP {0} falls back to CPU\" << std::endl;\n".format(option['api_name'])
-        fallback_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_is_top_level())"
+        fallback_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_is_top_level() && c10::probe::fallback_is_enabled())"
         fallback_boxing = ""
         fallback_unboxing = ""
         fallback_actuals = []
