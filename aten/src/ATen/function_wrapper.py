@@ -125,7 +125,9 @@ c10::probe::LogATenKernel();
       try {
         ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
       } catch(const c10::Error& c10_error) {
-        if(${fallback_condition}) {
+        if(${fallback_condition} &&
+          (c10_error.msg_without_backtrace().find("missing HammerBlade kernel") != std::string::npos
+           || c10_error.msg_without_backtrace().find("is not implemented for HB, and Fallback is not enabled") != std::string::npos)) {
           ${fallback_warning}
           ${fallback_boxing}
           ${fallback_ret_val} at::native::${native_type_method_dispatch}(${fallback_actuals});
