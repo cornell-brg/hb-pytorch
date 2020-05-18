@@ -122,7 +122,19 @@ c10::probe::LogATenKernel();
     ${device_guard_declaration}
 #ifdef HB_REDISPATCH
     if(!${redispatch_condition}) {
-      ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
+      try {
+        ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
+      } catch(const c10::Error& c10_error) {
+        if(${fallback_condition}) {
+          ${fallback_warning}
+          ${fallback_boxing}
+          ${fallback_ret_val} at::native::${native_type_method_dispatch}(${fallback_actuals});
+          ${fallback_unboxing}
+          ${fallback_ret_call}
+        } else {
+          throw;
+        }
+      }
     } else {
       ${tensor_boxing}
       ${simple_ret_val} at::native::${native_type_method_dispatch}(${alter_actuals});
@@ -703,6 +715,13 @@ FunctionOption = TypedDict('FunctionOption', {
     'redispatch_ret_call' : str,
     'alter_method_dispatch' : str,
     'alter_actuals' : List[str],
+    'fallback_condition' : str,
+    'fallback_actuals' : List[str],
+    'fallback_warning' : str,
+    'fallback_boxing' : str,
+    'fallback_ret_val' : str,
+    'fallback_unboxing' : str,
+    'fallback_ret_call' : str,
 })
 
 OutputDeclaration = NamedTuple('OutputDeclaration', [
@@ -1402,6 +1421,68 @@ TensorList {0}_hb = TensorList({0}_hb_vec);
                 ret_call = 'return ' + option['return_type'] + "(" + ",".join(ret_elements) + ");"
                 option['redispatch_ret_call'] = ret_call
 
+        def process_fallback_hb_to_cpu(option):
+            # type: (FunctionOption) -> None
+            option['fallback_warning'] = "std::cerr << \"ATen OP {0} falls back to CPU\" << std::endl;\n".format(option['api_name'])
+            fallback_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_is_top_level())"
+            fallback_boxing = ""
+            fallback_unboxing = ""
+            fallback_actuals = []
+            option['fallback_condition'] = fallback_condition
+
+            # convert formals to boxed actuals
+            non_const_tensor = 0
+            for f in option['formals_list']:
+                if f['type'] == 'Tensor &':
+                    fallback_boxing += "auto {0}_cpu = {0}.cpu();\n".format(f['name'])
+                    fallback_unboxing += "{0}.copy_({0}_cpu.hammerblade());\n".format(f['name'])
+                    fallback_actuals.append(f['name'] + "_cpu")
+                    non_const_tensor += 1
+                elif f['type'] == 'const Tensor &':
+                    fallback_actuals.append(f['name'] + ".cpu()")
+                elif f['type'] == 'TensorList':
+                    fallback_boxing += """
+std::vector<Tensor> {0}_vec = {0}.vec();
+std::vector<Tensor> {0}_cpu_vec;
+for (const auto& t : {0}_vec) {{
+  {0}_cpu_vec.push_back(t.cpu());
+}}
+TensorList {0}_cpu = TensorList({0}_cpu_vec);
+\n""".format(f['name'])
+                    fallback_actuals.append(f['name'] + "_cpu")
+                else:
+                    fallback_actuals.append(f['name'])
+            option['fallback_boxing'] = fallback_boxing
+            option['fallback_unboxing'] = fallback_unboxing
+            option['fallback_actuals'] = fallback_actuals
+            assert len(fallback_actuals) == len(option['formals_list'])
+            assert len(option['returns']) == non_const_tensor or non_const_tensor == 0
+            returns = option['returns']
+            if len(returns) == 0:
+                option['fallback_ret_val'] = ''
+                option['fallback_ret_call'] = 'return;'
+            elif len(returns) == 1:
+                returns_0 = returns[0]
+                option['fallback_ret_val'] = 'auto res ='
+                if returns_0['type'] == 'Tensor':
+                    option['fallback_ret_call'] = 'return res.hammerblade();'
+                elif returns_0['type'] == 'Tensor &':
+                    option['fallback_ret_call'] = 'return {0};'.format(returns_0['name'])
+                else:
+                    option['fallback_ret_call'] = 'return res;'
+            else:
+                option['fallback_ret_val'] = 'auto res ='
+                ret_elements = []
+                for r in range(len(returns)):
+                    if returns[r]['type'] == 'Tensor':
+                        ret_elements.append("(std::get<{0}>(res)).hammerblade()".format(r))
+                    elif returns[r]['type'] == 'Tensor &':
+                        ret_elements.append(returns[r]['name'])
+                    else:
+                        ret_elements.append("std::get<{0}>(res)".format(r))
+                ret_call = 'return ' + option['return_type'] + "(" + ",".join(ret_elements) + ");"
+                option['fallback_ret_call'] = ret_call
+
         def add_namedtensor_enabled_macro(code):
             # type: (FunctionCode) -> FunctionCode
             return FunctionCode(
@@ -1470,6 +1551,7 @@ TensorList {0}_hb = TensorList({0}_hb_vec);
             top_env['type_method_declarations'].append(
                 check_namedtensor_enabled(NATIVE_DISPATCH_DECLARATION.substitute(option)))
             process_redispatch_cpu_to_hb(option)
+            process_fallback_hb_to_cpu(option)
             top_env['type_method_definitions'].append(
                 check_namedtensor_enabled(NATIVE_DISPATCH_DEFINITION_DEFAULT_REDISPATCH.substitute(option)))
             if option['use_c10_dispatcher'] == 'full':
