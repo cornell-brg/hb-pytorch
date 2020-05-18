@@ -195,7 +195,7 @@ c10::probe::LogATenKernel();
     ${device_guard_declaration}
 #ifdef HB_REDISPATCH
     if(!${fallback_condition}) {
-        TORCH_CHECK(false, "Not implemented for HB, and Fallback is not enabled");
+        TORCH_CHECK(false, "${api_name} is not implemented for HB, and Fallback is not enabled");
     } else {
         ${fallback_warning}
         ${fallback_boxing}
@@ -204,7 +204,7 @@ c10::probe::LogATenKernel();
         ${fallback_ret_call}
     }
 #else
-    TORCH_CHECK(false, "Not implemented for HB, and Fallback is not enabled");
+    TORCH_CHECK(false, "${api_name} is not implemented for HB, and Fallback is not enabled");
 #endif
 }
 """)
@@ -2201,6 +2201,13 @@ TensorList {0}_cpu = TensorList({0}_cpu_vec);
                     process_fallback_hb_to_cpu(option)
                     type_object_definitions.append(
                         NATIVE_DISPATCH_DEFINITION_BACKEND_FALLBACK.substitute(env))
+                    if option['use_c10_dispatcher'] == 'full':
+                        function_registrations.append(
+                            BACKEND_FUNCTION_REGISTRATION.substitute(env))
+                    else:
+                        assert option['use_c10_dispatcher'] == 'unboxed_only'
+                        function_registrations.append(
+                            BACKEND_UNBOXEDONLY_FUNCTION_REGISTRATION.substitute(env))
 
     for declaration in declarations:
         for option in declaration['options']:
