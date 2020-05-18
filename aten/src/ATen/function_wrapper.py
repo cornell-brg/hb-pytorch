@@ -153,6 +153,7 @@ NATIVE_DISPATCH_DEFINITION_BACKEND = CodeTemplate("""\
 ${return_type} ${api_name}(${type_method_formals}) {
 #ifdef PROFILE_ATEN
 c10::probe::LogATenKernel();
+${log_unimpl}
 #endif
 #ifdef BUILD_NAMEDTENSOR
     ${named_guard_declaration}
@@ -750,6 +751,7 @@ FunctionOption = TypedDict('FunctionOption', {
     'fallback_unboxing' : str,
     'fallback_ret_call' : str,
     'fallback_method_dispatch' : str,
+    'log_unimpl' : str,
 })
 
 OutputDeclaration = NamedTuple('OutputDeclaration', [
@@ -2184,6 +2186,12 @@ TensorList {0}_cpu = TensorList({0}_cpu_vec);
                     type_object_declarations.append(
                         NATIVE_DISPATCH_DECLARATION.substitute(env))
                     option['native_type_method_dispatch'] = native_dispatch
+                    if backend == 'CPU' and 'HammerBlade' not in option['backend_types']:
+                        option['log_unimpl'] = 'if (c10::probe::hb_profiler_is_in_roi()) {\n'
+                        option['log_unimpl'] += '  c10::probe::log_unimpl_kernel("aten::{0}");\n'.format(option['api_name'])
+                        option['log_unimpl'] += '}'
+                    else:
+                        option['log_unimpl'] = ''
                     if backend == 'CPU' and 'HammerBlade' in option['backend_types']:
                         process_redispatch_cpu_to_hb(option)
                         type_object_definitions.append(
