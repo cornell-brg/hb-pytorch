@@ -12,7 +12,7 @@ torch.manual_seed(42)
 random.seed(42)
 
 def test_typedefault_1():
-    x = torch.tensor([ 0.2341,  0.2539, -0.6256, -0.6448])
+    x = torch.tensor([0.2341, 0.2539, -0.6256, -0.6448])
     cpu = torch.atan(x)
     torch.hammerblade.profiler.enable()
     torch.hammerblade.profiler.fallback.enable()
@@ -23,7 +23,7 @@ def test_typedefault_1():
 
 @pytest.mark.xfail
 def test_typedefault_1F():
-    x = tensor([ 0.2341,  0.2539, -0.6256, -0.6448])
+    x = tensor([0.2341, 0.2539, -0.6256, -0.6448])
     cpu = torch.atan(x)
     torch.hammerblade.profiler.enable()
     hb = torch.atan(x.hammerblade())
