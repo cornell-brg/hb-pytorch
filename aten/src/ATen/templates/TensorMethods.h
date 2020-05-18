@@ -31,6 +31,15 @@ inline Tensor Tensor::cpu() const {
   return to(options().device(DeviceType::CPU), /*non_blocking*/ false, /*copy*/ false);
 }
 
+// Do copy to CPU only if the tensor is defined
+inline Tensor Tensor::cpu_ifdef() const {
+  if (this->defined()) {
+    return to(options().device(DeviceType::CPU), /*non_blocking*/ false, /*copy*/ false);
+  } else {
+    return *this;
+  }
+}
+
 // TODO: The Python version also accepts arguments
 inline Tensor Tensor::cuda() const {
   return to(options().device(DeviceType::CUDA), /*non_blocking*/ false, /*copy*/ false);

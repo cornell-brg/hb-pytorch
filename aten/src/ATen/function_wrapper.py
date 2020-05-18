@@ -1460,18 +1460,18 @@ TensorList {0}_hb = TensorList({0}_hb_vec);
             non_const_tensor = 0
             for f in option['formals_list']:
                 if f['type'] == 'Tensor &':
-                    fallback_boxing += "auto {0}_cpu = {0}.cpu();\n".format(f['name'])
+                    fallback_boxing += "auto {0}_cpu = {0}.cpu_ifdef();\n".format(f['name'])
                     fallback_unboxing += "{0}.copy_({0}_cpu.hammerblade());\n".format(f['name'])
                     fallback_actuals.append(f['name'] + "_cpu")
                     non_const_tensor += 1
                 elif f['type'] == 'const Tensor &':
-                    fallback_actuals.append(f['name'] + ".cpu()")
+                    fallback_actuals.append(f['name'] + ".cpu_ifdef()")
                 elif f['type'] == 'TensorList':
                     fallback_boxing += """
 std::vector<Tensor> {0}_vec = {0}.vec();
 std::vector<Tensor> {0}_cpu_vec;
 for (const auto& t : {0}_vec) {{
-  {0}_cpu_vec.push_back(t.cpu());
+  {0}_cpu_vec.push_back(t.cpu_ifdef());
 }}
 TensorList {0}_cpu = TensorList({0}_cpu_vec);
 \n""".format(f['name'])
@@ -2112,18 +2112,18 @@ TensorList {0}_hb = TensorList({0}_hb_vec);
         non_const_tensor = 0
         for f in option['formals_list']:
             if f['type'] == 'Tensor &':
-                fallback_boxing += "auto {0}_cpu = {0}.cpu();\n".format(f['name'])
+                fallback_boxing += "auto {0}_cpu = {0}.cpu_ifdef();\n".format(f['name'])
                 fallback_unboxing += "{0}.copy_({0}_cpu.hammerblade());\n".format(f['name'])
                 fallback_actuals.append(f['name'] + "_cpu")
                 non_const_tensor += 1
             elif f['type'] == 'const Tensor &':
-                fallback_actuals.append(f['name'] + ".cpu()")
+                fallback_actuals.append(f['name'] + ".cpu_ifdef()")
             elif f['type'] == 'TensorList':
                 fallback_boxing += """
 std::vector<Tensor> {0}_vec = {0}.vec();
 std::vector<Tensor> {0}_cpu_vec;
 for (const auto& t : {0}_vec) {{
-  {0}_cpu_vec.push_back(t.cpu());
+  {0}_cpu_vec.push_back(t.cpu_ifdef());
 }}
 TensorList {0}_cpu = TensorList({0}_cpu_vec);
 \n""".format(f['name'])
