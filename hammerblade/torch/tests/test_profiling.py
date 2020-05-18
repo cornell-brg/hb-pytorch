@@ -6,10 +6,10 @@ Unit tests for torch.hammerblade.profiler
 import json
 import torch
 import random
-import pytest
 
 torch.manual_seed(42)
 random.seed(42)
+torch.hammerblade.init()
 
 def test_ROI():
     assert not torch.hammerblade.profiler.is_in_ROI()
@@ -112,11 +112,11 @@ def test_route_1():
     mat2 = torch.randn(3, 3)
     route = """[
     {
-        "offload": false,
+        "offload": true,
         "signature": "at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)"
     },
     {
-        "offload": false,
+        "offload": true,
         "signature": "at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)"
     }
 ]
@@ -125,31 +125,10 @@ def test_route_1():
     torch.hammerblade.profiler.route.set_route_from_json(data)
     _route = torch.hammerblade.profiler.route.json()
     assert _route == route
+    out1 = torch.addmm(M, mat1, mat2)
+    out1 = out1 + M
     torch.hammerblade.profiler.enable()
-    torch.addmm(M, mat1, mat2)
-    torch.add(M, mat1)
+    out2 = torch.addmm(M, mat1, mat2)
+    out2 = out2 + M
     torch.hammerblade.profiler.disable()
-
-@pytest.mark.xfail
-def test_route_2_FF():
-    M = torch.randn(2, 3)
-    mat1 = torch.randn(2, 3)
-    mat2 = torch.randn(3, 3)
-    # TODO: reset route
-    route = """[
-    {
-        "offload": false,
-        "signature": "at::Tensor at::CPUType::{anonymous}::addmm(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::Scalar, c10::Scalar)"
-    },
-    {
-        "offload": false,
-        "signature": "at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)"
-    }
-]
-"""
-    data = json.loads(route)
-    torch.hammerblade.profiler.route.set_route_from_json(data)
-    torch.hammerblade.profiler.enable()
-    torch.addmm(M, mat1, mat2)
-    torch.addmm(M, mat1, mat2)
-    torch.hammerblade.profiler.disable()
+    assert torch.allclose(out1, out2)

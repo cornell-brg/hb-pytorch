@@ -125,9 +125,9 @@ c10::probe::LogATenKernel();
       ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
     } else {
       ${tensor_boxing}
-      //${return_call} at::native::${native_type_method_dispatch}(${alter_actuals});
-      at::native::${native_type_method_dispatch}(${alter_actuals});
-      TORCH_CHECK(false, "Termination after redispatching");
+      ${simple_ret_val} at::native::${native_type_method_dispatch}(${alter_actuals});
+      ${tensor_unboxing}
+      ${redispatch_ret_call}
     }
 #else
     ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
@@ -162,9 +162,9 @@ c10::probe::LogATenKernel();
         ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
     } else {
         ${tensor_boxing}
-        //${return_call} at::native::${alter_method_dispatch}(${alter_actuals});
-        at::native::${alter_method_dispatch}(${alter_actuals});
-        TORCH_CHECK(false, "Termination after redispatching");
+        ${simple_ret_val} at::native::${alter_method_dispatch}(${alter_actuals});
+        ${tensor_unboxing}
+        ${redispatch_ret_call}
     }
 #else
     ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
@@ -698,6 +698,9 @@ FunctionOption = TypedDict('FunctionOption', {
     'zero_dim_dispatch_when_scalar': str,
     'redispatch_condition' : str,
     'tensor_boxing' : str,
+    'tensor_unboxing' : str,
+    'simple_ret_val' : str,
+    'redispatch_ret_call' : str,
     'alter_method_dispatch' : str,
     'alter_actuals' : List[str],
 })
@@ -1331,6 +1334,7 @@ def create_generic(top_env, declarations):
             # type: (FunctionOption) -> None
             redispatch_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_is_top_level() && c10::probe::should_redispatch(__PRETTY_FUNCTION__))"
             tensor_boxing = ""
+            tensor_unboxing = ""
             alter_actuals = []
             option['redispatch_condition'] = redispatch_condition
 
@@ -1339,16 +1343,64 @@ def create_generic(top_env, declarations):
             for f in option['formals_list']:
                 if f['type'] == 'Tensor &':
                     tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
+                    tensor_unboxing += "{0}.copy_({0}_hb.cpu());\n".format(f['name'])
                     alter_actuals.append(f['name'] + "_hb")
                     non_const_tensor += 1
                 elif f['type'] == 'const Tensor &':
                     alter_actuals.append(f['name'] + ".llcopy()")
+                elif f['type'] == 'TensorList':
+                    tensor_boxing += """
+std::vector<Tensor> {0}_vec = {0}.vec();
+std::vector<Tensor> {0}_hb_vec;
+for (const auto& t : {0}_vec) {{
+  {0}_hb_vec.push_back(t.llcopy());
+}}
+TensorList {0}_hb = TensorList({0}_hb_vec);
+\n""".format(f['name'])
+                    alter_actuals.append(f['name'] + "_hb")
                 else:
                     alter_actuals.append(f['name'])
             option['tensor_boxing'] = tensor_boxing
+            option['tensor_unboxing'] = tensor_unboxing
             option['alter_actuals'] = alter_actuals
             assert len(alter_actuals) == len(option['formals_list'])
             assert len(option['returns']) == non_const_tensor or non_const_tensor == 0
+            # unbox return values from HB kernels and move results to CPU
+            # there are 3 cases:
+            # no return value (void) -- len(option['returns']) == 0
+            #   in this case we don't capture return value and just return
+            # return a single object -- len(option['returns']) == 1
+            #   in this case we capture return value to *res*
+            #   - this could be a tensor (Tensor) -- return res.cpu()
+            #   - this could be a tensor ref (Tensor &) -- unbox and return the corresponding Tensor
+            #   - this could be some other value -- return res
+            # return a tuple -- len(option['returns']) > 1
+            #   in this case, we get each element and handles them in the same way as above
+            returns = option['returns']
+            if len(returns) == 0:
+                option['simple_ret_val'] = ''
+                option['redispatch_ret_call'] = 'return;'
+            elif len(returns) == 1:
+                returns_0 = returns[0]
+                option['simple_ret_val'] = 'auto res ='
+                if returns_0['type'] == 'Tensor':
+                    option['redispatch_ret_call'] = 'return res.cpu();'
+                elif returns_0['type'] == 'Tensor &':
+                    option['redispatch_ret_call'] = 'return {0};'.format(returns_0['name'])
+                else:
+                    option['redispatch_ret_call'] = 'return res;'
+            else:
+                option['simple_ret_val'] = 'auto res ='
+                ret_elements = []
+                for r in range(len(returns)):
+                    if returns[r]['type'] == 'Tensor':
+                        ret_elements.append("(std::get<{0}>(res)).cpu()".format(r))
+                    elif returns[r]['type'] == 'Tensor &':
+                        ret_elements.append(returns[r]['name'])
+                    else:
+                        ret_elements.append("std::get<{0}>(res)".format(r))
+                ret_call = 'return ' + option['return_type'] + "(" + ",".join(ret_elements) + ");"
+                option['redispatch_ret_call'] = ret_call
 
         def add_namedtensor_enabled_macro(code):
             # type: (FunctionCode) -> FunctionCode
@@ -1864,6 +1916,7 @@ def create_derived(backend_type_env, declarations):
         # type: (FunctionOption) -> None
         redispatch_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_is_top_level() && c10::probe::should_redispatch(__PRETTY_FUNCTION__))"
         tensor_boxing = ""
+        tensor_unboxing = ""
         alter_actuals = []
         option['redispatch_condition'] = redispatch_condition
 
@@ -1872,16 +1925,64 @@ def create_derived(backend_type_env, declarations):
         for f in option['formals_list']:
             if f['type'] == 'Tensor &':
                 tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
+                tensor_unboxing += "{0}.copy_({0}_hb.cpu());\n".format(f['name'])
                 alter_actuals.append(f['name'] + "_hb")
                 non_const_tensor += 1
             elif f['type'] == 'const Tensor &':
                 alter_actuals.append(f['name'] + ".llcopy()")
+            elif f['type'] == 'TensorList':
+                tensor_boxing += """
+std::vector<Tensor> {0}_vec = {0}.vec();
+std::vector<Tensor> {0}_hb_vec;
+for (const auto& t : {0}_vec) {{
+  {0}_hb_vec.push_back(t.llcopy());
+}}
+TensorList {0}_hb = TensorList({0}_hb_vec);
+\n""".format(f['name'])
+                alter_actuals.append(f['name'] + "_hb")
             else:
                 alter_actuals.append(f['name'])
         option['tensor_boxing'] = tensor_boxing
+        option['tensor_unboxing'] = tensor_unboxing
         option['alter_actuals'] = alter_actuals
         assert len(alter_actuals) == len(option['formals_list'])
         assert len(option['returns']) == non_const_tensor or non_const_tensor == 0
+        # unbox return values from HB kernels and move results to CPU
+        # there are 3 cases:
+        # no return value (void) -- len(option['returns']) == 0
+        #   in this case we don't capture return value and just return
+        # return a single object -- len(option['returns']) == 1
+        #   in this case we capture return value to *res*
+        #   - this could be a tensor (Tensor) -- return res.cpu()
+        #   - this could be a tensor ref (Tensor &) -- unbox and return the corresponding Tensor
+        #   - this could be some other value -- return res
+        # return a tuple -- len(option['returns']) > 1
+        #   in this case, we get each element and handles them in the same way as above
+        returns = option['returns']
+        if len(returns) == 0:
+            option['simple_ret_val'] = ''
+            option['redispatch_ret_call'] = 'return;'
+        elif len(returns) == 1:
+            returns_0 = returns[0]
+            option['simple_ret_val'] = 'auto res ='
+            if returns_0['type'] == 'Tensor':
+                option['redispatch_ret_call'] = 'return res.cpu();'
+            elif returns_0['type'] == 'Tensor &':
+                option['redispatch_ret_call'] = 'return {0};'.format(returns_0['name'])
+            else:
+                option['redispatch_ret_call'] = 'return res;'
+        else:
+            option['simple_ret_val'] = 'auto res ='
+            ret_elements = []
+            for r in range(len(returns)):
+                if returns[r]['type'] == 'Tensor':
+                    ret_elements.append("(std::get<{0}>(res)).cpu()".format(r))
+                elif returns[r]['type'] == 'Tensor &':
+                    ret_elements.append(returns[r]['name'])
+                else:
+                    ret_elements.append("std::get<{0}>(res)".format(r))
+            ret_call = 'return ' + option['return_type'] + "(" + ",".join(ret_elements) + ");"
+            option['redispatch_ret_call'] = ret_call
 
         # get alternative dispatching dst
         dispatch = option['type_method_definition_dispatch']
