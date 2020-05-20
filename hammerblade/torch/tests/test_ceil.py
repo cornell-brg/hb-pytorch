@@ -24,4 +24,3 @@ def test_torch_ceil_2():
 def test_torch_ceil_3():
     x = torch.randn(1)
     _test_torch_ceil_check(x)
-
