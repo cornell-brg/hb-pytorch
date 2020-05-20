@@ -1,6 +1,6 @@
 """
 Tests on Ceil kernel
-04/10/2020 Kofi Efah (kae87)
+05/19/2020 Kofi Efah (kae87)
 """
 import torch
 
