@@ -621,6 +621,7 @@
   dispatch:
     CPU: ceil_out
     CUDA: ceil_out
+    HammerBlade: ceil_out
 
 - func: chain_matmul(Tensor[] matrices) -> Tensor
   variants: function
