@@ -134,7 +134,7 @@ cmake_dependent_option(
   HB_REDISPATCH "Enable conditional redispatch to HB" ON
   "PROFILE_ATEN;USE_HB" OFF)
 cmake_dependent_option(
-  HB_ENABLE_KERNEL_LOG "Enable HammerBlade kernel call logging" ON
+  HB_ENABLE_KERNEL_LOG "Enable HammerBlade kernel call logging" OFF
   "USE_HB_EMUL" OFF)
 option(USE_ROCM "Use ROCm" ON)
 option(CAFFE2_STATIC_LINK_CUDA "Statically link CUDA libraries" OFF)
