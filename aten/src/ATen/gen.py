@@ -306,6 +306,7 @@ def generate_storage_type_and_tensor(backend, density, declarations):
 
     if env['Backend'] == 'HammerBlade':
         env['namespace'] = env['Backend'].lower()
+        env['legacy_th_headers'].append('#include <ATen/LegacyTHFunctionsCPU.h>')
 
     if density != 'Sparse':
         fm.write(env['Type'] + ".cpp", TYPE_DERIVED_CPP, env)

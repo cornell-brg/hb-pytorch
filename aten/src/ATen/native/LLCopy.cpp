@@ -11,6 +11,10 @@ namespace native {
 Tensor llcopy_to_hb(const Tensor& self) {
 
 #ifdef USE_HB
+  // if tensor is not defined, just return it
+  if (!self.defined()) {
+    return self;
+  }
   // get low level storage size
   size_t itemsize = self.storage().itemsize();
   int64_t numel = self.storage().numel();
