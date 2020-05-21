@@ -25,8 +25,8 @@
 #include <kernel_logger.h>
 #endif
 
-extern std::map<std::string, std::function<int(uint32_t, uint64_t*)>> kernelMap;
-extern std::vector<std::function<int(uint32_t, uint64_t*)>> enqueued_kernel;
+extern std::map<std::string, std::function<int(uint32_t, uint64_t*, uint32_t, uint32_t, uint32_t)>> kernelMap;
+extern std::vector<std::function<int(uint32_t, uint64_t*, uint32_t, uint32_t, uint32_t)>> enqueued_kernel;
 extern std::vector<uint32_t>  enqueued_argc;
 extern std::vector<uint64_t*> enqueued_argv;
 
@@ -42,7 +42,8 @@ void enqueue_kernel(const std::string &kernel, uint32_t argc, uint64_t* argv);
 int execute_kernels();
 
 typedef struct _kernel_registry_ {
-    _kernel_registry_(std::string kernel_name, std::function<int(uint32_t, uint64_t*)> kernel_ptr) {
+    _kernel_registry_(std::string kernel_name,
+                      std::function<int(uint32_t, uint64_t*, uint32_t, uint32_t, uint32_t)> kernel_ptr) {
         kernelMap[kernel_name] = kernel_ptr;
     }
 } kernel_registry;
@@ -62,17 +63,25 @@ typedef struct _kernel_registry_ {
                                                           HB_EMUL_REG_KERNEL_1ARGS)(__VA_ARGS__)      \
 
 #define HB_EMUL_REG_KERNEL_1ARGS(kernel)                                                              \
-int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
     assert (argc == 0);                                                                               \
     int err = kernel();                                                                               \
-    LOG_KERNEL_CALL(#kernel);                                                                          \
+    LOG_KERNEL_CALL(#kernel);                                                                         \
     return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 
 #define HB_EMUL_REG_KERNEL_2ARGS(kernel, at0)                                                         \
-int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
     assert (argc == 1);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
@@ -83,7 +92,11 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_3ARGS(kernel, at0, at1)                                                    \
-int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
     assert (argc == 2);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -96,7 +109,11 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_4ARGS(kernel, at0, at1, at2)                                               \
-int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
     assert (argc == 3);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -111,7 +128,11 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_5ARGS(kernel, at0, at1, at2, at3)                                          \
-int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
     assert (argc == 4);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -128,7 +149,11 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_6ARGS(kernel, at0, at1, at2, at3, at4)                                     \
-int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
     assert (argc == 5);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -147,7 +172,11 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_7ARGS(kernel, at0, at1, at2, at3, at4, at5)                                \
-int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
     assert (argc == 6);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -168,7 +197,11 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_8ARGS(kernel, at0, at1, at2, at3, at4, at5, at6)                           \
-int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
     assert (argc == 7);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -191,7 +224,11 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_9ARGS(kernel, at0, at1, at2, at3, at4, at5, at6, at7)                      \
-int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
     assert (argc == 8);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -216,7 +253,11 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_10ARGS(kernel, at0, at1, at2, at3, at4, at5, at6, at7, at8)                \
-int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
     assert (argc == 9);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -243,7 +284,11 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_11ARGS(kernel, at0, at1, at2, at3, at4, at5, at6, at7, at8, at9)           \
-int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
     assert (argc == 10);                                                                              \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -272,7 +317,11 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {            
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
 
 #define HB_EMUL_REG_KERNEL_12ARGS(kernel, at0, at1, at2, at3, at4, at5, at6, at7, at8, at9, at10)     \
-int trampoline_##kernel(const uint32_t argc, const uint64_t* argv) {                                  \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
     assert (argc == 11);                                                                              \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
