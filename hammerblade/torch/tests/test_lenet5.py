@@ -102,7 +102,7 @@ def test(net, loader, loss_func, hb=False):
         test_loss, num_correct, len(loader.dataset), test_accuracy
     ))
 
-@pytest.mark.skipif(torch.hb_emul_on, reason="Slow on cosim")
+@pytest.mark.skipif(not torch.hb_emul_on, reason="Slow on cosim")
 def test_lenet5_backprop_1():
     # Create a model on CPU with random weights
     net = LeNet5()
