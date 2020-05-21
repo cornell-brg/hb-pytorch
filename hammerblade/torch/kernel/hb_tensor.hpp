@@ -85,7 +85,7 @@ class HBTensor {
         uint32_t* strides_remote = (uint32_t*) ((intptr_t) t->strides);
         uint32_t* sizes_remote = (uint32_t*) ((intptr_t) t->sizes);
 
-        // Move strides and sizes to DRAM
+        // Move strides and sizes to scratchpad
         for(int i=0; i<dims; ++i) {
           strides[i] = strides_remote[i];
           sizes[i] = sizes_remote[i];
