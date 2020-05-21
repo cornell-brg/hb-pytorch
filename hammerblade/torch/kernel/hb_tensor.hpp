@@ -61,30 +61,27 @@ typedef struct {
 // allocation.
 // =========================================================
 
-template <typename DT, int32_t dims=-1>
-class HBTensor {
+template<typename DT>
+class HBTensorImpl {
   private:
     uint32_t N;
-    uint32_t strides[dims];
-    uint32_t sizes[dims];
+    uint32_t dims;
+    uint32_t* strides;
+    uint32_t* sizes;
     DT* data;
 
   public:
-    HBTensor(hb_tensor_t* t) :
-      N(t->N),
-      data((DT*) ((intptr_t) t->data)) {
-        hb_assert_msg(
-          t->dims == dims,
-          "error: HBTensor dims don't match offloaed tensor dims");
-
-        uint32_t* strides_remote = (uint32_t*) ((intptr_t) t->strides);
-        uint32_t* sizes_remote = (uint32_t*) ((intptr_t) t->sizes);
-
-        // Move strides and sizes to scratchpad
-        for(int i=0; i<dims; ++i) {
-          strides[i] = strides_remote[i];
-          sizes[i] = sizes_remote[i];
-        }
+    HBTensorImpl(uint32_t N, uint32_t dims, uint32_t* strides,
+                 uint32_t* sizes, DT* data) :
+      N(N),
+      dims(dims),
+      strides(strides),
+      sizes(sizes),
+      data(data) {
+        // WAW HW bug seems to be triggered on a non-bloacking load to
+        // the register holding `sizes` in various kernels. This fix
+        // adds a RAW dependedncy on that register, blocking the load.
+        HB_FIX_WAW_HAZARD(sizes);
       }
 
     char* data_ptr() {
@@ -152,6 +149,36 @@ class HBTensor {
 
       return data[offset];
     }
+};
+
+template <typename DT, int32_t dims=-1>
+class HBTensor : public HBTensorImpl<DT> {
+  private:
+    uint32_t strides[dims];
+    uint32_t sizes[dims];
+
+  public:
+    HBTensor(hb_tensor_t* t) :
+      HBTensorImpl<DT>(
+        t->N,
+        (uint32_t) dims,
+        strides,
+        sizes,
+        (DT*) ((intptr_t) t->data)
+      ) {
+        hb_assert_msg(
+          t->dims == dims,
+          "error: HBTensor dims don't match offloaed tensor dims");
+
+        uint32_t* strides_remote = (uint32_t*) ((intptr_t) t->strides);
+        uint32_t* sizes_remote = (uint32_t*) ((intptr_t) t->sizes);
+
+        // Move strides and sizes to scratchpad
+        for(int i=0; i<dims; ++i) {
+          strides[i] = strides_remote[i];
+          sizes[i] = sizes_remote[i];
+        }
+      }
 };
 
 template <typename DT>
