@@ -15,11 +15,12 @@
 #else
 #define BSG_TILE_GROUP_X_DIM 1
 #define BSG_TILE_GROUP_Y_DIM 1
-#endif
+#endif // HB_EMUL
 #define bsg_tiles_X BSG_TILE_GROUP_X_DIM
 #define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
 #include "bsg_manycore.h"
 #include "bsg_set_tile_x_y.h"
+#include "bsg_tile_group_barrier.hpp"
 #include "hb_tensor.hpp"
 #include <hb_assert.hpp>
 #include <hb_parallel_for.hpp>
@@ -38,4 +39,10 @@
 
 #include <hammerblade_emul.hpp>
 
-#endif
+#ifdef HB_EMUL
+extern bsg_barrier g_barrier;
+#else
+extern bsg_barrier<bsg_tiles_X, bsg_tiles_Y> g_barrier;
+#endif // HB_EMUL
+
+#endif // _KERNEL_COMMON_H
