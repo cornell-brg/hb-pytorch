@@ -28,6 +28,7 @@
 #include <bsg_manycore_cuda.h>
 #include <bsg_manycore_errno.h>
 #include <kernel_trampoline.h>
+#include <emul_hb_device.h>
 
 #include <cstring>
 #include <cassert>
@@ -130,6 +131,7 @@ static size_t get_env_num_tiles(const char* var_name, size_t def_value = 0) {
               dim.y = get_env_num_tiles("HBEMUL_TILE_Y_DIM", 1);;
             }
             device->mesh->dim = dim;
+            emul_hb_mesh_dim = dim;
             return HB_MC_SUCCESS;
           } else {
             return HB_MC_INITIALIZED_TWICE;
