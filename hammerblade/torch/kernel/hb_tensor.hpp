@@ -61,7 +61,7 @@ typedef struct {
 // allocation.
 // =========================================================
 
-template <typename DT, uint32_t dims=-1>
+template <typename DT, int32_t dims=-1>
 class HBTensor {
   private:
     uint32_t N;
@@ -73,11 +73,6 @@ class HBTensor {
     HBTensor(hb_tensor_t* t) :
       N(t->N),
       data((DT*) ((intptr_t) t->data)) {
-        // WAW HW bug seems to be triggered on a non-bloacking load to
-        // the register holding `sizes` in various kernels. This fix
-        // adds a RAW dependedncy on that register, blocking the load.
-        HB_FIX_WAW_HAZARD(sizes);
-
         hb_assert_msg(
           t->dims == dims,
           "error: HBTensor dims don't match offloaed tensor dims");
