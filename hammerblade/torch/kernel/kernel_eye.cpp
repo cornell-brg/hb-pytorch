@@ -11,18 +11,22 @@ extern "C" {
     // Start profiling
 
     bsg_cuda_print_stat_kernel_start();
-    for(long i = 0; i < N; i++) {
-      for(long j = 0; j < M; j++) {
-        if(i == j) {
-          y(i,j) = 1;
-        }
-        else {
-          y(i,j) = 0;
+    if(__bsg_id == 0) {
+      for(long i = 0; i < N; i++) {
+        for(long j = 0; j < M; j++) {
+          if(i == j) {
+            y(i,j) = 1;
+          }
+          else {
+            y(i,j) = 0;
+          }
         }
       }
     }
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
+
+    g_barrier.sync();
     return 0;
   }
 

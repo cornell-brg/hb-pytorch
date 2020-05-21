@@ -104,6 +104,7 @@ extern "C" {
                                       return weight(i);
                                     });
 
+    g_barrier.sync();
     return 0;
 
   }
@@ -133,6 +134,7 @@ extern "C" {
                                       return (float)1.0f;
                                     });
 
+    g_barrier.sync();
     return 0;
 
   }
