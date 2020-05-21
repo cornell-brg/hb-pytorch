@@ -182,92 +182,16 @@ class HBTensor : public HBTensorImpl<DT> {
 };
 
 template <typename DT>
-class HBTensor<DT, -1> {
-  private:
-    uint32_t N;
-    uint32_t dims;
-    uint32_t* strides;
-    uint32_t* sizes;
-    DT* data;
-
+class HBTensor<DT, -1> : public HBTensorImpl<DT> {
   public:
     HBTensor(hb_tensor_t* t) :
-      N(t->N),
-      dims(t->dims),
-      strides((uint32_t*) ((intptr_t) t->strides)),
-      sizes((uint32_t*) ((intptr_t) t->sizes)),
-      data((DT*) ((intptr_t) t->data)) {
-        // WAW HW bug seems to be triggered on a non-bloacking load to
-        // the register holding `sizes` in various kernels. This fix
-        // adds a RAW dependedncy on that register, blocking the load.
-        HB_FIX_WAW_HAZARD(sizes);
-      }
-
-    char* data_ptr() {
-      return (char*)data;
-    }
-
-    uint32_t* get_strides() {
-      return strides;
-    }
-
-    uint32_t* get_sizes() {
-      return sizes;
-    }
-
-    int numel() {
-      return N;
-    }
-
-    uint32_t dim(uint32_t d) {
-      hb_assert_msg(d < dims,
-                    "error: dimesnion must be less than %d\n",
-                    dims);
-      return sizes[d];
-    }
-
-    uint32_t ndim() {
-      return dims;
-    }
-
-    // Special case where we want linear, 0-d
-    // and 1-d tensor indexing.
-    //
-    // XXX: The tensor has to be contiguous if
-    // it's >1-d tensor.
-    DT& operator()(uint32_t index) {
-      hb_assert_msg(index < N,
-                    "error: N=%d but accessed %d\n",
-                    N, index);
-      if(dims != 1) {
-        return data[index];
-      } else {
-        // Explicitly calculate data index to handle
-        // non-contiguous 1-d tensors.
-        return data[index * strides[0]];
-      }
-    }
-
-    template<typename... T>
-    DT& operator()(uint32_t index0, T... indices) {
-      std::initializer_list<uint32_t> iarray = {index0, indices...};
-
-      hb_assert_msg(iarray.size() == dims,
-                    "error: expected dims=%d arguments but got %d\n",
-                    dims, iarray.size());
-      uint32_t offset = 0;
-      uint32_t s = 0;
-      for(auto index : iarray) {
-        offset += (index * strides[s]);
-        s++;
-      }
-
-      hb_assert_msg(offset < N,
-                    "error: N=%d but accessed %d\n",
-                    N, offset);
-
-      return data[offset];
-    }
+      HBTensorImpl<DT>(
+        t->N,
+        t->dims,
+        (uint32_t*) ((intptr_t) t->strides),
+        (uint32_t*) ((intptr_t) t->sizes),
+        (DT*) ((intptr_t) t->data)
+      ) {}
 };
 
 template<typename T>
