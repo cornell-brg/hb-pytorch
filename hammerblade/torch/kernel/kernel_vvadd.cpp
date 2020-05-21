@@ -15,10 +15,11 @@ extern "C" {
           hb_tensor_t* _other) {
     auto result = HBTensor<float>(_result);
     auto self = HBTensor<float>(_self);
-    //auto other = HBTensor<float>(_other);
+    auto other = HBTensor<float>(_other);
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
+/*
     float self_buffer[BLOCK_SIZE];
     //float other_buffer[BLOCK_SIZE];
     float res_buffer[BLOCK_SIZE];
@@ -45,13 +46,26 @@ extern "C" {
             result(offset + j) = res_buffer[j];
         }
     }
+*/
 
-/*
+    bsg_printf("RESULT %d\n", result.numel());
+    for (int i = 0; i < result.numel(); i++) {
+        bsg_print_float(result(i));
+    }
+    bsg_printf("self %d\n", self.numel());
+    for (int i = 0; i < self.numel(); i++) {
+        bsg_print_float(self(i));
+    }
+    bsg_printf("other %d\n", other.numel());
+    for (int i = 0; i < other.numel(); i++) {
+        bsg_print_float(other(i));
+    }
+
     hb_foreach(result, self, other,
         [&](float self, float other) {
           return self + other;
         });
-*/
+
 
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
