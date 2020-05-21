@@ -338,8 +338,11 @@ static size_t get_env_num_tiles(const char* var_name, size_t def_value = 0) {
           if (!device_busy || !binary_loaded) {
             return HB_MC_UNINITIALIZED;
           }
-          // assume a single thread for now
-          if (grid_dim.x * grid_dim.y * tg_dim.x * tg_dim.y != 1) {
+          // assume a single grid for now
+          // pytorch tile group size should match emulation tile group size
+          if (grid_dim.x * grid_dim.y != 1
+              || tg_dim.x != emul_hb_mesh_dim.x
+              || tg_dim.y != emul_hb_mesh_dim.y) {
             return HB_MC_FAIL;
           }
           std::string _name(name);
