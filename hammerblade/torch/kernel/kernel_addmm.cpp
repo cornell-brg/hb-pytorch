@@ -127,18 +127,17 @@ extern "C" {
           float* _beta,
           float* _alpha) {
 
+    auto self = HBTensor<float>(_self);
+    auto mat1 = HBTensor<float>(_mat1);
+    auto mat2 = HBTensor<float>(_mat2);
+    auto result = HBTensor<float>(_result);
+    float beta = *_beta;
+    float alpha = *_alpha;
+
+    // Start profiling
+    bsg_cuda_print_stat_kernel_start();
+
     if (__bsg_id == 0) {
-
-        auto self = HBTensor<float>(_self);
-        auto mat1 = HBTensor<float>(_mat1);
-        auto mat2 = HBTensor<float>(_mat2);
-        auto result = HBTensor<float>(_result);
-        float beta = *_beta;
-        float alpha = *_alpha;
-
-        // Start profiling
-        bsg_cuda_print_stat_kernel_start();
-
 
         // v2: single tile, use blocking
         int r1 = mat1.dim(0);
@@ -284,9 +283,11 @@ extern "C" {
         }
 */
 
-        //   End profiling
-        bsg_cuda_print_stat_kernel_end();
     }
+    //   End profiling
+    bsg_cuda_print_stat_kernel_end();
+
+    g_barrier.sync();
     return 0;
   }
 
