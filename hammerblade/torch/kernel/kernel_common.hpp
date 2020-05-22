@@ -13,8 +13,8 @@
 #define BSG_TILE_GROUP_X_DIM emul_hb_mesh_dim.x
 #define BSG_TILE_GROUP_Y_DIM emul_hb_mesh_dim.y
 #else
-#define BSG_TILE_GROUP_X_DIM 1
-#define BSG_TILE_GROUP_Y_DIM 1
+#define BSG_TILE_GROUP_X_DIM bsg_global_X
+#define BSG_TILE_GROUP_Y_DIM (bsg_global_Y - 1)
 #endif // HB_EMUL
 #define bsg_tiles_X BSG_TILE_GROUP_X_DIM
 #define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
@@ -42,7 +42,7 @@
 #ifdef HB_EMUL
 extern bsg_barrier g_barrier;
 #else
-extern bsg_barrier<bsg_tiles_X, bsg_tiles_Y> g_barrier;
+static bsg_barrier<bsg_tiles_X, bsg_tiles_Y> g_barrier;
 #endif // HB_EMUL
 
 #endif // _KERNEL_COMMON_H
