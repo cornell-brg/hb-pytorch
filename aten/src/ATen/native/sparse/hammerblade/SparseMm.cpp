@@ -11,9 +11,11 @@ using namespace at::sparse;
 IntTensor _to_csr_int( const IntTensor& rowIndices, int64_t dim, int64_t nnz) {
 
   TORCH_CHECK(rowIndices.is_hammerblade(), "row Indices should be on hammerblade");
+
+  IntTensor csr = at::zeros({dim + 1}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
+
   uint32_t dim_uint = (uint32_t)(dim);
   uint32_t nnz_uint = (uint32_t)(nnz);
-  IntTensor csr = at::zeros({dim + 1}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
   hb_offload_kernel(csr, rowIndices, dim_uint, nnz_uint, "tensorlib_coo_to_csr");
 
 /*

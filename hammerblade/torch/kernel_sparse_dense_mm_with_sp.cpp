@@ -32,16 +32,16 @@ extern "C" {
     
     
     bsg_cuda_print_stat_kernel_start();
-   
+    
+    int rowindice[m+1];
+
+    for(uint32_t k = 0; k < m+1; k++) {
+      rowindice[k] = csr(k);
+    }
+
     for (uint32_t i = start; i < end; i++) {
       for(uint32_t dense_col = 0; dense_col < n; dense_col++) {
-        for (uint32_t col_index = csr(i); col_index < csr(i+1); col_index++) { //CSR MODE
-         //  uint32_t result_index = i * n + dense_col;
-         //  result(result_index) = result(result_index) + values(col_index) * dense(indices(col_index + indices.stride(0)) * n + dense_col);
-//        for(uint32_t j = 0; j < v; j++) {   // COO mode
-//          if(indices(0, j) == i) { //COO mode
-//            result(i, dense_col)    = result(i, dense_col) + values(j) * dense(indices(1, j), dense_col); // COO mode
-//          }
+        for (uint32_t col_index = rowindice[i]; col_index < rowindice[i+1]; col_index++) { //CSR MODE
           result(i, dense_col)    = result(i, dense_col) + values(col_index) * dense(indices(col_index), dense_col); //CSR mode
         }
       }   

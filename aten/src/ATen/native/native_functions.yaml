@@ -1884,6 +1884,10 @@
 
 - func: _sparse_mm(Tensor sparse, Tensor dense) -> Tensor
   use_c10_dispatcher: full
+  dispatch:
+    SparseCPU: _sparse_mm
+    SparseCUDA: _sparse_mm
+    SparseHammerBlade: _sparse_mm_hb
 
 - func: mode(Tensor self, int dim=-1, bool keepdim=False) -> (Tensor values, Tensor indices)
   supports_named_tensor: True

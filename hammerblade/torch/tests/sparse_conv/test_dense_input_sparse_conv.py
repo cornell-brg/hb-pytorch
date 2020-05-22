@@ -26,7 +26,7 @@ def test_lenet5_sparse01_conv1():
 
     cpu_i = convert_dense_input(di, 5, 5)
     cpu_sw = dw.view(6, -1).to_sparse()
-    cpu_out = torch.mm(cpu_sw, cpu_i)
+    cpu_out = torch.sparse.mm(cpu_sw, cpu_i)
     out1 = cpu_out.view(1, 6, 28, 28)
 
     hb_i = di.hammerblade()
@@ -45,7 +45,7 @@ def test_lenet5_sparse01_conv2():
 
     cpu_i = convert_dense_input(di, 5, 5)
     cpu_sw = dw.view(16, -1).to_sparse()
-    cpu_out = torch.mm(cpu_sw, cpu_i)
+    cpu_out = torch.sparse.mm(cpu_sw, cpu_i)
     out1 = cpu_out.view(1, 16, 10, 10)
 
     hb_i = di.hammerblade()
@@ -64,7 +64,7 @@ def test_lenet5_sparse02_conv1():
 
     cpu_i = convert_dense_input(di, 5, 5)
     cpu_sw = dw.view(6, -1).to_sparse()
-    cpu_out = torch.mm(cpu_sw, cpu_i)
+    cpu_out = torch.sparse.mm(cpu_sw, cpu_i)
     out1 = cpu_out.view(1, 6, 28, 28)
 
     hb_i = di.hammerblade()
@@ -83,7 +83,7 @@ def test_lenet5_sparse02_conv2():
 
     cpu_i = convert_dense_input(di, 5, 5)
     cpu_sw = dw.view(16, -1).to_sparse()
-    cpu_out = torch.mm(cpu_sw, cpu_i)
+    cpu_out = torch.sparse.mm(cpu_sw, cpu_i)
     out1 = cpu_out.view(1, 16, 10, 10)
 
     hb_i = di.hammerblade()
@@ -102,7 +102,7 @@ def test_lenet5_sparse03_conv1():
 
     cpu_i = convert_dense_input(di, 5, 5)
     cpu_sw = dw.view(6, -1).to_sparse()
-    cpu_out = torch.mm(cpu_sw, cpu_i)
+    cpu_out = torch.sparse.mm(cpu_sw, cpu_i)
     out1 = cpu_out.view(1, 6, 28, 28)
 
     hb_i = di.hammerblade()
@@ -121,7 +121,7 @@ def test_lenet5_sparse03_conv2():
 
     cpu_i = convert_dense_input(di, 5, 5)
     cpu_sw = dw.view(16, -1).to_sparse()
-    cpu_out = torch.mm(cpu_sw, cpu_i)
+    cpu_out = torch.sparse.mm(cpu_sw, cpu_i)
     out1 = cpu_out.view(1, 16, 10, 10)
 
     hb_i = di.hammerblade()
@@ -140,7 +140,7 @@ def test_customize_sparse01_conv1():
 
     cpu_i = convert_dense_input(di, 3, 3)
     cpu_sw = dw.view(32, -1).to_sparse()
-    cpu_out = torch.mm(cpu_sw, cpu_i)
+    cpu_out = torch.sparse.mm(cpu_sw, cpu_i)
     out1 = cpu_out.view(1, 32, 14, 14)
 
     hb_i = di.hammerblade()
@@ -159,7 +159,7 @@ def test_customize_sparse02_conv1():
 
     cpu_i = convert_dense_input(di, 3, 3)
     cpu_sw = dw.view(32, -1).to_sparse()
-    cpu_out = torch.mm(cpu_sw, cpu_i)
+    cpu_out = torch.sparse.mm(cpu_sw, cpu_i)
     out1 = cpu_out.view(1, 32, 14, 14)
 
     hb_i = di.hammerblade()
@@ -178,7 +178,7 @@ def test_customize_sparse03_conv1():
 
     cpu_i = convert_dense_input(di, 3, 3)
     cpu_sw = dw.view(32, -1).to_sparse()
-    cpu_out = torch.mm(cpu_sw, cpu_i)
+    cpu_out = torch.sparse.mm(cpu_sw, cpu_i)
     out1 = cpu_out.view(1, 32, 14, 14)
 
     hb_i = di.hammerblade()

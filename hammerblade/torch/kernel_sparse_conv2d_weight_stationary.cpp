@@ -60,22 +60,19 @@ extern "C" {
         for(uint32_t co = start; co < end; ++co) {
           for(uint32_t i = w_row(co); i < w_row(co+1); i++) {
             uint32_t w_1d = w_col(i);
-            uint32_t ci = std::floor(w_1d / (Kh * Kw));
+            uint32_t ci = w_1d / (Kh * Kw);
             uint32_t rest = w_1d - ci * Kh * Kw;
-            uint32_t kh = std::floor(rest / Kh);
+            uint32_t kh = rest / Kh;
             uint32_t kw = rest - kh * Kh;
             float val = w_val(i);
             for(uint32_t yh = 0; yh < Hout; ++yh) {
               for(uint32_t yw = 0; yw < Wout; ++yw) {
-                if((ci + kh + kw) == 0) {
-                  y(n, co, yh, yw) = 0.0;
-                }
 
                 int32_t xh = Sh * yh - Ph + kh;
                 int32_t xw = Sw * yw - Pw + kw;
 
                 if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                  y(n, co, yh, yw) += x(n, ci, xh, xw) * w_val(i);
+                  y(n, co, yh, yw) += x(n, ci, xh, xw) * val;
                 } // else 0
               }
             }

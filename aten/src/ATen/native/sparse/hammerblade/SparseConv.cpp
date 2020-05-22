@@ -106,7 +106,7 @@ Tensor hb_sparse_convolution_forward(
   checkAllSameType(c, {input, weight});
   checkAllSameHB(c, {input, weight});
 
-  auto output_t = at::empty(
+  auto output_t = at::zeros(
                     sparse_conv_output_size(input->sizes(), weight->sizes(),
                                      padding, stride, dilation, groups),
                     input->options());
