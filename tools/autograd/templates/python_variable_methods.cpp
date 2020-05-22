@@ -339,6 +339,14 @@ static PyObject * THPVariable_invert(PyObject* self, PyObject* args) {
   END_HANDLE_TH_ERRORS
 }
 
+static PyObject * THPVariable_hammerblade_ll(PyObject* self, PyObject* args, PyObject* kwargs) {
+  HANDLE_TH_ERRORS
+  auto& self_ = reinterpret_cast<THPVariable*>(self)->cdata;
+  torch::utils::hammerblade_lazy_init();
+  return THPVariable_Wrap(self_.llcopy());
+  END_HANDLE_TH_ERRORS
+}
+
 static Tensor dispatch_to(const Tensor & self, Device device, bool non_blocking, bool copy, c10::optional<c10::MemoryFormat> optional_memory_format) {
   AutoNoGIL no_gil;
   // NOTE: this is where we record aten::to in the graph during tracing. However, the behavior of aten::to
@@ -884,6 +892,7 @@ PyMethodDef variable_methods[] = {
   {"cpu", (PyCFunction)(void(*)(void))THPVariable_cpu, METH_VARARGS | METH_KEYWORDS, NULL},
   {"cuda", (PyCFunction)(void(*)(void))THPVariable_cuda, METH_VARARGS | METH_KEYWORDS, NULL},
   {"hammerblade", (PyCFunction)(void(*)(void))THPVariable_hammerblade, METH_VARARGS | METH_KEYWORDS, NULL},
+  {"hammerblade_ll", (PyCFunction)(void(*)(void))THPVariable_hammerblade_ll, METH_VARARGS | METH_KEYWORDS, NULL},
   {"data_ptr", (PyCFunction)THPVariable_data_ptr, METH_NOARGS, NULL},
   {"dim", (PyCFunction)THPVariable_dim, METH_NOARGS, NULL},
 #ifdef BUILD_NAMEDTENSOR

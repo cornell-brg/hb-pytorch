@@ -4,12 +4,14 @@ Unit tests for torch.fill_ kernel
 """
 
 import torch
+import random
 import hypothesis.strategies as st
 from math import isnan, isinf
 from hypothesis import assume, given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
 torch.manual_seed(42)
+random.seed(42)
 
 def _test_torch_fill(x, s):
     h = x.hammerblade()

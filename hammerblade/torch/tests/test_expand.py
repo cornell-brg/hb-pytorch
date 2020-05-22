@@ -4,8 +4,10 @@ Tests on torch.contiguous
 """
 
 import torch
+import random
 
 torch.manual_seed(42)
+random.seed(42)
 
 def test_torch_expand_1():
     x = torch.tensor([[1.], [2.], [3.]])

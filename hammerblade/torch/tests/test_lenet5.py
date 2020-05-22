@@ -6,11 +6,12 @@ Test on a small CNN
 import numpy as np
 import torch
 import torch.nn as nn
+import random
 import pytest
 import hbutils
-import os
 
 torch.manual_seed(42)
+random.seed(42)
 
 # Network
 class LeNet5(nn.Module):
@@ -101,7 +102,7 @@ def test(net, loader, loss_func, hb=False):
         test_loss, num_correct, len(loader.dataset), test_accuracy
     ))
 
-@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Slow on cosim")
+@pytest.mark.skipif(not torch.hb_emul_on, reason="Slow on cosim")
 def test_lenet5_backprop_1():
     # Create a model on CPU with random weights
     net = LeNet5()

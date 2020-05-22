@@ -20,6 +20,12 @@
 #include <torch/csrc/autograd/generated/variable_factories.h>
 #include <torch/csrc/Generator.h>
 
+#ifdef HB_ENABLE_KERNEL_LOG
+#include <c10/hammerblade/emul/kernel_logger.h>
+
+extern KernelLogger kernel_call_logger;
+#endif
+
 // using namespace hammerblade;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -44,6 +50,40 @@ PyObject * THBPModule_set_run_yet_variable_to_false_wrap(PyObject *self, PyObjec
   Py_RETURN_NONE;
   END_HANDLE_TH_ERRORS
 }
+
+#ifdef HB_ENABLE_KERNEL_LOG
+PyObject * THBPModule_enable_kernel_call_logger(PyObject *self, PyObject *noargs)
+{
+  HANDLE_TH_ERRORS
+  kernel_call_logger.enable();
+  Py_RETURN_NONE;
+  END_HANDLE_TH_ERRORS;
+}
+
+PyObject * THBPModule_disable_kernel_call_logger(PyObject *self, PyObject *noargs)
+{
+  HANDLE_TH_ERRORS
+  kernel_call_logger.disable();
+  Py_RETURN_NONE;
+  END_HANDLE_TH_ERRORS;
+}
+
+PyObject * THBPModule_log_kernel_call_logger(PyObject *self, PyObject *noargs)
+{
+  HANDLE_TH_ERRORS
+  std::string log = kernel_call_logger.log();
+  return PyUnicode_FromString(log.c_str());
+  END_HANDLE_TH_ERRORS;
+}
+
+PyObject * THBPModule_clear_kernel_call_logger(PyObject *self, PyObject *noargs)
+{
+  HANDLE_TH_ERRORS
+  kernel_call_logger.clear();
+  Py_RETURN_NONE;
+  END_HANDLE_TH_ERRORS;
+}
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // HammerBlade module initialization
@@ -102,6 +142,16 @@ static struct PyMethodDef _THBPModule_methods[] = {
   {"_hammerblade_getDevice",   (PyCFunction)THBPModule_getDevice_wrap,   METH_NOARGS,  nullptr},
   {"_hammerblade_set_run_yet_variable_to_false",
     (PyCFunction)THBPModule_set_run_yet_variable_to_false_wrap, METH_NOARGS, nullptr},
+#ifdef HB_ENABLE_KERNEL_LOG
+  {"_hammerblade_enable_kernel_call_logger",
+    (PyCFunction)THBPModule_enable_kernel_call_logger, METH_NOARGS, nullptr},
+  {"_hammerblade_disable_kernel_call_logger",
+    (PyCFunction)THBPModule_disable_kernel_call_logger, METH_NOARGS, nullptr},
+  {"_hammerblade_log_kernel_call_logger",
+    (PyCFunction)THBPModule_log_kernel_call_logger, METH_NOARGS, nullptr},
+  {"_hammerblade_clear_kernel_call_logger",
+    (PyCFunction)THBPModule_clear_kernel_call_logger, METH_NOARGS, nullptr},
+#endif
   {nullptr}
 };
 

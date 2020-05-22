@@ -15,6 +15,27 @@ enum Reduction {
 };
 
 //====================================================================
+// Calculate how many input elements to produce one output
+//====================================================================
+
+template<typename scalar_t>
+inline uint32_t calc_elements_per_output(HBTensor<scalar_t> out,
+                                         HBTensor<scalar_t> in,
+                                         uint32_t num_reduction_dim) {
+  // corner case: iterator appears to be 1d but generating n outputs
+  //              1 input element per output
+  if(in.ndim() == 1 && out.numel() == in.numel()) {
+    return 1;
+  }
+  // there could be more than 1 dims
+  uint32_t elements_to_collect = in.dim(0);
+  for(auto i = 1; i < num_reduction_dim; i++) {
+    elements_to_collect *= in.dim(i);
+  }
+  return elements_to_collect;
+}
+
+//====================================================================
 // Binary reductions -- sum, mean, etc.
 //
 // ndim -> number of dims in reduction iterator -- this may not equal

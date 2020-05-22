@@ -6,7 +6,7 @@ Lin Cheng
 """
 
 # pytest commandline options
-pytest_argv = ["-vs"]
+pytest_argv = ["-v"]
 
 # This is a work around of the bug in which sys.argv is not set
 # when running as embededd script
@@ -37,6 +37,8 @@ else:
     # inside COSIM
     import glob
     targets = glob.glob(current_path + "/tests/test_*.py")
+
+targets.sort()
 
 print()
 print(" files collected by pytest runner:")

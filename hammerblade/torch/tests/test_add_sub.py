@@ -5,12 +5,14 @@ Lin Cheng
 """
 
 import torch
+import random
 from math import isnan, isinf
 from hypothesis import assume, given, settings
 import hypothesis.strategies as st
 from .hypothesis_test_util import HypothesisUtil as hu
 
 torch.manual_seed(42)
+random.seed(42)
 
 # test of adding two tensors
 

@@ -8,6 +8,7 @@
 #include <ATen/${Generator}.h>
 #include <ATen/ExpandUtils.h>
 #include <ATen/core/EnableNamedTensor.h>
+#include <c10/probe/HBProfiler.h>
 ${th_headers}
 ${extra_cuda_headers}
 

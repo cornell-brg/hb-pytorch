@@ -3,14 +3,15 @@ Test on multilayer perceptron MNIST
 04/06/2020 Lin Cheng (lc873@cornell.edu)
 """
 
-import os
 import copy
 import torch
 import torch.nn as nn
+import random
 import hbutils
 import pytest
 
 torch.manual_seed(42)
+random.seed(42)
 
 # -------------------------------------------------------------------------
 # Multilayer Preception for MNIST
@@ -37,7 +38,7 @@ class MLPModel(nn.Module):
 # Forward pass
 # -------------------------------------------------------------------------
 
-@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Slow on cosim")
+@pytest.mark.skipif(not torch.hb_emul_on, reason="Slow on cosim")
 def test_mlp_inference():
     # create CPU model with random parameters
     model_cpu = MLPModel()
@@ -68,7 +69,7 @@ def test_mlp_inference():
 # Backward pass
 # -------------------------------------------------------------------------
 
-@pytest.mark.skipif(os.environ.get('USE_HB_EMUL') is None, reason="Slow on cosim")
+@pytest.mark.skipif(not torch.hb_emul_on, reason="Slow on cosim")
 def test_mlp_backprop():
     # create CPU model with random parameters
     model_cpu = MLPModel()

@@ -3,8 +3,12 @@ Unit tests for torch.addmm kernel
 03/09/2020 Lin Cheng (lc873@cornell.edu)
 """
 import torch
+import random
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
+
+torch.manual_seed(42)
+random.seed(42)
 
 # helper function for testing
 def _test_torch_addmm(M, mat1, mat2, rel_tol=1e-05, abs_tol=1e-08):
@@ -45,7 +49,7 @@ def test_torch_addmm_broadcast():
 
 # bigger matrix
 def test_torch_addmm_big_rand():
-    _test_torch_addmm(torch.randn(1, 1), torch.randn(78, 56), torch.randn(56, 39), rel_tol=1e-04, abs_tol=1e-06)
+    _test_torch_addmm(torch.randn(1, 1), torch.rand(78, 56), torch.rand(56, 39), rel_tol=1e-04, abs_tol=1e-06)
 
 # directed test with given numbers
 def test_torch_addmm_directed():

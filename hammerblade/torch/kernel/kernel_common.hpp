@@ -18,6 +18,7 @@
 #include "hb_tensor.hpp"
 #include <hb_assert.hpp>
 #include <hb_parallel_for.hpp>
+#include <hb_hw_patch.hpp>
 
 //====================================================================
 // HammerBlade kernel emulation

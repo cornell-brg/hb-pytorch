@@ -41,6 +41,10 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
                                   const int64_t* strides,
                                   const int64_t* sizes,
                                   const void* data,
+#ifdef HB_ENABLE_KERNEL_LOG
+                                  void* storage_head,
+                                  uint32_t storage_numel,
+#endif
                                   std::vector<eva_t>& device_ptrs) {
 
   eva_t tensor, tensor_strides, tensor_sizes, tensor_data;
@@ -63,6 +67,10 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
     .strides = tensor_strides,
     .sizes = tensor_sizes,
     .data = (eva_t)((intptr_t)data),
+#ifdef HB_ENABLE_KERNEL_LOG
+    .storage_head = storage_head,
+    .storage_numel = storage_numel,
+#endif
   };
 
   // copy tensor struct
@@ -80,7 +88,7 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
 
 
 eva_t create_device_tensor(const Tensor& tensor,
-                                  std::vector<eva_t> device_ptrs) {
+                           std::vector<eva_t>& device_ptrs) {
   if(!tensor.is_contiguous()) {
     AT_WARN("Offloading non contiguous plain tensor. Make sure you are expecting this!");
   }
@@ -91,7 +99,13 @@ eva_t create_device_tensor(const Tensor& tensor,
   const int64_t* sizes = (const int64_t*) tensor.sizes().data();
   const void* data = (const void*) tensor.data_ptr();
 
-  return create_device_tensor(N, dims, strides, sizes, data, device_ptrs);
+  return create_device_tensor(
+      N, dims, strides, sizes, data,
+#ifdef HB_ENABLE_KERNEL_LOG
+      (void*) tensor.storage().data(),
+      (uint32_t) tensor.storage().numel(),
+#endif
+      device_ptrs);
 }
 
 //===================================================
@@ -101,7 +115,7 @@ eva_t create_device_tensor(const Tensor& tensor,
 //===================================================
 
 eva_t create_device_vector(IntArrayRef arr_ref, bool input,
-                                  std::vector<eva_t> device_ptrs) {
+                          std::vector<eva_t>& device_ptrs) {
   uint32_t N = arr_ref.size();
   const int64_t* data = arr_ref.data();
   eva_t data_d = c10::hammerblade::device_malloc(N * sizeof(int32_t));

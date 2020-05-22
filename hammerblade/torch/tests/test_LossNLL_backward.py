@@ -5,9 +5,11 @@ Tests on torch.nn.NLLLoss backward
 
 import torch
 import torch.nn as nn
+import random
 import hbutils
 
 torch.manual_seed(42)
+random.seed(42)
 
 def _test_torch_nn_NLLLoss_back(loss, input, target):
     m = nn.LogSoftmax(dim=1)

@@ -394,6 +394,7 @@ class CAFFE2_API Tensor {
   Tensor operator[](int64_t index) const;
 
   Tensor cpu() const;
+  Tensor cpu_ifdef() const;
   Tensor cuda() const;
   Tensor hip() const;
   Tensor hammerblade() const;

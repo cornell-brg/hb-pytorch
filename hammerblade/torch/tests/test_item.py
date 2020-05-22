@@ -5,9 +5,11 @@ Unit tests for torch.tensor.item
 
 import math
 import torch
+import random
 import pytest
 
 torch.manual_seed(42)
+random.seed(42)
 
 def _test_torch_tensor_item(tensor):
     h = tensor.hammerblade()
