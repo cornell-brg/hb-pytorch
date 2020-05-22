@@ -22,8 +22,8 @@ extern "C" {
           hb_vector_t* input_sizes,
           hb_vector_t* weight_sizes) {
 
-    auto y = HBTensor<float>(output);
-    auto x = HBTensor<float>(input);
+    auto y = HBTensor<float, 4>(output);
+    auto x = HBTensor<float, 4>(input);
     auto w_row = HBTensor<int>(csr);
     auto w_col = HBTensor<int>(colindices);
     auto w_val = HBTensor<float>(values);
