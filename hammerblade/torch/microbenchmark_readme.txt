@@ -20,8 +20,7 @@ Here is how to perform kernel microbenchmarking in hb-pytorch:
    python setup.py develop
 
 7. Go to hb-pytorch/hammerblade/torch and run
-   make clean
-   make regression
+   pycosim.trace -m pytest -vs tests/YOUR_TEST_FILE.py
 
    This will generate the vanilla_stats.csv file which we need to gather data from.
 

@@ -21,9 +21,9 @@ def _test_torch_vvadd(x1, x2):
     #assert torch.allclose(y_h.cpu(), x1)
 
 def test_torch_vvadd_1():
-    x1 = torch.tensor([1.,2.,3.,4.,5.,6.,7.,8.])
-    x2 = torch.tensor([9.,10.,11.,12.,13.,14.,15.,16.])
-    #x1 = torch.randn(96)
-    #x2 = torch.randn(96)
+    #x1 = torch.tensor([1.,2.,3.,4.,5.,6.,7.,8.])
+    #x2 = torch.tensor([9.,10.,11.,12.,13.,14.,15.,16.])
+    x1 = torch.randn(96)
+    x2 = torch.randn(96)
     _test_torch_vvadd(x1, x2)
 

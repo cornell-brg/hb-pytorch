@@ -1319,7 +1319,7 @@ class VanillaStatsParser:
                 for k,v in tile_data_bubble.items():
                     assert len(v) == len(tiles)
                     ax.bar(tile_inds, v, bottom=bot, color=bubble_colors[i], width=barsize)
-                   legends.append(mpatches.Patch(color=bubble_colors[i], label=k)) # add legend
+                    legends.append(mpatches.Patch(color=bubble_colors[i], label=k)) # add legend
                     bot = [x+y for x,y in zip(bot, v)]
                     i += 1
 

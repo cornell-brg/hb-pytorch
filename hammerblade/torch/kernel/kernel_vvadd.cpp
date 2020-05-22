@@ -48,19 +48,6 @@ extern "C" {
     }
 */
 
-    bsg_printf("RESULT %d\n", result.numel());
-    for (int i = 0; i < result.numel(); i++) {
-        bsg_print_float(result(i));
-    }
-    bsg_printf("self %d\n", self.numel());
-    for (int i = 0; i < self.numel(); i++) {
-        bsg_print_float(self(i));
-    }
-    bsg_printf("other %d\n", other.numel());
-    for (int i = 0; i < other.numel(); i++) {
-        bsg_print_float(other(i));
-    }
-
     hb_foreach(result, self, other,
         [&](float self, float other) {
           return self + other;
