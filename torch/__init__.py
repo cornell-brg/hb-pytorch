@@ -283,7 +283,7 @@ from .functional import *
 # Import HB profiler functions
 ################################################################################
 
-import torch.hb_profiler
+import torch.hammerblade.profiler
 
 ################################################################################
 # Remove unnecessary members

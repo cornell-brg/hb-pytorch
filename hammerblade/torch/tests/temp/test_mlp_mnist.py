@@ -38,7 +38,7 @@ class MLPModel(nn.Module):
 # Forward pass
 # -------------------------------------------------------------------------
 
-@pytest.mark.skipif(torch.hb_emul_on, reason="Slow on cosim")
+@pytest.mark.skipif(not torch.hb_emul_on, reason="Slow on cosim")
 def test_mlp_inference():
     # create CPU model with random parameters
     model_cpu = MLPModel()
@@ -69,7 +69,7 @@ def test_mlp_inference():
 # Backward pass
 # -------------------------------------------------------------------------
 
-@pytest.mark.skipif(torch.hb_emul_on, reason="Slow on cosim")
+@pytest.mark.skipif(not torch.hb_emul_on, reason="Slow on cosim")
 def test_mlp_backprop():
     # create CPU model with random parameters
     model_cpu = MLPModel()

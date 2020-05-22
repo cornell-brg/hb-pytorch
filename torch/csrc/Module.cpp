@@ -527,10 +527,6 @@ static PyObject * THPModule_hbProfilerEnd(PyObject *module, PyObject *noargs) {
 }
 
 #ifdef PROFILE_ATEN
-static PyObject * THPModule_hbProfilerExecTimeFancyTable(PyObject *module, PyObject *noargs) {
-  return PyUnicode_FromString(c10::probe::exec_time_fancy_table().c_str());
-}
-
 static PyObject * THPModule_hbProfilerExecTimeRawStack(PyObject *module, PyObject *noargs) {
   return PyUnicode_FromString(c10::probe::exec_time_raw_stack().c_str());
 }
@@ -545,6 +541,24 @@ static PyObject * THPModule_hbProfilerRoutePrint(PyObject *module, PyObject *noa
 
 static PyObject * THPModule_hbProfilerChartPrint(PyObject *module, PyObject *noargs) {
   return PyUnicode_FromString(c10::probe::chart_print().c_str());
+}
+
+static PyObject * THPModule_hbProfilerFallbackEnable(PyObject *module, PyObject *noargs) {
+  c10::probe::fallback_enable();
+  Py_RETURN_NONE;
+}
+
+static PyObject * THPModule_hbProfilerFallbackDisable(PyObject *module, PyObject *noargs) {
+  c10::probe::fallback_disable();
+  Py_RETURN_NONE;
+}
+
+static PyObject * THPModule_hbProfilerFallbackIsEnabled(PyObject *module, PyObject *noargs) {
+  if (c10::probe::fallback_is_enabled()) {
+    Py_RETURN_TRUE;
+  } else {
+    Py_RETURN_FALSE;
+  }
 }
 
 static PyObject * THPModule_hbProfilerAddBeacon(PyObject *_unused, PyObject *kernel_signature)
@@ -629,7 +643,6 @@ static PyMethodDef TorchMethods[] = {
   {"_hb_profiler_start", (PyCFunction)THPModule_hbProfilerStart, METH_NOARGS,  nullptr},
   {"_hb_profiler_end",   (PyCFunction)THPModule_hbProfilerEnd,   METH_NOARGS,  nullptr},
 #ifdef PROFILE_ATEN
-  {"_hb_profiler_exec_time_fancy_table",  (PyCFunction)THPModule_hbProfilerExecTimeFancyTable,   METH_NOARGS,  nullptr},
   {"_hb_profiler_exec_time_raw_stack",  (PyCFunction)THPModule_hbProfilerExecTimeRawStack, METH_NOARGS, nullptr},
   {"_hb_profiler_unimpl_print",  (PyCFunction)THPModule_hbProfilerUnimplPrint, METH_NOARGS, nullptr},
   {"_hb_profiler_chart_add_beacon",  (PyCFunction)THPModule_hbProfilerAddBeacon, METH_O, nullptr},
@@ -637,6 +650,9 @@ static PyMethodDef TorchMethods[] = {
   {"_hb_profiler_route_add_waypoint",  (PyCFunction)THPModule_hbProfilerAddWaypoint, METH_VARARGS, nullptr},
   {"_hb_profiler_route_print",  (PyCFunction)THPModule_hbProfilerRoutePrint, METH_NOARGS, nullptr},
   {"_hb_profiler_chart_print",  (PyCFunction)THPModule_hbProfilerChartPrint, METH_NOARGS, nullptr},
+  {"_hb_profiler_fallback_enable",  (PyCFunction)THPModule_hbProfilerFallbackEnable, METH_NOARGS, nullptr},
+  {"_hb_profiler_fallback_disable",  (PyCFunction)THPModule_hbProfilerFallbackDisable, METH_NOARGS, nullptr},
+  {"_hb_profiler_fallback_is_enabled",  (PyCFunction)THPModule_hbProfilerFallbackIsEnabled, METH_NOARGS, nullptr},
 #endif
   {nullptr, nullptr, 0, nullptr}
 };

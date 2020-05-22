@@ -16,9 +16,9 @@ extern "C" {
           hb_tensor_t* weight,
           hb_vector_t* padding,
           hb_vector_t* strides) {
-    auto y = HBTensor<float>(output);
-    auto x = HBTensor<float>(input);
-    auto w = HBTensor<float>(weight);
+    auto y = HBTensor<float, 4>(output);
+    auto x = HBTensor<float, 4>(input);
+    auto w = HBTensor<float, 4>(weight);
     auto p = HBVector<uint32_t>(padding);
     auto s = HBVector<uint32_t>(strides);
 

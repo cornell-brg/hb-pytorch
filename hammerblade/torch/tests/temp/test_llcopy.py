@@ -50,3 +50,14 @@ def test_normal_copy():
     h = x.hammerblade()
     assert not x.is_contiguous()
     assert h.is_contiguous()
+
+def test_llcopy_backward():
+    x1 = torch.tensor([1., 2., 3., 4.], requires_grad=True)
+    x2 = torch.tensor([1., 2., 3., 4.], requires_grad=True)
+    y1 = torch.sum(x1)
+    y2 = torch.sum(x2.hammerblade_ll())
+    assert torch.allclose(y1, y2.cpu())
+    assert y2.device == torch.device("hammerblade")
+    y1.backward()
+    y2.backward()
+    assert torch.allclose(x1.grad, x2.grad)

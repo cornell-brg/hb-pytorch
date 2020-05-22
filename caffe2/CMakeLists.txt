@@ -1065,6 +1065,7 @@ endif()
 
 if(USE_HB)
   target_link_libraries(torch PUBLIC c10_hammerblade)
+  target_compile_definitions(torch PRIVATE USE_HB)
 endif()
 
 target_link_libraries(torch PUBLIC c10_probe)

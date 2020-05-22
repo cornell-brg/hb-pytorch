@@ -43,7 +43,7 @@ extern "C" {
   void dram_to_sp_simple(
           float* dest,
           float coeff,
-          HBTensor<float> src,
+          HBTensor<float, 2> src,
           int dim_y,
           int dim_x,
           int r_idx,
@@ -99,7 +99,7 @@ extern "C" {
   void dram_to_sp(
           float* dest,
           float coeff,
-          HBTensor<float> src,
+          HBTensor<float, 2> src,
           int dim_y,
           int dim_x,
           int r_idx,
@@ -129,10 +129,10 @@ extern "C" {
 
     if (__bsg_id == 0) {
 
-        auto self = HBTensor<float>(_self);
-        auto mat1 = HBTensor<float>(_mat1);
-        auto mat2 = HBTensor<float>(_mat2);
-        auto result = HBTensor<float>(_result);
+        auto self = HBTensor<float, 2>(_self);
+        auto mat1 = HBTensor<float, 2>(_mat1);
+        auto mat2 = HBTensor<float, 2>(_mat2);
+        auto result = HBTensor<float, 2>(_result);
         float beta = *_beta;
         float alpha = *_alpha;
 
