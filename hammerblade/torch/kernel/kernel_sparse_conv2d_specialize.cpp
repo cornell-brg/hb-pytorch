@@ -27,6 +27,16 @@ extern "C" {
     auto w_row = HBTensor<int>(csr);
     auto w_col = HBTensor<int>(colindices);
     auto w_val = HBTensor<float>(values);
+
+    //specialize tensor stirdes to constant
+    const int y_s0 = y.stride(0);
+    const int y_s1 = y.stride(1);
+    const int y_s2 = y.stride(2);
+    const int x_s0 = x.stride(0);
+    const int x_s1 = x.stride(1);
+    const int x_s2 = x.stride(2);
+    float* y_data = (float*)(y.data_ptr());
+    float* x_data = (float*)(x.data_ptr());
     
     auto p = HBVector<uint32_t>(padding);
     auto s = HBVector<uint32_t>(strides);
@@ -72,7 +82,8 @@ extern "C" {
                 int32_t xw = Sw * yw - Pw + kw;
 
                 if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                  y(n, co, yh, yw) += x(n, ci, xh, xw) * val;
+                  y_data[n>>6+co>>4+yh>>2+yw] += x_data[n>>8+ci>>6+xh>>3+xw] * val;
+                 // y(n, co, yh, yw) += x(n, ci, xh, xw) * val;
                 } // else 0
               }
             }
