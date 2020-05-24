@@ -28,7 +28,7 @@ def test_lenet5_sparse01_conv1():
     out1 = cpu_out.view(1, 6, 28, 28)
 
     hb_i = di.hammerblade()
-    hb_sw = dw.hammerblade()
+    hb_sw = sw.hammerblade()
     hb_out = F.conv2d(hb_i, hb_sw, bias = None, stride = 1, padding = 0, dilation = 1)
     out2 = hb_out.cpu()
 
