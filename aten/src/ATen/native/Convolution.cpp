@@ -645,17 +645,21 @@ at::Tensor _convolution(
     }
 #endif
   } else if (input.device().type() == c10::DeviceType::HAMMERBLADE) {
-    TORCH_CHECK(input.type() == weight.type(),
-             "Input type (", input.type().toString(), ") and weight type (", weight.type().toString(),
-             ") should be the same");
+   // TORCH_CHECK(input.type() == weight.type(),
+   //          "Input type (", input.type().toString(), ") and weight type (", weight.type().toString(),
+   //          ") should be the same");
     TORCH_CHECK(!bias.defined() || (input.type() == bias.type()),
              "Input type (", input.type().toString(), ") and bias type (", bias.type().toString(),
              ") should be the same");
     
-    if (params.transposed) {
+    if (params.transposed && (!weight.is_sparse())) {
       output = at::hb_convolution_transpose(
           input.contiguous(), weight, bias,
           params.padding, params.output_padding, params.stride, params.dilation, params.groups);
+    } else if (weight.is_sparse()){
+      output = at::hb_sparse_convolution(
+          input.contiguous(), weight, bias, 
+          params.padding, params.stride, params.dilation, params.groups);
     } else {
       output = at::hb_convolution(
           input.contiguous(), weight, bias,
