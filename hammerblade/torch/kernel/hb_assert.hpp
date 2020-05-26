@@ -2,8 +2,8 @@
 // An assert that works on both cosim and emul
 // 03/16/2020 Lin Cheng (lc873@cornell.edu)
 //====================================================================
-#ifndef _BSG_ASSERT_HPP
-#define _BSG_ASSERT_HPP
+#ifndef _HB_ASSERT_HPP
+#define _HB_ASSERT_HPP
 
 #define hb_assert(cond) if (!(cond)) {                       \
     bsg_printf("assert failed at %s:%d", __FILE__, __LINE__); \

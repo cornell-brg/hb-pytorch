@@ -15,8 +15,6 @@ else
   COSIM_EXE := $(COSIM_PYTHON_DIR)/test_loader
 endif
 
-$(info Waves, $(WAVES), $(COSIM_EXE))
-
 COSIM_DEBUG :=
 ifeq ($(TRACE),1)
   # bsg_replicant detail: +trace enables execution trace
@@ -49,6 +47,11 @@ regression: kernel.riscv $(COSIM_EXE)
 
 $(COSIM_EXE):
 	$(MAKE) -C $(COSIM_PYTHON_DIR) $@
+
+ifeq ($(DEBUG),1)
+  RISCV_GXX_EXTRA_OPTS += -g
+  RISCV_LINK_OPTS += -g
+endif
 
 # Include BSG Manycore's builddefs
 include $(BSG_MANYCORE_DIR)/software/mk/Makefile.master

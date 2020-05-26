@@ -1,0 +1,7 @@
+#pragma once
+
+// Automatically generated header file for the C10 Probe library.  Do not
+// include this file directly.  Instead, include c10/probe/ProbeMacros.h
+
+#cmakedefine C10_PROBE_BUILD_SHARED_LIBS
+

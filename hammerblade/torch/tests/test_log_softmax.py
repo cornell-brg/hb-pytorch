@@ -18,7 +18,7 @@ def _test_log_softmax(x, dim):
     y = F.log_softmax(x, dim)
     y_hb = F.log_softmax(x_hb, dim)
 
-    assert torch.allclose(y, y_hb.cpu(), atol=1e-7)
+    assert torch.allclose(y, y_hb.cpu(), atol=1e-6)
 
 def test_log_softmax_1():
     x = torch.rand(2, 3)

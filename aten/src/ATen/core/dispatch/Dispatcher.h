@@ -3,6 +3,7 @@
 #include <ATen/core/dispatch/OperatorEntry.h>
 #include <ATen/core/dispatch/RegistrationHandleRAII.h>
 #include <c10/util/Exception.h>
+#include <c10/probe/HBProfiler.h>
 #include <mutex>
 #include <list>
 
@@ -224,6 +225,7 @@ inline void Dispatcher::callBoxed(const OperatorHandle& op, Stack* stack) const 
 }
 
 inline const KernelFunction& Dispatcher::dispatch_(const DispatchTable& dispatchTable, const ska::flat_hash_map<TensorTypeId, KernelFunction>& backendFallbackKernels, c10::optional<TensorTypeId> dispatchKey) {
+
   if (C10_LIKELY(dispatchKey.has_value())) {
     const KernelFunction* backendKernel = dispatchTable.lookup(*dispatchKey);
 

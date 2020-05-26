@@ -652,6 +652,14 @@ if (USE_NCCL)
   target_compile_definitions(torch PRIVATE USE_NCCL)
 endif()
 
+if (PROFILE_ATEN)
+  target_compile_definitions(torch PRIVATE PROFILE_ATEN)
+endif()
+
+if (HB_REDISPATCH)
+  target_compile_definitions(torch PRIVATE HB_REDISPATCH)
+endif()
+
 
 # ==========================================================
 # formerly-libtorch flags
@@ -1057,7 +1065,10 @@ endif()
 
 if(USE_HB)
   target_link_libraries(torch PUBLIC c10_hammerblade)
+  target_compile_definitions(torch PRIVATE USE_HB)
 endif()
+
+target_link_libraries(torch PUBLIC c10_probe)
 
 # ---[ Test binaries.
 if (BUILD_TEST)

@@ -210,7 +210,20 @@ if (USE_HB)
       ${TORCH_SRC_DIR}/csrc/hammerblade/Module.cpp
       ${TORCH_SRC_DIR}/csrc/hammerblade/python_comm.cpp
       )
-    list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS USE_HB _XOPEN_SOURCE=500)
+    list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS USE_HB)
+endif()
+
+if (USE_HB_EMUL)
+    list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS USE_HB_EMUL)
+endif()
+
+if (NOT USE_HB_EMUL)
+    list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS _XOPEN_SOURCE=500)
+endif()
+
+if (HB_ENABLE_KERNEL_LOG)
+  list(APPEND TORCH_PYTHON_INCLUDE_DIRECTORIES "${TORCH_ROOT}/hammerblade/torch/kernel")
+  list(APPEND TORCH_PYTHON_INCLUDE_DIRECTORIES "${TORCH_ROOT}/third_party/include")
 endif()
 
 if (USE_ROCM)
@@ -261,6 +274,14 @@ if (USE_NCCL)
       ${TORCH_SRC_DIR}/csrc/cuda/python_nccl.cpp)
     list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS USE_NCCL)
     list(APPEND TORCH_PYTHON_LINK_LIBRARIES __caffe2_nccl)
+endif()
+
+if (PROFILE_ATEN)
+  list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS PROFILE_ATEN)
+endif()
+
+if (HB_REDISPATCH)
+  list(APPEND TORCH_PYTHON_COMPILE_DEFINITIONS HB_REDISPATCH)
 endif()
 
 # In the most recent CMake versions, a new 'TRANSFORM' subcommand of 'list' allows much of the boilerplate of defining the lists

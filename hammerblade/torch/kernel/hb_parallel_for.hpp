@@ -19,15 +19,73 @@ template<typename scalar_t>
 inline uint32_t offset_calc(uint32_t idx, HBTensor<scalar_t> tensor) {
   uint32_t* strides = tensor.get_strides();
   uint32_t* sizes = tensor.get_sizes();
-  uint32_t factor = 1;
   uint32_t offset = 0;
   for(int32_t i = tensor.ndim() - 1; i >= 0; i--) {
     uint32_t dimx = idx % sizes[i];
+    idx /= sizes[i];
     offset += dimx * strides[i];
-    idx /= factor;
-    factor *= sizes[i];
   }
   return offset;
+}
+
+// =========================================================
+// Pointwise for -- Ternary
+// =========================================================
+
+template<typename scalar_t, typename F>
+inline void hb_foreach(HBTensor<scalar_t> res,
+                       HBTensor<scalar_t> input,
+                       HBTensor<scalar_t> tensor1,
+                       HBTensor<scalar_t> tensor2,
+                       F functor) {
+  char* data[4];
+  data[0] = res.data_ptr();
+  data[1] = input.data_ptr();
+  data[2] = tensor1.data_ptr();
+  data[3] = tensor2.data_ptr();
+
+  // is_trivial_1d
+  if(res.ndim() == 1) {
+
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[4];
+    strides[0] = (res.get_strides())[0];
+    strides[1] = (input.get_strides())[0];
+    strides[2] = (tensor1.get_strides())[0];
+    strides[3] = (tensor2.get_strides())[0];
+
+    //-----------------------------
+    // iterating over all elementes
+    //-----------------------------
+    size_t start = 0;
+    size_t end = res.numel();
+    for (size_t idx = start; idx < end; idx++) {
+      scalar_t* res_dp = (scalar_t*)(data[0]);
+      scalar_t* input_dp = (scalar_t*)(data[1]);
+      scalar_t* tensor1_dp = (scalar_t*)(data[2]);
+      scalar_t* tensor2_dp = (scalar_t*)(data[3]);
+      *res_dp = functor(*input_dp, *tensor1_dp, *tensor2_dp);
+      data[0] += strides[0];
+      data[1] += strides[1];
+      data[2] += strides[2];
+      data[3] += strides[3];
+    }
+  } else {
+    //-----------------------------
+    // iterating over all elementes
+    //-----------------------------
+    size_t start = 0;
+    size_t end = res.numel();
+    for (size_t idx = start; idx < end; idx++) {
+      scalar_t* res_dp = (scalar_t*)(data[0] + offset_calc(idx, res));
+      scalar_t* input_dp = (scalar_t*)(data[1] + offset_calc(idx, input));
+      scalar_t* tensor1_dp = (scalar_t*)(data[2] + offset_calc(idx, tensor1));
+      scalar_t* tensor2_dp = (scalar_t*)(data[3] + offset_calc(idx, tensor2));
+      *res_dp = functor(*input_dp, *tensor1_dp, *tensor2_dp);
+    }
+  }
 }
 
 // =========================================================
@@ -170,6 +228,74 @@ inline void hb_foreach(HBTensor<scalar_t> res,
     for (size_t idx = start; idx < end; idx++) {
       scalar_t* res_dp = (scalar_t*)(data[0] + offset_calc(idx, res));
       *res_dp = functor();
+    }
+  }
+}
+
+// =========================================================
+// Tile Pointwise for -- Ternary
+// =========================================================
+
+template<typename scalar_t, typename F>
+inline void hb_parallel_foreach(HBTensor<scalar_t> res,
+                                HBTensor<scalar_t> input,
+                                HBTensor<scalar_t> tensor1,
+                                HBTensor<scalar_t> tensor2,
+                                F functor) {
+  char* data[4];
+  data[0] = res.data_ptr();
+  data[1] = input.data_ptr();
+  data[2] = tensor1.data_ptr();
+  data[3] = tensor2.data_ptr();
+
+  // is_trivial_1d
+  if(res.ndim() == 1) {
+
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[4];
+    strides[0] = (res.get_strides())[0];
+    strides[1] = (input.get_strides())[0];
+    strides[2] = (tensor1.get_strides())[0];
+    strides[3] = (tensor2.get_strides())[0];
+
+    //-----------------------------
+    // iterating over all elementes
+    //-----------------------------
+    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    size_t start = len_per_tile * __bsg_id;
+    size_t end = start + len_per_tile;
+    end = (end > res.numel())  ? res.numel() : end;
+    data[0] += strides[0] * start;
+    data[1] += strides[1] * start;
+    data[2] += strides[2] * start;
+    data[3] += strides[3] * start;
+    for (size_t idx = start; idx < end; idx++) {
+      scalar_t* res_dp = (scalar_t*)(data[0]);
+      scalar_t* input_dp = (scalar_t*)(data[1]);
+      scalar_t* tensor1_dp = (scalar_t*)(data[2]);
+      scalar_t* tensor2_dp = (scalar_t*)(data[3]);
+      *res_dp = functor(*input_dp, *tensor1_dp, *tensor2_dp);
+      data[0] += strides[0];
+      data[1] += strides[1];
+      data[2] += strides[2];
+      data[3] += strides[3];
+    }
+  } else {
+    //-----------------------------
+    // iterating over all elementes
+    //-----------------------------
+    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    size_t start = len_per_tile * __bsg_id;
+    size_t end = start + len_per_tile;
+    end = (end > res.numel())  ? res.numel() : end;
+    for (size_t idx = start; idx < end; idx++) {
+      scalar_t* res_dp = (scalar_t*)(data[0] + offset_calc(idx, res));
+      scalar_t* input_dp = (scalar_t*)(data[1] + offset_calc(idx, input));
+      scalar_t* tensor1_dp = (scalar_t*)(data[2] + offset_calc(idx, tensor1));
+      scalar_t* tensor2_dp = (scalar_t*)(data[3] + offset_calc(idx, tensor2));
+      *res_dp = functor(*input_dp, *tensor1_dp, *tensor2_dp);
     }
   }
 }

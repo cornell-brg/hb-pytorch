@@ -19,8 +19,8 @@ extern "C" {
     auto y = HBTensor<float>(output);
     auto x = HBTensor<float>(input);
     auto w = HBTensor<float>(weight);
-    auto p = BSGVector<uint32_t>(padding);
-    auto s = BSGVector<uint32_t>(strides);
+    auto p = HBVector<uint32_t>(padding);
+    auto s = HBVector<uint32_t>(strides);
 
     // Conv2d parameters
     auto N = y.dim(0); // number of minibatches
@@ -110,8 +110,8 @@ extern "C" {
     auto x = HBTensor<float>(grad_input);
     auto y = HBTensor<float>(grad_output);
     auto w = HBTensor<float>(weight);
-    auto p = BSGVector<uint32_t>(padding);
-    auto s = BSGVector<uint32_t>(strides);
+    auto p = HBVector<uint32_t>(padding);
+    auto s = HBVector<uint32_t>(strides);
 
     // Conv2d parameters
     auto N = y.dim(0); // number of minibatches
@@ -174,8 +174,8 @@ extern "C" {
     auto x = HBTensor<float>(input);
     auto y = HBTensor<float>(grad_output);
     auto w = HBTensor<float>(grad_weight);
-    auto p = BSGVector<uint32_t>(padding);
-    auto s = BSGVector<uint32_t>(strides);
+    auto p = HBVector<uint32_t>(padding);
+    auto s = HBVector<uint32_t>(strides);
 
     // Conv2d parameters
     auto N = y.dim(0); // number of minibatches

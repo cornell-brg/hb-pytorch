@@ -31,5 +31,5 @@ def _get_device_index(device, optional=False):
             return torch.hammerblade.current_device()
         else:
             raise ValueError('Expected a hammerblade device with a specified index '
-                             'or an integer, but got: '.format(device))
+                             'or an integer, but got: {0}'.format(device))
     return device_idx
