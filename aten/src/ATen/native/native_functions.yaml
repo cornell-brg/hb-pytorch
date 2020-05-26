@@ -2680,12 +2680,14 @@
   dispatch:
     CPU: _tanh__cpu
     CUDA: _tanh__cuda
+    HammerBlade: _tanh__hb
 
 - func: tanh.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
   dispatch:
     CPU: _tanh_out_cpu
     CUDA: _tanh_out_cuda
+    HammerBlade: _tanh_out_hb
 
 - func: tensordot(Tensor self, Tensor other, int[] dims_self, int[] dims_other) -> Tensor
   variants: function

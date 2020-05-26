@@ -5,26 +5,18 @@
 #include <ATen/native/hammerblade/Offload.h>
 
 namespace at { namespace native {
+namespace {
 
-Tensor& tanh_(Tensor& self) {
-
-  AT_DISPATCH_FLOAT_TYPE_ONLY(
-    self.scalar_type(), "tanh_",
-    [&] {
-      hb_offload_kernel(self, "tensorlib_tanh");
-    });
-  return self;
+static void tanh_kernel_hb(TensorIterator& iter) {
+    AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "tanh_hb", [&]() {
+        offload_op_unary(iter, "tensorlib_tanh");
+        });
 }
 
-Tensor& tanh_out_(Tensor& out, const Tensor& self){
+} // anonymous namespace
 
-  AT_DISPATCH_FLOAT_TYPE_ONLY(
-    self.scalar_type(), "tanh_out_",
-    [&] {
-      hb_offload_kernel(self, out, "tensorlib_tanh_out");
-    });
-  return out;
-}
+REGISTER_HAMMERBLADE_DISPATCH(tanh_stub, &tanh_kernel_hb);
+
 }}  // namespace at::native
 
 

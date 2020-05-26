@@ -9,47 +9,21 @@
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_tanh(
-          hb_tensor_t* _self) {
-
-  auto self = HBTensor<float>(_self);
- 
-  // Start profiling
-  bsg_cuda_print_stat_kernel_start();
-
-  hb_parallel_for(self.numel(), [&](size_t i) {
-    float a = tanh(self(i));
-    self(i) = a; 
-  }); 
-
-  //end profiling
-  bsg_cuda_print_stat_kernel_end();
-  return 0;
+          hb_tensor_t* t0_p,
+          hb_tensor_t* t1_p) {
+    auto res = HBTensor<float>(t0_p);
+    auto input = HBTensor<float>(t1_p);
+    // Start profiling
+    bsg_cuda_print_stat_kernel_start();
+    hb_parallel_foreach(res, input,
+      [&](float a) {
+        return tanh(a);
+    });
+    //end profiling
+    bsg_cuda_print_stat_kernel_end();
+    return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_tanh, hb_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_tanh, hb_tensor_t*, hb_tensor_t*)
 
 }
-
-extern "C" {
-
-  __attribute__ ((noinline))  int tensorlib_tanh_out(
-         hb_tensor_t* _self, hb_tensor_t* _out) {
-
-  auto self = HBTensor<float>(_self);
-  auto out = HBTensor<float>(_out);
-
-  // Start profiling
-  bsg_cuda_print_stat_kernel_start();
- 
-  hb_parallel_for(self.numel(), [&](size_t i) {
-    float a = tanh(self(i));
-    out(i) = a;
-  });
-
-  //end profiling
-  bsg_cuda_print_stat_kernel_end();
-  return 0;
-  }
-
-    HB_EMUL_REG_KERNEL(tensorlib_tanh_out, hb_tensor_t*, hb_tensor_t*)
-}                         
