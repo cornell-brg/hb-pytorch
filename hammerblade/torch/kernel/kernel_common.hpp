@@ -42,7 +42,7 @@
 #ifdef HB_EMUL
 extern bsg_barrier g_barrier;
 #else
-static bsg_barrier<bsg_tiles_X, bsg_tiles_Y> g_barrier;
+extern bsg_barrier<bsg_tiles_X, bsg_tiles_Y> g_barrier;
 #endif // HB_EMUL
 
 #endif // _KERNEL_COMMON_H
