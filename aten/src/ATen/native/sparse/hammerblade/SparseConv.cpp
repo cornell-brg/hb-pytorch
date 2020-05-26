@@ -103,18 +103,17 @@ Tensor hb_sparse_convolution_forward(
     const TensorArg& input, const TensorArg& weight,
     IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation,
     int64_t groups) {
-  checkAllSameType(c, {input, weight});
+  //checkAllSameType(c, {input, weight});
   checkAllSameHB(c, {input, weight});
-
+  
   auto output_t = at::zeros(
                     sparse_conv_output_size(input->sizes(), weight->sizes(),
                                      padding, stride, dilation, groups),
                     input->options());
-
   if (output_t.numel() == 0) {
     return output_t;
   }
-  
+    
   IntTensor indices = (*weight)._indices();
   Tensor values = (*weight)._values();
   IntArrayRef input_sizes = (*input).sizes();
@@ -125,18 +124,18 @@ Tensor hb_sparse_convolution_forward(
   uint32_t w_dim1 = (uint32_t)((*weight).size(1));
   uint32_t w_dim2 = (uint32_t)((*weight).size(2));
   uint32_t w_dim3 = (uint32_t)((*weight).size(3));
-
-  IntTensor new_indices = reshape_sparse_weight(*weight, w_dim2, w_dim3, _nnz);
+  IntTensor new_indices = reshape_sparse_weight(indices, w_dim2, w_dim3, _nnz);
+  
   IntTensor rowIndices = indices.select(0, 0);
   IntTensor csr = _to_csr_int(rowIndices, w_dim0, _nnz);
 
   // Avoid ambiguity of "output" when this is being used as backwards
   TensorArg output{ output_t, "result", 0 };
 
-  sparse_convolution_shape_check(c, input, weight, output, padding, stride,
-             dilation, groups);
+  // sparse_convolution_shape_check(c, input, weight, output, padding, stride,
+  //           dilation, groups);
 
-  Tensor weight_contig = weight->contiguous();
+  //Tensor weight_contig = weight->contiguous();
   hb_sparse_convolution_arg_check(output->dim(), dilation, groups);
   
   std::vector<eva_t> device_args;
