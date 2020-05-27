@@ -44,6 +44,8 @@ extern "C" {
     });
 
     bsg_cuda_print_stat_kernel_end();
+
+    g_barrier.sync();
     return 0;
   }
 

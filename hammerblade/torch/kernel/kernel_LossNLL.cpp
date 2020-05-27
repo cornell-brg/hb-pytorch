@@ -106,6 +106,7 @@ extern "C" {
                              return weight(i);
                            });
 
+    g_barrier.sync();
     return 0;
 
   }
@@ -131,7 +132,10 @@ extern "C" {
                            [&](int i) {
                              return (float)1.0f;
                            });
+
+    g_barrier.sync();
     return 0;
+
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_lossnll, hb_tensor_t*, hb_tensor_t*,
