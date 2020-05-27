@@ -70,6 +70,11 @@ public:
     }
   }
 
+  // the kernel based workaround needs a reset method on the barrier
+  void reset() {
+    return;
+  }
+
 private:
     std::mutex mMutex;
     std::condition_variable mCond;
