@@ -8,8 +8,8 @@ import torch.nn as nn
 from hypothesis import given, settings
 
 def test_tanh_1():
-    a = torch.rand(10)
+    a = torch.randn(10)
+    out_cpu = torch.tanh(a)
     out = torch.tanh(a.hammerblade())
-    i = 0
-    while (i<out.numel()):
-        assert(out[i] == math.tanh(a[i]))
+    assert out.is_hammerblade
+    assert torch.allclose(out.cpu(), out_cpu)
