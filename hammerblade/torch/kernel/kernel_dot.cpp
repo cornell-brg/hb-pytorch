@@ -21,9 +21,16 @@ extern "C" {
     hb_parallel_for(a.numel(), [&](size_t i) {
         sum += a(i) * b(i);
     });
-    // XXX: this operation should be atomic and consider the case in which
-    // there are more than 1 tile
-    c(0) = sum;
+    float *buffer = (float*)g_reduction_buffer;
+    buffer[__bsg_id] = sum;
+    g_barrier.sync();
+
+    if(__bsg_id == 0) {
+      for(size_t idx = 0; idx < bsg_tiles_X * bsg_tiles_Y; idx++) {
+        c(0) += buffer[idx];
+      }
+    }
+
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
 
