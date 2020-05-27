@@ -2,6 +2,7 @@
 #define _HB_REDUCTION_H
 
 #include <hb_parallel_for.hpp>
+#include <kernel_common.hpp>
 
 //====================================================================
 // Reduction mode used in LossNLL and other loss functions
@@ -68,55 +69,57 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
                                     F1 reduce, F2 project) {
   hb_assert_msg(out.numel() == 1, "reduction_simple only handles trivial case");
 
+  char* data[2];
+  data[0] = out.data_ptr();
+  data[1] = in.data_ptr();
+  scalar_t* buffer = (scalar_t*)g_reduction_buffer;
+
+  //-----------------------------
+  // partial_result
+  //-----------------------------
+  scalar_t result = 0;
+
+  // is_trivial_1d
+  if(in.ndim() == 1) {
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[2];
+    strides[0] = (out.get_strides())[0];
+    strides[1] = (in.get_strides())[0];
+
+    //-----------------------------
+    // iterating over all elementes
+    //-----------------------------
+    hb_parallel_for(in.numel(), [&](size_t idx) {
+      // XXX: when offloading through reduction path, strides are measured in numel
+      scalar_t* in_dp = (scalar_t*)(data[1] + strides[1] * idx * sizeof(scalar_t));
+      reduce(result, *in_dp);
+    });
+  } else {
+    //-----------------------------
+    // iterating over all elementes
+    //-----------------------------
+    hb_parallel_for(in.numel(), [&](size_t idx) {
+      // XXX: when offloading through reduction path, strides are measured in numel
+      scalar_t* in_dp = (scalar_t*)(data[1] + offset_calc(idx, in) * sizeof(scalar_t));
+      reduce(result, *in_dp);
+    });
+  }
+  buffer[__bsg_id] = result;
+  g_barrier.sync();
+
   if(__bsg_id == 0) {
-
-    char* data[2];
-    data[0] = out.data_ptr();
-    data[1] = in.data_ptr();
-
-    //-----------------------------
-    // partial_result
-    //-----------------------------
-    scalar_t result = 0;
-
-    // is_trivial_1d
-    if(in.ndim() == 1) {
-
-
-      //-----------------------------
-      // collect metadata
-      //-----------------------------
-      uint32_t strides[2];
-      strides[0] = (out.get_strides())[0];
-      strides[1] = (in.get_strides())[0];
-
-      //-----------------------------
-      // iterating over all elementes
-      //-----------------------------
-      size_t start = 0;
-      size_t end = in.numel();
-      for (size_t idx = start; idx < end; idx++) {
-        // XXX: when offloading through reduction path, strides are measured in numel
-        scalar_t* in_dp = (scalar_t*)(data[1] + strides[1] * idx * sizeof(scalar_t));
-        reduce(result, *in_dp);
-      }
-    } else {
-      //-----------------------------
-      // iterating over all elementes
-      //-----------------------------
-      size_t start = 0;
-      size_t end = in.numel();
-      for (size_t idx = start; idx < end; idx++) {
-        // XXX: when offloading through reduction path, strides are measured in numel
-        scalar_t* in_dp = (scalar_t*)(data[1] + offset_calc(idx, in) * sizeof(scalar_t));
-        reduce(result, *in_dp);
-      }
+    result = 0;
+    for(size_t idx = 0; idx < bsg_tiles_X * bsg_tiles_Y; idx++) {
+      result += buffer[idx];
     }
-
     // produce final result
     scalar_t* out_dp = (scalar_t*)(data[0]);
     *out_dp = project(result);
   }
+
+  g_barrier.sync();
 }
 
 template<typename scalar_t, typename F1, typename F2>
