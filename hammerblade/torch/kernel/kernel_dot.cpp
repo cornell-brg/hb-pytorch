@@ -26,9 +26,11 @@ extern "C" {
     g_barrier.sync();
 
     if(__bsg_id == 0) {
+      float result = 0.0f;
       for(size_t idx = 0; idx < bsg_tiles_X * bsg_tiles_Y; idx++) {
-        c(0) += buffer[idx];
+        result += buffer[idx];
       }
+      c(0) = result;
     }
 
     //   End profiling
