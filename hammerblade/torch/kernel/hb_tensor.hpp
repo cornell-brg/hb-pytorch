@@ -61,8 +61,8 @@ typedef struct {
 // allocation.
 // =========================================================
 
-template <typename DT>
-class HBTensor {
+template<typename DT>
+class HBTensorImpl {
   private:
     uint32_t N;
     uint32_t dims;
@@ -71,12 +71,13 @@ class HBTensor {
     DT* data;
 
   public:
-    HBTensor(hb_tensor_t* t) :
-      N(t->N),
-      dims(t->dims),
-      strides((uint32_t*) ((intptr_t) t->strides)),
-      sizes((uint32_t*) ((intptr_t) t->sizes)),
-      data((DT*) ((intptr_t) t->data)) {
+    HBTensorImpl(uint32_t N, uint32_t dims, uint32_t* strides,
+                 uint32_t* sizes, DT* data) :
+      N(N),
+      dims(dims),
+      strides(strides),
+      sizes(sizes),
+      data(data) {
         // WAW HW bug seems to be triggered on a non-bloacking load to
         // the register holding `sizes` in various kernels. This fix
         // adds a RAW dependedncy on that register, blocking the load.
@@ -150,6 +151,48 @@ class HBTensor {
     }
 };
 
+template <typename DT, int32_t dims=-1>
+class HBTensor : public HBTensorImpl<DT> {
+  private:
+    uint32_t strides[dims];
+    uint32_t sizes[dims];
+
+  public:
+    HBTensor(hb_tensor_t* t) :
+      HBTensorImpl<DT>(
+        t->N,
+        (uint32_t) dims,
+        strides,
+        sizes,
+        (DT*) ((intptr_t) t->data)
+      ) {
+        hb_assert_msg(
+          t->dims == dims,
+          "error: HBTensor dims don't match offloaed tensor dims");
+
+        uint32_t* strides_remote = (uint32_t*) ((intptr_t) t->strides);
+        uint32_t* sizes_remote = (uint32_t*) ((intptr_t) t->sizes);
+
+        // Move strides and sizes to scratchpad
+        for(int i=0; i<dims; ++i) {
+          strides[i] = strides_remote[i];
+          sizes[i] = sizes_remote[i];
+        }
+      }
+};
+
+template <typename DT>
+class HBTensor<DT, -1> : public HBTensorImpl<DT> {
+  public:
+    HBTensor(hb_tensor_t* t) :
+      HBTensorImpl<DT>(
+        t->N,
+        t->dims,
+        (uint32_t*) ((intptr_t) t->strides),
+        (uint32_t*) ((intptr_t) t->sizes),
+        (DT*) ((intptr_t) t->data)
+      ) {}
+};
 
 template<typename T>
 class HBVector {

@@ -25,14 +25,14 @@ extern "C" {
             for (int k = 0; k < mid_dim; k += 8) {
                 int mat1_idx = mat1_row_offset + k;
                 int mat2_idx = k * dim_x + j;
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx] * sp_mat2[mat2_idx]; 
+                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx] * sp_mat2[mat2_idx];
                 dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 1] * sp_mat2[mat2_idx + dim_x];
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 2] * sp_mat2[mat2_idx + 2 * dim_x]; 
+                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 2] * sp_mat2[mat2_idx + 2 * dim_x];
                 dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 3] * sp_mat2[mat2_idx + 3 * dim_x];
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 4] * sp_mat2[mat2_idx + 4 * dim_x]; 
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 5] * sp_mat2[mat2_idx + 5 * dim_x]; 
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 6] * sp_mat2[mat2_idx + 6 * dim_x]; 
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 7] * sp_mat2[mat2_idx + 7 * dim_x]; 
+                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 4] * sp_mat2[mat2_idx + 4 * dim_x];
+                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 5] * sp_mat2[mat2_idx + 5 * dim_x];
+                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 6] * sp_mat2[mat2_idx + 6 * dim_x];
+                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 7] * sp_mat2[mat2_idx + 7 * dim_x];
             }
         }
     }
@@ -43,7 +43,7 @@ extern "C" {
   void dram_to_sp_simple(
           float* dest,
           float coeff,
-          HBTensor<float> src,
+          HBTensor<float, 2> src,
           int dim_y,
           int dim_x,
           int r_idx,
@@ -80,14 +80,14 @@ extern "C" {
             for (int k = 0; k < mid_dim; k += 8) {
                 int mat1_idx = mat1_row_offset + k;
                 int mat2_idx = k * dim_x + j;
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx] * sp_mat2[mat2_idx]; 
+                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx] * sp_mat2[mat2_idx];
                 if (k + 1 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 1] * sp_mat2[mat2_idx + dim_x];
-                if (k + 2 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 2] * sp_mat2[mat2_idx + 2 * dim_x]; 
+                if (k + 2 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 2] * sp_mat2[mat2_idx + 2 * dim_x];
                 if (k + 3 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 3] * sp_mat2[mat2_idx + 3 * dim_x];
-                if (k + 4 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 4] * sp_mat2[mat2_idx + 4 * dim_x]; 
-                if (k + 5 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 5] * sp_mat2[mat2_idx + 5 * dim_x]; 
-                if (k + 6 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 6] * sp_mat2[mat2_idx + 6 * dim_x]; 
-                if (k + 7 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 7] * sp_mat2[mat2_idx + 7 * dim_x]; 
+                if (k + 4 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 4] * sp_mat2[mat2_idx + 4 * dim_x];
+                if (k + 5 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 5] * sp_mat2[mat2_idx + 5 * dim_x];
+                if (k + 6 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 6] * sp_mat2[mat2_idx + 6 * dim_x];
+                if (k + 7 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 7] * sp_mat2[mat2_idx + 7 * dim_x];
             }
         }
     }
@@ -99,7 +99,7 @@ extern "C" {
   void dram_to_sp(
           float* dest,
           float coeff,
-          HBTensor<float> src,
+          HBTensor<float, 2> src,
           int dim_y,
           int dim_x,
           int r_idx,
@@ -127,15 +127,16 @@ extern "C" {
           float* _beta,
           float* _alpha) {
 
-    auto self = HBTensor<float>(_self);
-    auto mat1 = HBTensor<float>(_mat1);
-    auto mat2 = HBTensor<float>(_mat2);
-    auto result = HBTensor<float>(_result);
+    auto self = HBTensor<float, 2>(_self);
+    auto mat1 = HBTensor<float, 2>(_mat1);
+    auto mat2 = HBTensor<float, 2>(_mat2);
+    auto result = HBTensor<float, 2>(_result);
     float beta = *_beta;
     float alpha = *_alpha;
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
+
 
     // v2: single tile, use blocking
     int r1 = mat1.dim(0);
@@ -175,19 +176,6 @@ extern "C" {
             }
             // end: unrolled version
 
-/*
-            // original non-unrolled version
-            float sp_result[res_dim_y][res_dim_x];
-
-            for (int i = 0; i < res_dim_y; i++) {
-                for (int j = 0; j < res_dim_x; j++) {
-                    sp_result[i][j] = beta * self(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j);
-                }
-            }
-            // end: original non-unrolled version
-*/
-
-
             // process mat1 and mat2 for this result block
             // only care about blocks of mat1 in row rr
             // and blocks of mat2 in col rc
@@ -212,36 +200,7 @@ extern "C" {
                 }
                 // end: unrolled version
 
-
-/*
-                // original non-unrolled version
-                float sp_mat1[res_dim_y][mid_dim];
-                float sp_mat2[mid_dim][res_dim_x];
-                for (int i = 0; i < res_dim_y; i++) {
-                    for (int j = 0; j < mid_dim; j++) {
-                        sp_mat1[i][j] = mat1(rr * BLOCK_DIM + i, mat1x * BLOCK_DIM + j);
-                    }
-                }
-
-                for (int i = 0; i < mid_dim; i++) {
-                    for (int j = 0; j < res_dim_x; j++) {
-                        sp_mat2[i][j] = mat2(mat2y * BLOCK_DIM + i, rc * BLOCK_DIM + j);
-                    }
-                }
-
-                // compute mat1 X mat2 for this block
-                for (int i = 0; i < res_dim_y; i++) {
-                    for (int j = 0; j < res_dim_x; j++) {
-                        for (int k = 0; k < mid_dim; k++) {
-                            sp_result[i][j] += alpha * sp_mat1[i][k] * sp_mat2[k][j]; 
-                        }
-                    }
-                }
-                // end: non-unrolled version
-*/
-
             }
-
 
             // copy this block back into DRAM
             for (int i = 0; i < res_dim_y; i++) {
@@ -249,10 +208,6 @@ extern "C" {
                     // unrolled version
                     result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * res_dim_x + j];
                     // end: unrolled version
-
-                    // original non-unrolled version
-                    //result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i][j];
-                    // end: original non-unrolled version
                 }
             }
         }
