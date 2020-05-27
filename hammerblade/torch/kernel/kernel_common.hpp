@@ -39,6 +39,7 @@
 
 #include <hammerblade_emul.hpp>
 
+extern void* g_reduction_buffer;
 #ifdef HB_EMUL
 extern bsg_barrier g_barrier;
 #else

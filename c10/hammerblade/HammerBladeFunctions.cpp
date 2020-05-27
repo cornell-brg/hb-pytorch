@@ -23,9 +23,13 @@ static void initHammerBladeDevice() {
   // device size when calling hb_mc_device_init
   _hb_tg_dim = _hb_device.mesh->dim;
   std::cerr << "PyTorch configed with " << _hb_tg_dim.x << " * " << _hb_tg_dim.y << " HB device" << std::endl;
-  std::vector<eva_t> barrier_workaround_argv;
-  offload_kernel("tensorlib_barrier_workaround", barrier_workaround_argv);
-  std::cerr << "HB barrier workaround kernel applied" << std::endl;
+  // config shared reduction buffer on device
+  // and reset barrier for now -- global constructors are not called
+  std::vector<eva_t> hb_startup_argv;
+  eva_t shared_reduction_buffer = device_malloc(_hb_tg_dim.x * _hb_tg_dim.y * 2 * sizeof(uint32_t));
+  hb_startup_argv.push_back(shared_reduction_buffer);
+  offload_kernel("tensorlib_hb_startup", hb_startup_argv);
+  std::cerr << "HB startup config kernel applied" << std::endl;
   return;
 }
 } // namespace unnamed
