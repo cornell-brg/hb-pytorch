@@ -24,7 +24,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_parallel_foreach(res, input, tensor1, tensor2,
+    hb_tiled_foreach(res, input, tensor1, tensor2,
       [&](float input_val, float tensor1_val, float tensor2_val) {
         return input_val + value * tensor1_val / tensor2_val;
     });

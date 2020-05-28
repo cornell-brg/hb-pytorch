@@ -49,7 +49,7 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    hb_parallel_for(num_softmax_axes, [&](size_t n) {
+    hb_tiled_for(num_softmax_axes, [&](size_t n) {
         uint32_t outer_index = n / in_strides[dim];
         uint32_t inner_index = n % in_strides[dim];
         uint32_t offset = outer_index * outer_stride + inner_index;

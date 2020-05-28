@@ -28,7 +28,7 @@ static int tensorlib_lossnll_impl(
   const auto n_dims = input.ndim();
 
   if(reduction == Reduction::None && n_dims == 2) {
-    hb_parallel_for(batch_size,
+    hb_tiled_for(batch_size,
         [&](size_t i) {
           const auto cur_target = target(i);
           if (cur_target == ignore_index) {

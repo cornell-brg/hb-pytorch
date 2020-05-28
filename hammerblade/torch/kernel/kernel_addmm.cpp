@@ -158,7 +158,7 @@ extern "C" {
     int m2_last_blk_dim_y = r2 % BLOCK_DIM == 0 ? BLOCK_DIM : r2 % BLOCK_DIM; // y dimension of last block of mat2
 
     // iterate over result blocks
-    hb_parallel_for(m1_num_blk_per_row, [&](size_t rr) {
+    hb_tiled_for(m1_num_blk_per_row, [&](size_t rr) {
         for (int rc = 0; rc < m2_num_blk_per_col; rc++) { // rc is index of col block in result matrix
             // calculate current result block dimensions
             int res_dim_y = rr == m1_num_blk_per_row - 1 ? m1_last_blk_dim_y : BLOCK_DIM;

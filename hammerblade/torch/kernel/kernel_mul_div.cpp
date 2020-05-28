@@ -17,7 +17,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_parallel_foreach(c, a, b,
+    hb_tiled_foreach(c, a, b,
         [&](float a, float b) {
           return a * b;
         });
@@ -41,7 +41,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_parallel_foreach(c, a, b,
+    hb_tiled_foreach(c, a, b,
       [&](float a, float b) {
         return a / b;
     });
