@@ -1,7 +1,7 @@
 #ifndef _HB_REDUCTION_H
 #define _HB_REDUCTION_H
 
-#include <hb_parallel_for.hpp>
+#include <hb_tiled_for.hpp>
 #include <kernel_common.hpp>
 
 //====================================================================
@@ -91,7 +91,7 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-    hb_parallel_for(in.numel(), [&](size_t idx) {
+    hb_tiled_for(in.numel(), [&](size_t idx) {
       // XXX: when offloading through reduction path, strides are measured in numel
       scalar_t* in_dp = (scalar_t*)(data[1] + strides[1] * idx * sizeof(scalar_t));
       reduce(result, *in_dp);
@@ -100,7 +100,7 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-    hb_parallel_for(in.numel(), [&](size_t idx) {
+    hb_tiled_for(in.numel(), [&](size_t idx) {
       // XXX: when offloading through reduction path, strides are measured in numel
       scalar_t* in_dp = (scalar_t*)(data[1] + offset_calc(idx, in) * sizeof(scalar_t));
       reduce(result, *in_dp);
@@ -139,7 +139,7 @@ inline void binary_reduction(HBTensor<scalar_t>out,
       // one input element
       hb_assert_msg(out.numel() == in.numel(),
                      "This case should be handled by reduction_simple?");
-      hb_parallel_for(out.numel(), [&](size_t n) {
+      hb_tiled_for(out.numel(), [&](size_t n) {
         out(n) = project(in(n));
       });
       break;
@@ -147,7 +147,7 @@ inline void binary_reduction(HBTensor<scalar_t>out,
       if(num_reduction_dim == 1) {
         // 2D input -- 1 reduction dim
         // parallelize over output elements
-        hb_parallel_for(out.numel(), [&](size_t n) {
+        hb_tiled_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
           scalar_t result = 0;
           for(size_t d = 0; d < elements_per_output; d++) {
@@ -163,7 +163,7 @@ inline void binary_reduction(HBTensor<scalar_t>out,
       if(num_reduction_dim == 1) {
         // 3D input -- 1 reduction dim
         // parallelize over output elements
-        hb_parallel_for(out.numel(), [&](size_t n) {
+        hb_tiled_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
           scalar_t result = 0;
           uint32_t dim1 = n / in.dim(2);
@@ -176,7 +176,7 @@ inline void binary_reduction(HBTensor<scalar_t>out,
       } else if(num_reduction_dim == 2) {
         // 3D input -- 2 reduction dim
         // parallelize over output elements
-        hb_parallel_for(out.numel(), [&](size_t n) {
+        hb_tiled_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
           scalar_t result = 0;
           for(size_t d = 0; d < elements_per_output; d++) {

@@ -27,7 +27,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_parallel_for(index.numel(), [&](size_t i) {
+    hb_tiled_for(index.numel(), [&](size_t i) {
       if (index_data[i] != padding_idx) {
         int32_t k = index_data[i];
         if (k >= 0 && k < num_weights) {

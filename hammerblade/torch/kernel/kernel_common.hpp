@@ -23,7 +23,7 @@
 #include "bsg_tile_group_barrier.hpp"
 #include "hb_tensor.hpp"
 #include <hb_assert.hpp>
-#include <hb_parallel_for.hpp>
+#include <hb_tiled_for.hpp>
 #include <hb_hw_patch.hpp>
 
 //====================================================================

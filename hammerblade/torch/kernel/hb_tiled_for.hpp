@@ -3,8 +3,8 @@
 // 03/12/2020 Lin Cheng (lc873@cornell.edu)
 //====================================================================
 
-#ifndef _HB_PARALLEL_FOR_HPP
-#define _HB_PARALLEL_FOR_HPP
+#ifndef _HB_TILED_FOR_HPP
+#define _HB_TILED_FOR_HPP
 
 #include <map>
 #include <math.h>
@@ -237,7 +237,7 @@ inline void hb_foreach(HBTensor<scalar_t> res,
 // =========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_parallel_foreach(HBTensor<scalar_t> res,
+inline void hb_tiled_foreach(HBTensor<scalar_t> res,
                                 HBTensor<scalar_t> input,
                                 HBTensor<scalar_t> tensor1,
                                 HBTensor<scalar_t> tensor2,
@@ -307,7 +307,7 @@ inline void hb_parallel_foreach(HBTensor<scalar_t> res,
 //==========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_parallel_foreach(HBTensor<scalar_t> res,
+inline void hb_tiled_foreach(HBTensor<scalar_t> res,
                                HBTensor<scalar_t> input,
                                HBTensor<scalar_t> other,
                                F functor) {
@@ -370,7 +370,7 @@ inline void hb_parallel_foreach(HBTensor<scalar_t> res,
 //==========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_parallel_foreach(HBTensor<scalar_t> res,
+inline void hb_tiled_foreach(HBTensor<scalar_t> res,
                                HBTensor<scalar_t> input,
                                F functor) {
   char* data[2];
@@ -426,7 +426,7 @@ inline void hb_parallel_foreach(HBTensor<scalar_t> res,
 //==========================================================
 
 template<typename scalar_t, typename F>
-inline void hb_parallel_foreach(HBTensor<scalar_t> res,
+inline void hb_tiled_foreach(HBTensor<scalar_t> res,
                                F functor) {
   char* data[1];
   data[0] = res.data_ptr();
@@ -494,7 +494,7 @@ inline void hb_for(size_t numel, FetchFunctor functor) {
 // functor takes in current index
 
 template <class FetchFunctor>
-inline void hb_parallel_for(size_t numel, FetchFunctor functor) {
+inline void hb_tiled_for(size_t numel, FetchFunctor functor) {
   //--------------------------------------
   // calculate start and end for this tile
   //--------------------------------------

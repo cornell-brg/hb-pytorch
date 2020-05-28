@@ -18,7 +18,7 @@ extern "C" {
       // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    hb_parallel_foreach(inp, res,
+    hb_tiled_foreach(inp, res,
       [&](float a){
       a = expf(-a);
       a = 1 + a;
