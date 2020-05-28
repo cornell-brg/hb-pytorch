@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdarg>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C"{
