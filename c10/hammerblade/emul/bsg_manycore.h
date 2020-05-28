@@ -43,6 +43,14 @@ static inline void bsg_cuda_print_stat_kernel_end() {
   return;
 }
 
+static inline void bsg_cuda_print_stat_start(uint32_t tag) {
+  return;
+}
+
+static inline void bsg_cuda_print_stat_end(uint32_t tag) {
+  return;
+}
+
 #define bsg_fail() assert (1==0 /* bsg_fail is called */)
 
 #endif // _BSG_MANYCORE_H
