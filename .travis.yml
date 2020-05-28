@@ -103,6 +103,9 @@ jobs:
               - export CFLAGS="-w"
               # Enable emulation layer
               - export USE_HB_EMUL=1
+              # Mutlitile execution
+              - export HBEMUL_TILE_X_DIM=2
+              - export HBEMUL_TILE_Y_DIM=2
               # Build and install pytorch
               - python setup.py develop
               # Check torch
