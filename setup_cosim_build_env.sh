@@ -44,8 +44,8 @@ else
 fi
 
 # Build COSIM runtime library and simulation executable
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch test_loader
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch test_loader.debug
+make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch test_pytorch.log
+make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch test_pytorch.debug.log
 
 # For backward compatibility.
 # Remove this with bsg_bladerunner's next version. Current is v4.0.0.
