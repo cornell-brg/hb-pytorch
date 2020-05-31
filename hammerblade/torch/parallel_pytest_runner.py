@@ -63,7 +63,7 @@ while batch < len(targets):
             with open("pytorch_cosim_unittest/" + test_name + "/run.sh", 'w') as outfile:
                 outfile.write(script)
             # start the job
-            cosim_run = subprocess.Popen(["sh", name + "/run.sh"], env=os.environ)
+            cosim_run = subprocess.Popen(["sh", "pytorch_cosim_unittest/" + test_name + "/run.sh"], env=os.environ)
             jobs.append(cosim_run)
     # wait for jobs to finish
     for job in jobs:
