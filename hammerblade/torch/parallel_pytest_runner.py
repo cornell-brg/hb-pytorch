@@ -1,11 +1,8 @@
 # import essential modules
 import sys
 import os
-import json
-import copy
 import subprocess
 import pathlib
-import pytest
 
 # figure out current directory
 current_path = str(pathlib.Path(__file__).parent.absolute())
