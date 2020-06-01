@@ -32,7 +32,7 @@ static int tensorlib_lossnll_backward_impl(
   if(reduction == Reduction::None && n_dims == 2) {
     // check_dim_size(grad_output, 1, 0, batch_size);
     hb_assert(grad_output.ndim() == 1 && grad_output.dim(0) == batch_size);
-    hb_parallel_for(batch_size,
+    hb_tiled_for(batch_size,
         [&](size_t i) {
           const auto cur_target = target(i);
           if (cur_target != ignore_index) {
@@ -60,7 +60,7 @@ static int tensorlib_lossnll_backward_impl(
     }
   } else if (n_dims == 2) {
     hb_assert(target.dim(0) == batch_size);
-    hb_parallel_for(batch_size,
+    hb_tiled_for(batch_size,
         [&](size_t i) {
           const auto cur_target = target(i);
 
@@ -104,6 +104,7 @@ extern "C" {
                                       return weight(i);
                                     });
 
+    g_barrier.sync();
     return 0;
 
   }
@@ -133,6 +134,7 @@ extern "C" {
                                       return (float)1.0f;
                                     });
 
+    g_barrier.sync();
     return 0;
 
   }

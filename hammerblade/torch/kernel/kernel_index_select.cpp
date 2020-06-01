@@ -27,12 +27,12 @@ extern "C" {
     if (rowsize > 0) {
       // self.ndim() can't be 0
       if (self.ndim() == 1) {
-        hb_parallel_for(index.numel(), [&](size_t i) {
+        hb_tiled_for(index.numel(), [&](size_t i) {
           hb_assert((index_data[i] >= 0 && index_data[i] < size0));
           result(i) = self(index_data[i]);
         });
       } else {
-        hb_parallel_for(index.numel(), [&](size_t i) {
+        hb_tiled_for(index.numel(), [&](size_t i) {
           memcpy(
             result_data + i * rowsize,
             self_data + index_data[i] * rowsize,
@@ -44,6 +44,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_end();
 
+    g_barrier.sync();
     return 0;
   }
 

@@ -52,7 +52,13 @@ This work aims to port PyTorch to HammerBlade.
       python setup.py develop
 
 - Turn on emulation debug info
+
       export HBEMUL_DEBUG=1
+
+- Setup emulated HB device size
+
+      export HBEMUL_TILE_X_DIM=2
+      export HBEMUL_TILE_Y_DIM=2
 
 [venv]: https://docs.python.org/3/tutorial/venv.html
 

@@ -18,14 +18,25 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
     // Partial dot product sum
-    hb_parallel_for(a.numel(), [&](size_t i) {
+    hb_tiled_for(a.numel(), [&](size_t i) {
         sum += a(i) * b(i);
     });
-    // XXX: this operation should be atomic and consider the case in which
-    // there are more than 1 tile
-    c(0) = sum;
+    float *buffer = (float*)g_reduction_buffer;
+    buffer[__bsg_id] = sum;
+    g_barrier.sync();
+
+    if(__bsg_id == 0) {
+      float result = 0.0f;
+      for(size_t idx = 0; idx < bsg_tiles_X * bsg_tiles_Y; idx++) {
+        result += buffer[idx];
+      }
+      c(0) = result;
+    }
+
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
+
+    g_barrier.sync();
     return 0;
   }
 

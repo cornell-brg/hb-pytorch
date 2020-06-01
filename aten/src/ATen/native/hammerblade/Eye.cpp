@@ -3,7 +3,7 @@
 #include <ATen/hammerblade/HammerBladeContext.h>
 #include <ATen/native/hammerblade/Offload.h>
 
-namespace at { 
+namespace at {
 namespace native {
 
   Tensor& eye_out_hb(Tensor& output, long n, long m) {
@@ -13,7 +13,11 @@ namespace native {
       m = n;
     }
     output.resize_({n,m});
-    hb_offload_kernel(output, n, m, "tensorlib_eye"); 
+
+    uint32_t m_u32 = safe_downcast<uint32_t, long>(m);
+    uint32_t n_u32 = safe_downcast<uint32_t, long>(n);
+
+    hb_offload_kernel(output, n_u32, m_u32, "tensorlib_eye");
     return output;
   }
 

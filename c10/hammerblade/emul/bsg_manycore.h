@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdarg>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -40,6 +41,14 @@ static inline void bsg_cuda_print_stat_kernel_start() {
 }
 
 static inline void bsg_cuda_print_stat_kernel_end() {
+  return;
+}
+
+static inline void bsg_cuda_print_stat_start(uint32_t tag) {
+  return;
+}
+
+static inline void bsg_cuda_print_stat_end(uint32_t tag) {
   return;
 }
 

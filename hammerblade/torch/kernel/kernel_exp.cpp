@@ -15,12 +15,14 @@ extern "C" {
     auto input = HBTensor<float>(t1_p);
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    hb_parallel_foreach(res, input,
+    hb_tiled_foreach(res, input,
       [&](float a) {
         return exp(a);
     });
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
+
+    g_barrier.sync();
     return 0;
   }
 

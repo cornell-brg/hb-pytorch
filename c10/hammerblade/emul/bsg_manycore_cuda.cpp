@@ -25,21 +25,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <bsg_manycore_cuda.h>  
+#include <bsg_manycore_cuda.h>
 #include <bsg_manycore_errno.h>
 #include <kernel_trampoline.h>
+#include <emul_hb_device.h>
+#include <kernel_common.hpp>
 
-#ifdef __cplusplus
 #include <cstring>
 #include <cassert>
 #include <cstdlib>
 #include <cstdio>
-#else
-#include <string.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#endif
+#include <string>
+#include <iostream>
 
 #define DEBUG 0
 
@@ -58,7 +55,20 @@ void reset_runtime() {
   binary_loaded = false;
 }
 
-
+namespace {
+static size_t get_env_num_tiles(const char* var_name, size_t def_value = 0) {
+  try {
+    if (auto* value = std::getenv(var_name)) {
+      int nthreads = std::stoi(value);
+      assert(nthreads > 0);
+      return nthreads;
+    }
+  } catch (const std::exception& e) {
+    std::cerr << "Invalid " << var_name << " variable value, " << e.what() << std::endl;
+  }
+  return def_value;
+}
+}
 
 // FAKE implemenations
 
@@ -78,17 +88,8 @@ void reset_runtime() {
         int hb_mc_device_init (hb_mc_device_t *device,
                                const char *name,
                                hb_mc_manycore_id_t id) {
-          fprintf(stderr, "Emulating CUDALite...\n");
           EMUL_WARNING();
-          if (id != 0) {
-            return HB_MC_INVALID;
-          }
-          if (!device_busy) {
-            device_busy = true;
-            return HB_MC_SUCCESS;
-          } else {
-            return HB_MC_INITIALIZED_TWICE;
-          }
+          return hb_mc_device_init_custom_dimensions(device, name, id, {0,0});
         }
 
 
@@ -111,8 +112,34 @@ void reset_runtime() {
                                                  const char *name,
                                                  hb_mc_manycore_id_t id,
                                                  hb_mc_dimension_t dim) {
+          fprintf(stderr, "Emulating CUDALite...\n");
           EMUL_WARNING();
-          return hb_mc_device_init(device, name, id);
+          if (id != 0) {
+            return HB_MC_INVALID;
+          }
+          if (!device_busy) {
+            // mark device as busey
+            device_busy = true;
+            // return default or customized size
+            device->mesh = (hb_mc_mesh_t *) malloc (sizeof (hb_mc_mesh_t));
+            if (device->mesh == NULL) {
+              return HB_MC_NOMEM;
+            }
+            // If the input dimensions are (0,0) this will initialize the whole array.
+            // In emulation, we read device size from ENV
+            if (!dim.x && !dim.y) {
+              dim.x = get_env_num_tiles("HBEMUL_TILE_X_DIM", 1);;
+              dim.y = get_env_num_tiles("HBEMUL_TILE_Y_DIM", 1);;
+            }
+            device->mesh->dim = dim;
+            // communicate emulated device size
+            emul_hb_mesh_dim = dim;
+            // initialize common kernel barrier
+            g_barrier.init(dim.x * dim.y);
+            return HB_MC_SUCCESS;
+          } else {
+            return HB_MC_INITIALIZED_TWICE;
+          }
         }
 
 
@@ -315,8 +342,11 @@ void reset_runtime() {
           if (!device_busy || !binary_loaded) {
             return HB_MC_UNINITIALIZED;
           }
-          // assume a single thread for now
-          if (grid_dim.x * grid_dim.y * tg_dim.x * tg_dim.y != 1) {
+          // assume a single grid for now
+          // pytorch tile group size should match emulation tile group size
+          if (grid_dim.x * grid_dim.y != 1
+              || tg_dim.x != emul_hb_mesh_dim.x
+              || tg_dim.y != emul_hb_mesh_dim.y) {
             return HB_MC_FAIL;
           }
           std::string _name(name);

@@ -38,6 +38,8 @@ extern "C" {
           elements_to_collect, reduce, project);
 
     bsg_cuda_print_stat_kernel_end();
+
+    g_barrier.sync();
     return 0;
   }
 

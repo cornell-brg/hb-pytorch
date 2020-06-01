@@ -20,12 +20,14 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_parallel_foreach(res, input,
+    hb_tiled_foreach(res, input,
       [](uint32_t a) {
         return a;
     });
 
     bsg_cuda_print_stat_kernel_end();
+
+    g_barrier.sync();
     return 0;
 
   }

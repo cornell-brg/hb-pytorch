@@ -22,13 +22,14 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_parallel_foreach(c, a, b,
+    hb_tiled_foreach(c, a, b,
       [&](float a, float b) {
         return a + alpha * b;
     });
 
     bsg_cuda_print_stat_kernel_end();
 
+    g_barrier.sync();
     return 0;
   }
 
