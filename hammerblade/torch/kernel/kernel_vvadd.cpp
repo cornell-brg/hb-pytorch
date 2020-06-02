@@ -1,5 +1,5 @@
 //====================================================================
-// Vector increment kernel
+// Vector - vector add kernel
 // 06/02/2020 Lin Cheng (lc873@cornell.edu)
 //====================================================================
 
@@ -7,11 +7,13 @@
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_vincr(
+  __attribute__ ((noinline))  int tensorlib_vvadd(
           hb_tensor_t* result_p,
-          hb_tensor_t* self_p) {
+          hb_tensor_t* self_p,
+          hb_tensor_t* other_p) {
 
-    // Convert low level pointers to Tensor objects
+    // Tutorial TODO:
+    // Convert all low level pointers to Tensor objects
     HBTensor<float> result(result_p);
     HBTensor<float> self(self_p);
 
@@ -20,10 +22,8 @@ extern "C" {
 
     // Use a single tile only
     if (__bsg_id == 0) {
-      // Add 1 to each element
-      for (size_t i = 0; i < self.numel(); i++) {
-        result(i) = self(i) + 1;
-      }
+      // Tutorial TODO:
+      // add elements from self and other together -- put the result in result
     }
 
     //   End profiling
@@ -35,6 +35,6 @@ extern "C" {
   }
 
   // Register the HB kernel with emulation layer
-  HB_EMUL_REG_KERNEL(tensorlib_vincr, hb_tensor_t*, hb_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_vvadd, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 
 }
