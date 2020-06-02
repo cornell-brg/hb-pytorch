@@ -139,8 +139,12 @@ c10::probe::LogATenKernel();
       }
     } else {
       ${tensor_boxing}
+      c10::probe::HBProfilerLog* HB_log = new c10::probe::HBProfilerLog("@HB_LOG@");
       ${simple_ret_val} at::native::${native_type_method_dispatch}(${alter_actuals});
+      delete HB_log;
+      c10::probe::HBProfilerLog* CPU_log = new c10::probe::HBProfilerLog("@CPU_LOG@");
       ${native_ret_val} at::native::${native_type_method_dispatch}(${native_actuals});
+      delete CPU_log;
       ${tensor_allclose}
       ${redispatch_ret_call}
     }
@@ -178,8 +182,12 @@ c10::probe::LogATenKernel();
         ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
     } else {
         ${tensor_boxing}
+        c10::probe::HBProfilerLog* HB_log = new c10::probe::HBProfilerLog("@HB_LOG@");
         ${simple_ret_val} at::native::${alter_method_dispatch}(${alter_actuals});
+        delete HB_log;
+        c10::probe::HBProfilerLog* CPU_log = new c10::probe::HBProfilerLog("@CPU_LOG@");
         ${native_ret_val} at::native::${native_type_method_dispatch}(${native_actuals});
+        delete CPU_log;
         ${tensor_allclose}
         ${redispatch_ret_call}
     }
