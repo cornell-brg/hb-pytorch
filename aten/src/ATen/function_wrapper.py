@@ -1505,6 +1505,14 @@ TensorList {0}_cpu = TensorList({0}_cpu_vec);
                     option['fallback_ret_call'] = 'return res.hammerblade();'
                 elif returns_0['type'] == 'Tensor &':
                     option['fallback_ret_call'] = 'return {0};'.format(returns_0['name'])
+                elif returns_0['type'] == 'std::vector<Tensor>':
+                    option['fallback_ret_call'] = """
+std::vector<Tensor> res_hb;
+for (const auto& t : res) {
+  res_hb.push_back(t.hammerblade());
+}
+return res_hb;
+"""
                 else:
                     option['fallback_ret_call'] = 'return res;'
             else:
@@ -2160,6 +2168,14 @@ TensorList {0}_cpu = TensorList({0}_cpu_vec);
                 option['fallback_ret_call'] = 'return res.hammerblade();'
             elif returns_0['type'] == 'Tensor &':
                 option['fallback_ret_call'] = 'return {0};'.format(returns_0['name'])
+            elif returns_0['type'] == 'std::vector<Tensor>':
+                option['fallback_ret_call'] = """
+std::vector<Tensor> res_hb;
+for (const auto& t : res) {
+  res_hb.push_back(t.hammerblade());
+}
+return res_hb;
+"""
             else:
                 option['fallback_ret_call'] = 'return res;'
         else:
