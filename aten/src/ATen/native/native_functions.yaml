@@ -6591,3 +6591,16 @@
   variants: function
   dispatch:
     HammerBlade: vincr_hb
+
+# Tutorial TODO:
+# Create an ATen operator vvadd, which takes 2 input arguments
+# self, and other, and produce a Tensor
+# An incomplete template is provided below ;)
+
+# Python binding will be created for you automatically
+# You would be able to call it by torch.vvadd()
+
+# - func: vvadd() -> Tensor
+#   use_c10_dispatcher: full
+#   variants: function
+#   dispatch:
