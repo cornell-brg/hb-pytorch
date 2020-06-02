@@ -1395,7 +1395,7 @@ def create_generic(top_env, declarations):
             for f in option['formals_list']:
                 if f['type'] == 'Tensor &':
                     tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
-                    # tensor_unboxing += "{0}.copy_({0}_hb.cpu());\n".format(f['name'])
+                    tensor_unboxing += "TORCH_CHECK(at::native::allclose({0}, {0}_hb.cpu()));\n".format(f['name'])
                     alter_actuals.append(f['name'] + "_hb")
                     non_const_tensor += 1
                 elif f['type'] == 'const Tensor &':
@@ -1438,24 +1438,24 @@ TensorList {0}_hb = TensorList({0}_hb_vec);
                 option['simple_ret_val'] = 'auto res_hb ='
                 option['native_ret_val'] = 'auto res_cpu ='
                 if returns_0['type'] == 'Tensor':
+                    option['tensor_unboxing'] += "TORCH_CHECK(at::native::allclose(res_cpu, res_hb.cpu()));\n"
                     option['redispatch_ret_call'] = 'return res_cpu;'
                 elif returns_0['type'] == 'Tensor &':
                     option['redispatch_ret_call'] = 'return {0};'.format(returns_0['name'])
+                elif returns_0['type'] == 'std::vector<Tensor>':
+                    option['redispatch_ret_call'] = 'return res_cpu;'
+                    option['tensor_unboxing'] += """
+for(size_t i = 0; i < res_cpu.size(); i++) {
+  TORCH_CHECK(at::native::allclose(res_cpu[i], res_hb[i].cpu()));
+}\n"""
                 else:
                     option['redispatch_ret_call'] = 'return res_cpu;'
             else:
                 option['simple_ret_val'] = 'auto res_hb ='
                 option['native_ret_val'] = 'auto res_cpu ='
-                # ret_elements = []
-                # for r in range(len(returns)):
-                #     if returns[r]['type'] == 'Tensor':
-                #         ret_elements.append("(std::get<{0}>(res)).cpu()".format(r))
-                #     elif returns[r]['type'] == 'Tensor &':
-                #         ret_elements.append(returns[r]['name'])
-                #     else:
-                #         ret_elements.append("std::get<{0}>(res)".format(r))
-                # ret_call = 'return ' + option['return_type'] + "(" + ",".join(ret_elements) + ");"
-                # option['redispatch_ret_call'] = ret_call
+                for r in range(len(returns)):
+                    if returns[r]['type'] == 'Tensor':
+                        option['tensor_unboxing'] += "TORCH_CHECK(at::native::allclose((std::get<{0}>(res_cpu)),(std::get<{0}>(res_hb)).cpu()));\n".format(r)
                 option['redispatch_ret_call'] = 'return res_cpu;'
 
         def process_fallback_hb_to_cpu(option):
@@ -2044,7 +2044,7 @@ def create_derived(backend_type_env, declarations):
         for f in option['formals_list']:
             if f['type'] == 'Tensor &':
                 tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
-                # tensor_unboxing += "{0}.copy_({0}_hb.cpu());\n".format(f['name'])
+                tensor_unboxing += "TORCH_CHECK(at::native::allclose({0}, {0}_hb.cpu()));\n".format(f['name'])
                 alter_actuals.append(f['name'] + "_hb")
                 non_const_tensor += 1
             elif f['type'] == 'const Tensor &':
@@ -2086,24 +2086,24 @@ TensorList {0}_hb = TensorList({0}_hb_vec);
             option['simple_ret_val'] = 'auto res_hb ='
             option['native_ret_val'] = 'auto res_cpu ='
             if returns_0['type'] == 'Tensor':
+                option['tensor_unboxing'] += "TORCH_CHECK(at::native::allclose(res_cpu, res_hb.cpu()));\n"
                 option['redispatch_ret_call'] = 'return res_cpu;'
             elif returns_0['type'] == 'Tensor &':
                 option['redispatch_ret_call'] = 'return {0};'.format(returns_0['name'])
+            elif returns_0['type'] == 'std::vector<Tensor>':
+                option['redispatch_ret_call'] = 'return res_cpu;'
+                option['tensor_unboxing'] += """
+for(size_t i = 0; i < res_cpu.size(); i++) {
+  TORCH_CHECK(at::native::allclose(res_cpu[i], res_hb[i].cpu()));
+}\n"""
             else:
                 option['redispatch_ret_call'] = 'return res_cpu;'
         else:
             option['simple_ret_val'] = 'auto res_hb ='
             option['native_ret_val'] = 'auto res_cpu ='
-            # ret_elements = []
-            # for r in range(len(returns)):
-            #     if returns[r]['type'] == 'Tensor':
-            #         ret_elements.append("(std::get<{0}>(res)).cpu()".format(r))
-            #     elif returns[r]['type'] == 'Tensor &':
-            #         ret_elements.append(returns[r]['name'])
-            #     else:
-            #         ret_elements.append("std::get<{0}>(res)".format(r))
-            # ret_call = 'return ' + option['return_type'] + "(" + ",".join(ret_elements) + ");"
-            # option['redispatch_ret_call'] = ret_call
+            for r in range(len(returns)):
+                if returns[r]['type'] == 'Tensor':
+                    option['tensor_unboxing'] += "TORCH_CHECK(at::native::allclose((std::get<{0}>(res_cpu)),(std::get<{0}>(res_hb)).cpu()));\n".format(r)
             option['redispatch_ret_call'] = 'return res_cpu;'
 
         # get alternative dispatching dst
