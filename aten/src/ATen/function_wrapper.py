@@ -141,7 +141,7 @@ c10::probe::LogATenKernel();
       ${tensor_boxing}
       ${simple_ret_val} at::native::${native_type_method_dispatch}(${alter_actuals});
       ${native_ret_val} at::native::${native_type_method_dispatch}(${native_actuals});
-      ${tensor_unboxing}
+      ${tensor_allclose}
       ${redispatch_ret_call}
     }
 #else
@@ -180,7 +180,7 @@ c10::probe::LogATenKernel();
         ${tensor_boxing}
         ${simple_ret_val} at::native::${alter_method_dispatch}(${alter_actuals});
         ${native_ret_val} at::native::${native_type_method_dispatch}(${native_actuals});
-        ${tensor_unboxing}
+        ${tensor_allclose}
         ${redispatch_ret_call}
     }
 #else
@@ -740,7 +740,7 @@ FunctionOption = TypedDict('FunctionOption', {
     'zero_dim_dispatch_when_scalar': str,
     'redispatch_condition' : str,
     'tensor_boxing' : str,
-    'tensor_unboxing' : str,
+    'tensor_allclose' : str,
     'simple_ret_val' : str,
     'native_ret_val' : str,
     'redispatch_ret_call' : str,
@@ -1386,7 +1386,7 @@ def create_generic(top_env, declarations):
             # type: (FunctionOption) -> None
             redispatch_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_is_top_level() && c10::probe::should_redispatch(__PRETTY_FUNCTION__))"
             tensor_boxing = ""
-            tensor_unboxing = ""
+            tensor_allclose = ""
             alter_actuals = []
             option['redispatch_condition'] = redispatch_condition
 
@@ -1395,7 +1395,7 @@ def create_generic(top_env, declarations):
             for f in option['formals_list']:
                 if f['type'] == 'Tensor &':
                     tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
-                    tensor_unboxing += "TORCH_CHECK(at::native::allclose({0}, {0}_hb.cpu()));\n".format(f['name'])
+                    tensor_allclose += "TORCH_CHECK(at::native::allclose({0}, {0}_hb.cpu()));\n".format(f['name'])
                     alter_actuals.append(f['name'] + "_hb")
                     non_const_tensor += 1
                 elif f['type'] == 'const Tensor &':
@@ -1413,7 +1413,7 @@ TensorList {0}_hb = TensorList({0}_hb_vec);
                 else:
                     alter_actuals.append(f['name'])
             option['tensor_boxing'] = tensor_boxing
-            option['tensor_unboxing'] = tensor_unboxing
+            option['tensor_allclose'] = tensor_allclose
             option['alter_actuals'] = alter_actuals
             assert len(alter_actuals) == len(option['formals_list'])
             assert len(option['returns']) == non_const_tensor or non_const_tensor == 0
@@ -1438,13 +1438,13 @@ TensorList {0}_hb = TensorList({0}_hb_vec);
                 option['simple_ret_val'] = 'auto res_hb ='
                 option['native_ret_val'] = 'auto res_cpu ='
                 if returns_0['type'] == 'Tensor':
-                    option['tensor_unboxing'] += "TORCH_CHECK(at::native::allclose(res_cpu, res_hb.cpu()));\n"
+                    option['tensor_allclose'] += "TORCH_CHECK(at::native::allclose(res_cpu, res_hb.cpu()));\n"
                     option['redispatch_ret_call'] = 'return res_cpu;'
                 elif returns_0['type'] == 'Tensor &':
                     option['redispatch_ret_call'] = 'return {0};'.format(returns_0['name'])
                 elif returns_0['type'] == 'std::vector<Tensor>':
                     option['redispatch_ret_call'] = 'return res_cpu;'
-                    option['tensor_unboxing'] += """
+                    option['tensor_allclose'] += """
 for(size_t i = 0; i < res_cpu.size(); i++) {
   TORCH_CHECK(at::native::allclose(res_cpu[i], res_hb[i].cpu()));
 }\n"""
@@ -1455,7 +1455,7 @@ for(size_t i = 0; i < res_cpu.size(); i++) {
                 option['native_ret_val'] = 'auto res_cpu ='
                 for r in range(len(returns)):
                     if returns[r]['type'] == 'Tensor':
-                        option['tensor_unboxing'] += "TORCH_CHECK(at::native::allclose((std::get<{0}>(res_cpu)),(std::get<{0}>(res_hb)).cpu()));\n".format(r)
+                        option['tensor_allclose'] += "TORCH_CHECK(at::native::allclose((std::get<{0}>(res_cpu)),(std::get<{0}>(res_hb)).cpu()));\n".format(r)
                 option['redispatch_ret_call'] = 'return res_cpu;'
 
         def process_fallback_hb_to_cpu(option):
@@ -2043,7 +2043,7 @@ def create_derived(backend_type_env, declarations):
         # type: (FunctionOption) -> None
         redispatch_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_is_top_level() && c10::probe::should_redispatch(__PRETTY_FUNCTION__))"
         tensor_boxing = ""
-        tensor_unboxing = ""
+        tensor_allclose = ""
         alter_actuals = []
         option['redispatch_condition'] = redispatch_condition
 
@@ -2052,7 +2052,7 @@ def create_derived(backend_type_env, declarations):
         for f in option['formals_list']:
             if f['type'] == 'Tensor &':
                 tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
-                tensor_unboxing += "TORCH_CHECK(at::native::allclose({0}, {0}_hb.cpu()));\n".format(f['name'])
+                tensor_allclose += "TORCH_CHECK(at::native::allclose({0}, {0}_hb.cpu()));\n".format(f['name'])
                 alter_actuals.append(f['name'] + "_hb")
                 non_const_tensor += 1
             elif f['type'] == 'const Tensor &':
@@ -2070,7 +2070,7 @@ TensorList {0}_hb = TensorList({0}_hb_vec);
             else:
                 alter_actuals.append(f['name'])
         option['tensor_boxing'] = tensor_boxing
-        option['tensor_unboxing'] = tensor_unboxing
+        option['tensor_allclose'] = tensor_allclose
         option['alter_actuals'] = alter_actuals
         assert len(alter_actuals) == len(option['formals_list'])
         assert len(option['returns']) == non_const_tensor or non_const_tensor == 0
@@ -2094,13 +2094,13 @@ TensorList {0}_hb = TensorList({0}_hb_vec);
             option['simple_ret_val'] = 'auto res_hb ='
             option['native_ret_val'] = 'auto res_cpu ='
             if returns_0['type'] == 'Tensor':
-                option['tensor_unboxing'] += "TORCH_CHECK(at::native::allclose(res_cpu, res_hb.cpu()));\n"
+                option['tensor_allclose'] += "TORCH_CHECK(at::native::allclose(res_cpu, res_hb.cpu()));\n"
                 option['redispatch_ret_call'] = 'return res_cpu;'
             elif returns_0['type'] == 'Tensor &':
                 option['redispatch_ret_call'] = 'return {0};'.format(returns_0['name'])
             elif returns_0['type'] == 'std::vector<Tensor>':
                 option['redispatch_ret_call'] = 'return res_cpu;'
-                option['tensor_unboxing'] += """
+                option['tensor_allclose'] += """
 for(size_t i = 0; i < res_cpu.size(); i++) {
   TORCH_CHECK(at::native::allclose(res_cpu[i], res_hb[i].cpu()));
 }\n"""
@@ -2111,7 +2111,7 @@ for(size_t i = 0; i < res_cpu.size(); i++) {
             option['native_ret_val'] = 'auto res_cpu ='
             for r in range(len(returns)):
                 if returns[r]['type'] == 'Tensor':
-                    option['tensor_unboxing'] += "TORCH_CHECK(at::native::allclose((std::get<{0}>(res_cpu)),(std::get<{0}>(res_hb)).cpu()));\n".format(r)
+                    option['tensor_allclose'] += "TORCH_CHECK(at::native::allclose((std::get<{0}>(res_cpu)),(std::get<{0}>(res_hb)).cpu()));\n".format(r)
             option['redispatch_ret_call'] = 'return res_cpu;'
 
         # get alternative dispatching dst
