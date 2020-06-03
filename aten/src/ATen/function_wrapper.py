@@ -1407,7 +1407,8 @@ def create_generic(top_env, declarations):
                     alter_actuals.append(f['name'] + "_hb")
                     non_const_tensor += 1
                 elif f['type'] == 'const Tensor &':
-                    alter_actuals.append(f['name'] + ".llcopy()")
+                    tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
+                    alter_actuals.append(f['name'] + "_hb")
                 elif f['type'] == 'TensorList':
                     tensor_boxing += """
 std::vector<Tensor> {0}_vec = {0}.vec();
@@ -2064,7 +2065,8 @@ def create_derived(backend_type_env, declarations):
                 alter_actuals.append(f['name'] + "_hb")
                 non_const_tensor += 1
             elif f['type'] == 'const Tensor &':
-                alter_actuals.append(f['name'] + ".llcopy()")
+                tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
+                alter_actuals.append(f['name'] + "_hb")
             elif f['type'] == 'TensorList':
                 tensor_boxing += """
 std::vector<Tensor> {0}_vec = {0}.vec();
