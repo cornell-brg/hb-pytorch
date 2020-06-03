@@ -14,6 +14,10 @@ const int IDLE = -1;
 const int IN_USE = -42;
 std::atomic<int> hb_device_status{IDLE};
 
+// bsg_time to cycles conversion factor
+// check #87
+const uint64_t cycle_time = 10;
+
 namespace {
 static std::once_flag init_flag;
 static void initHammerBladeDevice() {
@@ -32,6 +36,11 @@ static void initHammerBladeDevice() {
   std::cerr << "HB startup config kernel applied" << std::endl;
   return;
 }
+
+static uint64_t elapsed_cycles() {
+  return bsg_time() / cycle_time;
+}
+
 } // namespace unnamed
 
 DeviceIndex device_count() noexcept {
@@ -117,10 +126,15 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
 
   C10_HB_CHECK(hb_mc_kernel_enqueue(&_hb_device, _hb_grid_dim, _hb_tg_dim, kernel,
                                     args.size(), cuda_argv));
+
+  uint64_t cycles_start = elapsed_cycles();
   C10_HB_CHECK(hb_mc_device_tile_groups_execute(&_hb_device));
+  uint64_t cycles_delta = elapsed_cycles() - cycles_start;
+  // assuming 1GHz
+  uint64_t time_on_device = cycles_delta / 1000;
 
   // write the SIMULATED time to ExecutionTime log
-  std::chrono::microseconds simulated(3154);
+  std::chrono::microseconds simulated(time_on_device);
   trim_log->trim_manual_log_exec_time(simulated);
   // delete trim log
   delete trim_log;

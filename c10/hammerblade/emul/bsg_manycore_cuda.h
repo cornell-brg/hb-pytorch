@@ -29,6 +29,7 @@
 #define BSG_MANYCORE_CUDA_H
 #include <bsg_manycore_features.h>
 #include <bsg_manycore_eva.h>
+#include <bsg_manycore_printing.h>
 
 #ifdef __cplusplus
 #include <cstdint>
