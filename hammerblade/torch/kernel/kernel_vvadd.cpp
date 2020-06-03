@@ -16,6 +16,7 @@ extern "C" {
     // Convert all low level pointers to Tensor objects
     HBTensor<float> result(result_p);
     HBTensor<float> self(self_p);
+    HBTensor<float> other(other_p);
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
@@ -24,6 +25,9 @@ extern "C" {
     if (__bsg_id == 0) {
       // Tutorial TODO:
       // add elements from self and other together -- put the result in result
+      for (size_t i = 0; i < self.numel(); i++) {
+        result(i) = self(i) + other(i);
+      }
     }
 
     //   End profiling
