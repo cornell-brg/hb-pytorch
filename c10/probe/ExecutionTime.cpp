@@ -8,6 +8,7 @@ namespace c10 {
 namespace probe {
 
 ExecutionTimeProfiler g_execution_time_profiler;
+ExecutionTimeProfiler g_per_op_execution_time_profiler;
 
 // ============ ExecutionTimeProfiler Members ============
 
@@ -65,6 +66,7 @@ ExecutionTimeLog::~ExecutionTimeLog() {
   auto delta = std::chrono::duration_cast<std::chrono::microseconds>
     (std::chrono::high_resolution_clock::now() - start);
   g_execution_time_profiler.log(stack, delta);
+  g_per_op_execution_time_profiler.log(stack, delta);
 }
 
 }} // namespace c10::probe

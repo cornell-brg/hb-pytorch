@@ -25,6 +25,7 @@ void HBProfiler::profiling_start() {
   // reset profiler pluggins
   g_unimpl_kernel_profiler.reset();
   g_execution_time_profiler.reset();
+  g_per_op_execution_time_profiler.reset();
   g_execution_charter.reset();
   // mark current time
   std::vector<std::string> fake_roi_stack;
@@ -86,6 +87,7 @@ HBProfilerLog::HBProfilerLog(const std::string& func_name) {
     g_curr_call_stack.push_back(func_name);
     execution_time_log = new ExecutionTimeLog(g_curr_call_stack);
     if (hb_profiler_is_top_level()) {
+      g_per_op_execution_time_profiler.reset();
       g_execution_charter.log(func_name);
     }
   }
@@ -96,6 +98,10 @@ HBProfilerLog::~HBProfilerLog()
 {
   if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
     delete execution_time_log;
+    if (hb_profiler_is_top_level()) {
+      std::cerr << "#TOP_LEVEL_FUNC#__" << g_curr_call_stack.back() << std::endl;
+      std::cerr << g_per_op_execution_time_profiler.str_dump() << std::endl;
+    }
     g_curr_call_stack.pop_back();
   }
 }
@@ -119,6 +125,7 @@ HBProfilerTrimLog::~HBProfilerTrimLog()
 
 void HBProfilerTrimLog::trim_manual_log_exec_time(std::chrono::microseconds simulated) {
   g_execution_time_profiler.log(g_curr_call_stack, simulated);
+  g_per_op_execution_time_profiler.log(g_curr_call_stack, simulated);
 }
 
 }} // namespace c10::probe
