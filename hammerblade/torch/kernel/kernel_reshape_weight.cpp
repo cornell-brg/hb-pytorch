@@ -36,7 +36,8 @@ extern "C" {
       new_indices(i) = weight_indices(1, i) * dim2 * dim3 + weight_indices(2, i) * dim3 + weight_indices(3, i);
     }
 
-    bsg_cuda_print_stat_kernel_end();   
+    bsg_cuda_print_stat_kernel_end();
+    g_barrier.sync();  
     return 0;
   }
 
