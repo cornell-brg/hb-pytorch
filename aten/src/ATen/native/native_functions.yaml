@@ -6605,3 +6605,11 @@
   variants: function
   dispatch:
     HammerBlade: vvadd_hb
+
+# Practice:
+# ATen operator vsort, that sorts a vector
+- func : vsort(Tensor self) -> Tensor
+  use_c10_dispatcher: full
+  variants: function
+  dispatch:
+    HammerBlade: vsort_hb
