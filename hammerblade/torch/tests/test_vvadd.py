@@ -32,7 +32,7 @@ def test_torch_vvadd_2():
 
 @settings(deadline=None)
 @given(tensors=hu.tensors(n=2))
-def test_torch_addcmul_hypothesis(tensors):
+def test_torch_vvadd_hypothesis(tensors):
     t1 = torch.tensor(tensors[0])
     t2 = torch.tensor(tensors[1])
     _test_torch_vvadd(t1, t2)

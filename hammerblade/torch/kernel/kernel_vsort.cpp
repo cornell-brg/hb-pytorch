@@ -31,17 +31,26 @@ static void tensorlib_vsort_recur(
 
             if (i < j) {
                 // Swap elements at i and j
+                auto temp = (*vec)(i);
+                (*vec)(i) = (*vec)(j);
+                (*vec)(j) = temp;
+                /*
                 (*vec)(i) = (*vec)(i) + (*vec)(j);
                 (*vec)(j) = (*vec)(i) - (*vec)(j);
                 (*vec)(i) = (*vec)(i) - (*vec)(j);
+                */
             }
         }
 
         // Swap elements at j and piv
+        auto temp = (*vec)(piv);
+        (*vec)(piv) = (*vec)(j);
+        (*vec)(j) = temp;
+        /*
         (*vec)(piv) = (*vec)(piv) + (*vec)(j);
         (*vec)(j) = (*vec)(piv) - (*vec)(j);
         (*vec)(piv) = (*vec)(piv) - (*vec)(j);
-
+        */
         tensorlib_vsort_recur(vec, first, j-1);
         tensorlib_vsort_recur(vec, j+1, last);
     }
