@@ -1,6 +1,6 @@
 import sys
-import os
-sys.path.append(os.getcwd() + '/..')
+import pathlib
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + '/..')
 import stack_parser
 import process_CPU_stack
 import process_HB_stack
