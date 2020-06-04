@@ -117,8 +117,10 @@ if __name__ == "__main__":
         data = external_stats.splitlines()
         overview = data[3]
         cycles = float(overview.split()[6])
-        # convert to milliseconds
-        ms = cycles / HB_FREQUENCY * 1000
-        external_trim = ms
+        # convert to microseconds
+        us = cycles / HB_FREQUENCY * 1000000
+        external_trim = us
 
+    compare(full_raw_stack, chunk_raw_stack)
+    print()
     compare(full_raw_stack, chunk_raw_stack, external_trim=external_trim)
