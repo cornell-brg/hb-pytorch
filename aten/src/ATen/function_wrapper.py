@@ -145,7 +145,9 @@ c10::probe::LogATenKernel();
       c10::probe::HBProfilerLog* CPU_log = new c10::probe::HBProfilerLog("@CPU_LOG@");
       ${native_ret_val} at::native::${native_type_method_dispatch}(${native_actuals});
       delete CPU_log;
-      ${tensor_allclose}
+      if(c10::probe::should_check_allclose()) {
+        ${tensor_allclose}
+      }
       ${redispatch_ret_call}
     }
 #else
@@ -188,7 +190,9 @@ c10::probe::LogATenKernel();
         c10::probe::HBProfilerLog* CPU_log = new c10::probe::HBProfilerLog("@CPU_LOG@");
         ${native_ret_val} at::native::${native_type_method_dispatch}(${native_actuals});
         delete CPU_log;
-        ${tensor_allclose}
+        if(c10::probe::should_check_allclose()) {
+          ${tensor_allclose}
+        }
         ${redispatch_ret_call}
     }
 #else
