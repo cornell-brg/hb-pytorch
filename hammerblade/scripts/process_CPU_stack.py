@@ -7,8 +7,8 @@ per ATen Operator
 """
 
 import sys
-import os
-sys.path.append(os.getcwd())
+import pathlib
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 import stack_parser
 
 # INPUT:  raw stack of a single ATen Operator

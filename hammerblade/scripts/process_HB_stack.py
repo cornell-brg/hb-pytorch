@@ -7,16 +7,17 @@ per ATen Operator
 """
 
 import sys
-import os
-sys.path.append(os.getcwd())
+import pathlib
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 import stack_parser
 
-# INPUT:  raw stack of a single ATen Operator
-# OUTPUT: subtree with HB_log as root
+# INPUT:   raw stack of a single ATen Operator
+# OUTPUT:  subtree with HB_log as root
 # OPTIONS: fancy_func -- show operator name as aten::op instead of raw func signature
+#          trimming -- apply trimming
 
-def parse(raw_stack, fancy_func=False):
-    root = stack_parser.exec_time_tree(raw_stack, fancy_func=fancy_func)
+def parse(raw_stack, fancy_func=False, trimming=False):
+    root = stack_parser.exec_time_tree(raw_stack, fancy_func=fancy_func, trimming=trimming)
     # in the per ATen OP context, the tree looks like
     #            root
     #        /          \
