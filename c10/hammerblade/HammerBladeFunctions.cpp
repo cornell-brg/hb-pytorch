@@ -16,7 +16,7 @@ std::atomic<int> hb_device_status{IDLE};
 
 // bsg_time to cycles conversion factor
 // check #87
-const uint64_t cycle_time = 10;
+const uint64_t cycle_time = 10000;
 
 namespace {
 static std::once_flag init_flag;
