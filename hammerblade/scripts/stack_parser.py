@@ -12,7 +12,7 @@ class exec_time_Node:
         self.time = float(time)
         self.children = []
         self.percentage = -1
-        if fancy_func:
+        if fancy_func and not self.func.startswith("@"):
             func = self.func
             func = func.split("(")[0]
             func = func.split("::")[-1]
@@ -66,7 +66,7 @@ def exec_time_construct_tree_impl(data, parent, fancy_func=False):
             # stack pop front
             lower_level.append((stack[1:], time))
             global_idx += 1
-        exec_time_construct_tree_impl(lower_level, node)
+        exec_time_construct_tree_impl(lower_level, node, fancy_func=fancy_func)
 
 # "Trim" the exec_time tree -> replace offload_kernel time
 # with simulated time
