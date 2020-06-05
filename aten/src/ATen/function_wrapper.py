@@ -138,7 +138,11 @@ c10::probe::LogATenKernel();
         }
       }
     } else {
+      std::stringstream buffer;
+      size_t vec_idx = 0;
       ${tensor_boxing}
+      std::cerr << "@#ACTUALS#@__";
+      std::cerr << buffer.str() << std::endl;
       c10::probe::HBProfilerLog* HB_log = new c10::probe::HBProfilerLog("@HB_LOG@");
       ${simple_ret_val} at::native::${native_type_method_dispatch}(${alter_actuals});
       delete HB_log;
@@ -183,7 +187,11 @@ c10::probe::LogATenKernel();
     if(!${redispatch_condition}) {
         ${return_call} at::native::${native_type_method_dispatch}(${native_actuals});
     } else {
+        std::stringstream buffer;
+        size_t vec_idx = 0;
         ${tensor_boxing}
+        std::cerr << "@#ACTUALS#@__";
+        std::cerr << buffer.str() << std::endl;
         c10::probe::HBProfilerLog* HB_log = new c10::probe::HBProfilerLog("@HB_LOG@");
         ${simple_ret_val} at::native::${alter_method_dispatch}(${alter_actuals});
         delete HB_log;
@@ -1407,18 +1415,23 @@ def create_generic(top_env, declarations):
             for f in option['formals_list']:
                 if f['type'] == 'Tensor &':
                     tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
+                    tensor_boxing += "buffer << \"{0};\" << {0}.sizes() << \"<|>\";\n".format(f['name'])
                     tensor_allclose += "TORCH_CHECK(at::native::allclose({0}, {0}_hb.cpu()));\n".format(f['name'])
                     alter_actuals.append(f['name'] + "_hb")
                     non_const_tensor += 1
                 elif f['type'] == 'const Tensor &':
                     tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
+                    tensor_boxing += "buffer << \"{0};\" << {0}.sizes() << \"<|>\";\n".format(f['name'])
                     alter_actuals.append(f['name'] + "_hb")
                 elif f['type'] == 'TensorList':
                     tensor_boxing += """
 std::vector<Tensor> {0}_vec = {0}.vec();
 std::vector<Tensor> {0}_hb_vec;
+vec_idx = 0;
 for (const auto& t : {0}_vec) {{
   {0}_hb_vec.push_back(t.llcopy());
+  buffer << "{0}_" << vec_idx << ";" << t.sizes() << "<|>";
+  vec_idx++;
 }}
 TensorList {0}_hb = TensorList({0}_hb_vec);
 \n""".format(f['name'])
@@ -2065,18 +2078,23 @@ def create_derived(backend_type_env, declarations):
         for f in option['formals_list']:
             if f['type'] == 'Tensor &':
                 tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
+                tensor_boxing += "buffer << \"{0};\" << {0}.sizes() << \"<|>\";\n".format(f['name'])
                 tensor_allclose += "TORCH_CHECK(at::native::allclose({0}, {0}_hb.cpu()));\n".format(f['name'])
                 alter_actuals.append(f['name'] + "_hb")
                 non_const_tensor += 1
             elif f['type'] == 'const Tensor &':
                 tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
+                tensor_boxing += "buffer << \"{0};\" << {0}.sizes() << \"<|>\";\n".format(f['name'])
                 alter_actuals.append(f['name'] + "_hb")
             elif f['type'] == 'TensorList':
                 tensor_boxing += """
 std::vector<Tensor> {0}_vec = {0}.vec();
 std::vector<Tensor> {0}_hb_vec;
+vec_idx = 0
 for (const auto& t : {0}_vec) {{
   {0}_hb_vec.push_back(t.llcopy());
+  buffer << "{0}_" << vec_idx << ";" << t.sizes() << "<|>";
+  vec_idx++;
 }}
 TensorList {0}_hb = TensorList({0}_hb_vec);
 \n""".format(f['name'])
