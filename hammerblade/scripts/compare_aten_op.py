@@ -7,7 +7,6 @@ External stats file can be passed in as --manycore-stats
 06/04/2020 Lin Cheng (lc873@cornell.edu)
 """
 
-import argparse
 import copy
 import sys
 import pathlib
@@ -26,6 +25,7 @@ HB_FREQUENCY = 1000000000 # Hz = 1GHz
 # OUTPUT: parsed arguments
 
 def parse_arguments():
+    import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--full', default="full.std")
     parser.add_argument('--chunk', default="chunk.std")
