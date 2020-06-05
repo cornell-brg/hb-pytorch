@@ -42,11 +42,35 @@ def traversal(root, func):
     return root
 
 # INPUT:   full_raw_stack & chunk_raw_stack
+# OUTPUT:  NONE
+
+def cross_check(full_raw_stack, chunk_raw_stack):
+    full_tree = stack_parser.exec_time_tree(full_raw_stack)
+    chunk_tree = stack_parser.exec_time_tree(chunk_raw_stack)
+    full_func_list = []
+    def gather_full_func(root):
+        full_func_list.append(root.func)
+    chunk_func_list = []
+    def gather_chunk_func(root):
+        chunk_func_list.append(root.func)
+    traversal(full_tree, gather_full_func)
+    traversal(chunk_tree, gather_chunk_func)
+    assert len(full_func_list) == len(chunk_func_list)
+    full_func = "<|>".join(full_func_list)
+    chunk_func = "<|>".join(chunk_func_list)
+    assert full_func == chunk_func
+
+
+# INPUT:   full_raw_stack & chunk_raw_stack
 # OUTPUT:  (CPU_tree, HB_tree, time on HB)
 # OPTIONS: fancy_func -- show operator name as aten::op instead of raw func signature
 #          external_trim -- use UW's profiler data instead of bsg_time for simulated time trimming
 
 def compare(full_raw_stack, chunk_raw_stack, fancy_func=False, external_trim=None):
+
+    # cross check both stacks -- make sure they have the same shape
+    cross_check(full_raw_stack, chunk_raw_stack)
+
     # process CPU_log and HB_log
     # CPU_log should be given by full input data
     # HB_log should be given by chunk input data
