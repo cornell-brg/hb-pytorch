@@ -127,14 +127,11 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   C10_HB_CHECK(hb_mc_kernel_enqueue(&_hb_device, _hb_grid_dim, _hb_tg_dim, kernel,
                                     args.size(), cuda_argv));
 
-  uint64_t cycles_start = elapsed_cycles();
   C10_HB_CHECK(hb_mc_device_tile_groups_execute(&_hb_device));
-  uint64_t cycles_delta = elapsed_cycles() - cycles_start;
-  // assuming 1GHz
-  uint64_t time_on_device = cycles_delta / 1000;
 
   // write the SIMULATED time to ExecutionTime log
-  std::chrono::microseconds simulated(time_on_device);
+  // set to 0 for now since bsg_time is ... wired
+  std::chrono::microseconds simulated(0);
   trim_log->trim_manual_log_exec_time(simulated);
   // delete trim log
   delete trim_log;
