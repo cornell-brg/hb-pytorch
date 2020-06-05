@@ -18,10 +18,14 @@ def parse(out_std):
     idx = 0
     for d in data:
         if d.startswith("@#ACTUALS#@__"):
+            # assuming exactly one redispatching per out.std log
+            assert actuals is None
             actuals = d.split("@#ACTUALS#@__")[1]
         if d.startswith("#TOP_LEVEL_FUNC#__"):
+            assert stack_start is None
             stack_start = idx
         if d.startswith("#TOP_LEVEL_FUNC_END#__"):
+            assert stack_end is None
             stack_end = idx
         idx += 1
     # correctness check -- all of these should be true
