@@ -8,6 +8,7 @@ External stats file can be passed in as --manycore-stats
 """
 
 import argparse
+import copy
 import sys
 import pathlib
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
@@ -61,8 +62,24 @@ def cross_check(full_raw_stack, chunk_raw_stack):
     assert full_func == chunk_func
 
 
+class ATen_OP:
+    def __init__(self, cpu_log, hb_log, time_on_hb):
+        self.cpu_log = copy.deepcopy(cpu_log)
+        self.hb_log = copy.deepcopy(hb_log)
+        # figure out time break down
+        self.xeon_time = self.cpu_log.time
+        self.hb_device_time = time_on_hb
+        host_only_hb_log = copy.deepcopy(hb_log)
+        def reset_trim(root):
+            if root.func == "@TRIM@":
+                root.time = float(0)
+        host_only_hb_log = traversal(host_only_hb_log, reset_trim)
+        stack_parser.exec_time_apply_trim(host_only_hb_log)
+        self.hb_host_time = host_only_hb_log.time
+
+
 # INPUT:   full_raw_stack & chunk_raw_stack
-# OUTPUT:  (CPU_tree, HB_tree, time on HB)
+# OUTPUT:  ATen_OP object
 # OPTIONS: fancy_func -- show operator name as aten::op instead of raw func signature
 #          external_trim -- use UW's profiler data instead of bsg_time for simulated time trimming
 
@@ -103,7 +120,7 @@ def compare(full_raw_stack, chunk_raw_stack, fancy_func=False, external_trim=Non
     print(stack_parser.exec_time_print_tree(hb_log))
     print("total time on HB = " + str(total_time_on_HB))
 
-    return (cpu_log, hb_log, total_time_on_HB)
+    return ATen_OP(cpu_log, hb_log, total_time_on_HB)
 
 # INPUT:   NONE
 # OUTPUT:  NONE

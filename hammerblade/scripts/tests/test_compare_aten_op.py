@@ -33,10 +33,14 @@ def test_compare_aten_op_1():
         external_trim = ms
 
     # do the comparison
-    cpu_log, hb_log, time_on_hb = compare(full_raw_stack, chunk_raw_stack, external_trim=external_trim)
+    aten_op = compare(full_raw_stack, chunk_raw_stack, external_trim=external_trim)
+    cpu_log = aten_op.cpu_log
+    hb_log = aten_op.hb_log
 
     # pytest assertion
-    assert time_on_hb == 1.204603
+    assert aten_op.hb_device_time == 1.204603
+    assert aten_op.hb_host_time == 170.0
+    assert aten_op.xeon_time == 34.895
     cpu_graph = stack_parser.exec_time_print_tree(cpu_log)
     assert cpu_graph == "|- Node(@CPU_LOG@ : 34.895)\n  |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 0.031)\n  |- Node(at::native::add_stub::add_stub() : 34.707)"
     hb_graph = stack_parser.exec_time_print_tree(hb_log)
