@@ -80,6 +80,38 @@ def cross_check(full_raw_stack, chunk_raw_stack):
     chunk_func = "<|>".join(chunk_func_list)
     assert full_func == chunk_func
 
+# INPUT:  a tree
+# OUTPUT: graphviz code
+
+def draw_tree(root):
+    # use a 2 passes method
+    nodes = []
+    idx = 0
+    root = copy.deepcopy(root)
+    def collect_nodes(root):
+        nonlocal idx
+        root.idx = idx
+        idx += 1
+        # dont show TRIM
+        if root.func != "@TRIM@":
+            nodes.append("{0} [ shape=record label = \"{1}|{2:.2f}\"];".format(root.idx, fancify(root.func), root.time))
+    traversal(root, collect_nodes)
+    edges = []
+    def collect_edges(root):
+        for child in root.children:
+            # dont show TRIM
+            if child.func != "@TRIM@":
+                edges.append("{0} -> {1};".format(root.idx, child.idx))
+    traversal(root, collect_edges)
+    buf = """
+digraph {
+"""
+    buf += "\n".join(nodes)
+    buf += "\n"
+    buf += "\n".join(edges)
+    buf += "\n}\n"
+    return buf
+
 
 class ATen_OP:
     def __init__(self, name, cpu_log, hb_log, time_on_hb, actuals):
@@ -97,6 +129,12 @@ class ATen_OP:
         stack_parser.exec_time_apply_trim(host_only_hb_log)
         self.hb_host_time = host_only_hb_log.time
         self.actuals = actuals
+
+    def draw_cpu_log(self):
+        return draw_tree(self.cpu_log)
+
+    def draw_hb_log(self):
+        return draw_tree(self.hb_log)
 
     def __str__(self):
         template = "\n|{func:^23}|{tensor:^15}|{full:^20}|{chunk:^20}|{xeon:^17}|{hb:^21}|{host:^17}|{device:^19}|"
@@ -239,3 +277,6 @@ if __name__ == "__main__":
     args = parse_arguments()
     aten_op = compare(args.full, args.chunk, args.manycore_stats, args.fancy)
     print(aten_op)
+    print(aten_op.draw_cpu_log())
+    print()
+    print(aten_op.draw_hb_log())
