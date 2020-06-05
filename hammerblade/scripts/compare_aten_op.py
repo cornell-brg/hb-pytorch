@@ -45,6 +45,22 @@ def traversal(root, func):
         traversal(child, func)
     return root
 
+# INPUT:  aten op signature
+# OUTPUT: fancy func name
+
+def fancify(func):
+    # if already in fancy format, return
+    if func.find("aten") != -1:
+        return func
+    # if this is a special node, return the untouched func
+    if func.startswith("@"):
+        return func
+    # fancify
+    func = func.split("(")[0]
+    func = func.split("::")[-1]
+    func = "aten::" + func
+    return func
+
 # INPUT:   full_raw_stack & chunk_raw_stack
 # OUTPUT:  NONE
 
@@ -66,7 +82,8 @@ def cross_check(full_raw_stack, chunk_raw_stack):
 
 
 class ATen_OP:
-    def __init__(self, cpu_log, hb_log, time_on_hb, actuals):
+    def __init__(self, name, cpu_log, hb_log, time_on_hb, actuals):
+        self.name = name
         self.cpu_log = copy.deepcopy(cpu_log)
         self.hb_log = copy.deepcopy(hb_log)
         # figure out time break down
@@ -81,6 +98,32 @@ class ATen_OP:
         self.hb_host_time = host_only_hb_log.time
         self.actuals = actuals
 
+    def __str__(self):
+        template = "\n|{func:^23}|{tensor:^15}|{full:^20}|{chunk:^20}|{xeon:^17}|{hb:^21}|{host:^17}|{device:^19}|"
+        buf = """
++-----------------------+---------------+--------------------+--------------------+-----------------+---------------------+-----------------+-------------------+
+|        ATen OP        |     Input     |     Full  Size     |     Chunk Size     |    Xeon Time    |    HB Total Time    |    Host Time    |    Device Time    |
++-----------------------+---------------+--------------------+--------------------+-----------------+---------------------+-----------------+-------------------+"""
+        # this may not always true ... but ...
+        assert len(self.actuals) > 0
+        op_loc = 0
+        loc = 0
+        for actual in self.actuals:
+            buf += template.format(
+                func = fancify(self.name) if loc == op_loc else "",
+                tensor = actual.name,
+                full = actual.full,
+                chunk = actual.chunk,
+                xeon = "{:.2f}".format(self.xeon_time) if loc == op_loc else "",
+                hb = "{:.2f}".format(self.hb_host_time + self.hb_device_time) if loc == op_loc else "",
+                host = "{:.2f}".format(self.hb_host_time) if loc == op_loc else "",
+                device = "{:.2f}".format(self.hb_device_time) if loc == op_loc else "")
+            loc += 1
+        buf += """
++-----------------------+---------------+--------------------+--------------------+-----------------+---------------------+-----------------+-------------------+
+"""
+        return buf
+
 
 # INPUT:   full_raw_stack + full_actuals & chunk_raw_stack + chunk_actuals
 # OUTPUT:  ATen_OP object
@@ -91,6 +134,11 @@ def compare_impl(full_raw_stack, full_actuals, chunk_raw_stack, chunk_actuals, f
 
     # cross check both stacks -- make sure they have the same shape
     cross_check(full_raw_stack, chunk_raw_stack)
+
+    # build a full tree -- just to get the aten op name
+    root = stack_parser.exec_time_tree(full_raw_stack, fancy_func=fancy_func)
+    # this must be true -- the root has 2 children -- the aten op and other
+    op_name = root.children[0].func
 
     # process CPU_log and HB_log
     # CPU_log should be given by full input data
@@ -127,7 +175,7 @@ def compare_impl(full_raw_stack, full_actuals, chunk_raw_stack, chunk_actuals, f
     # process input tensors
     actuals = actual_parser.parse(full_actuals, chunk_actuals)
 
-    return ATen_OP(cpu_log, hb_log, total_time_on_HB, actuals)
+    return ATen_OP(op_name, cpu_log, hb_log, total_time_on_HB, actuals)
 
 
 # INPUT:   full out.std file path; chunk out.std file path; manycore_stats.log path
@@ -189,4 +237,5 @@ def compare(full_path, chunk_path, stats_path=None, fancy_func=False):
 if __name__ == "__main__":
 
     args = parse_arguments()
-    compare(args.full, args.chunk, args.manycore_stats, args.fancy)
+    aten_op = compare(args.full, args.chunk, args.manycore_stats, args.fancy)
+    print(aten_op)
