@@ -99,9 +99,12 @@ HBProfilerLog::~HBProfilerLog()
   if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
     delete execution_time_log;
     if (hb_profiler_is_top_level()) {
-      std::cerr << "#TOP_LEVEL_FUNC#__" << g_curr_call_stack.back() << std::endl;
-      std::cerr << g_per_op_execution_time_profiler.str_dump() << std::endl;
-      std::cerr << "#TOP_LEVEL_FUNC_END#__" << g_curr_call_stack.back() << std::endl;
+      std::string per_op_log = g_per_op_execution_time_profiler.str_dump();
+      if (per_op_log.find("@CPU_LOG@") != std::string::npos) {
+        std::cerr << "#TOP_LEVEL_FUNC#__" << g_curr_call_stack.back() << std::endl;
+        std::cerr << per_op_log << std::endl;
+        std::cerr << "#TOP_LEVEL_FUNC_END#__" << g_curr_call_stack.back() << std::endl;
+      }
     }
     g_curr_call_stack.pop_back();
   }
