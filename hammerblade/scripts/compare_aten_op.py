@@ -12,6 +12,7 @@ import copy
 import sys
 import pathlib
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
+import std_parser
 import stack_parser
 import process_CPU_stack
 import process_HB_stack
@@ -25,8 +26,8 @@ HB_FREQUENCY = 1000000000 # Hz = 1GHz
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--full', default="full.stack")
-    parser.add_argument('--chunk', default="chunk.stack")
+    parser.add_argument('--full', default="full.std")
+    parser.add_argument('--chunk', default="chunk.std")
     parser.add_argument('--manycore-stats', default="NONE")
     return parser.parse_args()
 
@@ -132,16 +133,27 @@ if __name__ == "__main__":
 
     args = parse_arguments()
 
-    # read stacks
+    # read actuals and stacks
+    full_actuals = None
     full_raw_stack = None
+    chunk_actuals = None
     chunk_raw_stack = None
+
     with open(args.full, "r") as f_full:
-        full_raw_stack = f_full.read()
+        full_actuals, full_raw_stack = std_parser.parse(f_full.read())
     with open(args.chunk, "r") as f_chunk:
-        chunk_raw_stack = f_chunk.read()
+        chunk_actuals, chunk_raw_stack = std_parser.parse(f_chunk.read())
     # make sure both stacks are read
+    assert full_actuals is not None
     assert full_raw_stack is not None
+    assert chunk_actuals is not None
     assert chunk_raw_stack is not None
+
+    # debug
+    print(full_actuals)
+    print(full_raw_stack)
+    print(chunk_actuals)
+    print(chunk_raw_stack)
 
     # read UW's profiling data is manycore_stats is defined
     external_stats = None
