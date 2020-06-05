@@ -134,7 +134,7 @@ def compare_impl(full_raw_stack, full_actuals, chunk_raw_stack, chunk_actuals, f
 # OUTPUT:  ATen_OP object
 # OPTIONS: fancy_func -- show operator name as aten::op instead of raw func signature
 
-def compare(full_path, chunk_path, stats_path = None, fancy_func=False):
+def compare(full_path, chunk_path, stats_path=None, fancy_func=False):
 
     # read actuals and stacks
     full_actuals = None
@@ -161,7 +161,7 @@ def compare(full_path, chunk_path, stats_path = None, fancy_func=False):
     # read UW's profiling data is manycore_stats is defined
     external_stats = None
     if stats_path is not None:
-        with open(args.manycore_stats, "r") as f_stats:
+        with open(stats_path, "r") as f_stats:
             external_stats = f_stats.read()
         assert external_stats is not None
 
