@@ -54,8 +54,119 @@ static void tensorlib_vsort_recur(
         tensorlib_vsort_recur(vec, first, j-1);
         tensorlib_vsort_recur(vec, j+1, last);
     }
+}
+
+static void quicksort_recur(
+    char* data,
+    uint32_t stride, 
+    int32_t first, 
+    int32_t last) {
+        
+    if (first >= last) {
+        return;
+    }
+    else {
+        int32_t i = first;
+        int32_t j = last;
+        int32_t piv = (first + last) / 2;
+
+        while (i < j) {
+            auto i_val = *(float*)(data + i*stride);
+            auto j_val = *(float*)(data + j*stride);
+            auto p_val = *(float*)(data + piv*stride);
+            
+
+            while (i_val <= p_val && i < last) {
+                i++;
+            }
+            while (j_val > p_val) {
+                j--;
+            }
+
+            if (i < j) {
+                // Swap elements at i and j
+                float* v1 = (float*)(data + i*stride);
+                float* v2 = (float*)(data + j*stride);
+              
+                float temp = *v1;
+                *v1 = *v2;
+                *v2 = temp;
+            }
+        }
+
+        // Swap elements at j and piv
+        float* v1 = (float*)(data + j*stride);
+        float* v2 = (float*)(data + piv*stride);
+
+        float temp = *v1;
+        *v1 = *v2;
+        *v2 = temp;
+        
+        quicksort_recur(data, stride, first, j-1);
+        quicksort_recur(data, stride, j+1, last);
+    }
+}
 
 
+static void merge_odd_even (
+  char* data,
+  uint32_t stride, 
+  size_t start, 
+  size_t size, 
+  size_t diff
+) {
+
+  size_t m = diff * 2;
+
+  if (m < size)
+  {
+    // Even subsequence
+    merge_odd_even(data, stride, start, size, m);
+    // Odd subsequence
+    merge_odd_even(data, stride, start+diff, size, m);
+
+    for (size_t i = start+diff; i+diff < start+size; i += m) {
+      float* v1 = (float*)(data + i*stride); 
+      float* v2 = (float*)(data + (i+diff)*stride);
+      if (*v1 > *v2) {
+        // Swap the two values
+        float t = *v1;
+        *v1 = *v2;
+        *v2 = t;
+      }
+    }
+  }
+  else {
+    float* v1 = (float*)(data + start*stride); 
+    float* v2 = (float*)(data + (start+diff)*stride);
+    if (*v1 > *v2) {
+      // Swap the two values
+      float t = *v1;
+      *v1 = *v2;
+      *v2 = t;
+    }
+  }
+}
+
+
+static void merge_sort (
+  char* data,
+  uint32_t stride,
+  size_t start, 
+  size_t end
+) {
+  if (start < end) {
+    size_t mid = start + (end - start)/2;
+
+    // Sort both halves
+    merge_sort(data, stride, start, mid);
+    merge_sort(data, stride, mid+1, end);
+
+    size_t size = end - start;
+
+    // Merge the two halves
+    merge_odd_even(data, stride, start, size, 1);
+  }
 }
 
 extern "C" {
@@ -71,6 +182,7 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
+    /*
     // Use a single tile only
     if (__bsg_id == 0) {
       // Add 1 to each element
@@ -80,6 +192,28 @@ extern "C" {
 
       tensorlib_vsort_recur(&result, 0, self.numel()-1);
     }
+    */
+
+    // Tiled sort
+
+    for (size_t i = 0; i < self.numel(); i++) {
+        result(i) = self(i);
+    }
+
+    char* data[1];
+    data[0] = result.data_ptr();
+
+    // Metadata
+    uint32_t strides[1];
+    strides[0] = (result.get_strides())[0];
+
+    size_t len_per_tile = result.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    size_t start = len_per_tile * __bsg_id;
+    size_t end = start + len_per_tile;
+    end = (end > result.numel())  ? result.numel() : end;
+
+    merge_sort(data[0], strides[0], start, end);
+    //quicksort_recur(data[0], strides[0], start, end-1);
 
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
