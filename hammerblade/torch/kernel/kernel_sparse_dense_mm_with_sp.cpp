@@ -25,7 +25,7 @@ extern "C" {
     uint32_t n = dense.dim(1);
     uint32_t v = values.numel();
 
-    size_t len_per_tile = m  / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    size_t len_per_tile = std::ceil((float)m / (float)(bsg_tiles_X * bsg_tiles_Y));
     size_t start = len_per_tile * __bsg_id;
     size_t end = start + len_per_tile;
     end = (end > m) ? m : end;
@@ -39,11 +39,15 @@ extern "C" {
       rowindice[k] = csr(k);
     }
 
+    float temp[1];
+
     for (uint32_t i = start; i < end; i++) {
       for(uint32_t dense_col = 0; dense_col < n; dense_col++) {
-        for (uint32_t col_index = rowindice[i]; col_index < rowindice[i+1]; col_index++) { //CSR MODE
-          result(i, dense_col)    = result(i, dense_col) + values(col_index) * dense(indices(col_index), dense_col); //CSR mode
+        temp[0] = 0.0;
+        for(uint32_t col_index = rowindice[i]; col_index < rowindice[i+1]; col_index++) { //CSR MODE
+         temp[0] = temp[0] + values(col_index) * dense(indices(col_index), dense_col); //CSR mode
         }
+        result(i, dense_col) = temp[0];
       }   
     }  
 
