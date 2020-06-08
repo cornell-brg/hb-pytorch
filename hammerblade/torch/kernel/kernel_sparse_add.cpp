@@ -13,11 +13,6 @@ extern "C" {
           hb_tensor_t* _indices,
           hb_tensor_t* _values,
           float* _alpha) {
- 
-//    uint32_t _r_strides = *(uint32_t*)((intptr_t)res->strides);
-//    uint32_t _d_strides = *(uint32_t*)((intptr_t)d->strides);
-//    uint32_t _i_strides = *(uint32_t*)((intptr_t)indices->strides);
-//    uint32_t _v_strides = *(uint32_t*)((intptr_t)valuse->strides);
 
     auto result = HBTensor<float>(_result);
     auto dense = HBTensor<float>(_dense);
@@ -25,14 +20,13 @@ extern "C" {
     auto values = HBTensor<float>(_values);
     float alpha= *_alpha; 
     
-    size_t len_per_tile = values.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > values.numel())  ? values.numel() : end;
+    size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
+    size_t start = __bsg_id;
+    size_t end = values.numel();
 
     bsg_cuda_print_stat_kernel_start();
 
-    for (uint32_t i = start; i < end; i++) {
+    for (uint32_t i = start; i < end; i = i + thread_num) {
       uint32_t offset = 0;
       uint32_t coo = i;
       for(uint32_t d = 0; d < dense.ndim(); d++) {
@@ -42,7 +36,8 @@ extern "C" {
       result(offset) = result(offset) + alpha * values(i);
     }
 
-    bsg_cuda_print_stat_kernel_end();   
+    bsg_cuda_print_stat_kernel_end(); 
+    g_barrier.sync();  
     return 0;
   }
 

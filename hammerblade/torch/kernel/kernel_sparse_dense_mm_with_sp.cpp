@@ -25,11 +25,9 @@ extern "C" {
     uint32_t n = dense.dim(1);
     uint32_t v = values.numel();
 
-    size_t len_per_tile = std::ceil((float)m / (float)(bsg_tiles_X * bsg_tiles_Y));
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > m) ? m : end;
-    
+    size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
+    size_t start = __bsg_id;
+    size_t end = m;
     
     bsg_cuda_print_stat_kernel_start();
     
@@ -41,7 +39,7 @@ extern "C" {
 
     float temp[1];
 
-    for (uint32_t i = start; i < end; i++) {
+    for (uint32_t i = start; i < end; i = i + thread_num) {
       for(uint32_t dense_col = 0; dense_col < n; dense_col++) {
         temp[0] = 0.0;
         for(uint32_t col_index = rowindice[i]; col_index < rowindice[i+1]; col_index++) { //CSR MODE

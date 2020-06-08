@@ -12,26 +12,20 @@ extern "C" {
           hb_tensor_t* _rowindices,
           uint32_t* _dim,
           uint32_t* _nnz) {
- 
-//    uint32_t _r_strides = *(uint32_t*)((intptr_t)res->strides);
-//    uint32_t _d_strides = *(uint32_t*)((intptr_t)d->strides);
-//    uint32_t _i_strides = *(uint32_t*)((intptr_t)indices->strides);
-//    uint32_t _v_strides = *(uint32_t*)((intptr_t)valuse->strides);
 
     auto csr = HBTensor<int>(_csr);
     auto rowindices = HBTensor<int>(_rowindices);
     uint32_t dim = *_dim;
     uint32_t nnz = *_nnz;
     
-    size_t len_per_tile = rowindices.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > rowindices.numel())  ? rowindices.numel() : end;
+    size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
+    size_t start = __bsg_id;
+    size_t end = nnz;
 
     bsg_cuda_print_stat_kernel_start();
 
     int h, hp0, hp1;
-    for (size_t i = start; i < end; i++) {
+    for (size_t i = start; i < end; i = i + thread_num) {
       hp0 = rowindices(i);
       hp1 = (i+1 == nnz) ? dim : rowindices(i+1);
       if(hp0 != hp1) for(h = hp0; h < hp1; h++) {
