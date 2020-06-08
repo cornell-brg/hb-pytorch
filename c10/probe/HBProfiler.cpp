@@ -51,15 +51,7 @@ void HBProfiler::profiling_end() {
 }
 
 
-// =============== c10 probe API functions ========================
-
-static bool hb_profiler_in_parallel_region() {
-#ifdef _OPENMP
-  return omp_in_parallel();
-#else
-  return false;
-#endif
-}
+// =============== c10 probe internal helper functions ========================
 
 static bool hb_profiler_thread_safe() {
 #ifdef _OPENMP
@@ -76,6 +68,8 @@ static bool hb_profiler_thread_safe() {
   return true;
 #endif
 }
+
+// =============== c10 probe API functions ========================
 
 void hb_profiler_start() {
   g_hb_profiler.profiling_start();
