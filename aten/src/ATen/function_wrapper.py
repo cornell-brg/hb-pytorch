@@ -756,7 +756,6 @@ FunctionOption = TypedDict('FunctionOption', {
     'variants': str,
     'when_spares_dispatch': str,
     'when_sparse_dispatch': str,
-    'with_gil': bool,
     'zero_dim_dispatch_when_scalar': str,
     'redispatch_condition' : str,
     'tensor_boxing' : str,
