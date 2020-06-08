@@ -53,11 +53,27 @@ void HBProfiler::profiling_end() {
 
 // =============== c10 probe API functions ========================
 
-bool hb_profiler_in_parallel_region() {
+static bool hb_profiler_in_parallel_region() {
 #ifdef _OPENMP
   return omp_in_parallel();
 #else
   return false;
+#endif
+}
+
+static bool hb_profiler_thread_safe() {
+#ifdef _OPENMP
+  // we profile if the current function is not in an active parallel region
+  // OR thread id == 0
+  if (!omp_in_parallel() || (omp_get_thread_num() == 0)) {
+    return true;
+  } else {
+    return false;
+  }
+#else
+  // if not compiled with OMP, we have no idea if the current thread should be
+  // profiled. use at your own risk
+  return true;
 #endif
 }
 
@@ -83,7 +99,7 @@ bool hb_profiler_is_top_level() {
 
 // Entering a function
 HBProfilerLog::HBProfilerLog(const std::string& func_name) {
-  if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
+  if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
     g_curr_call_stack.push_back(func_name);
     execution_time_log = new ExecutionTimeLog(g_curr_call_stack);
     if (hb_profiler_is_top_level()) {
@@ -96,7 +112,7 @@ HBProfilerLog::HBProfilerLog(const std::string& func_name) {
 // Returning from a function
 HBProfilerLog::~HBProfilerLog()
 {
-  if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
+  if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
     delete execution_time_log;
     if (hb_profiler_is_top_level()) {
       std::string per_op_log = g_per_op_execution_time_profiler.str_dump();
@@ -114,7 +130,7 @@ HBProfilerLog::~HBProfilerLog()
 
 // Entering a function
 HBProfilerTrimLog::HBProfilerTrimLog() {
-  if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
+  if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
     g_curr_call_stack.push_back("@TRIM@");
   }
 }
@@ -122,7 +138,7 @@ HBProfilerTrimLog::HBProfilerTrimLog() {
 // Returning from a function
 HBProfilerTrimLog::~HBProfilerTrimLog()
 {
-  if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
+  if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
     g_curr_call_stack.pop_back();
   }
 }
