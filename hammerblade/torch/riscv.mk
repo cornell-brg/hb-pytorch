@@ -55,6 +55,11 @@ ifeq ($(DEBUG),1)
 endif
 
 # Include BSG Manycore's builddefs
+ifdef CLANG
+export CLANG=1
+RISCV_GXX_EXTRA_OPTS += -Wno-c++11-narrowing # Fixme: fix these warnings!
+RISCV_LINK_OPTS += -lstdc++
+endif
 include $(BSG_F1_DIR)/machine.mk
 include $(BSG_MANYCORE_DIR)/software/mk/Makefile.master
 
