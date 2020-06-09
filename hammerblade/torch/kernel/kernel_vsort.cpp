@@ -256,10 +256,26 @@ extern "C" {
     }
     size_t bsg_total = bsg_tiles_X * bsg_tiles_Y;
 
+    /*
+    g_barrier.sync();
+
+    size_t div = 2;
+    while (div < 3) { //result.numel()) {
+      tensorlib_merge(&result, div);
+      div *= 2;
+    }
+
+    if (__bsg_id < result.numel()) {
+      result(__bsg_id) = 0;
+    }
+    */
+
+    
     // Each tile can start with two elements
     if (bsg_total > (result.numel() / 2)) {
       size_t div = 2;
       while (div < result.numel()) {
+        g_barrier.sync()
         tensorlib_merge(&result, div);
         div *= 2;
       }
@@ -269,7 +285,7 @@ extern "C" {
           result(i) = 0;
       }  
     }
-
+    
 
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
