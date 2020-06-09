@@ -169,6 +169,39 @@ static void merge_sort (
   }
 }
 
+static void compare_swap(HBTensor<float>* vec, size_t i, size_t j) 
+{
+  if ((*vec)(i) > (*vec)(j)) {
+    auto t = (*vec)(i);
+    (*vec)(i) = (*vec)(j);
+    (*vec)(j) = t;
+  }
+}
+
+static void odd_even(HBTensor<float>* vec, size_t l, size_t s, size_t r)
+{
+  size_t m  = r * 2;
+  if (m < s) {
+    odd_even(vec, l, s, m);
+    odd_even(vec, l+r, s, m);
+    for (size_t i = l+r; i+r < l+s; i += m) {
+      compare_swap(vec, i, i+r);
+    }
+  }
+  else {
+    compare_swap(vec, l, l+r);  
+  }
+}
+
+static void tensorlib_merge(HBTensor<float>* vec, size_t div)
+{
+  size_t lo = __bsg_id * div;
+  size_t hi = lo + div;
+  if (lo < (*vec).numel()) {
+    odd_even(vec, lo, div, 1);
+  }
+}
+
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_vsort(
@@ -193,7 +226,7 @@ extern "C" {
       tensorlib_vsort_recur(&result, 0, self.numel()-1);
     }
     */
-
+  /*
     // Tiled sort
 
     for (size_t i = 0; i < self.numel(); i++) {
@@ -214,6 +247,29 @@ extern "C" {
 
     merge_sort(data[0], strides[0], start, end);
     //quicksort_recur(data[0], strides[0], start, end-1);
+
+    */
+
+    // Copy all the elements to be sorted
+    for (size_t i = 0; i < self.numel(); i++) {
+        result(i) = self(i);
+    }
+    size_t bsg_total = bsg_tiles_X * bsg_tiles_Y;
+
+    // Each tile can start with two elements
+    if (bsg_total > (result.numel() / 2)) {
+      size_t div = 2;
+      while (div < result.numel()) {
+        tensorlib_merge(&result, div);
+        div *= 2;
+      }
+    }
+    else {
+      for (size_t i = 0; i < self.numel(); i++) {
+          result(i) = 0;
+      }  
+    }
+
 
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
