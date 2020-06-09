@@ -7,18 +7,41 @@ This work aims to port PyTorch to HammerBlade.
 
 ### How to build PyTorch to use COSIM
   This assumes that you have a working COSIM installed. Then you can either put `hb-pytorch` under `bsg_bladerunner`, or set `BRG_BSG_BLADERUNNER_DIR` to your `bladerunner` path.
- - Clone hb-pytorch repo
-    `git clone -b hb-device git@github.com:cornell-brg/hb-pytorch.git`
- - Create python virtual environment
-    `python3.6 -m venv ./venv_pytorch`
- - Install dependencies
-    `pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis`
- - Init pytorch third party dependencies
-    `git submodule update --init --recursive`
- - Setup building environment variables.
-    `cd hb-pytorch && source setup_cosim_build_env.sh`
- - Build pytorch. This step can take up to 15 minutes
-    `python setup.py develop`
+ - Enable devtoolset-8 or any toolchain that supports C++14.
+ - Set following variable to point to `bsg_bladerunner` clone:
+ ```
+ export BRG_BSG_BLADERUNNER_DIR=<path to bsg_bladerunner that has be setup>
+ ```
+ - Clone hb-pytorch repo:
+ ```
+ git clone -b hb-device git@github.com:cornell-brg/hb-pytorch.git
+ ```
+ - Create python virtual environment:
+ ```
+ python3.6 -m venv ./venv_pytorch`
+ ```
+ - Install dependencies:
+ ```
+ pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis
+ ```
+ - Init pytorch third party dependencies:
+ ```
+ git submodule update --init --recursive
+ ```
+ - Setup building environment variables:
+ ```
+ cd hb-pytorch && source setup_cosim_build_env.sh
+ ```
+ - Build pytorch. This step can take up to 15 minutes:
+ ```
+ python setup.py develop
+ ```
+
+ Above command also compiles device kernels with RISCV toolchain and installs the kernel binary. Optionally,
+ kernels can be compiled with Clang by running the following instead of above:
+ ```
+ CLANG=1 python setup.py develop 
+ ```
  - PyTorch can be used with cosim by running one of the following the executable in place of `python`:
     - `pycosim`: Runs python with cosim backend
     - `pycosim.trace`: Enables device instruction trace
