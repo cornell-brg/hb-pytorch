@@ -73,7 +73,7 @@ def exec_time_construct_tree_impl(data, parent, fancy_func=False):
 def exec_time_apply_trim(root):
     trim_amount = 0.0
     # this is a func that runs on HB, which needs trimming
-    if root.func.startswith("@OFFLOAD_KERNEL@__"):
+    if root.func.startswith("@OFFLOAD_KERNEL@__") or root.func.startswith("@BSG_API_CALL@__"):
         assert len(root.children) == 1
         simulated = root.children[0]
         assert simulated.func == "@TRIM@"

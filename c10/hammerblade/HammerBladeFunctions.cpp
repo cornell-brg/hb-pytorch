@@ -65,6 +65,13 @@ void set_device(DeviceIndex device) {
  * -------------------------------------------------------------------------------------*/
 
 eva_t device_malloc(size_t nbytes) {
+  c10::probe::LogATenKernelWithName("@BSG_API_CALL@__malloc");
+  // assume 0 time
+  c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
+  std::chrono::microseconds simulated(0);
+  trim_log->trim_manual_log_exec_time(simulated);
+  delete trim_log;
+  // end of trimming
   eva_t data_p;
   C10_HB_CHECK(hb_mc_device_malloc(&_hb_device, (uint32_t) nbytes, &data_p));
   return data_p;
@@ -72,23 +79,51 @@ eva_t device_malloc(size_t nbytes) {
 
 
 void device_free(eva_t data_p) {
+  c10::probe::LogATenKernelWithName("@BSG_API_CALL@__free");
+  // assume 0 time
+  c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
+  std::chrono::microseconds simulated(0);
+  trim_log->trim_manual_log_exec_time(simulated);
+  delete trim_log;
+  // end of trimming
   C10_HB_CHECK(hb_mc_device_free(&_hb_device, data_p));
 }
 
 
 void* memcpy_host_to_device(void *dst, const void *src, uint32_t nbytes) {
+  c10::probe::LogATenKernelWithName("@BSG_API_CALL@__memcpy");
+  // assume 0 time
+  c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
+  std::chrono::microseconds simulated(0);
+  trim_log->trim_manual_log_exec_time(simulated);
+  delete trim_log;
+  // end of trimming
   C10_HB_CHECK(hb_mc_device_memcpy(&_hb_device, dst, src, nbytes, HB_MC_MEMCPY_TO_DEVICE));
   return dst;
 }
 
 
 void* memcpy_device_to_host(void *dst, const void *src, uint32_t nbytes) {
+  c10::probe::LogATenKernelWithName("@BSG_API_CALL@__memcpy");
+  // assume 0 time
+  c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
+  std::chrono::microseconds simulated(0);
+  trim_log->trim_manual_log_exec_time(simulated);
+  delete trim_log;
+  // end of trimming
   C10_HB_CHECK(hb_mc_device_memcpy(&_hb_device, dst, src, nbytes, HB_MC_MEMCPY_TO_HOST));
   return dst;
 }
 
 
 void* DMA_host_to_device(void *dst, const void *src, uint32_t nbytes) {
+  c10::probe::LogATenKernelWithName("@BSG_API_CALL@__dma");
+  // assume 0 time
+  c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
+  std::chrono::microseconds simulated(0);
+  trim_log->trim_manual_log_exec_time(simulated);
+  delete trim_log;
+  // end of trimming
   hb_mc_dma_htod_t job = {.d_addr=(eva_t)((intptr_t)dst), .h_addr=src, .size=nbytes};
   C10_HB_CHECK(hb_mc_device_dma_to_device(&_hb_device, &job, 1));
   return dst;
@@ -96,6 +131,13 @@ void* DMA_host_to_device(void *dst, const void *src, uint32_t nbytes) {
 
 
 void* DMA_device_to_host(void *dst, const void *src, uint32_t nbytes) {
+  c10::probe::LogATenKernelWithName("@BSG_API_CALL@__dma");
+  // assume 0 time
+  c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
+  std::chrono::microseconds simulated(0);
+  trim_log->trim_manual_log_exec_time(simulated);
+  delete trim_log;
+  // end of trimming
   hb_mc_dma_dtoh_t job = {.d_addr=(eva_t)((intptr_t)src), .h_addr=dst, .size=nbytes};
   C10_HB_CHECK(hb_mc_device_dma_to_host(&_hb_device, &job, 1));
   return dst;
