@@ -5,7 +5,6 @@ Tests on torch.to (copy_hb_to_hb kernel)
 
 import torch
 import random
-import pytest
 
 torch.manual_seed(42)
 random.seed(42)
