@@ -1502,6 +1502,8 @@ for(size_t i = 0; i < res_cpu.size(); i++) {
                     fallback_unboxing += "{0}.copy_({0}_cpu.hammerblade());\n".format(f['name'])
                     fallback_actuals.append(f['name'] + "_cpu")
                     non_const_tensor += 1
+                elif f['type'] == 'const TensorOptions &':
+                    fallback_actuals.append("{0}.device(at::kCPU)".format(f['name']))
                 elif f['type'] == 'const Tensor &':
                     fallback_actuals.append(f['name'] + ".cpu_ifdef()")
                 elif f['type'] == 'TensorList':
@@ -2173,6 +2175,8 @@ for(size_t i = 0; i < res_cpu.size(); i++) {
                 fallback_unboxing += "{0}.copy_({0}_cpu.hammerblade());\n".format(f['name'])
                 fallback_actuals.append(f['name'] + "_cpu")
                 non_const_tensor += 1
+            elif f['type'] == 'const TensorOptions &':
+                fallback_actuals.append("{0}.device(at::kCPU)".format(f['name']))
             elif f['type'] == 'const Tensor &':
                 fallback_actuals.append(f['name'] + ".cpu_ifdef()")
             elif f['type'] == 'TensorList':
