@@ -70,7 +70,7 @@ else()
   add_custom_target(
     kernel_riscv_exe
     COMMAND mkdir -p riscv
-    COMMAND make -C riscv -f $ENV{HB_KERNEL_DIR}/riscv.mk kernel.riscv
+    COMMAND make -C riscv -f $ENV{HB_KERNEL_DIR}/riscv.mk kernel.riscv -j8
     COMMAND cp riscv/kernel.riscv .
     COMMAND rm -rf riscv
     DEPENDS $ENV{HB_KERNEL_DIR}/riscv.mk
