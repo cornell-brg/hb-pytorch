@@ -1418,6 +1418,8 @@ def create_generic(top_env, declarations):
                     tensor_allclose += "TORCH_CHECK(at::native::allclose({0}, {0}_hb.cpu(), 0.01, 0.01));\n".format(f['name'])
                     alter_actuals.append(f['name'] + "_hb")
                     non_const_tensor += 1
+                elif f['type'] == 'const TensorOptions &':
+                    alter_actuals.append("{0}.device(at::kHAMMERBLADE)".format(f['name']))
                 elif f['type'] == 'const Tensor &':
                     tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
                     tensor_boxing += "buffer << \"{0};\" << {0}.sizes() << \"<|>\";\n".format(f['name'])
@@ -2081,6 +2083,8 @@ def create_derived(backend_type_env, declarations):
                 tensor_allclose += "TORCH_CHECK(at::native::allclose({0}, {0}_hb.cpu(), 0.01, 0.01));\n".format(f['name'])
                 alter_actuals.append(f['name'] + "_hb")
                 non_const_tensor += 1
+            elif f['type'] == 'const TensorOptions &':
+                alter_actuals.append("{0}.device(at::kHAMMERBLADE)".format(f['name']))
             elif f['type'] == 'const Tensor &':
                 tensor_boxing += "auto {0}_hb = {0}.llcopy();\n".format(f['name'])
                 tensor_boxing += "buffer << \"{0};\" << {0}.sizes() << \"<|>\";\n".format(f['name'])
