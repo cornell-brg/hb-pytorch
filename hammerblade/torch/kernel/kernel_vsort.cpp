@@ -4,6 +4,7 @@
 //====================================================================
 
 #include <kernel_common.hpp>
+#include <cmath>
 
 // Helper function to perform Quick Sort
 // Modified implementation from 
@@ -171,10 +172,12 @@ static void merge_sort (
 
 static void compare_swap(HBTensor<float>* vec, size_t i, size_t j) 
 {
-  if ((*vec)(i) > (*vec)(j)) {
-    auto t = (*vec)(i);
-    (*vec)(i) = (*vec)(j);
-    (*vec)(j) = t;
+  if (i < (*vec).numel() && j < (*vec).numel()) {
+    if ((*vec)(i) > (*vec)(j)) {
+      auto t = (*vec)(i);
+      (*vec)(i) = (*vec)(j);
+      (*vec)(j) = t;
+    }
   }
 }
 
@@ -185,11 +188,15 @@ static void odd_even(HBTensor<float>* vec, size_t l, size_t s, size_t r)
     odd_even(vec, l, s, m);
     odd_even(vec, l+r, s, m);
     for (size_t i = l+r; i+r < l+s; i += m) {
-      compare_swap(vec, i, i+r);
+      if (i+r < (*vec).numel()) {
+        compare_swap(vec, i, i+r);
+      }
     }
   }
   else {
-    compare_swap(vec, l, l+r);  
+    if (l+r < (*vec).numel()) {
+      compare_swap(vec, l, l+r);  
+    }
   }
 }
 
@@ -197,7 +204,7 @@ static void tensorlib_merge(HBTensor<float>* vec, size_t div)
 {
   size_t lo = __bsg_id * div;
   size_t hi = lo + div;
-  if (lo < (*vec).numel()) {
+  if (lo < (*vec).numel() && hi) {
     odd_even(vec, lo, div, 1);
   }
 }
@@ -250,9 +257,11 @@ extern "C" {
 
     */
 
+    if (__bsg_id == 0) {
     // Copy all the elements to be sorted
     for (size_t i = 0; i < self.numel(); i++) {
         result(i) = self(i);
+    }
     }
     size_t bsg_total = bsg_tiles_X * bsg_tiles_Y;
 
@@ -269,13 +278,16 @@ extern "C" {
       result(__bsg_id) = 0;
     }
     */
+    size_t total_div = result.numel();
+    if (ceil(log2(total_div)) != floor(log2(total_div))){
+      total_div = pow(2, ceil(log2(total_div)));
+    }
 
-    
     // Each tile can start with two elements
-    if (bsg_total > (result.numel() / 2)) {
+    if (bsg_total >= (result.numel() / 2)) {
       size_t div = 2;
-      while (div < result.numel()) {
-        g_barrier.sync()
+      while (div <= total_div) { //result.numel()) {
+        g_barrier.sync();
         tensorlib_merge(&result, div);
         div *= 2;
       }
