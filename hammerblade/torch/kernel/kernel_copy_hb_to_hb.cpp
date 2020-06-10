@@ -45,7 +45,7 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_copy_Int_to_Long(
               hb_tensor_t* t0_p,
               hb_tensor_t* t1_p) {
-    return tensorlib_copy_impl<int,long>(t0_p, t1_p);
+    return tensorlib_copy_impl<int,long long>(t0_p, t1_p);
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_copy_Int_to_Long, hb_tensor_t*, hb_tensor_t*)
@@ -72,7 +72,7 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_copy_Long_to_Int(
               hb_tensor_t* t0_p,
               hb_tensor_t* t1_p) {
-    return tensorlib_copy_impl<long,int>(t0_p, t1_p);
+    return tensorlib_copy_impl<long long,int>(t0_p, t1_p);
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_copy_Long_to_Int, hb_tensor_t*, hb_tensor_t*)
@@ -81,7 +81,7 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_copy_Long_to_Long(
               hb_tensor_t* t0_p,
               hb_tensor_t* t1_p) {
-    return tensorlib_copy_impl<long,long>(t0_p, t1_p);
+    return tensorlib_copy_impl<long long,long long>(t0_p, t1_p);
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_copy_Long_to_Long, hb_tensor_t*, hb_tensor_t*)
@@ -90,7 +90,7 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_copy_Long_to_Float(
               hb_tensor_t* t0_p,
               hb_tensor_t* t1_p) {
-    return tensorlib_copy_impl<long,float>(t0_p, t1_p);
+    return tensorlib_copy_impl<long long,float>(t0_p, t1_p);
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_copy_Long_to_Float, hb_tensor_t*, hb_tensor_t*)
@@ -99,7 +99,7 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_copy_Long_to_Double(
               hb_tensor_t* t0_p,
               hb_tensor_t* t1_p) {
-    return tensorlib_copy_impl<long,double>(t0_p, t1_p);
+    return tensorlib_copy_impl<long long,double>(t0_p, t1_p);
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_copy_Long_to_Double, hb_tensor_t*, hb_tensor_t*)
@@ -117,7 +117,7 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_copy_Float_to_Long(
               hb_tensor_t* t0_p,
               hb_tensor_t* t1_p) {
-    return tensorlib_copy_impl<float,long>(t0_p, t1_p);
+    return tensorlib_copy_impl<float,long long>(t0_p, t1_p);
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_copy_Float_to_Long, hb_tensor_t*, hb_tensor_t*)
@@ -153,7 +153,7 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_copy_Double_to_Long(
               hb_tensor_t* t0_p,
               hb_tensor_t* t1_p) {
-    return tensorlib_copy_impl<double,long>(t0_p, t1_p);
+    return tensorlib_copy_impl<double,long long>(t0_p, t1_p);
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_copy_Double_to_Long, hb_tensor_t*, hb_tensor_t*)
