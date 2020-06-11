@@ -257,9 +257,9 @@ def compare(full_path, chunk_path, stats_path=None, fancy_func=False):
         data = external_stats.splitlines()
         overview = data[3]
         cycles = float(overview.split()[6])
-        # convert to milliseconds
-        ms = cycles / HB_FREQUENCY * 1000
-        external_trim = ms
+        # convert to microseconds
+        us = cycles / HB_FREQUENCY * 1000000
+        external_trim = us
 
     # do the comparison
     return compare_impl(full_raw_stack, full_actuals, chunk_raw_stack, chunk_actuals,

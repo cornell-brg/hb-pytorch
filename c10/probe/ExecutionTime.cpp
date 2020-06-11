@@ -33,7 +33,7 @@ const std::string ExecutionTimeProfiler::str_dump() {
   std::stringstream buffer;
 
   for (const auto& p : execution_time_dict) {
-    double ms = p.second.count() / 1000.0;
+    auto us = std::chrono::duration_cast<std::chrono::microseconds>(p.second);
     auto& stack = p.first;
     // we concat the call stack to get the name
     std::string name;
@@ -42,7 +42,7 @@ const std::string ExecutionTimeProfiler::str_dump() {
       name += "<|>";
     }
     name += stack.back();
-    buffer << name << ";" << ms << endl;
+    buffer << name << ";" << us.count() << endl;
   }
   // buffer.str() is a temp object that will be destroyed
   // at the end of this expression

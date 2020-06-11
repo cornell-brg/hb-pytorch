@@ -125,7 +125,7 @@ def fancy_print(trimming=False):
         buffer = ""
         for e in (root.children + [root]):
             func = e.func
-            time = e.time / 1000.0
+            time = e.time / 1000000.0
             percentage = e.percentage
             buffer += ('{func:30}     {time:.2f} {percentage:.1f}%\n'.format(
                 func=func, time=time, percentage=percentage))
@@ -147,7 +147,7 @@ def latex_table(trimming=False):
         for e in (root.children + [root]):
             func = e.func
             func = func.replace("_", "\\_")
-            time = e.time / 1000.0
+            time = e.time / 1000000.0
             percentage = e.percentage
             buffer += ('\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\\n'.format(
                 func=func, time=time, percentage=percentage))
