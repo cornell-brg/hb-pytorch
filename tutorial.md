@@ -315,3 +315,27 @@ tensor(8., device='hammerblade', grad_fn=<SumBackward0>)
 tensor([[42., 42.],
         [42., 42.]])
 ```
+
+## To Do On Your Own (Vector-Vector-Add)
+
+In this section, you will add another branch new operator -- vvadd -- into PyTorch. `vvadd` takes in 2 tensors that have the same shape, , adds them together, and returns a new tensor. The files you need to touch is quite similar to the `vincr` case.
+
+Templates are left in these files. Edit them and get `vvadd` to work.
+ - [aten/src/ATen/native/native_functions.yaml](aten/src/ATen/native/native_functions.yaml)
+ - [aten/src/ATen/native/hammerblade/Vvadd.cpp](aten/src/ATen/native/hammerblade/Vvadd.cpp)
+ - [hammerblade/torch/kernel/kernel_vvadd.cpp](hammerblade/torch/kernel/kernel_vvadd.cpp)
+ 
+After filling in the blanks and re-building, we are expecting something like this:
+```
+python
+Python 3.7.4 (default, Sep 28 2019, 14:22:12)
+[GCC 6.3.1 20170216 (Red Hat 6.3.1-3)] on linux
+>>> import torch
+>>> torch.hammerblade.init()
+>>> x = torch.ones(10).hammerblade()
+>>> x
+tensor([1., 1., 1., 1., 1., 1., 1., 1., 1., 1.], device='hammerblade')
+>>> torch.vvadd(x, x)
+tensor([2., 2., 2., 2., 2., 2., 2., 2., 2., 2.], device='hammerblade')
+```
+Good luck!
