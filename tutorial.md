@@ -10,9 +10,8 @@
  - Introduction
  - Setup HB-PyTorch Development Environment with Emulation Layer
  - Vector-Increment Operator
- - Vector-Vector-Add Operator
- - (Fake) Auto Differentiation for VVAdd 
- - To Do On Your Own
+ - (Fake) Auto Differentiation for Vector-Increment
+ - To Do On Your Own (Vector-Vector-Add)
  
 ### Introduction
 This tutorial will discuss how to setup development environemnt for HB-PyTorch, add a branch new operator to PyTorch for HammerBlade, and register auto-differentiation (backward pass) for your new operator. We start with HammerBlade _Emulation_Layer_, in which all interaction with HammerBlade hardware is emualted natively on x86. Similarly, HammerBlade device kernels are compiled for, and executed natively on x86 as well. If you have experience with iOS or Android development, building for Emulation Layer is analog to building for simulator in XCode.
@@ -278,13 +277,41 @@ To run all tests, go to [hammerblade/torch](hammerblade/torch) and run
 python pytest_runner.py
 ```
 
-### Tutorial Task -- Extend PyTorch with a Vector-Vector Add Operator
+### (Fake) Auto Differentiation for Vector-Increment
+One nice thing about PyTorch is that when writing a model, the user does not need to specify the backward pass. _Auto differentiation_ takes care of it. However, when a brand new operator is added to PyTorch, there is (at least currently) no way to magically figure out what is differential of your new operator -- it's not so _auto_ after all ...
 
-Similarly, we need to edit 3 files
-`aten/src/ATen/native/native_functions.yaml` -- to register the operation
-`aten/src/ATen/native/hammerblade/Vvadd.cpp` -- vincr kernel host code (runs on CPU)
-`hammerblade/torch/kernel/kernel_vadd.cpp` -- vincr kernel device code (runs on HB)
+As developers, we need to tell PyTorch how to handle our `vincr` when "automatically" generates the backward pass path.
 
-Templates are added for you. Search for `Tutorial TODO` to find the tasks.
+To do so, edit [tools/autograd/derivatives.yaml](tools/autograd/derivatives.yaml) and add these to the end of the file
+```yaml
+- name: vincr(Tensor self) -> Tensor
+  self: zeros_like(self).fill_(42)
+```
+It's easy to spot that the `name` field is the same as what we put down in [aten/src/ATen/native/native_functions.yaml](aten/src/ATen/native/native_functions.yaml) for `func`.
+```yaml
+  self: zeros_like(self).fill_(42)
+```
+This is the most important line. It says the gradient of `self` should be a tensor that has the same shape as self, and each element should be 42.
 
-Good luck!
+Now we re-build and give it a try. This time `--cmake` is not necessary since we only touched existing files.
+```bash
+python setup.py develop
+```
+
+```
+python
+Python 3.7.4 (default, Sep 28 2019, 14:22:12)
+[GCC 6.3.1 20170216 (Red Hat 6.3.1-3)] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import torch
+>>> x = torch.ones(2, 2, requires_grad=True)
+>>> h = x.hammerblade()
+>>> y = torch.vincr(h)
+>>> z = y.sum()
+>>> z
+tensor(8., device='hammerblade', grad_fn=<SumBackward0>)
+>>> z.backward()
+>>> x.grad
+tensor([[42., 42.],
+        [42., 42.]])
+```
