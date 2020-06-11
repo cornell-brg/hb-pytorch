@@ -1606,3 +1606,6 @@
 
 - name: nonzero(Tensor self) -> Tensor
   output_differentiability: [False]
+
+- name: vincr(Tensor self) -> Tensor
+  self: zeros_like(self).fill_(42)
