@@ -204,8 +204,17 @@ static void tensorlib_merge(HBTensor<float>* vec, size_t div)
 {
   size_t lo = __bsg_id * div;
   size_t hi = lo + div;
-  if (lo < (*vec).numel() && hi) {
+  if (lo < (*vec).numel()) {
     odd_even(vec, lo, div, 1);
+  }
+}
+
+static void merge_range(HBTensor<float>* vec, size_t lo, size_t hi){
+  if (hi - lo > 1) {
+    size_t mid = lo + ((hi - lo) / 2);
+    merge_range(vec, lo, mid);
+    merge_range(vec, mid, hi);
+    odd_even(vec, lo, hi-lo, 1);
   }
 }
 
@@ -293,9 +302,26 @@ extern "C" {
       }
     }
     else {
-      for (size_t i = 0; i < self.numel(); i++) {
-          result(i) = 0;
-      }  
+      size_t len_tile = result.numel() / bsg_total;
+      if (ceil(log2(len_tile)) != floor(log2(len_tile))){
+        len_tile = pow(2, ceil(log2(len_tile)));
+      }
+      
+      size_t lo = __bsg_id * len_tile;
+      size_t hi = lo + len_tile;
+      //hi = (hi > result.numel()) ? result.numel() : hi;
+      if (lo < result.numel()) {
+        merge_range(&result, lo, hi);
+      }
+
+      
+      size_t div = len_tile*2;
+      while (div <= total_div) {
+        g_barrier.sync();
+        tensorlib_merge(&result, div);
+        div *= 2;
+      }
+      
     }
     
 
