@@ -10,9 +10,8 @@
  - Introduction
  - Setup HB-PyTorch Development Environment with Emulation Layer
  - Vector-Increment Operator
- - Vector-Vector-Add Operator
- - (Fake) Auto Differentiation for VVAdd 
- - To Do On Your Own
+ - (Fake) Auto Differentiation for Vector-Increment
+ - To Do On Your Own (Vector-Vector-Add)
  
 ### Introduction
 This tutorial will discuss how to setup development environemnt for HB-PyTorch, add a branch new operator to PyTorch for HammerBlade, and register auto-differentiation (backward pass) for your new operator. We start with HammerBlade _Emulation_Layer_, in which all interaction with HammerBlade hardware is emualted natively on x86. Similarly, HammerBlade device kernels are compiled for, and executed natively on x86 as well. If you have experience with iOS or Android development, building for Emulation Layer is analog to building for simulator in XCode.
@@ -94,8 +93,8 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> import torch
 >>> x = torch.ones(10).hammerblade()
 Emulating CUDALite...
-Emulation barrier init'ed with 1 threads
-PyTorch configed with 1 * 1 HB device
+Emulation barrier init'ed with 4 threads
+PyTorch configed with 2 * 2 HB device
 HB startup config kernel applied
 >>> torch.vincr(x)
 tensor([2., 2., 2., 2., 2., 2., 2., 2., 2., 2.], device='hammerblade')
@@ -220,14 +219,123 @@ Now we are ready to re-build PyTorch and give it a try. You must re-build PyTorc
 ```bash
 python setup.py develop --cmake
 ```
+Finally, we add tests on our newly created `vincr` operator.
 
-### Tutorial Task -- Extend PyTorch with a Vector-Vector Add Operator
+Edit [hammerblade/torch/tests/test_vincr.py](hammerblade/torch/tests/test_vincr.py) and add the following lines.
+```python
+import torch
+import random
+from hypothesis import given, settings
+from .hypothesis_test_util import HypothesisUtil as hu
 
-Similarly, we need to edit 3 files
-`aten/src/ATen/native/native_functions.yaml` -- to register the operation
-`aten/src/ATen/native/hammerblade/Vvadd.cpp` -- vincr kernel host code (runs on CPU)
-`hammerblade/torch/kernel/kernel_vadd.cpp` -- vincr kernel device code (runs on HB)
+torch.manual_seed(42)
+random.seed(42)
 
-Templates are added for you. Search for `Tutorial TODO` to find the tasks.
+def _test_torch_vincr(tensor):
+    h = tensor.hammerblade()
+    out = torch.vincr(h)
+    assert out.device == torch.device("hammerblade")
+    assert torch.allclose(tensor + 1, out.cpu())
 
+def test_torch_vincr_1():
+    t = torch.ones(10)
+    _test_torch_vincr(t)
+
+def test_torch_vincr_2():
+    t = torch.randn(10)
+    _test_torch_vincr(t)
+
+def test_torch_vincr_3():
+    t = torch.randn(2, 3)
+    _test_torch_vincr(t)
+
+@settings(deadline=None)
+@given(tensor=hu.tensor())
+def test_torch_vincr_hypothesis(tensor):
+    t = torch.tensor(tensor)
+    _test_torch_vincr(t)
+```
+
+Our tests, very much like `test_vincr.py`, are composed by a few direct tests (`test_torch_vincr_1~3`) and a hypothesis test (`test_torch_vincr_hypothesis`). [Hypothesis](https://hypothesis.readthedocs.io/en/latest/) is a widely adopted property-based testing framework. We have a few wrappers around hypothesis to make writing tests simpler. You may refer to [hammerblade/torch/tests/hypothesis_test_util.py](hammerblade/torch/tests/hypothesis_test_util.py) for more info.
+
+Direct tests are relatively simple to parse, so we focus on the hypothesis test.
+```python
+@settings(deadline=None)
+```
+This line is necessary since running on COSIM take a long time and hypothesis by default has a very low timeout threshold.
+```python
+@given(tensor=hu.tensor())
+```
+This line tells hypothesis to generate a single "tensor". It's actually a numpy array ... that's why we need to manually convert it to a PyTorch tensor
+```python
+t = torch.tensor(tensor)
+```
+
+
+To run all tests, go to [hammerblade/torch](hammerblade/torch) and run
+```bash
+python pytest_runner.py
+```
+
+### (Fake) Auto Differentiation for Vector-Increment
+One nice thing about PyTorch is that when writing a model, the user does not need to specify the backward pass. _Auto differentiation_ takes care of it. However, when a brand new operator is added to PyTorch, there is (at least currently) no way to magically figure out what is differential of your new operator -- it's not so _auto_ after all ...
+
+As developers, we need to tell PyTorch how to handle our `vincr` when "automatically" generates the backward pass path.
+
+To do so, edit [tools/autograd/derivatives.yaml](tools/autograd/derivatives.yaml) and add these to the end of the file
+```yaml
+- name: vincr(Tensor self) -> Tensor
+  self: zeros_like(self).fill_(42)
+```
+It's easy to spot that the `name` field is the same as what we put down in [aten/src/ATen/native/native_functions.yaml](aten/src/ATen/native/native_functions.yaml) for `func`.
+```yaml
+  self: zeros_like(self).fill_(42)
+```
+This is the most important line. It says the gradient of `self` should be a tensor that has the same shape as self, and each element should be 42.
+
+Now we re-build and give it a try. This time `--cmake` is not necessary since we only touched existing files.
+```bash
+python setup.py develop
+```
+
+```
+python
+Python 3.7.4 (default, Sep 28 2019, 14:22:12)
+[GCC 6.3.1 20170216 (Red Hat 6.3.1-3)] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import torch
+>>> x = torch.ones(2, 2, requires_grad=True)
+>>> h = x.hammerblade()
+>>> y = torch.vincr(h)
+>>> z = y.sum()
+>>> z
+tensor(8., device='hammerblade', grad_fn=<SumBackward0>)
+>>> z.backward()
+>>> x.grad
+tensor([[42., 42.],
+        [42., 42.]])
+```
+
+## To Do On Your Own (Vector-Vector-Add)
+
+In this section, you will add another branch new operator -- vvadd -- into PyTorch. `vvadd` takes in 2 tensors that have the same shape, , adds them together, and returns a new tensor. The files you need to touch is quite similar to the `vincr` case.
+
+Templates are left in these files. Edit them and get `vvadd` to work.
+ - [aten/src/ATen/native/native_functions.yaml](aten/src/ATen/native/native_functions.yaml)
+ - [aten/src/ATen/native/hammerblade/Vvadd.cpp](aten/src/ATen/native/hammerblade/Vvadd.cpp)
+ - [hammerblade/torch/kernel/kernel_vvadd.cpp](hammerblade/torch/kernel/kernel_vvadd.cpp)
+ 
+After filling in the blanks and re-building, we are expecting something like this:
+```
+python
+Python 3.7.4 (default, Sep 28 2019, 14:22:12)
+[GCC 6.3.1 20170216 (Red Hat 6.3.1-3)] on linux
+>>> import torch
+>>> torch.hammerblade.init()
+>>> x = torch.ones(10).hammerblade()
+>>> x
+tensor([1., 1., 1., 1., 1., 1., 1., 1., 1., 1.], device='hammerblade')
+>>> torch.vvadd(x, x)
+tensor([2., 2., 2., 2., 2., 2., 2., 2., 2., 2.], device='hammerblade')
+```
 Good luck!
