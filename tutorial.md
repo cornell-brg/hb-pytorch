@@ -94,8 +94,8 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> import torch
 >>> x = torch.ones(10).hammerblade()
 Emulating CUDALite...
-Emulation barrier init'ed with 1 threads
-PyTorch configed with 1 * 1 HB device
+Emulation barrier init'ed with 4 threads
+PyTorch configed with 2 * 2 HB device
 HB startup config kernel applied
 >>> torch.vincr(x)
 tensor([2., 2., 2., 2., 2., 2., 2., 2., 2., 2.], device='hammerblade')
@@ -219,6 +219,63 @@ Finally, we need to register this kernel with emulation layer, so we can lookup 
 Now we are ready to re-build PyTorch and give it a try. You must re-build PyTorch with `--cmake` flag since we added new files.
 ```bash
 python setup.py develop --cmake
+```
+Finally, we add tests on our newly created `vincr` operator.
+
+Edit [hammerblade/torch/tests/test_vincr.py](hammerblade/torch/tests/test_vincr.py) and add the following lines.
+```python
+import torch
+import random
+from hypothesis import given, settings
+from .hypothesis_test_util import HypothesisUtil as hu
+
+torch.manual_seed(42)
+random.seed(42)
+
+def _test_torch_vincr(tensor):
+    h = tensor.hammerblade()
+    out = torch.vincr(h)
+    assert out.device == torch.device("hammerblade")
+    assert torch.allclose(tensor + 1, out.cpu())
+
+def test_torch_vincr_1():
+    t = torch.ones(10)
+    _test_torch_vincr(t)
+
+def test_torch_vincr_2():
+    t = torch.randn(10)
+    _test_torch_vincr(t)
+
+def test_torch_vincr_3():
+    t = torch.randn(2, 3)
+    _test_torch_vincr(t)
+
+@settings(deadline=None)
+@given(tensor=hu.tensor())
+def test_torch_vincr_hypothesis(tensor):
+    t = torch.tensor(tensor)
+    _test_torch_vincr(t)
+```
+
+Our tests, very much like `test_vincr.py`, are composed by a few direct tests (`test_torch_vincr_1~3`) and a hypothesis test (`test_torch_vincr_hypothesis`). [Hypothesis](https://hypothesis.readthedocs.io/en/latest/) is a widely adopted property-based testing framework. We have a few wrappers around hypothesis to make writing tests simpler. You may refer to [hammerblade/torch/tests/hypothesis_test_util.py](hammerblade/torch/tests/hypothesis_test_util.py) for more info.
+
+Direct tests are relatively simple to parse, so we focus on the hypothesis test.
+```python
+@settings(deadline=None)
+```
+This line is necessary since running on COSIM take a long time and hypothesis by default has a very low timeout threshold.
+```python
+@given(tensor=hu.tensor())
+```
+This line tells hypothesis to generate a single "tensor". It's actually a numpy array ... that's why we need to manually convert it to a PyTorch tensor
+```python
+t = torch.tensor(tensor)
+```
+
+
+To run all tests, go to [hammerblade/torch](hammerblade/torch) and run
+```bash
+python pytest_runner.py
 ```
 
 ### Tutorial Task -- Extend PyTorch with a Vector-Vector Add Operator
