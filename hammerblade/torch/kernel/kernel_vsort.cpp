@@ -264,29 +264,25 @@ extern "C" {
     merge_sort(data[0], strides[0], start, end);
     //quicksort_recur(data[0], strides[0], start, end-1);
 
-    */
+    
 
     if (__bsg_id == 0) {
-    // Copy all the elements to be sorted
-    for (size_t i = 0; i < self.numel(); i++) {
-        result(i) = self(i);
-    }
-    }
-    size_t bsg_total = bsg_tiles_X * bsg_tiles_Y;
-
-    /*
-    g_barrier.sync();
-
-    size_t div = 2;
-    while (div < 3) { //result.numel()) {
-      tensorlib_merge(&result, div);
-      div *= 2;
-    }
-
-    if (__bsg_id < result.numel()) {
-      result(__bsg_id) = 0;
+      // Copy all the elements to be sorted
+      for (size_t i = 0; i < self.numel(); i++) {
+          result(i) = self(i);
+      }
     }
     */
+
+    // Copy all elements to result
+    hb_tiled_foreach(res, input,
+      [](float a) {
+        return a;
+    })
+
+
+    size_t bsg_total = bsg_tiles_X * bsg_tiles_Y;
+
     size_t total_div = result.numel();
     if (ceil(log2(total_div)) != floor(log2(total_div))){
       total_div = pow(2, ceil(log2(total_div)));
@@ -309,7 +305,6 @@ extern "C" {
       
       size_t lo = __bsg_id * len_tile;
       size_t hi = lo + len_tile;
-      //hi = (hi > result.numel()) ? result.numel() : hi;
       if (lo < result.numel()) {
         merge_range(&result, lo, hi);
       }
