@@ -276,7 +276,11 @@ if __name__ == "__main__":
 
     args = parse_arguments()
     aten_op = compare(args.full, args.chunk, args.manycore_stats, args.fancy)
-    print(aten_op)
+    print("==CPU=LOG==")
     print(aten_op.draw_cpu_log())
     print()
+    print("==HB=LOG==")
     print(aten_op.draw_hb_log())
+    print()
+    print("==TEXT==")
+    print(aten_op)
