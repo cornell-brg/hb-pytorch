@@ -61,7 +61,12 @@ void offload_memcpy(eva_t dest, eva_t src, uint32_t n) {
 
 // Offload routine for device to device transfers when input is an iter
 void offload_memcpy(TensorIterator& iter) {
-  offload_op_unary(iter, "tensorlib_copy_hb_to_hb");
+  std::string memcpy_kernel = "tensorlib_copy_";
+  memcpy_kernel += c10::toString(iter.dtype(1));
+  memcpy_kernel += "_to_";
+  memcpy_kernel += c10::toString(iter.dtype(0));
+  offload_op_unary(iter, memcpy_kernel.c_str());
 }
+
 } // namespace native
 } // namespace at
