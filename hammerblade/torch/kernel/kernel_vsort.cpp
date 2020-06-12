@@ -276,10 +276,10 @@ extern "C" {
     */
 
     // Copy all elements to result
-    hb_tiled_foreach(res, input,
+    hb_tiled_foreach(result, self,
       [](float a) {
         return a;
-    })
+    });
 
     size_t bsg_total = bsg_tiles_X * bsg_tiles_Y;
 
