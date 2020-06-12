@@ -276,13 +276,13 @@ extern "C" {
     */
   
 
-    
+    /*
     // Copy all elements to result
     hb_tiled_foreach(result, self,
       [=](float a) {
         return a;
     });
-    
+    */
     
     size_t bsg_total = bsg_tiles_X * bsg_tiles_Y;
 
@@ -293,6 +293,14 @@ extern "C" {
 
     // Each tile can start with two elements
     if (bsg_total >= (result.numel() / 2)) {
+      // Copy over the assigned tensor elements
+      if (__bsg_id*2 < result.numel()){
+        result(__bsg_id*2) = self(__bsg_id*2);
+      }
+      if (__bsg_id*2 + 1 < result.numel()){
+        result(__bsg_id*2+1) = self(__bsg_id*2+1);
+      }
+
       size_t div = 2;
       while (div <= total_div) { //result.numel()) {
         g_barrier.sync();
@@ -309,6 +317,10 @@ extern "C" {
       size_t lo = __bsg_id * len_tile;
       size_t hi = lo + len_tile;
       if (lo < result.numel()) {
+        // Copy over the assigned elements 
+        for (size_t i = lo; i < hi && i < result.numel(); i++) {
+          result(i) = self(i);
+        }
         merge_range(&result, lo, hi);
       }
 
