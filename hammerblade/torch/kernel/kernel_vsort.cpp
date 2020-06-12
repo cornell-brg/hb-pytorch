@@ -263,7 +263,7 @@ extern "C" {
 
     merge_sort(data[0], strides[0], start, end);
     //quicksort_recur(data[0], strides[0], start, end-1);
-
+    */
     
 
     if (__bsg_id == 0) {
@@ -273,13 +273,14 @@ extern "C" {
       }
 
     }
-    */
-
+    
+    /*
     // Copy all elements to result
     hb_tiled_foreach(result, self,
       [](float a) {
         return a;
     });
+    */
 
     size_t bsg_total = bsg_tiles_X * bsg_tiles_Y;
 
