@@ -12,7 +12,7 @@ def test_compare_aten_op_1():
                       current_path + "/demo/manycore_stats.log")
 
     # pytest assertion
-    assert aten_op.hb_device_time == 1.204603
+    assert aten_op.hb_device_time == 1204.603
     assert aten_op.hb_host_time == 170.0
     assert aten_op.xeon_time == 34.451
     cpu_graph = stack_parser.exec_time_print_tree(aten_op.cpu_log)
@@ -26,6 +26,6 @@ def test_compare_aten_op_2():
                       current_path + "/demo/manycore_stats.log", fancy_func=True)
 
     # pytest assertion
-    assert aten_op.hb_device_time == 1.204603
+    assert aten_op.hb_device_time == 1204.603
     assert aten_op.hb_host_time == 170.0
     assert aten_op.xeon_time == 34.451
