@@ -147,15 +147,16 @@ class ATen_OP:
         op_loc = 0
         loc = 0
         for actual in self.actuals:
+            # table uses ms instead of us
             buf += template.format(
                 func = fancify(self.name) if loc == op_loc else "",
                 tensor = actual.name,
                 full = actual.full,
                 chunk = actual.chunk,
-                xeon = "{:.2f}".format(self.xeon_time) if loc == op_loc else "",
-                hb = "{:.2f}".format(self.hb_host_time + self.hb_device_time) if loc == op_loc else "",
-                host = "{:.2f}".format(self.hb_host_time) if loc == op_loc else "",
-                device = "{:.2f}".format(self.hb_device_time) if loc == op_loc else "")
+                xeon = "{:.2f}".format(self.xeon_time / 1000.0) if loc == op_loc else "",
+                hb = "{:.2f}".format((self.hb_host_time + self.hb_device_time) / 1000.0) if loc == op_loc else "",
+                host = "{:.2f}".format(self.hb_host_time / 1000.0) if loc == op_loc else "",
+                device = "{:.2f}".format(self.hb_device_time / 1000.0) if loc == op_loc else "")
             loc += 1
         buf += """
 +-----------------------+---------------+--------------------+--------------------+-----------------+---------------------+-----------------+-------------------+
