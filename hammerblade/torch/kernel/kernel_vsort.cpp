@@ -271,6 +271,7 @@ extern "C" {
       for (size_t i = 0; i < self.numel(); i++) {
           result(i) = self(i);
       }
+
     }
     */
 
@@ -279,7 +280,6 @@ extern "C" {
       [](float a) {
         return a;
     })
-
 
     size_t bsg_total = bsg_tiles_X * bsg_tiles_Y;
 
@@ -309,7 +309,6 @@ extern "C" {
         merge_range(&result, lo, hi);
       }
 
-      
       size_t div = len_tile*2;
       while (div <= total_div) {
         g_barrier.sync();
@@ -319,7 +318,6 @@ extern "C" {
       
     }
     
-
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
 
