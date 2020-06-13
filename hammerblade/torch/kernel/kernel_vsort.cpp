@@ -292,7 +292,7 @@ extern "C" {
     }
 
     // Each tile can start with two elements
-    if (bsg_total >= (result.numel() / 2)) {
+    if (bsg_total >= ((float)result.numel() / 2)) {
       // Copy over the assigned tensor elements
       if (__bsg_id*2 < result.numel()){
         result(__bsg_id*2) = self(__bsg_id*2);
