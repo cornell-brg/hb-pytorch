@@ -313,6 +313,9 @@ extern "C" {
       if (ceil(log2(len_tile)) != floor(log2(len_tile))){
         len_tile = pow(2, ceil(log2(len_tile)));
       }
+      else {
+        len_tile = pow(2, log2(len_tile) + 1);
+      }
       
       size_t lo = __bsg_id * len_tile;
       size_t hi = lo + len_tile;
