@@ -41,7 +41,9 @@ def test_torch_vsort_4():
     _test_torch_vsort(t1)
 
 @settings(deadline=None)
-@given(tensor=hu.tensor())
+@given(tensor=hu.tensor1d(nonzero=True, min_len=5))
 def test_torch_vsort_hypothesis(tensor):
     t1 = torch.tensor(tensor)
+    #t1 = t1.float()
+    #t1 = t1.T
     _test_torch_vsort(t1)
