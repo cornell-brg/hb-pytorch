@@ -4,7 +4,7 @@ Unit tests for torch.hammerblade.profiler.fallback
 """
 
 import torch
-import torch.nn.functional as F
+import torch.nn as nn
 import random
 import pytest
 
@@ -52,20 +52,22 @@ def test_native_1F():
     assert torch.allclose(hb.cpu(), cpu)
 
 def test_complex_1():
-    input = torch.randn(3)
-    target = torch.empty(3).random_(2)
-    cpu_loss = F.binary_cross_entropy_with_logits(input, target)
+    unfold = nn.Unfold(kernel_size=(2, 3))
+    input = torch.randn(2, 5, 3, 4)
     torch.hammerblade.profiler.enable()
     torch.hammerblade.profiler.fallback.enable()
-    hb_loss = F.binary_cross_entropy_with_logits(input.hammerblade(), target.hammerblade())
+    output = unfold(input)
+    output_h = unfold(input.hammerblade())
     torch.hammerblade.profiler.fallback.disable()
     torch.hammerblade.profiler.disable()
-    assert torch.allclose(hb_loss.cpu(), cpu_loss)
+    assert output_h.device == torch.device("hammerblade")
+    assert torch.allclose(output, output_h.cpu())
 
 @pytest.mark.xfail
 def test_complex_1F():
-    input = torch.randn(3)
-    target = torch.empty(3).random_(2)
-    cpu_loss = F.binary_cross_entropy_with_logits(input, target)
-    hb_loss = F.binary_cross_entropy_with_logits(input.hammerblade(), target.hammerblade())
-    assert torch.allclose(hb_loss.cpu(), cpu_loss)
+    unfold = nn.Unfold(kernel_size=(2, 3))
+    input = torch.randn(2, 5, 3, 4)
+    output = unfold(input)
+    output_h = unfold(input.hammerblade())
+    assert output_h.device == torch.device("hammerblade")
+    assert torch.allclose(output, output_h.cpu())
