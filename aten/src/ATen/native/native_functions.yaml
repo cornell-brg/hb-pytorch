@@ -1132,6 +1132,7 @@
   dispatch:
     CPU: _exp__cpu
     CUDA: _exp__cuda
+    HammerBlade: _exp__hb
 
 - func: exp.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
@@ -1525,6 +1526,7 @@
   dispatch:
     CPU: log_out
     CUDA: log_out
+    HammerBlade: log_out
 
 - func: log10(Tensor self) -> Tensor
   use_c10_dispatcher: full
