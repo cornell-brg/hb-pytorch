@@ -3,8 +3,10 @@ Tests for exp
 04/13/2020 Yuyi He (yh383@cornell.edu)
 """
 import torch
+import random
 
 torch.manual_seed(42)
+random.seed(42)
 
 def _test_torch_exp(x):
     h = x.hammerblade()
@@ -26,5 +28,5 @@ def test_torch_exp_3():
     _test_torch_exp(x)
 
 def test_torch_exp_4():
-    x = torch.Tensor([float('inf')]) 
+    x = torch.Tensor([float('inf')])
     _test_torch_exp(x)
