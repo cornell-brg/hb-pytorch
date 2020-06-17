@@ -53,7 +53,7 @@ void HBProfiler::profiling_end() {
 
 // =============== c10 probe internal helper functions ========================
 
-static bool hb_profiler_thread_safe() {
+bool hb_profiler_thread_safe() {
 #ifdef _OPENMP
   // we profile if the current function is not in an active parallel region
   // OR thread id == 0

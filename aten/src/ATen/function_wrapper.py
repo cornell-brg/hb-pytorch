@@ -1403,7 +1403,7 @@ def create_generic(top_env, declarations):
 
         def process_redispatch_cpu_to_hb(option):
             # type: (FunctionOption) -> None
-            redispatch_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_is_top_level() && c10::probe::should_redispatch(__PRETTY_FUNCTION__))"
+            redispatch_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_thread_safe() && c10::probe::hb_profiler_is_top_level() && c10::probe::should_redispatch(__PRETTY_FUNCTION__))"
             tensor_boxing = ""
             tensor_allclose = ""
             alter_actuals = []
@@ -2070,7 +2070,7 @@ def create_derived(backend_type_env, declarations):
 
     def process_redispatch_cpu_to_hb(option):
         # type: (FunctionOption) -> None
-        redispatch_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_is_top_level() && c10::probe::should_redispatch(__PRETTY_FUNCTION__))"
+        redispatch_condition = "(c10::probe::use_hb_redispatch() && c10::probe::hb_profiler_is_in_roi() && c10::probe::hb_profiler_thread_safe() && c10::probe::hb_profiler_is_top_level() && c10::probe::should_redispatch(__PRETTY_FUNCTION__))"
         tensor_boxing = ""
         tensor_allclose = ""
         alter_actuals = []
