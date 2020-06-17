@@ -395,6 +395,7 @@ class CAFFE2_API Tensor {
 
   Tensor cpu() const;
   Tensor cpu_ifdef() const;
+  Tensor llcopy_ifdef() const;
   Tensor cuda() const;
   Tensor hip() const;
   Tensor hammerblade() const;
