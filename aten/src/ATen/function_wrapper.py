@@ -1414,7 +1414,7 @@ def create_generic(top_env, declarations):
             for f in option['formals_list']:
                 if f['type'] == 'Tensor &':
                     tensor_boxing += "auto {0}_hb = {0}.llcopy_ifdef();\n".format(f['name'])
-                    tensor_boxing += "buffer << \"{0};\" << {0}.sizes() << \"<|>\";\n".format(f['name'])
+                    tensor_boxing += "buffer << \"{0};\" << {0}.sizes_ifdef() << \"<|>\";\n".format(f['name'])
                     tensor_allclose += "TORCH_CHECK(at::native::allclose({0}, {0}_hb.cpu(), 0.01, 0.01));\n".format(f['name'])
                     alter_actuals.append(f['name'] + "_hb")
                     non_const_tensor += 1
@@ -1422,7 +1422,7 @@ def create_generic(top_env, declarations):
                     alter_actuals.append("{0}.device(at::kHAMMERBLADE)".format(f['name']))
                 elif f['type'] == 'const Tensor &':
                     tensor_boxing += "auto {0}_hb = {0}.llcopy_ifdef();\n".format(f['name'])
-                    tensor_boxing += "buffer << \"{0};\" << {0}.sizes() << \"<|>\";\n".format(f['name'])
+                    tensor_boxing += "buffer << \"{0};\" << {0}.sizes_ifdef() << \"<|>\";\n".format(f['name'])
                     alter_actuals.append(f['name'] + "_hb")
                 elif f['type'] == 'TensorList':
                     tensor_boxing += """
@@ -1431,7 +1431,7 @@ std::vector<Tensor> {0}_hb_vec;
 vec_idx = 0;
 for (const auto& t : {0}_vec) {{
   {0}_hb_vec.push_back(t.llcopy_ifdef());
-  buffer << "{0}_" << vec_idx << ";" << t.sizes() << "<|>";
+  buffer << "{0}_" << vec_idx << ";" << t.sizes_ifdef() << "<|>";
   vec_idx++;
 }}
 TensorList {0}_hb = TensorList({0}_hb_vec);
@@ -2081,7 +2081,7 @@ def create_derived(backend_type_env, declarations):
         for f in option['formals_list']:
             if f['type'] == 'Tensor &':
                 tensor_boxing += "auto {0}_hb = {0}.llcopy_ifdef();\n".format(f['name'])
-                tensor_boxing += "buffer << \"{0};\" << {0}.sizes() << \"<|>\";\n".format(f['name'])
+                tensor_boxing += "buffer << \"{0};\" << {0}.sizes_ifdef() << \"<|>\";\n".format(f['name'])
                 tensor_allclose += "TORCH_CHECK(at::native::allclose({0}, {0}_hb.cpu(), 0.01, 0.01));\n".format(f['name'])
                 alter_actuals.append(f['name'] + "_hb")
                 non_const_tensor += 1
@@ -2089,7 +2089,7 @@ def create_derived(backend_type_env, declarations):
                 alter_actuals.append("{0}.device(at::kHAMMERBLADE)".format(f['name']))
             elif f['type'] == 'const Tensor &':
                 tensor_boxing += "auto {0}_hb = {0}.llcopy_ifdef();\n".format(f['name'])
-                tensor_boxing += "buffer << \"{0};\" << {0}.sizes() << \"<|>\";\n".format(f['name'])
+                tensor_boxing += "buffer << \"{0};\" << {0}.sizes_ifdef() << \"<|>\";\n".format(f['name'])
                 alter_actuals.append(f['name'] + "_hb")
             elif f['type'] == 'TensorList':
                 tensor_boxing += """
@@ -2098,7 +2098,7 @@ std::vector<Tensor> {0}_hb_vec;
 vec_idx = 0
 for (const auto& t : {0}_vec) {{
   {0}_hb_vec.push_back(t.llcopy_ifdef());
-  buffer << "{0}_" << vec_idx << ";" << t.sizes() << "<|>";
+  buffer << "{0}_" << vec_idx << ";" << t.sizes_ifdef() << "<|>";
   vec_idx++;
 }}
 TensorList {0}_hb = TensorList({0}_hb_vec);
