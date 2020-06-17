@@ -29,6 +29,35 @@ inline uint32_t offset_calc(uint32_t idx, HBTensor<scalar_t> tensor) {
 }
 
 // =========================================================
+// Tiled range calculation
+// hb_range -> [start, end)
+// =========================================================
+typedef struct hb_range {
+  size_t start;
+  size_t end;
+} hb_range;
+
+inline void calc_range(hb_range* range, size_t numel) {
+  // per pod chunk
+  size_t len_per_pod  = numel / BSG_POD_DIM + 1;
+  // chunk range
+  size_t pod_start    = len_per_pod * __bsg_pod_id;
+  size_t pod_end      = pod_start + len_per_pod;
+  pod_end = (pod_end > numel) ? numel : pod_end;
+  size_t pod_size     = pod_end - pod_start;
+  // per tile range within a pod
+  size_t len_per_tile = pod_size / (bsg_tiles_X * bsg_tiles_Y) + 1;
+  size_t start        = len_per_tile * __bsg_id;
+  size_t end          = start + len_per_tile;
+  end = (end > pod_size) ? pod_size : end;
+  // range in global idx
+  range->start = pod_start + start;
+  range->end   = pod_start + end;
+
+  return;
+}
+
+// =========================================================
 // Pointwise for -- Ternary
 // =========================================================
 
@@ -263,10 +292,11 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > res.numel())  ? res.numel() : end;
+    hb_range range;
+    calc_range(&range, res.numel());
+    size_t start = range.start;
+    size_t end   = range.end;
+
     data[0] += strides[0] * start;
     data[1] += strides[1] * start;
     data[2] += strides[2] * start;
@@ -286,10 +316,11 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > res.numel())  ? res.numel() : end;
+    hb_range range;
+    calc_range(&range, res.numel());
+    size_t start = range.start;
+    size_t end   = range.end;
+
     for (size_t idx = start; idx < end; idx++) {
       scalar_t* res_dp = (scalar_t*)(data[0] + offset_calc(idx, res));
       scalar_t* input_dp = (scalar_t*)(data[1] + offset_calc(idx, input));
@@ -330,10 +361,11 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > res.numel())  ? res.numel() : end;
+    hb_range range;
+    calc_range(&range, res.numel());
+    size_t start = range.start;
+    size_t end   = range.end;
+
     data[0] += strides[0] * start;
     data[1] += strides[1] * start;
     data[2] += strides[2] * start;
@@ -350,10 +382,11 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > res.numel())  ? res.numel() : end;
+    hb_range range;
+    calc_range(&range, res.numel());
+    size_t start = range.start;
+    size_t end   = range.end;
+
     for (size_t idx = start; idx < end; idx++) {
       scalar_t* res_dp = (scalar_t*)(data[0] + offset_calc(idx, res));
       scalar_t* input_dp = (scalar_t*)(data[1] + offset_calc(idx, input));
@@ -390,10 +423,11 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > res.numel())  ? res.numel() : end;
+    hb_range range;
+    calc_range(&range, res.numel());
+    size_t start = range.start;
+    size_t end   = range.end;
+
     data[0] += strides[0] * start;
     data[1] += strides[1] * start;
     for (size_t idx = start; idx < end; idx++) {
@@ -407,10 +441,11 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > res.numel())  ? res.numel() : end;
+    hb_range range;
+    calc_range(&range, res.numel());
+    size_t start = range.start;
+    size_t end   = range.end;
+
     for (size_t idx = start; idx < end; idx++) {
       scalar_t* res_dp = (scalar_t*)(data[0] + offset_calc(idx, res));
       scalar_t* input_dp = (scalar_t*)(data[1] + offset_calc(idx, input));
@@ -446,10 +481,11 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > res.numel())  ? res.numel() : end;
+    hb_range range;
+    calc_range(&range, res.numel());
+    size_t start = range.start;
+    size_t end   = range.end;
+
     data[0] += strides[0] * start;
     data[1] += strides[1] * start;
     for (size_t idx = start; idx < end; idx++) {
@@ -463,10 +499,11 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > res.numel())  ? res.numel() : end;
+    hb_range range;
+    calc_range(&range, res.numel());
+    size_t start = range.start;
+    size_t end   = range.end;
+
     for (size_t idx = start; idx < end; idx++) {
       scalar_dst* res_dp = (scalar_dst*)(data[0] + offset_calc(idx, res));
       scalar_src* input_dp = (scalar_src*)(data[1] + offset_calc(idx, input));
@@ -499,10 +536,11 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > res.numel())  ? res.numel() : end;
+    hb_range range;
+    calc_range(&range, res.numel());
+    size_t start = range.start;
+    size_t end   = range.end;
+
     data[0] += strides[0] * start;
     for (size_t idx = start; idx < end; idx++) {
       scalar_t* res_dp = (scalar_t*)(data[0]);
@@ -513,10 +551,11 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-    size_t start = len_per_tile * __bsg_id;
-    size_t end = start + len_per_tile;
-    end = (end > res.numel())  ? res.numel() : end;
+    hb_range range;
+    calc_range(&range, res.numel());
+    size_t start = range.start;
+    size_t end   = range.end;
+
     for (size_t idx = start; idx < end; idx++) {
       scalar_t* res_dp = (scalar_t*)(data[0] + offset_calc(idx, res));
       *res_dp = functor();
@@ -554,10 +593,11 @@ inline void hb_tiled_for(size_t numel, FetchFunctor functor) {
   //--------------------------------------
   // calculate start and end for this tile
   //--------------------------------------
-  size_t len_per_tile = numel / (bsg_tiles_X * bsg_tiles_Y) + 1;
-  size_t start = len_per_tile * __bsg_id;
-  size_t end = start + len_per_tile;
-  end = (end > numel)  ? numel : end;
+  hb_range range;
+  calc_range(&range, numel);
+  size_t start = range.start;
+  size_t end   = range.end;
+
   //-----------------
   // loop
   //----------------
