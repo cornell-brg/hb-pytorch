@@ -74,6 +74,8 @@ inline bool variable_excluded_from_dispatch() {
 // Note that Tensor can also be NULL, i.e. it is not associated with any underlying TensorImpl, and
 // special care must be taken to handle this.
 class CAFFE2_API Tensor {
+ private:
+  int undefined_size = 0xbeefbeef;
  public:
   Tensor(){};
   // This constructor should not be used by end users and is an implementation
@@ -183,7 +185,7 @@ class CAFFE2_API Tensor {
     if (this->defined()) {
       return impl_->sizes();
     } else {
-      return IntArrayRef(-1);
+      return IntArrayRef(undefined_size);
     }
   }
   IntArrayRef sizes() const {
