@@ -12,8 +12,6 @@
 #include <hb_assert.hpp>
 #include <hb_tensor.hpp>
 
-#include <iostream>
-
 // =========================================================
 // Linear index to offset
 // =========================================================
@@ -95,7 +93,6 @@ inline void hb_foreach(HBTensor<scalar_t> res,
       if (strides[i] == 0) {
         fixed_data[i] = *(scalar_t*)data[i];
         data[i] = (char*)&fixed_data[i];
-        std::cout << " tensor " << i << " has a stride == 0" << std::endl;
       }
     }
 
@@ -164,7 +161,6 @@ inline void hb_foreach(HBTensor<scalar_t> res,
       if (strides[i] == 0) {
         fixed_data[i] = *(scalar_t*)data[i];
         data[i] = (char*)&fixed_data[i];
-        std::cout << " tensor " << i << " has a stride == 0" << std::endl;
       }
     }
 
@@ -227,7 +223,6 @@ inline void hb_foreach(HBTensor<scalar_t> res,
       if (strides[i] == 0) {
         fixed_data[i] = *(scalar_t*)data[i];
         data[i] = (char*)&fixed_data[i];
-        std::cout << " tensor " << i << " has a stride == 0" << std::endl;
       }
     }
 
@@ -284,7 +279,6 @@ inline void hb_foreach(HBTensor<scalar_t> res,
       if (strides[i] == 0) {
         fixed_data[i] = *(scalar_t*)data[i];
         data[i] = (char*)&fixed_data[i];
-        std::cout << " tensor " << i << " has a stride == 0" << std::endl;
       }
     }
 
@@ -347,7 +341,6 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
       if (strides[i] == 0) {
         fixed_data[i] = *(scalar_t*)data[i];
         data[i] = (char*)&fixed_data[i];
-        std::cout << " tensor " << i << " has a stride == 0" << std::endl;
       }
     }
 
@@ -428,7 +421,6 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
       if (strides[i] == 0) {
         fixed_data[i] = *(scalar_t*)data[i];
         data[i] = (char*)&fixed_data[i];
-        std::cout << " tensor " << i << " has a stride == 0" << std::endl;
       }
     }
 
@@ -502,7 +494,6 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
       if (strides[i] == 0) {
         fixed_data[i] = *(scalar_t*)data[i];
         data[i] = (char*)&fixed_data[i];
-        std::cout << " tensor " << i << " has a stride == 0" << std::endl;
       }
     }
 
@@ -627,7 +618,6 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
       if (strides[i] == 0) {
         fixed_data[i] = *(scalar_t*)data[i];
         data[i] = (char*)&fixed_data[i];
-        std::cout << " tensor " << i << " has a stride == 0" << std::endl;
       }
     }
 
