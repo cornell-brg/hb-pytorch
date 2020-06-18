@@ -96,7 +96,7 @@ class HBTensorImpl {
       return sizes;
     }
 
-    int numel() {
+    uint32_t numel() {
       return N;
     }
 

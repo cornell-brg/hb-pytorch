@@ -606,5 +606,26 @@ inline void hb_tiled_for(size_t numel, FetchFunctor functor) {
   }
 }
 
+// =========================================================
+// HB tile range
+// =========================================================
+// functor takes in current index
+
+template <class FetchFunctor>
+inline void hb_tiled_range(size_t numel, FetchFunctor functor) {
+  //--------------------------------------
+  // calculate start and end for this tile
+  //--------------------------------------
+  hb_range range;
+  calc_range(&range, numel);
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  //-----------------
+  // range
+  //----------------
+  functor(start, end);
+}
+
 
 #endif
