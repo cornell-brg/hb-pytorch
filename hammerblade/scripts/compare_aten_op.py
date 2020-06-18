@@ -309,9 +309,16 @@ def compare(full_path, chunk_path, stats_path=None, fancy_func=False):
     # read UW's profiling data is manycore_stats is defined
     external_stats = None
     if stats_path is not None:
-        with open(stats_path, "r") as f_stats:
-            external_stats = f_stats.read()
-        assert external_stats is not None
+        try:
+            with open(stats_path, "r") as f_stats:
+                external_stats = f_stats.read()
+            assert external_stats is not None
+        except:
+            print()
+            print("Warning: manycore-stats specified but not found")
+            print()
+            pass
+
 
     # read external cycles if necessary
     external_trim = None
