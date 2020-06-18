@@ -27,24 +27,6 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    /*
-    hb_tiled_for(index.numel(), [&](size_t i) {
-      if (index_data[i] != padding_idx) {
-        int32_t k = index_data[i];
-        if (k >= 0 && k < num_weights) {
-          float scale = 1.0;
-          float* dst = grad_weight_data + k * grad_weight.get_strides()[0];
-          float* src = grad_data + i * grad.get_strides()[0];
-          for (size_t j=0; j<numel; j++) {
-            *dst += *src * scale;
-            dst++;
-            src++;
-          }
-        }
-      }
-    });
-    */
-
     uint32_t indices_numel = index.numel();
     // parallelize over vocabulary
     hb_tiled_range(num_weights, [&](size_t start, size_t end) {
