@@ -186,6 +186,44 @@ class ATen_OP:
 """
         return buf
 
+# INPUT:  a List of ATen_OP objects
+# OUTPUT: a single ATen_OP which is the average
+
+def average_aten_op(ops):
+    assert len(ops) > 0
+    # collect base info
+    op0 = ops[0]
+    name = op0.name
+    actuals = op0.actuals
+    device_time = op0.hb_device_time
+    cpu_log = op0.cpu_log
+    hb_log = op0.hb_log
+    # accumulate
+    for op in ops[1:]:
+        # cross check
+        assert name == op.name
+        assert len(actuals) == len(op.actuals)
+        for i in range(len(actuals)):
+            assert actuals[i].name == op.actuals[i].name
+            assert actuals[i].full == op.actuals[i].full
+            assert actuals[i].chunk == op.actuals[i].chunk
+        assert device_time == op.hb_device_time
+        # add
+        cpu_log = add_tree(cpu_log, op.cpu_log)
+        hb_log = add_tree(hb_log, op.hb_log)
+    # average
+    factor = 1.0 / len(ops)
+    def average(root):
+        nonlocal factor
+        root.time = root.time * factor
+    traversal(cpu_log, average)
+    traversal(hb_log, average)
+
+    # final object
+    return ATen_OP(name, cpu_log, hb_log, device_time, actuals)
+
+
+
 
 # INPUT:   full_raw_stack + full_actuals & chunk_raw_stack + chunk_actuals
 # OUTPUT:  ATen_OP object
