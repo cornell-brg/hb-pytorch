@@ -112,6 +112,29 @@ digraph {
     buf += "\n}\n"
     return buf
 
+# INPUT:  2 trees
+# OUTPUT: 1 tree in which each node's time == sum of time of 2 input trees
+
+def add_tree(root1, root2):
+    # collect nodes
+    tree1 = []
+    def collect_tree1(root):
+        tree1.append(root)
+    res_tree = copy.deepcopy(root1)
+    traversal(res_tree, collect_tree1)
+    tree2 = []
+    def collect_tree2(root):
+        tree2.append(root)
+    traversal(root2, collect_tree2)
+    assert len(tree1) == len(tree2)
+    # output tree
+    for i in range(len(tree1)):
+        assert tree1[i].func == tree2[i].func
+        assert len(tree1[i].children) == len(tree2[i].children)
+        # add time together
+        tree1[i].time += tree2[i].time
+    return res_tree
+
 
 class ATen_OP:
     def __init__(self, name, cpu_log, hb_log, time_on_hb, actuals):
