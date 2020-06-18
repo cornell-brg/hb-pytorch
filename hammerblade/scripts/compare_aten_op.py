@@ -27,8 +27,8 @@ HB_FREQUENCY = 1000000000 # Hz = 1GHz
 def parse_arguments():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--full', default="full.std")
-    parser.add_argument('--chunk', default="chunk.std")
+    parser.add_argument('--full', action='append')
+    parser.add_argument('--chunk', action='append')
     parser.add_argument('--manycore-stats', default=None)
     parser.add_argument('--fancy', action='store_true', default=False)
     return parser.parse_args()
@@ -337,7 +337,16 @@ def compare(full_path, chunk_path, stats_path=None, fancy_func=False):
 if __name__ == "__main__":
 
     args = parse_arguments()
-    aten_op = compare(args.full, args.chunk, args.manycore_stats, args.fancy)
+    # debug
+    print(args.full)
+    print(args.chunk)
+    assert len(args.full) == len(args.chunk)
+
+    ops = []
+    for i in range(len(args.full)):
+        ops.append(compare(args.full[i], args.chunk[i], args.manycore_stats, args.fancy))
+    aten_op = average_aten_op(ops)
+
     print("==CPU=LOG==")
     print(aten_op.draw_cpu_log())
     print()
