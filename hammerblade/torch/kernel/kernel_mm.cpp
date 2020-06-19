@@ -14,7 +14,6 @@ extern "C" {
           float* dest,
           float* sp_mat1,
           float* sp_mat2,
-          float alpha,
           int dim_y,
           int dim_x,
           int mid_dim) {
@@ -25,14 +24,14 @@ extern "C" {
             for (int k = 0; k < mid_dim; k += 8) {
                 int mat1_idx = mat1_row_offset + k;
                 int mat2_idx = k * dim_x + j;
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx] * sp_mat2[mat2_idx];
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 1] * sp_mat2[mat2_idx + dim_x];
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 2] * sp_mat2[mat2_idx + 2 * dim_x];
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 3] * sp_mat2[mat2_idx + 3 * dim_x];
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 4] * sp_mat2[mat2_idx + 4 * dim_x];
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 5] * sp_mat2[mat2_idx + 5 * dim_x];
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 6] * sp_mat2[mat2_idx + 6 * dim_x];
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 7] * sp_mat2[mat2_idx + 7 * dim_x];
+                dest[dest_row_offset + j] += sp_mat1[mat1_idx] * sp_mat2[mat2_idx];
+                dest[dest_row_offset + j] += sp_mat1[mat1_idx + 1] * sp_mat2[mat2_idx + dim_x];
+                dest[dest_row_offset + j] += sp_mat1[mat1_idx + 2] * sp_mat2[mat2_idx + 2 * dim_x];
+                dest[dest_row_offset + j] += sp_mat1[mat1_idx + 3] * sp_mat2[mat2_idx + 3 * dim_x];
+                dest[dest_row_offset + j] += sp_mat1[mat1_idx + 4] * sp_mat2[mat2_idx + 4 * dim_x];
+                dest[dest_row_offset + j] += sp_mat1[mat1_idx + 5] * sp_mat2[mat2_idx + 5 * dim_x];
+                dest[dest_row_offset + j] += sp_mat1[mat1_idx + 6] * sp_mat2[mat2_idx + 6 * dim_x];
+                dest[dest_row_offset + j] += sp_mat1[mat1_idx + 7] * sp_mat2[mat2_idx + 7 * dim_x];
             }
         }
     }
@@ -42,7 +41,6 @@ extern "C" {
   // Assume dim_y and dim_x are both exactly BLOCK_SIZE
   static void dram_to_sp_simple(
           float* dest,
-          float coeff,
           HBTensor<float, 2> src,
           int dim_y,
           int dim_x,
@@ -51,14 +49,14 @@ extern "C" {
     for (int i = 0; i < dim_y; i++) {
         int row_offset = i * dim_x;
         for (int j = 0; j < dim_x; j += 8) {
-            dest[row_offset + j] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-            dest[row_offset + j + 1] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
-            dest[row_offset + j + 2] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
-            dest[row_offset + j + 3] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
-            dest[row_offset + j + 4] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
-            dest[row_offset + j + 5] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
-            dest[row_offset + j + 6] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
-            dest[row_offset + j + 7] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            dest[row_offset + j] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
+            dest[row_offset + j + 1] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
+            dest[row_offset + j + 2] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
+            dest[row_offset + j + 3] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
+            dest[row_offset + j + 4] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
+            dest[row_offset + j + 5] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
+            dest[row_offset + j + 6] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
+            dest[row_offset + j + 7] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
         }
     }
 }
@@ -69,7 +67,6 @@ extern "C" {
           float* dest,
           float* sp_mat1,
           float* sp_mat2,
-          float alpha,
           int dim_y,
           int dim_x,
           int mid_dim) {
@@ -80,14 +77,14 @@ extern "C" {
             for (int k = 0; k < mid_dim; k += 8) {
                 int mat1_idx = mat1_row_offset + k;
                 int mat2_idx = k * dim_x + j;
-                dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx] * sp_mat2[mat2_idx];
-                if (k + 1 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 1] * sp_mat2[mat2_idx + dim_x];
-                if (k + 2 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 2] * sp_mat2[mat2_idx + 2 * dim_x];
-                if (k + 3 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 3] * sp_mat2[mat2_idx + 3 * dim_x];
-                if (k + 4 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 4] * sp_mat2[mat2_idx + 4 * dim_x];
-                if (k + 5 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 5] * sp_mat2[mat2_idx + 5 * dim_x];
-                if (k + 6 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 6] * sp_mat2[mat2_idx + 6 * dim_x];
-                if (k + 7 < mid_dim) dest[dest_row_offset + j] += alpha * sp_mat1[mat1_idx + 7] * sp_mat2[mat2_idx + 7 * dim_x];
+                dest[dest_row_offset + j] += sp_mat1[mat1_idx] * sp_mat2[mat2_idx];
+                if (k + 1 < mid_dim) dest[dest_row_offset + j] += sp_mat1[mat1_idx + 1] * sp_mat2[mat2_idx + dim_x];
+                if (k + 2 < mid_dim) dest[dest_row_offset + j] += sp_mat1[mat1_idx + 2] * sp_mat2[mat2_idx + 2 * dim_x];
+                if (k + 3 < mid_dim) dest[dest_row_offset + j] += sp_mat1[mat1_idx + 3] * sp_mat2[mat2_idx + 3 * dim_x];
+                if (k + 4 < mid_dim) dest[dest_row_offset + j] += sp_mat1[mat1_idx + 4] * sp_mat2[mat2_idx + 4 * dim_x];
+                if (k + 5 < mid_dim) dest[dest_row_offset + j] += sp_mat1[mat1_idx + 5] * sp_mat2[mat2_idx + 5 * dim_x];
+                if (k + 6 < mid_dim) dest[dest_row_offset + j] += sp_mat1[mat1_idx + 6] * sp_mat2[mat2_idx + 6 * dim_x];
+                if (k + 7 < mid_dim) dest[dest_row_offset + j] += sp_mat1[mat1_idx + 7] * sp_mat2[mat2_idx + 7 * dim_x];
             }
         }
     }
@@ -98,7 +95,6 @@ extern "C" {
   // dim_y and dim_x can be less than BLOCK_SIZE
   static void dram_to_sp(
           float* dest,
-          float coeff,
           HBTensor<float, 2> src,
           int dim_y,
           int dim_x,
@@ -107,32 +103,26 @@ extern "C" {
     for (int i = 0; i < dim_y; i++) {
         int row_offset = i * dim_x;
         for (int j = 0; j < dim_x; j += 8) {
-            dest[row_offset + j] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-            if (j + 1 < dim_x) dest[row_offset + j + 1] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
-            if (j + 2 < dim_x) dest[row_offset + j + 2] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
-            if (j + 3 < dim_x) dest[row_offset + j + 3] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
-            if (j + 4 < dim_x) dest[row_offset + j + 4] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
-            if (j + 5 < dim_x) dest[row_offset + j + 5] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
-            if (j + 6 < dim_x) dest[row_offset + j + 6] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
-            if (j + 7 < dim_x) dest[row_offset + j + 7] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            dest[row_offset + j] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
+            if (j + 1 < dim_x) dest[row_offset + j + 1] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
+            if (j + 2 < dim_x) dest[row_offset + j + 2] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
+            if (j + 3 < dim_x) dest[row_offset + j + 3] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
+            if (j + 4 < dim_x) dest[row_offset + j + 4] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
+            if (j + 5 < dim_x) dest[row_offset + j + 5] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
+            if (j + 6 < dim_x) dest[row_offset + j + 6] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
+            if (j + 7 < dim_x) dest[row_offset + j + 7] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
         }
     }
 }
 
-  __attribute__ ((noinline))  int tensorlib_addmm(
+  __attribute__ ((noinline))  int tensorlib_mm(
           hb_tensor_t* _result,
-          hb_tensor_t* _self,
           hb_tensor_t* _mat1,
-          hb_tensor_t* _mat2,
-          float* _beta,
-          float* _alpha) {
+          hb_tensor_t* _mat2) {
 
-    auto self = HBTensor<float, 2>(_self);
     auto mat1 = HBTensor<float, 2>(_mat1);
     auto mat2 = HBTensor<float, 2>(_mat2);
     auto result = HBTensor<float, 2>(_result);
-    float beta = *_beta;
-    float alpha = *_alpha;
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
@@ -167,16 +157,9 @@ extern "C" {
         int res_dim_x = rc == m2_num_blk_per_col - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
         int partial_block = (res_dim_y != BLOCK_DIM) || (res_dim_x != BLOCK_DIM);
 
-        // initialize scratchpad result (load beta * self into result)
-
-        // unrolled version
+        // initialize scratchpad result (init to 0's)
         float sp_result[res_dim_y * res_dim_x];
-        if (partial_block) { // general case
-            dram_to_sp(sp_result, beta, self, res_dim_y, res_dim_x, rr, rc);
-        } else { // common case: res_dim_y == res_dim_x == BLOCK_SIZE
-            dram_to_sp_simple(sp_result, beta, self, res_dim_y, res_dim_x, rr, rc);
-        }
-        // end: unrolled version
+        memset(sp_result, 0, res_dim_y * res_dim_x * sizeof(float));
 
         // process mat1 and mat2 for this result block
         // only care about blocks of mat1 in row rr
@@ -192,13 +175,13 @@ extern "C" {
             float sp_mat1[res_dim_y * mid_dim];
             float sp_mat2[mid_dim * res_dim_x];
             if (partial_block) { // general case
-                dram_to_sp(sp_mat1, 1.0f, mat1, res_dim_y, mid_dim, rr, mat1x);
-                dram_to_sp(sp_mat2, 1.0f, mat2, mid_dim, res_dim_x, mat2y, rc);
-                compute(sp_result, sp_mat1, sp_mat2, alpha, res_dim_y, res_dim_x, mid_dim);
+                dram_to_sp(sp_mat1, mat1, res_dim_y, mid_dim, rr, mat1x);
+                dram_to_sp(sp_mat2, mat2, mid_dim, res_dim_x, mat2y, rc);
+                compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
             } else { // common case: res_dim_y == res_dim_x == BLOCK_SIZE
-                dram_to_sp_simple(sp_mat1, 1.0f, mat1, res_dim_y, mid_dim, rr, mat1x);
-                dram_to_sp_simple(sp_mat2, 1.0f, mat2, mid_dim, res_dim_x, mat2y, rc);
-                compute_simple(sp_result, sp_mat1, sp_mat2, alpha, res_dim_y, res_dim_x, mid_dim);
+                dram_to_sp_simple(sp_mat1, mat1, res_dim_y, mid_dim, rr, mat1x);
+                dram_to_sp_simple(sp_mat2, mat2, mid_dim, res_dim_x, mat2y, rc);
+                compute_simple(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
             }
             // end: unrolled version
 
@@ -220,7 +203,7 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_addmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, float*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_mm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 
 }
 
