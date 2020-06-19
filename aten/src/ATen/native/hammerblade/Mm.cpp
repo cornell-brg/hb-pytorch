@@ -4,13 +4,6 @@
 
 namespace at { namespace native {
 
-/*
-Tensor mm_hb(const Tensor& input, const Tensor& mat2) {
-  Tensor t = at::zeros({}, mat2.options());
-  return at::addmm(t, input, mat2, 0, 1); // redispatch!
-}
-*/
-
 Tensor mm_hb(const Tensor& input, const Tensor& mat2) {
   TORCH_CHECK(input.scalar_type() == ScalarType::Float, "HammerBlade addmm is implemented for Float only");
   TORCH_CHECK(mat2.scalar_type() == ScalarType::Float, "HammerBlade addmm is implemented for Float only");
