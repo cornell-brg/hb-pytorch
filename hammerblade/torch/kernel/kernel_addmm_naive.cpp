@@ -53,7 +53,7 @@ static void dram_to_sp_simple(
         int row_offset = i * dim_x;
         int j = 0;
         for (;j < dim_x - 8; j += 8) {
-            dest[row_offset + j]     = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
+            dest[row_offset + j] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
             dest[row_offset + j + 1] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
             dest[row_offset + j + 2] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
             dest[row_offset + j + 3] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
@@ -69,48 +69,16 @@ static void dram_to_sp_simple(
     }
 }
 
-static void dram_to_sp(
-          float* dest,
-          float coeff,
-          HBTensor<float, 2> src,
-          int dim_y,
-          int dim_x,
-          int r_idx,
-          int c_idx) {
-    for (int i = 0; i < dim_y; i++) {
-        int row_offset = i * dim_x;
-        int j = 0;
-        for (;j < dim_x - 8; j += 8) {
-            dest[row_offset + j] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-            dest[row_offset + j + 1] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
-            dest[row_offset + j + 2] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
-            dest[row_offset + j + 3] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
-            dest[row_offset + j + 4] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
-            dest[row_offset + j + 5] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
-            dest[row_offset + j + 6] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
-            dest[row_offset + j + 7] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
-        }
-        // fixup
-        for (;j < dim_x; j++) {
-            dest[row_offset + j] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-        }
-    }
-}
-
-  __attribute__ ((noinline))  int tensorlib_addmm(
+  __attribute__ ((noinline))  int tensorlib_addmm_naive(
           hb_tensor_t* _result,
           hb_tensor_t* _self,
           hb_tensor_t* _mat1,
-          hb_tensor_t* _mat2,
-          float* _beta,
-          float* _alpha) {
+          hb_tensor_t* _mat2) {
 
     auto self = HBTensor<float, 2>(_self);
     auto mat1 = HBTensor<float, 2>(_mat1);
     auto mat2 = HBTensor<float, 2>(_mat2);
     auto result = HBTensor<float, 2>(_result);
-    float beta = *_beta;
-    float alpha = *_alpha;
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
@@ -145,13 +113,11 @@ static void dram_to_sp(
         int res_dim_x = rc == m2_num_blk_per_col - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
         int partial_block = (res_dim_y != BLOCK_DIM) || (res_dim_x != BLOCK_DIM);
 
-        // initialize scratchpad result (load beta * self into result)
+        // initialize scratchpad result (self into result)
 
         // unrolled version
         float sp_result[res_dim_y * res_dim_x];
-        float sp_self[res_dim_y * res_dim_x];
-        dram_to_sp(sp_self, beta, self, res_dim_y, res_dim_x, rr, rc);
-        memset(sp_result, 0, res_dim_y * res_dim_x * sizeof(float));
+        dram_to_sp_simple(sp_result, self, res_dim_y, res_dim_x, rr, rc);
         // end: unrolled version
 
         // process mat1 and mat2 for this result block
@@ -178,7 +144,7 @@ static void dram_to_sp(
         for (int i = 0; i < res_dim_y; i++) {
             for (int j = 0; j < res_dim_x; j++) {
                 // unrolled version
-                result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_self[i * res_dim_x + j] + alpha * sp_result[i * res_dim_x + j];
+                result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * res_dim_x + j];
                 // end: unrolled version
             }
         }
@@ -190,7 +156,7 @@ static void dram_to_sp(
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_addmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, float*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_addmm_naive, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 
 }
 
