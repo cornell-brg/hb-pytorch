@@ -3,66 +3,11 @@
 // 03/09/2020 Kexin Zheng, Lin Cheng (kz73@cornell.edu, lc873@cornell.edu)
 //====================================================================
 
+#define BLOCK_DIM 8 // sqrt(4KB/4 byte/4 data matrix) = 15 max
 #include <kernel_common.hpp>
 #include <kernel_addmm.hpp>
-#define BLOCK_DIM 8 // sqrt(4KB/4 byte/4 data matrix) = 15 max
 
 extern "C" {
-
-static void dram_to_sp_simple(
-          float* dest,
-          HBTensor<float, 2> src,
-          int dim_y,
-          int dim_x,
-          int r_idx,
-          int c_idx) {
-    for (int i = 0; i < dim_y; i++) {
-        int row_offset = i * dim_x;
-        int j = 0;
-        for (;j < dim_x - 8; j += 8) {
-            dest[row_offset + j]     = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-            dest[row_offset + j + 1] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
-            dest[row_offset + j + 2] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
-            dest[row_offset + j + 3] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
-            dest[row_offset + j + 4] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
-            dest[row_offset + j + 5] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
-            dest[row_offset + j + 6] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
-            dest[row_offset + j + 7] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
-        }
-        // fixup
-        for (;j < dim_x; j++) {
-            dest[row_offset + j] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-        }
-    }
-}
-
-static void dram_to_sp(
-          float* dest,
-          float coeff,
-          HBTensor<float, 2> src,
-          int dim_y,
-          int dim_x,
-          int r_idx,
-          int c_idx) {
-    for (int i = 0; i < dim_y; i++) {
-        int row_offset = i * dim_x;
-        int j = 0;
-        for (;j < dim_x - 8; j += 8) {
-            dest[row_offset + j] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-            dest[row_offset + j + 1] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
-            dest[row_offset + j + 2] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
-            dest[row_offset + j + 3] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
-            dest[row_offset + j + 4] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
-            dest[row_offset + j + 5] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
-            dest[row_offset + j + 6] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
-            dest[row_offset + j + 7] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
-        }
-        // fixup
-        for (;j < dim_x; j++) {
-            dest[row_offset + j] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-        }
-    }
-}
 
   __attribute__ ((noinline))  int tensorlib_addmm(
           hb_tensor_t* _result,
@@ -117,7 +62,11 @@ static void dram_to_sp(
         // unrolled version
         float sp_result[res_dim_y * res_dim_x];
         float sp_self[res_dim_y * res_dim_x];
-        dram_to_sp(sp_self, beta, self, res_dim_y, res_dim_x, rr, rc);
+        if (partial_block) { // general case
+            dram_to_sp(sp_self, beta, self, res_dim_y, res_dim_x, rr, rc);
+        } else {
+            dram_to_sp_simple(sp_self, beta, self, res_dim_y, res_dim_x, rr, rc);
+        }
         memset(sp_result, 0, res_dim_y * res_dim_x * sizeof(float));
         // end: unrolled version
 
@@ -134,9 +83,16 @@ static void dram_to_sp(
             // unrolled version
             float sp_mat1[res_dim_y * mid_dim];
             float sp_mat2[mid_dim * res_dim_x];
-            dram_to_sp_simple(sp_mat1, mat1, res_dim_y, mid_dim, rr, mat1x);
-            dram_to_sp_simple(sp_mat2, mat2, mid_dim, res_dim_x, mat2y, rc);
-            compute_simple(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
+            if (partial_block) { // general case
+                dram_to_sp(sp_mat1, mat1, res_dim_y, mid_dim, rr, mat1x);
+                dram_to_sp(sp_mat2, mat2, mid_dim, res_dim_x, mat2y, rc);
+                compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
+            }
+            else {
+                dram_to_sp_simple(sp_mat1, mat1, res_dim_y, mid_dim, rr, mat1x);
+                dram_to_sp_simple(sp_mat2, mat2, mid_dim, res_dim_x, mat2y, rc);
+                compute_simple(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
+            }
             // end: unrolled version
 
         }
