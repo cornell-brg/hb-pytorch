@@ -38,16 +38,12 @@ if [ -z "$BRG_BSG_BLADERUNNER_DIR" ]
 then
   export BSG_MANYCORE_DIR="<path-to-your-cudalite-cosim-runtime>"
 else
-  export BSG_MANYCORE_DIR=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries
+  export BSG_MANYCORE_DIR=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries/platforms/aws-vcs
 fi
 
 # Build COSIM runtime library and simulation executable
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch test_pytorch.log
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch test_pytorch.debug.log
-
-# For backward compatibility.
-# Remove this with bsg_bladerunner's next version. Current is v4.0.0.
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/python test_loader
+make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/python test_python.log
+make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/python test_python.debug.log
 
 export HB_KERNEL_DIR=$DIR/hammerblade/torch
 
