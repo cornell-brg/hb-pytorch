@@ -6,46 +6,63 @@
 This work aims to port PyTorch to HammerBlade.
 
 ### How to build PyTorch to use COSIM
-  This assumes that you have a working COSIM installed. Then you can either put `hb-pytorch` under `bsg_bladerunner`, or set `BRG_BSG_BLADERUNNER_DIR` to your `bladerunner` path.
- - Enable devtoolset-8 or any toolchain that supports C++14.
+  This assumes that you have a working HB Cosimulation installed through `bsg_bladerunner`. Then:
+ - Enable `devtoolset-8` or any toolchain that supports C++14.
  - Set following variable to point to `bsg_bladerunner` clone:
- ```
- export BRG_BSG_BLADERUNNER_DIR=<path to bsg_bladerunner that has be setup>
- ```
- - Clone hb-pytorch repo:
- ```
- git clone -b hb-device git@github.com:cornell-brg/hb-pytorch.git
- ```
- - Create python virtual environment:
- ```
- python3.6 -m venv ./venv_pytorch`
- ```
- - Install dependencies:
- ```
- pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis
- ```
- - Init pytorch third party dependencies:
- ```
- git submodule update --init --recursive
- ```
- - Setup building environment variables:
- ```
- cd hb-pytorch && source setup_cosim_build_env.sh
- ```
- - Build pytorch. This step can take up to 15 minutes:
- ```
- python setup.py develop
- ```
 
- Above command also compiles device kernels with RISCV toolchain and installs the kernel binary. Optionally,
- kernels can be compiled with Clang by running the following instead of above:
- ```
- CLANG=1 python setup.py develop 
- ```
- - PyTorch can be used with cosim by running one of the following the executable in place of `python`:
+       export BRG_BSG_BLADERUNNER_DIR=<path to bsg_bladerunner that has be setup>
+
+ - Clone hb-pytorch repo:
+
+       git clone -b hb-device git@github.com:cornell-brg/hb-pytorch.git
+
+ - Create python virtual environment:
+
+       python3.6 -m venv ./venv_pytorch`
+
+ - Install dependencies:
+
+       pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis
+
+ - Init pytorch third party dependencies:
+
+       git submodule update --init --recursive
+
+ - Setup building environment variables:
+
+       cd hb-pytorch && source setup_cosim_build_env.sh
+
+ - Build pytorch. This step can take up to 15 minutes:
+
+       python setup.py develop
+
+   Above command also compiles device kernels with RISCV toolchain and installs the kernel binary. Optionally,
+   kernels can be compiled with Clang by running the following instead of above:
+
+       CLANG=1 python setup.py develop
+
+   It's important that `CLANG=1` has to be present everytime we build/re-build `hb-pytorch to compile
+   kernels with Clang. To check if the current build compiled kernels with Clang, we can run:
+
+       readelf -p .comment <hb-pytorch-root>/build/c10/hammerblade/kernel.riscv
+
+   The output when compiled with Clang should be something like this:
+
+       String dump of section '.comment':
+         [     0]  clang version 10.0.0 (https://github.com/bespoke-silicon-group/llvm-project.git 3ee81f3def2c4c2a818f9f939f4421b3f3af313e)
+         [    7a]  GCC: (GNU) 9.2.0
+
+
+ - PyTorch can be used with cosim by running one of the following executables, instead of `python`:
     - `pycosim`: Runs python with cosim backend
     - `pycosim.trace`: Enables device instruction trace
     - `pycosim.wave`: Enbales device instruction trace AND waveform dumps
+
+   For example, a PyTorch program `foo.py` can be executed with `hb-pytorch`'s cosim backend with on of the following:
+
+       pycosim foo.py
+       pycosim.trace foo.py # To get HB device execution trace
+       pycosim.wave foo.py # To get HB device execution trace and RTL simulation waveform.
 
 ### How to build PyTorch with Emulation Layer
 
@@ -207,7 +224,7 @@ hblog.disable()
 # This is excluded from the log
 print(x - y)
 
-# Logs only the tensor add 
+# Logs only the tensor add
 print(hblog.json())
 
 # Clears above operations from the logger
@@ -217,7 +234,7 @@ hblog.enable()
 print(x * y)
 hblog.disable()
 
-# Logs only the tensor mul 
+# Logs only the tensor mul
 print(hblog.json())
 ```
 
