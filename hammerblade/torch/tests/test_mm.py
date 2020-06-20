@@ -55,4 +55,4 @@ def test_torch_mm_large():
     out = torch.mm(mat1, mat2)
     out_h = torch.mm(mat1_h, mat2_h)
     assert out_h.device == torch.device("hammerblade")
-    assert torch.allclose(out_h.cpu(), out)
+    assert torch.allclose(out_h.cpu(), out, rtol=1e-04, atol=1e-06)
