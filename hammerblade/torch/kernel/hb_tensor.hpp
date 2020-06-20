@@ -125,7 +125,7 @@ class HBTensorImpl {
       } else {
         // Explicitly calculate data index to handle
         // non-contiguous 1-d tensors.
-        return data[index * strides[0]];
+        return data[(uint32_t)((float)index * (float)strides[0])];
       }
     }
 
@@ -139,7 +139,7 @@ class HBTensorImpl {
       uint32_t offset = 0;
       uint32_t s = 0;
       for(auto index : iarray) {
-        offset += (index * strides[s]);
+        offset += ((uint32_t)((float)index * (float)strides[s]));
         s++;
       }
 
