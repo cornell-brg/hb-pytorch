@@ -49,7 +49,8 @@ make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/python test_python.de
 
 export HB_KERNEL_DIR=$DIR/hammerblade/torch
 
-echo "  \$BSG_MANYCORE_DIR is set to $BSG_MANYCORE_DIR"
+echo "  \$BSG_MANYCORE_INCLUDE is set to $BSG_MANYCORE_INCLUDE"
+echo "  \$BSG_MANYCORE_LDPATH is set to $BSG_MANYCORE_LDPATH"
 echo "  \$HB_KERNEL_DIR is set to $HB_KERNEL_DIR"
 echo ""
 echo "  Done!"
