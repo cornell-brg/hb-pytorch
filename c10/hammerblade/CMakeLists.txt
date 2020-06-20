@@ -55,10 +55,10 @@ if(USE_HB_EMUL)
   target_compile_definitions(c10_hammerblade PRIVATE "-DHB_KERNEL_DIR=NULL")
 else()
   # Use real BSG CUDALite
-  if( NOT DEFINED ENV{BSG_MANYCORE_DIR} )
-    message( FATAL_ERROR "BSG_MANYCORE_DIR not set: Please set BSG_MANYCORE_DIR to bsg_f1/libraries location.")
+  if( NOT DEFINED ENV{BSG_MANYCORE_LDPATH} )
+    message( FATAL_ERROR "BSG_MANYCORE_LDPATH not set: Please set BSG_MANYCORE_LDPATH to bsg_f1/libraries location.")
   endif()
-  find_library(BSG_MANYCORE_RUNTIME_LIB bsg_manycore_runtime HINTS $ENV{BSG_MANYCORE_DIR})
+  find_library(BSG_MANYCORE_RUNTIME_LIB bsg_manycore_runtime HINTS $ENV{BSG_MANYCORE_LDPATH})
   target_link_libraries(c10_hammerblade PUBLIC ${BSG_MANYCORE_RUNTIME_LIB})
 
   # Dependency on kernel binary path
@@ -89,7 +89,7 @@ else()
     "-DCOSIM"
     )
 
-  target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_DIR} )
+  target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_INCLUDE} )
 endif()
 
 target_include_directories(
