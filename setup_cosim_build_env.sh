@@ -36,9 +36,11 @@ echo "  hb-pytorch lives in $DIR"
 # setup cudalite runtime and pytorch kernel binary paths
 if [ -z "$BRG_BSG_BLADERUNNER_DIR" ]
 then
-  export BSG_MANYCORE_DIR="<path-to-your-cudalite-cosim-runtime>"
+  export BSG_MANYCORE_INCLUDE="<path-to-your-cudalite-cosim-runtime-source>"
+  export BSG_MANYCORE_LDPATH="<path-to-your-cudalite-cosim-runtime-lib>"
 else
-  export BSG_MANYCORE_DIR=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries/platforms/aws-vcs
+  export BSG_MANYCORE_INCLUDE=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries
+  export BSG_MANYCORE_LDPATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries/platforms/aws-vcs
 fi
 
 # Build COSIM runtime library and simulation executable
