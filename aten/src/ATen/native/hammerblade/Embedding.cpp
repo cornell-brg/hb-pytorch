@@ -18,7 +18,7 @@ Tensor embedding_dense_backward_hb(
 
   int64_t numel = indices.numel();
   auto indices_contig = indices.to(at::kInt).contiguous();
-  auto grad = grad_.contiguous().view({numel, grad_.size(-1)});
+  auto grad = grad_.contiguous().view({numel, grad_.size(-1)}).contiguous();
   auto grad_weight = at::zeros({num_weights, grad_.size(-1)}, grad_.options());
 
   int32_t padding_idx_i32 = safe_downcast<int32_t, int64_t>(padding_idx);
