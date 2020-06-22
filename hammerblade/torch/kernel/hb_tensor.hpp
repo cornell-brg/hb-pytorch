@@ -9,6 +9,7 @@
 #include <math.h>
 #include <initializer_list>
 #include <cstdint>
+#include <bsg_manycore.h>
 #include <hb_assert.hpp>
 #include <hb_hw_patch.hpp>
 
@@ -63,18 +64,18 @@ typedef struct {
 // allocation.
 // =========================================================
 
-template<typename DT>
+template<typename DT, typename IT>
 class HBTensorImpl {
   private:
     uint32_t N;
     uint32_t dims;
-    uint32_t* strides;
-    uint32_t* sizes;
+    IT* strides;
+    IT* sizes;
     DT* data;
 
   public:
-    HBTensorImpl(uint32_t N, uint32_t dims, uint32_t* strides,
-                 uint32_t* sizes, DT* data) :
+    HBTensorImpl(uint32_t N, uint32_t dims, IT* strides,
+                 IT* sizes, DT* data) :
       N(N),
       dims(dims),
       strides(strides),
@@ -86,15 +87,15 @@ class HBTensorImpl {
         HB_FIX_WAW_HAZARD(sizes);
       }
 
-    char* data_ptr() {
-      return (char*)data;
+    DT* data_ptr() {
+      return (DT*)data;
     }
 
-    uint32_t* get_strides() {
+    IT* get_strides() {
       return strides;
     }
 
-    uint32_t* get_sizes() {
+    IT* get_sizes() {
       return sizes;
     }
 
@@ -151,19 +152,19 @@ class HBTensorImpl {
 };
 
 template <typename DT, int32_t dims=-1>
-class HBTensor : public HBTensorImpl<DT> {
+class HBTensor : public HBTensorImpl<__remote DT, uint32_t> {
   private:
     uint32_t strides[dims];
     uint32_t sizes[dims];
 
   public:
     HBTensor(hb_tensor_t* t) :
-      HBTensorImpl<DT>(
+      HBTensorImpl<__remote DT, uint32_t>(
         t->N,
         (uint32_t) dims,
         strides,
         sizes,
-        (DT*) ((intptr_t) t->data)
+        (__remote DT*) ((intptr_t) t->data)
       ) {
         hb_assert_msg(
           t->dims == dims,
@@ -181,19 +182,19 @@ class HBTensor : public HBTensorImpl<DT> {
 };
 
 template <typename DT>
-class HBTensor<DT, -1> : public HBTensorImpl<DT> {
+class HBTensor<DT, -1> : public HBTensorImpl<__remote DT, uint32_t> {
   private:
     uint32_t strides[DEFAULT_STRIDES];
     uint32_t sizes[DEFAULT_STRIDES];
 
   public:
     HBTensor(hb_tensor_t* t) :
-      HBTensorImpl<DT>(
+      HBTensorImpl<__remote DT, __remote uint32_t>(
         t->N,
         t->dims,
         strides,
         sizes,
-        (DT*) ((intptr_t) t->data)
+        (__remote DT*) ((intptr_t) t->data)
       ) {
         hb_assert_msg(
           t->dims <= DEFAULT_STRIDES,
