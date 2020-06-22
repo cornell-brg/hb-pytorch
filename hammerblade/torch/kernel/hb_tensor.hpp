@@ -129,25 +129,22 @@ class HBTensorImpl {
       }
     }
 
-    template<typename... T>
-    DT& operator()(uint32_t index0, T... indices) {
-      std::initializer_list<uint32_t> iarray = {index0, indices...};
+    DT& operator()(uint32_t index0, uint32_t index1) {
+      return data[(uint32_t)((float)index0 * (float)strides[0]
+                  + (float)index1 * (float)strides[1])];
+    }
 
-      hb_assert_msg(iarray.size() == dims,
-                    "error: expected dims=%d arguments but got %d\n",
-                    dims, iarray.size());
-      uint32_t offset = 0;
-      uint32_t s = 0;
-      for(auto index : iarray) {
-        offset += ((uint32_t)((float)index * (float)strides[s]));
-        s++;
-      }
+    DT& operator()(uint32_t index0, uint32_t index1, uint32_t index2) {
+      return data[(uint32_t)((float)index0 * (float)strides[0]
+                  + (float)index1 * (float)strides[1]
+                  + (float)index2 * (float)strides[2])];
+    }
 
-      hb_assert_msg(offset < N,
-                    "error: N=%d but accessed %d\n",
-                    N, offset);
-
-      return data[offset];
+    DT& operator()(uint32_t index0, uint32_t index1, uint32_t index2, uint32_t index3) {
+      return data[(uint32_t)((float)index0 * (float)strides[0]
+                  + (float)index1 * (float)strides[1]
+                  + (float)index2 * (float)strides[2]
+                  + (float)index3 * (float)strides[3])];
     }
 };
 
