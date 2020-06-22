@@ -80,14 +80,22 @@ inline void dram_to_sp_simple(
         int row_offset = i * dim_x;
         int j = 0;
         for (;j < dim_x; j += 8) {
-            dest[row_offset + j]     = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-            dest[row_offset + j + 1] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
-            dest[row_offset + j + 2] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
-            dest[row_offset + j + 3] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
-            dest[row_offset + j + 4] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
-            dest[row_offset + j + 5] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
-            dest[row_offset + j + 6] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
-            dest[row_offset + j + 7] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            register float tmp0 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
+            register float tmp1 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
+            register float tmp2 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
+            register float tmp3 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
+            register float tmp4 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
+            register float tmp5 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
+            register float tmp6 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
+            register float tmp7 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            dest[row_offset + j]     = tmp0;
+            dest[row_offset + j + 1] = tmp1;
+            dest[row_offset + j + 2] = tmp2;
+            dest[row_offset + j + 3] = tmp3;
+            dest[row_offset + j + 4] = tmp4;
+            dest[row_offset + j + 5] = tmp5;
+            dest[row_offset + j + 6] = tmp6;
+            dest[row_offset + j + 7] = tmp7;
         }
     }
 }
@@ -103,14 +111,22 @@ inline void dram_to_sp(
         int row_offset = i * dim_x;
         int j = 0;
         for (;j < dim_x - 8; j += 8) {
-            dest[row_offset + j]     = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-            dest[row_offset + j + 1] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
-            dest[row_offset + j + 2] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
-            dest[row_offset + j + 3] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
-            dest[row_offset + j + 4] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
-            dest[row_offset + j + 5] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
-            dest[row_offset + j + 6] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
-            dest[row_offset + j + 7] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            register float tmp0 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
+            register float tmp1 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
+            register float tmp2 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
+            register float tmp3 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
+            register float tmp4 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
+            register float tmp5 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
+            register float tmp6 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
+            register float tmp7 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            dest[row_offset + j]     = tmp0;
+            dest[row_offset + j + 1] = tmp1;
+            dest[row_offset + j + 2] = tmp2;
+            dest[row_offset + j + 3] = tmp3;
+            dest[row_offset + j + 4] = tmp4;
+            dest[row_offset + j + 5] = tmp5;
+            dest[row_offset + j + 6] = tmp6;
+            dest[row_offset + j + 7] = tmp7;
         }
         // fixup
         for (;j < dim_x; j++) {
@@ -133,14 +149,30 @@ static void dram_to_sp_simple(
         int row_offset = i * dim_x;
         int j = 0;
         for (;j < dim_x; j += 8) {
-            dest[row_offset + j] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-            dest[row_offset + j + 1] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
-            dest[row_offset + j + 2] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
-            dest[row_offset + j + 3] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
-            dest[row_offset + j + 4] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
-            dest[row_offset + j + 5] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
-            dest[row_offset + j + 6] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
-            dest[row_offset + j + 7] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            register float tmp0 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
+            register float tmp1 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
+            register float tmp2 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
+            register float tmp3 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
+            register float tmp4 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
+            register float tmp5 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
+            register float tmp6 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
+            register float tmp7 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            tmp0 = tmp0 * coeff;
+            tmp1 = tmp1 * coeff;
+            tmp2 = tmp2 * coeff;
+            tmp3 = tmp3 * coeff;
+            tmp4 = tmp4 * coeff;
+            tmp5 = tmp5 * coeff;
+            tmp6 = tmp6 * coeff;
+            tmp7 = tmp7 * coeff;
+            dest[row_offset + j]     = tmp0;
+            dest[row_offset + j + 1] = tmp1;
+            dest[row_offset + j + 2] = tmp2;
+            dest[row_offset + j + 3] = tmp3;
+            dest[row_offset + j + 4] = tmp4;
+            dest[row_offset + j + 5] = tmp5;
+            dest[row_offset + j + 6] = tmp6;
+            dest[row_offset + j + 7] = tmp7;
         }
     }
 }
@@ -157,14 +189,30 @@ static void dram_to_sp(
         int row_offset = i * dim_x;
         int j = 0;
         for (;j < dim_x - 8; j += 8) {
-            dest[row_offset + j] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-            dest[row_offset + j + 1] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
-            dest[row_offset + j + 2] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
-            dest[row_offset + j + 3] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
-            dest[row_offset + j + 4] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
-            dest[row_offset + j + 5] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
-            dest[row_offset + j + 6] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
-            dest[row_offset + j + 7] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            register float tmp0 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
+            register float tmp1 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
+            register float tmp2 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
+            register float tmp3 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
+            register float tmp4 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
+            register float tmp5 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
+            register float tmp6 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
+            register float tmp7 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            tmp0 = tmp0 * coeff;
+            tmp1 = tmp1 * coeff;
+            tmp2 = tmp2 * coeff;
+            tmp3 = tmp3 * coeff;
+            tmp4 = tmp4 * coeff;
+            tmp5 = tmp5 * coeff;
+            tmp6 = tmp6 * coeff;
+            tmp7 = tmp7 * coeff;
+            dest[row_offset + j]     = tmp0;
+            dest[row_offset + j + 1] = tmp1;
+            dest[row_offset + j + 2] = tmp2;
+            dest[row_offset + j + 3] = tmp3;
+            dest[row_offset + j + 4] = tmp4;
+            dest[row_offset + j + 5] = tmp5;
+            dest[row_offset + j + 6] = tmp6;
+            dest[row_offset + j + 7] = tmp7;
         }
         // fixup
         for (;j < dim_x; j++) {
