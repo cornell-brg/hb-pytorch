@@ -301,8 +301,8 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
                                HBTensor<scalar_src> input,
                                F functor) {
 
-  scalar_dst* res_data = (scalar_dst*)res.data_ptr();
-  scalar_src* input_data = (scalar_src*)input.data_ptr();
+  __remote scalar_dst* res_data = (__remote scalar_dst*)res.data_ptr();
+  __remote scalar_src* input_data = (__remote scalar_src*)input.data_ptr();
 
   // is_trivial_1d
   if(res.ndim() == 1) {
@@ -328,22 +328,22 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
     if (end - start > 4) {
       for (; idx < end - 4; idx += 4) {
         scalar_src input_dp_0 = *(input_data);
-        scalar_dst* res_dp_0 = (res_data);
+        __remote scalar_dst* res_dp_0 = (res_data);
         res_data += strides[0];
         input_data += strides[1];
 
         scalar_src input_dp_1 = *(input_data);
-        scalar_dst* res_dp_1 = (res_data);
+        __remote scalar_dst* res_dp_1 = (res_data);
         res_data += strides[0];
         input_data += strides[1];
 
         scalar_src input_dp_2 = *(input_data);
-        scalar_dst* res_dp_2 = (res_data);
+        __remote scalar_dst* res_dp_2 = (res_data);
         res_data += strides[0];
         input_data += strides[1];
 
         scalar_src input_dp_3 = *(input_data);
-        scalar_dst* res_dp_3 = (res_data);
+        __remote scalar_dst* res_dp_3 = (res_data);
         res_data += strides[0];
         input_data += strides[1];
 
@@ -354,8 +354,8 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
       }
     }
     for (; idx < end; idx++) {
-      scalar_dst* res_dp = (res_data);
-      scalar_src* input_dp = (input_data);
+      __remote scalar_dst* res_dp = (res_data);
+      __remote scalar_src* input_dp = (input_data);
       *res_dp = functor(*input_dp);
       res_data += strides[0];
       input_data += strides[1];
@@ -373,12 +373,12 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
     uint32_t* dst_sizes = res.get_sizes();
 
     for (size_t idx = start; idx < end; idx++) {
-      scalar_dst* dst_data = res_data + idx * dst_strides[0];
-      scalar_src* src_data = input_data + idx * src_strides[0];
+      __remote scalar_dst* dst_data = res_data + idx * dst_strides[0];
+      __remote scalar_src* src_data = input_data + idx * src_strides[0];
 
       for (size_t inner = 0; inner < res.dim(1); inner++) {
-        scalar_src input_dp_0 = *(src_data);
-        scalar_dst* res_dp_0 = (dst_data);
+        __remote scalar_src input_dp_0 = *(src_data);
+        __remote scalar_dst* res_dp_0 = (dst_data);
         dst_data += dst_strides[1];
         src_data += src_strides[1];
 
@@ -397,12 +397,12 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
     uint32_t* dst_sizes = res.get_sizes();
 
     for (size_t idx = start; idx < end; idx++) {
-      scalar_dst* dst_data = res_data + idx % dst_sizes[1] * dst_strides[1] + idx / dst_sizes[1] * dst_strides[0];
-      scalar_src* src_data = input_data + idx % src_sizes[1] * src_strides[1] + idx / src_sizes[1] * src_strides[0];
+      __remote scalar_dst* dst_data = res_data + idx % dst_sizes[1] * dst_strides[1] + idx / dst_sizes[1] * dst_strides[0];
+      __remote scalar_src* src_data = input_data + idx % src_sizes[1] * src_strides[1] + idx / src_sizes[1] * src_strides[0];
 
       for (size_t inner = 0; inner < res.dim(2); inner++) {
         scalar_src input_dp_0 = *(src_data);
-        scalar_dst* res_dp_0 = (dst_data);
+        __remote scalar_dst* res_dp_0 = (dst_data);
         dst_data += dst_strides[2];
         src_data += src_strides[2];
 
@@ -419,8 +419,8 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
     size_t end   = range.end;
 
     for (size_t idx = start; idx < end; idx++) {
-      scalar_dst* res_dp = (res_data + offset_calc(idx, res));
-      scalar_src* input_dp = (input_data + offset_calc(idx, input));
+      __remote scalar_dst* res_dp = (res_data + offset_calc(idx, res));
+      __remote scalar_src* input_dp = (input_data + offset_calc(idx, input));
       *res_dp = functor(*input_dp);
     }
   }

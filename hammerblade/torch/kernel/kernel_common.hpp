@@ -29,6 +29,10 @@
 #include <hb_tiled_for.hpp>
 #include <hb_hw_patch.hpp>
 
+void hb_memcpy(__remote void* __restrict dest,
+               const __remote void* __restrict src,
+               size_t n);
+
 //====================================================================
 // HammerBlade kernel emulation
 // 03/02/2020, Lin Cheng (lc873@cornell.edu)
