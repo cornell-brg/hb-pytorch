@@ -58,7 +58,6 @@ def fancify(func):
     # fancify
     func = func.split("(")[0]
     func = func.split("::")[-1]
-    func = "aten::" + func
     return func
 
 # INPUT:   full_raw_stack & chunk_raw_stack
@@ -160,7 +159,7 @@ class ATen_OP:
         return draw_tree(self.hb_log)
 
     def __str__(self):
-        template = "\n|{func:^23}|{tensor:^15}|{full:^20}|{chunk:^20}|{xeon:^17}|{hb:^21}|{host:^17}|{device:^19}|"
+        template = "\n| {func:<22}| {tensor:<14}| {full:<19}| {chunk:<19}|{xeon:>16} |{hb:>20} |{host:>16} |{device:>18} |"
         buf = """
 +-----------------------+---------------+--------------------+--------------------+-----------------+---------------------+-----------------+-------------------+
 |        ATen OP        |     Input     |     Full  Size     |     Chunk Size     |    Xeon Time    |    HB Total Time    |    Host Time    |    Device Time    |

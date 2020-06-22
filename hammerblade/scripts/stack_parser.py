@@ -16,7 +16,6 @@ class exec_time_Node:
             func = self.func
             func = func.split("(")[0]
             func = func.split("::")[-1]
-            func = "aten::" + func
             self.func = func
 
     def add_child(self, child):
