@@ -56,17 +56,17 @@ def test_add_tree_1():
     assert graph1 == graph2
     assert graph1 == """
 digraph {
-0 [ shape=record label = "aten::time_in_roi|0.40"];
-1 [ shape=record label = "aten::add|0.40"];
+0 [ shape=record label = "time_in_roi|0.40"];
+1 [ shape=record label = "add|0.40"];
 2 [ shape=record label = "@CPU_LOG@|0.07"];
-3 [ shape=record label = "aten::empty|0.01"];
-4 [ shape=record label = "aten::add_stub|0.01"];
+3 [ shape=record label = "empty|0.01"];
+4 [ shape=record label = "add_stub|0.01"];
 5 [ shape=record label = "@HB_LOG@|0.23"];
-6 [ shape=record label = "aten::empty|0.01"];
-7 [ shape=record label = "aten::add_stub|0.19"];
+6 [ shape=record label = "empty|0.01"];
+7 [ shape=record label = "add_stub|0.19"];
 8 [ shape=record label = "@OFFLOAD_KERNEL@__tensorlib_add|0.14"];
-10 [ shape=record label = "aten::llcopy|0.03"];
-11 [ shape=record label = "aten::other|0.00"];
+10 [ shape=record label = "llcopy|0.03"];
+11 [ shape=record label = "other|0.00"];
 0 -> 1;
 0 -> 11;
 1 -> 2;
@@ -81,17 +81,17 @@ digraph {
 """
     assert graph == """
 digraph {
-0 [ shape=record label = "aten::time_in_roi|0.80"];
-1 [ shape=record label = "aten::add|0.80"];
+0 [ shape=record label = "time_in_roi|0.80"];
+1 [ shape=record label = "add|0.80"];
 2 [ shape=record label = "@CPU_LOG@|0.13"];
-3 [ shape=record label = "aten::empty|0.03"];
-4 [ shape=record label = "aten::add_stub|0.02"];
+3 [ shape=record label = "empty|0.03"];
+4 [ shape=record label = "add_stub|0.02"];
 5 [ shape=record label = "@HB_LOG@|0.47"];
-6 [ shape=record label = "aten::empty|0.02"];
-7 [ shape=record label = "aten::add_stub|0.37"];
+6 [ shape=record label = "empty|0.02"];
+7 [ shape=record label = "add_stub|0.37"];
 8 [ shape=record label = "@OFFLOAD_KERNEL@__tensorlib_add|0.29"];
-10 [ shape=record label = "aten::llcopy|0.05"];
-11 [ shape=record label = "aten::other|0.00"];
+10 [ shape=record label = "llcopy|0.05"];
+11 [ shape=record label = "other|0.00"];
 0 -> 1;
 0 -> 11;
 1 -> 2;
