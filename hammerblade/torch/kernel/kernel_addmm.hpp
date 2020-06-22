@@ -88,6 +88,7 @@ inline void dram_to_sp_simple(
             register float tmp5 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
             register float tmp6 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
             register float tmp7 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            asm volatile("": : :"memory");
             dest[row_offset + j]     = tmp0;
             dest[row_offset + j + 1] = tmp1;
             dest[row_offset + j + 2] = tmp2;
@@ -119,6 +120,7 @@ inline void dram_to_sp(
             register float tmp5 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
             register float tmp6 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
             register float tmp7 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            asm volatile("": : :"memory");
             dest[row_offset + j]     = tmp0;
             dest[row_offset + j + 1] = tmp1;
             dest[row_offset + j + 2] = tmp2;
@@ -157,6 +159,7 @@ static void dram_to_sp_simple(
             register float tmp5 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
             register float tmp6 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
             register float tmp7 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            asm volatile("": : :"memory");
             tmp0 = tmp0 * coeff;
             tmp1 = tmp1 * coeff;
             tmp2 = tmp2 * coeff;
@@ -197,6 +200,7 @@ static void dram_to_sp(
             register float tmp5 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
             register float tmp6 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
             register float tmp7 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
+            asm volatile("": : :"memory");
             tmp0 = tmp0 * coeff;
             tmp1 = tmp1 * coeff;
             tmp2 = tmp2 * coeff;

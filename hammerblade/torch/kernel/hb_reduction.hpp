@@ -161,6 +161,7 @@ inline void binary_reduction(HBTensor<scalar_t>out,
               register scalar_t tmp5 = in(d + 5, n);
               register scalar_t tmp6 = in(d + 6, n);
               register scalar_t tmp7 = in(d + 7, n);
+              asm volatile("": : :"memory");
               reduce(result, tmp0);
               reduce(result, tmp1);
               reduce(result, tmp2);
@@ -200,6 +201,7 @@ inline void binary_reduction(HBTensor<scalar_t>out,
               register scalar_t tmp5 = in(d + 5, dim1, dim2);
               register scalar_t tmp6 = in(d + 6, dim1, dim2);
               register scalar_t tmp7 = in(d + 7, dim1, dim2);
+              asm volatile("": : :"memory");
               reduce(result, tmp0);
               reduce(result, tmp1);
               reduce(result, tmp2);
