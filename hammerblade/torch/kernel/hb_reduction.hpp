@@ -92,7 +92,7 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
     // iterating over all elementes
     //-----------------------------
     hb_tiled_range(in.numel(), [&](size_t start, size_t end) {
-      scalar_t* in_dp = (data[1] + strides[1] * start);
+      __remote scalar_t* in_dp = (data[1] + strides[1] * start);
       for(size_t i = start; i < end; i++) {
         reduce(result, *in_dp);
         in_dp += strides[1];
@@ -103,7 +103,7 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
     // iterating over all elementes
     //-----------------------------
     hb_tiled_for(in.numel(), [&](size_t idx) {
-      scalar_t* in_dp = (scalar_t*)(data[1] + offset_calc(idx, in));
+      __remote scalar_t* in_dp = (scalar_t*)(data[1] + offset_calc(idx, in));
       reduce(result, *in_dp);
     });
   }
@@ -116,7 +116,7 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
       result += buffer[idx];
     }
     // produce final result
-    scalar_t* out_dp = (scalar_t*)(data[0]);
+    __remote scalar_t* out_dp = (__remote scalar_t*)(data[0]);
     *out_dp = project(result);
   }
 
