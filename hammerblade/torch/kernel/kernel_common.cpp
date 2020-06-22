@@ -1,7 +1,6 @@
 #include <kernel_common.hpp>
 #include <string.h>
 #include <stdint.h>
-#include "../../string/local.h"
 
 // common reduction buffer
 void* g_reduction_buffer;
@@ -14,9 +13,11 @@ bsg_barrier<bsg_tiles_X, bsg_tiles_Y> g_barrier;
 #endif // HB_EMUL
 
 // This is just Newlib's memcpy with __remote annotations
-void hb_memcpy(__remote void* __restrict aa,
+__remote void* hb_memcpy(__remote void* __restrict aa,
                const __remote void* __restrict bb,
                size_t n) {
+  #define unlikely(X) __builtin_expect (!!(X), 0)
+
   #define BODY(a, b, t) { \
     t tt = *b; \
     a++, b++; \
