@@ -12,6 +12,8 @@
 #include <hb_assert.hpp>
 #include <hb_hw_patch.hpp>
 
+#define DEFAULT_STRIDES 5
+
 // =========================================================
 // Device Tensor structs
 //
@@ -180,16 +182,34 @@ class HBTensor : public HBTensorImpl<DT> {
 
 template <typename DT>
 class HBTensor<DT, -1> : public HBTensorImpl<DT> {
+  private:
+    uint32_t strides[DEFAULT_STRIDES];
+    uint32_t sizes[DEFAULT_STRIDES];
+
   public:
     HBTensor(hb_tensor_t* t) :
       HBTensorImpl<DT>(
         t->N,
         t->dims,
-        (uint32_t*) ((intptr_t) t->strides),
-        (uint32_t*) ((intptr_t) t->sizes),
+        strides,
+        sizes,
         (DT*) ((intptr_t) t->data)
-      ) {}
+      ) {
+        hb_assert_msg(
+          t->dims <= DEFAULT_STRIDES,
+          "error: tensor dims is too large");
+
+        uint32_t* strides_remote = (uint32_t*) ((intptr_t) t->strides);
+        uint32_t* sizes_remote = (uint32_t*) ((intptr_t) t->sizes);
+
+        // Move strides and sizes to scratchpad
+        for(int i=0; i<t->dims; ++i) {
+          strides[i] = strides_remote[i];
+          sizes[i] = sizes_remote[i];
+        }
+      }
 };
+
 
 template<typename T>
 class HBVector {
