@@ -127,26 +127,26 @@ class HBTensorImpl {
       } else {
         // Explicitly calculate data index to handle
         // non-contiguous 1-d tensors.
-        return data[(uint32_t)((float)index * (float)strides[0])];
+        return data[index * strides[0]];
       }
     }
 
     DT& operator()(uint32_t index0, uint32_t index1) {
-      return data[(uint32_t)((float)index0 * (float)strides[0]
-                  + (float)index1 * (float)strides[1])];
+      return data[index0 * strides[0]
+                  + index1 * strides[1]];
     }
 
     DT& operator()(uint32_t index0, uint32_t index1, uint32_t index2) {
-      return data[(uint32_t)((float)index0 * (float)strides[0]
-                  + (float)index1 * (float)strides[1]
-                  + (float)index2 * (float)strides[2])];
+      return data[index0 * strides[0]
+                  + index1 * strides[1]
+                  + index2 * strides[2]];
     }
 
     DT& operator()(uint32_t index0, uint32_t index1, uint32_t index2, uint32_t index3) {
-      return data[(uint32_t)((float)index0 * (float)strides[0]
-                  + (float)index1 * (float)strides[1]
-                  + (float)index2 * (float)strides[2]
-                  + (float)index3 * (float)strides[3])];
+      return data[index0 * strides[0]
+                  + index1 * strides[1]
+                  + index2 * strides[2]
+                  + index3 * strides[3]];
     }
 };
 
