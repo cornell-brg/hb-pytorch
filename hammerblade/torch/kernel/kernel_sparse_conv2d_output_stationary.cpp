@@ -63,10 +63,10 @@ extern "C" {
       wrow[1] = w_row(co+1);
       size_t col_size = wrow[1] - wrow[0];
       int32_t wcol[col_size];
-      int32_t wval[col_size];
-      for(uint32_t index = 0; index < col_size; ++index) {
-        wcol[index] = w_col(index + wrow[0]);
-        wval[index] = w_val(index + wrow[0]);
+      float wval[col_size];
+      for(uint32_t ind = 0; ind < col_size; ++ind) {
+        wcol[ind] = w_col(ind + wrow[0]);
+        wval[ind] = w_val(ind + wrow[0]);
       }
       for(uint32_t n = 0; n < N; ++n) {
         for(uint32_t yh = 0; yh < Hout; ++yh) {

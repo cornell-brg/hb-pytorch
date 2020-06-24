@@ -14,7 +14,7 @@ def convert_dense_input(x, r, s):
     return x
 
 def load_conv2_sparse_weight_reshape():
-    model = torch.load("LeNet_5.prune.only.fc.pth.tar", map_location='cpu')
+    model = torch.load("LeNet_5.prune.conv.fc.pth.tar", map_location='cpu')
     weights = model.get('state_dict')
     conv2_weight = weights.get('conv2.weight').cpu()
     conv2_weight = conv2_weight.view(50, -1).contiguous()
@@ -28,10 +28,12 @@ def test_lenet5_sparse01_conv2():
     cpu_i = convert_dense_input(di, 5, 5)
     cpu_sw = load_conv2_sparse_weight_reshape()
     cpu_out = torch.sparse.mm(cpu_sw, cpu_i)
+    print(cpu_out)
 
     hb_i = cpu_i.hammerblade()
     hb_sw = cpu_sw.hammerblade()
     hb_out = torch.sparse.mm(hb_sw, hb_i)
+    print(hb_out)
     out2 = hb_out.cpu()
 
-    assert torch.allclose(cpu_out, out2)
+    assert torch.allclose(cpu_out, out2, atol=1e-6)

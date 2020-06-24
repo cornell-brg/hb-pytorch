@@ -30,19 +30,13 @@ extern "C" {
     size_t end = m;
     
     bsg_cuda_print_stat_kernel_start();
-    
-    int rowindice[m+1];
-
-    for(uint32_t k = 0; k < m+1; k++) {
-      rowindice[k] = csr(k);
-    }
 
     float temp[1];
 
     for (uint32_t i = start; i < end; i = i + thread_num) {
       for(uint32_t dense_col = 0; dense_col < n; dense_col++) {
         temp[0] = 0.0;
-        for(uint32_t col_index = rowindice[i]; col_index < rowindice[i+1]; col_index++) { //CSR MODE
+        for(uint32_t col_index = csr(i); col_index < csr(i+1); col_index++) { //CSR MODE
          temp[0] = temp[0] + values(col_index) * dense(indices(col_index), dense_col); //CSR mode
         }
         result(i, dense_col) = temp[0];
