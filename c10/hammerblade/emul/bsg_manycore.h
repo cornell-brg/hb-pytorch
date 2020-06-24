@@ -6,6 +6,8 @@
 #include <cstdarg>
 #include <stdint.h>
 
+#define __remote
+
 #ifdef __cplusplus
 extern "C"{
 #endif
