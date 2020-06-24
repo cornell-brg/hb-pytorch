@@ -1,6 +1,7 @@
 .DEFAULT = help
 
 BSG_MANYCORE_DIR := $(BRG_BSG_BLADERUNNER_DIR)/bsg_manycore
+BSG_F1_DIR       := $(BRG_BSG_BLADERUNNER_DIR)/bsg_replicant
 COSIM_PYTHON_DIR := $(BRG_BSG_BLADERUNNER_DIR)/bsg_replicant/testbenches/python
 KERNEL_DIR       := $(shell git rev-parse --show-toplevel)/hammerblade/torch/kernel
 SCRIPT_DIR       := $(shell git rev-parse --show-toplevel)/hammerblade/torch/
@@ -54,6 +55,12 @@ ifeq ($(DEBUG),1)
 endif
 
 # Include BSG Manycore's builddefs
+ifdef CLANG
+export CLANG=1
+RISCV_GXX_EXTRA_OPTS += -Wno-c++11-narrowing # Fixme: fix these warnings!
+RISCV_LINK_OPTS += -lstdc++
+endif
+include $(BSG_F1_DIR)/machine.mk
 include $(BSG_MANYCORE_DIR)/software/mk/Makefile.master
 
 INCS := -I$(KERNEL_DIR)

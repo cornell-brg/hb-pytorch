@@ -1135,6 +1135,7 @@
   dispatch:
     CPU: _exp__cpu
     CUDA: _exp__cuda
+    HammerBlade: _exp__hb
 
 - func: exp.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
@@ -1528,6 +1529,7 @@
   dispatch:
     CPU: log_out
     CUDA: log_out
+    HammerBlade: log_out
 
 - func: log10(Tensor self) -> Tensor
   use_c10_dispatcher: full
@@ -6603,3 +6605,22 @@
   variants: function
   device_guard: False
   supports_named_tensor: True
+
+- func: vincr(Tensor self) -> Tensor
+  use_c10_dispatcher: full
+  variants: function
+  dispatch:
+    HammerBlade: vincr_hb
+
+# Tutorial TODO:
+# Create an ATen operator vvadd, which takes 2 input arguments
+# self, and other, and produce a Tensor
+# An incomplete template is provided below ;)
+
+# Python binding will be created for you automatically
+# You would be able to call it by torch.vvadd()
+
+# - func: vvadd() -> Tensor
+#   use_c10_dispatcher: full
+#   variants: function
+#   dispatch:

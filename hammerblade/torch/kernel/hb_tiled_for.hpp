@@ -420,6 +420,62 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
 }
 
 // =========================================================
+// Tile Element-wise for -- Unary ops -- Special conversion
+//
+// This function calculates the per tile range automatically
+//==========================================================
+
+template<typename scalar_src, typename scalar_dst, typename F>
+inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
+                               HBTensor<scalar_src> input,
+                               F functor) {
+  char* data[2];
+  data[0] = res.data_ptr();
+  data[1] = input.data_ptr();
+
+  // is_trivial_1d
+  if(res.ndim() == 1) {
+
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[2];
+    strides[0] = (res.get_strides())[0];
+    strides[1] = (input.get_strides())[0];
+
+    //-----------------------------
+    // iterating over all elementes
+    //-----------------------------
+    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    size_t start = len_per_tile * __bsg_id;
+    size_t end = start + len_per_tile;
+    end = (end > res.numel())  ? res.numel() : end;
+    data[0] += strides[0] * start;
+    data[1] += strides[1] * start;
+    for (size_t idx = start; idx < end; idx++) {
+      scalar_dst* res_dp = (scalar_dst*)(data[0]);
+      scalar_src* input_dp = (scalar_src*)(data[1]);
+      *res_dp = functor(*input_dp);
+      data[0] += strides[0];
+      data[1] += strides[1];
+    }
+  } else {
+    //-----------------------------
+    // iterating over all elementes
+    //-----------------------------
+    size_t len_per_tile = res.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    size_t start = len_per_tile * __bsg_id;
+    size_t end = start + len_per_tile;
+    end = (end > res.numel())  ? res.numel() : end;
+    for (size_t idx = start; idx < end; idx++) {
+      scalar_dst* res_dp = (scalar_dst*)(data[0] + offset_calc(idx, res));
+      scalar_src* input_dp = (scalar_src*)(data[1] + offset_calc(idx, input));
+      *res_dp = functor(*input_dp);
+    }
+  }
+}
+
+// =========================================================
 // Tile Element-wise for -- Nullary ops
 //
 // This function calculates the per tile range automatically
