@@ -22,9 +22,7 @@ def _test_max(x1, x2):
     assert h1 is not x1
     assert h2 is not x2
     y_c = torch.max(x1, x2)
-    print(y_c)
     y_h = torch.max(h1, h2)
-    print(y_h)
     assert y_h.device == torch.device("hammerblade")
     assert torch.allclose(y_c, y_h.cpu())
 
