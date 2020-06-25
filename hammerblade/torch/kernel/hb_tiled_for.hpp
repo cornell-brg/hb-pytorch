@@ -613,6 +613,55 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
       data[0] += strides[0];
       data[1] += strides[1];
     }
+  } else if (res.ndim() == 2) {
+    // the idea is each tile takes care of the first dim in one shot
+    hb_range range;
+    calc_range(&range, res.dim(0));
+    size_t start = range.start;
+    size_t end   = range.end;
+
+    uint32_t* src_strides = input.get_strides();
+    uint32_t* src_sizes = input.get_sizes();
+    uint32_t* dst_strides = res.get_strides();
+    uint32_t* dst_sizes = res.get_sizes();
+
+    for (size_t idx = start; idx < end; idx++) {
+      char* dst_data = data[0] + idx * dst_strides[0];
+      char* src_data = data[1] + idx * src_strides[0];
+
+      for (size_t inner = 0; inner < res.dim(1); inner++) {
+        scalar_src input_dp_0 = *(scalar_src*)(src_data);
+        scalar_dst* res_dp_0 = (scalar_dst*)(dst_data);
+        dst_data += dst_strides[1];
+        src_data += src_strides[1];
+
+        *res_dp_0 = functor(input_dp_0);
+      }
+    }
+  } else if (res.ndim() == 3) {
+    hb_range range;
+    calc_range(&range, res.dim(0) * res.dim(1));
+    size_t start = range.start;
+    size_t end   = range.end;
+
+    uint32_t* src_strides = input.get_strides();
+    uint32_t* src_sizes = input.get_sizes();
+    uint32_t* dst_strides = res.get_strides();
+    uint32_t* dst_sizes = res.get_sizes();
+
+    for (size_t idx = start; idx < end; idx++) {
+      char* dst_data = data[0] + idx % dst_sizes[1] * dst_strides[1] + idx / dst_sizes[1] * dst_strides[0];
+      char* src_data = data[1] + idx % src_sizes[1] * src_strides[1] + idx / src_sizes[1] * src_strides[0];
+
+      for (size_t inner = 0; inner < res.dim(2); inner++) {
+        scalar_src input_dp_0 = *(scalar_src*)(src_data);
+        scalar_dst* res_dp_0 = (scalar_dst*)(dst_data);
+        dst_data += dst_strides[2];
+        src_data += src_strides[2];
+
+        *res_dp_0 = functor(input_dp_0);
+      }
+    }
   } else {
     //-----------------------------
     // iterating over all elementes
@@ -622,28 +671,7 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
     size_t start = range.start;
     size_t end   = range.end;
 
-    size_t idx = start;
-    if (end - start > 4) {
-      for (; idx < end - 4; idx += 4) {
-        scalar_src input_dp_0 = *(scalar_src*)(data[1] + offset_calc(idx, input));
-        scalar_dst* res_dp_0 = (scalar_dst*)(data[0] + offset_calc(idx, res));
-
-        scalar_src input_dp_1 = *(scalar_src*)(data[1] + offset_calc(idx+1, input));
-        scalar_dst* res_dp_1 = (scalar_dst*)(data[0] + offset_calc(idx+1, res));
-
-        scalar_src input_dp_2 = *(scalar_src*)(data[1] + offset_calc(idx+2, input));
-        scalar_dst* res_dp_2 = (scalar_dst*)(data[0] + offset_calc(idx+2, res));
-
-        scalar_src input_dp_3 = *(scalar_src*)(data[1] + offset_calc(idx+3, input));
-        scalar_dst* res_dp_3 = (scalar_dst*)(data[0] + offset_calc(idx+3, res));
-
-        *res_dp_0 = functor(input_dp_0);
-        *res_dp_1 = functor(input_dp_1);
-        *res_dp_2 = functor(input_dp_2);
-        *res_dp_3 = functor(input_dp_3);
-      }
-    }
-    for (; idx < end; idx++) {
+    for (size_t idx = start; idx < end; idx++) {
       scalar_dst* res_dp = (scalar_dst*)(data[0] + offset_calc(idx, res));
       scalar_src* input_dp = (scalar_src*)(data[1] + offset_calc(idx, input));
       *res_dp = functor(*input_dp);
