@@ -188,8 +188,8 @@ inline void binary_reduction(HBTensor<scalar_t>out,
         hb_tiled_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
           scalar_t result = 0;
-          uint32_t dim1 = n / in.dim(2);
-          uint32_t dim2 = n % in.dim(2);
+          uint32_t dim1 = n % in.dim(1);
+          uint32_t dim2 = n / in.dim(1);
           size_t d = 0;
           if (elements_per_output > 16) {
             for(; d < elements_per_output - 8; d += 8) {
@@ -224,8 +224,8 @@ inline void binary_reduction(HBTensor<scalar_t>out,
           // reduction result init to 0
           scalar_t result = 0;
           for(size_t d = 0; d < elements_per_output; d++) {
-            uint32_t dim0 = d / in.dim(1);
-            uint32_t dim1 = d % in.dim(1);
+            uint32_t dim0 = d % in.dim(0);
+            uint32_t dim1 = d / in.dim(0);
             reduce(result, in(dim0, dim1, n));
           }
           out(0, 0, n) = project(result);
