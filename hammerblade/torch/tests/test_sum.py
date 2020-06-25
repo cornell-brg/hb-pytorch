@@ -5,6 +5,7 @@ Unit tests for torch.sum
 
 import torch
 import random
+import pytest
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
@@ -198,3 +199,8 @@ def test_torch_sum_hypothesis_3d(tensor):
     _test_torch_sum(x, dim=(0, 1))
     _test_torch_sum(x, dim=(1, 2))
     _test_torch_sum(x, dim=(0, 2))
+
+@pytest.mark.skipif(not torch.hb_emul_on, reason="Prohibitively slow on cosim")
+def test_large_index():
+    x = torch.randn(128, 850, 200)
+    _test_torch_sum(x, dim=1)
