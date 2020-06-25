@@ -144,41 +144,21 @@ extern "C" {
     int c2 = mat2.dim(1);
     hb_assert(c1 == r2);
 
-    //---------------------------------------------------
-    // calculate x dimension start and end for this tile
-    //---------------------------------------------------
-    size_t len_per_tile = r1 / bsg_tiles_X + 1;
-    size_t start_x = len_per_tile * __bsg_x;
-    size_t end_x = start_x + len_per_tile;
-    end_x = (end_x > r1)  ? r1 : end_x;
-
-    //---------------------------------------------------
-    // calculate Y dimension start and end for this tile
-    //---------------------------------------------------
-    len_per_tile = c2 / bsg_tiles_Y + 1;
-    size_t start_y = len_per_tile * __bsg_y;
-    size_t end_y = start_y + len_per_tile;
-    end_y = (end_y > c2)  ? c2 : end_y;
-
     //-----------------
     // loop
     //----------------
     for(size_t k = 0; k < c1; k++) {
-      for (size_t i = start_x; i < end_x; i++) {
-        for (size_t j = start_y; j < end_y; j++) {
+      hb_tiled_for(r1, c2, [&](size_t i, size_t j) {
           if(k == 0)
-            result(i, j) = 0.0;
+              result(i, j) = 0;
 
           result(i, j) += mat1(i, k) * mat2(k, j);
-        }
-      }
+      });
     }
 
-    for (size_t i = start_x; i < end_x; i++) {
-      for (size_t j = start_y; j < end_y; j++) {
+    hb_tiled_for(r1, c2, [&](size_t i, size_t j) {
         result(i, j) = beta * self(i, j) + alpha * result(i, j);
-      }
-    }
+    });
     
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
