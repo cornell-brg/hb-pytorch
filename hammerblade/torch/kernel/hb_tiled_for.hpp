@@ -629,7 +629,37 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
       char* dst_data = data[0] + idx * dst_strides[0];
       char* src_data = data[1] + idx * src_strides[0];
 
-      for (size_t inner = 0; inner < res.dim(1); inner++) {
+      size_t inner = 0;
+      if (res.dim(1) > 4) {
+        for (; inner < res.dim(1) - 4; inner += 4) {
+          scalar_src input_dp_0 = *(scalar_src*)(src_data);
+          scalar_dst* res_dp_0 = (scalar_dst*)(dst_data);
+          dst_data += dst_strides[1];
+          src_data += src_strides[1];
+
+          scalar_src input_dp_1 = *(scalar_src*)(src_data);
+          scalar_dst* res_dp_1 = (scalar_dst*)(dst_data);
+          dst_data += dst_strides[1];
+          src_data += src_strides[1];
+
+          scalar_src input_dp_2 = *(scalar_src*)(src_data);
+          scalar_dst* res_dp_2 = (scalar_dst*)(dst_data);
+          dst_data += dst_strides[1];
+          src_data += src_strides[1];
+
+          scalar_src input_dp_3 = *(scalar_src*)(src_data);
+          scalar_dst* res_dp_3 = (scalar_dst*)(dst_data);
+          dst_data += dst_strides[1];
+          src_data += src_strides[1];
+
+          *res_dp_0 = functor(input_dp_0);
+          *res_dp_1 = functor(input_dp_1);
+          *res_dp_2 = functor(input_dp_2);
+          *res_dp_3 = functor(input_dp_3);
+        }
+      }
+
+      for (; inner < res.dim(1); inner++) {
         scalar_src input_dp_0 = *(scalar_src*)(src_data);
         scalar_dst* res_dp_0 = (scalar_dst*)(dst_data);
         dst_data += dst_strides[1];
@@ -653,7 +683,36 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
       char* dst_data = data[0] + idx % dst_sizes[1] * dst_strides[1] + idx / dst_sizes[1] * dst_strides[0];
       char* src_data = data[1] + idx % src_sizes[1] * src_strides[1] + idx / src_sizes[1] * src_strides[0];
 
-      for (size_t inner = 0; inner < res.dim(2); inner++) {
+      size_t inner = 0;
+      if (res.dim(2) > 4) {
+        for (; inner < res.dim(2) - 4; inner += 4) {
+          scalar_src input_dp_0 = *(scalar_src*)(src_data);
+          scalar_dst* res_dp_0 = (scalar_dst*)(dst_data);
+          dst_data += dst_strides[2];
+          src_data += src_strides[2];
+
+          scalar_src input_dp_1 = *(scalar_src*)(src_data);
+          scalar_dst* res_dp_1 = (scalar_dst*)(dst_data);
+          dst_data += dst_strides[2];
+          src_data += src_strides[2];
+
+          scalar_src input_dp_2 = *(scalar_src*)(src_data);
+          scalar_dst* res_dp_2 = (scalar_dst*)(dst_data);
+          dst_data += dst_strides[2];
+          src_data += src_strides[2];
+
+          scalar_src input_dp_3 = *(scalar_src*)(src_data);
+          scalar_dst* res_dp_3 = (scalar_dst*)(dst_data);
+          dst_data += dst_strides[2];
+          src_data += src_strides[2];
+
+          *res_dp_0 = functor(input_dp_0);
+          *res_dp_1 = functor(input_dp_1);
+          *res_dp_2 = functor(input_dp_2);
+          *res_dp_3 = functor(input_dp_3);
+        }
+      }
+      for (; inner < res.dim(2); inner++) {
         scalar_src input_dp_0 = *(scalar_src*)(src_data);
         scalar_dst* res_dp_0 = (scalar_dst*)(dst_data);
         dst_data += dst_strides[2];
