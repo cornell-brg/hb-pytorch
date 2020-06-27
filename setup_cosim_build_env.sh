@@ -44,8 +44,8 @@ else
 fi
 
 # Build COSIM runtime library and simulation executable
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/python test_python.log
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/python test_python.debug.log
+make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python test_python.log
+make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python test_python.debug.log
 
 export HB_KERNEL_DIR=$DIR/hammerblade/torch
 
