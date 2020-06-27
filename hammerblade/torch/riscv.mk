@@ -82,6 +82,9 @@ kernel.riscv: $(KERNEL_OBJS)
 	$(RISCV_LINK) $(KERNEL_OBJS) $(SPMD_COMMON_OBJECTS) \
 		-L. -l:$(BSG_MANYCORE_LIB) -o $@ $(filter-out -nostdlib,$(RISCV_LINK_OPTS))
 
+%.dis: %.o
+	$(RISCV_BIN_DIR)/riscv32-unknown-elf-dramfs-objdump -M numeric --disassemble-all -S $<
+
 clean:
 	-rm -rf stack.info.* *.log *.csv ucli.key
 	-rm -rf *.o *.riscv
