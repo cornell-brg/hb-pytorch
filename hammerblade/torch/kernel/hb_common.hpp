@@ -1,7 +1,32 @@
+#ifndef _HB_COMMON_HPP
+#define _HB_COMMON_HPP
+
+// Pointers to remote locations (non-scratchpad) could be qualified
+// with __remote. Doing so would tell compiler to assign a different
+// address space to the contents of those pointers and latencies of
+// memory accesses would be considered as 20 cycles. For example,
+// `__remote float* foo;` essentially declares foo as `__remote float*`
+// type, and the compiler assumes loads from `foo` to take 20 cycles
+// on average.
+#ifdef __clang__
+#define __remote __attribute__((address_space(1)))
+#else
+#define __remote
+#endif
+
+// This macro is to protect the code from uncertainity with
+// restrict/__restrict/__restrict__. Apparently some Newlib
+// headers define __restrict as nothing, but __restrict__
+// seems to work. So, we can use NOALIAS as our main way to
+// resolve pointer alaising and possibly in future we could
+// have `#ifdef`s here to make sure we use the right one in
+// each circumstance.
+#define NOALIAS __restrict__
+
 // =============================================================
 // Workarounds for HB HW Issues
 //
-// This header file implementes a set of workarounds for HW
+// This implementes a set of workarounds for HW
 // issues that might be discovered on ASIC. The plan is to
 // reproduce the bug in cosimulation and use verilog asserts
 // to root cause the line of kernel code triggering the bug.
@@ -34,12 +59,7 @@
 //   .
 //   strides[1] = (input.get_strides())[0];
 // =============================================================
-
-#ifndef _HB_HW_PATCH_HPP
-#define _HB_HW_PATCH_HPP
-
 #ifndef HB_EMUL
-
 // Fixes WAW violations in HW
 //
 // WAW violations are seen in cosimulation as errors starting with:
@@ -52,11 +72,8 @@
         : "r" ((var))          \
         );                     \
   } while(0)
-
 #else
-
 #define HB_FIX_WAW_HAZARD(var)
-
 #endif // ifndef HB_EMUL
 
-#endif // _HB_HW_PATCH_HPP
+#endif // _HB_COMMON_HPP
