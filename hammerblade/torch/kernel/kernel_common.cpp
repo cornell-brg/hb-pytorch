@@ -13,8 +13,8 @@ bsg_barrier<bsg_tiles_X, bsg_tiles_Y> g_barrier;
 #endif // HB_EMUL
 
 // This is just Newlib's memcpy with __remote annotations
-__remote void* hb_memcpy(__remote void* __restrict aa,
-               const __remote void* __restrict bb,
+__remote void* hb_memcpy(__remote void* NOALIAS aa,
+               const __remote void* NOALIAS bb,
                size_t n) {
   #define unlikely(X) __builtin_expect (!!(X), 0)
 

@@ -29,8 +29,8 @@
 #include <hb_tiled_for.hpp>
 #include <hb_hw_patch.hpp>
 
-__remote void* hb_memcpy(__remote void* __restrict dest,
-                         const __remote void* __restrict src,
+__remote void* hb_memcpy(__remote void* NOALIAS dest,
+                         const __remote void* NOALIAS src,
                          size_t n);
 
 //====================================================================
