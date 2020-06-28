@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <bsg_manycore.h>
 #include <hb_assert.hpp>
-#include <hb_hw_patch.hpp>
+#include <hb_common.hpp>
 
 #define DEFAULT_STRIDES 5
 
