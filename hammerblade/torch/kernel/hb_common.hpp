@@ -23,6 +23,14 @@
 // each circumstance.
 #define NOALIAS __restrict__
 
+#define PRAGMA(x) _Pragma(#x)
+#ifdef __clang__
+#define UNROLL(n) PRAGMA(unroll n)
+#else
+#define UNROLL(n) PRAGMA(GCC unroll n)
+#endif
+#undef PRAGMA
+
 // =============================================================
 // Workarounds for HB HW Issues
 //

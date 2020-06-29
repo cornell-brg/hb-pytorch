@@ -195,11 +195,7 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
     size_t start = range.start;
     size_t end   = range.end;
 
-    resptr += strides[0] * start;
-    inputptr += strides[1] * start;
-    otherptr += strides[2] * start;
-    #pragma unroll 4
-    for (size_t idx = start; idx < end; idx++) {
+    UNROLL(4) for (size_t idx = start; idx < end; idx++) {
       resptr[idx*strides[0]] = functor(inputptr[idx*strides[1]],
                                        otherptr[idx*strides[2]]);
     }
