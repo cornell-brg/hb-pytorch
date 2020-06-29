@@ -176,17 +176,6 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
     strides[1] = (input.get_strides())[0] / sizeof(scalar_t);
     strides[2] = (other.get_strides())[0] / sizeof(scalar_t);
 
-    //------------------------------
-    // in the case where stride is 0
-    //------------------------------
-    __remote scalar_t fixed_data[3];
-    for (size_t i = 0; i < 3; i++) {
-      if (strides[i] == 0) {
-        fixed_data[i] = *data[i];
-        data[i] = &fixed_data[i];
-      }
-    }
-
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
