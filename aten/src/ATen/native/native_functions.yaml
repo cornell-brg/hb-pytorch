@@ -6608,8 +6608,8 @@
 #   dispatch:
 
 
-  func: sddmm(Tensor a, Tensor b, Tensor c, Tensor(a!) out) -> Tensor(a!)
+  func: sddmm(Tensor a, Tensor b, Tensor c) -> Tensor
   use_c10_dispatcher: full
   variants: function
   dispatch:
-    CPU: sddmm_cpu
+    SparseCPU: sddmm_cpu
