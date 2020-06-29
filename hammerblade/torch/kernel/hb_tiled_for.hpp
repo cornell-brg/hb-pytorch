@@ -15,6 +15,7 @@
 #include <initializer_list>
 #include <hb_assert.hpp>
 #include <hb_tensor.hpp>
+#include <hb_common.hpp>
 
 // =========================================================
 // Linear index to offset
@@ -157,16 +158,16 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
 //==========================================================
 
 template<typename scalar_t, typename F>
-__attribute__((noinline)) void hb_tiled_foreach_impl(HBTensor<scalar_t> res,
-                                  HBTensor<scalar_t> input,
-                                  HBTensor<scalar_t> other,
-                                  __remote char* __restrict resptr,
-                                  __remote char* __restrict inputptr,
-                                  __remote char* __restrict otherptr,
-                                  F functor) {
+__attribute__((noinline)) void hb_tiled_foreach_impl(
+      HBTensor<scalar_t> res,
+      HBTensor<scalar_t> input,
+      HBTensor<scalar_t> other,
+      __remote float* NOALIAS resptr,
+      __remote float* NOALIAS inputptr,
+      __remote float* NOALIAS otherptr,
+      F functor) {
   // is_trivial_1d
   if(res.ndim() == 1) {
-
     //-----------------------------
     // collect metadata
     //-----------------------------
@@ -197,14 +198,9 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(HBTensor<scalar_t> res,
     resptr += strides[0] * start;
     inputptr += strides[1] * start;
     otherptr += strides[2] * start;
+    #pragma unroll 4
     for (size_t idx = start; idx < end; idx++) {
-      __remote scalar_t* res_dp = (__remote scalar_t*)(resptr);
-      __remote scalar_t* input_dp = (__remote scalar_t*)(inputptr);
-      __remote scalar_t* other_dp = (__remote scalar_t*)(otherptr);
-      *res_dp = functor(*input_dp, *other_dp);
-      resptr += strides[0];
-      inputptr += strides[1];
-      otherptr += strides[2];
+      resptr[idx*strides[0]] = functor(inputptr[idx*strides[1]], otherptr[idx*strides[2]]);
     }
   } else {
     //-----------------------------
@@ -225,14 +221,14 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(HBTensor<scalar_t> res,
 }
 
 template<typename scalar_t, typename F>
-__attribute__((noinline)) void hb_tiled_foreach(HBTensor<scalar_t> res,
+void hb_tiled_foreach(HBTensor<scalar_t> res,
                                HBTensor<scalar_t> input,
                                HBTensor<scalar_t> other,
                                F functor) {
   hb_tiled_foreach_impl(res, input, other,
-                        res.data_ptr(),
-                        input.data_ptr(), 
-                        other.data_ptr(),
+                        (__remote float*) res.data_ptr(),
+                        (__remote float*) input.data_ptr(),
+                        (__remote float*) other.data_ptr(),
                         functor);
 }
 
