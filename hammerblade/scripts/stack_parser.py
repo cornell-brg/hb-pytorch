@@ -1,4 +1,9 @@
-import torch
+"""
+This is a number of functions to parse the execution stack log
+It's almost the same as torch/hammerblade/profiler/exec_time.py
+But this is meant for a single ATen Operator's log
+06/04/2020 Lin Cheng (lc873@cornell.edu)
+"""
 
 class exec_time_Node:
 
@@ -7,11 +12,10 @@ class exec_time_Node:
         self.time = float(time)
         self.children = []
         self.percentage = -1
-        if fancy_func:
+        if fancy_func and not self.func.startswith("@"):
             func = self.func
             func = func.split("(")[0]
             func = func.split("::")[-1]
-            func = "aten::" + func
             self.func = func
 
     def add_child(self, child):
@@ -27,12 +31,18 @@ def exec_time_preprocess(data):
     data = data.splitlines()
     roi = ()
     for d in data:
+        if len(d) == 0:
+            continue
+        if d.startswith("#TOP_LEVEL_FUNC_END#__"):
+            continue
+        if d.startswith("#TOP_LEVEL_FUNC#__"):
+            signature = d[len("#TOP_LEVEL_FUNC#__"):]
+            continue
         stack, time = d.split(";")
-        if stack == "time_in_roi":
-            roi = (stack, time)
-        else:
-            stack = stack.split("<|>")
-            processed.append((stack, time))
+        if stack == signature:
+            roi = ("time_in_roi", time)
+        stack = stack.split("<|>")
+        processed.append((stack, time))
     return processed, roi
 
 # recursively construct a stack tree
@@ -55,7 +65,7 @@ def exec_time_construct_tree_impl(data, parent, fancy_func=False):
             # stack pop front
             lower_level.append((stack[1:], time))
             global_idx += 1
-        exec_time_construct_tree_impl(lower_level, node)
+        exec_time_construct_tree_impl(lower_level, node, fancy_func=fancy_func)
 
 # "Trim" the exec_time tree -> replace offload_kernel time
 # with simulated time
@@ -105,8 +115,8 @@ def exec_time_print_tree(root, lvl=0, output=None):
     return "\n".join(output)
 
 # wrap everything, return a tree
-def exec_time_tree(fancy_func=False, trimming=False):
-    data = torch._C._hb_profiler_exec_time_raw_stack()
+def exec_time_tree(raw_stack, fancy_func=False, trimming=False):
+    data = raw_stack
     data, roi = exec_time_preprocess(data)
     root = exec_time_Node(roi[0], roi[1])
     exec_time_construct_tree_impl(data, root, fancy_func)
@@ -116,54 +126,3 @@ def exec_time_tree(fancy_func=False, trimming=False):
     exec_time_add_other(root)
     exec_time_calc_percentage(root)
     return root
-
-# --------- torch.hb_profiler.exec_time APIs ---------
-
-def fancy_print(trimming=False):
-    try:
-        root = exec_time_tree(fancy_func=True, trimming=trimming)
-        buffer = ""
-        for e in (root.children + [root]):
-            func = e.func
-            time = e.time / 1000000.0
-            percentage = e.percentage
-            buffer += ('{func:30}     {time:.2f} {percentage:.1f}%\n'.format(
-                func=func, time=time, percentage=percentage))
-        return buffer
-    except AttributeError:
-        print("PyTorch is not built with profiling")
-
-def latex_table(trimming=False):
-    try:
-        root = exec_time_tree(fancy_func=True, trimming=trimming)
-        buffer = ""
-        header = "\\begin{table}[t]\n" \
-                 "\\begin{tabular}{lrr}\n" \
-                 "\\toprule\n" \
-                 "& \\textbf{Time} & \\textbf{Percent} \\\\\n" \
-                 "\\textbf{Kernel} & \\textbf{(s)} & \\textbf{of Total} \\\\ \\midrule\n"
-        buffer += header
-
-        for e in (root.children + [root]):
-            func = e.func
-            func = func.replace("_", "\\_")
-            time = e.time / 1000000.0
-            percentage = e.percentage
-            buffer += ('\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\\n'.format(
-                func=func, time=time, percentage=percentage))
-
-        footer = "\\bottomrule\n" \
-                 "\\end{tabular}\n" \
-                 "\\label{tbl-plat}\n" \
-                 "\\end{table}\n"
-        buffer += footer
-        return buffer
-    except AttributeError:
-        print("PyTorch is not built with profiling")
-
-def raw_stack(trimming=False):
-    try:
-        root = exec_time_tree(trimming=trimming)
-        return exec_time_print_tree(root)
-    except AttributeError:
-        print("PyTorch is not built with profiling")

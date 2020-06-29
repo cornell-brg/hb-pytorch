@@ -21,3 +21,15 @@ def json():
         return torch._C._hb_profiler_route_print()
     except AttributeError:
         print("PyTorch is not built with profiling")
+
+def result_check_enable():
+    try:
+        torch._C._hb_profiler_route_enable_allclose_check()
+    except AttributeError:
+        print("PyTorch is not built with profiling")
+
+def result_check_disable():
+    try:
+        torch._C._hb_profiler_route_disable_allclose_check()
+    except AttributeError:
+        print("PyTorch is not built with profiling")

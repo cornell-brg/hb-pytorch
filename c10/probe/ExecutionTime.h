@@ -34,5 +34,6 @@ private:
 };
 
 extern ExecutionTimeProfiler g_execution_time_profiler;
+extern ExecutionTimeProfiler g_per_op_execution_time_profiler;
 
 }} // namespace c10::probe
