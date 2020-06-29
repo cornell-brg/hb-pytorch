@@ -59,12 +59,12 @@ def test_torch_contiguous_6():
 
 def test_torch_contiguous_7():
     x = torch.randn(2, 4, 9)
-    h = x.hammerblade().transpose(0,2)
+    h = x.hammerblade().transpose(0, 2)
     assert not h.is_contiguous()
     y = h.contiguous()
     assert y.device == torch.device("hammerblade")
     assert y.is_contiguous()
-    assert torch.equal(x.transpose(0,2), y.cpu())
+    assert torch.equal(x.transpose(0, 2), y.cpu())
 
 def test_torch_contiguous_8():
     x = torch.randn(2, 3, 4, 5, 6, 7)
