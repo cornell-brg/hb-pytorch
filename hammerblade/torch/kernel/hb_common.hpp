@@ -29,7 +29,6 @@
 #else
 #define UNROLL(n) PRAGMA(GCC unroll n)
 #endif
-#undef PRAGMA
 
 // =============================================================
 // Workarounds for HB HW Issues
