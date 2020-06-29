@@ -1,6 +1,10 @@
 //====================================================================
 // Element-wise for helper function
 // 03/12/2020 Lin Cheng (lc873@cornell.edu)
+//
+// Note: assuming a 3D tensor, and you access it with (x, y, z)
+// Plain tensor has indices numbered as (0, 1, 2)
+// BUT iterator tensor has indices numbered as (2, 1, 0)
 //====================================================================
 
 #ifndef _HB_TILED_FOR_HPP
@@ -20,7 +24,7 @@ inline uint32_t offset_calc(uint32_t idx, HBTensor<scalar_t> tensor) {
   uint32_t* strides = tensor.get_strides();
   uint32_t* sizes = tensor.get_sizes();
   uint32_t offset = 0;
-  for(int32_t i = tensor.ndim() - 1; i >= 0; i--) {
+  for(uint32_t i = 0; i < tensor.ndim(); i++) {
     uint32_t dimx = idx % sizes[i];
     idx /= sizes[i];
     offset += dimx * strides[i];
