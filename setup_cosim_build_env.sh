@@ -42,12 +42,9 @@ else
 fi
 
 # Build COSIM runtime library and simulation executable
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch test_pytorch.log
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch test_pytorch.debug.log
-
-# For backward compatibility.
-# Remove this with bsg_bladerunner's next version. Current is v4.0.0.
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/python test_loader
+make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python test_python.log
+# this one does not work ... what should we do?
+# make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python test_python.debug.log
 
 export HB_KERNEL_DIR=$DIR/hammerblade/torch
 

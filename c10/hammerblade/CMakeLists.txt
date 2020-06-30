@@ -58,7 +58,7 @@ else()
   if( NOT DEFINED ENV{BSG_MANYCORE_DIR} )
     message( FATAL_ERROR "BSG_MANYCORE_DIR not set: Please set BSG_MANYCORE_DIR to bsg_f1/libraries location.")
   endif()
-  find_library(BSG_MANYCORE_RUNTIME_LIB bsg_manycore_runtime HINTS $ENV{BSG_MANYCORE_DIR})
+  find_library(BSG_MANYCORE_RUNTIME_LIB bsg_manycore_runtime HINTS $ENV{BSG_MANYCORE_DIR}/platforms/aws-vcs)
   target_link_libraries(c10_hammerblade PUBLIC ${BSG_MANYCORE_RUNTIME_LIB})
 
   # Dependency on kernel binary path
