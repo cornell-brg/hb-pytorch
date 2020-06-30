@@ -91,10 +91,19 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
+<<<<<<< HEAD
     hb_tiled_for(in.numel(), [&](size_t idx) {
       // XXX: when offloading through reduction path, strides are measured in numel
       scalar_t* in_dp = (scalar_t*)(data[1] + strides[1] * idx * sizeof(scalar_t));
       reduce(result, *in_dp);
+=======
+    hb_tiled_range(in.numel(), [&](size_t start, size_t end) {
+      scalar_t* in_dp = (data[1] + strides[1] * start);
+      for(size_t i = start; i < end; i++) {
+        reduce(result, *in_dp);
+        in_dp += strides[1];
+      }
+>>>>>>> 6ba7fa696... [trivial reduction] use tiled_range
     });
   } else {
     //-----------------------------
