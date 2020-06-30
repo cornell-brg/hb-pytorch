@@ -73,16 +73,14 @@ inline void calc_range(hb_range* range, size_t numel) {
   return;
 }
 
-// =========================================================
-// Tile Pointwise for -- Ternary
-// =========================================================
+template<typename scalar_t, typename F, class... Types>
+inline void hb_tiled_foreach(F functor, Types... args) {
+  HBTensor<scalar_t> tensor_list[] = {args...};
+  HBTensor<scalar_t> res = tensor_list[0];
+  HBTensor<scalar_t> input = tensor_list[1];
+  HBTensor<scalar_t> tensor1 = tensor_list[2];
+  HBTensor<scalar_t> tensor2 = tensor_list[3];
 
-template<typename scalar_t, typename F>
-inline void hb_tiled_foreach(HBTensor<scalar_t> res,
-                                HBTensor<scalar_t> input,
-                                HBTensor<scalar_t> tensor1,
-                                HBTensor<scalar_t> tensor2,
-                                F functor) {
   __remote scalar_t* data[4];
   data[0] = (__remote scalar_t*)res.data_ptr();
   data[1] = (__remote scalar_t*)input.data_ptr();
@@ -148,6 +146,19 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
       *res_dp = functor(*input_dp, *tensor1_dp, *tensor2_dp);
     }
   }
+}
+
+// =========================================================
+// Tile Pointwise for -- Ternary
+// =========================================================
+
+template<typename scalar_t, typename F>
+inline void hb_tiled_foreach(HBTensor<scalar_t> res,
+                                HBTensor<scalar_t> input,
+                                HBTensor<scalar_t> tensor1,
+                                HBTensor<scalar_t> tensor2,
+                                F functor) {
+  hb_tiled_foreach<scalar_t>(functor, res, input, tensor1, tensor2);
 }
 
 // =========================================================
