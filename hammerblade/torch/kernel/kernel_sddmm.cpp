@@ -21,8 +21,8 @@ extern "C" {
           hb_tensor_t* row_p, //rows
           hb_tensor_t* b_p, //dense
           hb_tensor_t* c_p, //dense
-          int* dot_prod_len, // i.e. b.size(0) or c.size(1)
-          int* nnz
+          size_t* dot_prod_len, // i.e. b.size(0) or c.size(1)
+          size_t* nnz
           ) { 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
@@ -33,9 +33,10 @@ extern "C" {
     auto c = HBTensor<float>(c_p);
     auto res = HBTensor<float>(out_p);
     auto dp_len = *dot_prod_len;
+    auto numel = *nnz;
 
 
-    hb_tiled_for(nnz, [&](int i) {
+    hb_tiled_for(numel, [&](int i) {
       int row = rows(i);
       int col = cols(i);
 
@@ -53,6 +54,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_sddmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,hb_tensor_t*, int*, int*)
+  HB_EMUL_REG_KERNEL(tensorlib_sddmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,hb_tensor_t*, size_t*, size_t*)
 
 }
