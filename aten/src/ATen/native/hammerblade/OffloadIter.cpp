@@ -43,7 +43,7 @@ void offload_iterator_op_impl(TensorIterator& iter, std::vector<eva_t> device_sc
     auto iter_strides = iter.strides(i);
     // XXX: strides are measured in bytes
     for(int j=0; j<iter.ndim(); j++) {
-      local_strides[j] = (int64_t)iter_strides[j];
+      local_strides[j] = (int64_t)iter_strides[j] / c10::elementSize(iter.dtype(i));
     }
     // Iterate over all tensors to create
     // corresponding tensors on the device.
