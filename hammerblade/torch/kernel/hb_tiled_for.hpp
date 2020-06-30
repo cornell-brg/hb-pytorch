@@ -158,23 +158,36 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
 //==========================================================
 
 template<typename scalar_t, typename F>
-__attribute__((noinline)) void hb_tiled_foreach_impl(
-      HBTensor<scalar_t> res,
-      HBTensor<scalar_t> input,
-      HBTensor<scalar_t> other,
-      __remote scalar_t* NOALIAS resptr,
-      __remote scalar_t* NOALIAS inputptr,
-      __remote scalar_t* NOALIAS otherptr,
-      F functor) {
+inline void hb_tiled_foreach(HBTensor<scalar_t> res,
+                               HBTensor<scalar_t> input,
+                               HBTensor<scalar_t> other,
+                               F functor) {
+  __remote char* data[3];
+  data[0] = res.data_ptr();
+  data[1] = input.data_ptr();
+  data[2] = other.data_ptr();
+
   // is_trivial_1d
   if(res.ndim() == 1) {
+
     //-----------------------------
     // collect metadata
     //-----------------------------
     uint32_t strides[3];
-    strides[0] = (res.get_strides())[0] / sizeof(scalar_t);
-    strides[1] = (input.get_strides())[0] / sizeof(scalar_t);
-    strides[2] = (other.get_strides())[0] / sizeof(scalar_t);
+    strides[0] = (res.get_strides())[0];
+    strides[1] = (input.get_strides())[0];
+    strides[2] = (other.get_strides())[0];
+
+    //------------------------------
+    // in the case where stride is 0
+    //------------------------------
+    __remote scalar_t fixed_data[3];
+    for (size_t i = 0; i < 3; i++) {
+      if (strides[i] == 0) {
+        fixed_data[i] = *(__remote scalar_t*)data[i];
+        data[i] = (char*)&fixed_data[i];
+      }
+    }
 
     //-----------------------------
     // iterating over all elementes
@@ -184,9 +197,17 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
     size_t start = range.start;
     size_t end   = range.end;
 
-    UNROLL(4) for (size_t idx = start; idx < end; idx++) {
-      resptr[idx*strides[0]] = functor(inputptr[idx*strides[1]],
-                                       otherptr[idx*strides[2]]);
+    data[0] += strides[0] * start;
+    data[1] += strides[1] * start;
+    data[2] += strides[2] * start;
+    for (size_t idx = start; idx < end; idx++) {
+      __remote scalar_t* res_dp = (__remote scalar_t*)(data[0]);
+      __remote scalar_t* input_dp = (__remote scalar_t*)(data[1]);
+      __remote scalar_t* other_dp = (__remote scalar_t*)(data[2]);
+      *res_dp = functor(*input_dp, *other_dp);
+      data[0] += strides[0];
+      data[1] += strides[1];
+      data[2] += strides[2];
     }
   } else {
     //-----------------------------
@@ -198,24 +219,12 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
     size_t end   = range.end;
 
     for (size_t idx = start; idx < end; idx++) {
-      __remote scalar_t* res_dp = (__remote scalar_t*)(resptr + offset_calc(idx, res));
-      __remote scalar_t* input_dp = (__remote scalar_t*)(inputptr + offset_calc(idx, input));
-      __remote scalar_t* other_dp = (__remote scalar_t*)(otherptr + offset_calc(idx, other));
+      __remote scalar_t* res_dp = (__remote scalar_t*)(data[0] + offset_calc(idx, res));
+      __remote scalar_t* input_dp = (__remote scalar_t*)(data[1] + offset_calc(idx, input));
+      __remote scalar_t* other_dp = (__remote scalar_t*)(data[2] + offset_calc(idx, other));
       *res_dp = functor(*input_dp, *other_dp);
     }
   }
-}
-
-template<typename scalar_t, typename F>
-void hb_tiled_foreach(HBTensor<scalar_t> res,
-                               HBTensor<scalar_t> input,
-                               HBTensor<scalar_t> other,
-                               F functor) {
-  hb_tiled_foreach_impl(res, input, other,
-                        (__remote scalar_t*) res.data_ptr(),
-                        (__remote scalar_t*) input.data_ptr(),
-                        (__remote scalar_t*) other.data_ptr(),
-                        functor);
 }
 
 // =========================================================
