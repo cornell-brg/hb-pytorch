@@ -16,18 +16,16 @@ Tensor sddmm_hb(const SparseTensor& sample, const Tensor& b, const Tensor& c) {
   TORCH_CHECK(c.is_hammerblade(), "Sddmm: expected 'mat2' to be a HammerBlade tensor");
 
   if ( (sample.scalar_type() != ScalarType::Float)
-    || (b.scalar_type() != ScalarType::Float) ) 
+    || (b.scalar_type() != ScalarType::Float) 
     || (c.scalar_type() != ScalarType::Float) ) {
     AT_ERROR("HammerBlade sddmm is implemented for Float only"); 
   }
-  
-  using scalar_t = float;
- 
+   
   TORCH_CHECK(sample.sparse_dim() == 2, "We do not support hybrid sparse tensor for 'sample' in HammerBlade sddmm!");
   TORCH_CHECK(b.dim() == 2 && c.dim() == 2, "Expected 2D matrixes for 'mat1' and 'mat2', but got ", b.dim(), " and ", c.dim(), " tensors");
   TORCH_CHECK(b.size(0) == c.size(1), "Matrix multiply dimension mismatch: 'mat1' dim 0 = ", b.size(0), ", 'mat2' dim 1 = ", c.size(1));
   
-  IntTensor indices = sampe._indices();
+  IntTensor indices = sample._indices();
   TORCH_CHECK(indices.dtype() == at::kInt, "Indices on HammerBlade should be int32");
   IntTensor colIndices = indices.select(0, 1);
   TORCH_CHECK(colIndices.is_hammerblade(), "colIndices show be HammerBlade Tensor");
