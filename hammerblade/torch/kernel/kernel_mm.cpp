@@ -9,20 +9,14 @@
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_addmm(
+  __attribute__ ((noinline))  int tensorlib_mm(
           hb_tensor_t* _result,
-          hb_tensor_t* _self,
           hb_tensor_t* _mat1,
-          hb_tensor_t* _mat2,
-          float* _beta,
-          float* _alpha) {
+          hb_tensor_t* _mat2) {
 
-    auto self = HBTensor<float, 2>(_self);
     auto mat1 = HBTensor<float, 2>(_mat1);
     auto mat2 = HBTensor<float, 2>(_mat2);
     auto result = HBTensor<float, 2>(_result);
-    float beta = *_beta;
-    float alpha = *_alpha;
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
@@ -57,18 +51,9 @@ extern "C" {
         int res_dim_x = rc == m2_num_blk_per_col - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
         int partial_block = (res_dim_y != BLOCK_DIM) || (res_dim_x != BLOCK_DIM);
 
-        // initialize scratchpad result (load beta * self into result)
-
-        // unrolled version
+        // initialize scratchpad result (init to 0's)
         float sp_result[res_dim_y * res_dim_x];
-        float sp_self[res_dim_y * res_dim_x];
-        if (partial_block) { // general case
-            dram_to_sp(sp_self, beta, self, res_dim_y, res_dim_x, rr, rc);
-        } else {
-            dram_to_sp_simple(sp_self, beta, self, res_dim_y, res_dim_x, rr, rc);
-        }
         memset(sp_result, 0, res_dim_y * res_dim_x * sizeof(float));
-        // end: unrolled version
 
         // process mat1 and mat2 for this result block
         // only care about blocks of mat1 in row rr
@@ -87,8 +72,7 @@ extern "C" {
                 dram_to_sp(sp_mat1, mat1, res_dim_y, mid_dim, rr, mat1x);
                 dram_to_sp(sp_mat2, mat2, mid_dim, res_dim_x, mat2y, rc);
                 compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
-            }
-            else {
+            } else {
                 dram_to_sp_simple(sp_mat1, mat1, res_dim_y, mid_dim, rr, mat1x);
                 dram_to_sp_simple(sp_mat2, mat2, mid_dim, res_dim_x, mat2y, rc);
                 compute_simple(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
@@ -101,7 +85,7 @@ extern "C" {
         for (int i = 0; i < res_dim_y; i++) {
             for (int j = 0; j < res_dim_x; j++) {
                 // unrolled version
-                result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_self[i * res_dim_x + j] + alpha * sp_result[i * res_dim_x + j];
+                result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * res_dim_x + j];
                 // end: unrolled version
             }
         }
@@ -113,7 +97,7 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_addmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, float*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_mm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 
 }
 

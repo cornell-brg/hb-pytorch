@@ -29,8 +29,22 @@ Tensor addmm_hb(
   std::tie(b_self) = expand_size(self, {mat1.size(0), mat2.size(1)}, "addmm_out");
   Tensor result = at::empty({b_self.size(0), b_self.size(1)}, b_self.options());
 
-  hb_offload_kernel(result, b_self, mat1, mat2, beta.to<scalar_t>(),
-                    alpha.to<scalar_t>(), "tensorlib_addmm");
+  //-------------------------------------
+  // special cases
+  // beta = 0, alpha = 1 -> same as mm
+  // beta = 1, alpha = 1 -> naive_addmm
+  //-------------------------------------
+  if (beta.to<scalar_t>() == 0.0f && alpha.to<scalar_t>() == 1.0f) {
+    // beta = 0, alpha = 1
+    hb_offload_kernel(result, mat1, mat2, "tensorlib_mm");
+  } else if (beta.to<scalar_t>() == 1.0f && alpha.to<scalar_t>() == 1.0f) {
+    // beta = 1, alpha = 1
+    hb_offload_kernel(result, b_self, mat1, mat2, "tensorlib_addmm_naive");
+  } else {
+    // general case
+    hb_offload_kernel(result, b_self, mat1, mat2, beta.to<scalar_t>(),
+                      alpha.to<scalar_t>(), "tensorlib_addmm");
+  }
 
   return result;
 }

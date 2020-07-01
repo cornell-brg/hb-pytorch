@@ -25,6 +25,7 @@ void HBProfiler::profiling_start() {
   // reset profiler pluggins
   g_unimpl_kernel_profiler.reset();
   g_execution_time_profiler.reset();
+  g_per_op_execution_time_profiler.reset();
   g_execution_charter.reset();
   // mark current time
   std::vector<std::string> fake_roi_stack;
@@ -50,15 +51,25 @@ void HBProfiler::profiling_end() {
 }
 
 
-// =============== c10 probe API functions ========================
+// =============== c10 probe internal helper functions ========================
 
-bool hb_profiler_in_parallel_region() {
+bool hb_profiler_thread_safe() {
 #ifdef _OPENMP
-  return omp_in_parallel();
+  // we profile if the current function is not in an active parallel region
+  // OR thread id == 0
+  if (!omp_in_parallel() || (omp_get_thread_num() == 0)) {
+    return true;
+  } else {
+    return false;
+  }
 #else
-  return false;
+  // if not compiled with OMP, we have no idea if the current thread should be
+  // profiled. use at your own risk
+  return true;
 #endif
 }
+
+// =============== c10 probe API functions ========================
 
 void hb_profiler_start() {
   g_hb_profiler.profiling_start();
@@ -82,10 +93,11 @@ bool hb_profiler_is_top_level() {
 
 // Entering a function
 HBProfilerLog::HBProfilerLog(const std::string& func_name) {
-  if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
+  if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
     g_curr_call_stack.push_back(func_name);
     execution_time_log = new ExecutionTimeLog(g_curr_call_stack);
     if (hb_profiler_is_top_level()) {
+      g_per_op_execution_time_profiler.reset();
       g_execution_charter.log(func_name);
     }
   }
@@ -94,8 +106,16 @@ HBProfilerLog::HBProfilerLog(const std::string& func_name) {
 // Returning from a function
 HBProfilerLog::~HBProfilerLog()
 {
-  if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
+  if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
     delete execution_time_log;
+    if (hb_profiler_is_top_level()) {
+      std::string per_op_log = g_per_op_execution_time_profiler.str_dump();
+      if (per_op_log.find("@CPU_LOG@") != std::string::npos) {
+        std::cerr << "#TOP_LEVEL_FUNC#__" << g_curr_call_stack.back() << std::endl;
+        std::cerr << per_op_log << std::endl;
+        std::cerr << "#TOP_LEVEL_FUNC_END#__" << g_curr_call_stack.back() << std::endl;
+      }
+    }
     g_curr_call_stack.pop_back();
   }
 }
@@ -104,7 +124,7 @@ HBProfilerLog::~HBProfilerLog()
 
 // Entering a function
 HBProfilerTrimLog::HBProfilerTrimLog() {
-  if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
+  if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
     g_curr_call_stack.push_back("@TRIM@");
   }
 }
@@ -112,13 +132,14 @@ HBProfilerTrimLog::HBProfilerTrimLog() {
 // Returning from a function
 HBProfilerTrimLog::~HBProfilerTrimLog()
 {
-  if (hb_profiler_is_in_roi() && !hb_profiler_in_parallel_region()) {
+  if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
     g_curr_call_stack.pop_back();
   }
 }
 
 void HBProfilerTrimLog::trim_manual_log_exec_time(std::chrono::microseconds simulated) {
   g_execution_time_profiler.log(g_curr_call_stack, simulated);
+  g_per_op_execution_time_profiler.log(g_curr_call_stack, simulated);
 }
 
 }} // namespace c10::probe

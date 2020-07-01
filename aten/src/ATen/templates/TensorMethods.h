@@ -40,6 +40,15 @@ inline Tensor Tensor::cpu_ifdef() const {
   }
 }
 
+// Do low-level copy to HammerBlade only if the tensor is defined
+inline Tensor Tensor::llcopy_ifdef() const {
+  if (this->defined()) {
+    return this->llcopy();
+  } else {
+    return *this;
+  }
+}
+
 // TODO: The Python version also accepts arguments
 inline Tensor Tensor::cuda() const {
   return to(options().device(DeviceType::CUDA), /*non_blocking*/ false, /*copy*/ false);
