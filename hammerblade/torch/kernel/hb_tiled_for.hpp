@@ -74,76 +74,30 @@ inline void calc_range(hb_range* range, size_t numel) {
 }
 
 template<typename scalar_t, typename F, class... Types>
-inline void hb_tiled_foreach(F functor, Types... args) {
-  HBTensor<scalar_t> tensor_list[] = {args...};
-  HBTensor<scalar_t> res = tensor_list[0];
-  HBTensor<scalar_t> input = tensor_list[1];
-  HBTensor<scalar_t> tensor1 = tensor_list[2];
-  HBTensor<scalar_t> tensor2 = tensor_list[3];
+inline void hb_tiled_foreach(F functor,
+                             HBTensor<scalar_t> res,
+                             Types... args) {
+  // Tensor operands
+  HBTensor<scalar_t> tensor_args[] = {args...};
 
-  __remote scalar_t* data[4];
-  data[0] = (__remote scalar_t*)res.data_ptr();
-  data[1] = (__remote scalar_t*)input.data_ptr();
-  data[2] = (__remote scalar_t*)tensor1.data_ptr();
-  data[3] = (__remote scalar_t*)tensor2.data_ptr();
+  // Iterating over all elementes
+  hb_range range;
+  calc_range(&range, res.numel());
+  size_t start = range.start;
+  size_t end   = range.end;
 
   // is_trivial_1d
   if(res.ndim() == 1) {
-
-    //-----------------------------
-    // collect metadata
-    //-----------------------------
-    uint32_t strides[4];
-    strides[0] = (res.get_strides())[0];
-    strides[1] = (input.get_strides())[0];
-    strides[2] = (tensor1.get_strides())[0];
-    strides[3] = (tensor2.get_strides())[0];
-
-    //------------------------------
-    // in the case where stride is 0
-    //------------------------------
-    __remote scalar_t fixed_data[4];
-    for (size_t i = 0; i < 4; i++) {
-      if (strides[i] == 0) {
-        fixed_data[i] = *data[i];
-        data[i] = &fixed_data[i];
-      }
-    }
-
-    //-----------------------------
-    // iterating over all elementes
-    //-----------------------------
-    hb_range range;
-    calc_range(&range, res.numel());
-    size_t start = range.start;
-    size_t end   = range.end;
-
-    data[0] += strides[0] * start;
-    data[1] += strides[1] * start;
-    data[2] += strides[2] * start;
-    data[3] += strides[3] * start;
-    for (size_t idx = start; idx < end; idx++) {
-      *data[0] = functor(*data[1], *data[2], *data[3]);
-      data[0] += strides[0];
-      data[1] += strides[1];
-      data[2] += strides[2];
-      data[3] += strides[3];
+    for(size_t idx = start; idx < end; idx++) {
+      ((__remote scalar_t*) res.data_ptr())[idx * res.get_strides()[0]] = 
+        functor(
+          ((__remote scalar_t*) args.data_ptr())[idx * args.get_strides()[0]]...);
     }
   } else {
-    //-----------------------------
-    // iterating over all elementes
-    //-----------------------------
-    hb_range range;
-    calc_range(&range, res.numel());
-    size_t start = range.start;
-    size_t end   = range.end;
-
     for (size_t idx = start; idx < end; idx++) {
-      __remote scalar_t* res_dp = (data[0] + offset_calc(idx, res));
-      __remote scalar_t* input_dp = (data[1] + offset_calc(idx, input));
-      __remote scalar_t* tensor1_dp = (data[2] + offset_calc(idx, tensor1));
-      __remote scalar_t* tensor2_dp = (data[3] + offset_calc(idx, tensor2));
-      *res_dp = functor(*input_dp, *tensor1_dp, *tensor2_dp);
+     ((__remote scalar_t*)  res.data_ptr())[offset_calc(idx, res)] = 
+       functor(((__remote scalar_t*)
+               args.data_ptr())[offset_calc(idx, args)]...);
     }
   }
 }
@@ -172,66 +126,7 @@ inline void hb_tiled_foreach(HBTensor<scalar_t> res,
                                HBTensor<scalar_t> input,
                                HBTensor<scalar_t> other,
                                F functor) {
-  __remote scalar_t* data[3];
-  data[0] = (__remote scalar_t*)res.data_ptr();
-  data[1] = (__remote scalar_t*)input.data_ptr();
-  data[2] = (__remote scalar_t*)other.data_ptr();
-
-  // is_trivial_1d
-  if(res.ndim() == 1) {
-
-    //-----------------------------
-    // collect metadata
-    //-----------------------------
-    uint32_t strides[3];
-    strides[0] = (res.get_strides())[0];
-    strides[1] = (input.get_strides())[0];
-    strides[2] = (other.get_strides())[0];
-
-    //------------------------------
-    // in the case where stride is 0
-    //------------------------------
-    __remote scalar_t fixed_data[3];
-    for (size_t i = 0; i < 3; i++) {
-      if (strides[i] == 0) {
-        fixed_data[i] = *data[i];
-        data[i] = &fixed_data[i];
-      }
-    }
-
-    //-----------------------------
-    // iterating over all elementes
-    //-----------------------------
-    hb_range range;
-    calc_range(&range, res.numel());
-    size_t start = range.start;
-    size_t end   = range.end;
-
-    data[0] += strides[0] * start;
-    data[1] += strides[1] * start;
-    data[2] += strides[2] * start;
-    for (size_t idx = start; idx < end; idx++) {
-      *data[0] = functor(*data[1], *data[2]);
-      data[0] += strides[0];
-      data[1] += strides[1];
-      data[2] += strides[2];
-    }
-  } else {
-    //-----------------------------
-    // iterating over all elementes
-    //-----------------------------
-    hb_range range;
-    calc_range(&range, res.numel());
-    size_t start = range.start;
-    size_t end   = range.end;
-
-    for (size_t idx = start; idx < end; idx++) {
-      __remote scalar_t* res_dp = (data[0] + offset_calc(idx, res));
-      __remote scalar_t* input_dp = (data[1] + offset_calc(idx, input));
-      __remote scalar_t* other_dp = (data[2] + offset_calc(idx, other));
-      *res_dp = functor(*input_dp, *other_dp);
-    }
-  }
+  hb_tiled_foreach<scalar_t>(functor, res, input, other);
 }
 
 // =========================================================
@@ -244,61 +139,7 @@ template<typename scalar_t, typename F>
 inline void hb_tiled_foreach(HBTensor<scalar_t> res,
                                HBTensor<scalar_t> input,
                                F functor) {
-  __remote scalar_t* data[2];
-  data[0] = (__remote scalar_t*)res.data_ptr();
-  data[1] = (__remote scalar_t*)input.data_ptr();
-
-  // is_trivial_1d
-  if(res.ndim() == 1) {
-
-    //-----------------------------
-    // collect metadata
-    //-----------------------------
-    uint32_t strides[2];
-    strides[0] = (res.get_strides())[0];
-    strides[1] = (input.get_strides())[0];
-
-    //------------------------------
-    // in the case where stride is 0
-    //------------------------------
-    __remote scalar_t fixed_data[2];
-    for (size_t i = 0; i < 2; i++) {
-      if (strides[i] == 0) {
-        fixed_data[i] = *data[i];
-        data[i] = &fixed_data[i];
-      }
-    }
-
-    //-----------------------------
-    // iterating over all elementes
-    //-----------------------------
-    hb_range range;
-    calc_range(&range, res.numel());
-    size_t start = range.start;
-    size_t end   = range.end;
-
-    data[0] += strides[0] * start;
-    data[1] += strides[1] * start;
-    for (size_t idx = start; idx < end; idx++) {
-      *data[0] = functor(*data[1]);
-      data[0] += strides[0];
-      data[1] += strides[1];
-    }
-  } else {
-    //-----------------------------
-    // iterating over all elementes
-    //-----------------------------
-    hb_range range;
-    calc_range(&range, res.numel());
-    size_t start = range.start;
-    size_t end   = range.end;
-
-    for (size_t idx = start; idx < end; idx++) {
-      __remote scalar_t* res_dp = (data[0] + offset_calc(idx, res));
-      __remote scalar_t* input_dp = (data[1] + offset_calc(idx, input));
-      *res_dp = functor(*input_dp);
-    }
-  }
+  hb_tiled_foreach<scalar_t>(functor, res, input);
 }
 
 // =========================================================
