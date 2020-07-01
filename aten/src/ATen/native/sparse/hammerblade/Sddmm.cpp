@@ -15,9 +15,9 @@ Tensor sddmm_hb(const SparseTensor& sample, const Tensor& b, const Tensor& c) {
   TORCH_CHECK(b.is_hammerblade(), "Sddmm: expected 'mat1' to be a HammerBlade tensor");
   TORCH_CHECK(c.is_hammerblade(), "Sddmm: expected 'mat2' to be a HammerBlade tensor");
 
-  if ( (sample.scalar_type() != ScalarType::Float)
-    || (b.scalar_type() != ScalarType::Float) 
-    || (c.scalar_type() != ScalarType::Float) ) {
+  if ( sample.scalar_type() != ScalarType::Float
+    || b.scalar_type() != ScalarType::Float
+    || c.scalar_type() != ScalarType::Float ) {
     AT_ERROR("HammerBlade sddmm is implemented for Float only"); 
   }
    
