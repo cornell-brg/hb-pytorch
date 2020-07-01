@@ -74,7 +74,7 @@ inline void calc_range(hb_range* range, size_t numel) {
 }
 
 // =========================================================
-// Tile Pointwise for
+// Tiled Pointwise for
 // =========================================================
 
 template<typename scalar_t, typename F, class... Types>
@@ -104,46 +104,6 @@ inline void hb_tiled_foreach(F functor,
                args.data_ptr())[offset_calc(idx, args)]...);
     }
   }
-}
-
-// =========================================================
-// Tile Pointwise for -- Ternary
-// =========================================================
-
-template<typename scalar_t, typename F>
-inline void hb_tiled_foreach(HBTensor<scalar_t> res,
-                                HBTensor<scalar_t> input,
-                                HBTensor<scalar_t> tensor1,
-                                HBTensor<scalar_t> tensor2,
-                                F functor) {
-  hb_tiled_foreach<scalar_t>(functor, res, input, tensor1, tensor2);
-}
-
-// =========================================================
-// Tile Element-wise for -- Binary ops
-//
-// This function calculates the per tile range automatically
-//==========================================================
-
-template<typename scalar_t, typename F>
-inline void hb_tiled_foreach(HBTensor<scalar_t> res,
-                               HBTensor<scalar_t> input,
-                               HBTensor<scalar_t> other,
-                               F functor) {
-  hb_tiled_foreach<scalar_t>(functor, res, input, other);
-}
-
-// =========================================================
-// Tile Element-wise for -- Unary ops
-//
-// This function calculates the per tile range automatically
-//==========================================================
-
-template<typename scalar_t, typename F>
-inline void hb_tiled_foreach(HBTensor<scalar_t> res,
-                               HBTensor<scalar_t> input,
-                               F functor) {
-  hb_tiled_foreach<scalar_t>(functor, res, input);
 }
 
 // =========================================================

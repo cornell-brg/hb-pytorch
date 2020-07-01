@@ -15,9 +15,11 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach(res, [&]() {
-      return value;
-    });
+    hb_tiled_foreach(
+      [&]() {
+        return value;
+      },
+      res);
 
     bsg_cuda_print_stat_kernel_end();
 
