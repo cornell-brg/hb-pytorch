@@ -73,6 +73,10 @@ inline void calc_range(hb_range* range, size_t numel) {
   return;
 }
 
+// =========================================================
+// Tile Pointwise for
+// =========================================================
+
 template<typename scalar_t, typename F, class... Types>
 inline void hb_tiled_foreach(F functor,
                              HBTensor<scalar_t> res,
@@ -89,13 +93,13 @@ inline void hb_tiled_foreach(F functor,
   // is_trivial_1d
   if(res.ndim() == 1) {
     for(size_t idx = start; idx < end; idx++) {
-      ((__remote scalar_t*) res.data_ptr())[idx * res.get_strides()[0]] = 
-        functor(
-          ((__remote scalar_t*) args.data_ptr())[idx * args.get_strides()[0]]...);
+      ((__remote scalar_t*) res.data_ptr())[idx * res.get_strides()[0]] =
+        functor(((__remote scalar_t*)
+                args.data_ptr())[idx * args.get_strides()[0]]...);
     }
   } else {
     for (size_t idx = start; idx < end; idx++) {
-     ((__remote scalar_t*)  res.data_ptr())[offset_calc(idx, res)] = 
+     ((__remote scalar_t*)  res.data_ptr())[offset_calc(idx, res)] =
        functor(((__remote scalar_t*)
                args.data_ptr())[offset_calc(idx, args)]...);
     }
