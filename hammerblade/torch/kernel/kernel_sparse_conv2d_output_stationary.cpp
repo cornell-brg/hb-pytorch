@@ -51,6 +51,7 @@ extern "C" {
     size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
     size_t start = __bsg_id;
     size_t end = Cout;
+    int32_t local_mem = 300;
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
@@ -61,35 +62,50 @@ extern "C" {
       int32_t wrow[2];
       wrow[0] = w_row(co);
       wrow[1] = w_row(co+1);
-      size_t col_size = wrow[1] - wrow[0];
-      int32_t wcol[col_size];
-      float wval[col_size];
-      for(uint32_t ind = 0; ind < col_size; ++ind) {
-        wcol[ind] = w_col(ind + wrow[0]);
-        wval[ind] = w_val(ind + wrow[0]);
+      size_t nnz = wrow[1] - wrow[0];
+      int32_t iter = 1;
+      int32_t col_size = nnz;
+      if(nnz > local_mem) {
+        iter = std::ceil((float)(nnz) / (float)(local_mem));
+        col_size = local_mem;
       }
-      for(uint32_t n = 0; n < N; ++n) {
-        for(uint32_t yh = 0; yh < Hout; ++yh) {
-          for(uint32_t yw = 0; yw < Wout; ++yw) {
-            temp[0] = 0.0;
-            int32_t xhoffset = Sh * yh - Ph;
-            int32_t xwoffset = Sw * yw - Pw;
-            for(uint32_t i = wrow[0]; i < wrow[1]; i++) {
-              int32_t index = i - wrow[0];
-              int32_t w_1d = wcol[index];
-              int32_t ci = w_1d / (Kh * Kw);
-              int32_t rest = w_1d - ci * Kh * Kw;
-              int32_t kh = rest / Kh;
-              int32_t kw = rest - kh * Kh;
+      for(int32_t it = 0; it < iter; ++it) {
+        int32_t col_start = it * col_size;
+        int32_t col_end = (col_start + col_size) > nnz ? nnz : (col_start + col_size);
+        int32_t length = col_end - col_start;
+        int32_t wcol[length];
+        float wval[length];
+        int offset = wrow[0] + it * col_size;
+        for(uint32_t ind = 0; ind < length; ++ind) {
+          wcol[ind] = w_col(ind + offset);
+          wval[ind] = w_val(ind + offset);
+        }
+        //bsg_printf("Row %d is performing on from %dth nnz to %dth nnz in iteration %d.\n", co, col_start, col_end, it);
+        for(uint32_t n = 0; n < N; ++n) {
+          for(uint32_t yh = 0; yh < Hout; ++yh) {
+            for(uint32_t yw = 0; yw < Wout; ++yw) {
+              temp[0] = y(n, co, yh, yw);
+              int32_t xhoffset = Sh * yh - Ph;
+              int32_t xwoffset = Sw * yw - Pw;
+              for(uint32_t i = 0; i < length; i++) {
+                // bsg_printf("The index of column is %d \n", index);
+                int32_t w_1d = wcol[i];
+                int32_t ci = w_1d / (Kh * Kw);
+                int32_t rest = w_1d - ci * Kh * Kw;
+                int32_t kh = rest / Kh;
+                int32_t kw = rest - kh * Kh;
 
-              int32_t xh = xhoffset + kh;
-              int32_t xw = xwoffset + kw;
+                int32_t xh = xhoffset + kh;
+                int32_t xw = xwoffset + kw;
 
-              if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                temp[0] += x(n, ci, xh, xw) * wval[index];
-              } // else 0
+                if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+                  temp[0] += x(n, ci, xh, xw) * wval[i];
+                  // bsg_printf("input is x[%d %d %d %d]\n", n, ci, xh, xw);
+                } // else 0
+              }
+              y(n, co, yh, yw) = temp[0];
+              //bsg_printf("output is y[%d %d %d %d]\n", n, co, yh, yw);
             }
-            y(n, co, yh, yw) = temp[0];
           }
         }
       }
