@@ -240,68 +240,6 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
 }
 
 // =========================================================
-// Tile Element-wise for -- Nullary ops
-//
-// This function calculates the per tile range automatically
-//==========================================================
-
-template<typename scalar_t, typename F>
-inline void hb_tiled_foreach(HBTensor<scalar_t> res,
-                               F functor) {
-  __remote scalar_t* data[1];
-  data[0] = (__remote scalar_t*)res.data_ptr();
-
-  // is_trivial_1d
-  if(res.ndim() == 1) {
-
-    //-----------------------------
-    // collect metadata
-    //-----------------------------
-    uint32_t strides[1];
-    strides[0] = (res.get_strides())[0];
-
-    //------------------------------
-    // in the case where stride is 0
-    //------------------------------
-    __remote scalar_t fixed_data[1];
-    for (size_t i = 0; i < 1; i++) {
-      if (strides[i] == 0) {
-        fixed_data[i] = *data[i];
-        data[i] = &fixed_data[i];
-      }
-    }
-
-    //-----------------------------
-    // iterating over all elementes
-    //-----------------------------
-    hb_range range;
-    calc_range(&range, res.numel());
-    size_t start = range.start;
-    size_t end   = range.end;
-
-    data[0] += strides[0] * start;
-    for (size_t idx = start; idx < end; idx++) {
-      __remote scalar_t* res_dp = data[0];
-      *data[0] = functor();
-      data[0] += strides[0];
-    }
-  } else {
-    //-----------------------------
-    // iterating over all elementes
-    //-----------------------------
-    hb_range range;
-    calc_range(&range, res.numel());
-    size_t start = range.start;
-    size_t end   = range.end;
-
-    for (size_t idx = start; idx < end; idx++) {
-      __remote scalar_t* res_dp = (data[0] + offset_calc(idx, res));
-      *res_dp = functor();
-    }
-  }
-}
-
-// =========================================================
 // HB for
 // =========================================================
 // functor takes in current index
