@@ -189,7 +189,7 @@ class HBTensor<DT, -1> : public HBTensorImpl<__remote DT, uint32_t> {
 
   public:
     HBTensor(hb_tensor_t* t) :
-      HBTensorImpl<__remote DT, __remote uint32_t>(
+      HBTensorImpl<__remote DT, uint32_t>(
         t->N,
         t->dims,
         strides,
