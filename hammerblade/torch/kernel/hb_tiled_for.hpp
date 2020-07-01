@@ -87,20 +87,25 @@ inline void hb_tiled_foreach(F functor,
   size_t start = range.start;
   size_t end   = range.end;
 
-  // is_trivial_1d
-  if(res.ndim() == 1) {
-    for(size_t idx = start; idx < end; idx++) {
-      ((__remote scalar_t*) res.data_ptr())[idx * res.get_strides()[0]] =
-        functor(((__remote scalar_t*)
-                args.data_ptr())[idx * args.get_strides()[0]]...);
+  ([start, end, functor, &res, &args...]<typename... T>(
+        __remote scalar_t* NOALIAS res_ptr,
+        T* NOALIAS... arg_ptrs) {
+    // is_trivial_1d
+    if(res.ndim() == 1) {
+      UNROLL(16) for(size_t idx = start; idx < end; idx++) {
+        res_ptr[idx * res.get_strides()[0]] = functor(
+            ((__remote scalar_t*)
+             args.data_ptr())[idx * args.get_strides()[0]]...);
+      }
+    } else {
+      UNROLL(16) for (size_t idx = start; idx < end; idx++) {
+        res_ptr[offset_calc(idx, res)] = functor(
+            ((__remote scalar_t*)
+             args.data_ptr())[offset_calc(idx, args)]...);
+      }
     }
-  } else {
-    for (size_t idx = start; idx < end; idx++) {
-      ((__remote scalar_t*)  res.data_ptr())[offset_calc(idx, res)] =
-        functor(((__remote scalar_t*)
-                args.data_ptr())[offset_calc(idx, args)]...);
-    }
-  }
+  })((__remote scalar_t*) res.data_ptr(),
+     ((__remote scalar_t*) args.data_ptr())...);
 }
 
 // =========================================================
