@@ -22,14 +22,15 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach(c, a, b,
+    hb_tiled_foreach(
       [&](float self, float other) {
         if (self <= threshold) {
           return value;
         } else {
           return other;
         }
-    });
+       },
+       c, a, b);
 
     bsg_cuda_print_stat_kernel_end();
 
