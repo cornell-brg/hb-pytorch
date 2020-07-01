@@ -81,9 +81,6 @@ template<typename scalar_t, typename F, class... Types>
 inline void hb_tiled_foreach(F functor,
                              HBTensor<scalar_t> res,
                              Types... args) {
-  // Tensor operands
-  HBTensor<scalar_t> tensor_args[] = {args...};
-
   // Iterating over all elementes
   hb_range range;
   calc_range(&range, res.numel());
@@ -99,9 +96,9 @@ inline void hb_tiled_foreach(F functor,
     }
   } else {
     for (size_t idx = start; idx < end; idx++) {
-     ((__remote scalar_t*)  res.data_ptr())[offset_calc(idx, res)] =
-       functor(((__remote scalar_t*)
-               args.data_ptr())[offset_calc(idx, args)]...);
+      ((__remote scalar_t*)  res.data_ptr())[offset_calc(idx, res)] =
+        functor(((__remote scalar_t*)
+                args.data_ptr())[offset_calc(idx, args)]...);
     }
   }
 }
