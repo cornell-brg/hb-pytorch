@@ -33,6 +33,7 @@ C10_PROBE_API void hb_profiler_start();
 C10_PROBE_API void hb_profiler_end();
 C10_PROBE_API bool hb_profiler_is_in_roi();
 C10_PROBE_API bool hb_profiler_is_top_level();
+C10_PROBE_API bool hb_profiler_thread_safe();
 
 extern HBProfiler g_hb_profiler;
 extern std::vector<std::string> g_curr_call_stack;

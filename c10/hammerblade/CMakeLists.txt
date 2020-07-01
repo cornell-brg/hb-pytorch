@@ -84,6 +84,11 @@ else()
     "-DHB_KERNEL_PATH=${CMAKE_INSTALL_PREFIX}/riscv/kernel.riscv"
     )
 
+  target_compile_definitions(
+    c10_hammerblade PRIVATE
+    "-DCOSIM"
+    )
+
   target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_DIR} )
 endif()
 

@@ -15,8 +15,6 @@ export USE_FBGEMM=0
 export USE_NNPACK=0
 export USE_QNNPACK=0
 export USE_DISTRIBUTED=0
-export USE_OPENMP=0
-export ATEN_THREADING=NATIVE
 export OMP_NUM_THREADS=1
 
 # Use gold if it's available for faster linking.

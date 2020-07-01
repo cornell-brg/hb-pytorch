@@ -539,6 +539,16 @@ static PyObject * THPModule_hbProfilerRoutePrint(PyObject *module, PyObject *noa
   return PyUnicode_FromString(c10::probe::route_print().c_str());
 }
 
+static PyObject * THPModule_hbProfilerRouteEnableAllcloseCheck(PyObject *module, PyObject *noargs) {
+  c10::probe::enable_allclose_check();
+  Py_RETURN_NONE;
+}
+
+static PyObject * THPModule_hbProfilerRouteDisableAllcloseCheck(PyObject *module, PyObject *noargs) {
+  c10::probe::disable_allclose_check();
+  Py_RETURN_NONE;
+}
+
 static PyObject * THPModule_hbProfilerChartPrint(PyObject *module, PyObject *noargs) {
   return PyUnicode_FromString(c10::probe::chart_print().c_str());
 }
@@ -649,6 +659,8 @@ static PyMethodDef TorchMethods[] = {
   {"_hb_profiler_chart_clear_beacon",  (PyCFunction)THPModule_hbProfilerClearBeacon, METH_NOARGS, nullptr},
   {"_hb_profiler_route_add_waypoint",  (PyCFunction)THPModule_hbProfilerAddWaypoint, METH_VARARGS, nullptr},
   {"_hb_profiler_route_print",  (PyCFunction)THPModule_hbProfilerRoutePrint, METH_NOARGS, nullptr},
+  {"_hb_profiler_route_enable_allclose_check",  (PyCFunction)THPModule_hbProfilerRouteEnableAllcloseCheck, METH_NOARGS, nullptr},
+  {"_hb_profiler_route_disable_allclose_check",  (PyCFunction)THPModule_hbProfilerRouteDisableAllcloseCheck, METH_NOARGS, nullptr},
   {"_hb_profiler_chart_print",  (PyCFunction)THPModule_hbProfilerChartPrint, METH_NOARGS, nullptr},
   {"_hb_profiler_fallback_enable",  (PyCFunction)THPModule_hbProfilerFallbackEnable, METH_NOARGS, nullptr},
   {"_hb_profiler_fallback_disable",  (PyCFunction)THPModule_hbProfilerFallbackDisable, METH_NOARGS, nullptr},

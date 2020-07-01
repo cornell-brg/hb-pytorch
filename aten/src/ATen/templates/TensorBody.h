@@ -179,6 +179,13 @@ class CAFFE2_API Tensor {
 
   std::string toString() const;
 
+  IntArrayRef sizes_ifdef() const {
+    if (this->defined()) {
+      return impl_->sizes();
+    } else {
+      return IntArrayRef();
+    }
+  }
   IntArrayRef sizes() const {
     return impl_->sizes();
   }
@@ -395,6 +402,7 @@ class CAFFE2_API Tensor {
 
   Tensor cpu() const;
   Tensor cpu_ifdef() const;
+  Tensor llcopy_ifdef() const;
   Tensor cuda() const;
   Tensor hip() const;
   Tensor hammerblade() const;

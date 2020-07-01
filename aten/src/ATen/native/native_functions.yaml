@@ -1876,7 +1876,6 @@
   dispatch:
     CPU: legacy::cpu::_th_mm_out
     CUDA: legacy::cuda::_th_mm_out
-    HammerBlade: mm_out_hb
     SparseCPU: _sparse_mm_out
     SparseCUDA: _sparse_mm_out
   supports_named_tensor: True
