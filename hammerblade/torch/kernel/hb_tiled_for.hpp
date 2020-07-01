@@ -77,11 +77,25 @@ inline void calc_range(hb_range* range, size_t numel) {
 // Tiled Pointwise for
 // =========================================================
 
-template<typename scalar_t, typename... T>
+template<typename scalar_t, typename F, typename... T, typename... P>
 __attribute__((noinline)) void hb_tiled_foreach_impl(
+      size_t start, size_t end, F functor,
+      HBTensor<scalar_t> res,
       __remote scalar_t* NOALIAS res_ptr,
-      T NOALIAS... args) {
-  res_ptr[0] = 0.0;
+      T... tensor_args,
+      P NOALIAS... tensor_data_ptrs) {
+  // is_trivial_1d
+  if(res.ndim() == 1) {
+    for(size_t idx = start; idx < end; idx++) {
+      //res_ptr[idx * res.get_strides()[0]] =
+      //  functor(tensor_data_ptrs[idx * tensor_args.get_strides()[0]]...);
+    }
+  } else {
+    for (size_t idx = start; idx < end; idx++) {
+      //res_ptr[offset_calc(idx, res)] =
+      //  functor(tensor_data_ptrs[offset_calc(idx, tensor_args)]...);
+    }
+  }
 }
 
 template<typename scalar_t, typename F, class... Types>
@@ -94,22 +108,10 @@ inline void hb_tiled_foreach(F functor,
   size_t start = range.start;
   size_t end   = range.end;
 
-  hb_tiled_foreach_impl(res.data_ptr(), args.data_ptr()...);
-
-  // is_trivial_1d
-  if(res.ndim() == 1) {
-    for(size_t idx = start; idx < end; idx++) {
-      ((__remote scalar_t*) res.data_ptr())[idx * res.get_strides()[0]] =
-        functor(((__remote scalar_t*)
-                args.data_ptr())[idx * args.get_strides()[0]]...);
-    }
-  } else {
-    for (size_t idx = start; idx < end; idx++) {
-      ((__remote scalar_t*)  res.data_ptr())[offset_calc(idx, res)] =
-        functor(((__remote scalar_t*)
-                args.data_ptr())[offset_calc(idx, args)]...);
-    }
-  }
+  hb_tiled_foreach_impl(start, end, functor, res,
+                        (__remote scalar_t*) res.data_ptr(),
+                        args...,
+                        ((__remote scalar_t*) args.data_ptr())...);
 }
 
 // =========================================================
