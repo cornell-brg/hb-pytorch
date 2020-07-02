@@ -18,7 +18,7 @@ extern "C" {
   auto res = HBTensor<float>(t1_p);
 
     hb_tiled_foreach(
-      [&](float a) {
+      [](float a) {
         return rintf(a);
       },
       inp, res);

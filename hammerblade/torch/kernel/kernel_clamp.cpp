@@ -42,7 +42,7 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
 
     hb_tiled_foreach(
-      [&](float a) {
+      [min](float a) {
         return a < min ? min : a;
       },
       res, input);
@@ -64,7 +64,7 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
 
     hb_tiled_foreach(
-      [&](float a) {
+      [max](float a) {
         return a > max ? max : a;
       },
       res, input);
