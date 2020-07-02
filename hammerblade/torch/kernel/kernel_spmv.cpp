@@ -23,7 +23,6 @@ extern "C" {
     uint32_t m = result.dim(0);
     uint32_t k = dense.dim(0);
     uint32_t v = result.numel();
-    printf("%d \n", v);
 
     size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
     size_t start = __bsg_id;
