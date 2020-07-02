@@ -16,7 +16,7 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
     hb_tiled_foreach(
-      [&](float a) {
+      [](float a) {
         return std::log(a);
       },
       res, input);
