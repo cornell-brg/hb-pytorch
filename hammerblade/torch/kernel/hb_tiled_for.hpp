@@ -115,7 +115,7 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
   }
 }
 
-// Binary
+// Unary
 template<typename scalar_t, typename F, typename... P>
 __attribute__((noinline)) void hb_tiled_foreach_impl(
       size_t start, size_t end, F functor,
