@@ -103,12 +103,12 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
       __remote scalar_t* NOALIAS res_ptr) {
   // is_trivial_1d
   if(res.ndim() == 1) {
-    for(size_t idx = start; idx < end; idx++) {
+    UNROLL(16) for(size_t idx = start; idx < end; idx++) {
       res_ptr[idx * res.get_strides()[0]] =
         functor();
     }
   } else {
-    for (size_t idx = start; idx < end; idx++) {
+    UNROLL(16) for (size_t idx = start; idx < end; idx++) {
       res_ptr[offset_calc(idx, res)] =
         functor();
     }
@@ -125,12 +125,12 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
       __remote scalar_t* NOALIAS tensor_data_ptr0) {
   // is_trivial_1d
   if(res.ndim() == 1) {
-    for(size_t idx = start; idx < end; idx++) {
+    UNROLL(16) for(size_t idx = start; idx < end; idx++) {
       res_ptr[idx * res.get_strides()[0]] =
         functor(tensor_data_ptr0[idx * tensor_arg0.get_strides()[0]]);
     }
   } else {
-    for (size_t idx = start; idx < end; idx++) {
+    UNROLL(16) for (size_t idx = start; idx < end; idx++) {
       res_ptr[offset_calc(idx, res)] =
         functor(tensor_data_ptr0[offset_calc(idx, tensor_arg0)]);
     }
@@ -149,13 +149,13 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
       __remote scalar_t* NOALIAS tensor_data_ptr1) {
   // is_trivial_1d
   if(res.ndim() == 1) {
-    for(size_t idx = start; idx < end; idx++) {
+    UNROLL(16) for(size_t idx = start; idx < end; idx++) {
       res_ptr[idx * res.get_strides()[0]] =
         functor(tensor_data_ptr0[idx * tensor_arg0.get_strides()[0]],
                 tensor_data_ptr1[idx * tensor_arg1.get_strides()[0]]);
     }
   } else {
-    for (size_t idx = start; idx < end; idx++) {
+    UNROLL(16) for (size_t idx = start; idx < end; idx++) {
       res_ptr[offset_calc(idx, res)] =
         functor(tensor_data_ptr0[offset_calc(idx, tensor_arg0)],
                 tensor_data_ptr1[offset_calc(idx, tensor_arg1)]);
@@ -177,14 +177,14 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
       __remote scalar_t* NOALIAS tensor_data_ptr2) {
   // is_trivial_1d
   if(res.ndim() == 1) {
-    for(size_t idx = start; idx < end; idx++) {
+    UNROLL(16) for(size_t idx = start; idx < end; idx++) {
       res_ptr[idx * res.get_strides()[0]] =
         functor(tensor_data_ptr0[idx * tensor_arg0.get_strides()[0]],
                 tensor_data_ptr1[idx * tensor_arg1.get_strides()[0]],
                 tensor_data_ptr2[idx * tensor_arg2.get_strides()[0]]);
     }
   } else {
-    for (size_t idx = start; idx < end; idx++) {
+    UNROLL(16) for (size_t idx = start; idx < end; idx++) {
       res_ptr[offset_calc(idx, res)] =
         functor(tensor_data_ptr0[offset_calc(idx, tensor_arg0)],
                 tensor_data_ptr1[offset_calc(idx, tensor_arg1)],
