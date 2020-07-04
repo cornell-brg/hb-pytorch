@@ -60,7 +60,13 @@ export CLANG=1
 RISCV_GXX_EXTRA_OPTS += -Wno-c++11-narrowing # Fixme: fix these warnings!
 RISCV_LINK_OPTS += -lstdc++
 endif
+
+ifdef HB_SILICON_V0
+include $(BSG_F1_DIR)/Makefile.machine.include
+else
 include $(BSG_F1_DIR)/machine.mk
+endif
+
 include $(BSG_MANYCORE_DIR)/software/mk/Makefile.master
 
 INCS := -I$(KERNEL_DIR)
