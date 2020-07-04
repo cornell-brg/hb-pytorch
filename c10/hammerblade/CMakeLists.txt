@@ -66,11 +66,17 @@ else()
     message( FATAL_ERROR "HB_KERNEL_DIR not set: Please set HB_KERNEL_DIR to kernel binary location.")
   endif()
 
+  if(USE_HB_SILION_V0)
+    set(KERNEL_MAKE_FLAGS "HB_SILICON_V0=1")
+  else()
+    set(KERNEL_MAKE_FLAGS "")
+  endif()
+
   # Kernel binary
   add_custom_target(
     kernel_riscv_exe
     COMMAND mkdir -p riscv
-    COMMAND make -C riscv -f $ENV{HB_KERNEL_DIR}/riscv.mk kernel.riscv -j8
+    COMMAND make -C riscv -f $ENV{HB_KERNEL_DIR}/riscv.mk ${KERNEL_COMPILE_FLAGS} kernel.riscv -j8
     COMMAND cp riscv/kernel.riscv .
     COMMAND rm -rf riscv
     DEPENDS $ENV{HB_KERNEL_DIR}/riscv.mk
@@ -84,10 +90,17 @@ else()
     "-DHB_KERNEL_PATH=${CMAKE_INSTALL_PREFIX}/riscv/kernel.riscv"
     )
 
-  target_compile_definitions(
-    c10_hammerblade PRIVATE
-    "-DCOSIM"
-    )
+  if(USE_HB_SILICON_V0)
+    target_compile_definitions(
+      c10_hammerblade PRIVATE
+      "-DHB_SILICON_V0"
+      )
+  else()
+    target_compile_definitions(
+      c10_hammerblade PRIVATE
+      "-DCOSIM"
+      )
+  endif()
 
   target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_INCLUDE} )
 endif()
