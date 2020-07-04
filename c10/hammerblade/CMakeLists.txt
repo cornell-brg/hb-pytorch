@@ -66,7 +66,7 @@ else()
     message( FATAL_ERROR "HB_KERNEL_DIR not set: Please set HB_KERNEL_DIR to kernel binary location.")
   endif()
 
-  if(USE_HB_SILION_V0)
+  if(USE_HB_SILICON_V0)
     set(KERNEL_MAKE_FLAGS "HB_SILICON_V0=1")
   else()
     set(KERNEL_MAKE_FLAGS "")
@@ -76,7 +76,7 @@ else()
   add_custom_target(
     kernel_riscv_exe
     COMMAND mkdir -p riscv
-    COMMAND make -C riscv -f $ENV{HB_KERNEL_DIR}/riscv.mk ${KERNEL_COMPILE_FLAGS} kernel.riscv -j8
+    COMMAND make -C riscv -f $ENV{HB_KERNEL_DIR}/riscv.mk ${KERNEL_MAKE_FLAGS} kernel.riscv -j8
     COMMAND cp riscv/kernel.riscv .
     COMMAND rm -rf riscv
     DEPENDS $ENV{HB_KERNEL_DIR}/riscv.mk
