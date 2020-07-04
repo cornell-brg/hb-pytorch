@@ -41,6 +41,7 @@ export BSG_MANYCORE_LDPATH=/usr/lib64
 
 export HB_KERNEL_DIR=$DIR/hammerblade/torch
 
+echo "  \$BRG_BSG_BLADERUNNER_DIR is set to $BRG_BSG_BLADERUNNER_DIR"
 echo "  \$BSG_MANYCORE_INCLUDE is set to $BSG_MANYCORE_INCLUDE"
 echo "  \$BSG_MANYCORE_LDPATH is set to $BSG_MANYCORE_LDPATH"
 echo "  \$HB_KERNEL_DIR is set to $HB_KERNEL_DIR"
