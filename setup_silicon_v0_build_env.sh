@@ -33,7 +33,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 echo "  hb-pytorch lives in $DIR"
 
-export HB_SILICON_V0=1
+export USE_HB_SILICON_V0=1
 
 # setup cudalite runtime and pytorch kernel binary paths
 export BSG_MANYCORE_INCLUDE=/usr/include
