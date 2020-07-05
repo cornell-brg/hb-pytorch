@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import hbutils
 
 def load_conv1_sparse_weight_reshape():
     model = torch.load("LeNet_5.prune.only.fc.pth.tar", map_location='cpu')
@@ -156,13 +155,14 @@ def test_lenet5_forward():
     net = LeNet_5()
     
 #    net_hb.load_state_dict(net.state_dict())
-
+    torch.hammerblade.profiler.enable()
     data = torch.rand(1, 1, 28, 28)
-    data_hb = hbutils.init_hb_tensor(data)
+    data_hb = data.hammerblade()
+    hb_result = net.forward_sparse_conv_for_hb(data_hb)
+    torch.hammerblade.profiler.disable()
 
     output = net.forward(data)
     output1 = net.forward_conv_to_gemm(data)  
     cpu_result  = net.forward_sparse_conv_to_gemm(data)
-    hb_result = net.forward_sparse_conv_for_hb(data_hb)
     assert torch.allclose(output, output1)   
     assert torch.allclose(cpu_result, hb_result.cpu())
