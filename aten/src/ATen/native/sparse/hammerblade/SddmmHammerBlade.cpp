@@ -1,5 +1,5 @@
 #include <ATen/ATen.h>
-#include <ATen/templates/NativeFunctions.h>
+// #include <ATen/NativeFunctions.h>
 #include <ATen/native/sparse/SparseTensorMath.h>
 #include <ATen/hammerblade/HammerBladeContext.h>
 #include <ATen/native/hammerblade/Offload.h>
