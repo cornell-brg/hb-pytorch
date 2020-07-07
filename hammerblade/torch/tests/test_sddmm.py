@@ -7,21 +7,21 @@ import torch
 torch.manual_seed(42)
 
 
-# def sddm_expected(a,b,c):
-#     outvals = torch.zeros(a._nnz())
-#     for k in range(a._nnz()):
-#         ai, aj = tuple(a._indices()[:, k].tolist())
-#         brow = b[ai, :]
-#         ccol = c[:, aj]
-#         outvals[k] = torch.dot(brow, ccol)
-#     return torch.sparse.FloatTensor(
-#         a._indices(),
-#         outvals,
-#         a.shape,
-#     )
+def sddm_expected(a,b,c):
+    outvals = torch.zeros(a._nnz())
+    for k in range(a._nnz()):
+        ai, aj = tuple(a._indices()[:, k].tolist())
+        brow = b[ai, :]
+        ccol = c[:, aj]
+        outvals[k] = torch.dot(brow, ccol)
+    return torch.sparse.FloatTensor(
+        a._indices(),
+        outvals,
+        a.shape,
+    ).to_dense()
 
 def _test_torch_sddmm(a, b, c):
-    # expected_tensor = torch.sddmm(a, b, c)
+    expected_tensor = sddmm_expected(a, b, c)
     ah = a.hammerblade()
     bh = b.hammerblade()
     ch = c.hammerblade()
@@ -29,8 +29,9 @@ def _test_torch_sddmm(a, b, c):
     got_device = got_hb.device
     got_tensor = got_hb.cpu()
     print(got_tensor)
+    print(expected_tensor)
     assert got_device == torch.device("hammerblade")
-    # assert torch.equal(got_tensor, expected_tensor)
+    assert torch.equal(got_tensor, expected_tensor)
 
 
 def test_torch_sddmm_1():
