@@ -394,4 +394,551 @@ inline void hb_tiled_range(size_t numel, FetchFunctor functor) {
 }
 
 
+
+// =========================================================
+// Tilewise element op helper - Multidimensional Tensor 
+// =========================================================
+template<typename scalar_t, typename F>
+inline void hb_tiled_foreach_multi(HBTensor<scalar_t> res,
+                               HBTensor<scalar_t> input,
+                               HBTensor<scalar_t> other,
+                               F functor) {
+  scalar_t* data[3];
+  data[0] = (scalar_t*)res.data_ptr();
+  data[1] = (scalar_t*)input.data_ptr();
+  data[2] = (scalar_t*)other.data_ptr();
+
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  hb_range range;
+  calc_range(&range, res.numel());
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  for (size_t idx = start; idx < end; idx++) {
+    scalar_t* res_dp = (data[0] + offset_calc(idx, res));
+    scalar_t* input_dp = (data[1] + offset_calc(idx, input));
+    scalar_t* other_dp = (data[2] + offset_calc(idx, other));
+    *res_dp = functor(*input_dp, *other_dp);
+  }
+
+}
+
+
+// =========================================================
+// Tilewise element op helper - Binary 
+// Unroll 3
+// =========================================================
+template<typename scalar_t, typename F>
+inline void hb_tiled_foreach_unroll3(F functor, 
+                               HBTensor<scalar_t> result,
+                               HBTensor<scalar_t> input,
+                               HBTensor<scalar_t> other) {
+  scalar_t* data[3];
+  data[0] = (scalar_t*)result.data_ptr();
+  data[1] = (scalar_t*)input.data_ptr();
+  data[2] = (scalar_t*)other.data_ptr();
+
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  hb_range range;
+  calc_range(&range, result.numel());
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  // is_trivial_1d
+  if(result.ndim() == 1) {
+
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[3];
+    strides[0] = (result.get_strides())[0];
+    strides[1] = (input.get_strides())[0];
+    strides[2] = (other.get_strides())[0];
+    
+    size_t i = start;
+    while (i + 2 < end){
+    
+      scalar_t x1 = *(data[1] + i * strides[1]);
+      scalar_t y1 = *(data[2] + i * strides[2]);
+      scalar_t x2 = *(data[1] + (i+1) * strides[1]);
+      scalar_t y2 = *(data[2] + (i+1) * strides[2]);
+      scalar_t x3 = *(data[1] + (i+2) * strides[1]);
+      scalar_t y3 = *(data[2] + (i+2) * strides[2]);
+      
+      scalar_t res1 = functor(x1, y1);
+      scalar_t res2 = functor(x2, y2);
+      scalar_t res3 = functor(x3, y3);
+      
+      *(data[0] + strides[0] * i++) = res1;
+      *(data[0] + strides[0] * i++) = res2;
+      *(data[0] + strides[0] * i++) = res3;
+    }
+    if (start + 3 < end) {
+      i -= 3;
+    }
+    while (i < end) {
+      scalar_t x = *(data[1] + i * strides[1]);
+      scalar_t y = *(data[2] + i * strides[2]);
+      scalar_t res = functor(x, y);
+      *(data[0] + strides[0]*i++) = res;
+    }
+  }
+  else {
+    hb_tiled_foreach_multi(result, input, other, functor);
+  } 
+}
+
+// =========================================================
+// Tilewise element op helper - Binary 
+// Unroll 5
+// =========================================================
+template<typename scalar_t, typename F>
+inline void hb_tiled_foreach_unroll5(F functor, 
+                               HBTensor<scalar_t> result,
+                               HBTensor<scalar_t> input,
+                               HBTensor<scalar_t> other) {
+  scalar_t* data[3];
+  data[0] = (scalar_t*)result.data_ptr();
+  data[1] = (scalar_t*)input.data_ptr();
+  data[2] = (scalar_t*)other.data_ptr();
+
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  hb_range range;
+  calc_range(&range, result.numel());
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  // is_trivial_1d
+  if(result.ndim() == 1) {
+
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[3];
+    strides[0] = (result.get_strides())[0];
+    strides[1] = (input.get_strides())[0];
+    strides[2] = (other.get_strides())[0];
+
+    size_t i = start;
+    while ( i + 4 < end){
+      scalar_t x1 = *(data[1] + i * strides[1]);
+      scalar_t y1 = *(data[2] + i * strides[2]);
+      scalar_t x2 = *(data[1] + (i+1) * strides[1]);
+      scalar_t y2 = *(data[2] + (i+1) * strides[2]);
+      scalar_t x3 = *(data[1] + (i+2) * strides[1]);
+      scalar_t y3 = *(data[2] + (i+2) * strides[2]);
+      scalar_t x4 = *(data[1] + (i+3) * strides[1]);
+      scalar_t y4 = *(data[2] + (i+3) * strides[2]);
+      scalar_t x5 = *(data[1] + (i+4) * strides[1]);
+      scalar_t y5 = *(data[2] + (i+4) * strides[2]);
+
+      scalar_t res1 = functor(x1, y1);
+      scalar_t res2 = functor(x2, y2);
+      scalar_t res3 = functor(x3, y3);
+      scalar_t res4 = functor(x4, y4);
+      scalar_t res5 = functor(x5, y5);
+
+      *(data[0] + strides[0]*i++) = res1;
+      *(data[0] + strides[0]*i++) = res2;
+      *(data[0] + strides[0]*i++) = res3;
+      *(data[0] + strides[0]*i++) = res4;
+      *(data[0] + strides[0]*i++) = res5;
+    }
+    if (start + 5 < end) {
+      i -= 5;
+    }
+    while (i < end) {
+      scalar_t x = *(data[1] + i * strides[1]);
+      scalar_t y = *(data[2] + i * strides[2]);
+      scalar_t res = x + y;
+      *(data[0] + strides[0]*i++) = res;
+    }
+  } 
+  else {
+    hb_tiled_foreach_multi(result, input, other, functor);
+  }
+}
+
+// =========================================================
+// Tilewise element op helper - Binary 
+// Unroll 7
+// =========================================================
+template<typename scalar_t, typename F>
+inline void hb_tiled_foreach_unroll7(F functor, 
+                               HBTensor<scalar_t> result,
+                               HBTensor<scalar_t> input,
+                               HBTensor<scalar_t> other) {
+  scalar_t* data[3];
+  data[0] = (scalar_t*)result.data_ptr();
+  data[1] = (scalar_t*)input.data_ptr();
+  data[2] = (scalar_t*)other.data_ptr();
+
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  hb_range range;
+  calc_range(&range, result.numel());
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  // is_trivial_1d
+  if(result.ndim() == 1) {
+
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[3];
+    strides[0] = (result.get_strides())[0];
+    strides[1] = (input.get_strides())[0];
+    strides[2] = (other.get_strides())[0];
+
+    size_t i = start;
+    while ( i + 6 < end){
+      scalar_t x1 = *(data[1] + i * strides[1]);
+      scalar_t y1 = *(data[2] + i * strides[2]);
+      scalar_t x2 = *(data[1] + (i+1) * strides[1]);
+      scalar_t y2 = *(data[2] + (i+1) * strides[2]);
+      scalar_t x3 = *(data[1] + (i+2) * strides[1]);
+      scalar_t y3 = *(data[2] + (i+2) * strides[2]);
+      scalar_t x4 = *(data[1] + (i+3) * strides[1]);
+      scalar_t y4 = *(data[2] + (i+3) * strides[2]);
+      scalar_t x5 = *(data[1] + (i+4) * strides[1]);
+      scalar_t y5 = *(data[2] + (i+4) * strides[2]);
+      scalar_t x6 = *(data[1] + (i+5) * strides[1]);
+      scalar_t y6 = *(data[2] + (i+5) * strides[2]);
+      scalar_t x7 = *(data[1] + (i+6) * strides[1]);
+      scalar_t y7 = *(data[2] + (i+6) * strides[2]);
+
+      scalar_t res1 = functor(x1, y1);
+      scalar_t res2 = functor(x2, y2);
+      scalar_t res3 = functor(x3, y3);
+      scalar_t res4 = functor(x4, y4);
+      scalar_t res5 = functor(x5, y5);
+      scalar_t res6 = functor(x6, y6);
+      scalar_t res7 = functor(x7, y7);
+
+      *(data[0] + strides[0]*i++) = res1;
+      *(data[0] + strides[0]*i++) = res2;
+      *(data[0] + strides[0]*i++) = res3;
+      *(data[0] + strides[0]*i++) = res4;
+      *(data[0] + strides[0]*i++) = res5;
+      *(data[0] + strides[0]*i++) = res6;
+      *(data[0] + strides[0]*i++) = res7;
+      
+    }
+    if (start + 7 < end) {
+      i -= 7;
+    }
+    while (i < end) {
+      scalar_t x = *(data[1] + i * strides[1]);
+      scalar_t y = *(data[2] + i * strides[2]);
+      scalar_t res = x + y;
+      *(data[0] + strides[0]*i++) = res;
+    }
+  } 
+  else {
+    hb_tiled_foreach_multi(result, input, other, functor);
+  }
+}
+
+// =========================================================
+// Tilewise element op helper - Binary 
+// Unroll 9
+// =========================================================
+template<typename scalar_t, typename F>
+inline void hb_tiled_foreach_unroll9(F functor, 
+                               HBTensor<scalar_t> result,
+                               HBTensor<scalar_t> input,
+                               HBTensor<scalar_t> other) {
+  scalar_t* data[3];
+  data[0] = (scalar_t*)result.data_ptr();
+  data[1] = (scalar_t*)input.data_ptr();
+  data[2] = (scalar_t*)other.data_ptr();
+
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  hb_range range;
+  calc_range(&range, result.numel());
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  // is_trivial_1d
+  if(result.ndim() == 1) {
+
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[3];
+    strides[0] = (result.get_strides())[0];
+    strides[1] = (input.get_strides())[0];
+    strides[2] = (other.get_strides())[0];
+
+    size_t i = start;
+    while ( i + 8 < end){
+      scalar_t x1 = *(data[1] + i * strides[1]);
+      scalar_t y1 = *(data[2] + i * strides[2]);
+      scalar_t x2 = *(data[1] + (i+1) * strides[1]);
+      scalar_t y2 = *(data[2] + (i+1) * strides[2]);
+      scalar_t x3 = *(data[1] + (i+2) * strides[1]);
+      scalar_t y3 = *(data[2] + (i+2) * strides[2]);
+      scalar_t x4 = *(data[1] + (i+3) * strides[1]);
+      scalar_t y4 = *(data[2] + (i+3) * strides[2]);
+      scalar_t x5 = *(data[1] + (i+4) * strides[1]);
+      scalar_t y5 = *(data[2] + (i+4) * strides[2]);
+      scalar_t x6 = *(data[1] + (i+5) * strides[1]);
+      scalar_t y6 = *(data[2] + (i+5) * strides[2]);
+      scalar_t x7 = *(data[1] + (i+6) * strides[1]);
+      scalar_t y7 = *(data[2] + (i+6) * strides[2]);
+      scalar_t x8 = *(data[1] + (i+7) * strides[1]);
+      scalar_t y8 = *(data[2] + (i+7) * strides[2]);
+      scalar_t x9 = *(data[1] + (i+8) * strides[1]);
+      scalar_t y9 = *(data[2] + (i+8) * strides[2]);
+
+      scalar_t res1 = functor(x1, y1);
+      scalar_t res2 = functor(x2, y2);
+      scalar_t res3 = functor(x3, y3);
+      scalar_t res4 = functor(x4, y4);
+      scalar_t res5 = functor(x5, y5);
+      scalar_t res6 = functor(x6, y6);
+      scalar_t res7 = functor(x7, y7);
+      scalar_t res8 = functor(x8, y8);
+      scalar_t res9 = functor(x9, y9);
+
+      *(data[0] + strides[0]*i++) = res1;
+      *(data[0] + strides[0]*i++) = res2;
+      *(data[0] + strides[0]*i++) = res3;
+      *(data[0] + strides[0]*i++) = res4;
+      *(data[0] + strides[0]*i++) = res5;
+      *(data[0] + strides[0]*i++) = res6;
+      *(data[0] + strides[0]*i++) = res7;
+      *(data[0] + strides[0]*i++) = res8;
+      *(data[0] + strides[0]*i++) = res9;
+      
+    }
+    if (start + 9 < end) {
+      i -= 9;
+    }
+    while (i < end) {
+      scalar_t x = *(data[1] + i * strides[1]);
+      scalar_t y = *(data[2] + i * strides[2]);
+      scalar_t res = x + y;
+      *(data[0] + strides[0]*i++) = res;
+    }
+  }
+  else {
+    hb_tiled_foreach_multi(result, input, other, functor);
+  } 
+}
+
+// =========================================================
+// Tilewise element op helper - Binary 
+// Unroll 11
+// =========================================================
+template<typename scalar_t, typename F>
+inline void hb_tiled_foreach_unroll11(F functor, 
+                               HBTensor<scalar_t> result,
+                               HBTensor<scalar_t> input,
+                               HBTensor<scalar_t> other) {
+  scalar_t* data[3];
+  data[0] = (scalar_t*)result.data_ptr();
+  data[1] = (scalar_t*)input.data_ptr();
+  data[2] = (scalar_t*)other.data_ptr();
+
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  hb_range range;
+  calc_range(&range, result.numel());
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  // is_trivial_1d
+  if(result.ndim() == 1) {
+
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[3];
+    strides[0] = (result.get_strides())[0];
+    strides[1] = (input.get_strides())[0];
+    strides[2] = (other.get_strides())[0];
+
+    size_t i = start;
+    while ( i + 10 < end){
+      scalar_t x1 = *(data[1] + i * strides[1]);
+      scalar_t y1 = *(data[2] + i * strides[2]);
+      scalar_t x2 = *(data[1] + (i+1) * strides[1]);
+      scalar_t y2 = *(data[2] + (i+1) * strides[2]);
+      scalar_t x3 = *(data[1] + (i+2) * strides[1]);
+      scalar_t y3 = *(data[2] + (i+2) * strides[2]);
+      scalar_t x4 = *(data[1] + (i+3) * strides[1]);
+      scalar_t y4 = *(data[2] + (i+3) * strides[2]);
+      scalar_t x5 = *(data[1] + (i+4) * strides[1]);
+      scalar_t y5 = *(data[2] + (i+4) * strides[2]);
+      scalar_t x6 = *(data[1] + (i+5) * strides[1]);
+      scalar_t y6 = *(data[2] + (i+5) * strides[2]);
+      scalar_t x7 = *(data[1] + (i+6) * strides[1]);
+      scalar_t y7 = *(data[2] + (i+6) * strides[2]);
+      scalar_t x8 = *(data[1] + (i+7) * strides[1]);
+      scalar_t y8 = *(data[2] + (i+7) * strides[2]);
+      scalar_t x9 = *(data[1] + (i+8) * strides[1]);
+      scalar_t y9 = *(data[2] + (i+8) * strides[2]);
+      scalar_t x10 = *(data[1] + (i+9) * strides[1]);
+      scalar_t y10 = *(data[2] + (i+9) * strides[2]);
+      scalar_t x11 = *(data[1] + (i+10) * strides[1]);
+      scalar_t y11 = *(data[2] + (i+10) * strides[2]);
+
+      scalar_t res1 = functor(x1, y1);
+      scalar_t res2 = functor(x2, y2);
+      scalar_t res3 = functor(x3, y3);
+      scalar_t res4 = functor(x4, y4);
+      scalar_t res5 = functor(x5, y5);
+      scalar_t res6 = functor(x6, y6);
+      scalar_t res7 = functor(x7, y7);
+      scalar_t res8 = functor(x8, y8);
+      scalar_t res9 = functor(x9, y9);
+      scalar_t res10 = functor(x10, y10);
+      scalar_t res11 = functor(x11, y11);
+
+      *(data[0] + strides[0]*i++) = res1;
+      *(data[0] + strides[0]*i++) = res2;
+      *(data[0] + strides[0]*i++) = res3;
+      *(data[0] + strides[0]*i++) = res4;
+      *(data[0] + strides[0]*i++) = res5;
+      *(data[0] + strides[0]*i++) = res6;
+      *(data[0] + strides[0]*i++) = res7;
+      *(data[0] + strides[0]*i++) = res8;
+      *(data[0] + strides[0]*i++) = res9;
+      *(data[0] + strides[0]*i++) = res10;
+      *(data[0] + strides[0]*i++) = res11;
+      
+    }
+    if (start + 11 < end) {
+      i -= 11;
+    }
+    while (i < end) {
+      scalar_t x = *(data[1] + i * strides[1]);
+      scalar_t y = *(data[2] + i * strides[2]);
+      scalar_t res = x + y;
+      *(data[0] + strides[0]*i++) = res;
+    }
+  }
+  else {
+    hb_tiled_foreach_multi(result, input, other, functor);
+  } 
+}
+
+// =========================================================
+// Tilewise element op helper - Binary 
+// Unroll 13
+// =========================================================
+template<typename scalar_t, typename F>
+inline void hb_tiled_foreach_unroll13(F functor, 
+                               HBTensor<scalar_t> result,
+                               HBTensor<scalar_t> input,
+                               HBTensor<scalar_t> other) {
+  scalar_t* data[3];
+  data[0] = (scalar_t*)result.data_ptr();
+  data[1] = (scalar_t*)input.data_ptr();
+  data[2] = (scalar_t*)other.data_ptr();
+
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  hb_range range;
+  calc_range(&range, result.numel());
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  // is_trivial_1d
+  if(result.ndim() == 1) {
+
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[3];
+    strides[0] = (result.get_strides())[0];
+    strides[1] = (input.get_strides())[0];
+    strides[2] = (other.get_strides())[0];
+
+    size_t i = start;
+    while ( i + 12 < end){
+      scalar_t x1 = *(data[1] + i * strides[1]);
+      scalar_t y1 = *(data[2] + i * strides[2]);
+      scalar_t x2 = *(data[1] + (i+1) * strides[1]);
+      scalar_t y2 = *(data[2] + (i+1) * strides[2]);
+      scalar_t x3 = *(data[1] + (i+2) * strides[1]);
+      scalar_t y3 = *(data[2] + (i+2) * strides[2]);
+      scalar_t x4 = *(data[1] + (i+3) * strides[1]);
+      scalar_t y4 = *(data[2] + (i+3) * strides[2]);
+      scalar_t x5 = *(data[1] + (i+4) * strides[1]);
+      scalar_t y5 = *(data[2] + (i+4) * strides[2]);
+      scalar_t x6 = *(data[1] + (i+5) * strides[1]);
+      scalar_t y6 = *(data[2] + (i+5) * strides[2]);
+      scalar_t x7 = *(data[1] + (i+6) * strides[1]);
+      scalar_t y7 = *(data[2] + (i+6) * strides[2]);
+      scalar_t x8 = *(data[1] + (i+7) * strides[1]);
+      scalar_t y8 = *(data[2] + (i+7) * strides[2]);
+      scalar_t x9 = *(data[1] + (i+8) * strides[1]);
+      scalar_t y9 = *(data[2] + (i+8) * strides[2]);
+      scalar_t x10 = *(data[1] + (i+9) * strides[1]);
+      scalar_t y10 = *(data[2] + (i+9) * strides[2]);
+      scalar_t x11 = *(data[1] + (i+10) * strides[1]);
+      scalar_t y11 = *(data[2] + (i+10) * strides[2]);
+      scalar_t x12 = *(data[1] + (i+11) * strides[1]);
+      scalar_t y12 = *(data[2] + (i+11) * strides[2]);
+      scalar_t x13 = *(data[1] + (i+12) * strides[1]);
+      scalar_t y13 = *(data[2] + (i+12) * strides[2]);
+
+      scalar_t res1 = functor(x1, y1);
+      scalar_t res2 = functor(x2, y2);
+      scalar_t res3 = functor(x3, y3);
+      scalar_t res4 = functor(x4, y4);
+      scalar_t res5 = functor(x5, y5);
+      scalar_t res6 = functor(x6, y6);
+      scalar_t res7 = functor(x7, y7);
+      scalar_t res8 = functor(x8, y8);
+      scalar_t res9 = functor(x9, y9);
+      scalar_t res10 = functor(x10, y10);
+      scalar_t res11 = functor(x11, y11);
+      scalar_t res12 = functor(x12, y12);
+      scalar_t res13 = functor(x13, y13);
+
+      *(data[0] + strides[0]*i++) = res1;
+      *(data[0] + strides[0]*i++) = res2;
+      *(data[0] + strides[0]*i++) = res3;
+      *(data[0] + strides[0]*i++) = res4;
+      *(data[0] + strides[0]*i++) = res5;
+      *(data[0] + strides[0]*i++) = res6;
+      *(data[0] + strides[0]*i++) = res7;
+      *(data[0] + strides[0]*i++) = res8;
+      *(data[0] + strides[0]*i++) = res9;
+      *(data[0] + strides[0]*i++) = res10;
+      *(data[0] + strides[0]*i++) = res11;
+      *(data[0] + strides[0]*i++) = res12;
+      *(data[0] + strides[0]*i++) = res13;
+    }
+    if (start + 13 < end) {
+      i -= 13;
+    }
+    while (i < end) {
+      scalar_t x = *(data[1] + i * strides[1]);
+      scalar_t y = *(data[2] + i * strides[2]);
+      scalar_t res = x + y;
+      *(data[0] + strides[0]*i++) = res;
+    }
+  }
+  else {
+    hb_tiled_foreach_multi(result, input, other, functor);
+  } 
+}
+
+
 #endif
