@@ -76,6 +76,8 @@ void offload_iterator_op_impl(TensorIterator& iter, std::vector<eva_t> device_sc
   }
 
 
+  // If tensors dont share the same type, this is a Type casting kernel
+  // -> do not modify the kernel name
   if (!iter_has_same_type || common_dtype == at::kFloat) {
     c10::hammerblade::offload_kernel(kernel, device_args);
   } else {
