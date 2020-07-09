@@ -1,6 +1,12 @@
 #ifndef _HB_COMMON_HPP
 #define _HB_COMMON_HPP
 
+// Print from specific tile id
+#define hb_tile_print(tile_id, fmt, ...) \
+  if(__bsg_id == tile_id) { \
+    bsg_printf(fmt, ##__VA_ARGS__); \
+  }
+
 // =============================================================
 // Workarounds for HB HW Issues
 //
