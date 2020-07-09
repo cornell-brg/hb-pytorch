@@ -37,8 +37,16 @@ void offload_iterator_op_impl(TensorIterator& iter, std::vector<eva_t> device_sc
   int64_t *local_strides = (int64_t*) malloc(iter.ndim() * sizeof(int64_t));
   TORCH_INTERNAL_ASSERT(local_strides, "HB memory allocation failed on host");
 
+  // Check if all tensors share the same type
+  bool iter_has_same_type = true;
+  ScalarType common_dtype = iter.common_dtype();
+
   // Allocate device tensors and copy the data
   for(int i=0; i<iter.ntensors(); i++) {
+
+    if (iter.dtype(i) != common_dtype) {
+      iter_has_same_type = false;
+    }
 
     auto iter_strides = iter.strides(i);
     // XXX: strides are measured in bytes
@@ -67,13 +75,14 @@ void offload_iterator_op_impl(TensorIterator& iter, std::vector<eva_t> device_sc
     device_args.push_back(alpha);
   }
 
-  if (iter.dtype() != at::kFloat) {
+
+  if (!iter_has_same_type || common_dtype == at::kFloat) {
+    c10::hammerblade::offload_kernel(kernel, device_args);
+  } else {
     std::string actual_kernel = kernel;
     actual_kernel += "_";
-    actual_kernel += c10::toString(iter.dtype(0));
+    actual_kernel += c10::toString(common_dtype);
     c10::hammerblade::offload_kernel(actual_kernel.c_str(), device_args);
-  } else {
-    c10::hammerblade::offload_kernel(kernel, device_args);
   }
 
   // Need to deallocate those args on device
