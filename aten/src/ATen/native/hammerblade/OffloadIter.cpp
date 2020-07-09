@@ -67,6 +67,13 @@ void offload_iterator_op_impl(TensorIterator& iter, std::vector<eva_t> device_sc
     device_args.push_back(alpha);
   }
 
+  if (iter.dtype() != at::kFloat) {
+    std::string actual_kernel = kernel;
+    actual_kernel += "_";
+    actual_kernel += c10::toString(iter.dtype(0));
+    c10::hammerblade::offload_kernel(actual_kernel.c_str(), device_args);
+  }
+
   c10::hammerblade::offload_kernel(kernel, device_args);
 
   // Need to deallocate those args on device

@@ -33,6 +33,21 @@ extern "C" {
     return 0;
   }
 
+  __attribute__ ((noinline))  int tensorlib_add_Long(
+          hb_tensor_t* t0_p,
+          hb_tensor_t* t1_p,
+          hb_tensor_t* t2_p,
+          long long* alpha_p) {
+
+    if (__bsg_id == 0) {
+      std::cout << "tensorlib_add_Long - Not implemented" << std::endl;
+    }
+
+    g_barrier.sync();
+    return 0;
+  }
+
   HB_EMUL_REG_KERNEL(tensorlib_add, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, float*)
+  HB_EMUL_REG_KERNEL(tensorlib_add_Long, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, long long*)
 
 }
