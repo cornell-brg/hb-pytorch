@@ -1,0 +1,14 @@
+[
+{
+        "offload": false,
+        "signature": "at::Tensor at::TypeDefault::to(const at::Tensor&, const c10::TensorOptions&, bool, bool, c10::optional<c10::MemoryFormat>)"
+},
+{
+        "offload": false,
+        "signature": "at::Tensor at::TypeDefault::to(const at::Tensor&, const c10::TensorOptions&, bool, bool, c10::optional<c10::MemoryFormat>)"
+},
+{
+        "offload": false,
+        "signature": "at::Tensor at::TypeDefault::conv2d(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::IntArrayRef, int64_t)"
+}
+]

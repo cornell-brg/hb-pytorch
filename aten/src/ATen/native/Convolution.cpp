@@ -665,6 +665,9 @@ at::Tensor _convolution(
           input.contiguous(), weight, bias,
           params.padding, params.stride, params.dilation, params.groups);
     }
+  } else if (input.device().type() == c10::DeviceType::CPU && weight.is_sparse()) {
+    output = at::sparse_convolution(input.contiguous(), weight, bias,
+          params.padding, params.stride, params.dilation, params.groups);
   } else if (input.device().type() == c10::DeviceType::CPU || input.device().type() == c10::DeviceType::CUDA) {
     if (params.use_cpu_depthwise3x3_winograd(input, weight)) {
       output = convolution_depthwise3x3_winograd_stub(
