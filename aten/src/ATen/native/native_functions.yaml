@@ -6591,8 +6591,8 @@
   use_c10_dispatcher: full
   variants: function, method
   dispatch:
-    SparseCPU: sddmm_cpu
     SparseHammerBlade: sddmm_hb
+    # SparseCPU: sddmm_cpu
 
 - func: vincr(Tensor self) -> Tensor
   use_c10_dispatcher: full
