@@ -27,21 +27,54 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_for(index.numel(), [&](size_t i) {
+    uint32_t indices_numel = index.numel();
+    // parallelize over vocabulary
+    // hb_tiled_range(num_weights, [&](size_t start, size_t end) {
+    //   for (uint32_t i = 0; i < indices_numel; i++) {
+    //     if (index_data[i] != padding_idx) {
+    //       int32_t k = index_data[i];
+    //       if (k >= start && k < end) {
+    //         float scale = 1.0;
+    //         float* dst = grad_weight_data + k * grad_weight.get_strides()[0];
+    //         float* src = grad_data + i * grad.get_strides()[0];
+    //         for (size_t j=0; j<numel; j++) {
+    //           *dst += *src * scale;
+    //           dst++;
+    //           src++;
+    //         }
+    //       }
+    //     }
+    //   }
+    // });
+
+    // which chunk of vocabulary we should focus on
+    size_t len_per_pod  = num_weights / BSG_POD_DIM + 1;
+    size_t pod_start    = len_per_pod * __bsg_pod_id;
+    size_t pod_end      = pod_start + len_per_pod;
+    pod_end = (pod_end > num_weights) ? num_weights : pod_end;
+
+    size_t len_per_tile = numel / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    size_t start        = len_per_tile * __bsg_id;
+    size_t end          = start + len_per_tile;
+    end = (end > numel) ? numel : end;
+
+    // add is handled by the entire pod
+    for (uint32_t i = 0; i < indices_numel; i++) {
       if (index_data[i] != padding_idx) {
         int32_t k = index_data[i];
-        if (k >= 0 && k < num_weights) {
+        if (k >= pod_start && k < pod_end) {
           float scale = 1.0;
-          float* dst = grad_weight_data + k * grad_weight.get_strides()[0];
-          float* src = grad_data + i * grad.get_strides()[0];
-          for (size_t j=0; j<numel; j++) {
+          // add is handled by the entire pod
+          float* dst = grad_weight_data + k * grad_weight.get_strides()[0] + start * grad_weight.get_strides()[1];
+          float* src = grad_data + i * grad.get_strides()[0] + start * grad.get_strides()[1];
+          for (size_t j=start; j<end; j++) {
             *dst += *src * scale;
             dst++;
             src++;
           }
         }
       }
-    });
+    }
 
     bsg_cuda_print_stat_kernel_end();
 

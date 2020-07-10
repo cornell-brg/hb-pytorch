@@ -150,7 +150,29 @@ inline void binary_reduction(HBTensor<scalar_t>out,
         hb_tiled_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
           scalar_t result = 0;
-          for(size_t d = 0; d < elements_per_output; d++) {
+          size_t d = 0;
+          if (elements_per_output > 16) {
+            for(; d < elements_per_output - 8; d += 8) {
+              register scalar_t tmp0 = in(d, n);
+              register scalar_t tmp1 = in(d + 1, n);
+              register scalar_t tmp2 = in(d + 2, n);
+              register scalar_t tmp3 = in(d + 3, n);
+              register scalar_t tmp4 = in(d + 4, n);
+              register scalar_t tmp5 = in(d + 5, n);
+              register scalar_t tmp6 = in(d + 6, n);
+              register scalar_t tmp7 = in(d + 7, n);
+              asm volatile("": : :"memory");
+              reduce(result, tmp0);
+              reduce(result, tmp1);
+              reduce(result, tmp2);
+              reduce(result, tmp3);
+              reduce(result, tmp4);
+              reduce(result, tmp5);
+              reduce(result, tmp6);
+              reduce(result, tmp7);
+            }
+          }
+          for(; d < elements_per_output; d++) {
             reduce(result, in(d, n));
           }
           out(0, n) = project(result);
@@ -166,9 +188,31 @@ inline void binary_reduction(HBTensor<scalar_t>out,
         hb_tiled_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
           scalar_t result = 0;
-          uint32_t dim1 = n / in.dim(2);
-          uint32_t dim2 = n % in.dim(2);
-          for(size_t d = 0; d < elements_per_output; d++) {
+          uint32_t dim1 = n % in.dim(1);
+          uint32_t dim2 = n / in.dim(1);
+          size_t d = 0;
+          if (elements_per_output > 16) {
+            for(; d < elements_per_output - 8; d += 8) {
+              register scalar_t tmp0 = in(d, dim1, dim2);
+              register scalar_t tmp1 = in(d + 1, dim1, dim2);
+              register scalar_t tmp2 = in(d + 2, dim1, dim2);
+              register scalar_t tmp3 = in(d + 3, dim1, dim2);
+              register scalar_t tmp4 = in(d + 4, dim1, dim2);
+              register scalar_t tmp5 = in(d + 5, dim1, dim2);
+              register scalar_t tmp6 = in(d + 6, dim1, dim2);
+              register scalar_t tmp7 = in(d + 7, dim1, dim2);
+              asm volatile("": : :"memory");
+              reduce(result, tmp0);
+              reduce(result, tmp1);
+              reduce(result, tmp2);
+              reduce(result, tmp3);
+              reduce(result, tmp4);
+              reduce(result, tmp5);
+              reduce(result, tmp6);
+              reduce(result, tmp7);
+            }
+          }
+          for(; d < elements_per_output; d++) {
             reduce(result, in(d, dim1, dim2));
           }
           out(0, dim1, dim2) = project(result);
@@ -180,8 +224,8 @@ inline void binary_reduction(HBTensor<scalar_t>out,
           // reduction result init to 0
           scalar_t result = 0;
           for(size_t d = 0; d < elements_per_output; d++) {
-            uint32_t dim0 = d / in.dim(1);
-            uint32_t dim1 = d % in.dim(1);
+            uint32_t dim0 = d % in.dim(0);
+            uint32_t dim1 = d / in.dim(0);
             reduce(result, in(dim0, dim1, n));
           }
           out(0, 0, n) = project(result);

@@ -70,7 +70,7 @@ else()
   add_custom_target(
     kernel_riscv_exe
     COMMAND mkdir -p riscv
-    COMMAND make -C riscv -f $ENV{HB_KERNEL_DIR}/riscv.mk kernel.riscv
+    COMMAND make -C riscv -f $ENV{HB_KERNEL_DIR}/riscv.mk kernel.riscv -j8
     COMMAND cp riscv/kernel.riscv .
     COMMAND rm -rf riscv
     DEPENDS $ENV{HB_KERNEL_DIR}/riscv.mk
@@ -82,6 +82,11 @@ else()
   target_compile_definitions(
     c10_hammerblade PRIVATE
     "-DHB_KERNEL_PATH=${CMAKE_INSTALL_PREFIX}/riscv/kernel.riscv"
+    )
+
+  target_compile_definitions(
+    c10_hammerblade PRIVATE
+    "-DCOSIM"
     )
 
   target_include_directories( c10_hammerblade PUBLIC $ENV{BSG_MANYCORE_DIR} )

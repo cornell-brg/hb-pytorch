@@ -157,11 +157,11 @@ def test_torch_mean_28():
     assert torch.allclose(mean_.cpu(), torch.mean(x, (0, 2), keepdim=True))
 
 def test_torch_mean_29():
-    x = torch.rand(2, 3, 4, 5)
+    x = torch.rand(2, 32, 64, 5)
     _test_torch_mean(x)
 
 def test_torch_mean_30():
-    x = torch.rand(2, 3, 4, 5)
+    x = torch.rand(2, 32, 64, 5)
     for dim in range(4):
         _test_torch_mean(x, dim=dim)
 

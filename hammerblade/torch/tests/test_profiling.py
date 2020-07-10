@@ -128,7 +128,9 @@ def test_route_1():
     out1 = torch.addmm(M, mat1, mat2)
     out1 = out1 + M
     torch.hammerblade.profiler.enable()
+    torch.hammerblade.profiler.route.result_check_enable()
     out2 = torch.addmm(M, mat1, mat2)
     out2 = out2 + M
+    torch.hammerblade.profiler.route.result_check_disable()
     torch.hammerblade.profiler.disable()
     assert torch.allclose(out1, out2)

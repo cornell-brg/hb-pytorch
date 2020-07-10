@@ -1,4 +1,5 @@
 #include <c10/hammerblade/HammerBladeAllocator.h>
+#include <c10/hammerblade/HammerBladeFunctions.h>
 #include <c10/core/DeviceType.h>
 
 #include <bsg_manycore_cuda.h>
@@ -7,14 +8,13 @@
 namespace c10 {
 
 void* alloc_hb(size_t nbytes) {
-  eva_t data_p;
-  C10_HB_CHECK(hb_mc_device_malloc(&(hammerblade::_hb_device), (uint32_t) nbytes, &data_p));
+  eva_t data_p = c10::hammerblade::device_malloc(nbytes);
   return (void *) ((intptr_t) data_p);
 }
 
 void free_hb(void* data) {
   eva_t data_p = (eva_t)((intptr_t)data);
-  C10_HB_CHECK(hb_mc_device_free(&(hammerblade::_hb_device), data_p));
+  c10::hammerblade::device_free(data_p);
 }
 
 /*

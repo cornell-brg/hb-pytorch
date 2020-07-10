@@ -77,4 +77,16 @@ const std::string route_print() {
   return g_execution_route.print();
 }
 
+bool should_check_allclose() {
+  return g_execution_route.should_check_allclose();
+}
+
+void enable_allclose_check() {
+  g_execution_route.enable_allclose_check();
+}
+
+void disable_allclose_check() {
+  g_execution_route.disable_allclose_check();
+}
+
 }} // namespace c10::probe

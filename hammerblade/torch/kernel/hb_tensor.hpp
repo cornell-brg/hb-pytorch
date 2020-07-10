@@ -12,6 +12,8 @@
 #include <hb_assert.hpp>
 #include <hb_hw_patch.hpp>
 
+#define DEFAULT_STRIDES 5
+
 // =========================================================
 // Device Tensor structs
 //
@@ -96,7 +98,7 @@ class HBTensorImpl {
       return sizes;
     }
 
-    int numel() {
+    uint32_t numel() {
       return N;
     }
 
@@ -129,25 +131,22 @@ class HBTensorImpl {
       }
     }
 
-    template<typename... T>
-    DT& operator()(uint32_t index0, T... indices) {
-      std::initializer_list<uint32_t> iarray = {index0, indices...};
+    DT& operator()(uint32_t index0, uint32_t index1) {
+      return data[index0 * strides[0]
+                  + index1 * strides[1]];
+    }
 
-      hb_assert_msg(iarray.size() == dims,
-                    "error: expected dims=%d arguments but got %d\n",
-                    dims, iarray.size());
-      uint32_t offset = 0;
-      uint32_t s = 0;
-      for(auto index : iarray) {
-        offset += (index * strides[s]);
-        s++;
-      }
+    DT& operator()(uint32_t index0, uint32_t index1, uint32_t index2) {
+      return data[index0 * strides[0]
+                  + index1 * strides[1]
+                  + index2 * strides[2]];
+    }
 
-      hb_assert_msg(offset < N,
-                    "error: N=%d but accessed %d\n",
-                    N, offset);
-
-      return data[offset];
+    DT& operator()(uint32_t index0, uint32_t index1, uint32_t index2, uint32_t index3) {
+      return data[index0 * strides[0]
+                  + index1 * strides[1]
+                  + index2 * strides[2]
+                  + index3 * strides[3]];
     }
 };
 
@@ -183,16 +182,34 @@ class HBTensor : public HBTensorImpl<DT> {
 
 template <typename DT>
 class HBTensor<DT, -1> : public HBTensorImpl<DT> {
+  private:
+    uint32_t strides[DEFAULT_STRIDES];
+    uint32_t sizes[DEFAULT_STRIDES];
+
   public:
     HBTensor(hb_tensor_t* t) :
       HBTensorImpl<DT>(
         t->N,
         t->dims,
-        (uint32_t*) ((intptr_t) t->strides),
-        (uint32_t*) ((intptr_t) t->sizes),
+        strides,
+        sizes,
         (DT*) ((intptr_t) t->data)
-      ) {}
+      ) {
+        hb_assert_msg(
+          t->dims <= DEFAULT_STRIDES,
+          "error: tensor dims is too large");
+
+        uint32_t* strides_remote = (uint32_t*) ((intptr_t) t->strides);
+        uint32_t* sizes_remote = (uint32_t*) ((intptr_t) t->sizes);
+
+        // Move strides and sizes to scratchpad
+        for(int i=0; i<t->dims; ++i) {
+          strides[i] = strides_remote[i];
+          sizes[i] = sizes_remote[i];
+        }
+      }
 };
+
 
 template<typename T>
 class HBVector {
