@@ -12,6 +12,8 @@
 #include <emul_hb_device.h>
 #define BSG_TILE_GROUP_X_DIM emul_hb_mesh_dim.x
 #define BSG_TILE_GROUP_Y_DIM emul_hb_mesh_dim.y
+#define bsg_tiles_X BSG_TILE_GROUP_X_DIM
+#define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
 #else
 #define BSG_TILE_GROUP_X_DIM bsg_global_X
 #define BSG_TILE_GROUP_Y_DIM (bsg_global_Y - 1)
