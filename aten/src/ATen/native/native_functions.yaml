@@ -1978,6 +1978,7 @@
     CPU: batch_norm_cpu
     CUDA: batch_norm_cuda
     MkldnnCPU: mkldnn_batch_norm
+    HammerBlade: batch_norm_hb
 
 - func: batch_norm_stats(Tensor input, float eps) -> (Tensor, Tensor)
   dispatch:
