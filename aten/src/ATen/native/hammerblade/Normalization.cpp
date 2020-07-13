@@ -12,6 +12,8 @@ std::tuple<Tensor,Tensor,Tensor> batch_norm_hb_transform_input(
     const Tensor& running_mean /* optional */,
     const Tensor& running_var /* optional */,
     bool train, double eps) {
+  TORCH_CHECK(input.dim() == 4,
+              "Only 2d BatchNorm is implemented for HB backend.");
   Tensor output = at::empty(input.sizes(), input.options());
 
   std::vector<eva_t> device_args;
@@ -26,7 +28,7 @@ std::tuple<Tensor,Tensor,Tensor> batch_norm_hb_transform_input(
   device_args.push_back(create_device_tensor(running_var, device_ptrs));
   device_args.push_back(train);
   device_args.push_back(eps);
-  c10::hammerblade::offload_kernel("tensorlib_batch_norm_transform_input",
+  c10::hammerblade::offload_kernel("tensorlib_batch_norm2d_transform_input",
                                    device_args);
   cleanup_device(device_args, device_ptrs);
 
