@@ -35,14 +35,14 @@ extern "C" {
           invstd = 1 / sqrt(running_var(c) + eps);
         }
 
-        float w = weight.numel() ? weight(c) : 1;
-        float b = bias.numel() ? bias(c) : 0;
+        float gamma = weight.numel() ? weight(c) : 1.0;
+        float beta = bias.numel() ? bias(c) : 0.0;
 
         for(size_t n = 0; n < input.get_sizes()[0]; ++n) { 
           for(size_t h = 0; h < input.get_sizes()[2]; ++h) {
             for(size_t w = 0; w < input.get_sizes()[3]; ++w) {
               output(n, c, h, w) = ((input(n, c, h, w) - mean) *
-                                    invstd) * w + b;
+                                    invstd) * gamma + beta;
             }
           }
         }

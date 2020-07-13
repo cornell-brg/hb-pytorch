@@ -24,9 +24,9 @@ def _test_batch_norm(inputs, running_mean, running_var,
     out_hb = F.batch_norm(inputs_hb, running_mean_hb, running_var_hb,
                           weights_hb, bias_hb, training)
 
-    assert torch.allclose(out, out_hb.cpu(), atol=1e-5)
-    assert torch.allclose(running_mean, running_mean_hb.cpu(), atol=1e-5)
-    assert torch.allclose(running_var, running_var_hb.cpu(), atol=1e-5)
+    assert torch.allclose(out, out_hb.cpu(), atol=1e-4)
+    assert torch.allclose(running_mean, running_mean_hb.cpu(), atol=1e-4)
+    assert torch.allclose(running_var, running_var_hb.cpu(), atol=1e-4)
 
 def test_batch_norm2d_1():
     inputs = torch.rand(1, 3, 3, 3, requires_grad=True)
