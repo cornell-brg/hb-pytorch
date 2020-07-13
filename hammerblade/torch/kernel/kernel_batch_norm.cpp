@@ -67,7 +67,45 @@ extern "C" {
     double momentum = *momentum_;
     double eps = *eps_;
 
+    uint32_t n_input = input.get_sizes()[1];
+    uint32_t n = input.numel() / n_input;
+
     if(__bsg_id == 0) {
+      for(size_t c = 0; c < n_input; ++c) {
+        float sum = 0.0;
+        for(size_t n = 0; n < input.get_sizes()[0]; ++n) { 
+          for(size_t h = 0; h < input.get_sizes()[2]; ++h) {
+            for(size_t w = 0; w < input.get_sizes()[3]; ++w) {
+              sum += input(n, c, h, w);
+            }
+          }
+        }
+        save_mean(c) = sum / n;
+
+        float var_sum = 0.0;
+        for(size_t n = 0; n < input.get_sizes()[0]; ++n) { 
+          for(size_t h = 0; h < input.get_sizes()[2]; ++h) {
+            for(size_t w = 0; w < input.get_sizes()[3]; ++w) {
+              var_sum += (input(n, c, h, w) - save_mean(c)) *
+                           (input(n, c, h, w) - save_mean(c));
+            }
+          }
+        }
+        save_invstd(c) = 1 / sqrt((var_sum / n) + eps);
+
+        // These are optional arguments for this kernel, so check
+        // for emptiness.
+
+        if(running_mean.numel()) {
+          running_mean(c) = momentum * save_mean(c) +
+                              (1 - momentum) * running_mean(c);
+        }
+
+        if(running_var.numel()) {
+          running_var(c) = momentum * (var_sum / (n - 1)) +
+                             (1 - momentum) * running_var(c);
+        }
+      }
     }
 
     g_barrier.sync();
