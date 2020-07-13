@@ -29,8 +29,8 @@ def _test_batch_norm(inputs, running_mean, running_var,
     assert torch.allclose(running_var, running_var_hb.cpu(), atol=1e-5)
 
 def test_batch_norm2d_1():
-    inputs = torch.rand(3, 1, 3, 3, requires_grad=True)
-    running_mean = torch.rand(1)
-    running_var = torch.rand(1)
+    inputs = torch.rand(1, 3, 3, 3, requires_grad=True)
+    running_mean = torch.rand(3)
+    running_var = torch.rand(3)
 
     _test_batch_norm(inputs, running_mean, running_var)
