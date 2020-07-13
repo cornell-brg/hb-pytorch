@@ -50,7 +50,7 @@ def test_add_4():
     x2 = torch.rand(16, 32)
     _test_add(x1, x2)
 
-ef test_add_int_1():
+def test_add_int_1():
     x = torch.ones(1, 10, dtype = torch.int)
     _test_add(x, x)
 
@@ -60,20 +60,20 @@ def test_add_int_2():
     _test_add(x1, x2)
 
 def test_add_int_3():
-    x1 = torch.randint(-2147483648, 2147483647, (1, 128))
-    x1.to(torch.int32)
-    x2 = torch.randint(-2147483648, 2147483647, (1, 128))
-    x2.to(torch.int32)
-    _test_add(x1, x2)
+    x1 = torch.randint(-2147483648/2, 2147483647/2, (1, 128))
+    x = x1.to(torch.int32)
+    x2 = torch.randint(-2147483648/2, 2147483647/2, (1, 128))
+    y = x2.to(torch.int32)
+    _test_add(x, y)
 
 def test_add_int_4():
-    x1 = torch.randint(-2147483648, 2147483647, (16, 32))
-    x1.to(torch.int32)
-    x2 = torch.randint(-2147483648, 2147483647, (16, 32))
-    x2.to(torch.int32)
-    _test_add(x1, x2)
+    x1 = torch.randint(-2147483648/2, 2147483647/2, (16, 32))
+    x = x1.to(torch.int32)
+    x2 = torch.randint(-2147483648/2, 2147483647/2, (16, 32))
+    y = x2.to(torch.int32)
+    _test_add(x, y)
     
-ef test_add_long_1():
+def test_add_long_1():
     x = torch.ones(1, 10, dtype = torch.long)
     _test_add(x, x)
 
@@ -83,20 +83,27 @@ def test_add_long_2():
     _test_add(x1, x2)
 
 def test_add_long_3():
-    x1 = torch.randint(-2**63, 2**63-1, (1, 128))
-    x2 = torch.randint(-2**63, 2**63-1, (1, 128))
+    x1 = torch.randint(-2**63/2, (2**63-1)/2, (1, 128))
+    x2 = torch.randint(-2**63/2, (2**63-1)/2, (1, 128))
     _test_add(x1, x2)
 
 def test_add_long_4():
-    x1 = torch.randint(-2**63, 2**63-1, (16, 32))
-    x2 = torch.randint(-2**63, 2**63-1, (16, 32))
+    x1 = torch.randint(-2**63/2, (2**63-1)/2, (16, 32))
+    x2 = torch.randint(-2**63/2, (2**63-1)/2, (16, 32))
     _test_add(x1, x2)
+    
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_add_hypothesis(inputs):
     x1 = torch.tensor(inputs[0])
     x2 = torch.tensor(inputs[1])
     _test_add(x1, x2)
+    x = x1.to(torch.int32)
+    y = x2.to(torch.int32)
+    _test_add(x, y)
+    xf = x1.to(torch.float32)
+    yf = x2.to(torch.float32)
+    _test_add(xf, yf)
 
 def test_add_with_scalar():
     x = torch.ones(16)
@@ -105,6 +112,19 @@ def test_add_with_scalar():
     y_h = h + 5
     assert y_h.device == torch.device("hammerblade")
     assert torch.allclose(y_h.cpu(), y_c)
+    xi = x.to(torch.int32)
+    hi = h.to(torch.int32)
+    yi_c = xi + 5
+    yi_h = hi + 5
+    assert yi_h.device == torch.device("hammerblade")
+    assert torch.allclose(yi_h.cpu(), yi_c)
+    xl = x.to(torch.int64)
+    hl = h.to(torch.int64)
+    yl_c = xl + 5
+    yl_h = hl + 5
+    assert yl_h.device == torch.device("hammerblade")
+    assert torch.allclose(yl_h.cpu(), yl_c)
+    
 
 @settings(deadline=None)
 @given(tensor=hu.tensor(), scalar=st.floats(width=32))
@@ -153,12 +173,60 @@ def test_sub_4():
     x2 = torch.rand(16, 32)
     _test_sub(x1, x2)
 
+def test_sub_int_1():
+    x = torch.ones(1, 10, dtype = torch.int)
+    _test_sub(x, x)
+
+def test_sub_int_2():
+    x1 = torch.ones(4, 5, dtype = torch.int)
+    x2 = torch.ones(4, 5, dtype = torch.int)
+    _test_sub(x1, x2)
+
+def test_sub_int_3():
+    x1 = torch.randint(-2147483648/2, 2147483647/2, (1, 128))
+    x = x1.to(torch.int32)
+    x2 = torch.randint(-2147483648/2, 2147483647/2, (1, 128))
+    y = x2.to(torch.int32)
+    _test_sub(x, y)
+
+def test_sub_int_4():
+    x1 = torch.randint(-2147483648/2, 2147483647/2, (16, 32))
+    x = x1.to(torch.int32)
+    x2 = torch.randint(-2147483648/2, 2147483647/2, (16, 32))
+    y = x2.to(torch.int32)
+    _test_sub(x, y)
+
+def test_sub_long_1():
+    x = torch.ones(1, 10)
+    _test_sub(x, x)
+
+def test_sub_long_2():
+    x1 = torch.ones(4, 5)
+    x2 = torch.ones(4, 5)
+    _test_sub(x1, x2)
+
+def test_sub_long_3():
+    x1 = torch.randint(-2**63/2, (2**63-1)/2, (1, 128))
+    x2 = torch.randint(-2**63/2, (2**63-1)/2, (1, 128))
+    _test_sub(x1, x2)
+
+def test_sub_long_4():
+    x1 = torch.randint(-2**63/2, (2**63-1)/2, (16, 32))
+    x2 = torch.randint(-2**63/2, (2**63-1)/2, (16, 32))
+    _test_sub(x1, x2)
+    
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_sub_hypothesis(inputs):
     x1 = torch.tensor(inputs[0])
     x2 = torch.tensor(inputs[1])
     _test_sub(x1, x2)
+    x = x1.to(torch.int32)
+    y = x2.to(torch.int32)
+    _test_sub(x, y)
+    xf = x1.to(torch.float32)
+    yf = x2.to(torch.float32)
+    _test_sub(xf, yf)
 
 def test_sub_with_scalar():
     x = torch.ones(16)
@@ -167,6 +235,18 @@ def test_sub_with_scalar():
     y_h = h - 5
     assert y_h.device == torch.device("hammerblade")
     assert torch.allclose(y_h.cpu(), y_c)
+    xi = x.to(torch.int32)
+    hi = h.to(torch.int32)
+    yi_c = xi - 5
+    yi_h = hi - 5
+    assert yi_h.device == torch.device("hammerblade")
+    assert torch.allclose(yi_h.cpu(), yi_c)
+    xl = x.to(torch.int64)
+    hl = h.to(torch.int64)
+    yl_c = xl - 5
+    yl_h = hl - 5
+    assert yl_h.device == torch.device("hammerblade")
+    assert torch.allclose(yl_h.cpu(), yl_c)
 
 @settings(deadline=None)
 @given(tensor=hu.tensor(), scalar=st.floats(width=32))
