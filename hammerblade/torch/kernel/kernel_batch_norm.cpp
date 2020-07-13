@@ -13,8 +13,8 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_batch_norm2d_transform_input(
       hb_tensor_t* output_, hb_tensor_t* input_, hb_tensor_t* weight_,
       hb_tensor_t* bias_, hb_tensor_t* save_mean_, hb_tensor_t* save_invstd_,
-      hb_tensor_t* running_mean_, hb_tensor_t* running_var_, bool train,
-      double eps) {
+      hb_tensor_t* running_mean_, hb_tensor_t* running_var_, bool* train_,
+      double* eps_) {
     HBTensor<float, 4> output(output_);
     HBTensor<float, 4> input(input_);
     HBTensor<float, 1> weight(weight_);
@@ -23,6 +23,8 @@ extern "C" {
     HBTensor<float, 1> save_invstd(save_invstd_);
     HBTensor<float, 1> running_mean(running_mean_);
     HBTensor<float, 1> running_var(running_var_);
+    bool train = *train_;
+    double eps = *eps_;
 
     if(__bsg_id == 0) {
       for(size_t c = 0; c < input.get_sizes()[1]; ++c) {
@@ -53,9 +55,32 @@ extern "C" {
     return 0;
   }
 
+  __attribute__ ((noinline))  int tensorlib_batch_norm2d_update_stats(
+      hb_tensor_t* save_mean_, hb_tensor_t* save_invstd_, hb_tensor_t* input_, 
+      hb_tensor_t* running_mean_, hb_tensor_t* running_var_, double* momentum_,
+      double* eps_) {
+    HBTensor<float, 1> save_mean(save_mean_);
+    HBTensor<float, 1> save_invstd(save_invstd_);
+    HBTensor<float, 4> input(input_);
+    HBTensor<float, 1> running_mean(running_mean_);
+    HBTensor<float, 1> running_var(running_var_);
+    double momentum = *momentum_;
+    double eps = *eps_;
+
+    if(__bsg_id == 0) {
+    }
+
+    g_barrier.sync();
+    return 0;
+  }
+
   HB_EMUL_REG_KERNEL(tensorlib_batch_norm2d_transform_input,
       hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
       hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
-      bool, double);
+      bool*, double*);
+
+  HB_EMUL_REG_KERNEL(tensorlib_batch_norm2d_update_stats,
+      hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+      hb_tensor_t*, double*, double*);
 
 }

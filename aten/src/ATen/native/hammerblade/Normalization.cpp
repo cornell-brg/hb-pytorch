@@ -26,8 +26,8 @@ std::tuple<Tensor,Tensor,Tensor> batch_norm_hb_transform_input(
   device_args.push_back(create_device_tensor(save_invstd, device_ptrs));
   device_args.push_back(create_device_tensor(running_mean, device_ptrs));
   device_args.push_back(create_device_tensor(running_var, device_ptrs));
-  device_args.push_back(train);
-  device_args.push_back(eps);
+  device_args.push_back(create_device_scalar(train));
+  device_args.push_back(create_device_scalar(eps));
   c10::hammerblade::offload_kernel("tensorlib_batch_norm2d_transform_input",
                                    device_args);
   cleanup_device(device_args, device_ptrs);
@@ -38,14 +38,28 @@ std::tuple<Tensor,Tensor,Tensor> batch_norm_hb_transform_input(
 std::tuple<Tensor,Tensor> batch_norm_hb_update_stats(
     const Tensor& input, const Tensor& running_mean, const Tensor& running_var,
     double momentum, double eps) {
-  TORCH_CHECK(false, "HB BatchNorm update stats unimplemented");
+  TORCH_CHECK(input.dim() == 4,
+              "Only 2d BatchNorm is implemented for HB backend.");
 
   int64_t n_input = input.size(1);
-  int64_t n = input.numel() / n_input;
 
   Tensor save_mean = at::empty({n_input}, input.options());
-  Tensor save_var_transform = at::empty({n_input}, input.options());
-  return std::make_tuple(save_mean, save_var_transform);
+  Tensor save_invstd = at::empty({n_input}, input.options());
+
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+  device_args.push_back(create_device_tensor(save_mean, device_ptrs));
+  device_args.push_back(create_device_tensor(save_invstd, device_ptrs));
+  device_args.push_back(create_device_tensor(input, device_ptrs));
+  device_args.push_back(create_device_tensor(running_mean, device_ptrs));
+  device_args.push_back(create_device_tensor(running_var, device_ptrs));
+  device_args.push_back(create_device_scalar(momentum));
+  device_args.push_back(create_device_scalar(eps));
+  c10::hammerblade::offload_kernel("tensorlib_batch_norm2d_update_stats",
+                                   device_args);
+  cleanup_device(device_args, device_ptrs);
+
+  return std::make_tuple(save_mean, save_invstd);
 }
 
 std::tuple<Tensor, Tensor, Tensor> batch_norm_hb(
