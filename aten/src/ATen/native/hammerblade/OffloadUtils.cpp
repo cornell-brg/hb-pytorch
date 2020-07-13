@@ -87,8 +87,15 @@ eva_t create_device_tensor(uint32_t N, uint32_t dims,
 }
 
 
-eva_t create_device_tensor(const Tensor& tensor,
+eva_t create_device_tensor(const Tensor& tensor_arg,
                            std::vector<eva_t>& device_ptrs) {
+  Tensor tensor;
+  if(!tensor_arg.defined()) {
+    tensor = at::empty({0});
+  } else {
+    tensor = tensor_arg;
+  }
+
   if(!tensor.is_contiguous()) {
     AT_WARN("Offloading non contiguous plain tensor. Make sure you are expecting this!");
   }
