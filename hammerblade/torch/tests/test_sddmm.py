@@ -7,7 +7,7 @@ import torch
 torch.manual_seed(42)
 
 
-def sddm_expected(a, b, c):
+def sddmm_expected(a, b, c):
     outvals = torch.zeros(a._nnz())
     for k in range(a._nnz()):
         ai, aj = tuple(a._indices()[:, k].tolist())
