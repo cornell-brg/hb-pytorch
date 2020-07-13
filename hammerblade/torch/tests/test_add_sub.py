@@ -60,16 +60,16 @@ def test_add_int_2():
     _test_add(x1, x2)
 
 def test_add_int_3():
-    x1 = torch.randint(-2147483648/2, 2147483647/2, (1, 128))
+    x1 = torch.randint(-2**30, 2**30-1, (1, 128))
     x = x1.to(torch.int32)
-    x2 = torch.randint(-2147483648/2, 2147483647/2, (1, 128))
+    x2 = torch.randint(-2**30, 2**30-1, (1, 128))
     y = x2.to(torch.int32)
     _test_add(x, y)
 
 def test_add_int_4():
-    x1 = torch.randint(-2147483648/2, 2147483647/2, (16, 32))
+    x1 = torch.randint(-2**30, 2**30-1, (16, 32))
     x = x1.to(torch.int32)
-    x2 = torch.randint(-2147483648/2, 2147483647/2, (16, 32))
+    x2 = torch.randint(-2**30, 2**30-1, (16, 32))
     y = x2.to(torch.int32)
     _test_add(x, y)
     
@@ -83,13 +83,13 @@ def test_add_long_2():
     _test_add(x1, x2)
 
 def test_add_long_3():
-    x1 = torch.randint(-2**63/2, (2**63-1)/2, (1, 128))
-    x2 = torch.randint(-2**63/2, (2**63-1)/2, (1, 128))
+    x1 = torch.randint(-2**62, 2**62-1, (1, 128))
+    x2 = torch.randint(-2**62, 2**62-1, (1, 128))
     _test_add(x1, x2)
 
 def test_add_long_4():
-    x1 = torch.randint(-2**63/2, (2**63-1)/2, (16, 32))
-    x2 = torch.randint(-2**63/2, (2**63-1)/2, (16, 32))
+    x1 = torch.randint(-2**62, 2**62-1, (16, 32))
+    x2 = torch.randint(-2**62, 2**62-1, (16, 32))
     _test_add(x1, x2)
     
 @settings(deadline=None)
@@ -183,16 +183,16 @@ def test_sub_int_2():
     _test_sub(x1, x2)
 
 def test_sub_int_3():
-    x1 = torch.randint(-2147483648/2, 2147483647/2, (1, 128))
+    x1 = torch.randint(-2**30, 2**30-1, (1, 128))
     x = x1.to(torch.int32)
-    x2 = torch.randint(-2147483648/2, 2147483647/2, (1, 128))
+    x2 = torch.randint(-2**30, 2**30-1, (1, 128))
     y = x2.to(torch.int32)
     _test_sub(x, y)
 
 def test_sub_int_4():
-    x1 = torch.randint(-2147483648/2, 2147483647/2, (16, 32))
+    x1 = torch.randint(-2**30, 2**30-1, (16, 32))
     x = x1.to(torch.int32)
-    x2 = torch.randint(-2147483648/2, 2147483647/2, (16, 32))
+    x2 = torch.randint(-2**30, 2**30-1, (16, 32))
     y = x2.to(torch.int32)
     _test_sub(x, y)
 
@@ -206,13 +206,13 @@ def test_sub_long_2():
     _test_sub(x1, x2)
 
 def test_sub_long_3():
-    x1 = torch.randint(-2**63/2, (2**63-1)/2, (1, 128))
-    x2 = torch.randint(-2**63/2, (2**63-1)/2, (1, 128))
+    x1 = torch.randint(-2**62, 2**62-1, (1, 128))
+    x2 = torch.randint(-2**62, 2**62-1, (1, 128))
     _test_sub(x1, x2)
 
 def test_sub_long_4():
-    x1 = torch.randint(-2**63/2, (2**63-1)/2, (16, 32))
-    x2 = torch.randint(-2**63/2, (2**63-1)/2, (16, 32))
+    x1 = torch.randint(-2**62, 2**62-1, (16, 32))
+    x2 = torch.randint(-2**62, 2**62-1, (16, 32))
     _test_sub(x1, x2)
     
 @settings(deadline=None)
