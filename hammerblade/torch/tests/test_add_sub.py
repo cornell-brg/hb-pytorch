@@ -50,6 +50,47 @@ def test_add_4():
     x2 = torch.rand(16, 32)
     _test_add(x1, x2)
 
+ef test_add_int_1():
+    x = torch.ones(1, 10, dtype = torch.int)
+    _test_add(x, x)
+
+def test_add_int_2():
+    x1 = torch.ones(4, 5, dtype = torch.int)
+    x2 = torch.ones(4, 5, dtype = torch.int)
+    _test_add(x1, x2)
+
+def test_add_int_3():
+    x1 = torch.randint(-2147483648, 2147483647, (1, 128))
+    x1.to(torch.int32)
+    x2 = torch.randint(-2147483648, 2147483647, (1, 128))
+    x2.to(torch.int32)
+    _test_add(x1, x2)
+
+def test_add_int_4():
+    x1 = torch.randint(-2147483648, 2147483647, (16, 32))
+    x1.to(torch.int32)
+    x2 = torch.randint(-2147483648, 2147483647, (16, 32))
+    x2.to(torch.int32)
+    _test_add(x1, x2)
+    
+ef test_add_long_1():
+    x = torch.ones(1, 10, dtype = torch.long)
+    _test_add(x, x)
+
+def test_add_long_2():
+    x1 = torch.ones(4, 5, dtype = torch.long)
+    x2 = torch.ones(4, 5, dtype = torch.long)
+    _test_add(x1, x2)
+
+def test_add_long_3():
+    x1 = torch.randint(-2**63, 2**63-1, (1, 128))
+    x2 = torch.randint(-2**63, 2**63-1, (1, 128))
+    _test_add(x1, x2)
+
+def test_add_long_4():
+    x1 = torch.randint(-2**63, 2**63-1, (16, 32))
+    x2 = torch.randint(-2**63, 2**63-1, (16, 32))
+    _test_add(x1, x2)
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_add_hypothesis(inputs):
