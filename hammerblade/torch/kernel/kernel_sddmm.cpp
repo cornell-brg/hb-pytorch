@@ -27,8 +27,8 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    auto cols = HBTensor<long>(col_p);
-    auto rows = HBTensor<long>(row_p);
+    auto cols = HBTensor<int>(col_p);
+    auto rows = HBTensor<int>(row_p);
     auto b = HBTensor<float>(b_p);
     auto c = HBTensor<float>(c_p);
     auto res = HBTensor<float>(out_p);
@@ -37,8 +37,8 @@ extern "C" {
 
     float sum;
     hb_tiled_for(numel, [&](size_t i) {
-      long row = rows(i);
-      long col = cols(i);
+      int row = rows(i);
+      int col = cols(i);
       sum = 0;
       for (int dot = 0; dot < dp_len; dot++){
         sum += b(row, dot) * c(dot, col);

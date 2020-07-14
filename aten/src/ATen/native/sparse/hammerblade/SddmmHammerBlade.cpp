@@ -26,7 +26,7 @@ Tensor sddmm_hb(const SparseTensor& sample, const Tensor& b, const Tensor& c) {
   TORCH_CHECK(b.size(1) == c.size(0), "Matrix multiply dimension mismatch: 'mat1' dim 1 = ", b.size(1), ", 'mat2' dim 0 = ", c.size(0));
   
   LongTensor indices = sample._indices();
-  TORCH_CHECK(indices.dtype() == at::kLong, "Indices on HammerBlade should be long, but got ", indices.dtype());
+  TORCH_CHECK(indices.dtype() == at::kInt, "Indices on HammerBlade should be int32, but got ", indices.dtype());
   LongTensor colIndices = indices.select(0, 1);
   TORCH_CHECK(colIndices.is_hammerblade(), "colIndices must be HammerBlade Tensor");
   LongTensor rowIndices = indices.select(0, 0);
