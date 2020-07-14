@@ -37,6 +37,7 @@ extern "C" {
 
 
     hb_tiled_for(numel, [&](int i) {
+      // bsg_print_int(i);
       int row = rows(i);
       int col = cols(i);
 

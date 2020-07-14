@@ -26,16 +26,18 @@ Tensor sddmm_hb(const SparseTensor& sample, const Tensor& b, const Tensor& c) {
   TORCH_CHECK(b.size(1) == c.size(0), "Matrix multiply dimension mismatch: 'mat1' dim 1 = ", b.size(1), ", 'mat2' dim 0 = ", c.size(0));
   
   IntTensor indices = sample._indices();
-  if (!(indices.dtype() == at::kInt)) TORCH_WARN("Indices on HammerBlade should be int32");
+  if (!(indices.dtype() == at::kInt)) TORCH_WARN("Indices on HammerBlade should be int32, but got ", indices.dtype());
   IntTensor colIndices = indices.select(0, 1);
-  if (!colIndices.is_hammerblade()) TORCH_WARN("colIndices show be HammerBlade Tensor");
+  TORCH_CHECK(colIndices.is_hammerblade(), "colIndices show be HammerBlade Tensor");
   IntTensor rowIndices = indices.select(0, 0);
-  if (!rowIndices.is_hammerblade()) TORCH_WARN("rowIndices show be HammerBlade Tensor");
-  
+  TORCH_CHECK(rowIndices.is_hammerblade(), "rowIndices show be HammerBlade Tensor");
+  TORCH_CHECK(b.size(0) == sample.size(0) && c.size(1) == sample.size(1), "Sddmm sample dimension mismatch: sample was not the same shape as b@c");
+
   Tensor result = at::zeros({b.size(0), c.size(1)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
 
   int64_t dot_prod_len = b.size(1);
   int64_t nnz = sample._nnz();
+  TORCH_WARN("nnz:", nnz);
 
   hb_offload_kernel(result, colIndices, rowIndices, b, c, dot_prod_len, nnz, "tensorlib_sddmm");
   return result;
