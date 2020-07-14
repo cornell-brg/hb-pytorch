@@ -68,5 +68,8 @@ def _test_BatchNorm2d(n, inputs):
 def test_BatchNorm2d_1():
     _test_BatchNorm2d(4, torch.ones(2, 4, 3, 3))
 
-def test_BatchNorm2d_1():
+def test_BatchNorm2d_2():
     _test_BatchNorm2d(4, torch.rand(2, 4, 3, 3))
+
+def test_BatchNorm2d_3():
+    _test_BatchNorm2d(4, torch.zeros(2, 4, 3, 3))
