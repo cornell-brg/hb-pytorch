@@ -63,7 +63,7 @@ def _test_BatchNorm2d(n, inputs):
     out = bn(inputs)
     out_hb = bn_hb(inputs.hammerblade())
 
-    torch.allclose(out, out_hb, atol=1e-5)
+    torch.allclose(out, out_hb.cpu(), atol=1e-5)
 
 def test_BatchNorm2d_1():
     _test_BatchNorm2d(4, torch.ones(2, 4, 3, 3))
