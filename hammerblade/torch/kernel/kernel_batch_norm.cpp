@@ -70,45 +70,70 @@ extern "C" {
     double momentum = *momentum_;
     double eps = *eps_;
 
-    uint32_t n_input = input.get_sizes()[1];
-    uint32_t n = input.numel() / n_input;
+    uint32_t N = input.get_sizes()[0];
+    uint32_t C = input.get_sizes()[1];
+    uint32_t H = input.get_sizes()[2];
+    uint32_t W = input.get_sizes()[3];
+    uint32_t numel = input.numel() / C;
 
-    if(__bsg_id == 0) {
-      for(size_t c = 0; c < n_input; ++c) {
+    for(size_t c = 0; c < C; ++c) {
+      float* reduction_buffer = (float*) g_reduction_buffer;
+
+      // Compute partial sum and store it in
+      // reduction buffer
+      float partial_sum = 0.0;
+      hb_tiled_for(N * H * W, [&](size_t i) {
+          size_t w = i % W;
+          size_t h = (i / W) % H;
+          size_t n = (i / (W * H)) % N;
+
+          partial_sum += input(n, c, h, w);
+      });
+      reduction_buffer[__bsg_id] = partial_sum;
+
+      // Use tile 0 to compute the mean
+      if(__bsg_id == 0) {
         float sum = 0.0;
-        for(size_t n = 0; n < input.get_sizes()[0]; ++n) { 
-          for(size_t h = 0; h < input.get_sizes()[2]; ++h) {
-            for(size_t w = 0; w < input.get_sizes()[3]; ++w) {
-              sum += input(n, c, h, w);
-            }
-          }
+        for(size_t i = 0; i < bsg_tiles_X * bsg_tiles_Y; ++i) {
+          sum += reduction_buffer[i];
         }
-        save_mean(c) = sum / n;
+        save_mean(c) = sum / numel;
+      }
 
+      // Compute partial sum and store it in
+      // reduction buffer
+      float partial_var_sum = 0.0;
+      hb_tiled_for(N * H * W, [&](size_t i) {
+          size_t w = i % W;
+          size_t h = (i / W) % H;
+          size_t n = (i / (W * H)) % N;
+
+          partial_var_sum += (input(n, c, h, w) - save_mean(c)) *
+                               (input(n, c, h, w) - save_mean(c));
+      });
+      reduction_buffer[__bsg_id] = partial_var_sum;
+
+      // Use tile 0 to compute remaining stats
+      if(__bsg_id == 0) {
         float var_sum = 0.0;
-        for(size_t n = 0; n < input.get_sizes()[0]; ++n) { 
-          for(size_t h = 0; h < input.get_sizes()[2]; ++h) {
-            for(size_t w = 0; w < input.get_sizes()[3]; ++w) {
-              var_sum += (input(n, c, h, w) - save_mean(c)) *
-                           (input(n, c, h, w) - save_mean(c));
-            }
-          }
+        for(size_t i = 0; i < bsg_tiles_X * bsg_tiles_Y; ++i) {
+          var_sum += reduction_buffer[i];
         }
-        save_invstd(c) = 1 / sqrt((var_sum / n) + eps);
+        save_invstd(c) = 1 / sqrt((var_sum / numel) + eps);
 
         // These are optional arguments for this kernel, so check
         // for emptiness.
-
+  
         if(running_mean.numel()) {
           running_mean(c) = momentum * save_mean(c) +
                               (1 - momentum) * running_mean(c);
         }
-
+  
         if(running_var.numel()) {
-          running_var(c) = momentum * (var_sum / (n - 1)) +
+          running_var(c) = momentum * (var_sum / (numel - 1)) +
                              (1 - momentum) * running_var(c);
         }
-      }
+      } 
     }
 
     g_barrier.sync();
