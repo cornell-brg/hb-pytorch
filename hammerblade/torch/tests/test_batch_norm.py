@@ -41,3 +41,32 @@ def test_batch_norm2d_train_1():
     running_var = torch.rand(3)
 
     _test_batch_norm(inputs, running_mean, running_var, training=True)
+
+def test_batch_norm2d_eval_2():
+    inputs = torch.rand(3, 3, 2, 2, requires_grad=True)
+    running_mean = torch.rand(3)
+    running_var = torch.rand(3)
+
+    _test_batch_norm(inputs, running_mean, running_var)
+
+def test_batch_norm2d_train_2():
+    inputs = torch.rand(3, 3, 2, 2, requires_grad=True)
+    running_mean = torch.rand(3)
+    running_var = torch.rand(3)
+
+    _test_batch_norm(inputs, running_mean, running_var, training=True)
+
+def _test_BatchNorm2d(n, inputs):
+    bn = torch.nn.BatchNorm2d(n)
+    bn_hb = torch.nn.BatchNorm2d(n).hammerblade()
+
+    out = bn(inputs)
+    out_hb = bn_hb(inputs.hammerblade())
+
+    torch.allclose(out, out_hb, atol=1e-5)
+
+def test_BatchNorm2d_1():
+    _test_BatchNorm2d(4, torch.ones(2, 4, 3, 3))
+
+def test_BatchNorm2d_1():
+    _test_BatchNorm2d(4, torch.rand(2, 4, 3, 3))
