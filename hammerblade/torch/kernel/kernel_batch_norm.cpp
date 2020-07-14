@@ -90,6 +90,8 @@ extern "C" {
           partial_sum += input(n, c, h, w);
       });
       reduction_buffer[__bsg_id] = partial_sum;
+      asm volatile("": : :"memory");
+      g_barrier.sync();
 
       // Use tile 0 to compute the mean
       if(__bsg_id == 0) {
@@ -99,6 +101,8 @@ extern "C" {
         }
         save_mean(c) = sum / numel;
       }
+      asm volatile("": : :"memory");
+      g_barrier.sync();
 
       // Compute partial sum and store it in
       // reduction buffer
@@ -112,6 +116,8 @@ extern "C" {
                                (input(n, c, h, w) - save_mean(c));
       });
       reduction_buffer[__bsg_id] = partial_var_sum;
+      asm volatile("": : :"memory");
+      g_barrier.sync();
 
       // Use tile 0 to compute remaining stats
       if(__bsg_id == 0) {
