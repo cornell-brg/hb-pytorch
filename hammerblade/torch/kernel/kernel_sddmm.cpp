@@ -37,7 +37,7 @@ extern "C" {
 
 
     hb_tiled_for(numel, [&](int i) {
-      // bsg_print_int(i);
+      bsg_print_int(i);
       int row = rows(i);
       int col = cols(i);
 
@@ -55,6 +55,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_sddmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,hb_tensor_t*, size_t*, size_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_sddmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, size_t*, size_t*)
 
 }

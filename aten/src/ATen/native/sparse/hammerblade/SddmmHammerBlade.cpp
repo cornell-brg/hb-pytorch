@@ -37,7 +37,8 @@ Tensor sddmm_hb(const SparseTensor& sample, const Tensor& b, const Tensor& c) {
 
   int64_t dot_prod_len = b.size(1);
   int64_t nnz = sample._nnz();
-  TORCH_WARN("nnz:", nnz);
+  TORCH_WARN("sample:", sample);
+  TORCH_WARN("indices:", indices);
 
   hb_offload_kernel(result, colIndices, rowIndices, b, c, dot_prod_len, nnz, "tensorlib_sddmm");
   return result;
