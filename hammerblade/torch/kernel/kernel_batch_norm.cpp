@@ -26,29 +26,32 @@ extern "C" {
     bool train = *train_;
     double eps = *eps_;
 
-    if(__bsg_id == 0) {
-      for(size_t c = 0; c < input.get_sizes()[1]; ++c) {
-        float mean, invstd;
-        if(train) {
-          mean = save_mean(c);
-          invstd = save_invstd(c);
-        } else {
-          mean = running_mean(c);
-          invstd = 1 / sqrt(running_var(c) + eps);
-        }
+    uint32_t N = input.get_sizes()[0];
+    uint32_t C = input.get_sizes()[1];
+    uint32_t H = input.get_sizes()[2];
+    uint32_t W = input.get_sizes()[3];
 
-        float gamma = weight.numel() ? weight(c) : 1.0;
-        float beta = bias.numel() ? bias(c) : 0.0;
-
-        for(size_t n = 0; n < input.get_sizes()[0]; ++n) { 
-          for(size_t h = 0; h < input.get_sizes()[2]; ++h) {
-            for(size_t w = 0; w < input.get_sizes()[3]; ++w) {
-              output(n, c, h, w) = ((input(n, c, h, w) - mean) *
-                                    invstd) * gamma + beta;
-            }
-          }
-        }
+    for(size_t c = 0; c < C; ++c) {
+      float mean, invstd;
+      if(train) {
+        mean = save_mean(c);
+        invstd = save_invstd(c);
+      } else {
+        mean = running_mean(c);
+        invstd = 1 / sqrt(running_var(c) + eps);
       }
+
+      float gamma = weight.numel() ? weight(c) : 1.0;
+      float beta = bias.numel() ? bias(c) : 0.0;
+
+      hb_tiled_for(N * H * W, [&](size_t i) {
+          size_t w = i % W;
+          size_t h = (i / W) % H;
+          size_t n = (i / (W * H)) % N;
+
+          output(n, c, h, w) = ((input(n, c, h, w) - mean) *
+                                invstd) * gamma + beta;
+      });
     }
 
     g_barrier.sync();
