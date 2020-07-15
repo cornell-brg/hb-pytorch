@@ -18,7 +18,7 @@ def _test_torch_addcmul(t1, t2, t3):
     out = torch.addcmul(t1, t2, t3, value=0.1)
     out_h = torch.addcmul(h1, h2, h3, value=0.1)
     assert out_h.device == torch.device("hammerblade")
-    assert torch.allclose(out_h.cpu(), out)
+    assert torch.allclose(out_h.cpu(), out, atol=1e-5)
 
 def test_torch_addcmul_1():
     t1 = torch.ones(10)
