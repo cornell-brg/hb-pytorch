@@ -297,7 +297,14 @@ class Module(object):
         Returns:
             Module: self
         """
-        return self._apply(lambda t: t.hammerblade())
+        def apply_hb(t):
+            if t.dtype == torch.int64:
+                # Let torch.long parameters stay on the host
+                return t
+            else:
+                return t.hammerblade()
+
+        return self._apply(lambda t: apply_hb(t))
 
     def cuda(self, device=None):
         r"""Moves all model parameters and buffers to the GPU.
