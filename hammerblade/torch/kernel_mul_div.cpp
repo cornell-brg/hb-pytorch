@@ -5,6 +5,7 @@
 
 #include <kernel_common.hpp>
 
+
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_mul(
@@ -17,10 +18,19 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
+    /*
     hb_tiled_foreach(c, a, b,
         [&](float a, float b) {
           return a * b;
         });
+    */
+
+    
+    hb_tiled_foreach_unroll<6>(c, a, b,
+        [&](float a, float b) {
+          return a * b;
+        });
+    
 
     bsg_cuda_print_stat_kernel_end();
 
@@ -41,7 +51,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach(c, a, b,
+    hb_tiled_foreach_unroll<8>(c, a, b,
       [&](float a, float b) {
         return a / b;
     });

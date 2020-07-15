@@ -888,6 +888,7 @@ inline void hb_tiled_foreach_unroll1_try(HBTensor<scalar_t> result,
   } 
 }
 
+/*
 template<int N, typename scalar_t, typename F>
 struct Unroll {
   inline static void copy_from(scalar_t* src, scalar_t* dest, size_t i);
@@ -940,20 +941,7 @@ template<typename scalar_t, typename F>
 inline void Unroll<0, scalar_t, F>::compute(scalar_t* res, scalar_t* x, scalar_t* y, F functor){
   res[0] = functor(x[0], y[0]);
 }
-/*
-}
-template<int N> //, typename scalar_t>
-inline void copy(int i) { //scalar_t* src, scalar_t* dest, size_t i){
-  i += 1; 
-  //dest[N] = src[i + N];
-  copy<N-1>(i);
 
-}
-template<> //, typename scalar_t>
-inline void copy<0>(int i) { //scalar_t* src, scalar_t* dest, size_t i){
-  
-}
-*/
 
 template< int N, typename scalar_t, typename F>
 inline void hb_tiled_foreach_unroll_pragma(HBTensor<scalar_t> result,
@@ -990,30 +978,15 @@ inline void hb_tiled_foreach_unroll_pragma(HBTensor<scalar_t> result,
 
     size_t i = start;
     while (i + N < end) {
-      Unroll<N-1, scalar_t, F>::copy_from(data[1], y, i);
-      Unroll<N-1, scalar_t, F>::copy_from(data[2], x, i);
+      Unroll<N-1, scalar_t, F>::copy_from(data[1], x, i);
+      Unroll<N-1, scalar_t, F>::copy_from(data[2], y, i);
 
       //asm volatile("": : :"memory");
       
       Unroll<N-1, scalar_t, F>::compute(res, x, y, functor);
-      /*
-      for (int j = 0; j < N; j++) {
-        x[j] = *(data[1] + (i+j) * strides[1]);
-        y[j] = *(data[2] + (i+j) * strides[2]);        
-      }
-      */
-      /*
-      for (int j = 0; j < N; j++) {
-        res[j] = functor(x[j], y[j]);
-      }
-      */
-      Unroll<N, scalar_t, F>::copy_to(res, data[0], i);
-      /*
-      for (int j = 0; j < N; j++) {
-        *(data[0] + strides[0]*(i+j)) = res[j];
-      }
-      */
-
+      
+      Unroll<N-1, scalar_t, F>::copy_to(res, data[0], i);
+      
       i += N;
     }
     if (start + N < end) {
@@ -1026,7 +999,7 @@ inline void hb_tiled_foreach_unroll_pragma(HBTensor<scalar_t> result,
       *(data[0] + strides[0]*i++) = res;
     }
   }
-  /*
+  
   else {
     size_t i = start;
     while (i < end) {
@@ -1037,8 +1010,9 @@ inline void hb_tiled_foreach_unroll_pragma(HBTensor<scalar_t> result,
       i++;
     }
   } 
-  */
+  
 }
+*/
 
 template<typename scalar_t, typename F>
 void hb_tiled_foreach_unroll_macro(HBTensor<scalar_t> result,
@@ -1119,13 +1093,12 @@ extern "C" {
     );
     */
     
-    hb_tiled_foreach_unroll_pragma<10>(result, self, other, 
+    hb_tiled_foreach_unroll<10>(result, self, other, 
       [&](float self, float other) {
         return self + other;
       }
     );
     
-
     /*
     if (__bsg_id == 0) {
       size_t st = result.ndim() - 1;

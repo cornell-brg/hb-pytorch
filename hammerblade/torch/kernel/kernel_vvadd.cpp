@@ -888,7 +888,7 @@ inline void hb_tiled_foreach_unroll1_try(HBTensor<scalar_t> result,
   } 
 }
 
-
+/*
 template<int N, typename scalar_t, typename F>
 struct Unroll {
   inline static void copy_from(scalar_t* src, scalar_t* dest, size_t i);
@@ -1012,7 +1012,7 @@ inline void hb_tiled_foreach_unroll_pragma(HBTensor<scalar_t> result,
   } 
   
 }
-
+*/
 
 template<typename scalar_t, typename F>
 void hb_tiled_foreach_unroll_macro(HBTensor<scalar_t> result,
@@ -1093,7 +1093,7 @@ extern "C" {
     );
     */
     
-    hb_tiled_foreach_unroll_pragma<8>(result, self, other, 
+    hb_tiled_foreach_unroll<2>(result, self, other, 
       [&](float self, float other) {
         return self + other;
       }

@@ -8,6 +8,7 @@
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
 
+
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_add(
@@ -22,10 +23,19 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
+    /*
     hb_tiled_foreach(c, a, b,
       [&](float a, float b) {
         return a + alpha * b;
     });
+    */
+    
+    
+    hb_tiled_foreach_unroll<2>(c, a, b,
+      [&](float a, float b) {
+        return a + alpha * b;
+    });
+    
 
     bsg_cuda_print_stat_kernel_end();
 

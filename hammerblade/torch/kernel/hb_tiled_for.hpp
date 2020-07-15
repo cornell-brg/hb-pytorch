@@ -810,64 +810,192 @@ inline void hb_tiled_range(size_t numel, FetchFunctor functor) {
 }
 
 
-/*
-template<int N, typename scalar_t, typename F>
+
+template<int N, typename T, typename Func>
 struct Unroll {
-  inline static void copy_from(HBTensor<scalar_t> src, scalar_t* dest, size_t i);
-  inline static void copy_to(scalar_t* src, HBTensor<scalar_t> dest, size_t i);
-  inline static void compute(scalar_t* res, scalar_t* x, scalar_t* y, F functor);
+  inline static void copy_from(T* src, T* dest, size_t i, uint32_t stride);
+  inline static void copy_to(T* src, T* dest, size_t i, uint32_t stride);
+  inline static void compute(T* res, T* x, T* y, T* z, Func functor);
+  inline static void compute(T* res, T* x, T* y, Func functor);
+  inline static void compute(T* res, T* x, Func functor);
+  inline static void compute(T* res, Func functor);
+  inline static void compute(Func functor, size_t i);
 };
 
-template<int N, typename scalar_t, typename F>
-inline void Unroll<N, scalar_t, F>::copy_from(HBTensor<scalar_t> src, scalar_t* dest, size_t i){
-  dest[N] = src(i + N);
-  Unroll<N-1, scalar_t, F>::copy_from(src, dest, i);
+template<int N, typename T, typename Func>
+inline void Unroll<N, T, Func>::copy_from(T* src, T* dest, size_t i, uint32_t stride){
+  dest[N] = *(src + (i+N) * stride);
+  Unroll<N-1, T, Func>::copy_from(src, dest, i, stride);
 }
 
-template<int N, typename scalar_t, typename F>
-inline void Unroll<N, scalar_t, F>::copy_to(scalar_t* src, HBTensor<scalar_t> dest, size_t i){
-  dest(N + i) = src[N];
-  Unroll<N-1, scalar_t, F>::copy_to(src, dest, i);
+template<int N, typename T, typename Func>
+inline void Unroll<N, T, Func>::copy_to(T* src, T* dest, size_t i, uint32_t stride){
+  *(dest + (i+N) * stride) = src[N];
+  Unroll<N-1, T, Func>::copy_to(src, dest, i, stride);
 }
 
-template<int N, typename scalar_t, typename F>
-inline void Unroll<N, scalar_t, F>::compute(scalar_t* res, scalar_t* x, scalar_t* y, F functor){
+template<int N, typename T, typename Func>
+inline void Unroll<N, T, Func>::compute(T* res, T* x, T* y, T* z, Func functor){
+  res[N] = functor(x[N], y[N], z[N]);
+  Unroll<N-1, T, Func>::compute(res, x, y, z, functor);
+}
+
+template<int N, typename T, typename Func>
+inline void Unroll<N, T, Func>::compute(T* res, T* x, T* y, Func functor){
   res[N] = functor(x[N], y[N]);
-  Unroll<N-1, scalar_t, F>::compute(res, x, y, functor);
+  Unroll<N-1, T, Func>::compute(res, x, y, functor);
 }
 
-template<typename scalar_t, typename F>
-struct Unroll<0, scalar_t, F> {
-  inline static void copy_from(HBTensor<scalar_t> src, scalar_t* dest, size_t i);
-  inline static void copy_to(scalar_t* src, HBTensor<scalar_t> dest, size_t i);
-  inline static void compute(scalar_t* res, scalar_t* x, scalar_t* y, F functor);
+template<int N, typename T, typename Func>
+inline void Unroll<N, T, Func>::compute(T* res, T* x, Func functor){
+  res[N] = functor(x[N]);
+  Unroll<N-1, T, Func>::compute(res, x, functor);
+}
+
+template<int N, typename T, typename Func>
+inline void Unroll<N, T, Func>::compute(T* res, Func functor){
+  res[N] = functor();
+  Unroll<N-1, T, Func>::compute(res, functor);
+}
+
+template<int N, typename T, typename Func>
+inline void Unroll<N, T, Func>::compute(Func functor, size_t i){
+  functor(N + i);
+  Unroll<N-1, T, Func>::compute(functor, i);
+}
+
+template<typename T, typename Func>
+struct Unroll<0, T, Func> {
+  inline static void copy_from(T* src, T* dest, size_t i, uint32_t stride);
+  inline static void copy_to(T* src, T* dest, size_t i, uint32_t stride);
+  inline static void compute(T* res, T* x, T* y, T* z, Func functor);
+  inline static void compute(T* res, T* x, T* y, Func functor);
+  inline static void compute(T* res, T* x, Func functor);
+  inline static void compute(T* res, Func functor);
+  inline static void compute(Func functor, size_t i);
 };
 
-template<typename scalar_t, typename F>
-inline void Unroll<0, scalar_t, F>::copy_from(HBTensor<scalar_t> src, scalar_t* dest, size_t i){
-  dest[0] = src(i);
+template<typename T, typename Func>
+inline void Unroll<0, T, Func>::copy_from(T* src, T* dest, size_t i, uint32_t stride){
+  dest[0] = *(src + i * stride);
 }
 
-template<typename scalar_t, typename F>
-inline void Unroll<0, scalar_t, F>::copy_to(scalar_t* src, HBTensor<scalar_t> dest, size_t i){
-  dest(i) = src[0];
+template<typename T, typename Func>
+inline void Unroll<0, T, Func>::copy_to(T* src, T* dest, size_t i, uint32_t stride){
+  *(dest + i * stride) = src[0];
 }
 
-template<typename scalar_t, typename F>
-inline void Unroll<0, scalar_t, F>::compute(scalar_t* res, scalar_t* x, scalar_t* y, F functor){
+template<typename T, typename Func>
+inline void Unroll<0, T, Func>::compute(T* res, T* x, T* y, T* z, Func functor){
+  res[0] = functor(x[0], y[0], z[0]);
+}
+
+template<typename T, typename Func>
+inline void Unroll<0, T, Func>::compute(T* res, T* x, T* y, Func functor){
   res[0] = functor(x[0], y[0]);
 }
 
+template<typename T, typename Func>
+inline void Unroll<0, T, Func>::compute(T* res, T* x, Func functor){
+  res[0] = functor(x[0]);
+}
 
-template< int N, typename scalar_t, typename F>
-inline void hb_tiled_foreach_unroll_pragma(HBTensor<scalar_t> result,
-                               HBTensor<scalar_t> input,
-                               HBTensor<scalar_t> other,
+template<typename T, typename Func>
+inline void Unroll<0, T, Func>::compute(T* res, Func functor){
+  res[0] = functor();
+}
+
+template<typename T, typename Func>
+inline void Unroll<0, T, Func>::compute(Func functor, size_t i){
+  functor(i);
+}
+
+// Tile element-wise for - Ternary ops
+
+template<int N, typename scalar_t, typename F>
+inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
+                               HBTensor<scalar_t> input1,
+                               HBTensor<scalar_t> input2,
+                               HBTensor<scalar_t> input3,
+                               F functor) {
+  scalar_t* data[4];
+  data[0] = (scalar_t*)result.data_ptr();
+  data[1] = (scalar_t*)input1.data_ptr();
+  data[2] = (scalar_t*)input2.data_ptr();
+  data[3] = (scalar_t*)input3.data_ptr();
+
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  size_t len_per_tile = result.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
+  size_t start = len_per_tile * __bsg_id;
+  size_t end = start + len_per_tile;
+  end = (end > result.numel())  ? result.numel() : end;
+
+  // is_trivial_1d
+  if(result.ndim() == 1) {
+
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[4];
+    strides[0] = (result.get_strides())[0];
+    strides[1] = (input1.get_strides())[0];
+    strides[2] = (input2.get_strides())[0];
+    strides[3] = (input3.get_strides())[0];
+
+    scalar_t x[N];
+    scalar_t y[N];
+    scalar_t z[N];
+    scalar_t res[N];
+
+    size_t i = start;
+    while (i + N < end) {
+      Unroll<N-1, scalar_t, F>::copy_from(data[1], x, i, strides[1]);
+      Unroll<N-1, scalar_t, F>::copy_from(data[2], y, i, strides[2]);
+      Unroll<N-1, scalar_t, F>::copy_from(data[3], z, i, strides[3]);
+
+      Unroll<N-1, scalar_t, F>::compute(res, x, y, z, functor);
+      
+      Unroll<N-1, scalar_t, F>::copy_to(res, data[0], i, strides[0]);
+      i += N;
+    }
+    if (start + N < end) {
+      i -= N;
+    }
+    while (i < end) {
+      scalar_t x = data[1][i];
+      scalar_t y = data[2][i];
+      scalar_t z = data[3][i];
+      scalar_t res = functor(x, y, z);
+      data[0][i++] = res;
+    }
+  }
+  else {
+    size_t i = start;
+    while (i < end) {
+      scalar_t x = *(data[1] + offset_calc(i, input1));
+      scalar_t y = *(data[2] + offset_calc(i, input2));
+      scalar_t z = *(data[3] + offset_calc(i, input3));
+      scalar_t res = functor(x, y, z);
+      *(data[0] + offset_calc(i, result)) = res;
+      i++;
+    }
+  }  
+}
+
+
+// Tile element-wise for - Binary ops
+
+template<int N, typename scalar_t, typename F>
+inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
+                               HBTensor<scalar_t> input1,
+                               HBTensor<scalar_t> input2,
                                F functor) {
   scalar_t* data[3];
   data[0] = (scalar_t*)result.data_ptr();
-  data[1] = (scalar_t*)input.data_ptr();
-  data[2] = (scalar_t*)other.data_ptr();
+  data[1] = (scalar_t*)input1.data_ptr();
+  data[2] = (scalar_t*)input2.data_ptr();
 
   //-----------------------------
   // iterating over all elementes
@@ -885,52 +1013,195 @@ inline void hb_tiled_foreach_unroll_pragma(HBTensor<scalar_t> result,
     //-----------------------------
     uint32_t strides[3];
     strides[0] = (result.get_strides())[0];
-    strides[1] = (input.get_strides())[0];
-    strides[2] = (other.get_strides())[0];
+    strides[1] = (input1.get_strides())[0];
+    strides[2] = (input2.get_strides())[0];
+
+    // Auxiliary arrays to store elements 
+    scalar_t x[N];
+    scalar_t y[N];
+    scalar_t res[N];
+
+    size_t i;
+    for (i = start ; i + N < end ; i += N) {
+      
+      // Compile-time loop functions to copy the tensor elements
+      Unroll<N-1, scalar_t, F>::copy_from(data[1], y, i, strides[1]);
+      Unroll<N-1, scalar_t, F>::copy_from(data[2], x, i, strides[2]);
+
+      //Unroll<N-1, scalar_t, F>::copy_from(&input, y, i);
+      ///Unroll<N-1, scalar_t, F>::copy_from(&other, x, i);
+
+      // Compile-time loop function to perform the functor
+      Unroll<N-1, scalar_t, F>::compute(res, x, y, functor);
+      
+      // Compile-time loop function to copy back to the tensor
+      Unroll<N-1, scalar_t, F>::copy_to(res, data[0], i, strides[0]);
+      //Unroll<N-1, scalar_t, F>::copy_to(res, &result, i);
+
+    }
+    if (start + N < end) {
+      i -= N;
+    }
+    for (; i < end ; i++) {
+      /*
+      scalar_t x = data[1][i];
+      scalar_t y = data[2][i];
+      scalar_t res = functor(x, y);
+      data[0][i] = res;
+      */
+      
+      scalar_t x = *(data[1] + i * strides[1]);
+      scalar_t y = *(data[2] + i * strides[2]);
+      scalar_t res = functor(x, y);
+      *(data[0] + strides[0]*i) = res;
+      
+      //i++;
+    }
+  }
+  
+  else {
+    for (size_t i = start ; i < end ; i++) {
+      scalar_t x = *(data[1] + offset_calc(i, input1));
+      scalar_t y = *(data[2] + offset_calc(i, input2));
+      scalar_t res = functor(x, y);
+      *(data[0] + offset_calc(i, result)) = res;
+    }
+  }  
+}
+
+// Tile element-wise for - Unary ops
+
+template<int N, typename scalar_t, typename F>
+inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
+                               HBTensor<scalar_t> input1,
+                               F functor) {
+  scalar_t* data[2];
+  data[0] = (scalar_t*)result.data_ptr();
+  data[1] = (scalar_t*)input1.data_ptr();
+
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  size_t len_per_tile = result.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
+  size_t start = len_per_tile * __bsg_id;
+  size_t end = start + len_per_tile;
+  end = (end > result.numel())  ? result.numel() : end;
+
+  // is_trivial_1d
+  if(result.ndim() == 1) {
+
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[3];
+    strides[0] = (result.get_strides())[0];
+    strides[1] = (input1.get_strides())[0];
 
     register scalar_t x[N];
-    register scalar_t y[N];
     register scalar_t res[N];
 
     size_t i = start;
     while (i + N < end) {
-      
-      Unroll<N-1, scalar_t, F>::copy_from(data[1], y, i);
-      Unroll<N-1, scalar_t, F>::copy_from(data[2], x, i);
-      
-
-      Unroll<N-1, scalar_t, F>::copy_from(input, y, i);
-      Unroll<N-1, scalar_t, F>::copy_from(other, x, i);
-
-      Unroll<N-1, scalar_t, F>::compute(res, x, y, functor);
-      
-      //Unroll<N-1, scalar_t, F>::copy_to(res, data[0], i);
-      Unroll<N-1, scalar_t, F>::copy_to(res, result, i);
-
+      Unroll<N-1, scalar_t, F>::copy_from(data[1], x, i, strides[1]);
+      Unroll<N-1, scalar_t, F>::compute(res, x, functor);
+      Unroll<N-1, scalar_t, F>::copy_to(res, data[0], i, strides[0]);
       i += N;
     }
     if (start + N < end) {
       i -= N;
     }
     while (i < end) {
-      scalar_t x = *(data[1] + i * strides[1]);
-      scalar_t y = *(data[2] + i * strides[2]);
-      scalar_t res = functor(x, y);
-      *(data[0] + strides[0]*i++) = res;
+      scalar_t x = data[1][i];
+      scalar_t res = functor(x);
+      data[0][i++] = res;
     }
   }
-  /*
   else {
     size_t i = start;
     while (i < end) {
-      scalar_t x = *(data[1] + offset(i, input));
-      scalar_t y = *(data[2] + offset(i, other));
-      scalar_t res = functor(x, y);
-      *(data[0] + offset(i, result)) = res;
+      scalar_t x = *(data[1] + offset_calc(i, input1));
+      scalar_t res = functor(x);
+      *(data[0] + offset_calc(i, result)) = res;
       i++;
     }
-  } 
-  
+  }  
 }
-*/
+
+// Tile element-wise for - Nullary ops
+
+template<int N, typename scalar_t, typename F>
+inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
+                               F functor) {
+  scalar_t* data[1];
+  data[0] = (scalar_t*)result.data_ptr();
+
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  size_t len_per_tile = result.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
+  size_t start = len_per_tile * __bsg_id;
+  size_t end = start + len_per_tile;
+  end = (end > result.numel())  ? result.numel() : end;
+
+  // is_trivial_1d
+  if(result.ndim() == 1) {
+
+    //-----------------------------
+    // collect metadata
+    //-----------------------------
+    uint32_t strides[1];
+    strides[0] = (result.get_strides())[0];
+
+    register scalar_t res[N];
+
+    size_t i = start;
+    while (i + N < end) {
+      Unroll<N-1, scalar_t, F>::compute(res, functor);
+      Unroll<N-1, scalar_t, F>::copy_to(res, data[0], i, strides[0]);
+      i += N;
+    }
+    if (start + N < end) {
+      i -= N;
+    }
+    while (i < end) {
+      scalar_t res = functor();
+      data[0][i++] = res;
+    }
+  }
+  else {
+    size_t i = start;
+    while (i < end) {
+      scalar_t res = functor();
+      *(data[0] + offset_calc(i, result)) = res;
+      i++;
+    }
+  }  
+}
+
+// Tile element-wise for 
+
+template<int N, typename Func>
+inline void hb_tiled_for_unroll(size_t numel, Func functor) {
+
+  //-----------------------------
+  // iterating over all elementes
+  //-----------------------------
+  size_t len_per_tile = numel / (bsg_tiles_X * bsg_tiles_Y) + 1;
+  size_t start = len_per_tile * __bsg_id;
+  size_t end = start + len_per_tile;
+  end = (end > numel)  ? numel : end;
+
+  size_t i = start;
+  while (i + N < end) {
+    Unroll<N-1, size_t, Func>::compute(functor, i);
+    i += N;
+  }
+  if (start + N < end) {
+    i -= N;
+  }
+  while (i < end) {
+    functor(i++);
+  }
+}
+
 #endif

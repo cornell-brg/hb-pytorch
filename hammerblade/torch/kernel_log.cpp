@@ -1,6 +1,6 @@
 //====================================================================
-// Sigmoid kernel
-// 03/17/2020 Lin Cheng (lc873@cornell.edu)
+// log kernel
+// 06/16/2020 Lin Cheng (lc873@cornell.edu)
 //====================================================================
 
 #include <kernel_common.hpp>
@@ -8,24 +8,17 @@
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_sigmoid(
+  __attribute__ ((noinline))  int tensorlib_log(
           hb_tensor_t* t0_p,
           hb_tensor_t* t1_p) {
-
-    auto inp = HBTensor<float>(t0_p);
-    auto res = HBTensor<float>(t1_p);
-
-      // Start profiling
+    auto res = HBTensor<float>(t0_p);
+    auto input = HBTensor<float>(t1_p);
+    // Start profiling
     bsg_cuda_print_stat_kernel_start();
-
-    hb_tiled_foreach_unroll<6>(inp, res,
-      [&](float a){
-      a = expf(-a);
-      a = 1 + a;
-      a = 1/a;
-      return a;
+    hb_tiled_foreach(res, input,
+      [&](float a) {
+        return std::log(a);
     });
-
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
 
@@ -33,7 +26,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_sigmoid, hb_tensor_t*, hb_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_log, hb_tensor_t*, hb_tensor_t*)
 
 }
-

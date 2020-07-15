@@ -12,7 +12,7 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_for(N, [&](size_t i) {
+    hb_tiled_for_unroll<4>(N, [&](size_t i) {
       for(auto j = 0; j < M; j++) {
         if(i == j) {
           y(i,j) = 1;
