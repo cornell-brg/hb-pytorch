@@ -13,8 +13,8 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_batch_norm2d_transform_input(
       hb_tensor_t* output_, hb_tensor_t* input_, hb_tensor_t* weight_,
       hb_tensor_t* bias_, hb_tensor_t* save_mean_, hb_tensor_t* save_invstd_,
-      hb_tensor_t* running_mean_, hb_tensor_t* running_var_, bool* train_,
-      double* eps_) {
+      hb_tensor_t* running_mean_, hb_tensor_t* running_var_, int* train_,
+      float* eps_) {
     HBTensor<float, 4> output(output_);
     HBTensor<float, 4> input(input_);
     HBTensor<float, 1> weight(weight_);
@@ -23,8 +23,8 @@ extern "C" {
     HBTensor<float, 1> save_invstd(save_invstd_);
     HBTensor<float, 1> running_mean(running_mean_);
     HBTensor<float, 1> running_var(running_var_);
-    bool train = *train_;
-    double eps = *eps_;
+    int train = *train_;
+    float eps = *eps_;
 
     uint32_t N = input.get_sizes()[0];
     uint32_t C = input.get_sizes()[1];
@@ -60,15 +60,15 @@ extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_batch_norm2d_update_stats(
       hb_tensor_t* save_mean_, hb_tensor_t* save_invstd_, hb_tensor_t* input_, 
-      hb_tensor_t* running_mean_, hb_tensor_t* running_var_, double* momentum_,
-      double* eps_) {
+      hb_tensor_t* running_mean_, hb_tensor_t* running_var_, float* momentum_,
+      float* eps_) {
     HBTensor<float, 1> save_mean(save_mean_);
     HBTensor<float, 1> save_invstd(save_invstd_);
     HBTensor<float, 4> input(input_);
     HBTensor<float, 1> running_mean(running_mean_);
     HBTensor<float, 1> running_var(running_var_);
-    double momentum = *momentum_;
-    double eps = *eps_;
+    float momentum = *momentum_;
+    float eps = *eps_;
 
     uint32_t N = input.get_sizes()[0];
     uint32_t C = input.get_sizes()[1];
@@ -146,10 +146,10 @@ extern "C" {
   HB_EMUL_REG_KERNEL(tensorlib_batch_norm2d_transform_input,
       hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
       hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
-      bool*, double*);
+      int*, float*);
 
   HB_EMUL_REG_KERNEL(tensorlib_batch_norm2d_update_stats,
       hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
-      hb_tensor_t*, double*, double*);
+      hb_tensor_t*, float*, float*);
 
 }
