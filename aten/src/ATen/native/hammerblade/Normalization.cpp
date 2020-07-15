@@ -26,8 +26,8 @@ std::tuple<Tensor,Tensor,Tensor> batch_norm_hb_transform_input(
   device_args.push_back(create_device_tensor(save_invstd, device_ptrs));
   device_args.push_back(create_device_tensor(running_mean, device_ptrs));
   device_args.push_back(create_device_tensor(running_var, device_ptrs));
-  device_args.push_back(create_device_scalar(train));
-  device_args.push_back(create_device_scalar(eps));
+  device_args.push_back(create_device_scalar((int) train));
+  device_args.push_back(create_device_scalar((float) eps));
   c10::hammerblade::offload_kernel("tensorlib_batch_norm2d_transform_input",
                                    device_args);
   cleanup_device(device_args, device_ptrs);
@@ -53,8 +53,8 @@ std::tuple<Tensor,Tensor> batch_norm_hb_update_stats(
   device_args.push_back(create_device_tensor(input, device_ptrs));
   device_args.push_back(create_device_tensor(running_mean, device_ptrs));
   device_args.push_back(create_device_tensor(running_var, device_ptrs));
-  device_args.push_back(create_device_scalar(momentum));
-  device_args.push_back(create_device_scalar(eps));
+  device_args.push_back(create_device_scalar((float) momentum));
+  device_args.push_back(create_device_scalar((float) eps));
   c10::hammerblade::offload_kernel("tensorlib_batch_norm2d_update_stats",
                                    device_args);
   cleanup_device(device_args, device_ptrs);
