@@ -753,9 +753,9 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
     // collect metadata
     //-----------------------------
     uint32_t strides[3];
-    strides[0] = 1; //(result.get_strides())[0];
-    strides[1] = 1; //(input1.get_strides())[0];
-    strides[2] = 1; //(input2.get_strides())[0];
+    strides[0] = (result.get_strides())[0];
+    strides[1] = (input1.get_strides())[0];
+    strides[2] = (input2.get_strides())[0];
 
     // Auxiliary arrays to store elements 
     scalar_t x[N];

@@ -91,18 +91,12 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
     //-----------------------------
     // iterating over all elementes
     //-----------------------------
-<<<<<<< HEAD
     hb_tiled_range(in.numel(), [&](size_t start, size_t end) {
       scalar_t* in_dp = (data[1] + strides[1] * start);
       for(size_t i = start; i < end; i++) {
         reduce(result, *in_dp);
         in_dp += strides[1];
       }
-=======
-    hb_tiled_for(in.numel(), [&](size_t idx) {
-      scalar_t* in_dp = (data[1] + strides[1] * idx);
-      reduce(result, *in_dp);
->>>>>>> 0109ef125... [TensorIterator] strides no longer measured in bytes
     });
   } else {
     //-----------------------------
