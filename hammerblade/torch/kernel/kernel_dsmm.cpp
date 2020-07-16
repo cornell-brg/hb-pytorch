@@ -18,8 +18,8 @@ extern "C" {
           hb_tensor_t* a_p, //dense
           hb_tensor_t* bcsc_p, //sparse
           hb_tensor_t* b_rows_p,
-          hb_tensor_t* b_cols_p,
-          size_t* dot_prod_len, // i.e. b.size(0) or c.size(1)
+          hb_tensor_t* b_vals_p,
+          size_t* dot_prod_len, // i.e. a.size(0) or b.size(1)
           size_t* b_nnz
           ) { 
     // Start profiling
@@ -28,21 +28,21 @@ extern "C" {
     auto a = HBTensor<float>(a_p);
     auto bcsc = HBTensor<float>(bcsc_p);
     auto b_rows = HBTensor<int>(b_rows_p);
-    auto b_cols = HBTensor<int>(b_cols_p);
+    auto b_vals = HBTensor<int>(b_vals_p);
     auto res = HBTensor<float>(out_p);
     auto dp_len = *dot_prod_len;
     auto numel = *b_nnz;
 
-//needs to be updated for csc algorithm:
+    // for each nonzero element in the sparse matrix
     float sum;
     hb_tiled_for(numel, [&](size_t i) {
       int row = b_rows(i);
-      int col = b_cols(i);
+      int col = csc(i);
       sum = 0;
       for (int dot = 0; dot < dp_len; dot++){
         sum += a(row, dot) * bcsc(dot, col);
       }
-      res(row, col) = sum;
+      res(row, col) += sum;
     });
 
     //   End profiling
