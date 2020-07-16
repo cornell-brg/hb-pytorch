@@ -298,8 +298,10 @@ class Module(object):
             Module: self
         """
         def apply_hb(t):
-            if t.dtype == torch.int64:
-                # Let torch.long parameters stay on the host
+            if isinstance(self, torch.nn.BatchNorm2d) and \
+                    (t.dtype == torch.int64):
+                # BatchNorm2d's batch counter is a long tensor. Since it is metadata
+                # for BatchNorm2d module, it is efficient for it to stay on the host.
                 return t
             else:
                 return t.hammerblade()
