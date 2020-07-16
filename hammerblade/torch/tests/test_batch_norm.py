@@ -5,7 +5,6 @@ Unit tests for batch_norm operator
 import torch
 import torch.nn.functional as F
 import random
-import pytest
 import hbutils
 
 torch.manual_seed(42)
