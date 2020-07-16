@@ -43,14 +43,13 @@ Tensor dsmm_hb(const Tensor& a_dense, const SparseTensor& b_sparse) {
   TORCH_CHECK(rowIndices.is_hammerblade(), "rowIndices must be HammerBlade Tensor");
 
   Tensor result = at::zeros({a_dense.size(0), b_sparse.size(1)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
-  int64_t dot_prod_len = a_dense.size(1);
   int64_t b_nnz = b_sparse._nnz();
   int64_t b_dim = b_sparse.dim();
 
   Tensor b_csc = _to_csc(colIndices, b_dim, b_nnz);
   Tensor values = b_sparse._values();
 
-  hb_offload_kernel(result, a_dense, b_csc, rowIndices, values, dot_prod_len, b_nnz, "tensorlib_dsmm");
+  hb_offload_kernel(result, a_dense, b_csc, rowIndices, values, "tensorlib_dsmm");
   return result;
 }
    
