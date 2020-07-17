@@ -275,12 +275,14 @@ extern "C" {
         }
       }
 
-      if(grad_weight.numel()) {
-        grad_weight(c) = dotp * invstd;
-      }
+      if(__bsg_id == 0) {
+        if(grad_weight.numel()) {
+          grad_weight(c) = dotp * invstd;
+        }
 
-      if(grad_bias.numel()) {
-        grad_bias(c) = sum;
+        if(grad_bias.numel()) {
+          grad_bias(c) = sum;
+        }
       }
     }
 
