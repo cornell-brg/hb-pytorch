@@ -59,7 +59,7 @@ extern "C" {
   }
 
   __attribute__ ((noinline))  int tensorlib_batch_norm2d_update_stats(
-      hb_tensor_t* save_mean_, hb_tensor_t* save_invstd_, hb_tensor_t* input_, 
+      hb_tensor_t* save_mean_, hb_tensor_t* save_invstd_, hb_tensor_t* input_,
       hb_tensor_t* running_mean_, hb_tensor_t* running_var_, float* momentum_,
       float* eps_) {
     HBTensor<float, 1> save_mean(save_mean_);
@@ -126,20 +126,29 @@ extern "C" {
 
         // These are optional arguments for this kernel, so check
         // for emptiness.
-  
+
         if(running_mean.numel()) {
           running_mean(c) = momentum * save_mean(c) +
                               (1 - momentum) * running_mean(c);
         }
-  
+
         if(running_var.numel()) {
           running_var(c) = momentum * (var_sum / (numel - 1)) +
                              (1 - momentum) * running_var(c);
         }
-      } 
+      }
       g_barrier.sync();
     }
 
+    return 0;
+  }
+
+  __attribute__ ((noinline))  int tensorlib_batch_norm2d_backward(
+      hb_tensor_t* grad_input_, hb_tensor_t* grad_weight_,
+      hb_tensor_t* grad_bias_, hb_tensor_t* grad_out_, hb_tensor_t* input_,
+      hb_tensor_t* weight_, hb_tensor_t* save_mean_, hb_tensor_t* save_invstd_,
+      hb_tensor_t* running_mean_, hb_tensor_t* running_var_, int* train_,
+      float* eps_) {
     return 0;
   }
 
@@ -151,5 +160,10 @@ extern "C" {
   HB_EMUL_REG_KERNEL(tensorlib_batch_norm2d_update_stats,
       hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
       hb_tensor_t*, float*, float*);
+
+  HB_EMUL_REG_KERNEL(tensorlib_batch_norm2d_backward,
+      hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+      hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+      hb_tensor_t*, hb_tensor_t*, int*, float*);
 
 }
