@@ -16,7 +16,7 @@ using namespace at::sparse;
 */
 Tensor _to_csc(const IntTensor& colIndices, int64_t dim, int64_t nnz) {
     Tensor csc = at::zeros({dim + 1}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
-    hb_offload_kernel(csc, colIndices, dim, nnz, "tensorlib_tocsr");
+    hb_offload_kernel(csc, colIndices, dim, nnz, "tensorlib_coo_to_csr");
     return csc;
 }
 
@@ -36,7 +36,7 @@ Tensor dsmm_hb(const Tensor& a_dense, const SparseTensor& b_sparse) {
   TORCH_CHECK(a_dense.size(1) == b_sparse.size(0), "Matrix multiply dimension mismatch: 'a' dim 1 = ", a_dense.size(1), ", 'b' dim 0 = ", b_sparse.size(0));
   
   IntTensor indices = b_sparse._indices();
-  // TORCH_CHECK(indices.dtype() == at::kLong, "Indices on HammerBlade should be int32, but got ", indices.dtype());
+  TORCH_CHECK(indices.dtype() == at::kInt, "Indices on HammerBlade should be int32, but got ", indices.dtype());
   IntTensor colIndices = indices.select(0, 1);
   TORCH_CHECK(colIndices.is_hammerblade(), "colIndices must be HammerBlade Tensor");
   IntTensor rowIndices = indices.select(0, 0);
@@ -46,9 +46,9 @@ Tensor dsmm_hb(const Tensor& a_dense, const SparseTensor& b_sparse) {
   int64_t b_nnz = b_sparse._nnz();
   int64_t b_dim = b_sparse.dim();
 
-  Tensor b_csc = _to_csc(colIndices, b_dim, b_nnz);
-  Tensor values = b_sparse._values();
-
+  IntTensor b_csc = _to_csc(colIndices, b_dim, b_nnz);
+  IntTensor values = b_sparse._values();
+  
   hb_offload_kernel(result, a_dense, b_csc, rowIndices, values, "tensorlib_dsmm");
   return result;
 }
