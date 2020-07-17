@@ -149,6 +149,59 @@ extern "C" {
       hb_tensor_t* weight_, hb_tensor_t* save_mean_, hb_tensor_t* save_invstd_,
       hb_tensor_t* running_mean_, hb_tensor_t* running_var_, int* train_,
       float* eps_) {
+    HBTensor<float, 4> grad_input(grad_input_);
+    HBTensor<float, 1> grad_weight(grad_weight_);
+    HBTensor<float, 1> grad_bias(grad_bias_);
+    HBTensor<float, 4> grad_out(grad_out_);
+    HBTensor<float, 4> input(input_);
+    HBTensor<float, 1> weight(weight_);
+    HBTensor<float, 1> save_mean(save_mean_);
+    HBTensor<float, 1> save_invstd(save_invstd_);
+    HBTensor<float, 1> running_mean(running_mean_);
+    HBTensor<float, 1> running_var(running_var_);
+    int train = *train_;
+    float eps = *eps_;
+
+    uint32_t N = input.get_sizes()[0];
+    uint32_t C = input.get_sizes()[1];
+    uint32_t H = input.get_sizes()[2];
+    uint32_t W = input.get_sizes()[3];
+    uint32_t numel = input.numel() / C;
+
+    if(__bsg_id == 0) {
+      for(size_t c = 0; c < C; ++c) {
+        float mean, invstd;
+        if(train) {
+          mean = save_mean(c);
+          invstd = save_invstd(c);
+        } else {
+          mean = running_mean(c);
+          invstd = 1 / sqrt(running_var(c) + eps);
+        }
+
+        float gamma = weight.numel() ? weight(c) : 1.0;
+
+        float sum = 0.0;
+        for(size_t n = 0; n < N; ++n) {
+          for(size_t h = 0; h < H; ++h) {
+            for(size_t w = 0; w < W; ++w) {
+              sum += grad_out(n, c, h, w);
+            }
+          }
+        }
+
+        float dotp = 0.0;
+        for(size_t n = 0; n < N; ++n) {
+          for(size_t h = 0; h < H; ++h) {
+            for(size_t w = 0; w < W; ++w) {
+              dotp += (input(n, c, h, w) - mean) * grad_out(n, c, h, w);
+            }
+          }
+        }
+
+      }
+    }
+
     return 0;
   }
 
