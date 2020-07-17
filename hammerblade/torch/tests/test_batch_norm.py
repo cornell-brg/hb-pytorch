@@ -98,7 +98,7 @@ def _test_BatchNorm2d(n, inputs, affine=True):
         out.backward(grad)
         out_hb.backward(grad_hb)
 
-        assert torch.allclose(inputs.grad, inputs_hb.grad.cpu(), atol=1e-5)
+        assert torch.allclose(inputs.grad, inputs_hb.grad.cpu(), atol=1e-4)
 
 def test_BatchNorm2d_1():
     _test_BatchNorm2d(4, torch.ones(2, 4, 3, 3, requires_grad=True))
