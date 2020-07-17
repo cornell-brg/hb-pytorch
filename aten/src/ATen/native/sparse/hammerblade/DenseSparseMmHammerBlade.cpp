@@ -8,18 +8,6 @@ namespace at { namespace native {
 
 using namespace at::sparse;
 
-
-/* 
-- A.Transpose for a sparse matrix is the same as swapping rowIndices and colIndices
-- csc(A) = csr(A.Transpose)
-==> csc(A) = csr(letting variable 'rowIndices' = colIndices).
-*/
-Tensor _to_csc(const IntTensor& colIndices, int64_t dim, int64_t nnz) {
-    Tensor csc = at::zeros({dim + 1}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
-    hb_offload_kernel(csc, colIndices, dim, nnz, "tensorlib_coo_to_csr");
-    return csc;
-}
-
 // computes b@c only at the locations where sample is nonzero
 Tensor dsmm_hb(const Tensor& a_dense, const SparseTensor& b_sparse) {
 
@@ -41,15 +29,13 @@ Tensor dsmm_hb(const Tensor& a_dense, const SparseTensor& b_sparse) {
   TORCH_CHECK(colIndices.is_hammerblade(), "colIndices must be HammerBlade Tensor");
   IntTensor rowIndices = indices.select(0, 0);
   TORCH_CHECK(rowIndices.is_hammerblade(), "rowIndices must be HammerBlade Tensor");
+  IntTensor values = b_sparse._values();
 
   Tensor result = at::zeros({a_dense.size(0), b_sparse.size(1)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
   int64_t b_nnz = b_sparse._nnz();
   int64_t b_dim = b_sparse.dim();
-
-  IntTensor b_csc = _to_csc(colIndices, b_dim, b_nnz);
-  IntTensor values = b_sparse._values();
   
-  hb_offload_kernel(result, a_dense, b_csc, rowIndices, values, "tensorlib_dsmm");
+  hb_offload_kernel(result, a_dense, colIndices, rowIndices, values, "tensorlib_dsmm");
   return result;
 }
    

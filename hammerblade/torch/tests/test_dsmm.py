@@ -25,12 +25,12 @@ def test_torch_dsmm_1():
     b = torch.Tensor([[5, 3], [1, 7], [1, 1]]).to_sparse()
     _test_torch_dsmm(a, b)
 
-# def test_torch_dsmm_2():
-#     a = torch.Tensor([[0, 1], [1, 0]])
-#     b = torch.Tensor([[5, 0], [1, 0]]).to_sparse()
-#     _test_torch_dsmm(a, b)
+def test_torch_dsmm_2():
+    a = torch.Tensor([[0, 1], [1, 0]])
+    b = torch.Tensor([[5, 0], [1, 0]]).to_sparse()
+    _test_torch_dsmm(a, b)
 
-# def test_torch_dsmm_3():
-#     a = torch.Tensor([[1, 2], [1, 1]])
-#     b = torch.Tensor([[5, 3], [1, 7]]).to_sparse()
-#     _test_torch_dsmm(a, b)
+def test_torch_dsmm_3():
+    a = torch.Tensor([[1, 2], [1, 1]])
+    b = torch.Tensor([[5, 3], [1, 7]]).to_sparse()
+    _test_torch_dsmm(a, b)
