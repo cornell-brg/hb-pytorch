@@ -199,6 +199,52 @@ extern "C" {
           }
         }
 
+        // Host code can mask each of these gradient computations. Host
+        // masks a gradient computation by offloading an empty tensor for
+        // corresponding gradient tensor. So, device should skip computing
+        // a gradient if corresponding tensor is empty.
+
+        if(grad_input.numel()) {
+          if (train) {
+            // when in training mode
+            // Q(X) = X - E[x] ; i.e. input centered to zero mean
+            // Y = Q(X) / sigma    ; i.e. BN output before weight and bias
+            // dL/dX = (Q(dL/dY) - dot(Y, dL/dY) * Y) / sigma * w
+
+            // projection of gradOutput on to output scaled by std
+            float k = dotp * invstd * invstd / numel;
+            for(size_t n = 0; n < N; ++n) {
+              for(size_t h = 0; h < H; ++h) {
+                for(size_t w = 0; w < W; ++w) {
+                  grad_input(n, c, h, w) = (input(n, c, h, w) - mean) * k;
+                }
+              }
+            }
+
+            float grad_mean = sum / numel;
+            for(size_t n = 0; n < N; ++n) {
+              for(size_t h = 0; h < H; ++h) {
+                for(size_t w = 0; w < W; ++w) {
+                  grad_input(n, c, h, w) = (grad_out(n, c, h, w) - grad_mean 
+                                              - grad_input(n, c, h, w))
+                                              * invstd * gamma;
+                }
+              }
+            }
+          } else {
+            // when in evaluation mode
+            // Q(X) = X - running_mean  ; i.e. input centered to zero mean
+            // Y = Q(X) / running_std    ; i.e. BN output before weight and bias
+            // dL/dX = w / running_std
+            for(size_t n = 0; n < N; ++n) {
+              for(size_t h = 0; h < H; ++h) {
+                for(size_t w = 0; w < W; ++w) {
+                  grad_input(n, c, h, w) = grad_out(n, c, h, w) * invstd * gamma;
+                }
+              }
+            }
+          }
+        }
       }
     }
 
