@@ -4,7 +4,7 @@ import json
 import copy
 import subprocess
 
-sys.path.append('/home/lc873/work/sdh/brg-hb-pytorch/hammerblade/scripts/')
+sys.path.append('/scratch/users/zz546/hb-pytorch/hammerblade/scripts/')
 
 from compare_aten_op import compare, average_aten_op
 
@@ -28,7 +28,7 @@ def compare_wrapper(full, chunk, stats):
 # Read kernels
 # ======================================================
 
-with open('cmd.json',) as f:
+with open('conv2_spmm.json',) as f:
   route = json.load(f)
 
 fancy_print(route)
@@ -42,16 +42,15 @@ print("total number of jobs: " + str(len(route)))
 
 kernels = []
 
-#for i in range(len(route)):
-for i in [37]:
-  hb_name = "recsys_kernel_%03d_hb" % i
-  name = "recsys_kernel_%03d_data_new_format" % i
+for i in range(len(route)):
+  hb_name = "conv2_spmm_hb_%d" % i
+  name = "conv2_spmm_data_new_format_%d" % i
   # work dir
   sh_cmd = "mkdir -p " + name
   print(sh_cmd)
   os.system(sh_cmd)
-  for j in range(10):
-    xeon_name = "recsys_kernel_%03d_xeon_%02d" % (i, j)
+  for j in range(20):
+    xeon_name = "conv2_spmm_xeon_%d_%d" % (i, j)
     # collect full stack
     sh_cmd = "cp " + xeon_name + "/out.std " + name + ("/full-%02d.std" % j)
     print(sh_cmd)
@@ -61,7 +60,7 @@ for i in [37]:
   print(sh_cmd)
   os.system(sh_cmd)
   # run uw's profiling data tool
-  sh_cmd = "(cd " + hb_name + ";python /work/global/brg/install/bare-pkgs/x86_64-centos7/bladerunner/bsg_manycore/software/py/vanilla_parser/stats_parser.py --stats vanilla_stats.csv)"
+  sh_cmd = "(cd " + hb_name + "; python /scratch/users/zz546/bsg_bladerunner/bsg_manycore/software/py/vanilla_parser/stats_parser.py --stats vanilla_stats.csv)"
   print(sh_cmd)
   os.system(sh_cmd)
   # collect output
@@ -84,7 +83,7 @@ for i in [37]:
   # ======================================================
 
   # run postprocessing script for cross check
-  sh_cmd = "python ~/work/sdh/brg-hb-pytorch/hammerblade/scripts/compare_aten_op.py --full {0}/full-00.std --chunk {0}/chunk-cosim.std --manycore-stats {0}/manycore_stats.log > {0}/cross_check.txt 2>&1".format(name)
+  sh_cmd = "python /scratch/users/zz546/hb-pytorch/hammerblade/scripts/compare_aten_op.py --full {0}/full-00.std --chunk {0}/chunk-cosim.std --manycore-stats {0}/manycore_stats.log > {0}/cross_check.txt 2>&1".format(name)
   print(sh_cmd)
   os.system(sh_cmd)
 

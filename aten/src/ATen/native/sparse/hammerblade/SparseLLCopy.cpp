@@ -19,6 +19,7 @@ SparseTensor llcopy_sparse_to_hb(const SparseTensor& self) {
   if (!self.defined()) {
     return self;
   }
+  
   // get low level indices and values storage size
   Tensor cpu_indices = self._indices();
   Tensor values = self._values();
@@ -61,13 +62,18 @@ SparseTensor llcopy_sparse_to_hb(const SparseTensor& self) {
   void* hb_indices_ptr = (void*)indices_tensor.storage().data();
   c10::hammerblade::DMA_host_to_device(hb_indices_ptr, indices_ptr, indices_storage_size);
 
-  void* values_ptr = (void*)indices.storage().data();
-  void* hb_values_ptr = (void*)indices_tensor.storage().data();
+  void* values_ptr = (void*)values.storage().data();
+  void* hb_values_ptr = (void*)values_tensor.storage().data();
   c10::hammerblade::DMA_host_to_device(hb_values_ptr, values_ptr, values_storage_size);
 
   //Create HB sparse tensor:
-  SparseTensor sparse_tensor;
+  TensorTypeId type_id = TensorTypeId::SparseHammerBladeTensorId;
+  SparseTensor sparse_tensor = detail::make_tensor<SparseTensorImpl>(TensorTypeSet(type_id), values_tensor.options().dtype());
+  get_sparse_impl(sparse_tensor)->resize_(self.sparse_dim(), self.dense_dim(), self.sizes());
   get_sparse_impl(sparse_tensor)->set_indices_and_values_unsafe(indices_tensor, values_tensor);
+  if(self.is_coalesced()) {
+    get_sparse_impl(sparse_tensor)->set_coalesced(true);
+  }
 
   return sparse_tensor;
 

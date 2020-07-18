@@ -24,16 +24,17 @@ def load_conv2_sparse_weight_reshape():
 def test_lenet5_sparse01_conv2():
 
     di = torch.rand(1, 20, 12, 12)
+    hb_di = di.hammerblade()
 
     cpu_i = convert_dense_input(di, 5, 5)
     cpu_sw = load_conv2_sparse_weight_reshape()
     cpu_out = torch.sparse.mm(cpu_sw, cpu_i)
-    print(cpu_out)
 
-    hb_i = cpu_i.hammerblade()
+   # hb_i = cpu_i.hammerblade()
+    hb_i = convert_dense_input(hb_di, 5, 5)
     hb_sw = cpu_sw.hammerblade()
     hb_out = torch.sparse.mm(hb_sw, hb_i)
-    print(hb_out)
+
     out2 = hb_out.cpu()
 
     assert torch.allclose(cpu_out, out2, atol=1e-6)

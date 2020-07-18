@@ -8,7 +8,7 @@ def fancy_print(route):
   for waypoint in route:
     print(waypoint)
 
-with open('cmd.json',) as f:
+with open('conv2_spmm.json',) as f:
   route = json.load(f)
 
 fancy_print(route)
@@ -16,22 +16,25 @@ print()
 
 print("total number of jobs: " + str(len(route)))
 
-for i in [37]:
-  for j in range(10):
+for i in range(len(route)):
+  for j in range(20):
     cmd = copy.deepcopy(route)
     cmd[i]['offload'] = True
     fancy_print(cmd)
     print()
-    name = "recsys_kernel_%03d_xeon_%02d" % (i, j)
+    name = "conv2_spmm_xeon_%d_%d" % (i, j)
     sh_cmd = "mkdir -p " + name
     print(sh_cmd)
     os.system(sh_cmd)
-    with open(name + "/cmd.json", 'w') as outfile:
+    with open(name + "/conv2_spmm.json", 'w') as outfile:
       json.dump(cmd, outfile, indent=4, sort_keys=True)
-    sh_cmd = "ln -s /work/global/lc873/work/sdh/playground/recsys_data/pytorch-apps/recsys/data " + name + "/data"
+    sh_cmd = "cp LeNet_5.prune.conv.fc.pth.tar " + name + "/"
     print(sh_cmd)
     os.system(sh_cmd)
-    script = "(cd " + name + "; python /work/global/lc873/work/sdh/playground/recsys_data/pytorch-apps/recsys/recsys.py --batch-size 256 --nbatch 1 --training > out.std 2>&1)"
+   # sh_cmd = "ln -s /work/global/lc873/work/sdh/playground/recsys_data/pytorch-apps/recsys/data " + name + "/data"
+   # print(sh_cmd)
+   # os.system(sh_cmd)
+    script = "(cd " + name + "; python -m pytest /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_lowerspmm_profiler.py > out.std 2>&1)"
     with open(name + "/run.sh", 'w') as outfile:
       outfile.write(script)
     print("starting cosim job ...")

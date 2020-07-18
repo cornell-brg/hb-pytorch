@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 import json
+import pytest
 
 def convert_dense_input(x, r, s):
     stride = (1, 1)
@@ -21,7 +22,7 @@ def load_conv2_sparse_weight():
     return conv2_weight
 
 def test_lenet5_sparse01_conv2():
-
+    torch.hammerblade.init()
     di = torch.rand(1, 20, 12, 12)
     cpu_sw = load_conv2_sparse_weight().to_sparse()
    # cpu_i = convert_dense_input(di, 5, 5)
@@ -40,8 +41,8 @@ def test_lenet5_sparse01_conv2():
     data = json.loads(route)
     torch.hammerblade.profiler.route.set_route_from_json(data)
     torch.hammerblade.profiler.enable()
-    hb_i = di.hammerblade()
-    hb_sw = cpu_sw.hammerblade()
+#    hb_i = di.hammerblade()
+#    hb_sw = cpu_sw.hammerblade()
     hb_out = F.conv2d(di, cpu_sw, bias = None, stride = 1, padding = 0, dilation = 1)
     torch.hammerblade.profiler.disable()
     #print(torch.hammerblade.profiler.exec_time.raw_stack())
