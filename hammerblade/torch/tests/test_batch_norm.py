@@ -86,6 +86,12 @@ def _test_BatchNorm2d(n, inputs, affine=True):
     bn = torch.nn.BatchNorm2d(n, affine=affine)
     bn_hb = torch.nn.BatchNorm2d(n, affine=affine).hammerblade()
 
+    # num_batches_tracked is BatchNorm2d's metadata and its data type
+    # is int64. HB doesn't support operations on this and since this
+    # metadata is independent to the core computation of BatchNorm2d,
+    # we move this to CPU.
+    bn_hb.move_buffers_to_cpu(torch.nn.BatchNorm2d, ['num_batches_tracked'])
+
     out = bn(inputs)
     out_hb = bn_hb(inputs_hb)
 
