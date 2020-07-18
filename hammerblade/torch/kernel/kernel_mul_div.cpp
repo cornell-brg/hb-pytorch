@@ -26,7 +26,7 @@ extern "C" {
     */
 
     
-    hb_tiled_foreach_unroll<6>(c, a, b,
+    hb_tiled_foreach_unroll<10>(c, a, b,
         [&](float a, float b) {
           return a * b;
         });

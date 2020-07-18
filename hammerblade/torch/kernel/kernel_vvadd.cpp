@@ -1093,7 +1093,7 @@ extern "C" {
     );
     */
     
-    hb_tiled_foreach_unroll<2>(result, self, other, 
+    hb_tiled_foreach_unroll<4>(result, self, other, 
       [&](float self, float other) {
         return self + other;
       }
