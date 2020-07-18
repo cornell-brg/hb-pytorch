@@ -297,16 +297,7 @@ class Module(object):
         Returns:
             Module: self
         """
-        def apply_hb(t):
-            if isinstance(self, torch.nn.BatchNorm2d) and \
-                    (t.dtype == torch.int64):
-                # BatchNorm2d's batch counter is a long tensor. Since it is metadata
-                # for BatchNorm2d module, it is efficient for it to stay on the host.
-                return t
-            else:
-                return t.hammerblade()
-
-        return self._apply(lambda t: apply_hb(t))
+        return self._apply(lambda t: t.hammerblade())
 
     def cuda(self, device=None):
         r"""Moves all model parameters and buffers to the GPU.
@@ -367,19 +358,20 @@ class Module(object):
         """
         return self._apply(lambda t: t.half() if t.is_floating_point() else t)
 
-    def cast_long_buffers_to_int(self):
-        r"""Casts all Long buffers to Int datatype.
+    def move_buffers_to_cpu(self, module_class, buffers=[]):
+        r"""Moves buffers listed in ``buffers`` to CPU. This is useful
+        when device doesn't support data type of some buffers.
 
         Returns:
             Module: self
         """
         for module in self.children():
-            module.cast_buffers_long_to_int()
+            module.move_buffers_to_cpu( module_class, buffers)
 
         for key, buf in self._buffers.items():
-            print(key)
-            if buf is not None and buf.dtype == torch.long:
-                self._buffers[key] = buf.int()
+            if buf is not None and isinstance(self, module_class) \
+                    and key in buffers:
+                self._buffers[key] = buf.cpu()
 
     def to(self, *args, **kwargs):
         r"""Moves and/or casts the parameters and buffers.
