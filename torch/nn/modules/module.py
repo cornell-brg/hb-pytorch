@@ -367,6 +367,20 @@ class Module(object):
         """
         return self._apply(lambda t: t.half() if t.is_floating_point() else t)
 
+    def cast_long_buffers_to_int(self):
+        r"""Casts all Long buffers to Int datatype.
+
+        Returns:
+            Module: self
+        """
+        for module in self.children():
+            module.cast_buffers_long_to_int()
+
+        for key, buf in self._buffers.items():
+            print(key)
+            if buf is not None and buf.dtype == torch.long:
+                self._buffers[key] = buf.int()
+
     def to(self, *args, **kwargs):
         r"""Moves and/or casts the parameters and buffers.
 
