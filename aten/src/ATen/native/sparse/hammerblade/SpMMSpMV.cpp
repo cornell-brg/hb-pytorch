@@ -75,7 +75,7 @@ Tensor _sparse_mm_hb(const SparseTensor& sparse, const Tensor& dense) {
   return result;
 }
 
-Tensor _sparse_mv_hb(const SparseTensor& sparse, const Tensor& dense) {
+Tensor mv_hb_sparse(const SparseTensor& sparse, const Tensor& dense) {
   TORCH_CHECK(sparse.is_hammerblade(), "SpMV: expected 'mat1' to be a HammerBlade tensor");
   TORCH_CHECK(dense.is_hammerblade(), "SpMV: expected 'mat2' to be a HammerBlade tensor");
 

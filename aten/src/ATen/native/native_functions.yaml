@@ -1961,7 +1961,8 @@
   dispatch:
     CPU: legacy::cpu::_th_mv
     CUDA: legacy::cuda::_th_mv
-    SparseHammerBlade: _sparse_mv_hb
+    SparseCPU: mv_sparse
+    SparseHammerBlade: mv_hb_sparse
   supports_named_tensor: True
 
 - func: mv.out(Tensor self, Tensor vec, *, Tensor(a!) out) -> Tensor(a!)
