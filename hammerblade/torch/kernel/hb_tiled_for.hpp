@@ -569,32 +569,24 @@ struct Unroll {
 
 template<int N, typename T, typename Func>
 inline void Unroll<N, T, Func>::copy_from(T* src, T* dest, uint32_t stride){
-  //dest[N] = *(src + (i+N) * stride);
   dest[N] = src[N * stride];
-  //dest[N] = *src;
-  //src += stride;
   Unroll<N-1, T, Func>::copy_from(src, dest, stride);
 }
 
 template<int N, typename T, typename Func>
 inline void Unroll<N, T, Func>::copy_to(T* src, T* dest, uint32_t stride){
-  //*(dest + (i+N) * stride) = src[N];
   dest[N * stride] = src[N];
   Unroll<N-1, T, Func>::copy_to(src, dest, stride);
 }
 
 template<int N, typename T, typename Func>
 inline void Unroll<N, T, Func>::copy_from(T* src, T* dest){
-  //dest[N] = *(src + (i+N) * stride);
   dest[N] = src[N];
-  //dest[N] = *src;
-  //src += stride;
   Unroll<N-1, T, Func>::copy_from(src, dest);
 }
 
 template<int N, typename T, typename Func>
 inline void Unroll<N, T, Func>::copy_to(T* src, T* dest){
-  //*(dest + (i+N) * stride) = src[N];
   dest[N] = src[N];
   Unroll<N-1, T, Func>::copy_to(src, dest);
 }
@@ -733,15 +725,25 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
 
     size_t i;
     for (i = start; i + N < end; i += N) {
-      Unroll<N-1, scalar_t, F>::copy_from(data[1] + i * strides[1], x, strides[1]);
-      Unroll<N-1, scalar_t, F>::copy_from(data[2] + i * strides[2], y, strides[2]);
-      Unroll<N-1, scalar_t, F>::copy_from(data[3] + i * strides[3], x, strides[3]);
+      // Compile-time loop functions to copy the tensor elements
+      if (strides[1] == 1) { Unroll<N-1, scalar_t, F>::copy_from(data[1] + i, x); }
+      else { Unroll<N-1, scalar_t, F>::copy_from(data[1] + i*strides[1], x, strides[1]); }
 
+      if (strides[2] == 1) { Unroll<N-1, scalar_t, F>::copy_from(data[2] + i, y); }
+      else { Unroll<N-1, scalar_t, F>::copy_from(data[2] + i*strides[2], y, strides[2]); }
+
+      if (strides[2] == 1) { Unroll<N-1, scalar_t, F>::copy_from(data[3] + i, y); }
+      else { Unroll<N-1, scalar_t, F>::copy_from(data[3] + i*strides[3], z, strides[3]); }
+
+      // Compile-time loop function to perform the functor
       Unroll<N-1, scalar_t, F>::compute(res, x, y, z, functor);
       
-      Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i * strides[0], strides[0]);
+      // Compile-time loop function to copy back to the tensor
+      if (strides[0] == 1) { Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i); }
+      else { Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i*strides[0], strides[0]); }
     }
     for (; i < end; i++) {
+      // Remaining elements
       scalar_t x = *(data[1] + i * strides[1]);
       scalar_t y = *(data[2] + i * strides[2]);
       scalar_t z = *(data[3] + i * strides[3]);
@@ -752,6 +754,7 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
   else {
     size_t i = start;
     for (size_t i = start; i < end; i++) {
+      // Non-contiguous memory tensors
       scalar_t x = *(data[1] + offset_calc(i, input1));
       scalar_t y = *(data[2] + offset_calc(i, input2));
       scalar_t z = *(data[3] + offset_calc(i, input3));
@@ -799,39 +802,27 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
     scalar_t res[N];
 
     size_t i;
-    for (i = start ; i + N < end ; i += N) {
-      
+    for (i = start ; i + N < end ; i += N) {      
       // Compile-time loop functions to copy the tensor elements
-      //Unroll<N-1, scalar_t, F>::copy_from(data[1], y, i, strides[1]);
       if (strides[1] == 1) { Unroll<N-1, scalar_t, F>::copy_from(data[1] + i, x); }
       else { Unroll<N-1, scalar_t, F>::copy_from(data[1] + i*strides[1], x, strides[1]); }
 
       if (strides[2] == 1) { Unroll<N-1, scalar_t, F>::copy_from(data[2] + i, y); }
       else { Unroll<N-1, scalar_t, F>::copy_from(data[2] + i*strides[2], y, strides[2]); }
 
-      //Unroll<N-1, scalar_t, F>::copy_from(&input, y, i);
-      ///Unroll<N-1, scalar_t, F>::copy_from(&other, x, i);
-
       // Compile-time loop function to perform the functor
       Unroll<N-1, scalar_t, F>::compute(res, x, y, functor);
       
       // Compile-time loop function to copy back to the tensor
-      if (strides[0] == 1) {
-        Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i);
-      }
-      else {
-        Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i * strides[0], strides[0]);
-      }
-      //Unroll<N-1, scalar_t, F>::copy_to(res, &result, i);
-
+      if (strides[0] == 1) { Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i); }
+      else { Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i*strides[0], strides[0]); }
     }
     for (; i < end ; i++) {
+      // Remaining elements 
       scalar_t x = *(data[1] + i * strides[1]);
       scalar_t y = *(data[2] + i * strides[2]);
       scalar_t res = functor(x, y);
       *(data[0] + strides[0]*i) = res;
-      
-      //i++;
     }
   }
   
@@ -878,11 +869,19 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
 
     size_t i;
     for (i = start; i + N < end; i += N) {
-      Unroll<N-1, scalar_t, F>::copy_from(data[1] + i * strides[1], x, strides[1]);
+      // Compile-time loop functions to copy the tensor elements
+      if (strides[1] == 1) { Unroll<N-1, scalar_t, F>::copy_from(data[1] + i, x); }
+      else { Unroll<N-1, scalar_t, F>::copy_from(data[1] + i*strides[1], x, strides[1]); }
+
+      // Compile-time loop function to perform the functor
       Unroll<N-1, scalar_t, F>::compute(res, x, functor);
-      Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i * strides[0], strides[0]);
+
+      // Compile-time loop function to copy back to the tensor
+      if (strides[0] == 1) { Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i); }
+      else { Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i*strides[0], strides[0]); }
     }
     for (; i < end; i++) {
+      // Remaining elements
       scalar_t x = *(data[1] + i * strides[1]);
       scalar_t res = functor(x);
       *(data[0] + i * strides[0]) = res;
@@ -926,15 +925,21 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
 
     size_t i = start;
     for (i = start; i + N < end; i += N) {
+      // Compile-time loop function to perform the functor
       Unroll<N-1, scalar_t, F>::compute(res, functor);
-      Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i * strides[0], strides[0]);
+
+      // Compile-time loop function to copy back to the tensor
+      if (strides[0] == 1) { Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i); }
+      else { Unroll<N-1, scalar_t, F>::copy_to(res, data[0] + i*strides[0], strides[0]); }
     }
     for (;i < end; i++) {
+      // Remaining elements
       scalar_t res = functor();
       *(data[0] + i * strides[0]) = res;
     }
   }
   else {
+    // Non-contiguous memory tensor
     for (size_t i = start; i < end; i++) {
       scalar_t res = functor();
       *(data[0] + offset_calc(i, result)) = res;
