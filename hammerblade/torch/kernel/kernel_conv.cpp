@@ -137,28 +137,23 @@ extern "C" {
     hb_tiled_foreach([]() {return 0.0;}, x);
     g_barrier.sync();
 
+    hb_tiled_for(N * Cin, [&](size_t i) {
+        uint32_t ci = i % Cin;
+        uint32_t n  = (i / Cin) % n;
 
-    // Preliminary single tile implementation
-    //
-    // Grows O(^5) with image size:
-    //   N x Cout x Cin x H x W
-    //   Kernel loops are constant-time
-    if(__bsg_id == 0) {
-      for(uint32_t n = 0; n < N; ++n)
         for(uint32_t co = 0; co < Cout; ++co)
           for(uint32_t yh = 0; yh < Hout; ++yh)
             for(uint32_t yw = 0; yw < Wout; ++yw)
-              for(uint32_t ci = 0; ci < Cin; ++ci)
-                for(uint32_t kh = 0; kh < Kh; ++kh)
-                  for(uint32_t kw = 0; kw < Kw; ++kw) {
-                    int32_t xh = Sh * yh - Ph + kh;
-                    int32_t xw = Sw * yw - Pw + kw;
+              for(uint32_t kh = 0; kh < Kh; ++kh)
+                for(uint32_t kw = 0; kw < Kw; ++kw) {
+                  int32_t xh = Sh * yh - Ph + kh;
+                  int32_t xw = Sw * yw - Pw + kw;
 
-                    if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                      x(n, ci, xh, xw) += y(n, co, yh, yw) * w(co, ci, kh, kw);
-                    } // else 0
-                  }
-    }
+                  if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+                    x(n, ci, xh, xw) += y(n, co, yh, yw) * w(co, ci, kh, kw);
+                  } // else 0
+                }
+    });
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
@@ -197,19 +192,16 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
+    // init weight grads
+    hb_tiled_foreach([]() {return 0.0;}, w);
+    g_barrier.sync();
+
     // Preliminary single tile implementation
     //
     // Grows O(^5) with image size:
     //   N x Cout x Cin x H x W
     //   Kernel loops are constant-time
     if(__bsg_id == 0) {
-      // init weight grad
-      for(uint32_t ci = 0; ci < Cin; ++ci)
-        for(uint32_t co = 0; co < Cout; ++co)
-          for(uint32_t kh = 0; kh < Kh; ++kh)
-            for(uint32_t kw = 0; kw < Kw; ++kw)
-              w(co, ci, kh, kw) = 0.0f;
-
       for(uint32_t n = 0; n < N; ++n)
         for(uint32_t co = 0; co < Cout; ++co)
           for(uint32_t yh = 0; yh < Hout; ++yh)
