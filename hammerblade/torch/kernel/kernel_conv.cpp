@@ -40,29 +40,24 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_for(N * Cout * Hout * Wout, [&](size_t i) {
-        uint32_t yw = i % Wout;
-        uint32_t yh = (i / Wout) % Hout;
-        uint32_t co = (i / (Hout * Wout)) % Cout;
-        uint32_t n  = (i / (Cout * Hout * Wout)) % N;
-
-        for(uint32_t ci = 0; ci < Cin; ++ci) {
-          for(uint32_t kh = 0; kh < Kh; ++kh) {
-            for(uint32_t kw = 0; kw < Kw; ++kw) {
-              if((ci + kh + kw) == 0) {
-                y(n, co, yh, yw) = 0.0;
-              }
-
-              int32_t xh = Sh * yh - Ph + kh;
-              int32_t xw = Sw * yw - Pw + kw;
-
-              if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                y(n, co, yh, yw) += x(n, ci, xh, xw) * w(co, ci, kh, kw);
-              } // else 0
+    hb_tiled_for([&](size_t n, size_t co, size_t yh, size_t yw) {
+      for(uint32_t ci = 0; ci < Cin; ++ci) {
+        for(uint32_t kh = 0; kh < Kh; ++kh) {
+          for(uint32_t kw = 0; kw < Kw; ++kw) {
+            if((ci + kh + kw) == 0) {
+              y(n, co, yh, yw) = 0.0;
             }
+
+            int32_t xh = Sh * yh - Ph + kh;
+            int32_t xw = Sw * yw - Pw + kw;
+
+            if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+              y(n, co, yh, yw) += x(n, ci, xh, xw) * w(co, ci, kh, kw);
+            } // else 0
           }
         }
-    });
+      }
+    }, N, Cout, Hout, Wout);
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
@@ -137,23 +132,20 @@ extern "C" {
     hb_tiled_foreach([]() {return 0.0;}, x);
     g_barrier.sync();
 
-    hb_tiled_for(N * Cin, [&](size_t i) {
-        uint32_t ci = i % Cin;
-        uint32_t n  = (i / Cin) % N;
+    hb_tiled_for([&](size_t n, size_t ci) {
+      for(uint32_t co = 0; co < Cout; ++co)
+        for(uint32_t yh = 0; yh < Hout; ++yh)
+          for(uint32_t yw = 0; yw < Wout; ++yw)
+            for(uint32_t kh = 0; kh < Kh; ++kh)
+              for(uint32_t kw = 0; kw < Kw; ++kw) {
+                int32_t xh = Sh * yh - Ph + kh;
+                int32_t xw = Sw * yw - Pw + kw;
 
-        for(uint32_t co = 0; co < Cout; ++co)
-          for(uint32_t yh = 0; yh < Hout; ++yh)
-            for(uint32_t yw = 0; yw < Wout; ++yw)
-              for(uint32_t kh = 0; kh < Kh; ++kh)
-                for(uint32_t kw = 0; kw < Kw; ++kw) {
-                  int32_t xh = Sh * yh - Ph + kh;
-                  int32_t xw = Sw * yw - Pw + kw;
-
-                  if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                    x(n, ci, xh, xw) += y(n, co, yh, yw) * w(co, ci, kh, kw);
-                  } // else 0
-                }
-    });
+                if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+                  x(n, ci, xh, xw) += y(n, co, yh, yw) * w(co, ci, kh, kw);
+                } // else 0
+              }
+    }, N, Cin);
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
@@ -196,23 +188,20 @@ extern "C" {
     hb_tiled_foreach([]() {return 0.0;}, w);
     g_barrier.sync();
 
-    hb_tiled_for(Cout * Cin, [&](size_t i) {
-        uint32_t ci = i % Cin;
-        uint32_t co  = (i / Cin) % Cout;
+    hb_tiled_for([&](size_t co, size_t ci) {
+      for(uint32_t n = 0; n < N; ++n)
+        for(uint32_t yh = 0; yh < Hout; ++yh)
+          for(uint32_t yw = 0; yw < Wout; ++yw)
+            for(uint32_t kh = 0; kh < Kh; ++kh)
+              for(uint32_t kw = 0; kw < Kw; ++kw) {
+                int32_t xh = Sh * yh - Ph + kh;
+                int32_t xw = Sw * yw - Pw + kw;
 
-        for(uint32_t n = 0; n < N; ++n)
-          for(uint32_t yh = 0; yh < Hout; ++yh)
-            for(uint32_t yw = 0; yw < Wout; ++yw)
-              for(uint32_t kh = 0; kh < Kh; ++kh)
-                for(uint32_t kw = 0; kw < Kw; ++kw) {
-                  int32_t xh = Sh * yh - Ph + kh;
-                  int32_t xw = Sw * yw - Pw + kw;
-
-                  if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                    w(co, ci, kh, kw) += y(n, co, yh, yw) * x(n, ci, xh, xw);
-                  } // else 0
-                }
-    });
+                if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+                  w(co, ci, kh, kw) += y(n, co, yh, yw) * x(n, ci, xh, xw);
+                } // else 0
+              }
+    }, Cout, Cin);
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
