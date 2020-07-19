@@ -133,19 +133,24 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
+    // init input grads
+    hb_tiled_for(N * Cin * Hin * Win, [&](size_t i) {
+        uint32_t xw = i % Win;
+        uint32_t xh = (i / Win) % Hin;
+        uint32_t ci = (i / (Hin * Win)) % Cin;
+        uint32_t n  = (i / (Cin * Hin * Win)) % N;
+
+        x(n, ci, xh, xw) = 0.0;
+    });
+    g_barrier.sync();
+
+
     // Preliminary single tile implementation
     //
     // Grows O(^5) with image size:
     //   N x Cout x Cin x H x W
     //   Kernel loops are constant-time
     if(__bsg_id == 0) {
-      // init input grads
-      for(uint32_t n = 0; n < N; ++n)
-        for(uint32_t ci = 0; ci < Cin; ++ci)
-          for(uint32_t xh = 0; xh < Hin; ++xh)
-            for(uint32_t xw = 0; xw < Win; ++xw)
-              x(n, ci, xh, xw) = 0.0;
-
       for(uint32_t n = 0; n < N; ++n)
         for(uint32_t co = 0; co < Cout; ++co)
           for(uint32_t yh = 0; yh < Hout; ++yh)
