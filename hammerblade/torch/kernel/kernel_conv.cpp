@@ -134,14 +134,7 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
 
     // init input grads
-    hb_tiled_for(N * Cin * Hin * Win, [&](size_t i) {
-        uint32_t xw = i % Win;
-        uint32_t xh = (i / Win) % Hin;
-        uint32_t ci = (i / (Hin * Win)) % Cin;
-        uint32_t n  = (i / (Cin * Hin * Win)) % N;
-
-        x(n, ci, xh, xw) = 0.0;
-    });
+    hb_tiled_foreach([]() {return 0.0;}, x);
     g_barrier.sync();
 
 
