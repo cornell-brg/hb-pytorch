@@ -372,6 +372,58 @@ inline void hb_tiled_for(size_t numel, FetchFunctor functor) {
   }
 }
 
+template <class FetchFunctor, typename... T>
+inline void hb_tiled_for(FetchFunctor functor, T... numels_) {
+  //--------------------------------------
+  // calculate start and end for this tile
+  //--------------------------------------
+  hb_range range;
+  calc_range(&range, numel);
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  //-----------------
+  // loop
+  //----------------
+  size_t numels[] = {numels_...};
+  size_t nargs = sizeof(numels) / sizeof(numels[0]);
+  size_t total_numel = 0;
+  UNROLL(4) for(size_t i = 0; i < nargs; ++i) {
+    total_numel *= numels[i];
+  }
+
+  for (size_t i = start; i < end; i++) {
+    switch(nargs) {
+      case 2: {
+        size_t a = (i / numels[1]) % numels[0];
+        size_t b = i % numels[1];
+        functor(a, b);
+        break;
+      }
+      
+      case 3: {
+        size_t a = (i / (numels[1] * numels[2]) % numels[0];
+        size_t b = (i / numels[2]) % numels[1];
+        size_t c = i % numels[2];
+        functor(a, b, c);
+        break;
+      }
+
+      case 4: {
+        size_t a = (i / (numels[1] * numels[2] * numels[3]) % numels[0];
+        size_t b = (i / (numels[2] * numels[3]) % numels[1];
+        size_t c = (i / numels[3]) % numels[2];
+        size_t d = i % numels[3];
+        functor(a, b, c, d);
+        break;
+      }
+
+      default:
+        functor(i);
+    }
+  }
+}
+
 // =========================================================
 // HB tile range
 // =========================================================
