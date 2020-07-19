@@ -235,17 +235,16 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    if(__bsg_id == 0) {
+    hb_tiled_for(Cout, [&](size_t co) {
       for(uint32_t n = 0; n < N; ++n)
-        for(uint32_t co = 0; co < Cout; ++co)
-          for(uint32_t yh = 0; yh < Hout; ++yh)
-            for(uint32_t yw = 0; yw < Wout; ++yw) {
-              if((n + yh + yw) == 0)
-                gb(co) = 0.0f;
+        for(uint32_t yh = 0; yh < Hout; ++yh)
+          for(uint32_t yw = 0; yw < Wout; ++yw) {
+            if((n + yh + yw) == 0)
+              gb(co) = 0.0f;
 
-              gb(co) += y(n, co, yh, yw);
-            }
-    }
+            gb(co) += y(n, co, yh, yw);
+          }
+    });
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
