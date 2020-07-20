@@ -366,7 +366,7 @@ class Module(object):
             Module: self
         """
         for module in self.children():
-            module.move_buffers_to_cpu( module_class, buffers)
+            module.move_buffers_to_cpu(module_class, buffers)
 
         for key, buf in self._buffers.items():
             if buf is not None and isinstance(self, module_class) \
