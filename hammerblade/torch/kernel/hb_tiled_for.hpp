@@ -732,7 +732,7 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
       if (strides[2] == 1) { Unroll<N-1, scalar_t, F>::copy_from(data[2] + i, y); }
       else { Unroll<N-1, scalar_t, F>::copy_from(data[2] + i*strides[2], y, strides[2]); }
 
-      if (strides[2] == 1) { Unroll<N-1, scalar_t, F>::copy_from(data[3] + i, y); }
+      if (strides[3] == 1) { Unroll<N-1, scalar_t, F>::copy_from(data[3] + i, z); }
       else { Unroll<N-1, scalar_t, F>::copy_from(data[3] + i*strides[3], z, strides[3]); }
 
       // Compile-time loop function to perform the functor

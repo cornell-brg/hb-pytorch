@@ -3,6 +3,9 @@
 // 03/05/2020 Lin Cheng and Bandhav Veluri (lc873@cornell.edu)
 //====================================================================
 
+// Uses hb_tiled_foreach_unroll with an unrolling factor of 8
+// Tested to be optimum for 4x4 Bladerunner
+
 #include <kernel_common.hpp>
 
 // We wrap all external-facing C++ kernels with `extern "C"` to
@@ -31,7 +34,7 @@ extern "C" {
     */
     
     
-    hb_tiled_foreach_unroll<14>(c, a, b,
+    hb_tiled_foreach_unroll<8>(c, a, b,
       [&](float a, float b) {
         return a + alpha * b;
     });

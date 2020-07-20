@@ -3,6 +3,9 @@
 // 03/06/2020 Lin Cheng (lc873@cornell.edu)
 //====================================================================
 
+// Uses hb_tiled_foreach_unroll with an unrolling factor of 6
+// Tested to be optimum for 4x4 Bladerunner
+
 #include <kernel_common.hpp>
 #include <cmath>
 
