@@ -18,7 +18,7 @@ extern "C" {
     auto input = HBTensor<float>(t1_p);
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    hb_tiled_foreach(res, input,
+    hb_tiled_foreach_unroll<10>(res, input,
       [&](float a) {
         return floor(a);
     });
