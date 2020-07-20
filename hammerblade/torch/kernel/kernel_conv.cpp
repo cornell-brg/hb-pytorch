@@ -40,23 +40,24 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
       
-    for(uint32_t ci = 0; ci < Cin; ++ci) // input channel first to maximum data reuse
-      hb_tiled_for([&](size_t n, size_t co, size_t yh, size_t yw) {
-        for(uint32_t kh = 0; kh < Kh; ++kh) {
-          for(uint32_t kw = 0; kw < Kw; ++kw) {
-            if((ci + kh + kw) == 0) {
-              y(n, co, yh, yw) = 0.0;
+    for(uint32_t n = 0; n < N; ++n)
+      for(uint32_t ci = 0; ci < Cin; ++ci) // input channel first to maximum data reuse
+        hb_tiled_for([&](size_t co, size_t yh, size_t yw) {
+          for(uint32_t kh = 0; kh < Kh; ++kh) {
+            for(uint32_t kw = 0; kw < Kw; ++kw) {
+              if((ci + kh + kw) == 0) {
+                y(n, co, yh, yw) = 0.0;
+              }
+
+              int32_t xh = Sh * yh - Ph + kh;
+              int32_t xw = Sw * yw - Pw + kw;
+
+              if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+                y(n, co, yh, yw) += x(n, ci, xh, xw) * w(co, ci, kh, kw);
+              } // else 0
             }
-
-            int32_t xh = Sh * yh - Ph + kh;
-            int32_t xw = Sw * yw - Pw + kw;
-
-            if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-              y(n, co, yh, yw) += x(n, ci, xh, xw) * w(co, ci, kh, kw);
-            } // else 0
           }
-        }
-      }, N, Cout, Hout, Wout);
+        }, Cout, Hout, Wout);
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
