@@ -194,19 +194,17 @@ extern "C" {
     g_barrier.sync();
 
     for(uint32_t n = 0; n < N; ++n)
-      hb_tiled_for([&](size_t co, size_t ci) {
+      hb_tiled_for([&](size_t co, size_t ci, size_t kh, size_t kw) {
         for(uint32_t yh = 0; yh < Hout; ++yh)
-          for(uint32_t yw = 0; yw < Wout; ++yw)
-            for(uint32_t kh = 0; kh < Kh; ++kh)
-              for(uint32_t kw = 0; kw < Kw; ++kw) {
-                int32_t xh = Sh * yh - Ph + kh;
-                int32_t xw = Sw * yw - Pw + kw;
+          for(uint32_t yw = 0; yw < Wout; ++yw){
+            int32_t xh = Sh * yh - Ph + kh;
+            int32_t xw = Sw * yw - Pw + kw;
 
-                if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                  w(co, ci, kh, kw) += y(n, co, yh, yw) * x(n, ci, xh, xw);
-                } // else 0
-              }
-      }, Cout, Cin);
+            if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+              w(co, ci, kh, kw) += y(n, co, yh, yw) * x(n, ci, xh, xw);
+            } // else 0
+          }
+      }, Cout, Cin, Kh, Kw);
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
