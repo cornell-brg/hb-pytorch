@@ -193,8 +193,8 @@ extern "C" {
     hb_tiled_foreach([]() {return 0.0;}, w);
     g_barrier.sync();
 
-    hb_tiled_for([&](size_t co, size_t ci) {
-      for(uint32_t n = 0; n < N; ++n)
+    for(uint32_t n = 0; n < N; ++n)
+      hb_tiled_for([&](size_t co, size_t ci) {
         for(uint32_t yh = 0; yh < Hout; ++yh)
           for(uint32_t yw = 0; yw < Wout; ++yw)
             for(uint32_t kh = 0; kh < Kh; ++kh)
@@ -206,7 +206,7 @@ extern "C" {
                   w(co, ci, kh, kw) += y(n, co, yh, yw) * x(n, ci, xh, xw);
                 } // else 0
               }
-    }, Cout, Cin);
+      }, Cout, Cin);
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
