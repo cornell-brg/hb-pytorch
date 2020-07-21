@@ -134,14 +134,20 @@ extern "C" {
 
     hb_tiled_for([&](size_t n, size_t ci) {
       for(uint32_t co = 0; co < Cout; ++co)
-        for(uint32_t yh = 0; yh < Hout; ++yh)
-          for(uint32_t yw = 0; yw < Wout; ++yw)
+        for(uint32_t xh = 0; xh < Hin; ++xh)
+          for(uint32_t xw = 0; xw < Win; ++xw)
             for(uint32_t kh = 0; kh < Kh; ++kh)
               for(uint32_t kw = 0; kw < Kw; ++kw) {
-                int32_t xh = Sh * yh - Ph + kh;
-                int32_t xw = Sw * yw - Pw + kw;
+                uint32_t rel_h = xh - kh + Ph;
+                uint32_t rel_w = xw - kw + Pw;
 
-                if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+                if((rel_h % Sh != 0) || (rel_w % Sw != 0))
+                  continue;
+
+                uint32_t yh = rel_h / Sh;
+                uint32_t yw = rel_w / Sw;
+
+                if(yh >= 0 && yh < Hout && yw >= 0 && yw < Wout) {
                   x(n, ci, xh, xw) += y(n, co, yh, yw) * w(co, ci, kh, kw);
                 } // else 0
               }
