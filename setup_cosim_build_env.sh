@@ -43,6 +43,8 @@ else
   export BSG_MANYCORE_LDPATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries/platforms/aws-vcs
 fi
 
+export USE_HB_COSIM=1
+
 # Build COSIM runtime library and simulation executable
 export BSG_MACHINE=4x4_fast_n_fake
 export BSG_MACHINE_PATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/machines/$BSG_MACHINE
