@@ -43,6 +43,8 @@ else
   export BSG_MANYCORE_LDPATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries/platforms/aws-vcs
 fi
 
+export USE_HB_COSIM=1
+
 # Build COSIM runtime library and simulation executable if not using one of the
 # BRG servers -- on BRG servers we have global installed COSIM so SW side ppl
 # dont have to worry about COSIM installation
