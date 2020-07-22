@@ -552,18 +552,33 @@ inline void hb_tiled_range(size_t numel, FetchFunctor functor) {
   functor(start, end);
 }
 
-
-
+//===================================================================
+// Unroll struct to hold the helper functions with compile-time loops
+// N    : Number of iterations
+// T    : Typename of tensor element
+// Func : Typename for functor
+//===================================================================
 template<int N, typename T, typename Func>
 struct Unroll {
+  // Function to copy tensor elements (src) to temp array (dest) accounting
+  // for strides (stride)
   inline static void copy_from(T* src, T* dest, uint32_t stride);
+  // Function to copy temp array (src) to tensor (dest) accounting
+  // for strides (stride)
   inline static void copy_to(T* src, T* dest, uint32_t stride);
+  // Function to copy contiguous tensor elements (src) to temp array (dest) 
   inline static void copy_from(T* src, T* dest);
+  // Function to copy temp array (src) to contiguous tensor (dest) 
   inline static void copy_to(T* src, T* dest);
+  // Function to perform ternary functor res = functor(x, y, z)
   inline static void compute(T* res, T* x, T* y, T* z, Func functor);
+  // Function to perform binary functor res = functor(x, y)
   inline static void compute(T* res, T* x, T* y, Func functor);
+  // Function to perform unary functor res = functor(x)
   inline static void compute(T* res, T* x, Func functor);
+  // Function to perform nullary functor res = functor()
   inline static void compute(T* res, Func functor);
+  //Function to perform functor (hb_tiled_for_unroll)
   inline static void compute(Func functor, size_t i);
 };
 
@@ -590,7 +605,6 @@ inline void Unroll<N, T, Func>::copy_to(T* src, T* dest){
   dest[N] = src[N];
   Unroll<N-1, T, Func>::copy_to(src, dest);
 }
-
 
 template<int N, typename T, typename Func>
 inline void Unroll<N, T, Func>::compute(T* res, T* x, T* y, T* z, Func functor){
@@ -622,6 +636,9 @@ inline void Unroll<N, T, Func>::compute(Func functor, size_t i){
   Unroll<N-1, T, Func>::compute(functor, i);
 }
 
+//===================================================================
+// Specialization for the Unroll struct for when N = 0 (end loop)
+//===================================================================
 template<typename T, typename Func>
 struct Unroll<0, T, Func> {
   inline static void copy_from(T* src, T* dest, uint32_t stride);
@@ -637,25 +654,21 @@ struct Unroll<0, T, Func> {
 
 template<typename T, typename Func>
 inline void Unroll<0, T, Func>::copy_from(T* src, T* dest, uint32_t stride){
-  //dest[0] = *(src + i * stride);
   dest[0] = src[0];
 }
 
 template<typename T, typename Func>
 inline void Unroll<0, T, Func>::copy_to(T* src, T* dest, uint32_t stride){
-  //*(dest + i * stride) = src[0];
   dest[0] = src[0];
 }
 
 template<typename T, typename Func>
 inline void Unroll<0, T, Func>::copy_from(T* src, T* dest){
-  //dest[0] = *(src + i * stride);
   dest[0] = src[0];
 }
 
 template<typename T, typename Func>
 inline void Unroll<0, T, Func>::copy_to(T* src, T* dest){
-  //*(dest + i * stride) = src[0];
   dest[0] = src[0];
 }
 
@@ -684,7 +697,9 @@ inline void Unroll<0, T, Func>::compute(Func functor, size_t i){
   functor(i);
 }
 
-// Tile element-wise for - Ternary ops
+//===================================================================
+// Tiled element-wise for with unrolling - Ternary ops
+//===================================================================
 
 template<int N, typename scalar_t, typename F>
 inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
@@ -701,10 +716,10 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
   //-----------------------------
   // iterating over all elementes
   //-----------------------------
-  size_t len_per_tile = result.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-  size_t start = len_per_tile * __bsg_id;
-  size_t end = start + len_per_tile;
-  end = (end > result.numel())  ? result.numel() : end;
+  hb_range range;
+  calc_range(&range, result.numel());
+  size_t start = range.start;
+  size_t end   = range.end;
 
   // is_trivial_1d
   if(result.ndim() == 1) {
@@ -764,8 +779,9 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
   }  
 }
 
-
-// Tile element-wise for - Binary ops
+//===================================================================
+// Tiled element-wise for with unrolling - Binary ops
+//===================================================================
 
 template<int N, typename scalar_t, typename F>
 inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
@@ -780,10 +796,10 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
   //-----------------------------
   // iterating over all elementes
   //-----------------------------
-  size_t len_per_tile = result.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-  size_t start = len_per_tile * __bsg_id;
-  size_t end = start + len_per_tile;
-  end = (end > result.numel())  ? result.numel() : end;
+  hb_range range;
+  calc_range(&range, result.numel());
+  size_t start = range.start;
+  size_t end   = range.end;
 
   // is_trivial_1d
   if(result.ndim() == 1) {
@@ -836,7 +852,9 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
   }  
 }
 
-// Tile element-wise for - Unary ops
+//===================================================================
+// Tiled element-wise for with unrolling - Unary ops
+//===================================================================
 
 template<int N, typename scalar_t, typename F>
 inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
@@ -849,10 +867,10 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
   //-----------------------------
   // iterating over all elementes
   //-----------------------------
-  size_t len_per_tile = result.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-  size_t start = len_per_tile * __bsg_id;
-  size_t end = start + len_per_tile;
-  end = (end > result.numel())  ? result.numel() : end;
+  hb_range range;
+  calc_range(&range, result.numel());
+  size_t start = range.start;
+  size_t end   = range.end;
 
   // is_trivial_1d
   if(result.ndim() == 1) {
@@ -896,7 +914,9 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
   }  
 }
 
-// Tile element-wise for - Nullary ops
+//===================================================================
+// Tiled element-wise for with unrolling - Nullary ops
+//===================================================================
 
 template<int N, typename scalar_t, typename F>
 inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
@@ -907,10 +927,10 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
   //-----------------------------
   // iterating over all elementes
   //-----------------------------
-  size_t len_per_tile = result.numel() / (bsg_tiles_X * bsg_tiles_Y) + 1;
-  size_t start = len_per_tile * __bsg_id;
-  size_t end = start + len_per_tile;
-  end = (end > result.numel())  ? result.numel() : end;
+  hb_range range;
+  calc_range(&range, result.numel());
+  size_t start = range.start;
+  size_t end   = range.end;
 
   // is_trivial_1d
   if(result.ndim() == 1) {
@@ -947,7 +967,9 @@ inline void hb_tiled_foreach_unroll(HBTensor<scalar_t> result,
   }  
 }
 
-// Tile element-wise for 
+//===================================================================
+// Tiled for with unrolling
+//===================================================================
 
 template<int N, typename Func>
 inline void hb_tiled_for_unroll(size_t numel, Func functor) {
@@ -955,10 +977,10 @@ inline void hb_tiled_for_unroll(size_t numel, Func functor) {
   //-----------------------------
   // iterating over all elementes
   //-----------------------------
-  size_t len_per_tile = numel / (bsg_tiles_X * bsg_tiles_Y) + 1;
-  size_t start = len_per_tile * __bsg_id;
-  size_t end = start + len_per_tile;
-  end = (end > numel)  ? numel : end;
+  hb_range range;
+  calc_range(&range, numel);
+  size_t start = range.start;
+  size_t end   = range.end;
 
   size_t i = start;
   while (i + N < end) {
