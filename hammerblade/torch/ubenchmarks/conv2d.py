@@ -14,6 +14,8 @@ if __name__ == "__main__":
     inputs = torch.rand(32, 16, 32, 32, requires_grad=True)
     kernel = torch.rand(32, 16, 3, 3, requires_grad=True)
 
+    output_ref = F.conv2d(inputs, kernel)
+
     if args.hammerblade:
         inputs = hbutils.init_hb_tensor(inputs)
         kernel = hbutils.init_hb_tensor(kernel)
@@ -22,3 +24,5 @@ if __name__ == "__main__":
     output = F.conv2d(inputs, kernel)
     hbprof.disable()
     print(hbprof.stats(key=['ExecTime']))
+
+    assert torch.allclose(output_ref, output.cpu())
