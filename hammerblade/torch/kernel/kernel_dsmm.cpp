@@ -11,7 +11,7 @@ extern "C" {
 
 
 /** 
- *  Dense-(sparse.T) matrix multiply.
+ *  Dense-sparse matrix multiply.
 */
   __attribute__ ((noinline))  int tensorlib_dstmm(
           hb_tensor_t* out_p, //destination
@@ -33,21 +33,6 @@ extern "C" {
     auto b_ncols = res.dim(1);
     auto nnz = b_vals.numel();
 
-    printf("bvals:"); 
-    for (int i = 0;i< b_vals.numel(); i++){
-      printf("%f, ", b_vals(i));
-    } printf("\n");
-
-    printf("brows:"); 
-    for (int i = 0;i< b_rows.numel(); i++){
-      printf("%i, ", b_rows(i));
-    } printf("\n");
-
-    printf("b_csc:"); 
-    for (int i = 0;i< b_csc.numel(); i++){
-      printf("%i, ", b_csc(i));
-    } printf("\n");
-
     // for each row of a, do the multiplication
     //(since this is a very even way to distribute the work)
     float sum;
@@ -59,13 +44,8 @@ extern "C" {
         for (int b_row_idx = b_csc(b_col); b_row_idx < b_csc(b_col+1); b_row_idx++){
           int b_row = b_rows(b_row_idx);
           float b_val = b_vals(b_row_idx);
-          printf("arow %i, ", a_row);
-          printf("bcol %i, ", b_col);
-          printf("brow %i, ", b_row);
-          printf("bval %f\n", b_val);
           sum += b_val * a(a_row, b_row); //a_col = b_row in dot prod
         }
-        printf("\n");
         res(a_row, b_col) = sum;
       }
     });

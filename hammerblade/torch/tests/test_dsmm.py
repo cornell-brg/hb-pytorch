@@ -6,12 +6,12 @@ import torch
 
 torch.manual_seed(42)
 
-def _test_torch_dsmm(a, b):
-    expected_tensor = (a@b.to_dense())
+def _test_torch_dsmm(a, bT):
+    expected_tensor = (a@bT.t().to_dense())
     print(expected_tensor)
     ah = a.hammerblade()
-    bh = b.hammerblade()
-    got_hb = torch.dstmp(ah, bh)
+    bTh = bT.hammerblade()
+    got_hb = torch.dstmp(ah, bTh)
     got_device = got_hb.device
     got_tensor = got_hb.cpu()
     print(got_tensor)
@@ -21,8 +21,8 @@ def _test_torch_dsmm(a, b):
 
 
 def test_torch_dsmm_1():
-    a = torch.Tensor([[1, 0, 1], [0, 3, 0]])
-    b = torch.Tensor([[5, 3], [1, 7], [1, 1]]).t().to_sparse()
+    a = torch.Tensor([[1, 2, 3]])
+    b = torch.Tensor([[0, 0, 0, 4], [0, 1, 2, 0], [0, 0, 0, 1]]).t().to_sparse()
     _test_torch_dsmm(a, b)
 
 def test_torch_dsmm_2():
