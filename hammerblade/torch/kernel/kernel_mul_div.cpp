@@ -17,16 +17,8 @@ extern "C" {
     auto b = HBTensor<float>(t2_p);
 
     bsg_cuda_print_stat_kernel_start();
-
-    /*
-    hb_tiled_foreach(c, a, b,
-        [&](float a, float b) {
-          return a * b;
-        });
-    */
-
     
-    hb_tiled_foreach_unroll<10>(c, a, b,
+    hb_tiled_foreach_unroll<8>(c, a, b,
         [&](float a, float b) {
           return a * b;
         });
@@ -51,7 +43,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach_unroll<8>(c, a, b,
+    hb_tiled_foreach_unroll<6>(c, a, b,
       [&](float a, float b) {
         return a / b;
     });
