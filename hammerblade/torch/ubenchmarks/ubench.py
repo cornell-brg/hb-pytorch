@@ -40,7 +40,7 @@ def header():
                               "CPU Time (ms)", "HB Time (ms)", "HB FLOPs/cycle")
 
 
-def benchmark_module(module, inputs, backward=False, *args, **kwargs):
+def benchmark_module(backward, inputs, module, *args, **kwargs):
     # Wrapper module for FLOP count
     class Model(nn.Module):
         def __init__(self, *args, **kwargs):
