@@ -1,0 +1,266 @@
++ COSIM_PYTHON_EXE=/scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader
++ [[ ! -f /scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader ]]
++ eval '/scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader +ntb_random_seed_automatic +c_args="-m' pytest -vs '/scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_profile_route.py"' '| grep -v ": instantiating\|\[.*_PROFILER\]"'
+++ /scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader +ntb_random_seed_automatic '+c_args=-m pytest -vs /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_profile_route.py'
+++ grep -v ': instantiating\|\[.*_PROFILER\]'
+ ATen profiler collecting ...
+at top level kernel at::Tensor at::TypeDefault::conv2d(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::IntArrayRef, int64_t)
+should I redispatch? 1/0
+redispatching...
+Fatal Python error: Segmentation fault
+
+Current thread 0x00002aaaaac20540 (most recent call first):
+  File "/scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_profile_route.py", line 45 in test_lenet5_sparse01_conv2
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/python.py", line 184 in pytest_pyfunc_call
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/callers.py", line 187 in _multicall
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/manager.py", line 87 in <lambda>
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/manager.py", line 93 in _hookexec
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/hooks.py", line 286 in __call__
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/python.py", line 1479 in runtest
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/runner.py", line 135 in pytest_runtest_call
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/callers.py", line 187 in _multicall
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/manager.py", line 87 in <lambda>
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/manager.py", line 93 in _hookexec
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/hooks.py", line 286 in __call__
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/runner.py", line 217 in <lambda>
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/runner.py", line 244 in from_call
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/runner.py", line 217 in call_runtest_hook
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/runner.py", line 186 in call_and_report
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/runner.py", line 100 in runtestprotocol
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/runner.py", line 85 in pytest_runtest_protocol
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/callers.py", line 187 in _multicall
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/manager.py", line 87 in <lambda>
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/manager.py", line 93 in _hookexec
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/hooks.py", line 286 in __call__
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/main.py", line 272 in pytest_runtestloop
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/callers.py", line 187 in _multicall
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/manager.py", line 87 in <lambda>
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/manager.py", line 93 in _hookexec
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/hooks.py", line 286 in __call__
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/main.py", line 247 in _main
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/main.py", line 191 in wrap_session
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/main.py", line 240 in pytest_cmdline_main
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/callers.py", line 187 in _multicall
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/manager.py", line 87 in <lambda>
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/manager.py", line 93 in _hookexec
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pluggy/hooks.py", line 286 in __call__
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/_pytest/config/__init__.py", line 125 in main
+  File "/work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/pytest/__main__.py", line 7 in <module>
+  File "/usr/lib64/python3.6/runpy.py", line 85 in _run_code
+  File "/usr/lib64/python3.6/runpy.py", line 193 in _run_module_as_main
+Chronologic VCS simulator copyright 1991-2018
+Contains Synopsys proprietary information.
+Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Jul 22 16:19 2020
+NOTE: automatic random seed used: 3561743989
+==================== BSG MACHINE SETTINGS: ====================
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_X                 =          16
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_Y                 =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_SET               =          64
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_WAY               =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_BLOCK_SIZE_WORDS  =          16
+[INFO][TESTBENCH] BSG_MACHINE_MAX_EPA_WIDTH            =          28
+[INFO][TESTBENCH] BSG_MACHINE_MEM_CFG                  = e_infinite_mem
+tb.card.fpga.CL.core_clk_gen with cycle_time_p      400000
+## ----------------------------------------------------------------
+## MANYCORE HETERO TYPE CONFIGUREATIONS
+## ----------------------------------------------------------------
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## ----------------------------------------------------------------
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+BSG INFO: test_pytorch Regression Test 
+============================= test session starts ==============================
+platform linux -- Python 3.6.8, pytest-5.4.1, py-1.8.1, pluggy-0.13.1 -- /work/shared/users/staff/zz546/venvs/sparse-pytorch/bin/python3
+cachedir: .pytest_cache
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase('/scratch/users/zz546/hb-pytorch/hammerblade/scripts/tests/sparse_conv2/sparse_conv2_hb_0/.hypothesis/examples')
+rootdir: /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests, inifile: pytest.ini
+plugins: hypothesis-5.10.4
+collecting ... collected 1 item
+
+../../../../../../pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_profile_route.py::test_lenet5_sparse01_conv2 
+An unexpected termination has occurred in /scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader due to a signal: Segmentation fault
+Hostname zhang-21.ece.cornell.edu
+
+During DPI-C function call Function="cosim_main" from /scratch/users/zz546/bsg_bladerunner/bsg_replicant/testbenches/machine_wrapper.sv, 50
+
+Command line: /scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader +ntb_random_seed_automatic "+c_args=-m pytest -vs /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_profile_route.py"
+
+--- Stack trace follows:
+
+Dumping VCS Annotated Stack:
+#0  0x00002aaab38b746c in waitpid () from /lib64/libc.so.6
+#1  0x00002aaab3834f62 in do_system () from /lib64/libc.so.6
+#2  0x00002aaaaca8c1fc in SNPSle_10ee25eff68cd8461c9146fa1d0b35e87067f3c8015b313e639d2928478c79b3f673f99203bcf8be64600612100082236bffb2007f1e0ef9 () from /opt/synopsys/packages/vcs-mx/O-2018.09-SP2/linux64/lib/liberrorinf.so
+#3  0x00002aaaaca8dd3e in SNPSle_10ee25eff68cd8461c9146fa1d0b35e87067f3c8015b313efba706aab251478fa49e66610e453774633a6c152e7ef778f2202cda681f3d4e () from /opt/synopsys/packages/vcs-mx/O-2018.09-SP2/linux64/lib/liberrorinf.so
+#4  0x00002aaaaca866e3 in SNPSle_d35ca1ff70d465c2b9b1a72eee90a506fdd009d3de3db1de () from /opt/synopsys/packages/vcs-mx/O-2018.09-SP2/linux64/lib/liberrorinf.so
+#5  0x00002aaaaf03eabf in SNPSle_64133461705005bb725549e2e6fa1b3f () from /opt/synopsys/packages/vcs-mx/O-2018.09-SP2/linux64/lib/libvcsnew.so
+#6  0x00002aaaaee84c89 in SNPSle_82244d58c54c18c70d63edc9becab634 () from /opt/synopsys/packages/vcs-mx/O-2018.09-SP2/linux64/lib/libvcsnew.so
+#8  0x00002aaaab2034fb in raise () from /lib64/libpthread.so.0
+#10 0x00002aaaaba4c4c9 in hb_mc_device_malloc () from /scratch/users/zz546/bsg_bladerunner/bsg_replicant/libraries/libbsg_manycore_runtime.so.1
+#11 0x00002aab0d706539 in c10::hammerblade::device_malloc (nbytes=11520) at ../c10/hammerblade/HammerBladeFunctions.cpp:76
+#12 0x00002aab0d7053c9 in c10::alloc_hb (nbytes=<optimized out>) at ../c10/hammerblade/HammerBladeAllocator.cpp:11
+#13 0x00002aab0d7062a1 in c10::DefaultHammerBladeAllocator::allocate (this=<optimized out>, nbytes=<optimized out>) at ../c10/hammerblade/HammerBladeAllocator.cpp:27
+#14 0x00002aab09e352a6 in at::native::llcopy_to_hb (self=...) at ../aten/src/ATen/native/LLCopy.cpp:31
+#15 0x00002aab0a27b36e in at::CPUType::(anonymous namespace)::llcopy (self=...) at aten/src/ATen/CPUType.cpp:264
+#16 0x00002aab0a2b93dd in c10::detail::WrapRuntimeKernelFunctor_<at::Tensor (*)(at::Tensor const&), at::Tensor, c10::guts::typelist::typelist<at::Tensor const&> >::operator() (args#0=..., this=<optimized out>) at ../aten/src/ATen/core/boxing/kernel_lambda.h:23
+#18 0x00002aab09c38036 in c10::KernelFunction::callUnboxedOnly<at::Tensor, at::Tensor const&> (this=<optimized out>) at ../aten/src/ATen/core/boxing/KernelFunction.h:95
+#24 0x00002aab0c1dc198 in c10::impl::OperatorEntry::readDispatchTable<at::Tensor c10::Dispatcher::callUnboxedOnly<at::Tensor, at::Tensor const&>(c10::OperatorHandle const&, at::Tensor const&) const::{lambda(c10::DispatchTable const&)#1}>(at::Tensor c10::Dispatcher::callUnboxedOnly<at::Tensor, at::Tensor const&>(c10::OperatorHandle const&, at::Tensor const&) const::{lambda(c10::DispatchTable const&)#1}&&) const (functor=<unknown type in /work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/torch/lib/libtorch.so, CU 0x2c5ac044, DIE 0x2c73ce74>, this=<optimized out>) at ../aten/src/ATen/core/dispatch/OperatorEntry.h:32
+#29 0x00002aab0a2b93dd in c10::detail::WrapRuntimeKernelFunctor_<at::Tensor (*)(at::Tensor const&), at::Tensor, c10::guts::typelist::typelist<at::Tensor const&> >::operator() (args#0=..., this=<optimized out>) at ../aten/src/ATen/core/boxing/kernel_lambda.h:23
+#31 0x00002aab0a2d2423 in c10::KernelFunction::callUnboxedOnly<at::Tensor, at::Tensor const&> (this=0x1ffd5d0) at ../aten/src/ATen/core/boxing/KernelFunction.h:95
+#40 0x00002aab0a2d2995 in at::Tensor::llcopy_ifdef (this=<optimized out>) at aten/src/ATen/core/TensorMethods.h:46
+#41 0x00002aab0a3f0073 in at::TypeDefault::conv2d (input=..., weight=..., bias=..., stride=..., padding=..., dilation=..., groups=1) at aten/src/ATen/TypeDefault.cpp:6430
+#42 0x00002aab0c0cf366 in torch::autograd::VariableType::(anonymous namespace)::conv2d (input=..., weight=..., bias=..., stride=..., padding=..., dilation=..., groups=1) at ../torch/csrc/autograd/generated/VariableType_3.cpp:2816
+#43 0x00002aab0a3889e3 in c10::detail::WrapRuntimeKernelFunctor_<at::Tensor (*)(at::Tensor const&, at::Tensor const&, at::Tensor const&, c10::ArrayRef<long>, c10::ArrayRef<long>, c10::ArrayRef<long>, long), at::Tensor, c10::guts::typelist::typelist<at::Tensor const&, at::Tensor const&, at::Tensor const&, c10::ArrayRef<long>, c10::ArrayRef<long>, c10::ArrayRef<long>, long> >::operator() (args#6=1, args#5=..., args#4=..., args#3=..., args#2=..., args#1=..., args#0=..., this=<optimized out>) at ../aten/src/ATen/core/boxing/kernel_lambda.h:23
+#45 0x00002aab08dd9f79 in c10::KernelFunction::callUnboxedOnly<at::Tensor, at::Tensor const&, at::Tensor const&, at::Tensor const&, c10::ArrayRef<long>, c10::ArrayRef<long>, c10::ArrayRef<long>, long> (this=0x190dfe0) at ../aten/src/ATen/core/boxing/KernelFunction.h:95
+#51 0x00002aab08d2d640 in c10::impl::OperatorEntry::readDispatchTable<at::Tensor c10::Dispatcher::callUnboxedOnly<at::Tensor, at::Tensor const&, at::Tensor const&, at::Tensor const&, c10::ArrayRef<long>, c10::ArrayRef<long>, c10::ArrayRef<long>, long>(c10::OperatorHandle const&, at::Tensor const&, at::Tensor const&, at::Tensor const&, c10::ArrayRef<long>, c10::ArrayRef<long>, c10::ArrayRef<long>, long) const::{lambda(c10::DispatchTable const&)#1}>(at::Tensor c10::Dispatcher::callUnboxedOnly<at::Tensor, at::Tensor const&, at::Tensor const&, at::Tensor const&, c10::ArrayRef<long>, c10::ArrayRef<long>, c10::ArrayRef<long>, long>(c10::OperatorHandle const&, at::Tensor const&, at::Tensor const&, at::Tensor const&, c10::ArrayRef<long>, c10::ArrayRef<long>, c10::ArrayRef<long>, long) const::{lambda(c10::DispatchTable const&)#1}&&) const (functor=<unknown type in /work/shared/users/staff/zz546/venvs/sparse-pytorch/lib64/python3.6/site-packages/torch/lib/libtorch_python.so, CU 0x767c82, DIE 0x8d3461>, this=<optimized out>) at ../aten/src/ATen/core/dispatch/OperatorEntry.h:32
+#56 0x00002aaaaadb4167 in _PyCFunction_FastCallDict () from /lib64/libpython3.6m.so.1.0
+#57 0x00002aaaaadb4539 in _PyCFunction_FastCallKeywords () from /lib64/libpython3.6m.so.1.0
+#58 0x00002aaaaae1f7df in ?? () from /lib64/libpython3.6m.so.1.0
+#59 0x00002aaaaae1537b in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#60 0x00002aaaaae1fc9f in PyEval_EvalCodeEx () from /lib64/libpython3.6m.so.1.0
+#61 0x00002aaaaad8eec2 in ?? () from /lib64/libpython3.6m.so.1.0
+#62 0x00002aaaaad76f63 in PyObject_Call () from /lib64/libpython3.6m.so.1.0
+#63 0x00002aaaaae15db7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#64 0x00002aaaaae1feaa in PyEval_EvalCodeEx () from /lib64/libpython3.6m.so.1.0
+#65 0x00002aaaaad8ede3 in ?? () from /lib64/libpython3.6m.so.1.0
+#66 0x00002aaaaad76f63 in PyObject_Call () from /lib64/libpython3.6m.so.1.0
+#67 0x00002aaaaae15db7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#68 0x00002aaaaae1edee in ?? () from /lib64/libpython3.6m.so.1.0
+#69 0x00002aaaaae1f67a in ?? () from /lib64/libpython3.6m.so.1.0
+#70 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#71 0x00002aaaaae1537b in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#72 0x00002aaaaae1e987 in ?? () from /lib64/libpython3.6m.so.1.0
+#73 0x00002aaaaae1f67a in ?? () from /lib64/libpython3.6m.so.1.0
+#74 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#75 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#76 0x00002aaaaae1f5ca in ?? () from /lib64/libpython3.6m.so.1.0
+#77 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#78 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#79 0x00002aaaaae1e987 in ?? () from /lib64/libpython3.6m.so.1.0
+#80 0x00002aaaaae209ff in _PyFunction_FastCallDict () from /lib64/libpython3.6m.so.1.0
+#81 0x00002aaaaad771de in _PyObject_FastCallDict () from /lib64/libpython3.6m.so.1.0
+#82 0x00002aaaaad772f1 in _PyObject_Call_Prepend () from /lib64/libpython3.6m.so.1.0
+#83 0x00002aaaaad76f63 in PyObject_Call () from /lib64/libpython3.6m.so.1.0
+#84 0x00002aaaaadcab2d in ?? () from /lib64/libpython3.6m.so.1.0
+#85 0x00002aaaaad77160 in _PyObject_FastCallDict () from /lib64/libpython3.6m.so.1.0
+#86 0x00002aaaaad777ec in _PyObject_FastCallKeywords () from /lib64/libpython3.6m.so.1.0
+#87 0x00002aaaaae1f98c in ?? () from /lib64/libpython3.6m.so.1.0
+#88 0x00002aaaaae1537b in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#89 0x00002aaaaae1f5ca in ?? () from /lib64/libpython3.6m.so.1.0
+#90 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#91 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#92 0x00002aaaaae1fc9f in PyEval_EvalCodeEx () from /lib64/libpython3.6m.so.1.0
+#93 0x00002aaaaad8ede3 in ?? () from /lib64/libpython3.6m.so.1.0
+#94 0x00002aaaaad76f63 in PyObject_Call () from /lib64/libpython3.6m.so.1.0
+#95 0x00002aaaaae15db7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#96 0x00002aaaaae1edee in ?? () from /lib64/libpython3.6m.so.1.0
+#97 0x00002aaaaae1f67a in ?? () from /lib64/libpython3.6m.so.1.0
+#98 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#99 0x00002aaaaae1537b in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#100 0x00002aaaaae1e987 in ?? () from /lib64/libpython3.6m.so.1.0
+#101 0x00002aaaaae1f67a in ?? () from /lib64/libpython3.6m.so.1.0
+#102 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#103 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#104 0x00002aaaaae1f5ca in ?? () from /lib64/libpython3.6m.so.1.0
+#105 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#106 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#107 0x00002aaaaae1e987 in ?? () from /lib64/libpython3.6m.so.1.0
+#108 0x00002aaaaae209ff in _PyFunction_FastCallDict () from /lib64/libpython3.6m.so.1.0
+#109 0x00002aaaaad771de in _PyObject_FastCallDict () from /lib64/libpython3.6m.so.1.0
+#110 0x00002aaaaad772f1 in _PyObject_Call_Prepend () from /lib64/libpython3.6m.so.1.0
+#111 0x00002aaaaad76f63 in PyObject_Call () from /lib64/libpython3.6m.so.1.0
+#112 0x00002aaaaadcab2d in ?? () from /lib64/libpython3.6m.so.1.0
+#113 0x00002aaaaad76f63 in PyObject_Call () from /lib64/libpython3.6m.so.1.0
+#114 0x00002aaaaae15db7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#115 0x00002aaaaae1eb69 in ?? () from /lib64/libpython3.6m.so.1.0
+#116 0x00002aaaaae1f67a in ?? () from /lib64/libpython3.6m.so.1.0
+#117 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#118 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#119 0x00002aaaaae1e987 in ?? () from /lib64/libpython3.6m.so.1.0
+#120 0x00002aaaaae1f67a in ?? () from /lib64/libpython3.6m.so.1.0
+#121 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#122 0x00002aaaaae1537b in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#123 0x00002aaaaae1feaa in PyEval_EvalCodeEx () from /lib64/libpython3.6m.so.1.0
+#124 0x00002aaaaad8eec2 in ?? () from /lib64/libpython3.6m.so.1.0
+#125 0x00002aaaaad76f63 in PyObject_Call () from /lib64/libpython3.6m.so.1.0
+#126 0x00002aaaaae15db7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#127 0x00002aaaaae1e987 in ?? () from /lib64/libpython3.6m.so.1.0
+#128 0x00002aaaaae1f67a in ?? () from /lib64/libpython3.6m.so.1.0
+#129 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#130 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#131 0x00002aaaaae1e987 in ?? () from /lib64/libpython3.6m.so.1.0
+#132 0x00002aaaaae1f67a in ?? () from /lib64/libpython3.6m.so.1.0
+#133 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#134 0x00002aaaaae1537b in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#135 0x00002aaaaae1fc9f in PyEval_EvalCodeEx () from /lib64/libpython3.6m.so.1.0
+#136 0x00002aaaaad8ede3 in ?? () from /lib64/libpython3.6m.so.1.0
+#137 0x00002aaaaad76f63 in PyObject_Call () from /lib64/libpython3.6m.so.1.0
+#138 0x00002aaaaae15db7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#139 0x00002aaaaae1edee in ?? () from /lib64/libpython3.6m.so.1.0
+#140 0x00002aaaaae1f67a in ?? () from /lib64/libpython3.6m.so.1.0
+#141 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#142 0x00002aaaaae1537b in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#143 0x00002aaaaae1e987 in ?? () from /lib64/libpython3.6m.so.1.0
+#144 0x00002aaaaae1f67a in ?? () from /lib64/libpython3.6m.so.1.0
+#145 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#146 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#147 0x00002aaaaae1f5ca in ?? () from /lib64/libpython3.6m.so.1.0
+#148 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#149 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#150 0x00002aaaaae1e987 in ?? () from /lib64/libpython3.6m.so.1.0
+#151 0x00002aaaaae209ff in _PyFunction_FastCallDict () from /lib64/libpython3.6m.so.1.0
+#152 0x00002aaaaad771de in _PyObject_FastCallDict () from /lib64/libpython3.6m.so.1.0
+#153 0x00002aaaaad772f1 in _PyObject_Call_Prepend () from /lib64/libpython3.6m.so.1.0
+#154 0x00002aaaaad76f63 in PyObject_Call () from /lib64/libpython3.6m.so.1.0
+#155 0x00002aaaaadcab2d in ?? () from /lib64/libpython3.6m.so.1.0
+#156 0x00002aaaaad77160 in _PyObject_FastCallDict () from /lib64/libpython3.6m.so.1.0
+#157 0x00002aaaaad777ec in _PyObject_FastCallKeywords () from /lib64/libpython3.6m.so.1.0
+#158 0x00002aaaaae1f98c in ?? () from /lib64/libpython3.6m.so.1.0
+#159 0x00002aaaaae1537b in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#160 0x00002aaaaae1fc9f in PyEval_EvalCodeEx () from /lib64/libpython3.6m.so.1.0
+#161 0x00002aaaaad8ede3 in ?? () from /lib64/libpython3.6m.so.1.0
+#162 0x00002aaaaad76f63 in PyObject_Call () from /lib64/libpython3.6m.so.1.0
+#163 0x00002aaaaae15db7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#164 0x00002aaaaae1edee in ?? () from /lib64/libpython3.6m.so.1.0
+#165 0x00002aaaaae1f67a in ?? () from /lib64/libpython3.6m.so.1.0
+#166 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#167 0x00002aaaaae1537b in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#168 0x00002aaaaae1e987 in ?? () from /lib64/libpython3.6m.so.1.0
+#169 0x00002aaaaae1f67a in ?? () from /lib64/libpython3.6m.so.1.0
+#170 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#171 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#172 0x00002aaaaae1f5ca in ?? () from /lib64/libpython3.6m.so.1.0
+#173 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#174 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#175 0x00002aaaaae1e987 in ?? () from /lib64/libpython3.6m.so.1.0
+#176 0x00002aaaaae209ff in _PyFunction_FastCallDict () from /lib64/libpython3.6m.so.1.0
+#177 0x00002aaaaad771de in _PyObject_FastCallDict () from /lib64/libpython3.6m.so.1.0
+#178 0x00002aaaaad772f1 in _PyObject_Call_Prepend () from /lib64/libpython3.6m.so.1.0
+#179 0x00002aaaaad76f63 in PyObject_Call () from /lib64/libpython3.6m.so.1.0
+#180 0x00002aaaaadcab2d in ?? () from /lib64/libpython3.6m.so.1.0
+#181 0x00002aaaaad77160 in _PyObject_FastCallDict () from /lib64/libpython3.6m.so.1.0
+#182 0x00002aaaaad777ec in _PyObject_FastCallKeywords () from /lib64/libpython3.6m.so.1.0
+#183 0x00002aaaaae1f98c in ?? () from /lib64/libpython3.6m.so.1.0
+#184 0x00002aaaaae1537b in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#185 0x00002aaaaae1f5ca in ?? () from /lib64/libpython3.6m.so.1.0
+#186 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#187 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#188 0x00002aaaaae1f5ca in ?? () from /lib64/libpython3.6m.so.1.0
+#189 0x00002aaaaae1f903 in ?? () from /lib64/libpython3.6m.so.1.0
+#190 0x00002aaaaae140f7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#191 0x00002aaaaae1fc9f in PyEval_EvalCodeEx () from /lib64/libpython3.6m.so.1.0
+#192 0x00002aaaaad8ede3 in ?? () from /lib64/libpython3.6m.so.1.0
+#193 0x00002aaaaad76f63 in PyObject_Call () from /lib64/libpython3.6m.so.1.0
+#194 0x00002aaaaae15db7 in _PyEval_EvalFrameDefault () from /lib64/libpython3.6m.so.1.0
+#195 0x00002aaaaae1edee in ?? () from /lib64/libpython3.6m.so.1.0
+#196 0x00002aaaaae1f67a in ?? () fr

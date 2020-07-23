@@ -1,0 +1,71 @@
+============================= test session starts ==============================
+platform linux -- Python 3.6.8, pytest-5.4.1, py-1.8.1, pluggy-0.13.1 -- /work/shared/users/staff/zz546/venvs/master-pytorch/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase('/scratch/users/zz546/hb-pytorch/hammerblade/scripts/tests/conv2_spmm/conv2_spmm_xeon_8_4/.hypothesis/examples')
+rootdir: /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests, inifile: pytest.ini
+plugins: hypothesis-5.8.3
+collecting ... collected 1 item
+
+../../../../../../pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_lowerspmm_profiler.py::test_lenet5_sparse01_conv2 Emulating CUDALite...
+Emulation barrier init'ed with 1 threads
+PyTorch configed with 1 * 1 HB device
+HB startup config kernel applied
+ ATen profiler collecting ...
+at top level kernel at::Tensor at::CPUType::{anonymous}::unfold(const at::Tensor&, int64_t, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::unfold(const at::Tensor&, int64_t, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::transpose(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::transpose(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::t(const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)
+should I redispatch? 1/0
+redispatching...
+@#ACTUALS#@__self;[500, 64]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat);1805
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@BSG_API_CALL@__free;14
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@CPU_LOG@;321
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);35
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);18
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@CPU_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool);251
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@CPU_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);6
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@CPU_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);3
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@CPU_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>int64_t at::TypeDefault::stride(const at::Tensor&, int64_t);2
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@;1307
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);50
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);27
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;8
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool);1209
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub();1185
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__free;47
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__malloc;38
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__memcpy;45
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@OFFLOAD_KERNEL@__tensorlib_copy_Float_to_Float;858
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>@HB_LOG@<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@OFFLOAD_KERNEL@__tensorlib_copy_Float_to_Float<|>@TRIM@;0
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);67
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;24
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;7
+at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)
+at top level kernel at::Tensor at::SparseCPUType::{anonymous}::_sparse_mm(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+PASSED
+
+============================== 1 passed in 0.69s ===============================

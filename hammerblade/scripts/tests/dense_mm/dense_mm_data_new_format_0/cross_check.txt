@@ -1,0 +1,138 @@
+['dense_mm_data_new_format_0/full-00.std']
+['dense_mm_data_new_format_0/chunk-cosim.std']
+self;[10, 8]<|>mat2;[8, 6]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&);2639
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free;20
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@;1632
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&);1618
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>);23
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&);1405
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar);1364
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub();1223
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);2
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@;650
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__free;49
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__malloc;41
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__memcpy;53
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@OFFLOAD_KERNEL@__tensorlib_mm;102
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@OFFLOAD_KERNEL@__tensorlib_mm<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);25
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;7
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);7
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);143
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;14
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;18
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)
+self;[10, 8]<|>mat2;[8, 6]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&);4222335
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free;14
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@;1745
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&);1734
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>);21
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&);1042
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar);999
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub();921
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);2
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@;4220302
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__free;86
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__malloc;19
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__memcpy;101171
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@OFFLOAD_KERNEL@__tensorlib_mm;4118736
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@OFFLOAD_KERNEL@__tensorlib_mm<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);18
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;3
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);5
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);131
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;34
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;20
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)
+|- Node(@CPU_LOG@ : 1632.0)
+  |- Node(at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&) : 1618.0)
+    |- Node(at::Tensor& at::CPUType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>) : 23.0)
+    |- Node(at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&) : 1405.0)
+      |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 1364.0)
+        |- Node(at::native::fill_stub::fill_stub() : 1223.0)
+    |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 2.0)
+|- Node(@HB_LOG@ : 287.0)
+  |- Node(@BSG_API_CALL@__free : 0.0)
+    |- Node(@TRIM@ : 0.0)
+  |- Node(@BSG_API_CALL@__malloc : 0.0)
+    |- Node(@TRIM@ : 0.0)
+  |- Node(@BSG_API_CALL@__memcpy : 0.0)
+    |- Node(@TRIM@ : 0.0)
+  |- Node(@OFFLOAD_KERNEL@__tensorlib_mm : 0.0)
+    |- Node(@TRIM@ : 0.0)
+  |- Node(at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 15.0)
+    |- Node(@BSG_API_CALL@__malloc : 0.0)
+      |- Node(@TRIM@ : 0.0)
+  |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 5.0)
+total time on HB = 16.759999999999998
+Actual self - full:[10, 8] <> chunk:[10, 8]
+Actual mat2 - full:[8, 6] <> chunk:[8, 6]
+==CPU=LOG==
+
+digraph {
+0 [ shape=record label = "@CPU_LOG@|1632.00"];
+1 [ shape=record label = "_th_mm|1618.00"];
+2 [ shape=record label = "resize_|23.00"];
+3 [ shape=record label = "zero_|1405.00"];
+4 [ shape=record label = "fill_|1364.00"];
+5 [ shape=record label = "fill_stub|1223.00"];
+6 [ shape=record label = "size|2.00"];
+0 -> 1;
+1 -> 2;
+1 -> 3;
+1 -> 6;
+3 -> 4;
+4 -> 5;
+}
+
+
+==HB=LOG==
+
+digraph {
+0 [ shape=record label = "@HB_LOG@|287.00"];
+1 [ shape=record label = "@BSG_API_CALL@__free|0.00"];
+3 [ shape=record label = "@BSG_API_CALL@__malloc|0.00"];
+5 [ shape=record label = "@BSG_API_CALL@__memcpy|0.00"];
+7 [ shape=record label = "@OFFLOAD_KERNEL@__tensorlib_mm|0.00"];
+9 [ shape=record label = "empty|15.00"];
+10 [ shape=record label = "@BSG_API_CALL@__malloc|0.00"];
+12 [ shape=record label = "size|5.00"];
+0 -> 1;
+0 -> 3;
+0 -> 5;
+0 -> 7;
+0 -> 9;
+0 -> 12;
+9 -> 10;
+}
+
+
+==TEXT==
+
++-----------------------+---------------+--------------------+--------------------+-----------------+---------------------+-----------------+-------------------+
+|        ATen OP        |     Input     |     Full  Size     |     Chunk Size     |    Xeon Time    |    HB Total Time    |    Host Time    |    Device Time    |
++-----------------------+---------------+--------------------+--------------------+-----------------+---------------------+-----------------+-------------------+
+| mm                    | self          | [10, 8]            | [10, 8]            |            1.63 |                0.30 |            0.29 |              0.02 |
+|                       | mat2          | [8, 6]             | [8, 6]             |                 |                     |                 |                   |
++-----------------------+---------------+--------------------+--------------------+-----------------+---------------------+-----------------+-------------------+
+

@@ -1,0 +1,46 @@
+============================= test session starts ==============================
+platform linux -- Python 3.6.8, pytest-5.4.1, py-1.8.1, pluggy-0.13.1 -- /work/shared/users/staff/zz546/venvs/master-pytorch/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase('/scratch/users/zz546/hb-pytorch/hammerblade/scripts/tests/sparse_conv2/sparse_conv2_xeon_0_15/.hypothesis/examples')
+rootdir: /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests, inifile: pytest.ini
+plugins: hypothesis-5.8.3
+collecting ... collected 1 item
+
+../../../../../../pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_profile_route.py::test_lenet5_sparse01_conv2  ATen profiler collecting ...
+at top level kernel at::Tensor at::TypeDefault::conv2d(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::IntArrayRef, int64_t)
+should I redispatch? 1/0
+redispatching...
+FAILED
+
+=================================== FAILURES ===================================
+__________________________ test_lenet5_sparse01_conv2 __________________________
+
+    def test_lenet5_sparse01_conv2():
+    
+        di = torch.rand(1, 20, 12, 12)
+        cpu_sw = load_conv2_sparse_weight().to_sparse()
+       # cpu_i = convert_dense_input(di, 5, 5)
+       # cpu_sw = load_conv2_sparse_weight().view(50, -1).to_sparse()
+       # cpu_out = torch.sparse.mm(cpu_sw, cpu_i)
+       # out1 = cpu_out.view(1, 50, 8, 8)
+       # torch.hammerblade.profiler.chart.add("at::Tensor at::TypeDefault::to(const at::Tensor&, const c10::TensorOptions&, bool, bool, c10::optional<c10::MemoryFormat>)")
+       # torch.hammerblade.profiler.chart.add("at::Tensor at::TypeDefault::conv2d(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::IntArrayRef, int64_t)")
+        route = """[
+        {
+            "offload": true,
+            "signature": "at::Tensor at::TypeDefault::conv2d(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::IntArrayRef, int64_t)"
+        }
+    ]
+    """
+        data = json.loads(route)
+        torch.hammerblade.profiler.route.set_route_from_json(data)
+        torch.hammerblade.profiler.enable()
+        #hb_i = di.hammerblade()
+        #hb_sw = cpu_sw.hammerblade()
+>       hb_out = F.conv2d(di, cpu_sw, bias = None, stride = 1, padding = 0, dilation = 1)
+E       RuntimeError: HammerBlade error: Not initialized
+
+../../../../../../pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_profile_route.py:45: RuntimeError
+=========================== short test summary info ============================
+FAILED ../../../../../../pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_profile_route.py::test_lenet5_sparse01_conv2
+============================== 1 failed in 0.75s ===============================

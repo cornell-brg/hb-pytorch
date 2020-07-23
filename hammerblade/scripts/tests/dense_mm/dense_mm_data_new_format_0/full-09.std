@@ -1,0 +1,51 @@
+============================= test session starts ==============================
+platform linux -- Python 3.6.8, pytest-5.4.1, py-1.8.1, pluggy-0.13.1 -- /work/shared/users/staff/zz546/venvs/master-pytorch/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase('/scratch/users/zz546/hb-pytorch/hammerblade/scripts/tests/dense_mm/dense_mm_xeon_0_9/.hypothesis/examples')
+rootdir: /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests, inifile: pytest.ini
+plugins: hypothesis-5.8.3
+collecting ... collected 1 item
+
+../../../../../../pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_dense_mm.py::test_dense_mm Emulating CUDALite...
+Emulation barrier init'ed with 1 threads
+PyTorch configed with 1 * 1 HB device
+HB startup config kernel applied
+ ATen profiler collecting ...
+at top level kernel at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+redispatching...
+@#ACTUALS#@__self;[10, 8]<|>mat2;[8, 6]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&);2913
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free;20
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@;1924
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&);1909
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>);20
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&);1329
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar);1294
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub();1182
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);2
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@;656
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__free;50
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__malloc;41
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__memcpy;53
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@OFFLOAD_KERNEL@__tensorlib_mm;139
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@OFFLOAD_KERNEL@__tensorlib_mm<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);25
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;7
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);6
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);126
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;15
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;15
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)
+PASSED
+
+============================== 1 passed in 0.66s ===============================

@@ -1,0 +1,287 @@
+['conv2_spmm_data_new_format_5/full-00.std']
+['conv2_spmm_data_new_format_5/chunk-cosim.std']
+============================= test session starts ==============================
+platform linux -- Python 3.6.8, pytest-5.4.1, py-1.8.1, pluggy-0.13.1 -- /work/shared/users/staff/zz546/venvs/master-pytorch/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase('/scratch/users/zz546/hb-pytorch/hammerblade/scripts/tests/conv2_spmm/conv2_spmm_xeon_5_0/.hypothesis/examples')
+rootdir: /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests, inifile: pytest.ini
+plugins: hypothesis-5.8.3
+collecting ... collected 1 item
+
+../../../../../../pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_lowerspmm_profiler.py::test_lenet5_sparse01_conv2 Emulating CUDALite...
+Emulation barrier init'ed with 1 threads
+PyTorch configed with 1 * 1 HB device
+HB startup config kernel applied
+ ATen profiler collecting ...
+at top level kernel at::Tensor at::CPUType::{anonymous}::unfold(const at::Tensor&, int64_t, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::unfold(const at::Tensor&, int64_t, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::transpose(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::transpose(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+redispatching...
+@#ACTUALS#@__self;[1, 8, 8, 20, 25]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t);4076
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@BSG_API_CALL@__free;17
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@;1337
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef);1294
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>);1182
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);33
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);18
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool);1117
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub();1090
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef);73
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef);58
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::alias(const at::Tensor&);5
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor& at::CPUType::{anonymous}::set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef);19
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor& at::CPUType::{anonymous}::set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef)<|>at::Tensor& at::native::legacy::cpu::_th_set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef);5
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);1
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@;2532
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef);2490
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>);2356
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);51
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);33
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;9
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool);2272
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub();2243
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__free;58
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__malloc;50
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__memcpy;51
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@OFFLOAD_KERNEL@__tensorlib_copy_Float_to_Float;1866
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@OFFLOAD_KERNEL@__tensorlib_copy_Float_to_Float<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef);77
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef);54
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::alias(const at::Tensor&);7
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor& at::HammerBladeType::{anonymous}::set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef);7
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);2
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);81
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;30
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;10
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+at top level kernel at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::t(const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::SparseCPUType::{anonymous}::_sparse_mm(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+PASSED
+
+============================== 1 passed in 0.71s ===============================
++ COSIM_PYTHON_EXE=/scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader
++ [[ ! -f /scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader ]]
++ eval '/scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader +ntb_random_seed_automatic +c_args="-m' pytest -vs '/scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_lowerspmm_profiler.py"' '| grep -v ": instantiating\|\[.*_PROFILER\]"'
+++ /scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader +ntb_random_seed_automatic '+c_args=-m pytest -vs /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_lowerspmm_profiler.py'
+++ grep -v ': instantiating\|\[.*_PROFILER\]'
+Chronologic VCS simulator copyright 1991-2018
+Contains Synopsys proprietary information.
+Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Jul 22 13:17 2020
+NOTE: automatic random seed used: 2642592510
+==================== BSG MACHINE SETTINGS: ====================
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_X                 =          16
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_Y                 =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_SET               =          64
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_WAY               =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_BLOCK_SIZE_WORDS  =          16
+[INFO][TESTBENCH] BSG_MACHINE_MAX_EPA_WIDTH            =          28
+[INFO][TESTBENCH] BSG_MACHINE_MEM_CFG                  = e_infinite_mem
+tb.card.fpga.CL.core_clk_gen with cycle_time_p      400000
+## ----------------------------------------------------------------
+## MANYCORE HETERO TYPE CONFIGUREATIONS
+## ----------------------------------------------------------------
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## ----------------------------------------------------------------
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+BSG INFO: test_pytorch Regression Test 
+============================= test session starts ==============================
+platform linux -- Python 3.6.8, pytest-5.4.1, py-1.8.1, pluggy-0.13.1 -- /work/shared/users/staff/zz546/venvs/sparse-pytorch/bin/python3
+cachedir: .pytest_cache
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase('/scratch/users/zz546/hb-pytorch/hammerblade/scripts/tests/conv2_spmm/conv2_spmm_hb_5/.hypothesis/examples')
+rootdir: /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests, inifile: pytest.ini
+plugins: hypothesis-5.10.4
+collecting ... collected 1 item
+
+../../../../../../pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_lowerspmm_profiler.py::test_lenet5_sparse01_conv2 "/scratch/users/zz546/bsg_bladerunner/bsg_manycore/v/bsg_manycore_endpoint_standard.v", 346: tb.card.fpga.CL.mcl_to_axil.mc_ep_to_fifos.epsd.genblk2.unnamed$$_0: started at 194168000ps failed at 194168000ps
+	Offending '((out_credits_o === 'x) || (out_credits_o > 5'b0))'
+## out of remote store credits(= 0) x,y= 0, 1 displaying only once (tb.card.fpga.CL.mcl_to_axil.mc_ep_to_fifos.epsd)
+##   (this may be a performance problem; or normal behavior)
+[INFO][RX] Unfreezing tile t=199606000000, x= 0, y= 2
+[INFO][RX] Unfreezing tile t=199611200000, x= 1, y= 2
+[INFO][RX] Unfreezing tile t=199617200000, x= 2, y= 2
+[INFO][RX] Unfreezing tile t=199624000000, x= 3, y= 2
+[INFO][RX] Unfreezing tile t=199631600000, x= 4, y= 2
+[INFO][RX] Unfreezing tile t=199640000000, x= 5, y= 2
+[INFO][RX] Unfreezing tile t=199649200000, x= 6, y= 2
+[INFO][RX] Unfreezing tile t=199659200000, x= 7, y= 2
+[INFO][RX] Unfreezing tile t=199670000000, x= 8, y= 2
+[INFO][RX] Unfreezing tile t=199681600000, x= 9, y= 2
+[INFO][RX] Unfreezing tile t=199694000000, x=10, y= 2
+[INFO][RX] Unfreezing tile t=199707200000, x=11, y= 2
+[INFO][RX] Unfreezing tile t=199721200000, x=12, y= 2
+[INFO][RX] Unfreezing tile t=199736000000, x=13, y= 2
+[INFO][RX] Unfreezing tile t=199751600000, x=14, y= 2
+[INFO][RX] Unfreezing tile t=199768000000, x=15, y= 2
+[INFO][RX] Unfreezing tile t=199776800000, x= 0, y= 3
+[INFO][RX] Unfreezing tile t=199782800000, x= 1, y= 3
+[INFO][RX] Unfreezing tile t=199789600000, x= 2, y= 3
+[INFO][RX] Unfreezing tile t=199797200000, x= 3, y= 3
+[INFO][RX] Unfreezing tile t=199805600000, x= 4, y= 3
+[INFO][RX] Unfreezing tile t=199814800000, x= 5, y= 3
+[INFO][RX] Unfreezing tile t=199824800000, x= 6, y= 3
+[INFO][RX] Unfreezing tile t=199835600000, x= 7, y= 3
+[INFO][RX] Unfreezing tile t=199847200000, x= 8, y= 3
+[INFO][RX] Unfreezing tile t=199859600000, x= 9, y= 3
+[INFO][RX] Unfreezing tile t=199872800000, x=10, y= 3
+[INFO][RX] Unfreezing tile t=199886800000, x=11, y= 3
+[INFO][RX] Unfreezing tile t=199901600000, x=12, y= 3
+[INFO][RX] Unfreezing tile t=199917200000, x=13, y= 3
+[INFO][RX] Unfreezing tile t=199933600000, x=14, y= 3
+[INFO][RX] Unfreezing tile t=199950800000, x=15, y= 3
+[INFO][RX] Unfreezing tile t=199960400000, x= 0, y= 4
+[INFO][RX] Unfreezing tile t=199967200000, x= 1, y= 4
+[INFO][RX] Unfreezing tile t=199974800000, x= 2, y= 4
+[INFO][RX] Unfreezing tile t=199983200000, x= 3, y= 4
+[INFO][RX] Unfreezing tile t=199992400000, x= 4, y= 4
+[INFO][RX] Unfreezing tile t=200002400000, x= 5, y= 4
+[INFO][RX] Unfreezing tile t=200013200000, x= 6, y= 4
+[INFO][RX] Unfreezing tile t=200024800000, x= 7, y= 4
+[INFO][RX] Unfreezing tile t=200037200000, x= 8, y= 4
+[INFO][RX] Unfreezing tile t=200050400000, x= 9, y= 4
+[INFO][RX] Unfreezing tile t=200064400000, x=10, y= 4
+[INFO][RX] Unfreezing tile t=200079200000, x=11, y= 4
+[INFO][RX] Unfreezing tile t=200094800000, x=12, y= 4
+[INFO][RX] Unfreezing tile t=200111200000, x=13, y= 4
+[INFO][RX] Unfreezing tile t=200128400000, x=14, y= 4
+[INFO][RX] Unfreezing tile t=200146400000, x=15, y= 4
+[INFO][RX] Unfreezing tile t=200156800000, x= 0, y= 5
+[INFO][RX] Unfreezing tile t=200164400000, x= 1, y= 5
+[INFO][RX] Unfreezing tile t=200172800000, x= 2, y= 5
+[INFO][RX] Unfreezing tile t=200182000000, x= 3, y= 5
+[INFO][RX] Unfreezing tile t=200192000000, x= 4, y= 5
+[INFO][RX] Unfreezing tile t=200202800000, x= 5, y= 5
+[INFO][RX] Unfreezing tile t=200214400000, x= 6, y= 5
+[INFO][RX] Unfreezing tile t=200226800000, x= 7, y= 5
+[INFO][RX] Unfreezing tile t=200240000000, x= 8, y= 5
+[INFO][RX] Unfreezing tile t=200254000000, x= 9, y= 5
+[INFO][RX] Unfreezing tile t=200268800000, x=10, y= 5
+[INFO][RX] Unfreezing tile t=200284400000, x=11, y= 5
+[INFO][RX] Unfreezing tile t=200300800000, x=12, y= 5
+[INFO][RX] Unfreezing tile t=200318000000, x=13, y= 5
+[INFO][RX] Unfreezing tile t=200336000000, x=14, y= 5
+[INFO][RX] Unfreezing tile t=200354800000, x=15, y= 5
+[INFO][RX] Unfreezing tile t=200366000000, x= 0, y= 6
+[INFO][RX] Unfreezing tile t=200374400000, x= 1, y= 6
+[INFO][RX] Unfreezing tile t=200383600000, x= 2, y= 6
+[INFO][RX] Unfreezing tile t=200393600000, x= 3, y= 6
+[INFO][RX] Unfreezing tile t=200404400000, x= 4, y= 6
+[INFO][RX] Unfreezing tile t=200416000000, x= 5, y= 6
+[INFO][RX] Unfreezing tile t=200428400000, x= 6, y= 6
+[INFO][RX] Unfreezing tile t=200441600000, x= 7, y= 6
+[INFO][RX] Unfreezing tile t=200455600000, x= 8, y= 6
+[INFO][RX] Unfreezing tile t=200470400000, x= 9, y= 6
+[INFO][RX] Unfreezing tile t=200486000000, x=10, y= 6
+[INFO][RX] Unfreezing tile t=200502400000, x=11, y= 6
+[INFO][RX] Unfreezing tile t=200519600000, x=12, y= 6
+[INFO][RX] Unfreezing tile t=200537600000, x=13, y= 6
+[INFO][RX] Unfreezing tile t=200556400000, x=14, y= 6
+[INFPyTorch configed with 16 * 8 HB device
+HB startup config kernel applied
+ ATen profiler collecting ...
+at top level kernel at::Tensor at::CPUType::{anonymous}::unfold(const at::Tensor&, int64_t, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::unfold(const at::Tensor&, int64_t, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::transpose(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::transpose(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+redispatching...
+@#ACTUALS#@__self;[1, 8, 8, 20, 25]<|>
+O][RX] Unfreezing tile t=200576000000, x=15, y= 6
+[INFO][RX] Unfreezing tile t=200588000000, x= 0, y= 7
+[INFO][RX] Unfreezing tile t=200597200000, x= 1, y= 7
+[INFO][RX] Unfreezing tile t=200607200000, x= 2, y= 7
+[INFO][RX] Unfreezing tile t=200618000000, x= 3, y= 7
+[INFO][RX] Unfreezing tile t=200629600000, x= 4, y= 7
+[INFO][RX] Unfreezing tile t=200642000000, x= 5, y= 7
+[INFO][RX] Unfreezing tile t=200655200000, x= 6, y= 7
+[INFO][RX] Unfreezing tile t=200669200000, x= 7, y= 7
+[INFO][RX] Unfreezing tile t=200684000000, x= 8, y= 7
+[INFO][RX] Unfreezing tile t=200699600000, x= 9, y= 7
+[INFO][RX] Unfreezing tile t=200716000000, x=10, y= 7
+[INFO][RX] Unfreezing tile t=200733200000, x=11, y= 7
+[INFO][RX] Unfreezing tile t=200751200000, x=12, y= 7
+[INFO][RX] Unfreezing tile t=200770000000, x=13, y= 7
+[INFO][RX] Unfreezing tile t=200789600000, x=14, y= 7
+[INFO][RX] Unfreezing tile t=200810000000, x=15, y= 7
+[INFO][RX] Unfreezing tile t=200822800000, x= 0, y= 8
+[INFO][RX] Unfreezing tile t=200832800000, x= 1, y= 8
+[INFO][RX] Unfreezing tile t=200843600000, x= 2, y= 8
+[INFO][RX] Unfreezing tile t=200855200000, x= 3, y= 8
+[INFO][RX] Unfreezing tile t=200867600000, x= 4, y= 8
+[INFO][RX] Unfreezing tile t=200880800000, x= 5, y= 8
+[INFO][RX] Unfreezing tile t=200894800000, x= 6, y= 8
+[INFO][RX] Unfreezing tile t=200909600000, x= 7, y= 8
+[INFO][RX] Unfreezing tile t=200925200000, x= 8, y= 8
+[INFO][RX] Unfreezing tile t=200941600000, x= 9, y= 8
+[INFO][RX] Unfreezing tile t=200958800000, x=10, y= 8
+[INFO][RX] Unfreezing tile t=200976800000, x=11, y= 8
+[INFO][RX] Unfreezing tile t=200995600000, x=12, y= 8
+[INFO][RX] Unfreezing tile t=201015200000, x=13, y= 8
+[INFO][RX] Unfreezing tile t=201035600000, x=14, y= 8
+[INFO][RX] Unfreezing tile t=201056800000, x=15, y= 8
+[INFO][RX] Unfreezing tile t=201070400000, x= 0, y= 9
+[INFO][RX] Unfreezing tile t=201081200000, x= 1, y= 9
+[INFO][RX] Unfreezing tile t=201092800000, x= 2, y= 9
+[INFO][RX] Unfreezing tile t=201105200000, x= 3, y= 9
+[INFO][RX] Unfreezing tile t=201118400000, x= 4, y= 9
+[INFO][RX] Unfreezing tile t=201132400000, x= 5, y= 9
+[INFO][RX] Unfreezing tile t=201147200000, x= 6, y= 9
+[INFO][RX] Unfreezing tile t=201162800000, x= 7, y= 9
+[INFO][RX] Unfreezing tile t=201179200000, x= 8, y= 9
+[INFO][RX] Unfreezing tile t=201196400000, x= 9, y= 9
+[INFO][RX] Unfreezing tile t=201214400000, x=10, y= 9
+[INFO][RX] Unfreezing tile t=201233200000, x=11, y= 9
+[INFO][RX] Unfreezing tile t=201252800000, x=12, y= 9
+[INFO][RX] Unfreezing tile t=201273200000, x=13, y= 9
+[INFO][RX] Unfreezing tile t=201294400000, x=14, y= 9
+[INFO][RX] Unfreezing tile t=201307176000, x=15, y= 9
+Traceback (most recent call last):
+  File "/scratch/users/zz546/hb-pytorch/hammerblade/scripts/compare_aten_op.py", line 358, in <module>
+    ops.append(compare(args.full[i], args.chunk[i], args.manycore_stats, args.fancy))
+  File "/scratch/users/zz546/hb-pytorch/hammerblade/scripts/compare_aten_op.py", line 300, in compare
+    chunk_actuals, chunk_raw_stack = std_parser.parse(f_chunk.read())
+  File "/scratch/users/zz546/hb-pytorch/hammerblade/scripts/std_parser.py", line 34, in parse
+    assert stack_start is not None
+AssertionError

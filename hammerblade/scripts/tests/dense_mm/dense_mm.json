@@ -1,0 +1,6 @@
+[
+    {
+        "offload": false,
+        "signature": "at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)"
+    }
+]

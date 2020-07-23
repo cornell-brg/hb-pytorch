@@ -1,0 +1,1 @@
+(cd sparse_conv2_hb_0; pycosim -m pytest -vs /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_profile_route.py > out.std 2>&1)

@@ -1,0 +1,84 @@
+============================= test session starts ==============================
+platform linux -- Python 3.6.8, pytest-5.4.1, py-1.8.1, pluggy-0.13.1 -- /work/shared/users/staff/zz546/venvs/master-pytorch/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase('/scratch/users/zz546/hb-pytorch/hammerblade/scripts/tests/conv2_spmm/conv2_spmm_xeon_5_0/.hypothesis/examples')
+rootdir: /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests, inifile: pytest.ini
+plugins: hypothesis-5.8.3
+collecting ... collected 1 item
+
+../../../../../../pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_lowerspmm_profiler.py::test_lenet5_sparse01_conv2 Emulating CUDALite...
+Emulation barrier init'ed with 1 threads
+PyTorch configed with 1 * 1 HB device
+HB startup config kernel applied
+ ATen profiler collecting ...
+at top level kernel at::Tensor at::CPUType::{anonymous}::unfold(const at::Tensor&, int64_t, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::unfold(const at::Tensor&, int64_t, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::transpose(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::transpose(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+redispatching...
+@#ACTUALS#@__self;[1, 8, 8, 20, 25]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t);4076
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@BSG_API_CALL@__free;17
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@;1337
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef);1294
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>);1182
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);33
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);18
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool);1117
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub();1090
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef);73
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef);58
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::alias(const at::Tensor&);5
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor& at::CPUType::{anonymous}::set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef);19
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::CPUType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor& at::CPUType::{anonymous}::set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef)<|>at::Tensor& at::native::legacy::cpu::_th_set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef);5
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@CPU_LOG@<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);1
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@;2532
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef);2490
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>);2356
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);51
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);33
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;9
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool);2272
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub();2243
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__free;58
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__malloc;50
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__memcpy;51
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@OFFLOAD_KERNEL@__tensorlib_copy_Float_to_Float;1866
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub()<|>@OFFLOAD_KERNEL@__tensorlib_copy_Float_to_Float<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef);77
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef);54
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::alias(const at::Tensor&);7
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::TypeDefault::_unsafe_view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor at::HammerBladeType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef)<|>at::Tensor& at::HammerBladeType::{anonymous}::set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef);7
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>@HB_LOG@<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);2
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);81
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;30
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;10
+at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+at top level kernel at::Tensor at::TypeDefault::flatten(const at::Tensor&, int64_t, int64_t)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::t(const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::SparseCPUType::{anonymous}::_sparse_mm(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+PASSED
+
+============================== 1 passed in 0.71s ===============================

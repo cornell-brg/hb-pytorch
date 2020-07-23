@@ -1,0 +1,101 @@
++ COSIM_PYTHON_EXE=/scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader
++ [[ ! -f /scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader ]]
++ eval '/scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader +ntb_random_seed_automatic +c_args="-m' pytest -vs '/scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_dense_mm.py"' '| grep -v ": instantiating\|\[.*_PROFILER\]"'
+++ /scratch/users/zz546/bsg_bladerunner//bsg_replicant/testbenches/pytorch/test_loader +ntb_random_seed_automatic '+c_args=-m pytest -vs /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_dense_mm.py'
+++ grep -v ': instantiating\|\[.*_PROFILER\]'
+Chronologic VCS simulator copyright 1991-2018
+Contains Synopsys proprietary information.
+Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Jul 21 17:53 2020
+NOTE: automatic random seed used: 1199650480
+==================== BSG MACHINE SETTINGS: ====================
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_X                 =           4
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_Y                 =           4
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_SET               =          64
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_WAY               =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_BLOCK_SIZE_WORDS  =          16
+[INFO][TESTBENCH] BSG_MACHINE_MAX_EPA_WIDTH            =          28
+[INFO][TESTBENCH] BSG_MACHINE_MEM_CFG                  = e_infinite_mem
+tb.card.fpga.CL.core_clk_gen with cycle_time_p      400000
+## ----------------------------------------------------------------
+## MANYCORE HETERO TYPE CONFIGUREATIONS
+## ----------------------------------------------------------------
+## 0,0,0,0,
+## 0,0,0,0,
+## 0,0,0,0,
+## 0,0,0,0,
+## ----------------------------------------------------------------
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+BSG INFO: test_pytorch Regression Test 
+============================= test session starts ==============================
+platform linux -- Python 3.6.8, pytest-5.4.1, py-1.8.1, pluggy-0.13.1 -- /work/shared/users/staff/zz546/venvs/sparse-pytorch/bin/python3
+cachedir: .pytest_cache
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase('/scratch/users/zz546/hb-pytorch/hammerblade/scripts/tests/dense_mm/dense_mm_hb_0/.hypothesis/examples')
+rootdir: /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests, inifile: pytest.ini
+plugins: hypothesis-5.10.4
+collecting ... collected 1 item
+
+../../../../../../pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_dense_mm.py::test_dense_mm "/scratch/users/zz546/bsg_bladerunner/bsg_manycore/v/bsg_manycore_endpoint_standard.v", 346: tb.card.fpga.CL.mcl_to_axil.mc_ep_to_fifos.epsd.genblk2.unnamed$$_0: started at 33328000ps failed at 33328000ps
+	Offending '((out_credits_o === 'x) || (out_credits_o > 5'b0))'
+## out of remote store credits(= 0) x,y=0,1 displaying only once (tb.card.fpga.CL.mcl_to_axil.mc_ep_to_fifos.epsd)
+##   (this may be a performance problem; or normal behavior)
+[INFO][RX] Unfreezing tile t=37133200000, x=0, y=2
+[INFO][RX] Unfreezing tile t=37138400000, x=1, y=2
+[INFO][RX] Unfreezing tile t=37144400000, x=2, y=2
+[INFO][RX] Unfreezing tile t=37151200000, x=3, y=2
+[INFO][RX] Unfreezing tile t=37155600000, x=0, y=3
+[INFO][RX] Unfreezing tile t=37161600000, x=1, y=3
+[INFO][RX] Unfreezing tile t=37168400000, x=2, y=3
+[INFO][RX] Unfreezing tile t=37176000000, x=3, y=3
+[INFO][RX] Unfreezing tile t=37181200000, x=0, y=4
+[INFOPyTorch configed with 4 * 4 HB device
+HB startup config kernel applied
+ ATen profiler collecting ...
+at top level kernel at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+redispatching...
+@#ACTUALS#@__self;[10, 8]<|>mat2;[8, 6]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&);4222335
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free;14
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@;1745
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&);1734
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>);21
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&);1042
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar);999
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub();921
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&)<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);2
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@;4220302
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__free;86
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__malloc;19
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__memcpy;101171
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@OFFLOAD_KERNEL@__tensorlib_mm;4118736
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@OFFLOAD_KERNEL@__tensorlib_mm<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);18
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;3
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);5
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);131
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;34
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;20
+at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)
+][RX] Unfreezing tile t=37188000000, x=1, y=4
+[INFO][RX] Unfreezing tile t=37195600000, x=2, y=4
+[INFO][RX] Unfreezing tile t=37204000000, x=3, y=4
+[INFO][RX] Unfreezing tile t=37210000000, x=0, y=5
+[INFO][RX] Unfreezing tile t=37217600000, x=1, y=5
+[INFO][RX] Unfreezing tile t=37226000000, x=2, y=5
+[INFO][RX] Unfreezing tile t=37232208000, x=3, y=5
+PASSED
+
+============================== 1 passed in 44.90s ==============================

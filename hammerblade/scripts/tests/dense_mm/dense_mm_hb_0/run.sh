@@ -1,0 +1,1 @@
+(cd dense_mm_hb_0; pycosim -m pytest -vs /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_dense_mm.py > out.std 2>&1)

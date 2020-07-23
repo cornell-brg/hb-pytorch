@@ -31,13 +31,8 @@ def test_lenet5_sparse01_conv2():
    # out1 = cpu_out.view(1, 50, 8, 8)
    # torch.hammerblade.profiler.chart.add("at::Tensor at::TypeDefault::to(const at::Tensor&, const c10::TensorOptions&, bool, bool, c10::optional<c10::MemoryFormat>)")
    # torch.hammerblade.profiler.chart.add("at::Tensor at::TypeDefault::conv2d(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::IntArrayRef, int64_t)")
-    route = """[
-    {
-        "offload": true,
-        "signature": "at::Tensor at::TypeDefault::conv2d(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::IntArrayRef, int64_t)"
-    }
-]
-"""
+    with open('sparse_conv2.json') as route:
+        data = json.load(route)
     data = json.loads(route)
     torch.hammerblade.profiler.route.set_route_from_json(data)
     torch.hammerblade.profiler.enable()
