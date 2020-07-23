@@ -51,12 +51,12 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
 
     log = ""
 
+    trap = io.StringIO()
     for i in inputs:
         # Compute FLOPS of this layers
         #
         # There doesn't seem to be nice tool estimate flops for backward.
         # Setting flops to 0 in case of backward.
-        trap = io.StringIO()
         with redirect_stdout(trap):
             flops, _ = thop.profile(Model(*args, **kwargs), inputs=(i,))
         if backward:
@@ -89,4 +89,6 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
             module.__name__, str([list(p.shape) for p in model.parameters()]),
             str(list(i.shape)), exec_time_cpu_ms, exec_time_hb_ms, FLOPs_per_cycle)
 
+    for l in trap.getvalue().split('\n'):
+        print("[THOP Message]:", l)
     return log
