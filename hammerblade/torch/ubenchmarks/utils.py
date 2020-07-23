@@ -1,5 +1,6 @@
 import argparse
-import sys, os
+import sys
+import os
 import io
 import torch
 import torch.nn as nn
@@ -8,18 +9,20 @@ import thop
 from contextlib import redirect_stdout
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'tests'))
-import hbutils # noqa
+import hbutils  # noqa
 
 _CYCLE_TIME = 1.021e-9
-_ROW_FORMAT ="{:>10} | {:>25} | {:>20} | {:>15} | {:>15} | {:>15}\n"
+_ROW_FORMAT = "{:>10} | {:>25} | {:>20} | {:>15} | {:>15} | {:>15}\n"
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
-           formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('--backward', default=False, action='store_true',
                         help="Benchmark the backward.")
     return parser.parse_args()
+
 
 def _evaluate_op(op, input):
     """
@@ -31,9 +34,11 @@ def _evaluate_op(op, input):
         output = op(input)
     return output, prof.self_cpu_time_total
 
+
 def header():
     return _ROW_FORMAT.format("Layer", "Layer parameters", "Inputs shape",
                               "CPU Time (ms)", "HB Time (ms)", "HB FLOPs/cycle")
+
 
 def benchmark_module(module, inputs, backward=False, *args, **kwargs):
     # Wrapper module for FLOP count
@@ -41,6 +46,7 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
         def __init__(self, *args, **kwargs):
             super(Model, self).__init__()
             self.layer = module(*args, **kwargs)
+
         def forward(self, x):
             return self.layer(x)
 
@@ -62,7 +68,7 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
         if backward:
             flops = 0
 
-        i_hb =  hbutils.init_hb_tensor(i)
+        i_hb = hbutils.init_hb_tensor(i)
 
         exec_time_cpu, exec_time_hb = 0, 0
         if not backward:
@@ -75,9 +81,9 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
             grad = torch.rand(forward_output.shape)
             grad_hb = grad.hammerblade()
             _, exec_time_cpu = _evaluate_op(lambda t: t.backward(grad),
-                                                     forward_output)
+                                            forward_output)
             _, exec_time_hb = _evaluate_op(lambda t: t.backward(grad_hb),
-                                                   forward_output_hb)
+                                           forward_output_hb)
             assert torch.allclose(i.grad, i_hb.grad.cpu(), atol=1e-5)
 
         hb_elapsed_cycles = (exec_time_hb * 1e-6) / _CYCLE_TIME
