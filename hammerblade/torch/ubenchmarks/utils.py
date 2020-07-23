@@ -37,18 +37,17 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
             return self.layer(x)
 
     # Compute FLOPS of this layers
-    macs, _ = thop.profile(Model(*args, **kwargs), inputs=(inputs[0],))
-    print(macs)
+    flops, _ = thop.profile(Model(*args, **kwargs), inputs=(inputs[0],))
 
     model = module(*args, **kwargs)
 
     model_hb = module(*args, **kwargs).hammerblade()
     model_hb.load_state_dict(model.state_dict())
 
-    row_format ="{:>10} | {:>30} | {:>15} | {:>15} | {:>15}"
+    row_format ="{:>10} | {:>30} | {:>15} | {:>15} | {:>15} | {:>15}"
 
-    print(row_format.format("Layer", "Layer parameters",
-                            "Inputs shape", "CPU Time (ms)", "HB Time (ms)"))
+    print(row_format.format("Layer", "Layer parameters", "Inputs shape",
+                            "CPU Time (ms)", "HB Time (ms)", "HB FLOPs/cycle"))
     for i in inputs:
         i_hb =  hbutils.init_hb_tensor(i)
 
@@ -66,8 +65,11 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
                                                    forward_output_hb)
             assert torch.allclose(output_cpu, output_hb.cpu(), atol=1e-5)
 
+        hb_elapsed_cycles = (exec_time_hb * 1e-6) / _CYCLE_TIME
+
         exec_time_cpu_ms = "{:6.2f}".format(exec_time_cpu / 1000)
         exec_time_hb_ms = "{:6.2f}".format(exec_time_hb / 1000)
+        FLOPs_per_cycle = "{:1.4f}".format(flops / hb_elapsed_cycles)
         print(row_format.format(
             module.__name__, str([list(p.shape) for p in model.parameters()]),
-            str(list(i.shape)), exec_time_cpu_ms, exec_time_hb_ms))
+            str(list(i.shape)), exec_time_cpu_ms, exec_time_hb_ms, FLOPs_per_cycle))
