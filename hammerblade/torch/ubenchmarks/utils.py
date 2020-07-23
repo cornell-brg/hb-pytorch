@@ -8,7 +8,7 @@ import thop
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'tests'))
 import hbutils # noqa
 
-_CYCLE_TIME = 1e-9
+_CYCLE_TIME = 1.021e-9
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -37,24 +37,24 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
         def forward(self, x):
             return self.layer(x)
 
-    # Compute FLOPS of this layers
-    #
-    # There doesn't seem to be nice tool estimate flops for backward.
-    # Setting flops to 0 in case of backward.
-    flops, _ = thop.profile(Model(*args, **kwargs), inputs=(inputs[0],))
-    if backward:
-        flops = 0
-
     model = module(*args, **kwargs)
 
     model_hb = module(*args, **kwargs).hammerblade()
     model_hb.load_state_dict(model.state_dict())
 
-    row_format ="{:>10} | {:>30} | {:>15} | {:>15} | {:>15} | {:>15}"
+    row_format ="{:>10} | {:>30} | {:>15} | {:>15} | {:>15} | {:>15}\n"
 
-    print(row_format.format("Layer", "Layer parameters", "Inputs shape",
-                            "CPU Time (ms)", "HB Time (ms)", "HB FLOPs/cycle"))
+    log = row_format.format("Layer", "Layer parameters", "Inputs shape",
+                            "CPU Time (ms)", "HB Time (ms)", "HB FLOPs/cycle")
     for i in inputs:
+        # Compute FLOPS of this layers
+        #
+        # There doesn't seem to be nice tool estimate flops for backward.
+        # Setting flops to 0 in case of backward.
+        flops, _ = thop.profile(Model(*args, **kwargs), inputs=(i,))
+        if backward:
+            flops = 0
+
         i_hb =  hbutils.init_hb_tensor(i)
 
         exec_time_cpu, exec_time_hb = 0, 0
@@ -78,6 +78,8 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
         exec_time_cpu_ms = "{:6.2f}".format(exec_time_cpu / 1000)
         exec_time_hb_ms = "{:6.2f}".format(exec_time_hb / 1000)
         FLOPs_per_cycle = "{:1.4f}".format(flops / hb_elapsed_cycles)
-        print(row_format.format(
+        log += row_format.format(
             module.__name__, str([list(p.shape) for p in model.parameters()]),
-            str(list(i.shape)), exec_time_cpu_ms, exec_time_hb_ms, FLOPs_per_cycle))
+            str(list(i.shape)), exec_time_cpu_ms, exec_time_hb_ms, FLOPs_per_cycle)
+
+    return log
