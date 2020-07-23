@@ -1,9 +1,11 @@
 import argparse
 import sys, os
+import io
 import torch
 import torch.nn as nn
 import torch.autograd.profiler as torchprof
 import thop
+from contextlib import redirect_stdout
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'tests'))
 import hbutils # noqa
@@ -54,7 +56,9 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
         #
         # There doesn't seem to be nice tool estimate flops for backward.
         # Setting flops to 0 in case of backward.
-        flops, _ = thop.profile(Model(*args, **kwargs), inputs=(i,))
+        trap = io.StringIO()
+        with redirect_stdout(trap):
+            flops, _ = thop.profile(Model(*args, **kwargs), inputs=(i,))
         if backward:
             flops = 0
 
