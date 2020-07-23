@@ -37,7 +37,12 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
             return self.layer(x)
 
     # Compute FLOPS of this layers
+    #
+    # There doesn't seem to be nice tool estimate flops for backward.
+    # Setting flops to 0 in case of backward.
     flops, _ = thop.profile(Model(*args, **kwargs), inputs=(inputs[0],))
+    if backward:
+        flops = 0
 
     model = module(*args, **kwargs)
 
