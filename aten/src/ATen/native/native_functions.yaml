@@ -6630,3 +6630,10 @@
 #   use_c10_dispatcher: full
 #   variants: function
 #   dispatch:
+
+- func: sddmm(Tensor self, Tensor mat1, Tensor mat2) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    # SparseCPU: sddmm_cpu
+    SparseHammerBlade: sddmm_hb
