@@ -29,6 +29,7 @@ def _evaluate_op(op, input):
     return output, prof.self_cpu_time_total
 
 def benchmark_module(module, inputs, backward=False, *args, **kwargs):
+    # Wrapper module for FLOP count
     class Model(nn.Module):
         def __init__(self, *args, **kwargs):
             super(Model, self).__init__()
@@ -64,11 +65,13 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
         else:
             forward_output = model(i)
             forward_output_hb = model_hb(i_hb)
-            output_cpu, exec_time_cpu = _evaluate_op(lambda t: t.backward(),
+            grad = torch.rand(forward_output.shape)
+            grad_hb = grad.hammerblade()
+            _, exec_time_cpu = _evaluate_op(lambda t: t.backward(grad),
                                                      forward_output)
-            output_hb, exec_time_hb = _evaluate_op(lambda t: t.backward(),
+            _, exec_time_hb = _evaluate_op(lambda t: t.backward(grad_hb),
                                                    forward_output_hb)
-            assert torch.allclose(output_cpu, output_hb.cpu(), atol=1e-5)
+            assert torch.allclose(i.grad, i_hb.grad.cpu(), atol=1e-5)
 
         hb_elapsed_cycles = (exec_time_hb * 1e-6) / _CYCLE_TIME
 
