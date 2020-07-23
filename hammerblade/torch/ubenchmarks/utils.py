@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'tests'))
 import hbutils # noqa
 
 _CYCLE_TIME = 1.021e-9
+_ROW_FORMAT ="{:>10} | {:>25} | {:>20} | {:>15} | {:>15} | {:>15}\n"
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -28,6 +29,10 @@ def _evaluate_op(op, input):
         output = op(input)
     return output, prof.self_cpu_time_total
 
+def header():
+    return _ROW_FORMAT.format("Layer", "Layer parameters", "Inputs shape",
+                              "CPU Time (ms)", "HB Time (ms)", "HB FLOPs/cycle")
+
 def benchmark_module(module, inputs, backward=False, *args, **kwargs):
     # Wrapper module for FLOP count
     class Model(nn.Module):
@@ -42,10 +47,8 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
     model_hb = module(*args, **kwargs).hammerblade()
     model_hb.load_state_dict(model.state_dict())
 
-    row_format ="{:>10} | {:>30} | {:>15} | {:>15} | {:>15} | {:>15}\n"
+    log = ""
 
-    log = row_format.format("Layer", "Layer parameters", "Inputs shape",
-                            "CPU Time (ms)", "HB Time (ms)", "HB FLOPs/cycle")
     for i in inputs:
         # Compute FLOPS of this layers
         #
@@ -78,7 +81,7 @@ def benchmark_module(module, inputs, backward=False, *args, **kwargs):
         exec_time_cpu_ms = "{:6.2f}".format(exec_time_cpu / 1000)
         exec_time_hb_ms = "{:6.2f}".format(exec_time_hb / 1000)
         FLOPs_per_cycle = "{:1.4f}".format(flops / hb_elapsed_cycles)
-        log += row_format.format(
+        log += _ROW_FORMAT.format(
             module.__name__, str([list(p.shape) for p in model.parameters()]),
             str(list(i.shape)), exec_time_cpu_ms, exec_time_hb_ms, FLOPs_per_cycle)
 
