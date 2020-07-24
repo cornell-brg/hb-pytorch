@@ -5,6 +5,19 @@
 
 #include <kernel_common.hpp>
 
+__attribute__((noinline))
+void load_weights(float* NOALIAS wl,
+                  __remote float* NOALIAS wr,
+                  HBTensor<float, 4> w,
+                  uint32_t co,
+                  uint32_t ci,
+                  uint32_t Kh,
+                  uint32_t Kw) {
+  UNROLL(16) for(int i=0; i<Kh*Kw; ++i) {
+    wl[i] = wr[w.offset(co, ci, i / Kh, i % Kw)];
+  }
+}
+
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
 
@@ -37,12 +50,25 @@ extern "C" {
     auto Ph = p[0];
     auto Pw = p[1];
 
+    // Weights buffer size
+    float W_local[10][10];
+
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
       
     for(uint32_t n = 0; n < N; ++n)
-      for(uint32_t ci = 0; ci < Cin; ++ci) // input channel first to maximum data reuse
+      for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
+        uint32_t last_co = -1;
+
         hb_tiled_for([&](size_t co, size_t yh, size_t yw) {
+          if(co != last_co) {
+            // Load weights to a local buffer at the start of each image
+            last_co = co;
+
+            load_weights(W_local[0], (__remote float*) w.data_ptr(),
+                         w, co, ci, Kh, Kw);
+          }
+
           for(uint32_t kh = 0; kh < Kh; ++kh) {
             for(uint32_t kw = 0; kw < Kw; ++kw) {
               if((ci + kh + kw) == 0) {
@@ -53,11 +79,12 @@ extern "C" {
               int32_t xw = Sw * yw - Pw + kw;
 
               if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                y(n, co, yh, yw) += x(n, ci, xh, xw) * w(co, ci, kh, kw);
+                y(n, co, yh, yw) += x(n, ci, xh, xw) * W_local[kh][kw];
               } // else 0
             }
           }
         }, Cout, Hout, Wout);
+      }
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
