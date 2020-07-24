@@ -114,6 +114,19 @@ class HBTensorImpl {
       return dims;
     }
 
+    template<typename ...T>
+    uint32_t offset(T... indices) {
+      uint32_t index_arr[] = {((uint32_t)indices)...};
+      const uint32_t n = sizeof(index_arr) / sizeof(index_arr[0]);
+
+      uint32_t offset = 0;
+      UNROLL(DEFAULT_STRIDES) for(int i=0; i< n; ++i) {
+        offset += index_arr[i] * strides[i];
+      }
+
+      return offset;
+    }
+
     // Special case where we want linear, 0-d
     // and 1-d tensor indexing.
     //
