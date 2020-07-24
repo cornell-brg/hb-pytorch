@@ -6,6 +6,9 @@
 #include <kernel_common.hpp>
 
 __attribute__((noinline))
+#ifdef __clang__
+__attribute__((no_builtin("memcpy")))
+#endif
 void load_weights(float* NOALIAS wl,
                   __remote float* NOALIAS wr,
                   HBTensor<float, 4> w,
@@ -13,8 +16,9 @@ void load_weights(float* NOALIAS wl,
                   uint32_t ci,
                   uint32_t Kh,
                   uint32_t Kw) {
-  UNROLL(16) for(int i=0; i<Kh*Kw; ++i) {
-    wl[i] = wr[w.offset(co, ci, i / Kh, i % Kw)];
+  uint32_t offset = w.offset(co, ci, 0, 0);
+  UNROLL(16) for(int i = 0; i < Kh * Kw; ++i) {
+    wl[i] = wr[offset + i];
   }
 }
 
@@ -51,7 +55,7 @@ extern "C" {
     auto Pw = p[1];
 
     // Weights buffer size
-    float W_local[10][10];
+    float W_local[100];
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
@@ -65,7 +69,7 @@ extern "C" {
             // Load weights to a local buffer at the start of each image
             last_co = co;
 
-            load_weights(W_local[0], (__remote float*) w.data_ptr(),
+            load_weights(W_local, (__remote float*) w.data_ptr(),
                          w, co, ci, Kh, Kw);
           }
 
@@ -79,7 +83,7 @@ extern "C" {
               int32_t xw = Sw * yw - Pw + kw;
 
               if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                y(n, co, yh, yw) += x(n, ci, xh, xw) * W_local[kh][kw];
+                y(n, co, yh, yw) += x(n, ci, xh, xw) * W_local[kh * Kh + kw];
               } // else 0
             }
           }
