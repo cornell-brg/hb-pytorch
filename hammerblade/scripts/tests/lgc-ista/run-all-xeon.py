@@ -28,17 +28,17 @@ for i in range(len(route)):
     os.system(sh_cmd)
     with open(name + "/lgc_ista.json", 'w') as outfile:
       json.dump(cmd, outfile, indent=4, sort_keys=True)
-#    sh_cmd = "cp LeNet_5.prune.conv.fc.pth.tar " + name + "/"
-#    print(sh_cmd)
-#    os.system(sh_cmd)
+    sh_cmd = "cp -r data/ " + name + "/"
+    print(sh_cmd)
+    os.system(sh_cmd)
    # sh_cmd = "ln -s /work/global/lc873/work/sdh/playground/recsys_data/pytorch-apps/recsys/data " + name + "/data"
    # print(sh_cmd)
    # os.system(sh_cmd)
-    script = "(cd " + name + "; python -m pytest -vs /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lenet5_sparseconv2_lowerspmm_profiler.py > out.std 2>&1)"
+    script = "(cd " + name + "; python /scratch/users/zz546/pytorch-cosim/hb-pytorch/hammerblade/torch/tests/profiler/test_lgc_ista_spmv_profile_route.py > out.std 2>&1)"
     with open(name + "/run.sh", 'w') as outfile:
       outfile.write(script)
     print("starting cosim job ...")
     # run the job 3 times
     for runs in range(3):
       cosim_run = subprocess.Popen(["sh", name + "/run.sh"], env=os.environ)
-      cosim_run.wait()
+#      cosim_run.wait()
