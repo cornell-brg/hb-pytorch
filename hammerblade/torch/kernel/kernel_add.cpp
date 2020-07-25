@@ -10,10 +10,10 @@ __attribute__((noinline)) void vec_add(
              __remote float* NOALIAS A,
              __remote float* NOALIAS B,
              float alpha) {
-  int start = __bsg_id*10000;
-  int end = (__bsg_id + 1) * 10000;
+  int start = __bsg_id*1000;
+  int end = (__bsg_id + 1) * 1000;
 
-  for(int n = 0; n < 10; ++n)
+  for(int n = 0; n < 2; ++n)
     if(__bsg_id < 100)
       UNROLL(16) for(int i = start; i < end; ++i) {
         C[i] = A[i] + alpha * B[i];
