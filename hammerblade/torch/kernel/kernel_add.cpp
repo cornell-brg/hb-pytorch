@@ -34,7 +34,7 @@ extern "C" {
     */
     
     
-    hb_tiled_foreach_unroll<8>(c, a, b,
+    hb_tiled_foreach_unroll<2>(c, a, b,
       [&](float a, float b) {
         return a + alpha * b;
     });
