@@ -34,6 +34,10 @@ __remote void* hb_memcpy(__remote void* NOALIAS dest,
                          const __remote void* NOALIAS src,
                          size_t n);
 
+void* hb_memcpy_to_dmem(void* NOALIAS dest,
+                        const __remote void* NOALIAS src,
+                        size_t n);
+
 //====================================================================
 // HammerBlade kernel emulation
 // 03/02/2020, Lin Cheng (lc873@cornell.edu)

@@ -55,14 +55,15 @@ class HBTensorCached : public HBTensorImpl<__remote DT, uint32_t> {
         }
       }
 
-    //void prefetch(uint32_t off) {
-    //  uint32_t end = min(off + cache_numel, N);
-    //
-    //  for(int i = off; i < end; ++i) {
-    //    cache[i % cache_numel].tag = off;
-    //  }
+    void prefetch(uint32_t off) {
+      uint32_t end = std::min(off + cache_numel, this->N);
 
-    //  hb_memcpy( + off,
+      // TODO: Implement this with memcpy
+      for(int i = off; i < end; ++i) {
+        cache_tag[i % cache_numel] = off;
+        cache_data[i % cache_numel] = this->data[i];
+      }
+    }
 
     template<typename ...T>
     DT cached_read(T... indices) {
@@ -76,6 +77,7 @@ class HBTensorCached : public HBTensorImpl<__remote DT, uint32_t> {
         misses++;
       }
 
+      prefetch(off);
       DT rdata = this->data[off];
       cache_tag[ci] = off;
       cache_data[ci] = rdata;

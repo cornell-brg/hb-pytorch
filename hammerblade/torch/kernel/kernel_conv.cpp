@@ -62,7 +62,9 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
 
     for(uint32_t n = 0; n < N; ++n)
-      for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
+      for(uint32_t ci = 0; ci < Cin; ++ci) {
+        // input channel first to maximum data reuse
+
         // Local vairables to schedule data loading from
         // dram to scratchpad.
         uint32_t last_co = -1;
@@ -86,7 +88,8 @@ extern "C" {
               int32_t xw = Sw * yw - Pw + kw;
 
               if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                y(n, co, yh, yw) += x.cached_read(n, ci, xh, xw) * W_local[kh * Kh + kw];
+                y(n, co, yh, yw) += x.cached_read(n, ci, xh, xw) *
+                                    W_local[kh * Kh + kw];
               } // else 0
             }
           }
