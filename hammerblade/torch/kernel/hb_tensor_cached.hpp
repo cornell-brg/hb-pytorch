@@ -7,24 +7,22 @@
 #define _HB_TENSOR_CACHED_HPP
 
 #include <cstdint>
+#include <climits>
 #include <bsg_manycore.h>
 #include <hb_assert.hpp>
 #include <hb_common.hpp>
 #include <hb_tensor.hpp>
-
-template<typename DT>
-struct hb_tensor_cache_line {
-  int32_t tag;
-  DT data;
-};
 
 template <typename DT, int32_t dims=-1, uint32_t cache_size = 8>
 class HBTensorCached : public HBTensorImpl<__remote DT, uint32_t> {
   private:
     uint32_t strides[dims];
     uint32_t sizes[dims];
-    const uint32_t cache_numel = cache_size / sizeof(hb_tensor_cache_line<DT>);
-    hb_tensor_cache_line<DT>  cache[cache_size / sizeof(hb_tensor_cache_line<DT>)] = {-1};
+
+    static constexpr uint32_t cache_numel = cache_size /
+                                            (sizeof(uint32_t) + sizeof(float));
+    uint32_t cache_tag[cache_numel];
+    float cache_data[cache_numel] = {0};
 
     uint32_t hits = 0;
     uint32_t misses = 0;
@@ -50,23 +48,37 @@ class HBTensorCached : public HBTensorImpl<__remote DT, uint32_t> {
           strides[i] = strides_remote[i];
           sizes[i] = sizes_remote[i];
         }
+
+        // Invalidate cache
+        UNROLL(32) for(int i = 0; i < cache_numel; ++i) {
+          cache_tag[i] = UINT_MAX;
+        }
       }
-    
+
+    //void prefetch(uint32_t off) {
+    //  uint32_t end = min(off + cache_numel, N);
+    //
+    //  for(int i = off; i < end; ++i) {
+    //    cache[i % cache_numel].tag = off;
+    //  }
+
+    //  hb_memcpy( + off,
+
     template<typename ...T>
     DT cached_read(T... indices) {
       uint32_t off = this->offset(indices...);
       uint32_t ci = off % cache_numel;
 
-      if(cache[ci].tag == off) {
+      if(cache_tag[ci] == off) {
         hits++;
-        return cache[ci].data;
+        return cache_data[ci];
       } else {
         misses++;
       }
 
       DT rdata = this->data[off];
-      cache[ci].tag = off;
-      cache[ci].data = rdata;
+      cache_tag[ci] = off;
+      cache_data[ci] = rdata;
       return rdata;
     }
 

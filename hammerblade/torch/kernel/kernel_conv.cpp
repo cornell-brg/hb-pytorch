@@ -60,7 +60,7 @@ extern "C" {
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-      
+
     for(uint32_t n = 0; n < N; ++n)
       for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
         // Local vairables to schedule data loading from
