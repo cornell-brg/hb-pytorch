@@ -12,18 +12,22 @@
 #include <hb_common.hpp>
 #include <hb_tensor.hpp>
 
-//typedef struct {
-//  uint32_t tag;
-//  float data;
-//} hb_tensor_cache_line_t;
+template<typename DT>
+struct hb_tensor_cache_line {
+  int32_t tag;
+  DT data;
+};
 
 template <typename DT, int32_t dims=-1, uint32_t cache_size = 8>
 class HBTensorCached : public HBTensorImpl<__remote DT, uint32_t> {
   private:
     uint32_t strides[dims];
     uint32_t sizes[dims];
-    const uint32_t cache_numel = cache_size / sizeof(hb_tensor_cache_line_t);
-    hb_tensor_cache_line_t cache[cache_size / sizeof(hb_tensor_cache_line_t)] = {0};
+    const uint32_t cache_numel = cache_size / sizeof(hb_tensor_cache_line<DT>);
+    hb_tensor_cache_line<DT>  cache[cache_size / sizeof(hb_tensor_cache_line<DT>)] = {-1};
+
+    uint32_t hits = 0;
+    uint32_t misses = 0;
 
   public:
     HBTensorCached(hb_tensor_t* t) :
@@ -50,17 +54,24 @@ class HBTensorCached : public HBTensorImpl<__remote DT, uint32_t> {
     
     template<typename ...T>
     DT cached_read(T... indices) {
-      uint32_t offset = offset(indices...);
-      uint32_t ci = offset % cache_numel;
+      uint32_t off = this->offset(indices...);
+      uint32_t ci = off % cache_numel;
 
-      if(cache[ci].tag == offset) {
+      if(cache[ci].tag == off) {
+        hits++;
         return cache[ci].data;
+      } else {
+        misses++;
       }
 
-      float rdata = data[offset];
-      cache[ci].tag = offset;
+      DT rdata = this->data[off];
+      cache[ci].tag = off;
       cache[ci].data = rdata;
       return rdata;
+    }
+
+    void print_stats() {
+      bsg_printf("hits: %d misses: %d\n", hits, misses);
     }
 };
 

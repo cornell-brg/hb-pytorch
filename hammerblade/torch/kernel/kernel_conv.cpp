@@ -4,6 +4,7 @@
 //====================================================================
 
 #include <kernel_common.hpp>
+#include "hb_tensor_cached.hpp"
 
 __attribute__((noinline))
 #ifdef __clang__
@@ -34,7 +35,7 @@ extern "C" {
           hb_vector_t* padding,
           hb_vector_t* strides) {
     auto y = HBTensor<float, 4>(output);
-    auto x = HBTensor<float, 4>(input);
+    auto x = HBTensorCached<float, 4, 256>(input);
     auto w = HBTensor<float, 4>(weight);
     auto p = HBVector<uint32_t>(padding);
     auto s = HBVector<uint32_t>(strides);
@@ -91,6 +92,11 @@ extern "C" {
           }
         }, Cout, Hout, Wout);
       }
+
+    if(__bsg_id == 0) {
+      bsg_printf("N:%d Ci:%d Co:%d Hin:%d Win:%d ", N, Cin, Cout, Hin, Win);
+      x.print_stats();
+    }
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
