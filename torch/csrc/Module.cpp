@@ -898,6 +898,20 @@ PyObject* initModule() {
 #endif
   ASSERT_TRUE(set_module_attr("hb_emul_on", hb_emul_on));
 
+#ifdef USE_HB_COSIM
+  PyObject *hb_cosim_on = Py_True;
+#else
+  PyObject *hb_cosim_on = Py_False;
+#endif
+  ASSERT_TRUE(set_module_attr("hb_cosim_on", hb_cosim_on));
+
+#ifdef USE_HB_SILICON_V0
+  PyObject *hb_silicon_v0_on = Py_True;
+#else
+  PyObject *hb_silicon_v0_on = Py_False;
+#endif
+  ASSERT_TRUE(set_module_attr("hb_silicon_v0_on", hb_silicon_v0_on));
+
   ASSERT_TRUE(set_module_attr("has_mkldnn", at::hasMKLDNN() ? Py_True : Py_False));
 
 #ifdef _GLIBCXX_USE_CXX11_ABI

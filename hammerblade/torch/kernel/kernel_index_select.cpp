@@ -15,9 +15,9 @@ extern "C" {
     HBTensor<float> self(self_p);
     HBTensor<float> result(result_p);
     HBTensor<int32_t> index(index_p);
-    float* self_data = (float*)self.data_ptr();
-    float* result_data = (float*)result.data_ptr();
-    int32_t* index_data = (int32_t*)index.data_ptr();
+    __remote float* self_data = (__remote float*)self.data_ptr();
+    __remote float* result_data = (__remote float*)result.data_ptr();
+    __remote int32_t* index_data = (__remote int32_t*)index.data_ptr();
 
     bsg_cuda_print_stat_kernel_start();
 
@@ -33,7 +33,7 @@ extern "C" {
         });
       } else {
         hb_tiled_for(index.numel(), [&](size_t i) {
-          memcpy(
+          hb_memcpy(
             result_data + i * rowsize,
             self_data + index_data[i] * rowsize,
             rowsize * sizeof(float)

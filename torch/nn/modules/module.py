@@ -358,6 +358,21 @@ class Module(object):
         """
         return self._apply(lambda t: t.half() if t.is_floating_point() else t)
 
+    def move_buffers_to_cpu(self, module_class, buffers=[]):
+        r"""Moves buffers listed in ``buffers`` to CPU. This is useful
+        when device doesn't support data type of some buffers.
+
+        Returns:
+            Module: self
+        """
+        for module in self.children():
+            module.move_buffers_to_cpu(module_class, buffers)
+
+        for key, buf in self._buffers.items():
+            if buf is not None and isinstance(self, module_class) \
+                    and key in buffers:
+                self._buffers[key] = buf.cpu()
+
     def to(self, *args, **kwargs):
         r"""Moves and/or casts the parameters and buffers.
 

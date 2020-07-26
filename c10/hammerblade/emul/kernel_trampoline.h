@@ -48,8 +48,10 @@ typedef struct _kernel_registry_ {
     }
 } kernel_registry;
 
-#define HB_GET_MACRO(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,NAME,...) NAME
-#define HB_EMUL_REG_KERNEL(...) HB_GET_MACRO(__VA_ARGS__, HB_EMUL_REG_KERNEL_12ARGS,                  \
+#define HB_GET_MACRO(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,_14,NAME,...) NAME
+#define HB_EMUL_REG_KERNEL(...) HB_GET_MACRO(__VA_ARGS__, HB_EMUL_REG_KERNEL_14ARGS,                  \
+                                                          HB_EMUL_REG_KERNEL_13ARGS,                  \
+                                                          HB_EMUL_REG_KERNEL_12ARGS,                  \
                                                           HB_EMUL_REG_KERNEL_11ARGS,                  \
                                                           HB_EMUL_REG_KERNEL_10ARGS,                  \
                                                           HB_EMUL_REG_KERNEL_9ARGS,                   \
@@ -347,6 +349,86 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     at10 arg10 = (at10)((intptr_t)_arg10);                                                            \
     int err = kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);              \
     LOG_KERNEL_CALL(#kernel, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);      \
+    return err;                                                                                       \
+}                                                                                                     \
+kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
+
+#define HB_EMUL_REG_KERNEL_13ARGS(kernel, at0, at1, at2, at3, at4, at5, at6, at7, at8, at9, at10,     \
+                                  at11)                                                               \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
+    assert (argc == 12);                                                                              \
+    uint64_t _arg0 = argv[0];                                                                         \
+    uint64_t _arg1 = argv[1];                                                                         \
+    uint64_t _arg2 = argv[2];                                                                         \
+    uint64_t _arg3 = argv[3];                                                                         \
+    uint64_t _arg4 = argv[4];                                                                         \
+    uint64_t _arg5 = argv[5];                                                                         \
+    uint64_t _arg6 = argv[6];                                                                         \
+    uint64_t _arg7 = argv[7];                                                                         \
+    uint64_t _arg8 = argv[8];                                                                         \
+    uint64_t _arg9 = argv[9];                                                                         \
+    uint64_t _arg10 = argv[10];                                                                       \
+    uint64_t _arg11 = argv[11];                                                                       \
+    at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
+    at1 arg1 = (at1)((intptr_t)_arg1);                                                                \
+    at2 arg2 = (at2)((intptr_t)_arg2);                                                                \
+    at3 arg3 = (at3)((intptr_t)_arg3);                                                                \
+    at4 arg4 = (at4)((intptr_t)_arg4);                                                                \
+    at5 arg5 = (at5)((intptr_t)_arg5);                                                                \
+    at6 arg6 = (at6)((intptr_t)_arg6);                                                                \
+    at7 arg7 = (at7)((intptr_t)_arg7);                                                                \
+    at8 arg8 = (at8)((intptr_t)_arg8);                                                                \
+    at9 arg9 = (at9)((intptr_t)_arg9);                                                                \
+    at10 arg10 = (at10)((intptr_t)_arg10);                                                            \
+    at11 arg11 = (at11)((intptr_t)_arg11);                                                            \
+    int err = kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);       \
+    LOG_KERNEL_CALL(#kernel, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,       \
+                    arg11);                                                                           \
+    return err;                                                                                       \
+}                                                                                                     \
+kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \
+
+#define HB_EMUL_REG_KERNEL_14ARGS(kernel, at0, at1, at2, at3, at4, at5, at6, at7, at8, at9, at10,     \
+                                  at11, at12)                                                         \
+int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,                                    \
+                        const uint32_t idx, const uint32_t idy, const uint32_t id) {                  \
+    __bsg_x = idx;                                                                                    \
+    __bsg_y = idy;                                                                                    \
+    __bsg_id = id;                                                                                    \
+    assert (argc == 13);                                                                              \
+    uint64_t _arg0 = argv[0];                                                                         \
+    uint64_t _arg1 = argv[1];                                                                         \
+    uint64_t _arg2 = argv[2];                                                                         \
+    uint64_t _arg3 = argv[3];                                                                         \
+    uint64_t _arg4 = argv[4];                                                                         \
+    uint64_t _arg5 = argv[5];                                                                         \
+    uint64_t _arg6 = argv[6];                                                                         \
+    uint64_t _arg7 = argv[7];                                                                         \
+    uint64_t _arg8 = argv[8];                                                                         \
+    uint64_t _arg9 = argv[9];                                                                         \
+    uint64_t _arg10 = argv[10];                                                                       \
+    uint64_t _arg11 = argv[11];                                                                       \
+    uint64_t _arg12 = argv[12];                                                                       \
+    at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
+    at1 arg1 = (at1)((intptr_t)_arg1);                                                                \
+    at2 arg2 = (at2)((intptr_t)_arg2);                                                                \
+    at3 arg3 = (at3)((intptr_t)_arg3);                                                                \
+    at4 arg4 = (at4)((intptr_t)_arg4);                                                                \
+    at5 arg5 = (at5)((intptr_t)_arg5);                                                                \
+    at6 arg6 = (at6)((intptr_t)_arg6);                                                                \
+    at7 arg7 = (at7)((intptr_t)_arg7);                                                                \
+    at8 arg8 = (at8)((intptr_t)_arg8);                                                                \
+    at9 arg9 = (at9)((intptr_t)_arg9);                                                                \
+    at10 arg10 = (at10)((intptr_t)_arg10);                                                            \
+    at11 arg11 = (at11)((intptr_t)_arg11);                                                            \
+    at12 arg12 = (at12)((intptr_t)_arg12);                                                            \
+    int err = kernel(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);\
+    LOG_KERNEL_CALL(#kernel, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,       \
+                    arg11, arg12);                                                                    \
     return err;                                                                                       \
 }                                                                                                     \
 kernel_registry registry_##kernel = {#kernel, trampoline_##kernel};                                   \

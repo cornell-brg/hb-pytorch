@@ -1997,6 +1997,7 @@
     CPU: batch_norm_cpu
     CUDA: batch_norm_cuda
     MkldnnCPU: mkldnn_batch_norm
+    HammerBlade: batch_norm_hb
 
 - func: batch_norm_stats(Tensor input, float eps) -> (Tensor, Tensor)
   dispatch:
@@ -2023,6 +2024,7 @@
   dispatch:
     CPU: batch_norm_backward_cpu
     CUDA: batch_norm_backward_cuda
+    HammerBlade: batch_norm_backward_hb
 
 - func: batch_norm_backward_reduce(Tensor grad_out, Tensor input, Tensor mean, Tensor invstd, Tensor? weight, bool input_g, bool weight_g, bool bias_g) -> (Tensor, Tensor, Tensor, Tensor)
   dispatch:

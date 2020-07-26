@@ -16,10 +16,11 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach(res, input,
-      [&](float a) {
+    hb_tiled_foreach(
+      [](float a) {
         return sqrt(a);
-    });
+      },
+      res, input);
 
     bsg_cuda_print_stat_kernel_end();
 
