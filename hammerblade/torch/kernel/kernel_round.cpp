@@ -17,9 +17,9 @@ extern "C" {
   auto inp = HBTensor<float>(t0_p);
   auto res = HBTensor<float>(t1_p);
 
-    hb_tiled_foreach_unroll<10>(inp, res,
-      [&](float a) {
-        return rintf(a);
+  hb_tiled_foreach_unroll<10>(inp, res,
+    [&](float a) {
+      return rintf(a);
     });
 
     //   End profiling

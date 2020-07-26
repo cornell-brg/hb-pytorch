@@ -20,10 +20,10 @@ extern "C" {
 
     hb_tiled_foreach_unroll<4>(inp, res,
       [&](float a){
-      a = expf(-a);
-      a = 1 + a;
-      a = 1/a;
-      return a;
+        a = expf(-a);
+        a = 1 + a;
+        a = 1/a;
+        return a;
     });
 
     //   End profiling

@@ -60,7 +60,18 @@ export CLANG=1
 RISCV_GXX_EXTRA_OPTS += -Wno-c++11-narrowing # Fixme: fix these warnings!
 RISCV_LINK_OPTS += -lstdc++
 endif
+
+ifdef HB_SILICON_V0
+include $(BSG_F1_DIR)/Makefile.machine.include
+else
 include $(BSG_F1_DIR)/machine.mk
+endif
+
+bsg_global_X := $(BSG_MACHINE_GLOBAL_X)
+bsg_global_Y := $(BSG_MACHINE_GLOBAL_Y)
+bsg_tiles_X  := $(bsg_global_X)
+bsg_tiles_Y  := $(shell expr $(bsg_global_Y) - 1 )
+
 include $(BSG_MANYCORE_DIR)/software/mk/Makefile.master
 
 INCS := -I$(KERNEL_DIR)
@@ -82,9 +93,12 @@ kernel.riscv: $(KERNEL_OBJS)
 	$(RISCV_LINK) $(KERNEL_OBJS) $(SPMD_COMMON_OBJECTS) \
 		-L. -l:$(BSG_MANYCORE_LIB) -o $@ $(filter-out -nostdlib,$(RISCV_LINK_OPTS))
 
+%.dis: %.o
+	$(RISCV_BIN_DIR)/riscv32-unknown-elf-dramfs-objdump -M numeric --disassemble-all -S $<
+
 clean:
 	-rm -rf stack.info.* *.log *.csv ucli.key
-	-rm -rf *.o *.riscv
+	-rm -rf *.o *.ll *.ll.pass *.riscv
 	-rm -rf *.rvo *.vpd
 	-rm -rf $(BSG_MANYCORE_LIB) $(KERNEL_CSRCS) $(KERNEL_CPPSRCS)
 	-rm -rf $(KERNEL_DIR)/*.rvo

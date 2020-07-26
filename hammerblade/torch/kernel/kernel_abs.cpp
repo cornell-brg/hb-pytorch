@@ -22,7 +22,7 @@ extern "C" {
     hb_tiled_foreach_unroll<2>(res, input,
       [&](float a) {
         return abs(a);
-    });
+      });
 
     bsg_cuda_print_stat_kernel_end();
 

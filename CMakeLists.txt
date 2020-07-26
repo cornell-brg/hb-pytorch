@@ -127,6 +127,14 @@ cmake_dependent_option(
 option(COLORIZE_OUTPUT "Colorize output during compilation" ON)
 option(USE_ASAN "Use Address Sanitizer" OFF)
 option(USE_CUDA "Use CUDA" ON)
+option(USE_ROCM "Use ROCm" ON)
+option(CAFFE2_STATIC_LINK_CUDA "Statically link CUDA libraries" OFF)
+cmake_dependent_option(
+    USE_CUDNN "Use cuDNN" ON
+    "USE_CUDA" OFF)
+cmake_dependent_option(
+    USE_STATIC_CUDNN "Use cuDNN static libraries" OFF
+    "USE_CUDNN" OFF)
 option(USE_HB "Use HammerBlade" ON)
 option(USE_HB_EMUL "Use HammerBlade Emulation Layer" OFF)
 option(PROFILE_ATEN "Turn on ATen kernel profiling" ON)
@@ -136,14 +144,9 @@ cmake_dependent_option(
 cmake_dependent_option(
   HB_ENABLE_KERNEL_LOG "Enable HammerBlade kernel call logging" OFF
   "USE_HB_EMUL" OFF)
-option(USE_ROCM "Use ROCm" ON)
-option(CAFFE2_STATIC_LINK_CUDA "Statically link CUDA libraries" OFF)
 cmake_dependent_option(
-    USE_CUDNN "Use cuDNN" ON
-    "USE_CUDA" OFF)
-cmake_dependent_option(
-    USE_STATIC_CUDNN "Use cuDNN static libraries" OFF
-    "USE_CUDNN" OFF)
+    USE_HB_SILION_V0 "Target HammerBlade v0 silion" OFF
+    "USE_HB;NOT USE_HB_EMUL" OFF)
 option(USE_FBGEMM "Use FBGEMM (quantized 8-bit server operators)" ON)
 option(USE_FFMPEG "Use ffmpeg" OFF)
 option(USE_GFLAGS "Use GFLAGS" OFF)

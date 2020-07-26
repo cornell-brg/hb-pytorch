@@ -116,7 +116,7 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
       result += buffer[idx];
     }
     // produce final result
-    scalar_t* out_dp = (scalar_t*)(data[0]);
+    __remote scalar_t* out_dp = (__remote scalar_t*)(data[0]);
     *out_dp = project(result);
   }
 

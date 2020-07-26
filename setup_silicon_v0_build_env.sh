@@ -33,22 +33,15 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 echo "  hb-pytorch lives in $DIR"
 
-# setup cudalite runtime and pytorch kernel binary paths
-if [ -z "$BRG_BSG_BLADERUNNER_DIR" ]
-then
-  export BSG_MANYCORE_INCLUDE="<path-to-your-cudalite-cosim-runtime-source>"
-  export BSG_MANYCORE_LDPATH="<path-to-your-cudalite-cosim-runtime-lib>"
-else
-  export BSG_MANYCORE_INCLUDE=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries
-  export BSG_MANYCORE_LDPATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries/platforms/aws-vcs
-fi
+export USE_HB_SILICON_V0=1
 
-# Build COSIM runtime library and simulation executable
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python test_python.log
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python test_python.debug.log
+# setup cudalite runtime and pytorch kernel binary paths
+export BSG_MANYCORE_INCLUDE=/usr/include
+export BSG_MANYCORE_LDPATH=/usr/lib64
 
 export HB_KERNEL_DIR=$DIR/hammerblade/torch
 
+echo "  \$BRG_BSG_BLADERUNNER_DIR is set to $BRG_BSG_BLADERUNNER_DIR"
 echo "  \$BSG_MANYCORE_INCLUDE is set to $BSG_MANYCORE_INCLUDE"
 echo "  \$BSG_MANYCORE_LDPATH is set to $BSG_MANYCORE_LDPATH"
 echo "  \$HB_KERNEL_DIR is set to $HB_KERNEL_DIR"

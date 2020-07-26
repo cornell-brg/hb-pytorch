@@ -29,7 +29,7 @@ extern "C" {
         } else {
           return other;
         }
-    });
+      });
 
     bsg_cuda_print_stat_kernel_end();
 

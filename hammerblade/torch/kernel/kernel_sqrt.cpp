@@ -19,7 +19,7 @@ extern "C" {
     hb_tiled_foreach_unroll<4>(res, input,
       [&](float a) {
         return sqrt(a);
-    });
+      });
 
     bsg_cuda_print_stat_kernel_end();
 

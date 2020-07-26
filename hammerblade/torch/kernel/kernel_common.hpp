@@ -12,12 +12,12 @@
 #include <emul_hb_device.h>
 #define BSG_TILE_GROUP_X_DIM emul_hb_mesh_dim.x
 #define BSG_TILE_GROUP_Y_DIM emul_hb_mesh_dim.y
+#define bsg_tiles_X BSG_TILE_GROUP_X_DIM
+#define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
 #else
 #define BSG_TILE_GROUP_X_DIM bsg_global_X
 #define BSG_TILE_GROUP_Y_DIM (bsg_global_Y - 1)
 #endif // HB_EMUL
-#define bsg_tiles_X BSG_TILE_GROUP_X_DIM
-#define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
 // imaginary __bsg_pod_id and BSG_POD_DIM
 #define __bsg_pod_id 0
 #define BSG_POD_DIM 1
@@ -27,7 +27,11 @@
 #include "hb_tensor.hpp"
 #include <hb_assert.hpp>
 #include <hb_tiled_for.hpp>
-#include <hb_hw_patch.hpp>
+#include <hb_common.hpp>
+
+__remote void* hb_memcpy(__remote void* NOALIAS dest,
+                         const __remote void* NOALIAS src,
+                         size_t n);
 
 //====================================================================
 // HammerBlade kernel emulation

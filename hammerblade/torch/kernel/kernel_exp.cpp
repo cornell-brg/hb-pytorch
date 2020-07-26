@@ -18,7 +18,7 @@ extern "C" {
     hb_tiled_foreach_unroll<10>(res, input,
       [&](float a) {
         return exp(a);
-    });
+      });
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
 

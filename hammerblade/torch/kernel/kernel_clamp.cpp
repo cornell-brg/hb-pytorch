@@ -25,7 +25,8 @@ extern "C" {
     hb_tiled_foreach_unroll<8>(res, input,
       [&](float a) {
         return a < min ? min : (a > max ? max : a);
-    });
+      },
+      res, input);
 
     bsg_cuda_print_stat_kernel_end();
 
@@ -46,7 +47,8 @@ extern "C" {
     hb_tiled_foreach_unroll<8>(res, input,
       [&](float a) {
         return a < min ? min : a;
-    });
+      },
+      res, input);
 
     bsg_cuda_print_stat_kernel_end();
 
@@ -67,7 +69,7 @@ extern "C" {
     hb_tiled_foreach_unroll<8>(res, input,
       [&](float a) {
         return a > max ? max : a;
-    });
+      });
 
     bsg_cuda_print_stat_kernel_end();
 

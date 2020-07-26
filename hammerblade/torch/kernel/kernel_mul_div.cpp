@@ -46,7 +46,7 @@ extern "C" {
     hb_tiled_foreach_unroll<6>(c, a, b,
       [&](float a, float b) {
         return a / b;
-    });
+      });
 
     bsg_cuda_print_stat_kernel_end();
 
