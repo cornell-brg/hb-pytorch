@@ -62,11 +62,13 @@ extern "C" {
       
     for(uint32_t n = 0; n < N; ++n)
       for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
+        // Local vairables to schedule data loading from
+        // dram to scratchpad.
         uint32_t last_co = -1;
 
         hb_tiled_for([&](size_t co, size_t yh, size_t yw) {
           if(co != last_co) {
-            // Load weights to a local buffer at the start of each image
+            // Load weights to a local buffer for each output channel
             last_co = co;
 
             load_weights(W_local, (__remote float*) w.data_ptr(),
