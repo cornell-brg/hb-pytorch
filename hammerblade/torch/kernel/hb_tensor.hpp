@@ -64,7 +64,12 @@ typedef struct {
 // allocation.
 // =========================================================
 
-template<typename DT, typename IT>
+typedef struct {
+  uint32_t tag;
+  float data;
+} hb_tensor_cache_line_t;
+
+template<typename DT, typename IT, uint32_t cache_size = 64>
 class HBTensorImpl {
   private:
     uint32_t N;
@@ -72,6 +77,8 @@ class HBTensorImpl {
     IT* strides;
     IT* sizes;
     DT* data;
+    const uint32_t cache_numel = cache_size / sizeof(hb_tensor_cache_line_t);
+    hb_tensor_cache_line_t cache[cache_size / sizeof(hb_tensor_cache_line_t)] = {0};
 
   public:
     HBTensorImpl(uint32_t N, uint32_t dims, IT* strides,
@@ -162,6 +169,21 @@ class HBTensorImpl {
                   + index2 * strides[2]
                   + index3 * strides[3]];
     }
+
+    template<typename ...T>
+    DT cached_read(T... indices) {
+      uint32_t off = offset(indices...);
+      uint32_t ci = off % cache_numel;
+
+      if(cache[ci].tag == off) {
+        return cache[ci].data;
+      }
+
+      float rdata = data[off];
+      cache[ci].tag = off;
+      cache[ci].data = rdata;
+      return rdata;
+    }
 };
 
 template <typename DT, int32_t dims=-1>
@@ -223,7 +245,6 @@ class HBTensor<DT, -1> : public HBTensorImpl<__remote DT, uint32_t> {
         }
       }
 };
-
 
 template<typename T>
 class HBVector {

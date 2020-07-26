@@ -85,7 +85,7 @@ extern "C" {
               int32_t xw = Sw * yw - Pw + kw;
 
               if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                y(n, co, yh, yw) += x(n, ci, xh, xw) * W_local[kh * Kh + kw];
+                y(n, co, yh, yw) += x.cached_read(n, ci, xh, xw) * W_local[kh * Kh + kw];
               } // else 0
             }
           }
