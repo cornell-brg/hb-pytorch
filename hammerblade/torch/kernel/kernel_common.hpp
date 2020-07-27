@@ -27,6 +27,7 @@
 #include "hb_tensor.hpp"
 #include <hb_assert.hpp>
 #include <hb_tiled_for.hpp>
+#include <hb_spatial_for.hpp>
 #include <hb_common.hpp>
 
 __remote void* hb_memcpy(__remote void* NOALIAS dest,

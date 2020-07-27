@@ -22,7 +22,7 @@ This work aims to port PyTorch to HammerBlade.
 
  - Install dependencies:
 
-       pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis
+       pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis thop
 
  - Init pytorch third party dependencies:
 

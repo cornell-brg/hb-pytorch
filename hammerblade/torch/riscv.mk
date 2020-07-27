@@ -64,7 +64,8 @@ endif
 ifdef HB_SILICON_V0
 include $(BSG_F1_DIR)/Makefile.machine.include
 else
-include $(BSG_F1_DIR)/machine.mk
+BSG_MACHINE ?= 4x4_fast_n_fake
+include  $(BSG_F1_DIR)/machines/$(BSG_MACHINE)/Makefile.machine.include
 endif
 
 bsg_global_X := $(BSG_MACHINE_GLOBAL_X)
@@ -80,6 +81,8 @@ KERNEL_CSRCS   := $(notdir $(wildcard $(KERNEL_DIR)/*.c))
 KERNEL_CPPSRCS := $(notdir $(wildcard $(KERNEL_DIR)/*.cpp))
 KERNEL_OBJS    := $(patsubst %.c,%.o,$(KERNEL_CSRCS)) \
                   $(patsubst %.cpp,%.o,$(KERNEL_CPPSRCS))
+KERNEL_DIS     := $(patsubst %.c,%.dis,$(KERNEL_CSRCS)) \
+                  $(patsubst %.cpp,%.dis,$(KERNEL_CPPSRCS))
 
 $(KERNEL_CSRCS): %.c : $(KERNEL_DIR)/%.c
 	cp $^ $@
@@ -93,8 +96,13 @@ kernel.riscv: $(KERNEL_OBJS)
 	$(RISCV_LINK) $(KERNEL_OBJS) $(SPMD_COMMON_OBJECTS) \
 		-L. -l:$(BSG_MANYCORE_LIB) -o $@ $(filter-out -nostdlib,$(RISCV_LINK_OPTS))
 
-%.dis: %.o
-	$(RISCV_BIN_DIR)/riscv32-unknown-elf-dramfs-objdump -M numeric --disassemble-all -S $<
+$(KERNEL_DIS): %.dis: %.o
+	$(RISCV_BIN_DIR)/riscv32-unknown-elf-dramfs-objdump -M numeric --disassemble-all -S $< > $@
+
+kernel.dis: kernel.riscv
+	$(RISCV_BIN_DIR)/riscv32-unknown-elf-dramfs-objdump -M numeric --disassemble-all -S $< > $@
+
+all.dis: kernel.dis $(KERNEL_DIS)
 
 clean:
 	-rm -rf stack.info.* *.log *.csv ucli.key

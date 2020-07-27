@@ -531,6 +531,72 @@ inline void hb_tiled_for(size_t numel, FetchFunctor functor) {
   }
 }
 
+template <class FetchFunctor>
+inline void hb_tiled_for(FetchFunctor functor,
+                         size_t N, size_t M) {
+  //--------------------------------------
+  // calculate start and end for this tile
+  //--------------------------------------
+  hb_range range;
+  calc_range(&range, N * M);
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  //-----------------
+  // loop
+  //----------------
+  for (size_t i = start; i < end; i++) {
+    size_t b = (i / M) % N;
+    size_t a = i % M;
+    functor(b, a);
+  }
+}
+
+template <class FetchFunctor>
+inline void hb_tiled_for(FetchFunctor functor,
+                        size_t O, size_t N, size_t M) {
+  //--------------------------------------
+  // calculate start and end for this tile
+  //--------------------------------------
+  hb_range range;
+  calc_range(&range, O * N * M);
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  //-----------------
+  // loop
+  //----------------
+  for (size_t i = start; i < end; i++) {
+    size_t c = (i / (N * M)) % O;
+    size_t b = (i / M) % N;
+    size_t a = i % M;
+    functor(c, b, a);
+  }
+}
+
+template <class FetchFunctor>
+inline void hb_tiled_for(FetchFunctor functor,
+                        size_t P, size_t O, size_t N, size_t M) {
+  //--------------------------------------
+  // calculate start and end for this tile
+  //--------------------------------------
+  hb_range range;
+  calc_range(&range, P * O * N * M);
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  //-----------------
+  // loop
+  //----------------
+  for (size_t i = start; i < end; i++) {
+    size_t d = (i / (O * N * M)) % P;
+    size_t c = (i / (N * M)) % O;
+    size_t b = (i / M) % N;
+    size_t a = i % M;
+    functor(d, c, b, a);
+  }
+}
+
 // =========================================================
 // HB tile range
 // =========================================================
