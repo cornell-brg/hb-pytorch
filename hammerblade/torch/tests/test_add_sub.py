@@ -144,13 +144,13 @@ def test_add_long_2():
     _test_add(x1, x2)
 
 def test_add_long_3():
-    x1 = torch.randint(-2 ** 62, 2 ** 62 - 1, (1, 128))
-    x2 = torch.randint(-2 ** 62, 2 ** 62 - 1, (1, 128))
+    x1 = torch.randint(-2 ** 62 + 1, 2 ** 62 - 1, (1, 128))
+    x2 = torch.randint(-2 ** 62 + 1, 2 ** 62 - 1, (1, 128))
     _test_add(x1, x2)
 
 def test_add_long_4():
-    x1 = torch.randint(-2 ** 62, 2 ** 62 - 1, (16, 32))
-    x2 = torch.randint(-2 ** 62, 2 ** 62 - 1, (16, 32))
+    x1 = torch.randint(-2 ** 62 + 1, 2 ** 62 - 1, (16, 32))
+    x2 = torch.randint(-2 ** 62 + 1, 2 ** 62 - 1, (16, 32))
     _test_add(x1, x2)
 
 @settings(deadline=None)
@@ -289,22 +289,22 @@ def test_sub_int_with_scalar():
 # ------------------------------------------------------------------------
 
 def test_sub_long_1():
-    x = torch.ones(1, 10)
+    x = torch.ones(1, 10, dtype=torch.long)
     _test_sub(x, x)
 
 def test_sub_long_2():
-    x1 = torch.ones(4, 5)
-    x2 = torch.ones(4, 5)
+    x1 = torch.ones(4, 5, dtype=torch.long)
+    x2 = torch.ones(4, 5, dtype=torch.long)
     _test_sub(x1, x2)
 
 def test_sub_long_3():
-    x1 = torch.randint(-2 ** 62, 2 ** 62 - 1, (1, 128))
-    x2 = torch.randint(-2 ** 62, 2 ** 62 - 1, (1, 128))
+    x1 = torch.randint(-2 ** 62 + 1, 2 ** 62 - 1, (1, 128))
+    x2 = torch.randint(-2 ** 62 + 1, 2 ** 62 - 1, (1, 128))
     _test_sub(x1, x2)
 
 def test_sub_long_4():
-    x1 = torch.randint(-2 ** 62, 2 ** 62 - 1, (16, 32))
-    x2 = torch.randint(-2 ** 62, 2 ** 62 - 1, (16, 32))
+    x1 = torch.randint(-2 ** 62 + 1, 2 ** 62 - 1, (16, 32))
+    x2 = torch.randint(-2 ** 62 + 1, 2 ** 62 - 1, (16, 32))
     _test_sub(x1, x2)
 
 @settings(deadline=None)
