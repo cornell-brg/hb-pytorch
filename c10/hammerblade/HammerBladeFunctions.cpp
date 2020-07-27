@@ -38,7 +38,11 @@ static void initHammerBladeDevice() {
 }
 
 static uint64_t elapsed_cycles() {
+#ifdef HB_SILICON_V0
+  return 0; // V0 Silicon does not have a cycle counter.
+#else
   return bsg_time() / cycle_time;
+#endif
 }
 
 } // namespace unnamed
@@ -117,6 +121,9 @@ void* memcpy_device_to_host(void *dst, const void *src, uint32_t nbytes) {
 
 
 void* DMA_host_to_device(void *dst, const void *src, uint32_t nbytes) {
+#ifdef HB_SILICON_V0
+  return memcpy_host_to_device(dst, src, nbytes);
+#else
   c10::probe::LogATenKernelWithName("@BSG_API_CALL@__dma");
   // assume 0 time
   c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
@@ -127,10 +134,14 @@ void* DMA_host_to_device(void *dst, const void *src, uint32_t nbytes) {
   hb_mc_dma_htod_t job = {.d_addr=(eva_t)((intptr_t)dst), .h_addr=src, .size=nbytes};
   C10_HB_CHECK(hb_mc_device_dma_to_device(&_hb_device, &job, 1));
   return dst;
+#endif
 }
 
 
 void* DMA_device_to_host(void *dst, const void *src, uint32_t nbytes) {
+#ifdef HB_SILICON_V0
+  return memcpy_device_to_host(dst, src, nbytes);
+#else
   c10::probe::LogATenKernelWithName("@BSG_API_CALL@__dma");
   // assume 0 time
   c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
@@ -141,6 +152,7 @@ void* DMA_device_to_host(void *dst, const void *src, uint32_t nbytes) {
   hb_mc_dma_dtoh_t job = {.d_addr=(eva_t)((intptr_t)src), .h_addr=dst, .size=nbytes};
   C10_HB_CHECK(hb_mc_device_dma_to_host(&_hb_device, &job, 1));
   return dst;
+#endif
 }
 
 

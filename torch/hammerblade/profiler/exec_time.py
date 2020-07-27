@@ -167,3 +167,26 @@ def raw_stack(trimming=False):
         return exec_time_print_tree(root)
     except AttributeError:
         print("PyTorch is not built with profiling")
+
+def roi_time(trimming=False):
+    try:
+        root = exec_time_tree(trimming=trimming)
+        if trimming:
+            exec_time_apply_trim(root)
+        return root.time
+    except AttributeError:
+        print("PyTorch is not built with profiling")
+
+def exec_time_dict(trimming=False):
+    """
+    Returns a dict with per operator execution times for all
+    operators on the top of the stack.
+    """
+    try:
+        root = exec_time_tree(fancy_func=True, trimming=trimming)
+        exec_dict = {}
+        for e in (root.children + [root]):
+            exec_dict[e.func] = e.time
+        return exec_dict
+    except AttributeError:
+        print("PyTorch is not built with profiling")

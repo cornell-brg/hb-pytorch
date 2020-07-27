@@ -19,10 +19,11 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach(res, input,
+    hb_tiled_foreach(
       [&](float a) {
         return a < min ? min : (a > max ? max : a);
-    });
+      },
+      res, input);
 
     bsg_cuda_print_stat_kernel_end();
 
@@ -40,10 +41,11 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach(res, input,
-      [&](float a) {
+    hb_tiled_foreach(
+      [min](float a) {
         return a < min ? min : a;
-    });
+      },
+      res, input);
 
     bsg_cuda_print_stat_kernel_end();
 
@@ -61,10 +63,11 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach(res, input,
-      [&](float a) {
+    hb_tiled_foreach(
+      [max](float a) {
         return a > max ? max : a;
-    });
+      },
+      res, input);
 
     bsg_cuda_print_stat_kernel_end();
 

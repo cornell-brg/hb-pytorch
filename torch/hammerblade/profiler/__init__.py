@@ -60,3 +60,9 @@ def stats(key=None, trimming=False):
             print("available ones are: ExecTime, ExecTime-Latex, ExecTime-Raw, Unimpl")
             return ""
     return buffer
+
+def total_time_in_ROI(trimming=False):
+    return exec_time.roi_time(trimming)
+
+def per_op_time_in_ROI(trimming=False):
+    return exec_time.exec_time_dict(trimming)

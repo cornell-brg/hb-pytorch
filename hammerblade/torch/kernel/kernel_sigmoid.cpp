@@ -18,13 +18,14 @@ extern "C" {
       // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach(inp, res,
-      [&](float a){
-      a = expf(-a);
-      a = 1 + a;
-      a = 1/a;
-      return a;
-    });
+    hb_tiled_foreach(
+      [](float a){
+        a = expf(-a);
+        a = 1 + a;
+        a = 1/a;
+        return a;
+      },
+      inp, res);
 
     //   End profiling
     bsg_cuda_print_stat_kernel_end();

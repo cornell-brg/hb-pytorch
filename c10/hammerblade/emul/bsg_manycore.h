@@ -6,6 +6,8 @@
 #include <cstdarg>
 #include <stdint.h>
 
+#define __remote
+
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -53,5 +55,11 @@ static inline void bsg_cuda_print_stat_end(uint32_t tag) {
 }
 
 #define bsg_fail() assert (1==0 /* bsg_fail is called */)
+
+#define __remote
+
+#define NOALIAS
+
+#define UNROLL(n)
 
 #endif // _BSG_MANYCORE_H
