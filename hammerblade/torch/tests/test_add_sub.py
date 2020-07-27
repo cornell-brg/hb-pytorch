@@ -133,7 +133,7 @@ def test_add_int_with_scalar():
 # ------------------------------------------------------------------------
 # tests of add kernel with long long (64bit) elements
 # ------------------------------------------------------------------------
-    
+
 def test_add_long_1():
     x = torch.ones(1, 10, dtype=torch.long)
     _test_add(x, x)
@@ -152,7 +152,7 @@ def test_add_long_4():
     x1 = torch.randint(-2 ** 62, 2 ** 62 - 1, (16, 32))
     x2 = torch.randint(-2 ** 62, 2 ** 62 - 1, (16, 32))
     _test_add(x1, x2)
-    
+
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_add_long_hypothesis(inputs):
@@ -166,7 +166,7 @@ def test_add_long_with_scalar():
     y_c = x + 5
     y_h = h + 5
     assert y_h.device == torch.device("hammerblade")
-    assert torch.allclose(y_h.cpu(), y_c)    
+    assert torch.allclose(y_h.cpu(), y_c)
 
 # ------------------------------------------------------------------------
 # test of subtracting x2 from x1
@@ -266,7 +266,7 @@ def test_sub_int_4():
     x2 = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32))
     y = x2.to(torch.int32)
     _test_sub(x, y)
-    
+
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_sub_int_hypothesis(inputs):
@@ -306,7 +306,7 @@ def test_sub_long_4():
     x1 = torch.randint(-2 ** 62, 2 ** 62 - 1, (16, 32))
     x2 = torch.randint(-2 ** 62, 2 ** 62 - 1, (16, 32))
     _test_sub(x1, x2)
-    
+
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_sub_long_hypothesis(inputs):
