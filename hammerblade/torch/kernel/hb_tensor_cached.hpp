@@ -60,7 +60,7 @@ class HBTensorCached : public HBTensorImpl<__remote DT, uint32_t> {
 
       // TODO: Implement this with memcpy
       for(int i = off; i < end; ++i) {
-        cache_tag[i % cache_numel] = off;
+        cache_tag[i % cache_numel] = i;
         cache_data[i % cache_numel] = this->data[i];
       }
     }
