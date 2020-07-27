@@ -30,10 +30,11 @@ int tensorlib_add( hb_tensor_t* t0_p, hb_tensor_t* t1_p,
 
   bsg_cuda_print_stat_kernel_start();
 
-  hb_tiled_foreach(c, a, b,
-    [&](float a, float b) {
+  hb_tiled_foreach(
+    [alpha](float a, float b) {
       return a + alpha * b;
-  });
+  },
+  c, a, b);
 
   bsg_cuda_print_stat_kernel_end();
   g_barrier.sync();
@@ -60,10 +61,11 @@ int tensorlib_add_Long( hb_tensor_t* t0_p, hb_tensor_t* t1_p,
 
   bsg_cuda_print_stat_kernel_start();
 
-  hb_tiled_foreach(c, a, b,
-    [&](long long a, long long b) {
+  hb_tiled_foreach(
+    [alpha](long long a, long long b) {
       return a + alpha * b;
-  });
+  },
+  c, a, b);
 
   bsg_cuda_print_stat_kernel_end();
   g_barrier.sync();
@@ -90,10 +92,11 @@ int tensorlib_add_Int( hb_tensor_t* t0_p, hb_tensor_t* t1_p,
     
   bsg_cuda_print_stat_kernel_start();
 
-  hb_tiled_foreach(c, a, b,
-    [&](int a, int b) {
+  hb_tiled_foreach(
+    [alpha](int a, int b) {
       return a + alpha * b;
-  });
+  },
+  c, a, b);
 
   bsg_cuda_print_stat_kernel_end();
   g_barrier.sync();
