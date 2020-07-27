@@ -91,25 +91,25 @@ def test_add_with_scalar_hypothesis(tensor, scalar):
 # ------------------------------------------------------------------------
 
 def test_add_int_1():
-    x = torch.ones(1, 10, dtype = torch.int)
+    x = torch.ones(1, 10, dtype=torch.int)
     _test_add(x, x)
 
 def test_add_int_2():
-    x1 = torch.ones(4, 5, dtype = torch.int)
-    x2 = torch.ones(4, 5, dtype = torch.int)
+    x1 = torch.ones(4, 5, dtype=torch.int)
+    x2 = torch.ones(4, 5, dtype=torch.int)
     _test_add(x1, x2)
 
 def test_add_int_3():
-    x1 = torch.randint(-2**30, 2**30-1, (1, 128))
+    x1 = torch.randint(-2 ** 30, 2 ** 30 - 1, (1, 128))
     x = x1.to(torch.int32)
-    x2 = torch.randint(-2**30, 2**30-1, (1, 128))
+    x2 = torch.randint(-2 ** 30, 2 ** 30 - 1, (1, 128))
     y = x2.to(torch.int32)
     _test_add(x, y)
 
 def test_add_int_4():
-    x1 = torch.randint(-2**30, 2**30-1, (16, 32))
+    x1 = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32))
     x = x1.to(torch.int32)
-    x2 = torch.randint(-2**30, 2**30-1, (16, 32))
+    x2 = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32))
     y = x2.to(torch.int32)
     _test_add(x, y)
 
@@ -123,7 +123,7 @@ def test_add_int_hypothesis(inputs):
     _test_add(x1, x2)
 
 def test_add_int_with_scalar():
-    x = torch.ones(16, dtype = torch.int)
+    x = torch.ones(16, dtype=torch.int)
     h = x.hammerblade()
     y_c = x + 5
     y_h = h + 5
@@ -135,22 +135,22 @@ def test_add_int_with_scalar():
 # ------------------------------------------------------------------------
     
 def test_add_long_1():
-    x = torch.ones(1, 10, dtype = torch.long)
+    x = torch.ones(1, 10, dtype=torch.long)
     _test_add(x, x)
 
 def test_add_long_2():
-    x1 = torch.ones(4, 5, dtype = torch.long)
-    x2 = torch.ones(4, 5, dtype = torch.long)
+    x1 = torch.ones(4, 5, dtype=torch.long)
+    x2 = torch.ones(4, 5, dtype=torch.long)
     _test_add(x1, x2)
 
 def test_add_long_3():
-    x1 = torch.randint(-2**62, 2**62-1, (1, 128))
-    x2 = torch.randint(-2**62, 2**62-1, (1, 128))
+    x1 = torch.randint(-2 ** 62, 2 ** 62 - 1, (1, 128))
+    x2 = torch.randint(-2 ** 62, 2 ** 62 - 1, (1, 128))
     _test_add(x1, x2)
 
 def test_add_long_4():
-    x1 = torch.randint(-2**62, 2**62-1, (16, 32))
-    x2 = torch.randint(-2**62, 2**62-1, (16, 32))
+    x1 = torch.randint(-2 ** 62, 2 ** 62 - 1, (16, 32))
+    x2 = torch.randint(-2 ** 62, 2 ** 62 - 1, (16, 32))
     _test_add(x1, x2)
     
 @settings(deadline=None)
@@ -161,7 +161,7 @@ def test_add_long_hypothesis(inputs):
     _test_add(x1, x2)
 
 def test_add_long_with_scalar():
-    x = torch.ones(16, dtype = torch.long)
+    x = torch.ones(16, dtype=torch.long)
     h = x.hammerblade()
     y_c = x + 5
     y_h = h + 5
@@ -245,25 +245,25 @@ def test_sub_with_scalar_hypothesis(tensor, scalar):
 # ------------------------------------------------------------------------
 
 def test_sub_int_1():
-    x = torch.ones(1, 10, dtype = torch.int)
+    x = torch.ones(1, 10, dtype=torch.int)
     _test_sub(x, x)
 
 def test_sub_int_2():
-    x1 = torch.ones(4, 5, dtype = torch.int)
-    x2 = torch.ones(4, 5, dtype = torch.int)
+    x1 = torch.ones(4, 5, dtype=torch.int)
+    x2 = torch.ones(4, 5, dtype=torch.int)
     _test_sub(x1, x2)
 
 def test_sub_int_3():
-    x1 = torch.randint(-2**30, 2**30-1, (1, 128))
+    x1 = torch.randint(-2 ** 30, 2 ** 30 - 1, (1, 128))
     x = x1.to(torch.int32)
-    x2 = torch.randint(-2**30, 2**30-1, (1, 128))
+    x2 = torch.randint(-2 ** 30, 2 ** 30 - 1, (1, 128))
     y = x2.to(torch.int32)
     _test_sub(x, y)
 
 def test_sub_int_4():
-    x1 = torch.randint(-2**30, 2**30-1, (16, 32))
+    x1 = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32))
     x = x1.to(torch.int32)
-    x2 = torch.randint(-2**30, 2**30-1, (16, 32))
+    x2 = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32))
     y = x2.to(torch.int32)
     _test_sub(x, y)
     
@@ -277,7 +277,7 @@ def test_sub_int_hypothesis(inputs):
     _test_sub(x1, x2)
 
 def test_sub_int_with_scalar():
-    x = torch.ones(16, dtype = torch.int)
+    x = torch.ones(16, dtype=torch.int)
     h = x.hammerblade()
     y_c = x - 5
     y_h = h - 5
@@ -298,13 +298,13 @@ def test_sub_long_2():
     _test_sub(x1, x2)
 
 def test_sub_long_3():
-    x1 = torch.randint(-2**62, 2**62-1, (1, 128))
-    x2 = torch.randint(-2**62, 2**62-1, (1, 128))
+    x1 = torch.randint(-2 ** 62, 2 ** 62 - 1, (1, 128))
+    x2 = torch.randint(-2 ** 62, 2 ** 62 - 1, (1, 128))
     _test_sub(x1, x2)
 
 def test_sub_long_4():
-    x1 = torch.randint(-2**62, 2**62-1, (16, 32))
-    x2 = torch.randint(-2**62, 2**62-1, (16, 32))
+    x1 = torch.randint(-2 ** 62, 2 ** 62 - 1, (16, 32))
+    x2 = torch.randint(-2 ** 62, 2 ** 62 - 1, (16, 32))
     _test_sub(x1, x2)
     
 @settings(deadline=None)
@@ -315,7 +315,7 @@ def test_sub_long_hypothesis(inputs):
     _test_sub(x1, x2)
 
 def test_sub_long_with_scalar():
-    x = torch.ones(16, dtype = torch.long)
+    x = torch.ones(16, dtype=torch.long)
     h = x.hammerblade()
     y_c = x - 5
     y_h = h - 5
