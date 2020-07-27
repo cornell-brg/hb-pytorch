@@ -23,6 +23,7 @@ class HBTensorCached : public HBTensorImpl<__remote DT, uint32_t> {
                                             (sizeof(uint32_t) + sizeof(float));
     uint32_t cache_tag[cache_numel];
     float cache_data[cache_numel] = {0};
+    uint32_t prefetch_block_size = 16;
 
     uint32_t hits = 0;
     uint32_t misses = 0;
@@ -55,23 +56,14 @@ class HBTensorCached : public HBTensorImpl<__remote DT, uint32_t> {
         }
       }
 
-    __attribute__((noinline))
-    void prefetch_impl(uint32_t* NOALIAS tag_ptr,
-                       DT* NOALIAS data_ptr,
-                       __remote DT* remote_data_ptr,
-                       uint32_t start, uint32_t end) {
-      UNROLL(16) for(uint32_t i = start; i < end; ++i) {
-        data_ptr[i % cache_numel] = remote_data_ptr[i];
-        tag_ptr[i % cache_numel] = i;
-      }
-    }
-
     void prefetch(uint32_t off) {
-      uint32_t end = std::min(off + cache_numel, this->N);
+      uint32_t end = std::min(off + prefetch_block_size, this->N);
 
-      prefetch_impl(cache_tag, cache_data,
-                    (__remote DT*) this->data,
-                    off, end);
+      // TODO: Implement this with memcpy
+      for(int i = off; i < end; ++i) {
+        cache_tag[i % cache_numel] = i;
+        cache_data[i % cache_numel] = this->data[i];
+      }
     }
 
     template<typename ...T>
