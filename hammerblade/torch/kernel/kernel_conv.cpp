@@ -12,12 +12,9 @@ __attribute__((no_builtin("memcpy")))
 #endif
 void load_weights(float* NOALIAS wl,
                   __remote float* NOALIAS wr,
-                  HBTensor<float, 4> w,
-                  uint32_t co,
-                  uint32_t ci,
+                  uint32_t offset,
                   uint32_t Kh,
                   uint32_t Kw) {
-  uint32_t offset = w.offset(co, ci, 0, 0);
   UNROLL(16) for(int i = 0; i < Kh * Kw; ++i) {
     wl[i] = wr[offset + i];
   }
@@ -65,7 +62,7 @@ extern "C" {
       for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
         blocked_for(Cout, [&](size_t co, size_t group_size) {
           load_weights(W_local, (__remote float*) w.data_ptr(),
-                       w, co, ci, Kh, Kw);
+                       w.offset(co, ci, 0, 0), Kh, Kw);
 
           hb_tiled_for(group_size, [&](size_t yh, size_t yw) {
             for(uint32_t kh = 0; kh < Kh; ++kh) {
