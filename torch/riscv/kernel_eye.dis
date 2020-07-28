@@ -1,0 +1,641 @@
+
+kernel_eye.o:     file format elf32-littleriscv
+
+
+Disassembly of section .group:
+
+00000000 <_ZN8HBTensorIfLln1EEC5EP11hb_tensor_t>:
+   0:	0001                	nop
+   2:	0000                	unimp
+   4:	00000007          	0x7
+   8:	0008                	0x8
+	...
+
+Disassembly of section .text:
+
+00000000 <tensorlib_eye>:
+   0:	f9010113          	addi	x2,x2,-112
+   4:	06812423          	sw	x8,104(x2)
+   8:	00058413          	mv	x8,x11
+   c:	00050593          	mv	x11,x10
+  10:	00410513          	addi	x10,x2,4
+  14:	06912223          	sw	x9,100(x2)
+  18:	07212023          	sw	x18,96(x2)
+  1c:	00060493          	mv	x9,x12
+  20:	05312e23          	sw	x19,92(x2)
+  24:	05412c23          	sw	x20,88(x2)
+  28:	05512a23          	sw	x21,84(x2)
+  2c:	05612823          	sw	x22,80(x2)
+  30:	05712623          	sw	x23,76(x2)
+  34:	05812423          	sw	x24,72(x2)
+  38:	06112623          	sw	x1,108(x2)
+  3c:	00000097          	auipc	x1,0x0
+  40:	000080e7          	jalr	x1 # 3c <tensorlib_eye+0x3c>
+  44:	00000337          	lui	x6,0x0
+  48:	000006b7          	lui	x13,0x0
+  4c:	000008b7          	lui	x17,0x0
+  50:	00000537          	lui	x10,0x0
+  54:	00032783          	lw	x15,0(x6) # 0 <tensorlib_eye>
+  58:	0006a583          	lw	x11,0(x13) # 0 <tensorlib_eye>
+  5c:	0008a703          	lw	x14,0(x17) # 0 <tensorlib_eye>
+  60:	00052603          	lw	x12,0(x10) # 0 <tensorlib_eye>
+  64:	00000837          	lui	x16,0x0
+  68:	00082e03          	lw	x28,0(x16) # 0 <tensorlib_eye>
+  6c:	00b782b3          	add	x5,x15,x11
+  70:	00c703b3          	add	x7,x14,x12
+  74:	01829913          	slli	x18,x5,0x18
+  78:	00040f37          	lui	x30,0x40
+  7c:	01239993          	slli	x19,x7,0x12
+  80:	3f000a37          	lui	x20,0x3f000
+  84:	00fc0b37          	lui	x22,0xfc0
+  88:	00042f83          	lw	x31,0(x8)
+  8c:	004e1c13          	slli	x24,x28,0x4
+  90:	ff0f0413          	addi	x8,x30,-16 # 3fff0 <.L88+0x3fae8>
+  94:	01497ab3          	and	x21,x18,x20
+  98:	0169fbb3          	and	x23,x19,x22
+  9c:	017aeeb3          	or	x29,x21,x23
+  a0:	008c77b3          	and	x15,x24,x8
+  a4:	00fee5b3          	or	x11,x29,x15
+  a8:	80000737          	lui	x14,0x80000
+  ac:	00e5e633          	or	x12,x11,x14
+  b0:	41001e37          	lui	x28,0x41001
+  b4:	0004af03          	lw	x30,0(x9)
+  b8:	ffd00293          	li	x5,-3
+  bc:	ffff8493          	addi	x9,x31,-1
+  c0:	d0ce2623          	sw	x12,-756(x28) # 41000d0c <.L88+0x41000804>
+  c4:	1e92e463          	bltu	x5,x9,2ac <.L16>
+  c8:	000000b7          	lui	x1,0x0
+  cc:	0000a383          	lw	x7,0(x1) # 0 <tensorlib_eye>
+  d0:	004fd913          	srli	x18,x31,0x4
+  d4:	00190993          	addi	x19,x18,1
+  d8:	027987b3          	mul	x15,x19,x7
+  dc:	00f98eb3          	add	x29,x19,x15
+  e0:	43dfe063          	bltu	x31,x29,500 <.L87>
+
+000000e4 <.L17>:
+  e4:	1dd7f463          	bgeu	x15,x29,2ac <.L16>
+  e8:	00478493          	addi	x9,x15,4
+  ec:	00048913          	mv	x18,x9
+  f0:	41d4fc63          	bgeu	x9,x29,508 <.L88>
+  f4:	00000a37          	lui	x20,0x0
+  f8:	000a2787          	flw	f15,0(x20) # 0 <tensorlib_eye>
+  fc:	00c12f83          	lw	x31,12(x2)
+ 100:	01412e03          	lw	x28,20(x2)
+ 104:	20f78653          	fmv.s	f12,f15
+ 108:	20f786d3          	fmv.s	f13,f15
+ 10c:	20f78753          	fmv.s	f14,f15
+ 110:	00178413          	addi	x8,x15,1
+ 114:	00278393          	addi	x7,x15,2
+ 118:	00378293          	addi	x5,x15,3
+
+0000011c <.L57>:
+ 11c:	120f0063          	beqz	x30,23c <.L19>
+ 120:	000fab03          	lw	x22,0(x31)
+ 124:	004fab83          	lw	x23,4(x31)
+ 128:	00000a13          	li	x20,0
+ 12c:	002b1713          	slli	x14,x22,0x2
+ 130:	02e28c33          	mul	x24,x5,x14
+ 134:	017b05b3          	add	x11,x22,x23
+ 138:	002b9993          	slli	x19,x23,0x2
+ 13c:	000e0a93          	mv	x21,x28
+ 140:	00259613          	slli	x12,x11,0x2
+ 144:	000e0b13          	mv	x22,x28
+ 148:	018e0bb3          	add	x23,x28,x24
+ 14c:	03428063          	beq	x5,x20,16c <.L89>
+
+00000150 <.L20>:
+ 150:	000ba023          	sw	x0,0(x23)
+ 154:	001a0093          	addi	x1,x20,1
+ 158:	00cb0b33          	add	x22,x22,x12
+ 15c:	013b8bb3          	add	x23,x23,x19
+ 160:	03e08063          	beq	x1,x30,180 <.L90>
+
+00000164 <.L58>:
+ 164:	00008a13          	mv	x20,x1
+ 168:	ff4294e3          	bne	x5,x20,150 <.L20>
+
+0000016c <.L89>:
+ 16c:	00fb2027          	fsw	f15,0(x22) # fc0000 <.L88+0xfbfaf8>
+ 170:	001a0093          	addi	x1,x20,1
+ 174:	00cb0b33          	add	x22,x22,x12
+ 178:	013b8bb3          	add	x23,x23,x19
+ 17c:	ffe094e3          	bne	x1,x30,164 <.L58>
+
+00000180 <.L90>:
+ 180:	02e38c33          	mul	x24,x7,x14
+ 184:	00000b13          	li	x22,0
+ 188:	000e0b93          	mv	x23,x28
+ 18c:	018e05b3          	add	x11,x28,x24
+ 190:	03638063          	beq	x7,x22,1b0 <.L91>
+
+00000194 <.L23>:
+ 194:	0005a023          	sw	x0,0(x11)
+ 198:	001b0093          	addi	x1,x22,1
+ 19c:	00cb8bb3          	add	x23,x23,x12
+ 1a0:	013585b3          	add	x11,x11,x19
+ 1a4:	036a0063          	beq	x20,x22,1c4 <.L92>
+
+000001a8 <.L59>:
+ 1a8:	00008b13          	mv	x22,x1
+ 1ac:	ff6394e3          	bne	x7,x22,194 <.L23>
+
+000001b0 <.L91>:
+ 1b0:	00cba027          	fsw	f12,0(x23)
+ 1b4:	001b0093          	addi	x1,x22,1
+ 1b8:	00cb8bb3          	add	x23,x23,x12
+ 1bc:	013585b3          	add	x11,x11,x19
+ 1c0:	ff6a14e3          	bne	x20,x22,1a8 <.L59>
+
+000001c4 <.L92>:
+ 1c4:	02870c33          	mul	x24,x14,x8
+ 1c8:	00000593          	li	x11,0
+ 1cc:	018e0bb3          	add	x23,x28,x24
+ 1d0:	02858063          	beq	x11,x8,1f0 <.L93>
+
+000001d4 <.L26>:
+ 1d4:	000ba023          	sw	x0,0(x23)
+ 1d8:	00158093          	addi	x1,x11,1
+ 1dc:	00ca8ab3          	add	x21,x21,x12
+ 1e0:	013b8bb3          	add	x23,x23,x19
+ 1e4:	02ba0063          	beq	x20,x11,204 <.L94>
+
+000001e8 <.L60>:
+ 1e8:	00008593          	mv	x11,x1
+ 1ec:	fe8594e3          	bne	x11,x8,1d4 <.L26>
+
+000001f0 <.L93>:
+ 1f0:	00daa027          	fsw	f13,0(x21)
+ 1f4:	00158093          	addi	x1,x11,1
+ 1f8:	00ca8ab3          	add	x21,x21,x12
+ 1fc:	013b8bb3          	add	x23,x23,x19
+ 200:	feba14e3          	bne	x20,x11,1e8 <.L60>
+
+00000204 <.L94>:
+ 204:	02e78b33          	mul	x22,x15,x14
+ 208:	00000593          	li	x11,0
+ 20c:	016e00b3          	add	x1,x28,x22
+ 210:	00f58e63          	beq	x11,x15,22c <.L95>
+
+00000214 <.L29>:
+ 214:	0000a023          	sw	x0,0(x1)
+ 218:	00158c13          	addi	x24,x11,1
+ 21c:	013080b3          	add	x1,x1,x19
+ 220:	00ba0e63          	beq	x20,x11,23c <.L19>
+
+00000224 <.L96>:
+ 224:	000c0593          	mv	x11,x24
+ 228:	fef596e3          	bne	x11,x15,214 <.L29>
+
+0000022c <.L95>:
+ 22c:	00e0a027          	fsw	f14,0(x1)
+ 230:	00158c13          	addi	x24,x11,1
+ 234:	013080b3          	add	x1,x1,x19
+ 238:	feba16e3          	bne	x20,x11,224 <.L96>
+
+0000023c <.L19>:
+ 23c:	00490a93          	addi	x21,x18,4
+ 240:	00048793          	mv	x15,x9
+ 244:	00440413          	addi	x8,x8,4
+ 248:	00438393          	addi	x7,x7,4
+ 24c:	00428293          	addi	x5,x5,4
+ 250:	01daf863          	bgeu	x21,x29,260 <.L56>
+ 254:	000a8913          	mv	x18,x21
+ 258:	00448493          	addi	x9,x9,4
+ 25c:	ec1ff06f          	j	11c <.L57>
+
+00000260 <.L56>:
+ 260:	ffc90793          	addi	x15,x18,-4
+ 264:	05d7f463          	bgeu	x15,x29,2ac <.L16>
+
+00000268 <.L18>:
+ 268:	00000bb7          	lui	x23,0x0
+ 26c:	000ba007          	flw	f0,0(x23) # 0 <tensorlib_eye>
+
+00000270 <.L33>:
+ 270:	020f0a63          	beqz	x30,2a4 <.L36>
+ 274:	000fa703          	lw	x14,0(x31)
+ 278:	004fa983          	lw	x19,4(x31)
+ 27c:	00000613          	li	x12,0
+ 280:	02e78a33          	mul	x20,x15,x14
+ 284:	00299b13          	slli	x22,x19,0x2
+ 288:	002a1c13          	slli	x24,x20,0x2
+ 28c:	018e00b3          	add	x1,x28,x24
+
+00000290 <.L37>:
+ 290:	26c78463          	beq	x15,x12,4f8 <.L97>
+ 294:	0000a023          	sw	x0,0(x1)
+
+00000298 <.L35>:
+ 298:	00160613          	addi	x12,x12,1
+ 29c:	016080b3          	add	x1,x1,x22
+ 2a0:	ffe618e3          	bne	x12,x30,290 <.L37>
+
+000002a4 <.L36>:
+ 2a4:	00178793          	addi	x15,x15,1
+ 2a8:	fcfe94e3          	bne	x29,x15,270 <.L33>
+
+000002ac <.L16>:
+ 2ac:	00032e03          	lw	x28,0(x6)
+ 2b0:	0008aa83          	lw	x21,0(x17)
+ 2b4:	0006af83          	lw	x31,0(x13)
+ 2b8:	00052583          	lw	x11,0(x10)
+ 2bc:	00082403          	lw	x8,0(x16)
+ 2c0:	01fe07b3          	add	x15,x28,x31
+ 2c4:	00ba83b3          	add	x7,x21,x11
+ 2c8:	01879293          	slli	x5,x15,0x18
+ 2cc:	01239913          	slli	x18,x7,0x12
+ 2d0:	3f0004b7          	lui	x9,0x3f000
+ 2d4:	00fc0837          	lui	x16,0xfc0
+ 2d8:	00040bb7          	lui	x23,0x40
+ 2dc:	0092f333          	and	x6,x5,x9
+ 2e0:	010978b3          	and	x17,x18,x16
+ 2e4:	00441e93          	slli	x29,x8,0x4
+ 2e8:	ff0b8713          	addi	x14,x23,-16 # 3fff0 <.L88+0x3fae8>
+ 2ec:	01136f33          	or	x30,x6,x17
+ 2f0:	00eef9b3          	and	x19,x29,x14
+ 2f4:	013f6a33          	or	x20,x30,x19
+ 2f8:	c0000b37          	lui	x22,0xc0000
+ 2fc:	016a6c33          	or	x24,x20,x22
+ 300:	41001637          	lui	x12,0x41001
+ 304:	d1862623          	sw	x24,-756(x12) # 41000d0c <.L88+0x41000804>
+ 308:	00052083          	lw	x1,0(x10)
+ 30c:	0006ae03          	lw	x28,0(x13)
+ 310:	00000ab7          	lui	x21,0x0
+ 314:	00408f93          	addi	x31,x1,4
+ 318:	000a8793          	mv	x15,x21
+ 31c:	01f78433          	add	x8,x15,x31
+ 320:	018e1593          	slli	x11,x28,0x18
+ 324:	00b463b3          	or	x7,x8,x11
+ 328:	200402b7          	lui	x5,0x20040
+ 32c:	0053e933          	or	x18,x7,x5
+ 330:	00100493          	li	x9,1
+ 334:	00990023          	sb	x9,0(x18)
+ 338:	00052303          	lw	x6,0(x10)
+ 33c:	04930e63          	beq	x6,x9,398 <.L39>
+
+00000340 <.L51>:
+ 340:	00100c13          	li	x24,1
+ 344:	0100006f          	j	354 <.L55>
+
+00000348 <.L98>:
+ 348:	000a8093          	mv	x1,x21
+ 34c:	1400ae2f          	lr.w.aq	x28,(x1)
+ 350:	018e0863          	beq	x28,x24,360 <.L54>
+
+00000354 <.L55>:
+ 354:	000a8693          	mv	x13,x21
+ 358:	1006a62f          	lr.w	x12,(x13)
+ 35c:	ff8616e3          	bne	x12,x24,348 <.L98>
+
+00000360 <.L54>:
+ 360:	06c12083          	lw	x1,108(x2)
+ 364:	06812403          	lw	x8,104(x2)
+ 368:	0007a023          	sw	x0,0(x15)
+ 36c:	06412483          	lw	x9,100(x2)
+ 370:	06012903          	lw	x18,96(x2)
+ 374:	05c12983          	lw	x19,92(x2)
+ 378:	05812a03          	lw	x20,88(x2)
+ 37c:	05412a83          	lw	x21,84(x2)
+ 380:	05012b03          	lw	x22,80(x2)
+ 384:	04c12b83          	lw	x23,76(x2)
+ 388:	04812c03          	lw	x24,72(x2)
+ 38c:	00000513          	li	x10,0
+ 390:	07010113          	addi	x2,x2,112
+ 394:	00008067          	ret
+
+00000398 <.L39>:
+ 398:	0047c803          	lbu	x16,4(x15)
+ 39c:	0ff87893          	andi	x17,x16,255
+ 3a0:	fe088ce3          	beqz	x17,398 <.L39>
+ 3a4:	0057ce83          	lbu	x29,5(x15)
+ 3a8:	0ffeff13          	andi	x30,x29,255
+ 3ac:	fe0f06e3          	beqz	x30,398 <.L39>
+ 3b0:	0067cb83          	lbu	x23,6(x15)
+ 3b4:	0ffbf713          	andi	x14,x23,255
+ 3b8:	fe0700e3          	beqz	x14,398 <.L39>
+ 3bc:	0077c983          	lbu	x19,7(x15)
+ 3c0:	0ff9fa13          	andi	x20,x19,255
+ 3c4:	fc0a0ae3          	beqz	x20,398 <.L39>
+ 3c8:	0006ab03          	lw	x22,0(x13)
+ 3cc:	21040e37          	lui	x28,0x21040
+ 3d0:	00100c13          	li	x24,1
+ 3d4:	00cb0613          	addi	x12,x22,12 # c000000c <.L88+0xbffffb04>
+ 3d8:	00c780b3          	add	x1,x15,x12
+ 3dc:	01c0efb3          	or	x31,x1,x28
+ 3e0:	018f8023          	sb	x24,0(x31)
+ 3e4:	00052403          	lw	x8,0(x10)
+ 3e8:	f5841ce3          	bne	x8,x24,340 <.L51>
+ 3ec:	0006a703          	lw	x14,0(x13)
+ 3f0:	06870c63          	beq	x14,x8,468 <.L45>
+
+000003f4 <.L50>:
+ 3f4:	00100513          	li	x10,1
+ 3f8:	0100006f          	j	408 <.L44>
+
+000003fc <.L99>:
+ 3fc:	00878293          	addi	x5,x15,8
+ 400:	1402a92f          	lr.w.aq	x18,(x5)
+ 404:	00a90863          	beq	x18,x10,414 <.L52>
+
+00000408 <.L44>:
+ 408:	00878593          	addi	x11,x15,8
+ 40c:	1005a3af          	lr.w	x7,(x11)
+ 410:	fea396e3          	bne	x7,x10,3fc <.L99>
+
+00000414 <.L52>:
+ 414:	0007a423          	sw	x0,8(x15)
+ 418:	00078223          	sb	x0,4(x15)
+ 41c:	000782a3          	sb	x0,5(x15)
+ 420:	00078323          	sb	x0,6(x15)
+ 424:	000783a3          	sb	x0,7(x15)
+ 428:	0007a023          	sw	x0,0(x15)
+ 42c:	00000f13          	li	x30,0
+ 430:	000a8793          	mv	x15,x21
+ 434:	200004b7          	lui	x9,0x20000
+ 438:	00100313          	li	x6,1
+ 43c:	000408b7          	lui	x17,0x40
+ 440:	00100837          	lui	x16,0x100
+
+00000444 <.L53>:
+ 444:	0006ae83          	lw	x29,0(x13)
+ 448:	01e7ebb3          	or	x23,x15,x30
+ 44c:	011f0f33          	add	x30,x30,x17
+ 450:	018e9993          	slli	x19,x29,0x18
+ 454:	0179ea33          	or	x20,x19,x23
+ 458:	009a6b33          	or	x22,x20,x9
+ 45c:	006b2023          	sw	x6,0(x22)
+ 460:	ff0f12e3          	bne	x30,x16,444 <.L53>
+ 464:	eddff06f          	j	340 <.L51>
+
+00000468 <.L45>:
+ 468:	00c7c583          	lbu	x11,12(x15)
+ 46c:	0ff5f393          	andi	x7,x11,255
+ 470:	fe038ce3          	beqz	x7,468 <.L45>
+ 474:	00d7c283          	lbu	x5,13(x15)
+ 478:	0ff2f913          	andi	x18,x5,255
+ 47c:	fe0906e3          	beqz	x18,468 <.L45>
+ 480:	00e7c483          	lbu	x9,14(x15)
+ 484:	0ff4f313          	andi	x6,x9,255
+ 488:	fe0300e3          	beqz	x6,468 <.L45>
+ 48c:	00f7c803          	lbu	x16,15(x15)
+ 490:	0ff87893          	andi	x17,x16,255
+ 494:	fc088ae3          	beqz	x17,468 <.L45>
+ 498:	00078623          	sb	x0,12(x15)
+ 49c:	000786a3          	sb	x0,13(x15)
+ 4a0:	00078723          	sb	x0,14(x15)
+ 4a4:	000787a3          	sb	x0,15(x15)
+ 4a8:	00000eb7          	lui	x29,0x0
+ 4ac:	0007a423          	sw	x0,8(x15)
+ 4b0:	00000413          	li	x8,0
+ 4b4:	008e8b93          	addi	x23,x29,8 # 8 <tensorlib_eye+0x8>
+ 4b8:	03fc0f37          	lui	x30,0x3fc0
+ 4bc:	200009b7          	lui	x19,0x20000
+ 4c0:	00100a13          	li	x20,1
+ 4c4:	01000b37          	lui	x22,0x1000
+ 4c8:	04000c37          	lui	x24,0x4000
+
+000004cc <.L49>:
+ 4cc:	01271713          	slli	x14,x14,0x12
+ 4d0:	008be633          	or	x12,x23,x8
+ 4d4:	01e770b3          	and	x1,x14,x30
+ 4d8:	00c0ee33          	or	x28,x1,x12
+ 4dc:	013e6fb3          	or	x31,x28,x19
+ 4e0:	014fa023          	sw	x20,0(x31)
+ 4e4:	01640433          	add	x8,x8,x22
+ 4e8:	00052703          	lw	x14,0(x10)
+ 4ec:	ff8410e3          	bne	x8,x24,4cc <.L49>
+ 4f0:	f14702e3          	beq	x14,x20,3f4 <.L50>
+ 4f4:	e4dff06f          	j	340 <.L51>
+
+000004f8 <.L97>:
+ 4f8:	0000a027          	fsw	f0,0(x1)
+ 4fc:	d9dff06f          	j	298 <.L35>
+
+00000500 <.L87>:
+ 500:	000f8e93          	mv	x29,x31
+ 504:	be1ff06f          	j	e4 <.L17>
+
+00000508 <.L88>:
+ 508:	00c12f83          	lw	x31,12(x2)
+ 50c:	01412e03          	lw	x28,20(x2)
+ 510:	d59ff06f          	j	268 <.L18>
+
+Disassembly of section .rodata._ZN8HBTensorIfLln1EEC2EP11hb_tensor_t.str1.4:
+
+00000000 <.LC0>:
+   0:	726f772f          	0x726f772f
+   4:	6c672f6b          	0x6c672f6b
+   8:	6c61626f          	jal	x4,166ce <.L88+0x161c6>
+   c:	33726b2f          	0x33726b2f
+  10:	3739                	jal	ffffff1e <.L88+0xfffffa16>
+  12:	2d62682f          	0x2d62682f
+  16:	7970                	flw	f12,116(x10)
+  18:	6f74                	flw	f13,92(x14)
+  1a:	6372                	flw	f6,28(x2)
+  1c:	2f68                	fld	f10,216(x14)
+  1e:	6168                	flw	f10,68(x10)
+  20:	6d6d                	lui	x26,0x1b
+  22:	7265                	lui	x4,0xffff9
+  24:	6c62                	flw	f24,24(x2)
+  26:	6461                	lui	x8,0x18
+  28:	2f65                	jal	7e0 <.L88+0x2d8>
+  2a:	6f74                	flw	f13,92(x14)
+  2c:	6372                	flw	f6,28(x2)
+  2e:	2f68                	fld	f10,216(x14)
+  30:	6e72656b          	0x6e72656b
+  34:	6c65                	lui	x24,0x19
+  36:	5f62682f          	0x5f62682f
+  3a:	6574                	flw	f13,76(x10)
+  3c:	736e                	flw	f6,248(x2)
+  3e:	682e726f          	jal	x4,e76c0 <.L88+0xe71b8>
+  42:	7070                	flw	f12,100(x8)
+  44:	0000                	unimp
+	...
+
+00000048 <.LC1>:
+  48:	7361                	lui	x6,0xffff8
+  4a:	74726573          	csrrsi	x10,0x747,4
+  4e:	6620                	flw	f8,72(x12)
+  50:	6961                	lui	x18,0x18
+  52:	656c                	flw	f11,76(x10)
+  54:	2064                	fld	f9,192(x8)
+  56:	7461                	lui	x8,0xffff8
+  58:	2520                	fld	f8,72(x10)
+  5a:	64253a73          	csrrc	x20,0x642,x10
+  5e:	0020                	addi	x8,x2,8
+
+00000060 <.LC2>:
+  60:	7265                	lui	x4,0xffff9
+  62:	6f72                	flw	f30,28(x2)
+  64:	3a72                	fld	f20,312(x2)
+  66:	7420                	flw	f8,104(x8)
+  68:	6e65                	lui	x28,0x19
+  6a:	20726f73          	csrrsi	x30,0x207,4
+  6e:	6964                	flw	f9,84(x10)
+  70:	736d                	lui	x6,0xffffb
+  72:	6920                	flw	f8,80(x10)
+  74:	6f742073          	csrs	0x6f7,x8
+  78:	616c206f          	j	c268e <.L88+0xc2186>
+  7c:	6772                	flw	f14,28(x2)
+  7e:	0065                	c.nop	25
+
+Disassembly of section .text._ZN8HBTensorIfLln1EEC2EP11hb_tensor_t:
+
+00000000 <_ZN8HBTensorIfLln1EEC1EP11hb_tensor_t>:
+   0:	00058713          	mv	x14,x11
+   4:	0045a683          	lw	x13,4(x11)
+   8:	00072803          	lw	x16,0(x14) # 80000000 <.L88+0x7ffffaf8>
+   c:	0105a583          	lw	x11,16(x11)
+  10:	00050793          	mv	x15,x10
+  14:	02850613          	addi	x12,x10,40
+  18:	01450513          	addi	x10,x10,20
+  1c:	0107a023          	sw	x16,0(x15)
+  20:	00d7a223          	sw	x13,4(x15)
+  24:	00a7a423          	sw	x10,8(x15)
+  28:	00c7a623          	sw	x12,12(x15)
+  2c:	00b7a823          	sw	x11,16(x15)
+  30:	00060613          	mv	x12,x12
+  34:	00500293          	li	x5,5
+  38:	04d2e463          	bltu	x5,x13,80 <.L14>
+  3c:	00872303          	lw	x6,8(x14)
+  40:	00c72383          	lw	x7,12(x14)
+  44:	02068c63          	beqz	x13,7c <.L1>
+  48:	00269893          	slli	x17,x13,0x2
+  4c:	00078713          	mv	x14,x15
+  50:	01178e33          	add	x28,x15,x17
+  54:	40f30eb3          	sub	x29,x6,x15
+  58:	40f38f33          	sub	x30,x7,x15
+
+0000005c <.L5>:
+  5c:	00ee8fb3          	add	x31,x29,x14
+  60:	000fa683          	lw	x13,0(x31)
+  64:	00ef05b3          	add	x11,x30,x14
+  68:	00470713          	addi	x14,x14,4
+  6c:	00d72823          	sw	x13,16(x14)
+  70:	0005a803          	lw	x16,0(x11)
+  74:	03072223          	sw	x16,36(x14)
+  78:	ffc712e3          	bne	x14,x28,5c <.L5>
+
+0000007c <.L1>:
+  7c:	00008067          	ret
+
+00000080 <.L14>:
+  80:	ff010113          	addi	x2,x2,-16
+  84:	000007b7          	lui	x15,0x0
+  88:	00112623          	sw	x1,12(x2)
+  8c:	000000b7          	lui	x1,0x0
+  90:	0c700613          	li	x12,199
+  94:	00008593          	mv	x11,x1
+  98:	00078513          	mv	x10,x15
+  9c:	00000097          	auipc	x1,0x0
+  a0:	000080e7          	jalr	x1 # 9c <.L14+0x1c>
+  a4:	00000637          	lui	x12,0x0
+  a8:	00060513          	mv	x10,x12
+  ac:	00000097          	auipc	x1,0x0
+  b0:	000080e7          	jalr	x1 # ac <.L14+0x2c>
+  b4:	00000537          	lui	x10,0x0
+  b8:	00052283          	lw	x5,0(x10) # 0 <_ZN8HBTensorIfLln1EEC1EP11hb_tensor_t>
+  bc:	00000337          	lui	x6,0x0
+  c0:	00032383          	lw	x7,0(x6) # 0 <_ZN8HBTensorIfLln1EEC1EP11hb_tensor_t>
+  c4:	01029893          	slli	x17,x5,0x10
+  c8:	4100feb7          	lui	x29,0x4100f
+  cc:	00788e33          	add	x28,x17,x7
+  d0:	adceac23          	sw	x28,-1320(x29) # 4100ead8 <.L88+0x4100e5d0>
+
+000000d4 <.L3>:
+  d4:	0000006f          	j	d4 <.L3>
+
+Disassembly of section .srodata.cst4:
+
+00000000 <.LC3>:
+   0:	0000                	unimp
+   2:	3f80                	fld	f8,56(x15)
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+   0:	4700                	lw	x8,8(x14)
+   2:	203a4343          	fmadd.s	f6,f20,f3,f4,rmm
+   6:	4728                	lw	x10,72(x14)
+   8:	554e                	lw	x10,240(x2)
+   a:	2029                	jal	14 <_ZN8HBTensorIfLln1EEC5EP11hb_tensor_t+0x14>
+   c:	2e39                	jal	32a <.L16+0x7e>
+   e:	2e32                	fld	f28,264(x2)
+  10:	0030                	addi	x12,x2,8
+
+Disassembly of section .eh_frame:
+
+00000000 <.eh_frame>:
+   0:	0010                	0x10
+   2:	0000                	unimp
+   4:	0000                	unimp
+   6:	0000                	unimp
+   8:	7a01                	lui	x20,0xfffe0
+   a:	0052                	c.slli	x0,0x14
+   c:	7c01                	lui	x24,0xfffe0
+   e:	0101                	addi	x2,x2,0
+  10:	00020d1b          	0x20d1b
+  14:	0014                	0x14
+  16:	0000                	unimp
+  18:	0018                	0x18
+	...
+  22:	0000                	unimp
+  24:	0200                	addi	x8,x2,256
+  26:	0e84                	addi	x9,x2,848
+  28:	4810                	lw	x12,16(x8)
+  2a:	0181                	addi	x3,x3,0
+  2c:	0044                	addi	x9,x2,4
+  2e:	0000                	unimp
+  30:	0030                	addi	x12,x2,8
+	...
+  3a:	0000                	unimp
+  3c:	4400                	lw	x8,8(x8)
+  3e:	700e                	flw	f0,224(x2)
+  40:	8844                	0x8844
+  42:	5402                	lw	x8,32(x2)
+  44:	0389                	addi	x7,x7,2
+  46:	0492                	slli	x9,x9,0x4
+  48:	9360                	0x9360
+  4a:	9405                	srai	x8,x8,0x21
+  4c:	9506                	add	x10,x10,x1
+  4e:	97089607          	0x97089607
+  52:	9809                	andi	x8,x8,-30
+  54:	810a                	mv	x2,x2
+  56:	0301                	addi	x6,x6,0
+  58:	0328                	addi	x10,x2,392
+  5a:	c10a                	sw	x2,128(x2)
+  5c:	c844                	sw	x9,20(x8)
+  5e:	c948                	sw	x10,20(x10)
+  60:	d244                	sw	x9,36(x12)
+  62:	d344                	sw	x9,36(x14)
+  64:	d444                	sw	x9,44(x8)
+  66:	d544                	sw	x9,44(x10)
+  68:	d644                	sw	x9,44(x12)
+  6a:	d744                	sw	x9,44(x14)
+  6c:	d844                	sw	x9,52(x8)
+  6e:	0e48                	addi	x10,x2,788
+  70:	4400                	lw	x8,8(x8)
+  72:	          	0xb
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	2a41                	jal	190 <.L90+0x10>
+   2:	0000                	unimp
+   4:	7200                	flw	f8,32(x12)
+   6:	7369                	lui	x6,0xffffa
+   8:	01007663          	bgeu	x0,x16,14 <.riscv.attributes+0x14>
+   c:	0020                	addi	x8,x2,8
+   e:	0000                	unimp
+  10:	1004                	addi	x9,x2,32
+  12:	7205                	lui	x4,0xfffe1
+  14:	3376                	fld	f6,376(x2)
+  16:	6932                	flw	f18,12(x2)
+  18:	7032                	flw	f0,44(x2)
+  1a:	5f30                	lw	x12,120(x14)
+  1c:	326d                	jal	fffff9c6 <.L88+0xfffff4be>
+  1e:	3070                	fld	f12,224(x8)
+  20:	615f 7032 5f30      	0x5f307032615f
+  26:	3266                	fld	f4,120(x2)
+  28:	3070                	fld	f12,224(x8)
+	...

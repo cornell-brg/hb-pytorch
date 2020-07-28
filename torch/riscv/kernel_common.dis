@@ -1,0 +1,230 @@
+
+kernel_common.o:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00000000 <_Z9hb_memcpyPvPKvj>:
+   0:	00a5c7b3          	xor	x15,x11,x10
+   4:	0037f293          	andi	x5,x15,3
+   8:	00c508b3          	add	x17,x10,x12
+   c:	06029263          	bnez	x5,70 <.L2>
+  10:	00300313          	li	x6,3
+  14:	04c37e63          	bgeu	x6,x12,70 <.L2>
+  18:	00357393          	andi	x7,x10,3
+  1c:	00050713          	mv	x14,x10
+  20:	06039863          	bnez	x7,90 <.L3>
+
+00000024 <.L4>:
+  24:	ffc8f393          	andi	x7,x17,-4
+  28:	fe038793          	addi	x15,x7,-32
+  2c:	08f76c63          	bltu	x14,x15,c4 <.L9>
+
+00000030 <.L8>:
+  30:	02777c63          	bgeu	x14,x7,68 <.L10>
+  34:	00058693          	mv	x13,x11
+  38:	00070793          	mv	x15,x14
+
+0000003c <.L11>:
+  3c:	0006a283          	lw	x5,0(x13)
+  40:	00478793          	addi	x15,x15,4
+  44:	00468693          	addi	x13,x13,4
+  48:	fe57ae23          	sw	x5,-4(x15)
+  4c:	fe77e8e3          	bltu	x15,x7,3c <.L11>
+  50:	fff38393          	addi	x7,x7,-1
+  54:	40e38fb3          	sub	x31,x7,x14
+  58:	ffcfff13          	andi	x30,x31,-4
+  5c:	004f0e93          	addi	x29,x30,4
+  60:	01d70733          	add	x14,x14,x29
+  64:	01d585b3          	add	x11,x11,x29
+
+00000068 <.L10>:
+  68:	01176863          	bltu	x14,x17,78 <.L7>
+
+0000006c <.L14>:
+  6c:	00008067          	ret
+
+00000070 <.L2>:
+  70:	00050713          	mv	x14,x10
+  74:	ff157ce3          	bgeu	x10,x17,6c <.L14>
+
+00000078 <.L7>:
+  78:	0005ce03          	lbu	x28,0(x11)
+  7c:	00170713          	addi	x14,x14,1
+  80:	00158593          	addi	x11,x11,1
+  84:	ffc70fa3          	sb	x28,-1(x14)
+  88:	ff1768e3          	bltu	x14,x17,78 <.L7>
+  8c:	00008067          	ret
+
+00000090 <.L3>:
+  90:	0005c683          	lbu	x13,0(x11)
+  94:	00170713          	addi	x14,x14,1
+  98:	00377613          	andi	x12,x14,3
+  9c:	fed70fa3          	sb	x13,-1(x14)
+  a0:	00158593          	addi	x11,x11,1
+  a4:	f80600e3          	beqz	x12,24 <.L4>
+  a8:	0005c683          	lbu	x13,0(x11)
+  ac:	00170713          	addi	x14,x14,1
+  b0:	00377613          	andi	x12,x14,3
+  b4:	fed70fa3          	sb	x13,-1(x14)
+  b8:	00158593          	addi	x11,x11,1
+  bc:	fc061ae3          	bnez	x12,90 <.L3>
+  c0:	f65ff06f          	j	24 <.L4>
+
+000000c4 <.L9>:
+  c4:	0005a283          	lw	x5,0(x11)
+  c8:	0045a683          	lw	x13,4(x11)
+  cc:	0085af83          	lw	x31,8(x11)
+  d0:	00c5af03          	lw	x30,12(x11)
+  d4:	0105ae83          	lw	x29,16(x11)
+  d8:	0145ae03          	lw	x28,20(x11)
+  dc:	0185a303          	lw	x6,24(x11)
+  e0:	01c5a803          	lw	x16,28(x11)
+  e4:	0205a603          	lw	x12,32(x11)
+  e8:	00572023          	sw	x5,0(x14)
+  ec:	00d72223          	sw	x13,4(x14)
+  f0:	01f72423          	sw	x31,8(x14)
+  f4:	01e72623          	sw	x30,12(x14)
+  f8:	01d72823          	sw	x29,16(x14)
+  fc:	01c72a23          	sw	x28,20(x14)
+ 100:	00672c23          	sw	x6,24(x14)
+ 104:	01072e23          	sw	x16,28(x14)
+ 108:	02c72023          	sw	x12,32(x14)
+ 10c:	02470713          	addi	x14,x14,36
+ 110:	02458593          	addi	x11,x11,36
+ 114:	faf768e3          	bltu	x14,x15,c4 <.L9>
+ 118:	f19ff06f          	j	30 <.L8>
+
+0000011c <tensorlib_hb_startup>:
+ 11c:	000007b7          	lui	x15,0x0
+ 120:	0007a283          	lw	x5,0(x15) # 0 <_Z9hb_memcpyPvPKvj>
+ 124:	000005b7          	lui	x11,0x0
+ 128:	00058613          	mv	x12,x11
+ 12c:	00329313          	slli	x6,x5,0x3
+ 130:	006503b3          	add	x7,x10,x6
+ 134:	0003a023          	sw	x0,0(x7)
+ 138:	0003a223          	sw	x0,4(x7)
+ 13c:	00060223          	sb	x0,4(x12)
+ 140:	000602a3          	sb	x0,5(x12)
+ 144:	00060323          	sb	x0,6(x12)
+ 148:	000603a3          	sb	x0,7(x12)
+ 14c:	00062023          	sw	x0,0(x12)
+ 150:	00060623          	sb	x0,12(x12)
+ 154:	000606a3          	sb	x0,13(x12)
+ 158:	00060723          	sb	x0,14(x12)
+ 15c:	000607a3          	sb	x0,15(x12)
+ 160:	00000737          	lui	x14,0x0
+ 164:	00a72023          	sw	x10,0(x14) # 0 <_Z9hb_memcpyPvPKvj>
+ 168:	00062423          	sw	x0,8(x12)
+ 16c:	00000513          	li	x10,0
+ 170:	00008067          	ret
+
+Disassembly of section .bss:
+
+00000000 <g_barrier>:
+	...
+
+Disassembly of section .text.startup:
+
+00000000 <_GLOBAL__sub_I_g_reduction_buffer>:
+   0:	000007b7          	lui	x15,0x0
+   4:	00078293          	mv	x5,x15
+   8:	0002a023          	sw	x0,0(x5)
+   c:	0002a223          	sw	x0,4(x5)
+  10:	00028223          	sb	x0,4(x5)
+  14:	000282a3          	sb	x0,5(x5)
+  18:	00028323          	sb	x0,6(x5)
+  1c:	000283a3          	sb	x0,7(x5)
+  20:	0002a023          	sw	x0,0(x5)
+  24:	0002a423          	sw	x0,8(x5)
+  28:	0002a623          	sw	x0,12(x5)
+  2c:	00028623          	sb	x0,12(x5)
+  30:	000286a3          	sb	x0,13(x5)
+  34:	00028723          	sb	x0,14(x5)
+  38:	000287a3          	sb	x0,15(x5)
+  3c:	0002a423          	sw	x0,8(x5)
+  40:	00028223          	sb	x0,4(x5)
+  44:	000282a3          	sb	x0,5(x5)
+  48:	00028323          	sb	x0,6(x5)
+  4c:	000283a3          	sb	x0,7(x5)
+  50:	0002a023          	sw	x0,0(x5)
+  54:	00028623          	sb	x0,12(x5)
+  58:	000286a3          	sb	x0,13(x5)
+  5c:	00028723          	sb	x0,14(x5)
+  60:	000287a3          	sb	x0,15(x5)
+  64:	0002a423          	sw	x0,8(x5)
+  68:	00008067          	ret
+
+Disassembly of section .init_array:
+
+00000000 <.init_array>:
+   0:	0000                	unimp
+	...
+
+Disassembly of section .sbss:
+
+00000000 <g_reduction_buffer>:
+   0:	0000                	unimp
+	...
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+   0:	4700                	lw	x8,8(x14)
+   2:	203a4343          	fmadd.s	f6,f20,f3,f4,rmm
+   6:	4728                	lw	x10,72(x14)
+   8:	554e                	lw	x10,240(x2)
+   a:	2029                	jal	14 <_Z9hb_memcpyPvPKvj+0x14>
+   c:	2e39                	jal	32a <tensorlib_hb_startup+0x20e>
+   e:	2e32                	fld	f28,264(x2)
+  10:	0030                	addi	x12,x2,8
+
+Disassembly of section .eh_frame:
+
+00000000 <.eh_frame>:
+   0:	0010                	0x10
+   2:	0000                	unimp
+   4:	0000                	unimp
+   6:	0000                	unimp
+   8:	7a01                	lui	x20,0xfffe0
+   a:	0052                	c.slli	x0,0x14
+   c:	7c01                	lui	x24,0xfffe0
+   e:	0101                	addi	x2,x2,0
+  10:	00020d1b          	0x20d1b
+  14:	0010                	0x10
+  16:	0000                	unimp
+  18:	0018                	0x18
+	...
+  26:	0000                	unimp
+  28:	0010                	0x10
+  2a:	0000                	unimp
+  2c:	002c                	addi	x11,x2,8
+	...
+  3a:	0000                	unimp
+  3c:	0010                	0x10
+  3e:	0000                	unimp
+  40:	0040                	addi	x8,x2,4
+	...
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	2a41                	jal	190 <tensorlib_hb_startup+0x74>
+   2:	0000                	unimp
+   4:	7200                	flw	f8,32(x12)
+   6:	7369                	lui	x6,0xffffa
+   8:	01007663          	bgeu	x0,x16,14 <.riscv.attributes+0x14>
+   c:	0020                	addi	x8,x2,8
+   e:	0000                	unimp
+  10:	1004                	addi	x9,x2,32
+  12:	7205                	lui	x4,0xfffe1
+  14:	3376                	fld	f6,376(x2)
+  16:	6932                	flw	f18,12(x2)
+  18:	7032                	flw	f0,44(x2)
+  1a:	5f30                	lw	x12,120(x14)
+  1c:	326d                	jal	fffff9c6 <tensorlib_hb_startup+0xfffff8aa>
+  1e:	3070                	fld	f12,224(x8)
+  20:	615f 7032 5f30      	0x5f307032615f
+  26:	3266                	fld	f4,120(x2)
+  28:	3070                	fld	f12,224(x8)
+	...

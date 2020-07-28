@@ -1092,18 +1092,6 @@ extern "C" {
       }
     );
     */
-
-    Unroll<4>::compute(res, in1, in2, 
-      [&](int x, int y) {
-        return x + y;
-      }
-    );
-
-    res[0] = in1[0] + in2[0];
-    res[1] = in1[1] + in2[1];
-    res[2] = in1[2] + in2[2];
-    res[3] = in1[3] + in2[3];
-    
     
     hb_tiled_foreach_unroll<4>(result, self, other, 
       [&](float self, float other) {
