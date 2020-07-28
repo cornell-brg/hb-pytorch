@@ -26,49 +26,4 @@ void blocked_for(size_t N, F functor) {
     functor(i, group_size);
 }
 
-template <class FetchFunctor>
-inline void blocked_tiled_for(FetchFunctor functor,
-                              size_t group_size, size_t id,
-                              size_t N, size_t M) {
-  size_t numel = N * M;
-
-  // per tile range within a pod
-  size_t len_per_tile = numel / group_size + 1;
-  size_t start        = len_per_tile * id;
-  size_t end          = start + len_per_tile;
-  end = (end > numel) ? numel : end;
-
-  //-----------------
-  // loop
-  //----------------
-  for (size_t i = start; i < end; i++) {
-    size_t b = (i / M) % N;
-    size_t a = i % M;
-    functor(b, a);
-  }
-}
-
-template <class FetchFunctor>
-inline void blocked_tiled_for(FetchFunctor functor,
-                              size_t group_size, size_t id,
-                              size_t O, size_t N, size_t M) {
-  size_t numel = O * N * M;
-
-  // per tile range within a pod
-  size_t len_per_tile = numel / group_size + 1;
-  size_t start        = len_per_tile * id;
-  size_t end          = start + len_per_tile;
-  end = (end > numel) ? numel : end;
-
-  //-----------------
-  // loop
-  //----------------
-  for (size_t i = start; i < end; i++) {
-    size_t c = (i / (N * M)) % O;
-    size_t b = (i / M) % N;
-    size_t a = i % M;
-    functor(c, b, a);
-  }
-}
-
 #endif // _KERNEL_CONV_HPP

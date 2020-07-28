@@ -68,7 +68,7 @@ extern "C" {
         uint32_t last_co = -1;
 
         blocked_for(Cout, [&](size_t co, size_t group_size) {
-          blocked_tiled_for([&](size_t yh, size_t yw) {
+          hb_tiled_for(group_size, [&](size_t yh, size_t yw) {
             if(co != last_co) {
               // Load weights to a local buffer for each output channel
               last_co = co;
@@ -91,7 +91,7 @@ extern "C" {
                 } // else 0
               }
             }
-          }, group_size, __bsg_id % group_size, Hout, Wout);
+          }, Hout, Wout);
         });
       }
     };
@@ -171,7 +171,8 @@ extern "C" {
 
     for(uint32_t n = 0; n < N; ++n)
     for(uint32_t co = 0; co < Cout; ++co)
-      hb_tiled_for([&](size_t ci, size_t xh, size_t xw) {
+      hb_tiled_for(bsg_tiles_X * bsg_tiles_Y,
+                   [&](size_t ci, size_t xh, size_t xw) {
         for(uint32_t kh = 0; kh < Kh; ++kh)
           for(uint32_t kw = 0; kw < Kw; ++kw) {
             uint32_t rel_h = xh - kh + Ph;
@@ -231,7 +232,8 @@ extern "C" {
     g_barrier.sync();
 
     for(uint32_t n = 0; n < N; ++n)
-      hb_tiled_for([&](size_t co, size_t ci, size_t kh, size_t kw) {
+      hb_tiled_for(bsg_tiles_X * bsg_tiles_Y,
+                   [&](size_t co, size_t ci, size_t kh, size_t kw) {
         for(uint32_t yh = 0; yh < Hout; ++yh)
           for(uint32_t yw = 0; yw < Wout; ++yw){
             int32_t xh = Sh * yh - Ph + kh;
