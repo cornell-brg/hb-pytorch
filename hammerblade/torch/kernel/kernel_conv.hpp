@@ -3,38 +3,50 @@
 // 27/07/2020 Bandhav Veluri
 //====================================================================
 
-struct Conv2dParams {
-  uint32_t N;
-  uint32_t Cout
-  uint32_t Hout
-  uint32_t Wout
-  uint32_t Cin;
-  uint32_t Hin;
-  uint32_t Win;
-  uint32_t Kh;
-  uint32_t Kw;
-  uint32_t Sh;
-  uint32_t Sw;
-  uint32_t Ph;
-  uint32_t Pw;
+#ifndef _KERNEL_CONV_HPP
+#define _KERNEL_CONV_HPP
 
-  Conv2dParams(HBTensor<float> x,
-               HBTensor<float> y,
-               HBTensor<float> w,
-               HBVector<float> s,
-               HBVector<float> p) {
-    N = y.dim(0); // number of minibatches
-    Cout = y.dim(1); // number of output channels
-    Hout = y.dim(2);
-    Wout = y.dim(3);
-    Cin = x.dim(1); // number of input channels
-    Hin = x.dim(2);
-    Win = x.dim(3);
-    Kh = w.dim(2);
-    Kw = w.dim(3);
-    Sh = s[0];
-    Sw = s[1];
-    Ph = p[0];
-    Pw = p[1];
+template<typename F>
+void blocked_for(size_t N, F functor) {
+  size_t group_size, start, end;
+
+  if(N >= bsg_tiles_X * bsg_tiles_Y) {
+    size_t split = N / (bsg_tiles_X * bsg_tiles_Y) + 1;
+    group_size = 1;
+    start = split * __bsg_id;
+    end = start + split;
+    end = (end > N) ? N : end;
+  } else {
+    group_size = (bsg_tiles_X * bsg_tiles_Y) / N;
+    start = __bsg_id / group_size;
+    end = start + 1;
   }
-};
+
+  for(size_t i = start; i < end; ++i)
+    functor(i, group_size);
+}
+
+template <class FetchFunctor>
+inline void blocked_tiled_for(FetchFunctor functor,
+                              size_t group_size, size_t id,
+                              size_t O, size_t N, size_t M) {
+  size_t numel = O * N * M;
+
+  // per tile range within a pod
+  size_t len_per_tile = numel / group_size + 1;
+  size_t start        = len_per_tile * id;
+  size_t end          = start + len_per_tile;
+  end = (end > numel) ? numel : end;
+
+  //-----------------
+  // loop
+  //----------------
+  for (size_t i = start; i < end; i++) {
+    size_t c = (i / (N * M)) % O;
+    size_t b = (i / M) % N;
+    size_t a = i % M;
+    functor(c, b, a);
+  }
+}
+
+#endif // _KERNEL_CONV_HPP
