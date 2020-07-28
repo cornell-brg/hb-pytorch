@@ -19,7 +19,7 @@ void blocked_for(size_t N, F functor) {
   } else {
     group_size = (bsg_tiles_X * bsg_tiles_Y) / N;
     start = __bsg_id / group_size;
-    end = start + 1;
+    end = (start >= N) ? start : start + 1;
   }
 
   for(size_t i = start; i < end; ++i)
