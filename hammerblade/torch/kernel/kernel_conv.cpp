@@ -6,20 +6,6 @@
 #include <kernel_common.hpp>
 #include "kernel_conv.hpp"
 
-__attribute__((noinline))
-#ifdef __clang__
-__attribute__((no_builtin("memcpy")))
-#endif
-void load_weights(float* NOALIAS wl,
-                  __remote float* NOALIAS wr,
-                  uint32_t offset,
-                  uint32_t Kh,
-                  uint32_t Kw) {
-  UNROLL(16) for(int i = 0; i < Kh * Kw; ++i) {
-    wl[i] = wr[offset + i];
-  }
-}
-
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
 
@@ -53,7 +39,10 @@ extern "C" {
     auto Pw = p[1];
 
     // Weights buffer size
-    float W_local[100];
+    register float W_local[5][5];
+    if(__bsg_id == 0)
+      hb_assert_msg(Kh <= 5 && Kw <= 5,
+                    "Conv2d filter doesn't fit in DMEM allocated array");
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
@@ -61,8 +50,12 @@ extern "C" {
     for(uint32_t n = 0; n < N; ++n) {
       for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
         blocked_for(Cout, [&](size_t co, size_t group_size) {
-          load_weights(W_local, (__remote float*) w.data_ptr(),
-                       w.offset(co, ci, 0, 0), Kh, Kw);
+          // Load the filter w(co, ci, :, :) to dmem
+          uint32_t w_offset = w.offset(co, ci, 0, 0);
+          auto w_ptr = (__remote float*) w.data_ptr();
+          for(int i = 0; i < Kh; ++i)
+            for(int j = 0; j < Kw; ++j)
+              W_local[i][j] = w_ptr[w_offset + i * Kw + j];
 
           hb_tiled_for(group_size, [&](size_t yh, size_t yw) {
             for(uint32_t kh = 0; kh < Kh; ++kh) {
@@ -75,7 +68,7 @@ extern "C" {
                 int32_t xw = Sw * yw - Pw + kw;
 
                 if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                  y(n, co, yh, yw) += x(n, ci, xh, xw) * W_local[kh * Kh + kw];
+                  y(n, co, yh, yw) += x(n, ci, xh, xw) * W_local[kh][kw];
                 } // else 0
               }
             }
