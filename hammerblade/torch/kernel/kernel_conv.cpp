@@ -6,6 +6,10 @@
 #include <kernel_common.hpp>
 #include "kernel_conv.hpp"
 
+// Size of buffers allocated for filters in DMEM
+const static uint32_t KhBufSize = 5;
+const static uint32_t KwBufSize = 5;
+
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
 
@@ -39,9 +43,9 @@ extern "C" {
     auto Pw = p[1];
 
     // Weights buffer size
-    register float W_local[5][5];
+    register float W_local[KhBufSize][KwBufSize];
     if(__bsg_id == 0)
-      hb_assert_msg(Kh <= 5 && Kw <= 5,
+      hb_assert_msg(Kh <= KhBufSize && Kw <= KwBufSize,
                     "Conv2d filter doesn't fit in DMEM allocated array");
 
     // Start profiling
