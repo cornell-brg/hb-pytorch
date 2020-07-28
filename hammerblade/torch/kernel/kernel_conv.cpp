@@ -4,6 +4,7 @@
 //====================================================================
 
 #include <kernel_common.hpp>
+#include "kernel_conv.hpp"
 
 __attribute__((noinline))
 #ifdef __clang__
@@ -59,14 +60,14 @@ extern "C" {
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-      
-    for(uint32_t n = 0; n < N; ++n)
+
+    blocked_for(N, [&](size_t n, size_t group_size) {
       for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
         // Local vairables to schedule data loading from
         // dram to scratchpad.
         uint32_t last_co = -1;
 
-        hb_tiled_for([&](size_t co, size_t yh, size_t yw) {
+        blocked_tiled_for([&](size_t co, size_t yh, size_t yw) {
           if(co != last_co) {
             // Load weights to a local buffer for each output channel
             last_co = co;
@@ -89,15 +90,16 @@ extern "C" {
               } // else 0
             }
           }
-        }, Cout, Hout, Wout);
+        }, group_size, __bsg_id % group_size, Cout, Hout, Wout);
       }
+    });
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;
-  }
+  };
 
   __attribute__ ((noinline))  int tensorlib_convolution_add_bias(
           hb_tensor_t* output,
