@@ -13,9 +13,43 @@ const static uint32_t KwBufSize = 5;
 inline void load_weights(float wl[KhBufSize][KwBufSize],
                          __remote float* NOALIAS wr,
                          uint32_t offset, uint32_t Kh, uint32_t Kw) {
-  for(int i = 0; i < Kh; ++i)
-    for(int j = 0; j < Kw; ++j)
-        wl[i][j] = wr[offset + i * Kw + j];
+  //for(int i = 0; i < Kh; ++i)
+  //  for(int j = 0; j < Kw; ++j)
+  //      wl[i][j] = wr[offset + i * Kw + j];
+  for(int i = 0; i < Kh * Kw; i+=8) {
+    register float w0 = wr[offset + i + 0];
+    register float w1 = wr[offset + i + 1];
+    register float w2 = wr[offset + i + 2];
+    register float w3 = wr[offset + i + 3];
+    register float w4 = wr[offset + i + 4];
+    register float w5 = wr[offset + i + 5];
+    register float w6 = wr[offset + i + 6];
+    register float w7 = wr[offset + i + 7];
+    register int i0 = (i + 0) / Kw;
+    register int j0 = (i + 0) % Kw;
+    register int i1 = (i + 1) / Kw;
+    register int j1 = (i + 1) % Kw;
+    register int i2 = (i + 2) / Kw;
+    register int j2 = (i + 2) % Kw;
+    register int i3 = (i + 3) / Kw;
+    register int j3 = (i + 3) % Kw;
+    register int i4 = (i + 4) / Kw;
+    register int j4 = (i + 4) % Kw;
+    register int i5 = (i + 5) / Kw;
+    register int j5 = (i + 5) % Kw;
+    register int i6 = (i + 6) / Kw;
+    register int j6 = (i + 6) % Kw;
+    register int i7 = (i + 7) / Kw;
+    register int j7 = (i + 7) % Kw;
+    wl[i0][j0] = w0;
+    wl[i1][j1] = w1;
+    wl[i2][j2] = w2;
+    wl[i3][j3] = w3;
+    wl[i4][j4] = w4;
+    wl[i5][j5] = w5;
+    wl[i6][j6] = w6;
+    wl[i7][j7] = w7;
+  }
 }
 
 // We wrap all external-facing C++ kernels with `extern "C"` to
@@ -65,9 +99,7 @@ extern "C" {
           // Load the filter w(co, ci, :, :) to dmem
           uint32_t w_offset = w.offset(co, ci, 0, 0);
           auto w_ptr = (__remote float*) w.data_ptr();
-          for(int i = 0; i < Kh; ++i)
-            for(int j = 0; j < Kw; ++j)
-              W_local[i][j] = w_ptr[w_offset + i * Kw + j];
+          load_weights(W_local, w_ptr, w_offset, Kh, Kw);
 
           hb_tiled_for(group_size, [&](size_t yh, size_t yw) {
             for(uint32_t kh = 0; kh < Kh; ++kh) {
