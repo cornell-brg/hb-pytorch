@@ -61,38 +61,40 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    blocked_for(N, [&](size_t n, size_t group_size) {
+    for(uint32_t n = 0; n < N; ++n) {
       for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
         // Local vairables to schedule data loading from
         // dram to scratchpad.
         uint32_t last_co = -1;
 
-        blocked_tiled_for([&](size_t co, size_t yh, size_t yw) {
-          if(co != last_co) {
-            // Load weights to a local buffer for each output channel
-            last_co = co;
+        blocked_for(Cout, [&](size_t co, size_t group_size) {
+          blocked_tiled_for([&](size_t yh, size_t yw) {
+            if(co != last_co) {
+              // Load weights to a local buffer for each output channel
+              last_co = co;
 
-            load_weights(W_local, (__remote float*) w.data_ptr(),
-                         w, co, ci, Kh, Kw);
-          }
-
-          for(uint32_t kh = 0; kh < Kh; ++kh) {
-            for(uint32_t kw = 0; kw < Kw; ++kw) {
-              if((ci + kh + kw) == 0) {
-                y(n, co, yh, yw) = 0.0;
-              }
-
-              int32_t xh = Sh * yh - Ph + kh;
-              int32_t xw = Sw * yw - Pw + kw;
-
-              if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                y(n, co, yh, yw) += x(n, ci, xh, xw) * W_local[kh * Kh + kw];
-              } // else 0
+              load_weights(W_local, (__remote float*) w.data_ptr(),
+                           w, co, ci, Kh, Kw);
             }
-          }
-        }, group_size, __bsg_id % group_size, Cout, Hout, Wout);
+
+            for(uint32_t kh = 0; kh < Kh; ++kh) {
+              for(uint32_t kw = 0; kw < Kw; ++kw) {
+                if((ci + kh + kw) == 0) {
+                  y(n, co, yh, yw) = 0.0;
+                }
+
+                int32_t xh = Sh * yh - Ph + kh;
+                int32_t xw = Sw * yw - Pw + kw;
+
+                if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+                  y(n, co, yh, yw) += x(n, ci, xh, xw) * W_local[kh * Kh + kw];
+                } // else 0
+              }
+            }
+          }, group_size, __bsg_id % group_size, Hout, Wout);
+        });
       }
-    });
+    };
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
