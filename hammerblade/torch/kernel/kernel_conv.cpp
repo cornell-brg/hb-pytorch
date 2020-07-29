@@ -79,24 +79,32 @@ extern "C" {
           load_weights(W_local, w_ptr, w_offset, Kh, Kw);
 
           blocked_for(tg_size_co, Hout, [&](size_t yh, size_t tg_size_yh) {
+            hb_range yw_range;
+            calc_range(&yw_range, Wout, tg_size_yh);
+            size_t yw_start = yw_range.start;
+            size_t yw_end   = yw_range.end;
+            
+            // width offset for the accessing local circular buffer
+            uint32_t w_off = yw_start % Kw;
+
             // Load input to local buffer
             for(uint32_t kh = 0; kh < Kh; ++kh) {
               for(uint32_t kw = 0; kw < Kw; ++kw) {
                 int32_t xh = Sh * yh - Ph + kh;
-                int32_t xw = Sw * 0 - Pw + kw;
+                int32_t xw = Sw * yw_start - Pw + kw;
 
                 if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win)
-                  X_local[kh][kw] = x(n, ci, xh, xw);
+                  X_local[kh][(w_off + kw) % Kw] = x(n, ci, xh, xw);
                 else
-                  X_local[kh][kw] = 0.0;
+                  X_local[kh][(w_off + kw) % Kw] = 0.0;
               }
             }
 
-            hb_tiled_for(tg_size_yh, Wout, [&](size_t yw) {
-              // width offset for the accessing local circular buffer
-              uint32_t w_off = yw % Kw;
+            for(uint32_t yw = yw_start; yw < yw_end; ++yw) {
+              w_off = yw % Kw;
 
-              if(yw != 0) {// y == 0 would be loaded in the outer loop
+              if(yw != yw_start) {
+                // Load a new column of input data
                 int32_t xw = Sw * yw - Pw + Kw;
 
                 for(uint32_t kh = 0; kh < Kh; ++kh) {
@@ -105,7 +113,7 @@ extern "C" {
                       (xh >= 0 && xh < Hin && xw >= 0 && xw < Win) ?
                         x(n, ci, xh, xw) : 0;
                 }
-              }
+              } // y == yw_start would be loaded in the outer loop
 
               for(uint32_t kh = 0; kh < Kh; ++kh) {
                 for(uint32_t kw = 0; kw < Kw; ++kw) {
@@ -117,7 +125,7 @@ extern "C" {
                                       W_local[kh][kw];
                 }
               }
-            });
+            };
           });
         });
       }
