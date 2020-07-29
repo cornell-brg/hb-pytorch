@@ -9,16 +9,17 @@
 template<typename F>
 void blocked_for(size_t tg_size, size_t N, F functor) {
   size_t group_size, start, end;
+  size_t tile_id = __bsg_id % tg_size;
 
   if(N >= tg_size) {
     size_t split = N / tg_size + 1;
     group_size = 1;
-    start = split * __bsg_id;
+    start = split * tile_id;
     end = start + split;
     end = (end > N) ? N : end;
   } else {
     group_size = tg_size / N;
-    start = __bsg_id / group_size;
+    start = tile_id / group_size;
     end = (start >= N) ? start : start + 1;
   }
 

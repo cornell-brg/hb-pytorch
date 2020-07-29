@@ -375,6 +375,24 @@ inline void hb_tiled_for(size_t numel, FetchFunctor functor) {
 }
 
 template <class FetchFunctor>
+inline void hb_tiled_for(size_t tg_size, size_t numel, FetchFunctor functor) {
+  //--------------------------------------
+  // calculate start and end for this tile
+  //--------------------------------------
+  hb_range range;
+  calc_range(&range, numel, tg_size);
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  //-----------------
+  // loop
+  //----------------
+  for (size_t i = start; i < end; i++) {
+    functor(i);
+  }
+}
+
+template <class FetchFunctor>
 inline void hb_tiled_for(size_t tg_size,
                          FetchFunctor functor,
                          size_t N, size_t M) {
