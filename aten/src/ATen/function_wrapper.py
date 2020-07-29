@@ -2095,7 +2095,7 @@ def create_derived(backend_type_env, declarations):
                 tensor_boxing += """
 std::vector<Tensor> {0}_vec = {0}.vec();
 std::vector<Tensor> {0}_hb_vec;
-vec_idx = 0
+vec_idx = 0;
 for (const auto& t : {0}_vec) {{
   {0}_hb_vec.push_back(t.llcopy_ifdef());
   buffer << "{0}_" << vec_idx << ";" << t.sizes_ifdef() << "<|>";
