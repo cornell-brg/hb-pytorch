@@ -79,17 +79,31 @@ extern "C" {
           load_weights(W_local, w_ptr, w_offset, Kh, Kw);
 
           blocked_for(tg_size_co, Hout, [&](size_t yh, size_t tg_size_yh) {
-            hb_tiled_for(tg_size_yh, Wout, [&](size_t yw) {
-              // Load input to local buffer
-              for(uint32_t kh = 0; kh < Kh; ++kh) {
-                for(uint32_t kw = 0; kw < Kw; ++kw) {
-                  int32_t xh = Sh * yh - Ph + kh;
-                  int32_t xw = Sw * yw - Pw + kw;
+            // Load input to local buffer
+            for(uint32_t kh = 0; kh < Kh; ++kh) {
+              for(uint32_t kw = 0; kw < Kw; ++kw) {
+                int32_t xh = Sh * yh - Ph + kh;
+                int32_t xw = Sw * 0 - Pw + kw;
 
-                  if(xh >= 0 && xw >= 0)
-                    X_local[kh][kw] = x(n, ci, xh, xw);
-                  else
-                    X_local[kh][kw] = 0.0;
+                if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win)
+                  X_local[kh][kw] = x(n, ci, xh, xw);
+                else
+                  X_local[kh][kw] = 0.0;
+              }
+            }
+
+            hb_tiled_for(tg_size_yh, Wout, [&](size_t yw) {
+              // width offset for the accessing local circular buffer
+              uint32_t w_off = yw % Kw;
+
+              if(yw != 0) {// y == 0 would be loaded in the outer loop
+                int32_t xw = Sw * yw - Pw + Kw;
+
+                for(uint32_t kh = 0; kh < Kh; ++kh) {
+                  int32_t xh = Sh * yh - Ph + kh;
+                  X_local[kh][(yw - 1) % Kw] =
+                      (xh >= 0 && xh < Hin && xw >= 0 && xw < Win) ?
+                        x(n, ci, xh, xw) : 0;
                 }
               }
 
@@ -99,12 +113,8 @@ extern "C" {
                     y(n, co, yh, yw) = 0.0;
                   }
 
-                  int32_t xh = Sh * yh - Ph + kh;
-                  int32_t xw = Sw * yw - Pw + kw;
-
-                  if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                    y(n, co, yh, yw) += X_local[kh][kw] * W_local[kh][kw];
-                  } // else 0
+                  y(n, co, yh, yw) += X_local[kh][(w_off + kw) % Kw] *
+                                      W_local[kh][kw];
                 }
               }
             });
