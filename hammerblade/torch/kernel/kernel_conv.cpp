@@ -6,9 +6,11 @@
 #include <kernel_common.hpp>
 #include "kernel_conv.hpp"
 
+namespace {
+
 // Size of buffers allocated for filters in DMEM
-const static uint32_t KhBufSize = 5;
-const static uint32_t KwBufSize = 5;
+const uint32_t KhBufSize = 5;
+const uint32_t KwBufSize = 5;
 
 inline void load_weights(float wl[KhBufSize][KwBufSize],
                          __remote float* NOALIAS wr,
@@ -18,6 +20,8 @@ inline void load_weights(float wl[KhBufSize][KwBufSize],
       wl[i][j] = wr[offset + i * Kw + j];
     }
   }
+}
+
 }
 
 // We wrap all external-facing C++ kernels with `extern "C"` to
@@ -76,6 +80,19 @@ extern "C" {
 
           blocked_for(tg_size_co, Hout, [&](size_t yh, size_t tg_size_yh) {
             hb_tiled_for(tg_size_yh, Wout, [&](size_t yw) {
+              // Load input to local buffer
+              for(uint32_t kh = 0; kh < Kh; ++kh) {
+                for(uint32_t kw = 0; kw < Kw; ++kw) {
+                  int32_t xh = Sh * yh - Ph + kh;
+                  int32_t xw = Sw * yw - Pw + kw;
+
+                  if(xh >= 0 && xw >= 0)
+                    X_local[kh][kw] = x(n, ci, xh, xw);
+                  else
+                    X_local[kh][kw] = 0.0;
+                }
+              }
+
               for(uint32_t kh = 0; kh < Kh; ++kh) {
                 for(uint32_t kw = 0; kw < Kw; ++kw) {
                   if((ci + kh + kw) == 0) {
@@ -86,7 +103,7 @@ extern "C" {
                   int32_t xw = Sw * yw - Pw + kw;
 
                   if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                    y(n, co, yh, yw) += x(n, ci, xh, xw) * W_local[kh][kw];
+                    y(n, co, yh, yw) += X_local[kh][kw] * W_local[kh][kw];
                   } // else 0
                 }
               }
