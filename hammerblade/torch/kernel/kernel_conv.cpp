@@ -85,7 +85,7 @@ extern "C" {
             size_t yw_end   = yw_range.end;
             
             // width offset for the accessing local circular buffer
-            uint32_t w_off = yw_start % Kw;
+            uint32_t w_off = (Sw * yw_start) % Kw;
 
             // Load input to local buffer
             for(uint32_t kh = 0; kh < Kh; ++kh) {
@@ -101,17 +101,19 @@ extern "C" {
             }
 
             for(uint32_t yw = yw_start; yw < yw_end; ++yw) {
-              w_off = yw % Kw;
+              w_off = (Sw * yw) % Kw;
 
               if(yw != yw_start) {
                 // Load a new column of input data
-                int32_t xw = Sw * yw - Pw + Kw - 1;
+                for(uint32_t sw = 0; sw < Sw; ++sw) {
+                  int32_t xw = Sw * yw - Pw + Kw - Sw + sw;
 
-                for(uint32_t kh = 0; kh < Kh; ++kh) {
-                  int32_t xh = Sh * yh - Ph + kh;
-                  X_local[kh][(yw - 1) % Kw] =
-                      (xh >= 0 && xh < Hin && xw >= 0 && xw < Win) ?
-                        x(n, ci, xh, xw) : 0;
+                  for(uint32_t kh = 0; kh < Kh; ++kh) {
+                    int32_t xh = Sh * yh - Ph + kh;
+                    X_local[kh][(Sw * (yw - 1) + sw) % Kw] =
+                        (xh >= 0 && xh < Hin && xw >= 0 && xw < Win) ?
+                          x(n, ci, xh, xw) : 0;
+                  }
                 }
               } // y == yw_start would be loaded in the outer loop
 
@@ -120,7 +122,6 @@ extern "C" {
                   if((ci + kh + kw) == 0) {
                     y(n, co, yh, yw) = 0.0;
                   }
-
                   y(n, co, yh, yw) += X_local[kh][(w_off + kw) % Kw] *
                                       W_local[kh][kw];
                 }
