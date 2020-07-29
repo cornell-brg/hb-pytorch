@@ -7,17 +7,17 @@
 #define _KERNEL_CONV_HPP
 
 template<typename F>
-void blocked_for(size_t N, F functor) {
+void blocked_for(size_t tg_size, size_t N, F functor) {
   size_t group_size, start, end;
 
-  if(N >= bsg_tiles_X * bsg_tiles_Y) {
-    size_t split = N / (bsg_tiles_X * bsg_tiles_Y) + 1;
+  if(N >= tg_size) {
+    size_t split = N / tg_size + 1;
     group_size = 1;
     start = split * __bsg_id;
     end = start + split;
     end = (end > N) ? N : end;
   } else {
-    group_size = (bsg_tiles_X * bsg_tiles_Y) / N;
+    group_size = tg_size / N;
     start = __bsg_id / group_size;
     end = (start >= N) ? start : start + 1;
   }

@@ -52,8 +52,12 @@ extern "C" {
     auto Ph = p[0];
     auto Pw = p[1];
 
-    // Weights buffer size
+    // Weights buffer
     register float W_local[KhBufSize][KwBufSize];
+    
+    // Circular buffer to hold inputs 
+    register float X_local[KhBufSize][KwBufSize];
+
     if(__bsg_id == 0)
       hb_assert_msg(Kh <= KhBufSize && Kw <= KwBufSize,
                     "Conv2d filter doesn't fit in DMEM allocated array");
@@ -63,7 +67,8 @@ extern "C" {
 
     for(uint32_t n = 0; n < N; ++n) {
       for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
-        blocked_for(Cout, [&](size_t co, size_t group_size) {
+        blocked_for(bsg_tiles_X * bsg_tiles_Y, Cout,
+                    [&](size_t co, size_t group_size) {
           // Load the filter w(co, ci, :, :) to dmem
           uint32_t w_offset = w.offset(co, ci, 0, 0);
           auto w_ptr = (__remote float*) w.data_ptr();
