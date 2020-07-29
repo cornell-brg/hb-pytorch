@@ -105,7 +105,7 @@ extern "C" {
 
               if(yw != yw_start) {
                 // Load a new column of input data
-                int32_t xw = Sw * yw - Pw + Kw;
+                int32_t xw = Sw * yw - Pw + Kw - 1;
 
                 for(uint32_t kh = 0; kh < Kh; ++kh) {
                   int32_t xh = Sh * yh - Ph + kh;
