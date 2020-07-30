@@ -4,24 +4,7 @@
 //====================================================================
 
 #include <kernel_common.hpp>
-
-namespace {
-
-// Size of buffers allocated for filters in DMEM
-const uint32_t KhBufSize = 5;
-const uint32_t KwBufSize = 5;
-
-inline void load_weights(float wl[KhBufSize][KwBufSize],
-                         __remote float* NOALIAS wr,
-                         uint32_t offset, uint32_t Kh, uint32_t Kw) {
-  for(int i = 0; i < Kh; ++i) {
-    for(int j = 0; j < Kw; ++j) {
-      wl[i][j] = wr[offset + i * Kw + j];
-    }
-  }
-}
-
-}
+#include <kernel_conv.hpp>
 
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
