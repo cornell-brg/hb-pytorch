@@ -224,6 +224,32 @@ class HBTensor<DT, -1> : public HBTensorImpl<__remote DT, uint32_t> {
       }
 };
 
+template <typename DT, uint32_t N, uint32_t C, uint32_t H, uint32_t W>
+class HBTensor4d {
+  private:
+    const uint32_t numel = N * C * H * W;
+    const uint32_t strides[4] = {
+      numel / N, numel / (N*C), numel / (N*C*H), 1
+    };
+    DT* data;
+
+  public:
+    HBTensor4d(hb_tensor_t* t) :
+      data((DT*) ((intptr_t) t->data)) {}
+
+    uint32_t offset(uint32_t n, uint32_t c, uint32_t h, uint32_t w) {
+      return strides[0]*n + strides[1]*c + strides[2]*h + w;
+    }
+
+    char* data_ptr() {
+      return (char*)data;
+    }
+
+    DT& operator()(uint32_t n, uint32_t c, uint32_t h, uint32_t w) {
+      uint32_t offset = strides[0]*n + strides[1]*c + strides[2]*h + w;
+      return data[offset];
+    }
+};
 
 template<typename T>
 class HBVector {
