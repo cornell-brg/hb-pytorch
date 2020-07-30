@@ -4,7 +4,6 @@
 //====================================================================
 
 #include <kernel_common.hpp>
-#include "kernel_conv.hpp"
 
 namespace {
 
@@ -71,14 +70,14 @@ extern "C" {
 
     for(uint32_t n = 0; n < N; ++n) {
       for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
-        blocked_for(bsg_tiles_X * bsg_tiles_Y, Cout,
-                    [&](size_t co, size_t tg_size_co) {
+        hb_blocked_for(bsg_tiles_X * bsg_tiles_Y, Cout,
+                      [&](size_t co, size_t tg_size_co) {
           // Load the filter w(co, ci, :, :) to dmem
           uint32_t w_offset = w.offset(co, ci, 0, 0);
           auto w_ptr = (__remote float*) w.data_ptr();
           load_weights(W_local, w_ptr, w_offset, Kh, Kw);
 
-          blocked_for(tg_size_co, Hout, [&](size_t yh, size_t tg_size_yh) {
+          hb_blocked_for(tg_size_co, Hout, [&](size_t yh, size_t tg_size_yh) {
             hb_range yw_range;
             calc_range(&yw_range, Wout, tg_size_yh);
             size_t yw_start = yw_range.start;
