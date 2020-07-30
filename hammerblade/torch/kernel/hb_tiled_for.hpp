@@ -462,31 +462,6 @@ inline void hb_tiled_for(size_t tg_size,
 }
 
 // =========================================================
-// HB Blocked for
-// =========================================================
-
-template<typename F>
-inline void hb_blocked_for(size_t tg_size, size_t N, F functor) {
-  size_t group_size, start, end;
-  size_t tile_id = __bsg_id % tg_size;
-
-  if(N >= tg_size) {
-    size_t split = N / tg_size + 1;
-    group_size = 1;
-    start = split * tile_id;
-    end = start + split;
-    end = (end > N) ? N : end;
-  } else {
-    group_size = tg_size / N;
-    start = tile_id / group_size;
-    end = (start >= N) ? start : start + 1;
-  }
-
-  for(size_t i = start; i < end; ++i)
-    functor(i, group_size);
-}
-
-// =========================================================
 // HB tile range
 // =========================================================
 // functor takes in current index
