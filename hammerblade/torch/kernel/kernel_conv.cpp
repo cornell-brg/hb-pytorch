@@ -178,6 +178,61 @@ static int convolution_backward_input(
   return 0;
 }
 
+static int convolution_backward_weight(
+        hb_tensor_t* grad_weight,
+        hb_tensor_t* grad_output,
+        hb_tensor_t* input,
+        hb_vector_t* padding,
+        hb_vector_t* strides) {
+  auto x = HBTensor<float>(input);
+  auto y = HBTensor<float>(grad_output);
+  auto w = HBTensor<float>(grad_weight);
+  auto p = HBVector<uint32_t>(padding);
+  auto s = HBVector<uint32_t>(strides);
+
+  // Conv2d parameters
+  auto N = y.dim(0); // number of minibatches
+  auto Cout = y.dim(1); // number of output channels
+  auto Hout = y.dim(2);
+  auto Wout = y.dim(3);
+  auto Cin = x.dim(1); // number of input channels
+  auto Hin = x.dim(2);
+  auto Win = x.dim(3);
+  auto Kh = w.dim(2);
+  auto Kw = w.dim(3);
+  auto Sh = s[0];
+  auto Sw = s[1];
+  auto Ph = p[0];
+  auto Pw = p[1];
+
+  // Start profiling
+  bsg_cuda_print_stat_kernel_start();
+
+  // init weight grads
+  hb_tiled_foreach([]() {return 0.0;}, w);
+  g_barrier.sync();
+
+  for(uint32_t n = 0; n < N; ++n)
+    hb_tiled_for(bsg_tiles_X * bsg_tiles_Y,
+                 [&](size_t co, size_t ci, size_t kh, size_t kw) {
+      for(uint32_t yh = 0; yh < Hout; ++yh)
+        for(uint32_t yw = 0; yw < Wout; ++yw){
+          int32_t xh = Sh * yh - Ph + kh;
+          int32_t xw = Sw * yw - Pw + kw;
+
+          if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+            w(co, ci, kh, kw) += y(n, co, yh, yw) * x(n, ci, xh, xw);
+          } // else 0
+        }
+    }, Cout, Cin, Kh, Kw);
+
+  // End profiling
+  bsg_cuda_print_stat_kernel_end();
+
+  g_barrier.sync();
+  return 0;
+}
+
 // We wrap all external-facing C++ kernels with `extern "C"` to
 // prevent name mangling
 
@@ -272,53 +327,24 @@ extern "C" {
           hb_tensor_t* input,
           hb_vector_t* padding,
           hb_vector_t* strides) {
-    auto x = HBTensor<float>(input);
-    auto y = HBTensor<float>(grad_output);
-    auto w = HBTensor<float>(grad_weight);
-    auto p = HBVector<uint32_t>(padding);
-    auto s = HBVector<uint32_t>(strides);
+    #define CONV_BACKWARD_WEIGHT_TEMPLATED(                                \
+        N, Cout, Hout, Wout, Cin, Hin, Win, Kh, Kw, Sh, Sw, Ph, Pw)        \
+      if(!convolution_backward_weight_template<                            \
+              N, Cout, Hout, Wout, Cin, Hin, Win, Kh, Kw, Sh, Sw, Ph, Pw>( \
+                  grad_weight, grad_output, input, padding, strides))      \
+        return 0;
 
-    // Conv2d parameters
-    auto N = y.dim(0); // number of minibatches
-    auto Cout = y.dim(1); // number of output channels
-    auto Hout = y.dim(2);
-    auto Wout = y.dim(3);
-    auto Cin = x.dim(1); // number of input channels
-    auto Hin = x.dim(2);
-    auto Win = x.dim(3);
-    auto Kh = w.dim(2);
-    auto Kw = w.dim(3);
-    auto Sh = s[0];
-    auto Sw = s[1];
-    auto Ph = p[0];
-    auto Pw = p[1];
+    const uint32_t N = 8;
+    CONV_BACKWARD_WEIGHT_TEMPLATED(N,  16, 32, 32,  3, 32, 32, 3, 3, 1, 1, 1, 1);
+    CONV_BACKWARD_WEIGHT_TEMPLATED(N,  32, 32, 32, 16, 32, 32, 3, 3, 1, 1, 1, 1);
+    CONV_BACKWARD_WEIGHT_TEMPLATED(N,  32, 32, 32, 16, 32, 32, 1, 1, 1, 1, 0, 0);
+    CONV_BACKWARD_WEIGHT_TEMPLATED(N,  64, 16, 16, 32, 16, 16, 3, 3, 1, 1, 1, 1);
+    CONV_BACKWARD_WEIGHT_TEMPLATED(N,  64, 16, 16, 32, 16, 16, 1, 1, 1, 1, 0, 0);
+    CONV_BACKWARD_WEIGHT_TEMPLATED(N, 128,  8,  8, 64,  8,  8, 3, 3, 1, 1, 1, 1);
+    CONV_BACKWARD_WEIGHT_TEMPLATED(N, 128,  8,  8, 64,  8,  8, 1, 1, 1, 1, 0, 0);
 
-    // Start profiling
-    bsg_cuda_print_stat_kernel_start();
-
-    // init weight grads
-    hb_tiled_foreach([]() {return 0.0;}, w);
-    g_barrier.sync();
-
-    for(uint32_t n = 0; n < N; ++n)
-      hb_tiled_for(bsg_tiles_X * bsg_tiles_Y,
-                   [&](size_t co, size_t ci, size_t kh, size_t kw) {
-        for(uint32_t yh = 0; yh < Hout; ++yh)
-          for(uint32_t yw = 0; yw < Wout; ++yw){
-            int32_t xh = Sh * yh - Ph + kh;
-            int32_t xw = Sw * yw - Pw + kw;
-
-            if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-              w(co, ci, kh, kw) += y(n, co, yh, yw) * x(n, ci, xh, xw);
-            } // else 0
-          }
-      }, Cout, Cin, Kh, Kw);
-
-    // End profiling
-    bsg_cuda_print_stat_kernel_end();
-
-    g_barrier.sync();
-    return 0;
+    return convolution_backward_weight(grad_weight, grad_output, input, padding,
+                                       strides);
   }
 
   __attribute__ ((noinline))  int tensorlib_convolution_backward_bias(
