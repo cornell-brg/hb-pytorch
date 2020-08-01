@@ -66,14 +66,18 @@ static int convolution_forward(
 
           // Load input to local buffer
           for(uint32_t kh = 0; kh < Kh; ++kh) {
+            uint32_t kw_local = w_off;
+
             for(uint32_t kw = 0; kw < Kw; ++kw) {
               int32_t xh = Sh * yh - Ph + kh;
               int32_t xw = Sw * yw_start - Pw + kw;
 
               if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win)
-                X_local[kh][(w_off + kw) % Kw] = x(n, ci, xh, xw);
+                X_local[kh][kw_local] = x(n, ci, xh, xw);
               else
-                X_local[kh][(w_off + kw) % Kw] = 0.0;
+                X_local[kh][kw_local] = 0.0;
+
+              w_off_local = (kw_local == (Kw - 1)) ? 0 : kw_local + 1;
             }
           }
 
