@@ -158,16 +158,20 @@ int convolution_forward_template(
             w_off = (Sw * yw) % Kw;
 
             if(yw != yw_start) {
+              uint32_t kw_local = (Sw * (yw - 1)) % Kw;
+
               // Load a new column of input data
               for(uint32_t sw = 0; sw < Sw; ++sw) {
                 int32_t xw = Sw * yw - Pw + Kw - Sw + sw;
 
                 for(uint32_t kh = 0; kh < Kh; ++kh) {
                   int32_t xh = Sh * yh - Ph + kh;
-                  X_local[kh][(Sw * (yw - 1) + sw) % Kw] =
+                  X_local[kh][kw_local] =
                       (xh >= 0 && xh < Hin && xw >= 0 && xw < Win) ?
                         x(n, ci, xh, xw) : 0;
                 }
+
+                kw_local = (kw_local == (Kw - 1)) ? 0 : kw_local + 1;
               }
             } // y == yw_start would be loaded in the outer loop
 
