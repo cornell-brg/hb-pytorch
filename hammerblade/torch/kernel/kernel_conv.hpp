@@ -189,6 +189,62 @@ int convolution_forward_template(
   return 0;
 }
 
+template<uint32_t N, uint32_t Cout, uint32_t Hout, uint32_t Wout,
+         uint32_t Cin, uint32_t Hin, uint32_t Win, uint32_t Kh,
+         uint32_t Kw, uint32_t Sh = 1, uint32_t Sw = 1, uint32_t Ph = 1,
+         uint32_t Pw = 1>
+int convolution_backward_input_template(
+          hb_tensor_t* grad_input,
+          hb_tensor_t* grad_output,
+          hb_tensor_t* weight,
+          hb_vector_t* padding,
+          hb_vector_t* strides) {
+    ConvParams params(grad_output, grad_input, weight, padding, strides);
+    if(!params.compare(N, Cout, Hout, Wout,
+                       Cin, Hin, Win, Kh,
+                       Kw, Sh, Sw, Ph, Pw)) {
+      return -1;
+    }
+
+    auto y = HBTensor4d<float, N, Cout, Hout, Wout>(grad_output);
+    auto x = HBTensor4d<float, N, Cin, Hin, Win>(grad_input);
+    auto w = HBTensor4d<float, Cout, Cin, Kh, Kw>(weight);
+
+    // Start profiling
+    bsg_cuda_print_stat_kernel_start();
+
+    // init input grads
+    x.init(0.0);
+    g_barrier.sync();
+
+    for(uint32_t n = 0; n < N; ++n)
+    for(uint32_t co = 0; co < Cout; ++co)
+      hb_tiled_for(bsg_tiles_X * bsg_tiles_Y,
+                   [&](size_t ci, size_t xh, size_t xw) {
+        for(uint32_t kh = 0; kh < Kh; ++kh)
+          for(uint32_t kw = 0; kw < Kw; ++kw) {
+            uint32_t rel_h = xh - kh + Ph;
+            uint32_t rel_w = xw - kw + Pw;
+
+            if((rel_h % Sh != 0) || (rel_w % Sw != 0))
+              continue;
+
+            uint32_t yh = rel_h / Sh;
+            uint32_t yw = rel_w / Sw;
+
+            if(yh >= 0 && yh < Hout && yw >= 0 && yw < Wout) {
+              x(n, ci, xh, xw) += y(n, co, yh, yw) * w(co, ci, kh, kw);
+            } // else 0
+          }
+      }, Cin, Hin, Win);
+
+    // End profiling
+    bsg_cuda_print_stat_kernel_end();
+
+    g_barrier.sync();
+    return 0;
+  }
+
 }
 
 #endif // _KERNEL_CONV_HPP
