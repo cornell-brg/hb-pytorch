@@ -77,7 +77,7 @@ static int convolution_forward(
               else
                 X_local[kh][kw_local] = 0.0;
 
-              w_off_local = (kw_local == (Kw - 1)) ? 0 : kw_local + 1;
+              kw_local = (kw_local == (Kw - 1)) ? 0 : kw_local + 1;
             }
           }
 
@@ -99,12 +99,16 @@ static int convolution_forward(
             } // y == yw_start would be loaded in the outer loop
 
             for(uint32_t kh = 0; kh < Kh; ++kh) {
+              uint32_t kw_local = w_off;
+
               for(uint32_t kw = 0; kw < Kw; ++kw) {
                 if((ci + kh + kw) == 0) {
                   y(n, co, yh, yw) = 0.0;
                 }
-                y(n, co, yh, yw) += X_local[kh][(w_off + kw) % Kw] *
-                                    W_local[kh][kw];
+
+                y(n, co, yh, yw) += X_local[kh][kw_local] * W_local[kh][kw];
+
+                kw_local = (kw_local == (Kw - 1)) ? 0 : kw_local + 1;
               }
             }
           };
