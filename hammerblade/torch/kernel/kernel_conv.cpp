@@ -43,6 +43,11 @@ static int convolution_forward(
   // number of remote loads.
   register float X_local[XhBufSize][KwBufSize];
 
+  // Number of outputs the data in X_local buffer can compute. This
+  // only depneds on the height of the buffer as width is equal to
+  // one kernel's width.
+  uint32_t NumLocalOutputs = XhBufSize - Kh + 1;
+
   if(__bsg_id == 0)
     hb_assert_msg(Kh <= KhBufSize && Kw <= KwBufSize,
                   "Conv2d filter doesn't fit in DMEM allocated array");
@@ -62,7 +67,11 @@ static int convolution_forward(
         size_t yh_start, yh_end, tg_size_yh;
         blocked_range(tg_size_co, Hout, yh_start, yh_end, tg_size_yh);
 
-        for(size_t yh = yh_start; yh < yh_end; ++yh) {
+        for(size_t yh = yh_start; yh < yh_end; yh += NumLocalOutputs) {
+          // Number of local outputs in this iteration
+          uint32_t num_local_outputs = std::min((uint32_t) (yh_end - yh),
+                                                NumLocalOutputs);
+
           hb_range yw_range;
           calc_range(&yw_range, Wout, tg_size_yh);
           size_t yw_start = yw_range.start;
@@ -71,18 +80,21 @@ static int convolution_forward(
           // width offset for the accessing local circular buffer
           uint32_t w_off = (Sw * yw_start) % Kw;
 
+          uint32_t xhl_end = num_local_outputs + Kh -1;
+          int32_t xh_start =  Sh * yh - Ph;
+
           // Load input to local buffer
-          for(uint32_t kh = 0; kh < Kh; ++kh) {
+          for(uint32_t xhl = 0; xhl < xhl_end; ++xhl) {
             uint32_t kw_local = w_off;
+            uint32_t xh = xhl + xh_start;
 
             for(uint32_t kw = 0; kw < Kw; ++kw) {
-              int32_t xh = Sh * yh - Ph + kh;
               int32_t xw = Sw * yw_start - Pw + kw;
 
               if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win)
-                X_local[kh][kw_local] = x(n, ci, xh, xw);
+                X_local[xhl][kw_local] = x(n, ci, xh, xw);
               else
-                X_local[kh][kw_local] = 0.0;
+                X_local[xhl][kw_local] = 0.0;
 
               kw_local = (kw_local == (Kw - 1)) ? 0 : kw_local + 1;
             }
@@ -98,9 +110,10 @@ static int convolution_forward(
               for(uint32_t sw = 0; sw < Sw; ++sw) {
                 int32_t xw = Sw * yw - Pw + Kw - Sw + sw;
 
-                for(uint32_t kh = 0; kh < Kh; ++kh) {
-                  int32_t xh = Sh * yh - Ph + kh;
-                  X_local[kh][kw_local] =
+                for(uint32_t xhl = 0; xhl < xhl_end; ++xhl) {
+                  int32_t xh = xhl + xh_start;
+
+                  X_local[xhl][kw_local] =
                       (xh >= 0 && xh < Hin && xw >= 0 && xw < Win) ?
                         x(n, ci, xh, xw) : 0;
                 }
@@ -109,21 +122,26 @@ static int convolution_forward(
               }
             } // y == yw_start would be loaded in the outer loop
 
-            for(uint32_t kh = 0; kh < Kh; ++kh) {
-              uint32_t kw_local = w_off;
+            for(uint32_t yh_local = 0; yh_local < num_local_outputs; ++yh_local) {
+              for(uint32_t kh = 0; kh < Kh; ++kh) {
+                uint32_t kw_local = w_off;
+                uint32_t kh_local = yh_local * kh;
+                uint32_t yh_remote = yh_local + yh;
 
-              for(uint32_t kw = 0; kw < Kw; ++kw) {
-                if((ci + kh + kw) == 0) {
-                  y(n, co, yh, yw) = 0.0;
+                for(uint32_t kw = 0; kw < Kw; ++kw) {
+                  if((ci + kh + kw) == 0) {
+                    y(n, co, yh, yw) = 0.0;
+                  }
+
+                  y(n, co, yh_remote, yw) += X_local[kh_local][kw_local] *
+                                             W_local[kh][kw];
+
+                  kw_local = (kw_local == (Kw - 1)) ? 0 : kw_local + 1;
                 }
-
-                y(n, co, yh, yw) += X_local[kh][kw_local] * W_local[kh][kw];
-
-                kw_local = (kw_local == (Kw - 1)) ? 0 : kw_local + 1;
               }
             }
-          };
-        };
+          }
+        }
       });
     }
   };
