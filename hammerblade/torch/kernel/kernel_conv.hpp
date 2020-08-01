@@ -24,9 +24,9 @@ inline void load_weights(float wl[KhBufSize][KwBufSize],
 
 struct ConvParams{
   uint32_t N;
-  uint32_t Cout
-  uint32_t Hout
-  uint32_t Wout
+  uint32_t Cout;
+  uint32_t Hout;
+  uint32_t Wout;
   uint32_t Cin;
   uint32_t Hin;
   uint32_t Win;
@@ -66,22 +66,22 @@ struct ConvParams{
   }
 
   bool compare(
-      uint32_t _N, uint32_t _Cout, uint32_t _Hout, uint32_t _Wout,
-      uint32_t _Cin, uint32_t _Hin, uint32_t _Win, uint32_t _Kh,
-      uint32_t _Kw, uint32_t _Sh, uint32_t _Sw, uint32_t _Ph, uint32_t _Pw) {
-    return ((N    == _N   ) && 
-            (Cout == _Cout) && 
-            (Hout == _Hout) && 
-            (Wout == _Wout) && 
-            (Cin  == _Cin ) && 
-            (Hin  == _Hin ) && 
-            (Win  == _Win ) && 
-            (Kh   == _Kh  ) && 
-            (Kw   == _Kw  ) && 
-            (Sh   == _Sh  ) && 
-            (Sw   == _Sw  ) && 
-            (Ph   == _Ph  ) && 
-            (Pw   == _Pw  )); 
+      uint32_t N_, uint32_t Cout_, uint32_t Hout_, uint32_t Wout_,
+      uint32_t Cin_, uint32_t Hin_, uint32_t Win_, uint32_t Kh_,
+      uint32_t Kw_, uint32_t Sh_, uint32_t Sw_, uint32_t Ph_, uint32_t Pw_) {
+    return ((N    == N_   ) && 
+            (Cout == Cout_) && 
+            (Hout == Hout_) && 
+            (Wout == Wout_) && 
+            (Cin  == Cin_ ) && 
+            (Hin  == Hin_ ) && 
+            (Win  == Win_ ) && 
+            (Kh   == Kh_  ) && 
+            (Kw   == Kw_  ) && 
+            (Sh   == Sh_  ) && 
+            (Sw   == Sw_  ) && 
+            (Ph   == Ph_  ) && 
+            (Pw   == Pw_  ));
   }
 };
 
@@ -187,7 +187,7 @@ int convolution_forward_template(
 
   g_barrier.sync();
   return 0;
-};
+}
 
 }
 
