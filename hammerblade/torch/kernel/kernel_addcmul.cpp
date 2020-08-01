@@ -3,8 +3,9 @@
 // 04/23/2020 Lin Cheng (lc873@cornell.edu)
 //====================================================================
 
-// Uses hb_tiled_foreach_unroll with an unrolling factor of 6
-// Tested to be optimum for 4x4 Bladerunner
+// Uses hb_tiled_foreach_unroll
+// Optimum unrolling for 4x4 Bladerunner: 6
+// Optimum unrolling for 8x16 Bladerunner: 6
 
 #include <kernel_common.hpp>
 
@@ -27,7 +28,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach_unroll<6>(res, input, tensor1, tensor2,
+    hb_tiled_foreach_unroll<1>(res, input, tensor1, tensor2,
       [&](float input_val, float tensor1_val, float tensor2_val) {
         return input_val + value * tensor1_val * tensor2_val;
       });

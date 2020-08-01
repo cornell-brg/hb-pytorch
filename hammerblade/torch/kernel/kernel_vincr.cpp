@@ -28,7 +28,7 @@ extern "C" {
     }
     */
 
-    hb_tiled_foreach_unroll<8>(result, self, 
+    hb_tiled_foreach_unroll<1>(result, self, 
       [&](float self) {
         return self + 1;
       }

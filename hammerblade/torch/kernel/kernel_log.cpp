@@ -16,7 +16,7 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
     
-    hb_tiled_foreach_unroll<12>(res, input,
+    hb_tiled_foreach_unroll<1>(res, input,
       [&](float a) {
         return std::log(a);
       });

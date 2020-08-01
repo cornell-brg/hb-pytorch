@@ -15,7 +15,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach_unroll<8>(res, [&]() {
+    hb_tiled_foreach_unroll<1>(res, [&]() {
       return value;
     });
 
