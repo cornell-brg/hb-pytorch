@@ -49,7 +49,7 @@ export USE_HB_COSIM=1
 # BRG servers -- on BRG servers we have global installed COSIM so SW side ppl
 # dont have to worry about COSIM installation
 if [[ "x${SETUP_BRG_HAMMERBLADE}" != "xyes" ]]; then
-  export BSG_MACHINE=4x4_fast_n_fake
+  export BSG_MACHINE=16x8_fast_n_fake
   export BSG_MACHINE_PATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/machines/$BSG_MACHINE
   make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python test_python.log
 fi

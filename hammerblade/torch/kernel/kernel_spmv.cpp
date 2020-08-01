@@ -37,7 +37,7 @@ extern "C" {
       for(uint32_t col_index = csr(i); col_index < csr(i+1); col_index++) { //CSR MODE
        temp[0] = temp[0] + values(col_index) * dense(indices(col_index)); //CSR mode
       }
-      result(i) = temp[0];   
+      result(i) = temp[0];
     }  
 
     bsg_cuda_print_stat_kernel_end();
