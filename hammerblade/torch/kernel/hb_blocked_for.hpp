@@ -12,15 +12,14 @@
 // Distributes work in blocks of tiles along a tensor axis of size N.
 // If N >= tg_size, each index can only be handled on by one tile,
 // so block size would be 1. If N < tg_size, blocksize could be
-// greater than one, meaning each index would be handled by 
-// multiple tiles. This function passes block size to the loop 
+// greater than one, meaning each index would be handled by
+// multiple tiles. This function passes block size to the loop
 // which can used to recusively distribute work among the sub block
 // of tiles.
 // =================================================================
 
-template<typename F>
-inline void hb_blocked_for(size_t tg_size, size_t N, F functor) {
-  size_t block_size, start, end;
+inline void blocked_range(size_t tg_size, size_t N,
+                          size_t& start, size_t& end, size_t& block_size) {
   size_t tile_id = __bsg_id % tg_size;
 
   if(N >= tg_size) {
@@ -34,6 +33,12 @@ inline void hb_blocked_for(size_t tg_size, size_t N, F functor) {
     start = tile_id / block_size;
     end = (start >= N) ? start : start + 1;
   }
+}
+
+template<typename F>
+inline void hb_blocked_for(size_t tg_size, size_t N, F functor) {
+  size_t block_size, start, end;
+  blocked_range(tg_size, N, start, end, block_size);
 
   for(size_t i = start; i < end; ++i)
     functor(i, block_size);

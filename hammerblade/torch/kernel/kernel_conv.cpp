@@ -37,7 +37,11 @@ static int convolution_forward(
   register float W_local[KhBufSize][KwBufSize];
 
   // Circular buffer to hold inputs
-  register float X_local[3 * KhBufSize][KwBufSize];
+  //
+  // Width is equal to kernel buffer size because we load
+  // input column by column. Height can be more to reduce
+  // number of remote loads.
+  register float X_local[XhBufSize][KwBufSize];
 
   if(__bsg_id == 0)
     hb_assert_msg(Kh <= KhBufSize && Kw <= KwBufSize,
@@ -55,7 +59,10 @@ static int convolution_forward(
         auto w_ptr = (__remote float*) w.data_ptr();
         load_weights(W_local, w_ptr, w_offset, Kh, Kw);
 
-        hb_blocked_for(tg_size_co, Hout, [&](size_t yh, size_t tg_size_yh) {
+        size_t yh_start, yh_end, tg_size_yh;
+        blocked_range(tg_size_co, Hout, yh_start, yh_end, tg_size_yh);
+
+        for(size_t yh = yh_start; yh < yh_end; ++yh) {
           hb_range yw_range;
           calc_range(&yw_range, Wout, tg_size_yh);
           size_t yw_start = yw_range.start;
@@ -116,7 +123,7 @@ static int convolution_forward(
               }
             }
           };
-        });
+        };
       });
     }
   };

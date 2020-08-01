@@ -11,6 +11,7 @@ namespace {
 // Size of buffers allocated for filters in DMEM
 const uint32_t KhBufSize = 5;
 const uint32_t KwBufSize = 5;
+const uint32_t XhBufSize = 3 * KhBufSize;
 
 inline void load_weights(float wl[KhBufSize][KwBufSize],
                          __remote float* NOALIAS wr,
