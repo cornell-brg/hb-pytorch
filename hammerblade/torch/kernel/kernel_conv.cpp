@@ -127,6 +127,9 @@ extern "C" {
           hb_tensor_t* weight,
           hb_vector_t* padding,
           hb_vector_t* strides) {
+    if(!convolution_forward_template<8, 32, 16, 16, 64, 16, 16, 3, 3, 1, 1, 1, 1>(
+                output, input, weight, padding, strides))
+      return 0;
     return convolution_forward(output, input, weight, padding, strides);
   };
 
