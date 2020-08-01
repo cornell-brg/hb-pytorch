@@ -60,7 +60,7 @@ static int convolution_forward(
           calc_range(&yw_range, Wout, tg_size_yh);
           size_t yw_start = yw_range.start;
           size_t yw_end   = yw_range.end;
-          
+
           // width offset for the accessing local circular buffer
           uint32_t w_off = (Sw * yw_start) % Kw;
 
@@ -127,9 +127,22 @@ extern "C" {
           hb_tensor_t* weight,
           hb_vector_t* padding,
           hb_vector_t* strides) {
-    if(!convolution_forward_template<8, 32, 16, 16, 64, 16, 16, 3, 3, 1, 1, 1, 1>(
-                output, input, weight, padding, strides))
-      return 0;
+    #define CONV_FORWARD_TEMPLATED(                                        \
+        N, Cout, Hout, Wout, Cin, Hin, Win, Kh, Kw, Sh, Sw, Ph, Pw)        \
+      if(!convolution_forward_template<                                    \
+              N, Cout, Hout, Wout, Cin, Hin, Win, Kh, Kw, Sh, Sw, Ph, Pw>( \
+                  output, input, weight, padding, strides))                \
+        return 0;
+
+    const uint32_t N = 8;
+    CONV_FORWARD_TEMPLATED(N,  16, 32, 32,  3, 32, 32, 3, 3, 1, 1, 1, 1);
+    CONV_FORWARD_TEMPLATED(N,  32, 32, 32, 16, 32, 32, 3, 3, 1, 1, 1, 1);
+    CONV_FORWARD_TEMPLATED(N,  32, 32, 32, 16, 32, 32, 1, 1, 1, 1, 0, 0);
+    CONV_FORWARD_TEMPLATED(N,  64, 16, 16, 32, 16, 16, 3, 3, 1, 1, 1, 1);
+    CONV_FORWARD_TEMPLATED(N,  64, 16, 16, 32, 16, 16, 1, 1, 1, 1, 0, 0);
+    CONV_FORWARD_TEMPLATED(N, 128,  8,  8, 64,  8,  8, 3, 3, 1, 1, 1, 1);
+    CONV_FORWARD_TEMPLATED(N, 128,  8,  8, 64,  8,  8, 1, 1, 1, 1, 0, 0);
+
     return convolution_forward(output, input, weight, padding, strides);
   };
 
