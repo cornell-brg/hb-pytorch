@@ -249,6 +249,12 @@ class HBTensor4d {
       uint32_t offset = strides[0]*n + strides[1]*c + strides[2]*h + w;
       return data[offset];
     }
+
+    void init(DT val) {
+      for(int i = 0; i < N; ++i) {
+        data[i] = val;
+      }
+    }
 };
 
 template<typename T>
