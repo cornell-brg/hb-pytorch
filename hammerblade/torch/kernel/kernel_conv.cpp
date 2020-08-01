@@ -37,7 +37,7 @@ static int convolution_forward(
   register float W_local[KhBufSize][KwBufSize];
 
   // Circular buffer to hold inputs
-  register float X_local[KhBufSize][KwBufSize];
+  register float X_local[3 * KhBufSize][KwBufSize];
 
   if(__bsg_id == 0)
     hb_assert_msg(Kh <= KhBufSize && Kw <= KwBufSize,
