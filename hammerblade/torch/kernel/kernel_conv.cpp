@@ -66,10 +66,10 @@ static int convolution_forward(
         load_weights(W_local, w_ptr, w_offset, Kh, Kw);
 
         size_t yw_start, yw_end, tg_size_yw;
-        blocked_range(tg_size_co, Hout, yw_start, yw_end, tg_size_yw);
+        blocked_range(tg_size_co, Wout, yw_start, yw_end, tg_size_yw);
 
         hb_range yh_range;
-        calc_range(&yh_range, Wout, tg_size_yw);
+        calc_range(&yh_range, Hout, tg_size_yw);
         size_t yh_start = yh_range.start;
         size_t yh_end   = yh_range.end;
 
