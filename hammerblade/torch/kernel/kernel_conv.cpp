@@ -124,22 +124,22 @@ static int convolution_forward(
             } // y == yw_start would be loaded in the outer loop
 
             for(uint32_t yh_local = 0; yh_local < num_local_outputs; ++yh_local) {
+              uint32_t yh_remote = yh_local + yh;
+              float y_out = (ci == 0) ? 0.0 : y(n, co, yh_remote, yw);
+
               for(uint32_t kh = 0; kh < Kh; ++kh) {
                 uint32_t kw_local = w_off;
                 uint32_t kh_local = yh_local * Sh + kh;
-                uint32_t yh_remote = yh_local + yh;
 
                 for(uint32_t kw = 0; kw < Kw; ++kw) {
-                  if((ci + kh + kw) == 0) {
-                    y(n, co, yh_remote, yw) = 0.0;
-                  }
-
-                  y(n, co, yh_remote, yw) += X_local[kh_local][kw_local] *
-                                             W_local[kh][kw];
+                  y_out += X_local[kh_local][kw_local] *
+                           W_local[kh][kw];
 
                   kw_local = (kw_local == (Kw - 1)) ? 0 : kw_local + 1;
                 }
               }
+
+              y(n, co, yh_remote, yw) = y_out;
             }
           }
         }
