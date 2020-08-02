@@ -56,7 +56,8 @@ static int convolution_forward(
   bsg_cuda_print_stat_kernel_start();
 
   for(uint32_t n = 0; n < N; ++n) {
-    for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
+    // input channel first to maximum data reuse
+    for(uint32_t ci = 0; ci < Cin; ++ci) {
       hb_blocked_for(bsg_tiles_X * bsg_tiles_Y, Cout,
                     [&](size_t co, size_t tg_size_co) {
         // Load the filter w(co, ci, :, :) to dmem
@@ -64,18 +65,18 @@ static int convolution_forward(
         auto w_ptr = (__remote float*) w.data_ptr();
         load_weights(W_local, w_ptr, w_offset, Kh, Kw);
 
-        size_t yh_start, yh_end, tg_size_yh;
-        blocked_range(tg_size_co, Hout, yh_start, yh_end, tg_size_yh);
+        size_t yw_start, yw_end, tg_size_yw;
+        blocked_range(tg_size_co, Hout, yw_start, yw_end, tg_size_yw);
+
+        hb_range yh_range;
+        calc_range(&yh_range, Wout, tg_size_yw);
+        size_t yh_start = yh_range.start;
+        size_t yh_end   = yh_range.end;
 
         for(size_t yh = yh_start; yh < yh_end; yh += NumLocalOutputs) {
           // Number of local outputs in this iteration
           uint32_t num_local_outputs = std::min((uint32_t) (yh_end - yh),
                                                 NumLocalOutputs);
-
-          hb_range yw_range;
-          calc_range(&yw_range, Wout, tg_size_yh);
-          size_t yw_start = yw_range.start;
-          size_t yw_end   = yw_range.end;
 
           // width offset for the accessing local circular buffer
           uint32_t w_off = (Sw * yw_start) % Kw;
