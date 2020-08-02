@@ -46,7 +46,7 @@ static int convolution_forward(
   // Number of outputs the data in X_local buffer can compute. This
   // only depneds on the height of the buffer as width is equal to
   // one kernel's width.
-  uint32_t NumLocalOutputs = XhBufSize - Kh + 1;
+  uint32_t NumLocalOutputs = (XhBufSize - Kh) / Sh + 1;
 
   if(__bsg_id == 0)
     hb_assert_msg(Kh <= KhBufSize && Kw <= KwBufSize,
@@ -80,7 +80,7 @@ static int convolution_forward(
           // width offset for the accessing local circular buffer
           uint32_t w_off = (Sw * yw_start) % Kw;
 
-          uint32_t xhl_end = num_local_outputs + Kh -1;
+          uint32_t xhl_end = num_local_outputs * Sh + Kh - 1;
           int32_t xh_start =  Sh * yh - Ph;
 
           // Load input to local buffer
@@ -125,7 +125,7 @@ static int convolution_forward(
             for(uint32_t yh_local = 0; yh_local < num_local_outputs; ++yh_local) {
               for(uint32_t kh = 0; kh < Kh; ++kh) {
                 uint32_t kw_local = w_off;
-                uint32_t kh_local = yh_local + kh;
+                uint32_t kh_local = yh_local * Sh + kh;
                 uint32_t yh_remote = yh_local + yh;
 
                 for(uint32_t kw = 0; kw < Kw; ++kw) {
