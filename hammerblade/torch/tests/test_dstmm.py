@@ -15,7 +15,7 @@ def _test_torch_dstmm(a, bT):
     got_tensor = got_hb.cpu()
     assert got_device == torch.device("hammerblade")
     assert torch.equal(got_tensor, expected_tensor)
-    #compare with CPU
+    # compare with CPU
     expected_tensor_cpu = torch.dstmm(a, bT)
     assert torch.equal(got_tensor, expected_tensor_cpu)
 
