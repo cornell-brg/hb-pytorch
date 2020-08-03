@@ -33,12 +33,7 @@ Tensor sddmm_hb(const SparseTensor& sample, const Tensor& b, const Tensor& c) {
 
   Tensor result = at::zeros({b.size(0), c.size(1)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
 
-  int64_t dot_prod_len = b.size(1);
-  int64_t nnz = sample._nnz();
-  // TORCH_WARN("sample:", sample);//sample = floatType
-  // TORCH_WARN("indices:", indices); //indices type = long
-
-  hb_offload_kernel(result, colIndices, rowIndices, b, c, dot_prod_len, nnz, "tensorlib_sddmm");
+  hb_offload_kernel(result, colIndices, rowIndices, b, c, "tensorlib_sddmm");
   return result;
 }
    
