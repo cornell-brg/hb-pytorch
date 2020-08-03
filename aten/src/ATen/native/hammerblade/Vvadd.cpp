@@ -11,7 +11,6 @@ Tensor vvadd_hb(const Tensor& self, const Tensor& other) {
 
   // Tutorial TODO:
   // Call HB device kernel tensorlib_vvadd
-  hb_offload_kernel(result, self, other, "tensorlib_vvadd");
 
   return result;
 }
