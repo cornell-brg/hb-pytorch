@@ -181,23 +181,27 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   C10_HB_CHECK(hb_mc_kernel_enqueue(&_hb_device, _hb_grid_dim, _hb_tg_dim, kernel,
                                     args.size(), cuda_argv));
 
-  // ----------------------------------------------
-  // Start the tracer (vanilla_operation_trace.csv)
-  // ----------------------------------------------
-  C10_HB_CHECK(hb_mc_manycore_trace_enable((&_hb_device)->mc));
+  if (hb_mc_should_trace) {
+    // ----------------------------------------------
+    // Start the tracer (vanilla_operation_trace.csv)
+    // ----------------------------------------------
+    C10_HB_CHECK(hb_mc_manycore_trace_enable((&_hb_device)->mc));
 
-  // ----------------------------------------------
-  // Start the logger (vanilla.log)
-  // ----------------------------------------------
-  C10_HB_CHECK(hb_mc_manycore_log_enable((&_hb_device)->mc));
+    // ----------------------------------------------
+    // Start the logger (vanilla.log)
+    // ----------------------------------------------
+    C10_HB_CHECK(hb_mc_manycore_log_enable((&_hb_device)->mc));
+  }
 
   C10_HB_CHECK(hb_mc_device_tile_groups_execute(&_hb_device));
 
-  // ----------------------------------------------
-  // Disable the tracer and the logger
-  // ----------------------------------------------
-  C10_HB_CHECK(hb_mc_manycore_log_disable((&_hb_device)->mc));
-  C10_HB_CHECK(hb_mc_manycore_trace_disable((&_hb_device)->mc));
+  if (hb_mc_should_trace) {
+    // ----------------------------------------------
+    // Disable the tracer and the logger
+    // ----------------------------------------------
+    C10_HB_CHECK(hb_mc_manycore_log_disable((&_hb_device)->mc));
+    C10_HB_CHECK(hb_mc_manycore_trace_disable((&_hb_device)->mc));
+  }
 
   // write the SIMULATED time to ExecutionTime log
   // set to 0 for now since bsg_time is ... wired
@@ -212,6 +216,16 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   TORCH_CHECK(hb_device_status.compare_exchange_strong(in_use, IDLE),
       "HB device is not in use, how is this possible?");
 
+}
+
+
+void enable_hb_trace() {
+  hb_mc_should_trace = true;
+}
+
+
+void disable_hb_trace() {
+  hb_mc_should_trace = false;
 }
 
 
