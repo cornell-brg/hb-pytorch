@@ -29,6 +29,7 @@
 #define BSG_MANYCORE_CUDA_H
 #include <bsg_manycore_features.h>
 #include <bsg_manycore_eva.h>
+#include <bsg_manycore.h>
 
 #ifdef __cplusplus
 #include <cstdint>
@@ -117,13 +118,14 @@ typedef int hb_mc_manycore_id_t;
 
 
         typedef struct {
+                hb_mc_manycore_t *mc;
                 hb_mc_program_t *program;
                 hb_mc_mesh_t *mesh;
                 hb_mc_tile_group_t *tile_groups;
                 uint32_t num_tile_groups;
                 uint32_t tile_group_capacity;
                 uint8_t num_grids;
-        } hb_mc_device_t; 
+        } hb_mc_device_t;
 
 
         enum hb_mc_memcpy_kind {

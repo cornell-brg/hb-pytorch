@@ -16,7 +16,7 @@ int bsg_printf(const char *fmt, ...);
 
 typedef struct hb_mc_manycore {
         const char *name;      //!< the name of this manycore
-        hb_mc_config_t config; //!< configuration of the manycore
+        // hb_mc_config_t config; //!< configuration of the manycore
         void *platform;        //!< machine-specific data pointer
         int dram_enabled;      //!< operating in no-dram mode?
 } hb_mc_manycore_t;
