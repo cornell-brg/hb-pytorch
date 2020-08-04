@@ -124,7 +124,10 @@ file(GLOB KERNEL_FILES ${CMAKE_CURRENT_BINARY_DIR}/riscv/kernel.riscv
                        ${CMAKE_CURRENT_BINARY_DIR}/riscv/*.dis)
 
 if(NOT USE_HB_EMUL)
-  install(FILES ${KERNEL_FILES} DESTINATION riscv)
+  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/riscv/
+          DESTINATION riscv
+          FILES_MATCHING PATTERN "*.dis")
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/riscv/kernel.riscv DESTINATION riscv)
   install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.sh
           DESTINATION bin RENAME pycosim)
   install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.trace.sh
