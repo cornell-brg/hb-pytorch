@@ -182,6 +182,7 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
                                     args.size(), cuda_argv));
 
   if (hb_mc_should_trace) {
+    std::cout << "tracing " << kernel << " ... ";
     // ----------------------------------------------
     // Start the tracer (vanilla_operation_trace.csv)
     // ----------------------------------------------
@@ -196,6 +197,7 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   C10_HB_CHECK(hb_mc_device_tile_groups_execute(&_hb_device));
 
   if (hb_mc_should_trace) {
+    std::cout << "done!" << std::endl;
     // ----------------------------------------------
     // Disable the tracer and the logger
     // ----------------------------------------------
