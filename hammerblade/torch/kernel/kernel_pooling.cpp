@@ -94,7 +94,7 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach([]() {return 0.0;}, x);
+    hb_tiled_foreach(x, []() {return 0.0;});
     g_barrier.sync();
 
     hb_tiled_for(bsg_tiles_X * bsg_tiles_Y,

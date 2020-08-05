@@ -159,7 +159,7 @@ static int convolution_backward_input(
   bsg_cuda_print_stat_kernel_start();
 
   // init input grads
-  hb_tiled_foreach([]() {return 0.0;}, x);
+  hb_tiled_foreach(x, []() {return 0.0;});
   g_barrier.sync();
 
   for(uint32_t n = 0; n < N; ++n)
@@ -221,7 +221,7 @@ static int convolution_backward_weight(
   bsg_cuda_print_stat_kernel_start();
 
   // init weight grads
-  hb_tiled_foreach([]() {return 0.0;}, w);
+  hb_tiled_foreach(w, []() {return 0.0;});
   g_barrier.sync();
 
   for(uint32_t n = 0; n < N; ++n)

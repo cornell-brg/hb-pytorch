@@ -75,12 +75,12 @@ else()
   # Kernel binary
   add_custom_target(
     kernel_riscv_exe
+    COMMAND rm -rf riscv
     COMMAND mkdir -p riscv
     COMMAND make -C riscv -f $ENV{HB_KERNEL_DIR}/riscv.mk ${KERNEL_MAKE_FLAGS} kernel.riscv -j8
-    COMMAND cp riscv/kernel.riscv .
-    COMMAND rm -rf riscv
+    COMMAND make -C riscv -f $ENV{HB_KERNEL_DIR}/riscv.mk ${KERNEL_MAKE_FLAGS} all.dis -j8
     DEPENDS $ENV{HB_KERNEL_DIR}/riscv.mk
-    BYPRODUCTS kernel.riscv
+    BYPRODUCTS riscv/
     )
 
   add_dependencies(c10_hammerblade kernel_riscv_exe)
@@ -119,6 +119,9 @@ foreach(file ${C10_HAMMERBLADE_HEADERS})
 endforeach()
 install(FILES ${CMAKE_BINARY_DIR}/c10/hammerblade/impl/hammerblade_cmake_macros.h
   DESTINATION include/c10/hammerblade/impl)
+
+file(GLOB KERNEL_FILES ${CMAKE_CURRENT_BINARY_DIR}/riscv/kernel.riscv
+                       ${CMAKE_CURRENT_BINARY_DIR}/riscv/*.dis)
 
 if(NOT USE_HB_EMUL)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/riscv/
