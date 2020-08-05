@@ -41,7 +41,8 @@ typedef struct hb_range {
   size_t end;
 } hb_range;
 
-inline void calc_range(hb_range* range, size_t numel) {
+inline void calc_range(hb_range* range, size_t numel,
+                       size_t tg_size = bsg_tiles_X * bsg_tiles_Y) {
   // per pod chunk
   size_t len_per_pod  = numel / BSG_POD_DIM + 1;
   // chunk range
@@ -56,8 +57,9 @@ inline void calc_range(hb_range* range, size_t numel) {
   size_t pod_size     = pod_end - pod_start;
 
   // per tile range within a pod
-  size_t len_per_tile = pod_size / (bsg_tiles_X * bsg_tiles_Y) + 1;
-  size_t start        = len_per_tile * __bsg_id;
+  size_t tile_id = __bsg_id % tg_size;
+  size_t len_per_tile = pod_size / tg_size + 1;
+  size_t start        = len_per_tile * tile_id;
   size_t end          = start + len_per_tile;
   end = (end > pod_size) ? pod_size : end;
   if (start >= end) {
@@ -532,13 +534,32 @@ inline void hb_tiled_for(size_t numel, FetchFunctor functor) {
 }
 
 template <class FetchFunctor>
-inline void hb_tiled_for(FetchFunctor functor,
+inline void hb_tiled_for(size_t tg_size, size_t numel, FetchFunctor functor) {
+  //--------------------------------------
+  // calculate start and end for this tile
+  //--------------------------------------
+  hb_range range;
+  calc_range(&range, numel, tg_size);
+  size_t start = range.start;
+  size_t end   = range.end;
+
+  //-----------------
+  // loop
+  //----------------
+  for (size_t i = start; i < end; i++) {
+    functor(i);
+  }
+}
+
+template <class FetchFunctor>
+inline void hb_tiled_for(size_t tg_size,
+                         FetchFunctor functor,
                          size_t N, size_t M) {
   //--------------------------------------
   // calculate start and end for this tile
   //--------------------------------------
   hb_range range;
-  calc_range(&range, N * M);
+  calc_range(&range, N * M, tg_size);
   size_t start = range.start;
   size_t end   = range.end;
 
@@ -553,13 +574,14 @@ inline void hb_tiled_for(FetchFunctor functor,
 }
 
 template <class FetchFunctor>
-inline void hb_tiled_for(FetchFunctor functor,
-                        size_t O, size_t N, size_t M) {
+inline void hb_tiled_for(size_t tg_size,
+                         FetchFunctor functor,
+                         size_t O, size_t N, size_t M) {
   //--------------------------------------
   // calculate start and end for this tile
   //--------------------------------------
   hb_range range;
-  calc_range(&range, O * N * M);
+  calc_range(&range, O * N * M, tg_size);
   size_t start = range.start;
   size_t end   = range.end;
 
@@ -575,13 +597,14 @@ inline void hb_tiled_for(FetchFunctor functor,
 }
 
 template <class FetchFunctor>
-inline void hb_tiled_for(FetchFunctor functor,
-                        size_t P, size_t O, size_t N, size_t M) {
+inline void hb_tiled_for(size_t tg_size,
+                         FetchFunctor functor,
+                         size_t P, size_t O, size_t N, size_t M) {
   //--------------------------------------
   // calculate start and end for this tile
   //--------------------------------------
   hb_range range;
-  calc_range(&range, P * O * N * M);
+  calc_range(&range, P * O * N * M, tg_size);
   size_t start = range.start;
   size_t end   = range.end;
 
