@@ -1,6 +1,7 @@
 """
 unit tests for torch.uniform_ kernel
-04/14/2020 Jack Weber (jlw422@cornell.edu)
+Author : Jack Weber
+Date   : 04/14/2020
 """
 
 import torch
@@ -8,6 +9,10 @@ import random
 
 torch.manual_seed(42)
 random.seed(42)
+
+# ----------------------------------------------------------------------
+# tests of torch.uniform_; makes sure numbers under 1
+# ----------------------------------------------------------------------
 
 def test_torch_uniform1():
     x = torch.rand(10, device="hammerblade")
