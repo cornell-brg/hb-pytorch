@@ -6,7 +6,6 @@
 
 namespace at { namespace native {
 
-
 Tensor hammerblade_common_seed_to_tensor_(uint32_t seed = 42) {
   uint32_t upper = (uint32_t)(seed << 16);
   auto tensor = at::empty({}, at::TensorOptions(at::kHAMMERBLADE).dtype(at::kInt));
@@ -14,20 +13,18 @@ Tensor hammerblade_common_seed_to_tensor_(uint32_t seed = 42) {
   return tensor;
 }
 
-
-
 Tensor& uniform_(Tensor& self, double from, double to, Generator* gen) {
 
-    AT_DISPATCH_FLOAT_TYPE_ONLY(self.scalar_type(), "uniform_", [&]() {
-    HammerBladeGenerator* generator = get_generator_or_default<HammerBladeGenerator>(gen,
+  AT_DISPATCH_FLOAT_TYPE_ONLY(self.scalar_type(), "uniform_", [&]() {
+  HammerBladeGenerator* generator = get_generator_or_default<HammerBladeGenerator>(gen,
                  hammerblade::detail::getDefaultHammerBladeGenerator());
 
-   float from_float = safe_downcast<float, double>(from);
-   float to_float = safe_downcast<float, double>(to);
+  float from_float = safe_downcast<float, double>(from);
+  float to_float = safe_downcast<float, double>(to);
 
-    auto seed_tensor = hammerblade_common_seed_to_tensor_(generator->random());
+  auto seed_tensor = hammerblade_common_seed_to_tensor_(generator->random());
 
-    hb_offload_kernel(self, seed_tensor, from_float, to_float, "tensorlib_uniform_");
+  hb_offload_kernel(self, seed_tensor, from_float, to_float, "tensorlib_uniform_");
   });
   return self;
 }
