@@ -1,6 +1,9 @@
-""" tests for tanh and tanh.out kernels
-5/26/2020 Jack Weber (jlw422@cornell.edu)
 """
+tests for tanh and tanh.out kernels
+Author : Jack Weber
+Date   : 05/26/2020
+"""
+
 
 import math
 import torch
@@ -14,7 +17,7 @@ def _test_tanh(x):
 	out = torch.tanh(h)
 	assert out.is_hammerblade
     assert torch.allclose(out.cpu(), out_cpu)
-    
+
 def test_tanh_1():
     a = torch.randn(10)
     _test_tanh(a)
@@ -26,6 +29,3 @@ def test_tanh_2():
 def test_tanh_3():
     a = torch.rand(16, 32)
     _test_tanh(a)
-    
-
-    
