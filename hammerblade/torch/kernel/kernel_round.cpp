@@ -17,13 +17,16 @@ extern "C" {
   auto inp = HBTensor<float>(t0_p);
   auto res = HBTensor<float>(t1_p);
 
-    hb_parallel_foreach(inp, res,
-      [&](float a) {
+    hb_tiled_foreach(
+      [](float a) {
         return rintf(a);
-    });
+      },
+      inp, res);
 
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
+
+    g_barrier.sync();
     return 0;
   }
 

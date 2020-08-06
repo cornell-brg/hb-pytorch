@@ -15,12 +15,15 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_parallel_foreach(res, [&]() {
-      return value;
-    });
+    hb_tiled_foreach(
+      [value]() {
+        return value;
+      },
+      res);
 
     bsg_cuda_print_stat_kernel_end();
 
+    g_barrier.sync();
     return 0;
   }
 

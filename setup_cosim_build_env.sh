@@ -15,8 +15,6 @@ export USE_FBGEMM=0
 export USE_NNPACK=0
 export USE_QNNPACK=0
 export USE_DISTRIBUTED=0
-export USE_OPENMP=0
-export ATEN_THREADING=NATIVE
 export OMP_NUM_THREADS=1
 
 # Use gold if it's available for faster linking.
@@ -38,22 +36,28 @@ echo "  hb-pytorch lives in $DIR"
 # setup cudalite runtime and pytorch kernel binary paths
 if [ -z "$BRG_BSG_BLADERUNNER_DIR" ]
 then
-  export BSG_MANYCORE_DIR="<path-to-your-cudalite-cosim-runtime>"
+  export BSG_MANYCORE_INCLUDE="<path-to-your-cudalite-cosim-runtime-source>"
+  export BSG_MANYCORE_LDPATH="<path-to-your-cudalite-cosim-runtime-lib>"
 else
-  export BSG_MANYCORE_DIR=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries
+  export BSG_MANYCORE_INCLUDE=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries
+  export BSG_MANYCORE_LDPATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries/platforms/aws-vcs
 fi
 
-# Build COSIM runtime library and simulation executable
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch test_loader
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/pytorch test_loader.debug
+export USE_HB_COSIM=1
 
-# For backward compatibility.
-# Remove this with bsg_bladerunner's next version. Current is v4.0.0.
-make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/testbenches/python test_loader
+# Build COSIM runtime library and simulation executable if not using one of the
+# BRG servers -- on BRG servers we have global installed COSIM so SW side ppl
+# dont have to worry about COSIM installation
+if [[ "x${SETUP_BRG_HAMMERBLADE}" != "xyes" ]]; then
+  export BSG_MACHINE=4x4_fast_n_fake
+  export BSG_MACHINE_PATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/machines/$BSG_MACHINE
+  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python test_python.log
+fi
 
 export HB_KERNEL_DIR=$DIR/hammerblade/torch
 
-echo "  \$BSG_MANYCORE_DIR is set to $BSG_MANYCORE_DIR"
+echo "  \$BSG_MANYCORE_INCLUDE is set to $BSG_MANYCORE_INCLUDE"
+echo "  \$BSG_MANYCORE_LDPATH is set to $BSG_MANYCORE_LDPATH"
 echo "  \$HB_KERNEL_DIR is set to $HB_KERNEL_DIR"
 echo ""
 echo "  Done!"

@@ -24,6 +24,10 @@ extern "C" {
     int32_t outer_size = 1;
     int32_t dim_size = grad.dim(dim);
     int32_t inner_size = 1;
+
+    // Start profiling
+    bsg_cuda_print_stat_kernel_start();
+
     for (int32_t i = 0; i < dim; ++i)
       outer_size *= grad.dim(i);
     for (int32_t i = dim + 1; i < grad.ndim(); ++i)
@@ -35,7 +39,7 @@ extern "C" {
     float* gradOutput_data_base = (float*)grad_p->data;
     float* output_data_base = (float*)output_p->data;
 
-    hb_parallel_for(outer_size * inner_size,
+    hb_tiled_for(outer_size * inner_size,
         [&](size_t i) {
 
           int32_t outer_idx = i / inner_size;
@@ -53,6 +57,10 @@ extern "C" {
 
         });
 
+    // End profiling
+    bsg_cuda_print_stat_kernel_end();
+
+    g_barrier.sync();
     return 0;
 
   }

@@ -15,9 +15,9 @@ extern "C" {
     HBTensor<float> self(self_p);
     HBTensor<float> result(result_p);
     HBTensor<int32_t> index(index_p);
-    float* self_data = (float*)self.data_ptr();
-    float* result_data = (float*)result.data_ptr();
-    int32_t* index_data = (int32_t*)index.data_ptr();
+    __remote float* self_data = (__remote float*)self.data_ptr();
+    __remote float* result_data = (__remote float*)result.data_ptr();
+    __remote int32_t* index_data = (__remote int32_t*)index.data_ptr();
 
     bsg_cuda_print_stat_kernel_start();
 
@@ -27,13 +27,13 @@ extern "C" {
     if (rowsize > 0) {
       // self.ndim() can't be 0
       if (self.ndim() == 1) {
-        hb_parallel_for(index.numel(), [&](size_t i) {
+        hb_tiled_for(index.numel(), [&](size_t i) {
           hb_assert((index_data[i] >= 0 && index_data[i] < size0));
           result(i) = self(index_data[i]);
         });
       } else {
-        hb_parallel_for(index.numel(), [&](size_t i) {
-          memcpy(
+        hb_tiled_for(index.numel(), [&](size_t i) {
+          hb_memcpy(
             result_data + i * rowsize,
             self_data + index_data[i] * rowsize,
             rowsize * sizeof(float)
@@ -44,6 +44,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_end();
 
+    g_barrier.sync();
     return 0;
   }
 

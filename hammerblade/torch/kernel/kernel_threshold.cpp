@@ -22,17 +22,19 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_parallel_foreach(c, a, b,
-      [&](float self, float other) {
+    hb_tiled_foreach(
+      [threshold, value](float self, float other) {
         if (self <= threshold) {
           return value;
         } else {
           return other;
         }
-    });
+       },
+       c, a, b);
 
     bsg_cuda_print_stat_kernel_end();
 
+    g_barrier.sync();
     return 0;
   }
 

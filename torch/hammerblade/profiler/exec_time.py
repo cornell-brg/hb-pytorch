@@ -62,7 +62,7 @@ def exec_time_construct_tree_impl(data, parent, fancy_func=False):
 def exec_time_apply_trim(root):
     trim_amount = 0.0
     # this is a func that runs on HB, which needs trimming
-    if root.func.startswith("@OFFLOAD_KERNEL@__"):
+    if root.func.startswith("@OFFLOAD_KERNEL@__") or root.func.startswith("@BSG_API_CALL@__"):
         assert len(root.children) == 1
         simulated = root.children[0]
         assert simulated.func == "@TRIM@"
@@ -125,7 +125,7 @@ def fancy_print(trimming=False):
         buffer = ""
         for e in (root.children + [root]):
             func = e.func
-            time = e.time / 1000.0
+            time = e.time / 1000000.0
             percentage = e.percentage
             buffer += ('{func:30}     {time:.2f} {percentage:.1f}%\n'.format(
                 func=func, time=time, percentage=percentage))
@@ -147,7 +147,7 @@ def latex_table(trimming=False):
         for e in (root.children + [root]):
             func = e.func
             func = func.replace("_", "\\_")
-            time = e.time / 1000.0
+            time = e.time / 1000000.0
             percentage = e.percentage
             buffer += ('\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\\n'.format(
                 func=func, time=time, percentage=percentage))
@@ -165,5 +165,28 @@ def raw_stack(trimming=False):
     try:
         root = exec_time_tree(trimming=trimming)
         return exec_time_print_tree(root)
+    except AttributeError:
+        print("PyTorch is not built with profiling")
+
+def roi_time(trimming=False):
+    try:
+        root = exec_time_tree(trimming=trimming)
+        if trimming:
+            exec_time_apply_trim(root)
+        return root.time
+    except AttributeError:
+        print("PyTorch is not built with profiling")
+
+def exec_time_dict(trimming=False):
+    """
+    Returns a dict with per operator execution times for all
+    operators on the top of the stack.
+    """
+    try:
+        root = exec_time_tree(fancy_func=True, trimming=trimming)
+        exec_dict = {}
+        for e in (root.children + [root]):
+            exec_dict[e.func] = e.time
+        return exec_dict
     except AttributeError:
         print("PyTorch is not built with profiling")

@@ -28,7 +28,7 @@ static int tensorlib_lossnll_impl(
   const auto n_dims = input.ndim();
 
   if(reduction == Reduction::None && n_dims == 2) {
-    hb_parallel_for(batch_size,
+    hb_tiled_for(batch_size,
         [&](size_t i) {
           const auto cur_target = target(i);
           if (cur_target == ignore_index) {
@@ -106,6 +106,7 @@ extern "C" {
                              return weight(i);
                            });
 
+    g_barrier.sync();
     return 0;
 
   }
@@ -131,7 +132,10 @@ extern "C" {
                            [&](int i) {
                              return (float)1.0f;
                            });
+
+    g_barrier.sync();
     return 0;
+
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_lossnll, hb_tensor_t*, hb_tensor_t*,
