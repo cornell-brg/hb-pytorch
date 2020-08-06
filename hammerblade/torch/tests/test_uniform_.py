@@ -20,8 +20,8 @@ def test_torch_uniform1():
     i = 0
     assert (x.device == torch.device("hammerblade"))
     while(i < x.numel()):
-        assert (out[i]<1)
-        i += 1;
+        assert (out[i] < 1)
+        i += 1
 
 def test_torch_uniform2():
     x = torch.rand(100, device="hammerblade")
@@ -29,6 +29,5 @@ def test_torch_uniform2():
     i = 0
     assert (x.device == torch.device("hammerblade"))
     while(i < x.numel()):
-        assert (out[i]<1)
-        i += 1;
-
+        assert (out[i] < 1)
+        i += 1
