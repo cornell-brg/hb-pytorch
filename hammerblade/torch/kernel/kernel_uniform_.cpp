@@ -12,6 +12,11 @@
 
 extern "C" {
 
+//====================================================================
+// tensorlib_uniform_
+//====================================================================
+// This is the uniform_ kernel
+
 __attribute__ ((noinline))
 int tensorlib_uniform_(hb_tensor_t* _self, hb_tensor_t* _seed,
                        float* _from, float* _to)
@@ -29,7 +34,7 @@ int tensorlib_uniform_(hb_tensor_t* _self, hb_tensor_t* _seed,
 
   bsg_cuda_print_stat_kernel_start();
 
-  hb_parallel_for(self.numel(), [&](size_t i) {
+  hb_tiled_for(self.numel(), [&](size_t i) {
     self(i) = distribution(generator);
   });
 
