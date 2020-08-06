@@ -103,7 +103,7 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
     // iterating over all elementes
     //-----------------------------
     hb_tiled_for(in.numel(), [&](size_t idx) {
-      __remote scalar_t* in_dp = (scalar_t*)(data[1] + offset_calc(idx, in));
+      __remote scalar_t* in_dp = (__remote scalar_t*)(data[1] + offset_calc(idx, in));
       reduce(result, *in_dp);
     });
   }
