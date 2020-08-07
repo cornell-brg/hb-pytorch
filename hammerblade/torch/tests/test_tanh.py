@@ -4,11 +4,7 @@ Author : Jack Weber
 Date   : 05/26/2020
 """
 
-
-import math
 import torch
-import torch.nn as nn
-from hypothesis import given, settings
 
 def _test_tanh(x):
     h = x.hammerblade()
