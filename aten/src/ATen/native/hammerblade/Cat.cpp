@@ -43,7 +43,6 @@ Tensor _cat_hb(TensorList tensors, int64_t dim) {
 
   // plain tensors
   std::vector<Tensor> tensor_args;
-  
 
   // scalars
   std::vector<eva_t> scalars;
@@ -102,7 +101,7 @@ Tensor _cat_hb(TensorList tensors, int64_t dim) {
       allContiguous = false;
       continue;
     }
-    
+
     cat_dim_size += tensor.size(dim);
 
     if (!tensor.is_contiguous(first_tensor_mem_format)) {

@@ -16,15 +16,15 @@ extern "C" {
 //====================================================================
 // This is a simple _cat kernel only works with 0 dim
 
-__attribute__ ((noinline))  
+__attribute__ ((noinline))
 int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
-                    uint32_t* length_p, int32_t* dim_p) 
+                    uint32_t* length_p, int32_t* dim_p)
 {
   HBTensor<float> result(result_p);
   uint32_t length = *length_p;
   int32_t dim = *dim_p;
   size_t index = 0;
-    
+
   bsg_cuda_print_stat_kernel_start();
   for (size_t i = 0; i < length; i++) {
 	HBTensor<float> tensor(tensors_p[i]);
@@ -33,7 +33,7 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
 	  index = index + 1;
 	}
   }
-  
+
   bsg_cuda_print_stat_kernel_end();
   g_barrier.sync();
   return 0;
