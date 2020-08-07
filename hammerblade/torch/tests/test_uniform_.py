@@ -20,7 +20,7 @@ def _test_torch_uniform(x):
     diff = False
     assert (x.device == torch.device("hammerblade"))
     while(i < x.numel()):
-        if diff == False:
+        if diff is False:
             if out[i] != out[0]:
                 diff = True
         assert (0 < out[i] < 1)
