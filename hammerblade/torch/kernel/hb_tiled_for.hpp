@@ -93,8 +93,8 @@ inline void hb_tiled_foreach(F functor,
   hb_tiled_foreach_impl(
       start, end, functor, res,
       args...,
-      (__remote scalar_t*) res.data_ptr(),
-      ((__remote scalar_t*) args.data_ptr())...);
+      (bsg_attr_remote scalar_t*) res.data_ptr(),
+      ((bsg_attr_remote scalar_t*) args.data_ptr())...);
 }
 
 // Nullary
@@ -102,15 +102,15 @@ template<typename scalar_t, typename F, typename... P>
 __attribute__((noinline)) void hb_tiled_foreach_impl(
       size_t start, size_t end, F functor,
       HBTensor<scalar_t> res,
-      __remote scalar_t* NOALIAS res_ptr) {
+      bsg_attr_remote scalar_t* bsg_attr_noalias res_ptr) {
   // is_trivial_1d
   if(res.ndim() == 1) {
-    UNROLL(16) for(size_t idx = start; idx < end; idx++) {
+    bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
       res_ptr[idx * res.get_strides()[0]] =
         functor();
     }
   } else {
-    UNROLL(16) for (size_t idx = start; idx < end; idx++) {
+    bsg_unroll(16) for (size_t idx = start; idx < end; idx++) {
       res_ptr[offset_calc(idx, res)] =
         functor();
     }
@@ -123,16 +123,16 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
       size_t start, size_t end, F functor,
       HBTensor<scalar_t> res,
       HBTensor<scalar_t> tensor_arg0,
-      __remote scalar_t* NOALIAS res_ptr,
-      __remote scalar_t* NOALIAS tensor_data_ptr0) {
+      bsg_attr_remote scalar_t* bsg_attr_noalias res_ptr,
+      bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr0) {
   // is_trivial_1d
   if(res.ndim() == 1) {
-    UNROLL(16) for(size_t idx = start; idx < end; idx++) {
+    bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
       res_ptr[idx * res.get_strides()[0]] =
         functor(tensor_data_ptr0[idx * tensor_arg0.get_strides()[0]]);
     }
   } else {
-    UNROLL(16) for (size_t idx = start; idx < end; idx++) {
+    bsg_unroll(16) for (size_t idx = start; idx < end; idx++) {
       res_ptr[offset_calc(idx, res)] =
         functor(tensor_data_ptr0[offset_calc(idx, tensor_arg0)]);
     }
@@ -146,18 +146,18 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
       HBTensor<scalar_t> res,
       HBTensor<scalar_t> tensor_arg0,
       HBTensor<scalar_t> tensor_arg1,
-      __remote scalar_t* NOALIAS res_ptr,
-      __remote scalar_t* NOALIAS tensor_data_ptr0,
-      __remote scalar_t* NOALIAS tensor_data_ptr1) {
+      bsg_attr_remote scalar_t* bsg_attr_noalias res_ptr,
+      bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr0,
+      bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr1) {
   // is_trivial_1d
   if(res.ndim() == 1) {
-    UNROLL(16) for(size_t idx = start; idx < end; idx++) {
+    bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
       res_ptr[idx * res.get_strides()[0]] =
         functor(tensor_data_ptr0[idx * tensor_arg0.get_strides()[0]],
                 tensor_data_ptr1[idx * tensor_arg1.get_strides()[0]]);
     }
   } else {
-    UNROLL(16) for (size_t idx = start; idx < end; idx++) {
+    bsg_unroll(16) for (size_t idx = start; idx < end; idx++) {
       res_ptr[offset_calc(idx, res)] =
         functor(tensor_data_ptr0[offset_calc(idx, tensor_arg0)],
                 tensor_data_ptr1[offset_calc(idx, tensor_arg1)]);
@@ -173,20 +173,20 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
       HBTensor<scalar_t> tensor_arg0,
       HBTensor<scalar_t> tensor_arg1,
       HBTensor<scalar_t> tensor_arg2,
-      __remote scalar_t* NOALIAS res_ptr,
-      __remote scalar_t* NOALIAS tensor_data_ptr0,
-      __remote scalar_t* NOALIAS tensor_data_ptr1,
-      __remote scalar_t* NOALIAS tensor_data_ptr2) {
+      bsg_attr_remote scalar_t* bsg_attr_noalias res_ptr,
+      bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr0,
+      bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr1,
+      bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr2) {
   // is_trivial_1d
   if(res.ndim() == 1) {
-    UNROLL(16) for(size_t idx = start; idx < end; idx++) {
+    bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
       res_ptr[idx * res.get_strides()[0]] =
         functor(tensor_data_ptr0[idx * tensor_arg0.get_strides()[0]],
                 tensor_data_ptr1[idx * tensor_arg1.get_strides()[0]],
                 tensor_data_ptr2[idx * tensor_arg2.get_strides()[0]]);
     }
   } else {
-    UNROLL(16) for (size_t idx = start; idx < end; idx++) {
+    bsg_unroll(16) for (size_t idx = start; idx < end; idx++) {
       res_ptr[offset_calc(idx, res)] =
         functor(tensor_data_ptr0[offset_calc(idx, tensor_arg0)],
                 tensor_data_ptr1[offset_calc(idx, tensor_arg1)],
@@ -206,8 +206,8 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
                                HBTensor<scalar_src> input,
                                F functor) {
 
-  __remote scalar_dst* res_data = (__remote scalar_dst*)res.data_ptr();
-  __remote scalar_src* input_data = (__remote scalar_src*)input.data_ptr();
+  bsg_attr_remote scalar_dst* res_data = (bsg_attr_remote scalar_dst*)res.data_ptr();
+  bsg_attr_remote scalar_src* input_data = (bsg_attr_remote scalar_src*)input.data_ptr();
 
   // is_trivial_1d
   if(res.ndim() == 1) {
@@ -233,22 +233,22 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
     if (end - start > 4) {
       for (; idx < end - 4; idx += 4) {
         scalar_src input_dp_0 = *(input_data);
-        __remote scalar_dst* res_dp_0 = (res_data);
+        bsg_attr_remote scalar_dst* res_dp_0 = (res_data);
         res_data += strides[0];
         input_data += strides[1];
 
         scalar_src input_dp_1 = *(input_data);
-        __remote scalar_dst* res_dp_1 = (res_data);
+        bsg_attr_remote scalar_dst* res_dp_1 = (res_data);
         res_data += strides[0];
         input_data += strides[1];
 
         scalar_src input_dp_2 = *(input_data);
-        __remote scalar_dst* res_dp_2 = (res_data);
+        bsg_attr_remote scalar_dst* res_dp_2 = (res_data);
         res_data += strides[0];
         input_data += strides[1];
 
         scalar_src input_dp_3 = *(input_data);
-        __remote scalar_dst* res_dp_3 = (res_data);
+        bsg_attr_remote scalar_dst* res_dp_3 = (res_data);
         res_data += strides[0];
         input_data += strides[1];
 
@@ -259,8 +259,8 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
       }
     }
     for (; idx < end; idx++) {
-      __remote scalar_dst* res_dp = (res_data);
-      __remote scalar_src* input_dp = (input_data);
+      bsg_attr_remote scalar_dst* res_dp = (res_data);
+      bsg_attr_remote scalar_src* input_dp = (input_data);
       *res_dp = functor(*input_dp);
       res_data += strides[0];
       input_data += strides[1];
@@ -278,12 +278,12 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
     uint32_t* dst_sizes = res.get_sizes();
 
     for (size_t idx = start; idx < end; idx++) {
-      __remote scalar_dst* dst_data = res_data + idx * dst_strides[0];
-      __remote scalar_src* src_data = input_data + idx * src_strides[0];
+      bsg_attr_remote scalar_dst* dst_data = res_data + idx * dst_strides[0];
+      bsg_attr_remote scalar_src* src_data = input_data + idx * src_strides[0];
 
       for (size_t inner = 0; inner < res.dim(1); inner++) {
         scalar_src input_dp_0 = *(src_data);
-        __remote scalar_dst* res_dp_0 = (dst_data);
+        bsg_attr_remote scalar_dst* res_dp_0 = (dst_data);
         dst_data += dst_strides[1];
         src_data += src_strides[1];
 
@@ -302,12 +302,12 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
     uint32_t* dst_sizes = res.get_sizes();
 
     for (size_t idx = start; idx < end; idx++) {
-      __remote scalar_dst* dst_data = res_data + idx % dst_sizes[1] * dst_strides[1] + idx / dst_sizes[1] * dst_strides[0];
-      __remote scalar_src* src_data = input_data + idx % src_sizes[1] * src_strides[1] + idx / src_sizes[1] * src_strides[0];
+      bsg_attr_remote scalar_dst* dst_data = res_data + idx % dst_sizes[1] * dst_strides[1] + idx / dst_sizes[1] * dst_strides[0];
+      bsg_attr_remote scalar_src* src_data = input_data + idx % src_sizes[1] * src_strides[1] + idx / src_sizes[1] * src_strides[0];
 
       for (size_t inner = 0; inner < res.dim(2); inner++) {
         scalar_src input_dp_0 = *(src_data);
-        __remote scalar_dst* res_dp_0 = (dst_data);
+        bsg_attr_remote scalar_dst* res_dp_0 = (dst_data);
         dst_data += dst_strides[2];
         src_data += src_strides[2];
 
@@ -324,8 +324,8 @@ inline void hb_tiled_foreach_conversion(HBTensor<scalar_dst> res,
     size_t end   = range.end;
 
     for (size_t idx = start; idx < end; idx++) {
-      __remote scalar_dst* res_dp = (res_data + offset_calc(idx, res));
-      __remote scalar_src* input_dp = (input_data + offset_calc(idx, input));
+      bsg_attr_remote scalar_dst* res_dp = (res_data + offset_calc(idx, res));
+      bsg_attr_remote scalar_src* input_dp = (input_data + offset_calc(idx, input));
       *res_dp = functor(*input_dp);
     }
   }
