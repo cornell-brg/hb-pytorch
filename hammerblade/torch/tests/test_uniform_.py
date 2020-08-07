@@ -17,14 +17,15 @@ random.seed(42)
 def _test_torch_uniform(x):
     out = x.cpu()
     i = 0
-    same = True
+    diff = False
     assert (x.device == torch.device("hammerblade"))
     while(i < x.numel()):
-        if same == True and out[i] != out[0]:
-            same = False
+        if diff == False:
+            if out[i] != out[0]:
+                diff = True
         assert (0 < out[i] < 1)
         i += 1
-    assert(same == False)
+    assert(diff)
 
 def test_torch_uniform1():
     x = torch.rand(10, device="hammerblade")
