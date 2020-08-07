@@ -14,20 +14,22 @@ random.seed(42)
 # tests of torch.uniform_; makes sure numbers under 1
 # ----------------------------------------------------------------------
 
-def test_torch_uniform1():
-    x = torch.rand(10, device="hammerblade")
+def _test_torch_uniform(x):
     out = x.cpu()
     i = 0
+    same = True
     assert (x.device == torch.device("hammerblade"))
     while(i < x.numel()):
-        assert (out[i] < 1)
+        if same == True and out[i] != out[0]:
+            same = False
+        assert (0 < out[i] < 1)
         i += 1
+    assert(same == False)
+
+def test_torch_uniform1():
+    x = torch.rand(10, device="hammerblade")
+    _test_torch_uniform(x)
 
 def test_torch_uniform2():
     x = torch.rand(100, device="hammerblade")
-    out = x.cpu()
-    i = 0
-    assert (x.device == torch.device("hammerblade"))
-    while(i < x.numel()):
-        assert (out[i] < 1)
-        i += 1
+    _test_torch_uniform(x)
