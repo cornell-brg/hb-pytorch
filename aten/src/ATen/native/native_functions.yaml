@@ -4247,6 +4247,7 @@
   dispatch:
     CPU: legacy::cpu::_th_uniform_
     CUDA: uniform_cuda_
+    HammerBlade: uniform_
   supports_named_tensor: True
 
 - func: normal_(Tensor(a!) self, float mean=0, float std=1, *, Generator? generator=None) -> Tensor(a!)
