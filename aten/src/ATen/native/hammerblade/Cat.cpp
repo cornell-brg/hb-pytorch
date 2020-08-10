@@ -55,15 +55,6 @@ Tensor _cat_hb(TensorList tensors, int64_t dim) {
   bool allContiguous = true;
   Tensor notSkippedTensor;
 
-  // Inputs cannot alias the output tensor
-  for (size_t i = 0; i < tensors.size(); i++) {
-    auto lap = at::get_overlap_status(result, tensors[i]);
-    TORCH_CHECK(lap != at::MemOverlapStatus::PARTIAL &&
-        lap != at::MemOverlapStatus::FULL, 0,
-        "unsupported operation: the input tensors cannot refer to any of the "
-        "output memory locations. Found overlap in input tensor ", i);
-  }
-
   auto should_skip = [](const Tensor& t) { return t.numel() == 0 && t.dim() == 1; };
   for (auto const &tensor : tensors) {
     if (should_skip(tensor)) {
