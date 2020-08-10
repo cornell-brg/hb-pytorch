@@ -45,12 +45,12 @@ extern "C" {
     float sp_mat2[BLOCK_DIM * BLOCK_DIM];
     float sp_result[BLOCK_DIM * BLOCK_DIM];
 
-    // iterate over result blocks
-    hb_tiled_for_hack(m1_num_blk_per_row * m2_num_blk_per_col, [&](size_t ridx) {
-        int rr = ridx / m2_num_blk_per_col;
-        // rc is index of col block in result matrix
-        int rc = ridx % m2_num_blk_per_col;
-        // calculate current result block dimensions
+    // std::cout << "m1_num_blk_per_row = " << m1_num_blk_per_row << " m2_num_blk_per_col = " << m2_num_blk_per_col << std::endl;
+    // std::cout << "result.dim(0) = " << result.dim(0) << " result.dim(1) = " << result.dim(1) << std::endl;
+    for (int i = 0; i < m1_num_blk_per_row; i += BSG_TILE_GROUP_Y_DIM) {
+      for (int j = 0; j < m2_num_blk_per_col; j += BSG_TILE_GROUP_X_DIM) {
+        int rr = i + __bsg_y;
+        int rc = j + __bsg_x;
         int res_dim_y = rr == m1_num_blk_per_row - 1 ? m1_last_blk_dim_y : BLOCK_DIM;
         int res_dim_x = rc == m2_num_blk_per_col - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
         int partial_block = (res_dim_y != BLOCK_DIM) || (res_dim_x != BLOCK_DIM);
@@ -108,7 +108,8 @@ extern "C" {
                 // end: unrolled version
             }
         }
-    });
+      }
+    }
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
 
