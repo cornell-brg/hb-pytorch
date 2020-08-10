@@ -26,8 +26,7 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
   size_t index = 0;
 
   bsg_cuda_print_stat_kernel_start();
-  
-  
+
   for (size_t i = 0; i < length; i++) {
 	HBTensor<float> tensor(tensors_p[i]);
 	hb_tiled_for(tensor.numel(), [&](size_t i) {
