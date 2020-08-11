@@ -23,7 +23,3 @@ def test_cat_2():
 def test_cat_3():
     x = torch.randn(3, 4, 5)
     _test_torch_cat(x)
-
-def test_cat_4():
-    x = torch.randn(2, 32, 64, 5)
-    _test_torch_cat(x)

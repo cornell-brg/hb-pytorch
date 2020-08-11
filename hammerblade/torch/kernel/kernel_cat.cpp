@@ -23,17 +23,16 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
   HBTensor<float> result(result_p);
   uint32_t length = *length_p;
   int32_t dim = *dim_p;
-  size_t index = 0;
-
+  HBTensor<float> tensor(tensors_p[0]);
+  int32_t size = tensor.numel();
   bsg_cuda_print_stat_kernel_start();
 
-  for (size_t i = 0; i < length; i++) {
-	HBTensor<float> tensor(tensors_p[i]);
-	hb_tiled_for(tensor.numel(), [&](size_t i) {
-      result(index) = tensor(i);
-      index ++;
-    });
-  }
+  hb_tiled_for(result.numel(), [&] (size_t i) {
+	size_t j = i / size;
+	size_t index = i % size;
+    HBTensor<float> t(tensors_p[j]);
+    result(i) = t(index);
+  });
 
   bsg_cuda_print_stat_kernel_end();
   g_barrier.sync();
