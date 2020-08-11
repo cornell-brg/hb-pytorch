@@ -40,7 +40,7 @@ then
   export BSG_MANYCORE_LDPATH="<path-to-your-cudalite-cosim-runtime-lib>"
 else
   export BSG_MANYCORE_INCLUDE=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries
-  export BSG_MANYCORE_LDPATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries/platforms/aws-vcs
+  export BSG_MANYCORE_LDPATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries/platforms/dpi-vcs
 fi
 
 export USE_HB_COSIM=1
