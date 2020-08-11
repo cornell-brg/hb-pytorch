@@ -3,7 +3,7 @@
 // 03/09/2020 Kexin Zheng, Lin Cheng (kz73@cornell.edu, lc873@cornell.edu)
 //====================================================================
 
-#define BLOCK_DIM 8 // sqrt(4KB/4 byte/4 data matrix) = 15 max
+//#define BLOCK_DIM 16 // sqrt(4KB/4 byte/4 data matrix) = 15 max
 #include <kernel_common.hpp>
 #include <kernel_addmm.hpp>
 

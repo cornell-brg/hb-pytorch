@@ -11,6 +11,8 @@
 //   iter 1 - mat1[0][1] * ( mat2[1][0], mat2[1][1], ..., mat2[1][7] )
 //   iter 2 - mat1[0][2] * ( mat2[2][0], mat2[2][1], ..., mat2[2][7] )
 
+#define BLOCK_DIM 16
+
 inline void compute_simple(
           float* dest,
           float* sp_mat1,
@@ -163,26 +165,28 @@ inline void dram_to_sp_simple(
     float* src_base = src_ptr + (r_idx * BLOCK_DIM * src_strides[0])
                       + (c_idx * BLOCK_DIM * src_strides[1]);
     int row_offset = 0;
-    for (int i = 0; i < dim_y; i++) {
-        register float tmp0 = *(src_base + 0);
-        register float tmp1 = *(src_base + 1);
-        register float tmp2 = *(src_base + 2);
-        register float tmp3 = *(src_base + 3);
-        register float tmp4 = *(src_base + 4);
-        register float tmp5 = *(src_base + 5);
-        register float tmp6 = *(src_base + 6);
-        register float tmp7 = *(src_base + 7);
+    for (int i = 0; i < BLOCK_DIM; i++) {
+      for (int j = 0; j < BLOCK_DIM; j += 8) {
+        register float tmp0 = *(src_base + j + 0);
+        register float tmp1 = *(src_base + j + 1);
+        register float tmp2 = *(src_base + j + 2);
+        register float tmp3 = *(src_base + j + 3);
+        register float tmp4 = *(src_base + j + 4);
+        register float tmp5 = *(src_base + j + 5);
+        register float tmp6 = *(src_base + j + 6);
+        register float tmp7 = *(src_base + j + 7);
         asm volatile("": : :"memory");
-        dest[row_offset + 0] = tmp0;
-        dest[row_offset + 1] = tmp1;
-        dest[row_offset + 2] = tmp2;
-        dest[row_offset + 3] = tmp3;
-        dest[row_offset + 4] = tmp4;
-        dest[row_offset + 5] = tmp5;
-        dest[row_offset + 6] = tmp6;
-        dest[row_offset + 7] = tmp7;
-        src_base += src_strides[0];
-        row_offset += dim_x;
+        dest[row_offset + j + 0] = tmp0;
+        dest[row_offset + j + 1] = tmp1;
+        dest[row_offset + j + 2] = tmp2;
+        dest[row_offset + j + 3] = tmp3;
+        dest[row_offset + j + 4] = tmp4;
+        dest[row_offset + j + 5] = tmp5;
+        dest[row_offset + j + 6] = tmp6;
+        dest[row_offset + j + 7] = tmp7;
+      }
+      src_base += src_strides[0];
+      row_offset += BLOCK_DIM;
     }
 }
 
