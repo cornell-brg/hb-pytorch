@@ -11,7 +11,7 @@
 //   iter 1 - mat1[0][1] * ( mat2[1][0], mat2[1][1], ..., mat2[1][7] )
 //   iter 2 - mat1[0][2] * ( mat2[2][0], mat2[2][1], ..., mat2[2][7] )
 
-#define BLOCK_DIM 16
+#define BLOCK_DIM 12
 
 inline void compute_simple(
           float* dest,
@@ -166,15 +166,15 @@ inline void dram_to_sp_simple(
                       + (c_idx * BLOCK_DIM * src_strides[1]);
     int row_offset = 0;
     for (int i = 0; i < BLOCK_DIM; i++) {
-      for (int j = 0; j < BLOCK_DIM; j += 8) {
+      for (int j = 0; j < BLOCK_DIM; j += 6) {
         register float tmp0 = *(src_base + j + 0);
         register float tmp1 = *(src_base + j + 1);
         register float tmp2 = *(src_base + j + 2);
         register float tmp3 = *(src_base + j + 3);
         register float tmp4 = *(src_base + j + 4);
         register float tmp5 = *(src_base + j + 5);
-        register float tmp6 = *(src_base + j + 6);
-        register float tmp7 = *(src_base + j + 7);
+        //register float tmp6 = *(src_base + j + 6);
+        //register float tmp7 = *(src_base + j + 7);
         asm volatile("": : :"memory");
         dest[row_offset + j + 0] = tmp0;
         dest[row_offset + j + 1] = tmp1;
@@ -182,8 +182,8 @@ inline void dram_to_sp_simple(
         dest[row_offset + j + 3] = tmp3;
         dest[row_offset + j + 4] = tmp4;
         dest[row_offset + j + 5] = tmp5;
-        dest[row_offset + j + 6] = tmp6;
-        dest[row_offset + j + 7] = tmp7;
+        //dest[row_offset + j + 6] = tmp6;
+        //dest[row_offset + j + 7] = tmp7;
       }
       src_base += src_strides[0];
       row_offset += BLOCK_DIM;
