@@ -50,6 +50,9 @@ int hb_mc_manycore_log_enable(hb_mc_manycore_t *mc);
 int hb_mc_manycore_log_disable(hb_mc_manycore_t *mc);
 
 
+int hb_mc_manycore_get_cycle(hb_mc_manycore_t *mc, uint64_t *time);
+
+
 #ifdef __cplusplus
 }
 #endif
