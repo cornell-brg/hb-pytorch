@@ -67,9 +67,13 @@ extern "C" {
     auto mat2 = HBTensor<float, 2>(_mat2);
     auto result = HBTensor<float, 2>(_result);
 
-    // buffers
-    float sp_mat1[BLOCK_DIM * BLOCK_DIM];
-    float sp_mat2[BLOCK_DIM * BLOCK_DIM];
+    // buffers -- with double buffering
+    float sp_mat1_A[BLOCK_DIM * BLOCK_DIM];
+    float sp_mat2_A[BLOCK_DIM * BLOCK_DIM];
+    float sp_mat1_B[BLOCK_DIM * BLOCK_DIM];
+    float sp_mat2_B[BLOCK_DIM * BLOCK_DIM];
+    float *sp_mat1 = sp_mat1_A;
+    float *sp_mat2 = sp_mat2_A;
     float sp_result[BLOCK_DIM * BLOCK_DIM];
 
     bsg_cuda_print_stat_kernel_start();
@@ -84,6 +88,14 @@ extern "C" {
                             dram_to_sp_simple(sp_mat1, mat1, rr, mat1x);
                             dram_to_sp_simple(sp_mat2, mat2, mat1x, rc);
                             compute_simple(sp_result, sp_mat1, sp_mat2);
+                          }
+                          // switch buffer
+                          if (sp_mat1 == sp_mat1_A) {
+                            sp_mat1 = sp_mat1_B;
+                            sp_mat2 = sp_mat2_B;
+                          } else {
+                            sp_mat1 = sp_mat1_A;
+                            sp_mat2 = sp_mat2_A;
                           }
                       };
     auto tile_finish = [&] (int rr, int rc, int res_dim_x, int res_dim_y) {
