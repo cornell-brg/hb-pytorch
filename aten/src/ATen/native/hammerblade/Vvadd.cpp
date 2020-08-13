@@ -13,7 +13,7 @@ Tensor vvadd_hb(const Tensor& self, const Tensor& other) {
 
   Tensor result = at::empty({self.size(0), other.size(1)}, self.options());
 
-  hb_offload_kernel(result, self, other, "tensorlib_mm");
+  hb_offload_kernel(result, self, other, "tensorlib_systolic");
 
   return result;
 }
