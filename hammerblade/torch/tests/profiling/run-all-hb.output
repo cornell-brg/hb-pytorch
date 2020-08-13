@@ -1,0 +1,26 @@
+{'offload': False, 'signature': 'at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)'}
+{'offload': False, 'signature': 'at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)'}
+{'offload': False, 'signature': 'at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)'}
+
+total number of jobs: 3
+{'offload': True, 'signature': 'at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)'}
+{'offload': False, 'signature': 'at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)'}
+{'offload': False, 'signature': 'at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)'}
+
+mkdir -p test_kernel_000_hb
+ln -s ../test.py test_kernel_000_hb/test.py
+starting cosim job ...
+{'offload': False, 'signature': 'at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)'}
+{'offload': True, 'signature': 'at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)'}
+{'offload': False, 'signature': 'at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)'}
+
+mkdir -p test_kernel_001_hb
+ln -s ../test.py test_kernel_001_hb/test.py
+starting cosim job ...
+{'offload': False, 'signature': 'at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)'}
+{'offload': False, 'signature': 'at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)'}
+{'offload': True, 'signature': 'at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)'}
+
+mkdir -p test_kernel_002_hb
+ln -s ../test.py test_kernel_002_hb/test.py
+starting cosim job ...

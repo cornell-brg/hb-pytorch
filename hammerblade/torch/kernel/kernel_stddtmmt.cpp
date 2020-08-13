@@ -10,12 +10,10 @@
 extern "C" {
 
 
-/** 
- * For each i,j, if the element a_ij is nonzero,
- * find (b@c)_ij. The result goes in out_p.
- * Nonzero entries of a are represented by (col, row).
-*/
-  __attribute__ ((noinline))  int tensorlib_sddmm(
+// computes (b@c.T).T, sampled by the (row, col).T coordinates, i.e. swap
+// row and col for a transposed output
+
+  __attribute__ ((noinline))  int tensorlib_stddtmmt(
           hb_tensor_t* out_p, //destination
           hb_tensor_t* col_p, //cols
           hb_tensor_t* row_p, //rows
@@ -40,9 +38,9 @@ extern "C" {
       int col = cols(i);
       sum = 0;
       for (int dot = 0; dot < dp_len; dot++){
-        sum += b(row, dot) * c(dot, col);
+        sum += b(col, dot) * c(row, dot);
       }
-      res(row, col) = sum;
+      res(col, row) = sum;
     });
 
     //   End profiling
@@ -52,6 +50,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_sddmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_stddtmmt, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 
 }

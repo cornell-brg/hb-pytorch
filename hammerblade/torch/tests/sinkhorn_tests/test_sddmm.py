@@ -1,5 +1,5 @@
 """
-Unit tests for sddmm kernel
+Unit tests for validating sddmm kernel
 07/30/2020 Andrew Pareles (amp342@cornell.edu)
 """
 import torch
@@ -48,7 +48,7 @@ def test_torch_sddmm_2():
     _test_torch_sddmm(a, b, c)
 
 def test_torch_sddmm_3():
-    a = torch.Tensor([[1, 1], [1, 1]]).to_sparse()
-    b = torch.Tensor([[5, 3], [1, 7]])
-    c = torch.Tensor([[1, 2], [2, 1]])
+    a = torch.Tensor([[1, 0], [0, 1], [2, 0]]).to_sparse()
+    b = torch.Tensor([[1, 2, 3], [1, 2, 3], [1, 2, 3]])
+    c = torch.Tensor([[1, 1], [2, 1], [3, 2]])
     _test_torch_sddmm(a, b, c)

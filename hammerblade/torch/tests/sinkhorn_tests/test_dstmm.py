@@ -1,5 +1,5 @@
 """
-Unit tests for dense-sparseT matrix product (dstmm) kernel
+Unit tests for validating dense-sparseT matrix product (dstmm) kernel
 06/30/2020 Andrew Pareles (amp342@cornell.edu)
 """
 import torch

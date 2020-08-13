@@ -1,0 +1,316 @@
++ COSIM_PYTHON_EXE=/home/amp342/Cosim/bsg_bladerunner/bsg_replicant/examples/python/test_loader
++ [[ ! -f /home/amp342/Cosim/bsg_bladerunner/bsg_replicant/examples/python/test_loader ]]
++ eval '/home/amp342/Cosim/bsg_bladerunner/bsg_replicant/examples/python/test_loader +ntb_random_seed_automatic +c_args="test.py"' '| grep -v ": instantiating\|\[.*_PROFILER\]"'
+++ /home/amp342/Cosim/bsg_bladerunner/bsg_replicant/examples/python/test_loader +ntb_random_seed_automatic +c_args=test.py
+++ grep -v ': instantiating\|\[.*_PROFILER\]'
+Chronologic VCS simulator copyright 1991-2018
+Contains Synopsys proprietary information.
+Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Aug 13 16:26 2020
+NOTE: automatic random seed used: 4075467382
+==================== BSG MACHINE SETTINGS: ====================
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_X                 =          16
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_Y                 =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_SET               =          64
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_WAY               =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_BLOCK_SIZE_WORDS  =          16
+[INFO][TESTBENCH] BSG_MACHINE_MAX_EPA_WIDTH            =          28
+[INFO][TESTBENCH] BSG_MACHINE_MEM_CFG                  = e_infinite_mem
+tb.card.fpga.CL.core_clk_gen with cycle_time_p      400000
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+BSG INFO: bsg_nonsynth_dpi_rom (initial begin)
+BSG INFO:     Instantiation: tb.card.fpga.CL.trace_control
+BSG INFO:     width_p:                 2
+BSG INFO:     init_o_p:      00
+BSG INFO:     use_input_p:   0
+BSG INFO:     use_output_p:  1
+BSG INFO:     debug_p:       0
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[15].tile.proc.h.z.vcore.vcore_prof
+## ----------------------------------------------------------------
+## MANYCORE HETERO TYPE CONFIGUREATIONS
+## ----------------------------------------------------------------
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## ----------------------------------------------------------------
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+BSG INFO: test_python Regression Test
+"/home/amp342/Cosim/bsg_bladerunner/bsg_manycore/v/bsg_manycore_endpoint_standard.v", 354: tb.card.fpga.CL.mcl_to_axil.mc_ep_to_fifos.epsd.genblk3.unnamed$$_0: started at 194368000ps failed at 194368000ps
+	Offending '((out_credits_o === 'x) || (out_credits_o > 5'b0))'
+## out of remote store credits(= 0) x,y= 0, 1 displaying only once (tb.card.fpga.CL.mcl_to_axil.mc_ep_to_fifos.epsd)
+##   (this may be a performance problem; or normal behavior)
+[INFO][RX] Unfreezing tile t=209064800000, x= 0, y= 2
+[INFO][RX] Unfreezing tile t=209070000000, x= 1, y= 2
+[INFO][RX] Unfreezing tile t=209076000000, x= 2, y= 2
+[INFO][RX] Unfreezing tile t=209082800000, x= 3, y= 2
+[INFO][RX] Unfreezing tile t=209090400000, x= 4, y= 2
+[INFO][RX] Unfreezing tile t=209098800000, x= 5, y= 2
+[INFO][RX] Unfreezing tile t=209108000000, x= 6, y= 2
+[INFO][RX] Unfreezing tile t=209118000000, x= 7, y= 2
+[INFO][RX] Unfreezing tile t=209128800000, x= 8, y= 2
+[INFO][RX] Unfreezing tile t=209140400000, x= 9, y= 2
+[INFO][RX] Unfreezing tile t=209152800000, x=10, y= 2
+[INFO][RX] Unfreezing tile t=209166000000, x=11, y= 2
+[INFO][RX] Unfreezing tile t=209180000000, x=12, y= 2
+[INFO][RX] Unfreezing tile t=209194800000, x=13, y= 2
+[INFO][RX] Unfreezing tile t=209210400000, x=14, y= 2
+[INFO][RX] Unfreezing tile t=209226800000, x=15, y= 2
+[INFO][RX] Unfreezing tile t=209236000000, x= 0, y= 3
+[INFO][RX] Unfreezing tile t=209242000000, x= 1, y= 3
+[INFO][RX] Unfreezing tile t=209248800000, x= 2, y= 3
+[INFO][RX] Unfreezing tile t=209256400000, x= 3, y= 3
+[INFO][RX] Unfreezing tile t=209264800000, x= 4, y= 3
+[INFO][RX] Unfreezing tile t=209274000000, x= 5, y= 3
+[INFO][RX] Unfreezing tile t=209284000000, x= 6, y= 3
+[INFO][RX] Unfreezing tile t=209294800000, x= 7, y= 3
+[INFO][RX] Unfreezing tile t=209306400000, x= 8, y= 3
+[INFO][RX] Unfreezing tile t=209318800000, x= 9, y= 3
+[INFO][RX] Unfreezing tile t=209332000000, x=10, y= 3
+[INFO][RX] Unfreezing tile t=209346000000, x=11, y= 3
+[INFO][RX] Unfreezing tile t=209360800000, x=12, y= 3
+[INFO][RX] Unfreezing tile t=209376400000, x=13, y= 3
+[INFO][RX] Unfreezing tile t=209392800000, x=14, y= 3
+[INFO][RX] Unfreezing tile t=209410000000, x=15, y= 3
+[INFO][RX] Unfreezing tile t=209420000000, x= 0, y= 4
+[INFO][RX] Unfreezing tile t=209426800000, x= 1, y= 4
+[INFO][RX] Unfreezing tile t=209434400000, x= 2, y= 4
+[INFO][RX] Unfreezing tile t=209442800000, x= 3, y= 4
+[INFO][RX] Unfreezing tile t=209452000000, x= 4, y= 4
+[INFO][RX] Unfreezing tile t=209462000000, x= 5, y= 4
+[INFO][RX] Unfreezing tile t=209472800000, x= 6, y= 4
+[INFO][RX] Unfreezing tile t=209484400000, x= 7, y= 4
+[INFO][RX] Unfreezing tile t=209496800000, x= 8, y= 4
+[INFO][RX] Unfreezing tile t=209510000000, x= 9, y= 4
+[INFO][RX] Unfreezing tile t=209524000000, x=10, y= 4
+[INFO][RX] Unfreezing tile t=209538800000, x=11, y= 4
+[INFO][RX] Unfreezing tile t=209554400000, x=12, y= 4
+[INFO][RX] Unfreezing tile t=209570800000, x=13, y= 4
+[INFO][RX] Unfreezing tile t=209588000000, x=14, y= 4
+[INFO][RX] Unfreezing tile t=209606000000, x=15, y= 4
+[INFO][RX] Unfreezing tile t=209616800000, x= 0, y= 5
+[INFO][RX] Unfreezing tile t=209624400000, x= 1, y= 5
+[INFO][RX] Unfreezing tile t=209632800000, x= 2, y= 5
+[INFO][RX] Unfreezing tile t=209642000000, x= 3, y= 5
+[INFO][RX] Unfreezing tile t=209652000000, x= 4, y= 5
+[INFO][RX] Unfreezing tile t=209PyTorch configed with 16 * 8 HB device
+HB startup config kernel applied
+ ATen profiler collecting ...
+662800000, x= 5, y= 5
+[INFO][RX] Unfreezing tile t=209674400000, x= 6, y= 5
+[INFO][RX] Unfreezing tile t=209686800000, x= 7, y= 5
+[INFO][RX] Unfreezing tile t=209700000000, x= 8, y= 5
+[INFO][RX] Unfreezing tile t=209714000000, x= 9, y= 5
+[INFO][RX] Unfreezing tile t=209728800000, x=10, y= 5
+[INFO][RX] Unfreezing tile t=209744400000, x=11, y= 5
+[INFO][RX] Unfreezing tile t=209760800000, x=12, y= 5
+[INFO][RX] Unfreezing tile t=209778000000, x=13, y= 5
+[INFO][RX] Unfreezing tile t=209796000000, x=14, y= 5
+[INFO][RX] Unfreezing tile t=209814800000, x=15, y= 5
+[INFO][RX] Unfreezing tile t=209826400000, x= 0, y= 6
+[INFO][RX] Unfreezing tile t=209834800000, x= 1, y= 6
+[INFO][RX] Unfreezing tile t=209844000000, x= 2, y= 6
+[INFO][RX] Unfreezing tile t=209854000000, x= 3, y= 6
+[INFO][RX] Unfreezing tile t=209864800000, x= 4, y= 6
+[INFO][RX] Unfreezing tile t=209876400000, x= 5, y= 6
+[INFO][RX] Unfreezing tile t=209888800000, x= 6, y= 6
+[INFO][RX] Unfreezing tile t=209902000000, x= 7, y= 6
+[INFO][RX] Unfreezing tile t=209916000000, x= 8, y= 6
+[INFO][RX] Unfreezing tile t=209930800000, x= 9, y= 6
+[INFO][RX] Unfreezing tile t=209946400000, x=10, y= 6
+[INFO][RX] Unfreezing tile t=209962800000, x=11, y= 6
+[INFO][RX] Unfreezing tile t=209980000000, x=12, y= 6
+[INFO][RX] Unfreezing tile t=209998000000, x=13, y= 6
+[INFO][RX] Unfreezing tile t=210016800000, x=14, y= 6
+[INFO][RX] Unfreezing tile t=210036400000, x=15, y= 6
+[INFO][RX] Unfreezing tile t=210048800000, x= 0, y= 7
+[INFO][RX] Unfreezing tile t=210058000000, x= 1, y= 7
+[INFO][RX] Unfreezing tile t=210068000000, x= 2, y= 7
+[INFO][RX] Unfreezing tile t=210078800000, x= 3, y= 7
+[INFO][RX] Unfreezing tile t=210090400000, x= 4, y= 7
+[INFO][RX] Unfreezing tile t=210102800000, x= 5, y= 7
+[INFO][RX] Unfreezing tile t=210116000000, x= 6, y= 7
+[INFO][RX] Unfreezing tile t=210130000000, x= 7, y= 7
+[INFO][RX] Unfreezing tile t=210144800000, x= 8, y= 7
+[INFO][RX] Unfreezing tile t=210160400000, x= 9, y= 7
+[INFO][RX] Unfreezing tile t=210176800000, x=10, y= 7
+[INFO][RX] Unfreezing tile t=210194000000, x=11, y= 7
+[INFO][RX] Unfreezing tile t=210212000000, x=12, y= 7
+[INFO][RX] Unfreezing tile t=210230800000, x=13, y= 7
+[INFO][RX] Unfreezing tile t=210250400000, x=14, y= 7
+[INFO][RX] Unfreezing tile t=210270800000, x=15, y= 7
+[INFO][RX] Unfreezing tile t=210284000000, x= 0, y= 8
+[INFO][RX] Unfreezing tile t=210294000000, x= 1, y= 8
+[INFO][RX] Unfreezing tile t=210304800000, x= 2, y= 8
+[INFO][RX] Unfreezing tile t=210316400000, x= 3, y= 8
+[INFO][RX] Unfreezing tile t=210328800000, x= 4, y= 8
+[INFO][RX] Unfreezing tile t=210342000000, x= 5, y= 8
+[INFO][RX] Unfreezing tile t=210356000000, x= 6, y= 8
+[INFO][RX] Unfreezing tile t=210370800000, x= 7, y= 8
+[INFO][RX] Unfreezing tile t=210386400000, x= 8, y= 8
+[INFO][RX] Unfreezing tile t=210402800000, x= 9, y= 8
+[INFO][RX] Unfreezing tile t=210420000000, x=10, y= 8
+[INFO][RX] Unfreezing tile t=210438000000, x=11, y= 8
+[INFO][RX] Unfreezing tile t=210456800000, x=12, y= 8
+[INFO][RX] Unfreezing tile t=210476400000, x=13, y= 8
+[INFO][RX] Unfreezing tile t=210496800000, x=14, y= 8
+[INFO][RX] Unfreezing tile t=210518000000, x=15, y= 8
+[INFO][RX] Unfreezing tile t=210532000000, x= 0, y= 9
+[INFO][RX] Unfreezing tile t=210542800000, x= 1, y= 9
+[INFO][RX] Unfreezing tile t=210554400000, x= 2, y= 9
+[INFO][RX] Unfreezing tile t=210566800000, x= 3, y= 9
+[INFO][RX] Unfreezing tile t=210580000000, x= 4, y= 9
+[INFO][RX] Unfreezing tile t=210594000000, x= 5, y= 9
+[INFO][RX] Unfreezing tile t=210608800000, x= 6, y= 9
+[INFO][RX] Unfreezing tile t=210624400000, x= 7, y= 9
+[INFO][RX] Unfreezing tile t=210640800000, x= 8, y= 9
+[INFO][RX] Unfreezing tile t=210658000000, x= 9, y= 9
+[INFO][RX] Unfreezing tile t=210676000000, x=10, y= 9
+[INFO][RX] Unfreezing tile t=210694800000, x=11, y= 9
+[INFO][RX] Unfreezing tile t=210714400000, x=12, y= 9
+[INFO][RX] Unfreezing tile t=210734800000, x=13, y= 9
+[INFO][RX] Unfreezing tile t=210756000000, x=14, y= 9
+[INFO][RX] Unfreezing tile t=210768344000, x=15, y= 9
+BSG REGRESSION TEST [32mPASSED[0m
+BSG REGRESSION TEST [32mPASSED[0m
+BSG COSIM PASS: Test passed!
+$finish called from file "/home/amp342/Cosim/bsg_bladerunner/bsg_replicant/libraries/platforms/aws-vcs/machine_wrapper.sv", line 60.
+Fatal: "/home/amp342/Cosim/bsg_bladerunner/basejump_stl/bsg_test/bsg_nonsynth_dpi_gpio.v", 62: tb.card.fpga.CL.trace_control: at time 287652480000 ps
+BSG ERROR (tb.card.fpga.CL.trace_control): final block executed before fini() was called
+$finish called from file "/home/amp342/Cosim/bsg_bladerunner/basejump_stl/bsg_test/bsg_nonsynth_dpi_gpio.v", line 62.
+$finish at simulation time         287652480000
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 287652480000 ps

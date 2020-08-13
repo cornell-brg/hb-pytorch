@@ -1,0 +1,6 @@
+[
+    {
+        "offload": true,
+        "signature": "at::Tensor at::SparseHammerBladeType::{anonymous}::sddmm(const at::Tensor&, const at::Tensor&, const at::Tensor&)"
+    }
+]

@@ -1,0 +1,1 @@
+(cd test_kernel_000_hb; pycosim test.py > out.std 2>&1)
