@@ -29,11 +29,18 @@ extern "C" {
     int c2 = mat2.dim(1);
     //hb_assert(c1 == r2);
 
+    //              -> dim(1)
+    //         _________
+    //         |
+    //   |     |
+    // dim(0)  |
+
+
     // calculate number of row and col blocks in each matrix
-    int m1_num_blk_per_row = (r1 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m1 per row
-    int m1_num_blk_per_col = (c1 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m1 per col
-    int m2_num_blk_per_row = (r2 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m2 per row
-    int m2_num_blk_per_col = (c2 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m2 per col
+    int m1_num_blk_per_col = (r1 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m1 per col
+    int m1_num_blk_per_row = (c1 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m1 per row
+    int m2_num_blk_per_col = (r2 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m2 per col
+    int m2_num_blk_per_row = (c2 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m2 per row
 
     // calculate dimensions of the last row and col block in each matrix
     int m1_last_blk_dim_x = c1 % BLOCK_DIM == 0 ? BLOCK_DIM : c1 % BLOCK_DIM; // x dimension of last block of mat1
@@ -45,15 +52,13 @@ extern "C" {
     float sp_mat2[BLOCK_DIM * BLOCK_DIM];
     float sp_result[BLOCK_DIM * BLOCK_DIM];
 
-    // std::cout << "m1_num_blk_per_row = " << m1_num_blk_per_row << " m2_num_blk_per_col = " << m2_num_blk_per_col << std::endl;
-    // std::cout << "result.dim(0) = " << result.dim(0) << " result.dim(1) = " << result.dim(1) << std::endl;
-    for (int i = 0; i < m1_num_blk_per_row; i += BSG_TILE_GROUP_Y_DIM) {
-      for (int j = 0; j < m2_num_blk_per_col; j += BSG_TILE_GROUP_X_DIM) {
+    for (int i = 0; i < m1_num_blk_per_col; i += BSG_TILE_GROUP_Y_DIM) {
+      for (int j = 0; j < m2_num_blk_per_row; j += BSG_TILE_GROUP_X_DIM) {
         int rr = i + __bsg_y;
         int rc = j + __bsg_x;
-        int res_dim_y = rr == m1_num_blk_per_row - 1 ? m1_last_blk_dim_y : BLOCK_DIM;
-        int res_dim_x = rc == m2_num_blk_per_col - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
-        int partial_block = (res_dim_y != BLOCK_DIM) || (res_dim_x != BLOCK_DIM);
+        int res_dim_y = rr == m1_num_blk_per_col - 1 ? m1_last_blk_dim_y : BLOCK_DIM;
+        int res_dim_x = rc == m2_num_blk_per_row - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
+        bool partial_block = (rr == m1_num_blk_per_col - 1) || (rc == m2_num_blk_per_row - 1);
 
         // initialize scratchpad result (init to 0's)
         // memset(sp_result, 0, res_dim_y * res_dim_x * sizeof(float));
@@ -79,21 +84,16 @@ extern "C" {
         // process mat1 and mat2 for this result block
         // only care about blocks of mat1 in row rr
         // and blocks of mat2 in col rc
-        for (int mat1x = 0, mat2y = 0; mat1x < m1_num_blk_per_col && mat2y < m2_num_blk_per_row; mat1x++, mat2y++) {
-            // calculate current block dimensions
-            int mid_dim = mat1x == m1_num_blk_per_col - 1 ? m1_last_blk_dim_x : BLOCK_DIM;
-            partial_block = partial_block || (mid_dim != BLOCK_DIM);
-
-            // load mat1 and mat2 into scratchpad
-
+        for (int mid_idx = 0; mid_idx < m1_num_blk_per_row; mid_idx++) {
             // unrolled version
-            if (partial_block) { // general case
-                dram_to_sp(sp_mat1, mat1, res_dim_y, mid_dim, rr, mat1x);
-                dram_to_sp(sp_mat2, mat2, mid_dim, res_dim_x, mat2y, rc);
+            if (partial_block || (mid_idx == m1_num_blk_per_row - 1)) { // general case
+                int mid_dim = mid_idx == m1_num_blk_per_row - 1 ? m1_last_blk_dim_x : BLOCK_DIM;
+                dram_to_sp(sp_mat1, mat1, res_dim_y, mid_dim, rr, mid_idx);
+                dram_to_sp(sp_mat2, mat2, mid_dim, res_dim_x, mid_idx, rc);
                 compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
             } else {
-                dram_to_sp_simple(sp_mat1, mat1, rr, mat1x);
-                dram_to_sp_simple(sp_mat2, mat2, mat2y, rc);
+                dram_to_sp_simple(sp_mat1, mat1, rr, mid_idx);
+                dram_to_sp_simple(sp_mat2, mat2, mid_idx, rc);
                 compute_simple(sp_result, sp_mat1, sp_mat2);
             }
             // end: unrolled version
