@@ -114,6 +114,19 @@ class HBTensorImpl {
       return dims;
     }
 
+    template<typename ...T>
+    uint32_t offset(T... indices) {
+      uint32_t index_arr[] = {((uint32_t)indices)...};
+      const uint32_t n = sizeof(index_arr) / sizeof(index_arr[0]);
+
+      uint32_t offset = 0;
+      UNROLL(DEFAULT_STRIDES) for(int i=0; i< n; ++i) {
+        offset += index_arr[i] * strides[i];
+      }
+
+      return offset;
+    }
+
     // Special case where we want linear, 0-d
     // and 1-d tensor indexing.
     //
@@ -211,6 +224,38 @@ class HBTensor<DT, -1> : public HBTensorImpl<__remote DT, uint32_t> {
       }
 };
 
+template <typename DT, uint32_t N, uint32_t C, uint32_t H, uint32_t W>
+class HBTensor4d {
+  private:
+    const uint32_t numel = N * C * H * W;
+    const uint32_t strides[4] = {
+      numel / N, numel / (N*C), numel / (N*C*H), 1
+    };
+    DT* data;
+
+  public:
+    HBTensor4d(hb_tensor_t* t) :
+      data((DT*) ((intptr_t) t->data)) {}
+
+    uint32_t offset(uint32_t n, uint32_t c, uint32_t h, uint32_t w) {
+      return strides[0]*n + strides[1]*c + strides[2]*h + w;
+    }
+
+    char* data_ptr() {
+      return (char*)data;
+    }
+
+    DT& operator()(uint32_t n, uint32_t c, uint32_t h, uint32_t w) {
+      uint32_t offset = strides[0]*n + strides[1]*c + strides[2]*h + w;
+      return data[offset];
+    }
+
+    void init(DT val) {
+      for(int i = 0; i < N; ++i) {
+        data[i] = val;
+      }
+    }
+};
 
 template<typename T>
 class HBVector {

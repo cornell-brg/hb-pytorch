@@ -121,7 +121,14 @@ install(FILES ${CMAKE_BINARY_DIR}/c10/hammerblade/impl/hammerblade_cmake_macros.
   DESTINATION include/c10/hammerblade/impl)
 
 if(NOT USE_HB_EMUL)
+<<<<<<< HEAD
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kernel.riscv DESTINATION riscv)
+=======
+  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/riscv/
+          DESTINATION riscv
+          FILES_MATCHING PATTERN "*.dis")
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/riscv/kernel.riscv DESTINATION riscv)
+>>>>>>> master
   install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.sh
           DESTINATION bin RENAME pycosim)
   install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.trace.sh

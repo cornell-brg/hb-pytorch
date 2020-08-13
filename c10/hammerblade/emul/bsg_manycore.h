@@ -14,6 +14,42 @@ extern "C"{
 
 int bsg_printf(const char *fmt, ...);
 
+typedef struct hb_mc_manycore {
+        const char *name;      //!< the name of this manycore
+        // hb_mc_config_t config; //!< configuration of the manycore
+        void *platform;        //!< machine-specific data pointer
+        int dram_enabled;      //!< operating in no-dram mode?
+} hb_mc_manycore_t;
+
+/**
+ * Enable trace file generation (vanilla_operation_trace.csv)
+ * @param[in] mc    A manycore instance initialized with hb_mc_manycore_init()
+ * @return HB_MC_SUCCESS on success. Otherwise an error code defined in bsg_manycore_errno.h.
+ */
+int hb_mc_manycore_trace_enable(hb_mc_manycore_t *mc);
+
+/**
+ * Disable trace file generation (vanilla_operation_trace.csv)
+ * @param[in] mc    A manycore instance initialized with hb_mc_manycore_init()
+ * @return HB_MC_SUCCESS on success. Otherwise an error code defined in bsg_manycore_errno.h.
+ */
+int hb_mc_manycore_trace_disable(hb_mc_manycore_t *mc);
+
+/**
+ * Enable log file generation (vanilla.log)
+ * @param[in] mc    A manycore instance initialized with hb_mc_manycore_init()
+ * @return HB_MC_SUCCESS on success. Otherwise an error code defined in bsg_manycore_errno.h.
+ */
+int hb_mc_manycore_log_enable(hb_mc_manycore_t *mc);
+
+/**
+ * Disable log file generation (vanilla.log)
+ * @param[in] mc    A manycore instance initialized with hb_mc_manycore_init()
+ * @return HB_MC_SUCCESS on success. Otherwise an error code defined in bsg_manycore_errno.h.
+ */
+int hb_mc_manycore_log_disable(hb_mc_manycore_t *mc);
+
+
 #ifdef __cplusplus
 }
 #endif
@@ -53,6 +89,7 @@ static inline void bsg_cuda_print_stat_start(uint32_t tag) {
 static inline void bsg_cuda_print_stat_end(uint32_t tag) {
   return;
 }
+
 
 #define bsg_fail() assert (1==0 /* bsg_fail is called */)
 
