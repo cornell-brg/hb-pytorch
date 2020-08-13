@@ -60,26 +60,8 @@ extern "C" {
         int res_dim_x = rc == m2_num_blk_per_row - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
         bool partial_block = (rr == m1_num_blk_per_col - 1) || (rc == m2_num_blk_per_row - 1);
 
-        // initialize scratchpad result (init to 0's)
-        // memset(sp_result, 0, res_dim_y * res_dim_x * sizeof(float));
-        for (int sp = 0; sp < BLOCK_DIM * BLOCK_DIM; sp += 16) {
-            sp_result[sp +  0] = 0;
-            sp_result[sp +  1] = 0;
-            sp_result[sp +  2] = 0;
-            sp_result[sp +  3] = 0;
-            sp_result[sp +  4] = 0;
-            sp_result[sp +  5] = 0;
-            sp_result[sp +  6] = 0;
-            sp_result[sp +  7] = 0;
-            sp_result[sp +  8] = 0;
-            sp_result[sp +  9] = 0;
-            sp_result[sp + 10] = 0;
-            sp_result[sp + 11] = 0;
-            sp_result[sp + 12] = 0;
-            sp_result[sp + 13] = 0;
-            sp_result[sp + 14] = 0;
-            sp_result[sp + 15] = 0;
-        }
+        // initialize output buffer to 0's
+        reset_sp(sp_result);
 
         // process mat1 and mat2 for this result block
         // only care about blocks of mat1 in row rr

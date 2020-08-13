@@ -181,6 +181,28 @@ inline void dram_to_sp_simple(
     }
 }
 
+inline void reset_sp(float* dest) {
+  // initialize scratchpad (init to 0's)
+  for (int sp = 0; sp < BLOCK_DIM * BLOCK_DIM; sp += 16) {
+      dest[sp +  0] = 0;
+      dest[sp +  1] = 0;
+      dest[sp +  2] = 0;
+      dest[sp +  3] = 0;
+      dest[sp +  4] = 0;
+      dest[sp +  5] = 0;
+      dest[sp +  6] = 0;
+      dest[sp +  7] = 0;
+      dest[sp +  8] = 0;
+      dest[sp +  9] = 0;
+      dest[sp + 10] = 0;
+      dest[sp + 11] = 0;
+      dest[sp + 12] = 0;
+      dest[sp + 13] = 0;
+      dest[sp + 14] = 0;
+      dest[sp + 15] = 0;
+  }
+}
+
 // XXX: in the test case, 1024x32 @ 32x1024 case, there is no partial blocks
 
 inline void dram_to_sp(
