@@ -3,7 +3,6 @@ tests of simple cat kernel.
 """
 
 import torch
-import random
 
 def _test_torch_cat(x):
     x_h = x.hammerblade()

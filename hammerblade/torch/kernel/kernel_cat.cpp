@@ -28,8 +28,8 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
   bsg_cuda_print_stat_kernel_start();
 
   hb_tiled_for(result.numel(), [&] (size_t i) {
-	size_t j = i / size;
-	size_t index = i % size;
+    size_t j = i / size;
+    size_t index = i % size;
     HBTensor<float> t(tensors_p[j]);
     result(i) = t(index);
   });
