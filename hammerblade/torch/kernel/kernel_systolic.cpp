@@ -92,9 +92,9 @@ extern "C" {
                 dram_to_sp(sp_mat2, mat2, mid_dim, res_dim_x, mat2y, rc);
                 compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
             } else {
-                dram_to_sp_simple(sp_mat1, mat1, res_dim_y, mid_dim, rr, mat1x);
-                dram_to_sp_simple(sp_mat2, mat2, mid_dim, res_dim_x, mat2y, rc);
-                compute_simple(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
+                dram_to_sp_simple(sp_mat1, mat1, rr, mat1x);
+                dram_to_sp_simple(sp_mat2, mat2, mat2y, rc);
+                compute_simple(sp_result, sp_mat1, sp_mat2);
             }
             // end: unrolled version
 

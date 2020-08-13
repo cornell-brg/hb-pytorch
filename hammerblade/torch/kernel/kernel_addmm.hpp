@@ -14,10 +14,7 @@
 inline void compute_simple(
           float* dest,
           float* sp_mat1,
-          float* sp_mat2,
-          int dim_y,
-          int dim_x,
-          int mid_dim) {
+          float* sp_mat2) {
     for (int iii = 0; iii < BLOCK_DIM; iii += 4) {
       for(int jjj = 0; jjj < BLOCK_DIM; jjj += 4) {
         int dest_base = iii * BLOCK_DIM + jjj;
@@ -154,8 +151,6 @@ inline void compute(
 inline void dram_to_sp_simple(
           float* dest,
           HBTensor<float, 2> src,
-          int dim_y,
-          int dim_x,
           int r_idx,
           int c_idx) {
     float* src_ptr = (float*)src.data_ptr();
@@ -163,7 +158,7 @@ inline void dram_to_sp_simple(
     float* src_base = src_ptr + (r_idx * BLOCK_DIM * src_strides[0])
                       + (c_idx * BLOCK_DIM * src_strides[1]);
     int row_offset = 0;
-    for (int i = 0; i < dim_y; i++) {
+    for (int i = 0; i < BLOCK_DIM; i++) {
         register float tmp0 = *(src_base + 0);
         register float tmp1 = *(src_base + 1);
         register float tmp2 = *(src_base + 2);
@@ -182,7 +177,7 @@ inline void dram_to_sp_simple(
         dest[row_offset + 6] = tmp6;
         dest[row_offset + 7] = tmp7;
         src_base += src_strides[0];
-        row_offset += dim_x;
+        row_offset += BLOCK_DIM;
     }
 }
 
