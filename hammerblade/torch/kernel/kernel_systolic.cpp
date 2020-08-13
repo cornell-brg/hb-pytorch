@@ -68,36 +68,174 @@ extern "C" {
     auto result = HBTensor<float, 2>(_result);
 
     // buffers -- with double buffering
+    float sp_result[BLOCK_DIM * BLOCK_DIM];
     float sp_mat1_A[BLOCK_DIM * BLOCK_DIM];
     float sp_mat2_A[BLOCK_DIM * BLOCK_DIM];
     float sp_mat1_B[BLOCK_DIM * BLOCK_DIM];
     float sp_mat2_B[BLOCK_DIM * BLOCK_DIM];
     float *sp_mat1 = sp_mat1_A;
     float *sp_mat2 = sp_mat2_A;
-    float sp_result[BLOCK_DIM * BLOCK_DIM];
+
+    // pointer to buffers in neighbors
+    // mat1_remote are to the East
+    float *sp_mat1_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,sp_mat1_A));
+    float *sp_mat1_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,sp_mat1_B));
+    // mat2_remote are to the South
+    float *sp_mat2_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,sp_mat2_A));
+    float *sp_mat2_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,sp_mat2_B));
+    float *sp_mat1_remote = sp_mat1_A_remote;
+    float *sp_mat2_remote = sp_mat2_A_remote;
+
+    // sync flags
+    // we need a local variable on whatever we need wait_local -- mat1_f, mat2_f, mat1_f_E, mat2_f_S for compute
+    // 0 -> ready to load
+    // 1 -> ready to use
+    volatile unsigned int  mat1_A_f     = 0;
+    volatile unsigned int  mat1_A_f_E   = 0;
+    volatile unsigned int *mat1_A_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&mat1_A_f));
+    volatile unsigned int *mat1_A_f_W_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&mat1_A_f_E));
+
+    volatile unsigned int  mat1_B_f     = 0;
+    volatile unsigned int  mat1_B_f_E   = 0;
+    volatile unsigned int *mat1_B_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&mat1_B_f));
+    volatile unsigned int *mat1_B_f_W_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&mat1_B_f_E));
+
+    volatile unsigned int  mat2_A_f     = 0;
+    volatile unsigned int  mat2_A_f_S   = 0;
+    volatile unsigned int *mat2_A_f_S_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,&mat2_A_f));
+    volatile unsigned int *mat2_A_f_N_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,&mat2_A_f_S));
+
+    volatile unsigned int  mat2_B_f     = 0;
+    volatile unsigned int  mat2_B_f_S   = 0;
+    volatile unsigned int *mat2_B_f_S_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,&mat2_B_f));
+    volatile unsigned int *mat2_B_f_N_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,&mat2_B_f_S));
+
+    volatile unsigned int *mat1_f     = &mat1_A_f;
+    volatile unsigned int *mat1_f_E   = &mat1_A_f_E;
+    volatile unsigned int *mat1_f_E_r =  mat1_A_f_E_r;
+    volatile unsigned int *mat1_f_W_r =  mat1_A_f_W_r;
+
+    volatile unsigned int *mat2_f     = &mat1_A_f;
+    volatile unsigned int *mat2_f_S   = &mat1_A_f_S;
+    volatile unsigned int *mat2_f_S_r =  mat1_A_f_S_r;
+    volatile unsigned int *mat2_f_N_r =  mat1_A_f_N_r;
 
     bsg_cuda_print_stat_kernel_start();
 
     auto tile_init = [&] { reset_sp(sp_result); };
+
     auto tile_task = [&] (int rr, int rc, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
-                          if (partial_block) { // general case
-                            dram_to_sp(sp_mat1, mat1, res_dim_y, mid_dim, rr, mat1x);
-                            dram_to_sp(sp_mat2, mat2, mid_dim, res_dim_x, mat1x, rc);
+
+                          // wait until buffer is loaded
+                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f)), 1);
+                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f)), 1);
+
+                          // do compute
+                          if (partial_block) {
                             compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
                           } else {
-                            dram_to_sp_simple(sp_mat1, mat1, rr, mat1x);
-                            dram_to_sp_simple(sp_mat2, mat2, mat1x, rc);
                             compute_simple(sp_result, sp_mat1, sp_mat2);
                           }
+
+                          // copy what we have worked on to the next tile
+                          if (__bsg_x < 2) {
+                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
+                            // TODO: copy mat1 to E
+                            asm volatile("": : :"memory");
+                            *mat1_f_E   = 1;
+                            *mat1_f_E_r = 1;
+                          }
+
+                          if (__bsg_y < 2) {
+                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
+                            // TODO: copy mat2 to S
+                            asm volatile("": : :"memory");
+                            *mat2_f_S   = 1;
+                            *mat2_f_S_r = 1;
+                          }
+
+                          // flag that we are done with the buffer
+                          asm volatile("": : :"memory");
+                          *mat1_f     = 0;
+                          *mat1_f_W_r = 0;
+                          *mat2_f     = 0;
+                          *mat2_f_N_r = 0;
+
                           // switch buffer
                           if (sp_mat1 == sp_mat1_A) {
-                            sp_mat1 = sp_mat1_B;
-                            sp_mat2 = sp_mat2_B;
+                            sp_mat1    = sp_mat1_B;
+                            sp_mat2    = sp_mat2_B;
+                            sp_mat1_remote = sp_mat1_B_remote;
+                            sp_mat2_remote = sp_mat2_B_remote;
+                            mat1_f     = &mat1_B_f;
+                            mat1_f_E   = &mat1_B_f_E;
+                            mat1_f_E_r =  mat1_B_f_E_r;
+                            mat1_f_W_r =  mat1_B_f_W_r;
+                            mat2_f     = &mat2_B_f;
+                            mat2_f_S   = &mat2_B_f_S;
+                            mat2_f_S_r =  mat2_B_f_S_r;
+                            mat2_f_N_r =  mat2_B_f_N_r;
                           } else {
-                            sp_mat1 = sp_mat1_A;
-                            sp_mat2 = sp_mat2_A;
+                            sp_mat1    = sp_mat1_A;
+                            sp_mat2    = sp_mat2_A;
+                            sp_mat1_remote = sp_mat1_A_remote;
+                            sp_mat2_remote = sp_mat2_A_remote;
+                            mat1_f     = &mat1_A_f;
+                            mat1_f_E   = &mat1_A_f_E;
+                            mat1_f_E_r =  mat1_A_f_E_r;
+                            mat1_f_W_r =  mat1_A_f_W_r;
+                            mat2_f     = &mat2_A_f;
+                            mat2_f_S   = &mat2_A_f_S;
+                            mat2_f_S_r =  mat2_A_f_S_r;
+                            mat2_f_N_r =  mat2_A_f_N_r;
                           }
                       };
+
+    auto dma_task = [&] (int rr, int rc, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
+
+                          // wait until buffer is ready
+                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
+                          if (partial_block) {
+                            dram_to_sp(sp_mat1_remote, mat1, res_dim_y, mid_dim, rr, mat1x);
+                          } else {
+                            dram_to_sp_simple(sp_mat1_remote, mat1, rr, mat1x);
+                          }
+                          asm volatile("": : :"memory");
+                          *mat1_f_E   = 1;
+                          *mat1_f_E_r = 1;
+
+                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
+                          if (partial_block) {
+                            dram_to_sp(sp_mat2_remote, mat2, mid_dim, res_dim_x, mat1x, rc);
+                          } else {
+                            dram_to_sp_simple(sp_mat2_remote, mat2, mat1x, rc);
+                          }
+                          asm volatile("": : :"memory");
+                          *mat2_f_S   = 1;
+                          *mat2_f_S_r = 1;
+
+                          // switch buffer
+                          if (sp_mat1_remote == sp_mat1_A_remote) {
+                            sp_mat1_remote = sp_mat1_B_remote;
+                            sp_mat2_remote = sp_mat2_B_remote;
+                            mat1_f     = &mat1_B_f;
+                            mat1_f_E   = &mat1_B_f_E;
+                            mat1_f_E_r =  mat1_B_f_E_r;
+                            mat2_f     = &mat2_B_f;
+                            mat2_f_S   = &mat2_B_f_S;
+                            mat2_f_S_r =  mat2_B_f_S_r;
+                          } else {
+                            sp_mat1_remote = sp_mat1_A_remote;
+                            sp_mat2_remote = sp_mat2_A_remote;
+                            mat1_f     = &mat1_A_f;
+                            mat1_f_E   = &mat1_A_f_E;
+                            mat1_f_E_r =  mat1_A_f_E_r;
+                            mat2_f     = &mat2_A_f;
+                            mat2_f_S   = &mat2_A_f_S;
+                            mat2_f_S_r =  mat2_A_f_S_r;
+                          }
+                      };
+
     auto tile_finish = [&] (int rr, int rc, int res_dim_x, int res_dim_y) {
                             // copy this block back into DRAM
                             for (int i = 0; i < res_dim_y; i++) {
