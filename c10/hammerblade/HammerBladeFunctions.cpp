@@ -41,7 +41,9 @@ static uint64_t elapsed_cycles() {
 #ifdef HB_SILICON_V0
   return 0; // V0 Silicon does not have a cycle counter.
 #else
-  return bsg_time() / cycle_time;
+  uint64_t cycles = -1;
+  C10_HB_CHECK(hb_mc_manycore_get_cycle(_hb_device.mc, &cycles));
+  return cycles;
 #endif
 }
 
