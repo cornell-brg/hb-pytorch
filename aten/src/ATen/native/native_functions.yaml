@@ -2683,12 +2683,14 @@
   dispatch:
     CPU: _tanh__cpu
     CUDA: _tanh__cuda
+    HammerBlade: _tanh__hb
 
 - func: tanh.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
   dispatch:
     CPU: _tanh_out_cpu
     CUDA: _tanh_out_cuda
+    HammerBlade: _tanh_out_hb
 
 - func: tensordot(Tensor self, Tensor other, int[] dims_self, int[] dims_other) -> Tensor
   variants: function
@@ -4245,6 +4247,7 @@
   dispatch:
     CPU: legacy::cpu::_th_uniform_
     CUDA: uniform_cuda_
+    HammerBlade: uniform_
   supports_named_tensor: True
 
 - func: normal_(Tensor(a!) self, float mean=0, float std=1, *, Generator? generator=None) -> Tensor(a!)
