@@ -31,10 +31,10 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
   bsg_cuda_print_stat_kernel_start();
 
   hb_tiled_for(result.numel(), [&] (int32_t i) {
-	if (i >= size) {
-	  HBTensor<float> tensor(tensors_p[++j]);
-	  size += tensor.numel();
-	  index = 0;
+    if (i >= size) {
+      HBTensor<float> tensor(tensors_p[++j]);
+      size += tensor.numel();
+      index = 0;
     }
     HBTensor<float> t(tensors_p[j]);
     result(i) = t(index++);
