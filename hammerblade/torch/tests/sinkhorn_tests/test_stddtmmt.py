@@ -30,8 +30,8 @@ def _test_torch_stddtmmt(a, b, c):
     assert got_device == torch.device("hammerblade")
     assert torch.equal(got_tensor, expected_tensor)
     # compare with CPU
-    # expected_tensor_cpu = torch.stddtmmt(a, b, c)
-    # assert torch.equal(got_tensor, expected_tensor_cpu)
+    expected_tensor_cpu = torch.stddtmmt(a, b, c)
+    assert torch.equal(got_tensor, expected_tensor_cpu)
 
 
 def test_torch_stddtmmt_1():
