@@ -270,3 +270,6 @@ DVEfiles
 infinite_mem_stats.csv
 stack.info.*/
 hbKernelCallLog.json
+
+# sinkhorn data
+hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/*

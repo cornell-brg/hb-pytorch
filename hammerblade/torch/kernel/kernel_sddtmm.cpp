@@ -9,11 +9,7 @@
 
 extern "C" {
 
-
-// computes (b@c.T).T, sampled by the (row, col).T coordinates, i.e. swap
-// row and col for a transposed output
-
-  __attribute__ ((noinline))  int tensorlib_stddtmmt(
+  __attribute__ ((noinline))  int tensorlib_sddtmm(
           hb_tensor_t* out_p, //destination
           hb_tensor_t* col_p, //cols
           hb_tensor_t* row_p, //rows
@@ -38,7 +34,7 @@ extern "C" {
       int col = cols(i);
       sum = 0;
       for (int dot = 0; dot < dp_len; dot++){
-        sum += b(col, dot) * c(row, dot);
+        sum += b(row, dot) * c(col, dot);
       }
       res(row, col) = sum;
     });
@@ -50,6 +46,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_stddtmmt, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_sddtmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 
 }

@@ -1290,7 +1290,7 @@ Tensor sddmm_cpu(
 
 
 template <typename scalar_t>
-void stddtmmt_kernel_cpu(
+void sddtmm_kernel_cpu(
   const SparseTensor& a_sparse_tensor,
   const Tensor& b_dense_tensor,
   const Tensor& c_dense_tensor,
@@ -1298,14 +1298,14 @@ void stddtmmt_kernel_cpu(
     
   if ( b_dense_tensor.scalar_type() != ScalarType::Float
     || c_dense_tensor.scalar_type() != ScalarType::Float ) {
-    AT_ERROR("Sddmm is implemented for Float type only for matrices b and c"); 
+    AT_ERROR("SddTmm is implemented for Float type only for matrices b and c"); 
   }
 
   TORCH_CHECK(a_sparse_tensor.sparse_dim() == 2, "We do not support hybrid sparse tensor for 'a' in sddmm!");
   TORCH_CHECK(b_dense_tensor.dim() == 2 && c_dense_tensor.dim() == 2, "Expected 2D matrixes for 'a' and 'b', but got ", b_dense_tensor.dim(), " and ", c_dense_tensor.dim(), " tensors");
   TORCH_CHECK(b_dense_tensor.size(1) == c_dense_tensor.size(1), "Matrix multiply dimension mismatch: 'b' dim 1 = ", b_dense_tensor.size(1), ", 'c'.T dim 0 = ", c_dense_tensor.size(1));
 
-  TORCH_CHECK(b_dense_tensor.size(0) == a_sparse_tensor.size(1) && c_dense_tensor.size(0) == a_sparse_tensor.size(0),"STddTmmT sample dimension mismatch: sample was shape ",a_sparse_tensor.size(0)," by ",a_sparse_tensor.size(1),", but b@c is shape ",c_dense_tensor.size(0)," by ",b_dense_tensor.size(0));
+  TORCH_CHECK(b_dense_tensor.size(0) == a_sparse_tensor.size(1) && c_dense_tensor.size(0) == a_sparse_tensor.size(0),"SddTmm sample dimension mismatch: sample was shape ",a_sparse_tensor.size(0)," by ",a_sparse_tensor.size(1),", but b@c is shape ",c_dense_tensor.size(0)," by ",b_dense_tensor.size(0));
 
   auto indices = a_sparse_tensor._indices();
   TORCH_CHECK(indices.dtype() == at::kLong, "Indices should be long, but got ", indices.dtype());
@@ -1322,18 +1322,18 @@ void stddtmmt_kernel_cpu(
 
     float dot_total = 0;
     for (int i = 0; i < dot_len; i++)
-      dot_total += b_dense[col][i] * c_dense[row][i];
+      dot_total += b_dense[row][i] * c_dense[col][i];
       
     out[row][col] = dot_total;
   }
 }
-Tensor stddtmmt_cpu(
+Tensor sddtmm_cpu(
   const SparseTensor& a_sparse_tensor,
   const Tensor& b_dense_tensor,
   const Tensor& c_dense_tensor) {
-  Tensor out_tensor = at::zeros({c_dense_tensor.size(0), b_dense_tensor.size(0)}, {at::requires_grad().device(at::kCPU).dtype(at::kFloat)});
-  AT_DISPATCH_ALL_TYPES(b_dense_tensor.scalar_type(), "stddtmmt_cpu", [&]{
-    stddtmmt_kernel_cpu<scalar_t>(a_sparse_tensor, b_dense_tensor, c_dense_tensor, out_tensor);
+  Tensor out_tensor = at::zeros({b_dense_tensor.size(0), c_dense_tensor.size(0)}, {at::requires_grad().device(at::kCPU).dtype(at::kFloat)});
+  AT_DISPATCH_ALL_TYPES(b_dense_tensor.scalar_type(), "sddtmm_cpu", [&]{
+    sddtmm_kernel_cpu<scalar_t>(a_sparse_tensor, b_dense_tensor, c_dense_tensor, out_tensor);
   });
   return out_tensor;
 }

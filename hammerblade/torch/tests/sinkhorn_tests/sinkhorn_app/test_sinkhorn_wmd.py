@@ -14,8 +14,8 @@ QUERY_IDX = 100
 LAMBDA = 1
 
 # Data files. (Ask Adrian for these.)
-DATA_MAT = 'data/cache-mat.npz'
-DATA_VECS = 'data/cache-vecs.npy'
+DATA_MAT = '/home/amp342/Emulator/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-mat.npz'
+DATA_VECS = '/home/amp342/Emulator/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-vecs.npy'
 
 
 def swmd_numpy(r, c, vecs, niters):
@@ -58,6 +58,7 @@ def swmd_numpy(r, c, vecs, niters):
     return out
 
 
+
 def _dsmp(a, b):
     """Dense/sparse matrix product.
     """
@@ -71,15 +72,32 @@ def _dsmp(a, b):
 
 
 
+def _sddmm(a, b, c):
+    """Only compute certain entries of b@c, based on the entries of a:
+    For all i,j with a_ij!=0, compute (b@c)_ij, where `a` is sparse, `b` and `c`
+    are dense, and `@` is matrix product. Returns a sparse matrix of (b@c)_ij.
+    """
+    outvals = torch.zeros(a._nnz())
+    for k in range(a._nnz()):
+        ai, aj = tuple(a._indices()[:, k].tolist())
+        brow = b[ai, :]
+        ccol = c[:, aj]
+        outvals[k] = torch.dot(brow, ccol)
+    return torch.sparse.FloatTensor(
+        a._indices(),
+        outvals,
+        a.shape,
+    )
 def swmd_torch(r, c, vecs, niters):
     # Convert arrays to PyTorch tensors.
     r = torch.FloatTensor(r)
     c_coo = c.tocoo()
-    cT = torch.sparse.FloatTensor(
+    c = torch.sparse.FloatTensor(
         torch.LongTensor(numpy.vstack((c_coo.row, c_coo.col))),
         torch.FloatTensor(c_coo.data),
         torch.Size(c_coo.shape),
-    ).T
+    )
+    cT = c.t()
     vecs = torch.FloatTensor(vecs)
 
     # I=(r > 0)
@@ -107,15 +125,17 @@ def swmd_torch(r, c, vecs, niters):
         u = 1.0 / x
 
         # OLD:
-        # v = c * (1.0 / torch.sddmm(c, K_T, u))
-        # x = torch.dsmm(K_div_r, v)
+        # v = c * (1.0 / _sddmm(c, K_T, u))
+        # x = _dsmp(K_div_r, v)
 
+        # vT = cT * (1.0 / _sddmm(cT, u.t(), K))
+        
         # Compute `c * 1/(K_T @ u)` using a hand-rolled SDDMM.
-        vT = cT * (1.0 / torch.sddTmm(c, K_T, uT))
+        vT = cT * (1.0 / torch.sddtmm(cT, u, K))
 
         # PyTorch doesn't support dense/sparse matrix multiply (only
         # sparse/dense), so I had to write my own. :'(
-        x = torch.dstmm(K_div_r, v)
+        x = torch.dstmm(K_div_r, vT)
 
     out = (u * _dsmp(K * M, v)).sum(axis=0)
     return out
