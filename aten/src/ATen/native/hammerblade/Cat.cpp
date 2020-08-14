@@ -25,25 +25,27 @@ Tensor _cat_hb(TensorList tensors, int64_t dim) {
   scalars.push_back(create_device_scalar(dim_i32));
 
   auto ndim = tensors[0].dim();
-
+  uint32_t space = 0;
+  for (size_t i = 0; i < length_u32; i++) {
+	TORCH_CHECK(tensors[i].dim() == ndim, "tensors have different dimensions");
+    space += tensors[i].size(0);
+  }
   Tensor result;
   if (ndim == 1) {
-    result = at::empty({tensors[1].size(0) * length_u32}, tensors[0].options());
+    result = at::empty({space}, tensors[0].options());
   }
 
   else if (ndim == 2) {
-    result = at::empty({tensors[0].size(0) * length_u32, tensors[0].size(1)}, tensors[0].options());
+    result = at::empty({space, tensors[0].size(1)}, tensors[0].options());
   }
 
   else if (ndim == 3) {
-    result = at::empty({tensors[0].size(0) * length_u32, tensors[0].size(1), tensors[0].size(2)}, tensors[0].options());  }
+    result = at::empty({space, tensors[0].size(1), tensors[0].size(2)}, tensors[0].options());
+  }
   tensor_args.push_back(result);
-
   // offload call
   offload_tensorlist_scalar_impl(tensors, tensor_args, scalars, "tensorlib__cat");
-
   return result;
-
 }
 
 }} // namespace at::native
