@@ -6641,13 +6641,14 @@
     SparseCPU: sddmm_cpu
     SparseHammerBlade: sddmm_hb
 
-  # (sampled transpose) dense-(dense transpose) matrix product transpose (self = sparse)
+  # [sampled transpose] dense-[dense transpose] matrix product [transpose] (self = sparse)
   # returns (mat1@mat2.T).T, sampled by self.T
+  # equivalent to sddmm(self.T, mat1, mat2.T).T
 - func: stddtmmt(Tensor self, Tensor mat1, Tensor mat2) -> Tensor
   use_c10_dispatcher: full
   variants: function, method
   dispatch:
-    SparseCPU: sddmm_cpu
+    SparseCPU: stddtmmt_cpu
     SparseHammerBlade: stddtmmt_hb
     
   # dense-sparse matrix product

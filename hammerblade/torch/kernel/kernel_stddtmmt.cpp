@@ -29,7 +29,7 @@ extern "C" {
     auto c = HBTensor<float>(c_p);
     auto res = HBTensor<float>(out_p);
     
-    auto dp_len = b.dim(1); // i.e. b.size(1) or c.size(0)
+    auto dp_len = b.dim(1); // i.e. b.size(1) or c.size(1)
     auto numel = cols.numel(); // i.e. cols.size() or rows.size()
 
     float sum;
@@ -40,7 +40,7 @@ extern "C" {
       for (int dot = 0; dot < dp_len; dot++){
         sum += b(col, dot) * c(row, dot);
       }
-      res(col, row) = sum;
+      res(row, col) = sum;
     });
 
     //   End profiling

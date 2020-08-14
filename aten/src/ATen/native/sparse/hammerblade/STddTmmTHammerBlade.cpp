@@ -21,7 +21,7 @@ Tensor stddtmmt_hb(const SparseTensor& sample, const Tensor& b, const Tensor& c)
    
   TORCH_CHECK(sample.sparse_dim() == 2, "We do not support hybrid sparse tensor for 'sample' in HammerBlade STddTmmT!");
   TORCH_CHECK(b.dim() == 2 && c.dim() == 2, "Expected 2D matrixes for 'b' and 'c', but got ", b.dim(), " and ", c.dim(), " tensors");
-  TORCH_CHECK(b.size(1) == c.size(1), "Matrix multiply dimension mismatch: 'b' dim 1 = ", b.size(1), ", 'c' dim 1 = ", c.size(1));
+  TORCH_CHECK(b.size(1) == c.size(1), "Matrix multiply dimension mismatch: 'b' dim 1 = ", b.size(1), ", 'c'.T dim 0 = ", c.size(1));
   
   IntTensor indices = sample._indices();
   TORCH_CHECK(indices.dtype() == at::kInt, "Indices on HammerBlade should be int32, but got ", indices.dtype());
@@ -29,9 +29,9 @@ Tensor stddtmmt_hb(const SparseTensor& sample, const Tensor& b, const Tensor& c)
   TORCH_CHECK(colIndices.is_hammerblade(), "colIndices must be HammerBlade Tensor");
   IntTensor rowIndices = indices.select(0, 0);
   TORCH_CHECK(rowIndices.is_hammerblade(), "rowIndices must be HammerBlade Tensor");
-  TORCH_CHECK(b.size(0) == sample.size(0) && c.size(0) == sample.size(1),"STddTmmT sample dimension mismatch: sample was shape ",sample.size(0)," by ",sample.size(1),", but b@c is shape ",b.size(0)," by ",c.size(0));
+  TORCH_CHECK(b.size(0) == sample.size(1) && c.size(0) == sample.size(0),"STddTmmT sample dimension mismatch: sample.T was shape ",sample.size(0)," by ",sample.size(1),", but (b@c.T).T is shape ",c.size(0)," by ",b.size(0));
 
-  Tensor result = at::zeros({b.size(0), c.size(0)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
+  Tensor result = at::zeros({c.size(0), b.size(0)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
 
   hb_offload_kernel(result, colIndices, rowIndices, b, c, "tensorlib_stddtmmt");
   return result;
