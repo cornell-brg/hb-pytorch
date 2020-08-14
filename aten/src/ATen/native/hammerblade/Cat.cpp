@@ -5,7 +5,6 @@
 namespace at { namespace native {
 
 Tensor _cat_hb(TensorList tensors, int64_t dim) {
-
   TORCH_CHECK(tensors.size() > 0, "_cat_hb: cannot concatenate empty tensor list");
   std::cout << "in _cat_hb, TensorList size = " << tensors.size()
             << " dim = " << dim << "; tensors have dimension "<< tensors[0].dim() << std::endl;

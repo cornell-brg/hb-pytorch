@@ -1,7 +1,6 @@
 """
 tests of simple cat kernel.
 """
-
 import torch
 
 def _test_torch_cat(x):
