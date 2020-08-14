@@ -132,7 +132,7 @@ def swmd_torch(r, c, vecs, niters):
         # true: v = c * (1.0 / torch.sddtmm(c, K_T, u.t()))
         # Interesting property: sddtmm(a,b,c).T = sddtmm(a.T,c,b)
         #TODO reformat u to u.t and K to K.t
-        v = cT * (1.0 / torch.sddtmm(cT, u.t(), K_T))
+        vT = cT * (1.0 / torch.sddtmm(cT, u.t(), K_T))
         
         # Compute `c * 1/(K_T @ u)` using a hand-rolled SDDMM.
         # WRONG: vT = cT * (1.0 / torch.sddtmm(cT, u, K))
