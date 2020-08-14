@@ -128,10 +128,13 @@ def swmd_torch(r, c, vecs, niters):
         # v = c * (1.0 / _sddmm(c, K_T, u))
         # x = _dsmp(K_div_r, v)
 
-        # vT = cT * (1.0 / _sddmm(cT, u.t(), K))
+        # true: v = c * (1.0 / torch.sddtmm(c, K_T, u.t()))
+        # Interesting property: sddtmm(a,b,c).T = sddtmm(a.T,c,b)
+        #TODO reformat u to u.t
+        v = cT * (1.0 / torch.sddtmm(cT, u.t(), K_T))
         
         # Compute `c * 1/(K_T @ u)` using a hand-rolled SDDMM.
-        vT = cT * (1.0 / torch.sddtmm(cT, u, K))
+        # WRONG: vT = cT * (1.0 / torch.sddtmm(cT, u, K))
 
         # PyTorch doesn't support dense/sparse matrix multiply (only
         # sparse/dense), so I had to write my own. :'(

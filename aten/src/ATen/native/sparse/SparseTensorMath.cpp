@@ -1305,7 +1305,7 @@ void sddtmm_kernel_cpu(
   TORCH_CHECK(b_dense_tensor.dim() == 2 && c_dense_tensor.dim() == 2, "Expected 2D matrixes for 'a' and 'b', but got ", b_dense_tensor.dim(), " and ", c_dense_tensor.dim(), " tensors");
   TORCH_CHECK(b_dense_tensor.size(1) == c_dense_tensor.size(1), "Matrix multiply dimension mismatch: 'b' dim 1 = ", b_dense_tensor.size(1), ", 'c'.T dim 0 = ", c_dense_tensor.size(1));
 
-  TORCH_CHECK(b_dense_tensor.size(0) == a_sparse_tensor.size(1) && c_dense_tensor.size(0) == a_sparse_tensor.size(0),"SddTmm sample dimension mismatch: sample was shape ",a_sparse_tensor.size(0)," by ",a_sparse_tensor.size(1),", but b@c is shape ",c_dense_tensor.size(0)," by ",b_dense_tensor.size(0));
+  TORCH_CHECK(b_dense_tensor.size(0) == a_sparse_tensor.size(0) && c_dense_tensor.size(0) == a_sparse_tensor.size(1),"SddTmm sample dimension mismatch: sample was shape ",a_sparse_tensor.size(0)," by ",a_sparse_tensor.size(1),", but b@c is shape ",b_dense_tensor.size(0)," by ",c_dense_tensor.size(0));
 
   auto indices = a_sparse_tensor._indices();
   TORCH_CHECK(indices.dtype() == at::kLong, "Indices should be long, but got ", indices.dtype());

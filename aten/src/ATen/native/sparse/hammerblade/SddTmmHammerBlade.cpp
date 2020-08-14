@@ -29,7 +29,7 @@ Tensor sddtmm_hb(const SparseTensor& sample, const Tensor& b, const Tensor& c) {
   TORCH_CHECK(colIndices.is_hammerblade(), "colIndices must be HammerBlade Tensor");
   IntTensor rowIndices = indices.select(0, 0);
   TORCH_CHECK(rowIndices.is_hammerblade(), "rowIndices must be HammerBlade Tensor");
-  TORCH_CHECK(b.size(0) == sample.size(1) && c.size(0) == sample.size(0),"SddTmm sample dimension mismatch: sample.T was shape ",sample.size(0)," by ",sample.size(1),", but (b@c.T).T is shape ",c.size(0)," by ",b.size(0));
+  TORCH_CHECK(b.size(0) == sample.size(0) && c.size(0) == sample.size(1),"SddTmm sample dimension mismatch: sample.T was shape ",sample.size(0)," by ",sample.size(1),", but (b@c.T) is shape ",b.size(0)," by ",c.size(0));
 
   Tensor result = at::zeros({b.size(0), c.size(0)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
 
