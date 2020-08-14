@@ -269,7 +269,7 @@ extern "C" {
       gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y, [] {}, col_dma_task, [] (int rr, int rc, int res_dim_x, int res_dim_y) {});
     } else {
       // PE
-      // gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y-1, tile_init, tile_task, tile_finish);
+      gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y-1, tile_init, tile_task, tile_finish);
     }
 
     bsg_cuda_print_stat_kernel_end();
