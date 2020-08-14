@@ -166,7 +166,7 @@ extern "C" {
                           }
 
                           // copy what we have worked on to the next tile
-                          if (__bsg_x < 2) {
+                          if (__bsg_x < SYSTOLIC_X_DIM) {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
                             // copy mat1 to E
                             spcpy(sp_mat1_remote, sp_mat1);
@@ -175,7 +175,7 @@ extern "C" {
                             *mat1_f_E_r = 1;
                           }
 
-                          if (__bsg_y < 2) {
+                          if (__bsg_y < SYSTOLIC_Y_DIM) {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
                             // copy mat2 to S
                             spcpy(sp_mat2_remote, sp_mat2);
