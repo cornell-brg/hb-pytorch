@@ -4,12 +4,16 @@
 //====================================================================
 
 #define BLOCK_DIM 8 // sqrt(4KB/4 byte/4 data matrix) = 15 max
+#define SYSTOLIC_X_DIM 2
+#define SYSTOLIC_Y_DIM 2
 #include <kernel_common.hpp>
 #include <kernel_addmm.hpp>
 
 template <typename FuncInit, typename FuncMain, typename FuncWB>
 inline void gemm_main_loop(HBTensor<float, 2> mat1,
                            HBTensor<float, 2> mat2,
+                           int __sys_x,
+                           int __sys_y,
                            FuncInit tile_init,
                            FuncMain tile_task,
                            FuncWB   tile_finish) {
@@ -31,10 +35,10 @@ inline void gemm_main_loop(HBTensor<float, 2> mat1,
     int m2_last_blk_dim_x = c2 % BLOCK_DIM == 0 ? BLOCK_DIM : c2 % BLOCK_DIM; // x dimension of last block of mat2
     int m2_last_blk_dim_y = r2 % BLOCK_DIM == 0 ? BLOCK_DIM : r2 % BLOCK_DIM; // y dimension of last block of mat2
 
-    for (int i = 0; i < m1_num_blk_per_col; i += BSG_TILE_GROUP_Y_DIM) {
-      for (int j = 0; j < m2_num_blk_per_row; j += BSG_TILE_GROUP_X_DIM) {
-        int rr = i + __bsg_y;
-        int rc = j + __bsg_x;
+    for (int i = 0; i < m1_num_blk_per_col; i += SYSTOLIC_Y_DIM) {
+      for (int j = 0; j < m2_num_blk_per_row; j += SYSTOLIC_X_DIM) {
+        int rr = i + __sys_y;
+        int rc = j + __sys_x;
         int res_dim_y = rr == m1_num_blk_per_col - 1 ? m1_last_blk_dim_y : BLOCK_DIM;
         int res_dim_x = rc == m2_num_blk_per_row - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
         int partial_block = (res_dim_y != BLOCK_DIM) || (res_dim_x != BLOCK_DIM);
@@ -115,10 +119,10 @@ extern "C" {
     volatile unsigned int *mat1_f_E_r =  mat1_A_f_E_r;
     volatile unsigned int *mat1_f_W_r =  mat1_A_f_W_r;
 
-    volatile unsigned int *mat2_f     = &mat1_A_f;
-    volatile unsigned int *mat2_f_S   = &mat1_A_f_S;
-    volatile unsigned int *mat2_f_S_r =  mat1_A_f_S_r;
-    volatile unsigned int *mat2_f_N_r =  mat1_A_f_N_r;
+    volatile unsigned int *mat2_f     = &mat2_A_f;
+    volatile unsigned int *mat2_f_S   = &mat2_A_f_S;
+    volatile unsigned int *mat2_f_S_r =  mat2_A_f_S_r;
+    volatile unsigned int *mat2_f_N_r =  mat2_A_f_N_r;
 
     bsg_cuda_print_stat_kernel_start();
 
@@ -191,7 +195,34 @@ extern "C" {
                           }
                       };
 
-    auto dma_task = [&] (int rr, int rc, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
+    auto col_dma_task = [&] (int rr, int rc, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
+
+                          // wait until buffer is ready
+                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
+                          if (partial_block) {
+                            dram_to_sp(sp_mat2_remote, mat2, mid_dim, res_dim_x, mat1x, rc);
+                          } else {
+                            dram_to_sp_simple(sp_mat2_remote, mat2, mat1x, rc);
+                          }
+                          asm volatile("": : :"memory");
+                          *mat2_f_S   = 1;
+                          *mat2_f_S_r = 1;
+
+                          // switch buffer
+                          if (sp_mat2_remote == sp_mat2_A_remote) {
+                            sp_mat2_remote = sp_mat2_B_remote;
+                            mat2_f     = &mat2_B_f;
+                            mat2_f_S   = &mat2_B_f_S;
+                            mat2_f_S_r =  mat2_B_f_S_r;
+                          } else {
+                            sp_mat2_remote = sp_mat2_A_remote;
+                            mat2_f     = &mat2_A_f;
+                            mat2_f_S   = &mat2_A_f_S;
+                            mat2_f_S_r =  mat2_A_f_S_r;
+                          }
+                      };
+
+    auto row_dma_task = [&] (int rr, int rc, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
 
                           // wait until buffer is ready
                           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
@@ -204,35 +235,17 @@ extern "C" {
                           *mat1_f_E   = 1;
                           *mat1_f_E_r = 1;
 
-                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
-                          if (partial_block) {
-                            dram_to_sp(sp_mat2_remote, mat2, mid_dim, res_dim_x, mat1x, rc);
-                          } else {
-                            dram_to_sp_simple(sp_mat2_remote, mat2, mat1x, rc);
-                          }
-                          asm volatile("": : :"memory");
-                          *mat2_f_S   = 1;
-                          *mat2_f_S_r = 1;
-
                           // switch buffer
                           if (sp_mat1_remote == sp_mat1_A_remote) {
                             sp_mat1_remote = sp_mat1_B_remote;
-                            sp_mat2_remote = sp_mat2_B_remote;
                             mat1_f     = &mat1_B_f;
                             mat1_f_E   = &mat1_B_f_E;
                             mat1_f_E_r =  mat1_B_f_E_r;
-                            mat2_f     = &mat2_B_f;
-                            mat2_f_S   = &mat2_B_f_S;
-                            mat2_f_S_r =  mat2_B_f_S_r;
                           } else {
                             sp_mat1_remote = sp_mat1_A_remote;
-                            sp_mat2_remote = sp_mat2_A_remote;
                             mat1_f     = &mat1_A_f;
                             mat1_f_E   = &mat1_A_f_E;
                             mat1_f_E_r =  mat1_A_f_E_r;
-                            mat2_f     = &mat2_A_f;
-                            mat2_f_S   = &mat2_A_f_S;
-                            mat2_f_S_r =  mat2_A_f_S_r;
                           }
                       };
 
@@ -244,8 +257,20 @@ extern "C" {
                               }
                             }
                         };
+
     // schedule
-    gemm_main_loop(mat1, mat2, tile_init, tile_task, tile_finish);
+    if (__bsg_id == 0 || __bsg_x > 2 || __bsg_y > 2) {
+      // do nothing
+    } else if (__bsg_x == 0 && __bsg_y != 0) {
+      // row DMA
+      gemm_main_loop(mat1, mat2, __bsg_x, __bsg_y-1, [] {}, row_dma_task, [] (int rr, int rc, int res_dim_x, int res_dim_y) {});
+    } else if (__bsg_y == 0 && __bsg_x != 0) {
+      // col DMA
+      gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y, [] {}, col_dma_task, [] (int rr, int rc, int res_dim_x, int res_dim_y) {});
+    } else {
+      // PE
+      // gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y-1, tile_init, tile_task, tile_finish);
+    }
 
     bsg_cuda_print_stat_kernel_end();
 
