@@ -6,7 +6,7 @@
 // Authors : Lin Cheng, Janice Wei
 // Date    : 07/29/2020, 08/04/2020
 
-
+#define BUF_SIZE 16
 #include <kernel_common.hpp>
 
 extern "C" {
@@ -22,11 +22,12 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
 {
   HBTensor<float> result(result_p);
   uint32_t length = *length_p;
+  hb_assert(length <= BUF_SIZE);
   int32_t dim = *dim_p;
-  int32_t arr[length];
-  
+  int32_t arr[BUF_SIZE];
+
   for(size_t i = 0; i < length; i++) {
-    HBTensor<float> tensor(tensors_p[0]);
+    HBTensor<float> tensor(tensors_p[i]);
     arr[i] = tensor.numel();
   }
   bsg_cuda_print_stat_kernel_start();
