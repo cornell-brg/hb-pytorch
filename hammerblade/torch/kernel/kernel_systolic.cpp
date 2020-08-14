@@ -9,6 +9,30 @@
 #include <kernel_common.hpp>
 #include <kernel_addmm.hpp>
 
+inline void spcpy(float* dest, float* src) {
+  for (int i = 0; i < BLOCK_DIM; i++) {
+        register float tmp0 = *(src + 0);
+        register float tmp1 = *(src + 1);
+        register float tmp2 = *(src + 2);
+        register float tmp3 = *(src + 3);
+        register float tmp4 = *(src + 4);
+        register float tmp5 = *(src + 5);
+        register float tmp6 = *(src + 6);
+        register float tmp7 = *(src + 7);
+        asm volatile("": : :"memory");
+        *(dest + 0) = tmp0;
+        *(dest + 1) = tmp1;
+        *(dest + 2) = tmp2;
+        *(dest + 3) = tmp3;
+        *(dest + 4) = tmp4;
+        *(dest + 5) = tmp5;
+        *(dest + 6) = tmp6;
+        *(dest + 7) = tmp7;
+        src += 8;
+        dest += 8;
+  }
+}
+
 template <typename FuncInit, typename FuncMain, typename FuncWB>
 inline void gemm_main_loop(HBTensor<float, 2> mat1,
                            HBTensor<float, 2> mat2,
@@ -144,7 +168,8 @@ extern "C" {
                           // copy what we have worked on to the next tile
                           if (__bsg_x < 2) {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
-                            // TODO: copy mat1 to E
+                            // copy mat1 to E
+                            spcpy(sp_mat1_remote, sp_mat1);
                             asm volatile("": : :"memory");
                             *mat1_f_E   = 1;
                             *mat1_f_E_r = 1;
@@ -152,7 +177,8 @@ extern "C" {
 
                           if (__bsg_y < 2) {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
-                            // TODO: copy mat2 to S
+                            // copy mat2 to S
+                            spcpy(sp_mat2_remote, sp_mat2);
                             asm volatile("": : :"memory");
                             *mat2_f_S   = 1;
                             *mat2_f_S_r = 1;
