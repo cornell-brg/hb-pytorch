@@ -27,7 +27,7 @@ Tensor _cat_hb(TensorList tensors, int64_t dim) {
   auto ndim = tensors[0].dim();
   uint32_t space = 0;
   for (size_t i = 0; i < length_u32; i++) {
-	TORCH_CHECK(tensors[i].dim() == ndim, "tensors have different dimensions");
+    TORCH_CHECK(tensors[i].dim() == ndim, "tensors have different dimensions");
     space += tensors[i].size(0);
   }
   Tensor result;
