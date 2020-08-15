@@ -63,21 +63,16 @@ def test_cat_error_1():
     with pytest.raises(RuntimeError):
         torch.cat([x, x, x], 0)
 
-#def test_cat_error_2():
-#    x = torch.ones(2).hammerblade()
-#    with pytest.raises(AssertionError):
-#        torch.cat([x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x], 0)
-
-def test_cat_erorr_3():
+def test_cat_erorr_2():
     x = torch.randn(3, 4).hammerblade()
     with pytest.raises(RuntimeError):
         torch.cat([x, x, x], 1)
 
-def test_cat_error_4():
+def test_cat_error_3():
     with pytest.raises(RuntimeError):
         torch.cat([], 0)
 
-def test_cat_error_5():
+def test_cat_error_4():
     x = torch.ones(2).hammerblade()
     y = torch.randn(3, 4).hammerblade()
     with pytest.raises(RuntimeError):
