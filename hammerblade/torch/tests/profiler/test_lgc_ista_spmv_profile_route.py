@@ -9,6 +9,11 @@
 """
 
 import os
+#os.environ["OMP_NUM_THREADS"] = "32"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+#os.environ["MKL_NUM_THREADS"] = "16" # export MKL_NUM_THREADS=6
+#os.environ["VECLIB_MAXIMUM_THREADS"] = "1" # export VECLIB_MAXIMUM_THREADS=4
+#os.environ["NUMEXPR_NUM_THREADS"] = "1" # export NUMEXPR_NUM_THREADS=6
 import sys
 import argparse
 import numpy as np
@@ -96,9 +101,21 @@ def ista(seeds, adj, alpha, rho, iters):
     
     return np.column_stack(out)
 
+def spy_sparse2torch_sparse(data):
+    row = data.shape[0]
+    col = data.shape[1]
+    values = data.data
+    coo_data = data.tocoo()
+    indices = np.append([coo_data.row], [coo_data.col], axis=0)
+    indices = torch.from_numpy(indices).long()
+#    indices = torch.LongTensor([coo_data.row, coo_data.col])
+    t = torch.sparse.FloatTensor(indices, torch.from_numpy(values).float(), torch.Size([row, col]))
+    return t
+
 def test_torch_ista(seeds, adj, size, alpha, rho, iters):
     out = torch.empty(0)
     for seed in tqdm(seeds):
+        t = time()
         s = np.zeros(adj.shape[0])
         s[seed] = 1
 
@@ -113,15 +130,18 @@ def test_torch_ista(seeds, adj, size, alpha, rho, iters):
         # Normalized adjacency matrix
         Q = D - ((1 - alpha) / 2) * (D + adj)
         Q = Dn_sqrt @ Q @ Dn_sqrt
-        Q = Q.toarray()
-
         # Convert numpy float64 data to torch float32 tensor
-        Q = torch.from_numpy(Q).to_sparse().float()
-        q = torch.zeros(size)
+        t1 = time()
+        Q = spy_sparse2torch_sparse(Q)
+        
         d_sqrt = torch.from_numpy(d_sqrt).float()
         dn_sqrt = torch.from_numpy(dn_sqrt).float()
         s = torch.from_numpy(s).float()
-        
+        numpy_time = t1 -t
+        convert_time = time() - t1
+        print('numpy cpu time = %f' % numpy_time, file=sys.stderr)
+        print('numpy to pytorch convertion time = %f' % convert_time, file=sys.stderr)
+        q = torch.zeros(size)        
         rad = rho * alpha * d_sqrt
         grad0 = -alpha * dn_sqrt * s
         grad = grad0.clone()
@@ -144,7 +164,7 @@ def parse_args():
     parser.add_argument('--alpha', type=float, default=0.15)
     parser.add_argument('--pnib-epsilon', type=float, default=1e-6)
     parser.add_argument('--ista-rho', type=float, default=1e-5)
-    parser.add_argument('--ista-iters', type=int, default=10)
+    parser.add_argument('--ista-iters', type=int, default=50)
     args = parser.parse_args()
     
     # !! In order to check accuracy, you _must_ use these parameters !!
@@ -152,7 +172,7 @@ def parse_args():
     assert args.alpha == 0.15
     assert args.pnib_epsilon == 1e-6
     assert args.ista_rho == 1e-5
-    assert args.ista_iters == 10
+    assert args.ista_iters == 50
     
     return args
 
@@ -170,18 +190,18 @@ if __name__ == "__main__":
     
     # PNIB: Use first `num_seeds` nodes as seeds
     # ISTA: Faster algorithm, so use more seeds to get roughly comparable total runtime
-    pnib_seeds = list(range(args.num_seeds))
+#    pnib_seeds = list(range(args.num_seeds))
     ista_seeds = list(range(1))
     
     # --
     # Run Parallel PR-Nibble
     
-    t = time()
-    pnib_scores = parallel_pr_nibble(pnib_seeds, adj, alpha=args.alpha, epsilon=args.pnib_epsilon)
-    assert pnib_scores.shape[0] == adj.shape[0]
-    assert pnib_scores.shape[1] == len(pnib_seeds)
-    pnib_elapsed = time() - t
-    print('parallel_pr_nibble: elapsed = %f' % pnib_elapsed, file=sys.stderr)
+#    t = time()
+#    pnib_scores = parallel_pr_nibble(pnib_seeds, adj, alpha=args.alpha, epsilon=args.pnib_epsilon)
+#    assert pnib_scores.shape[0] == adj.shape[0]
+#    assert pnib_scores.shape[1] == len(pnib_seeds)
+#    pnib_elapsed = time() - t
+#    print('parallel_pr_nibble: elapsed = %f' % pnib_elapsed, file=sys.stderr)
     
     # --
     # Run ISTA
@@ -194,12 +214,13 @@ if __name__ == "__main__":
     print('ista: elapsed = %f' % ista_elapsed, file=sys.stderr)
     t1 = time()
 
-    with open('lgc_ista.json') as route:
-        data = json.load(route)
-    torch.hammerblade.profiler.route.set_route_from_json(data)
-    torch.hammerblade.profiler.enable()
+#    with open('lgc_ista.json') as route:
+#        data = json.load(route)
+#    torch.hammerblade.profiler.route.set_route_from_json(data)
+#    torch.hammerblade.profiler.enable()
+    t = time()
     torch_out = test_torch_ista(ista_seeds, adj, size, alpha=args.alpha, rho=args.ista_rho, iters=args.ista_iters)
-    torch.hammerblade.profiler.disable()
+#    torch.hammerblade.profiler.disable()
 
     torch_ista_elapsed = time() - t1
     print('torch ista: elapsed = %f' % torch_ista_elapsed, file=sys.stderr)

@@ -8,7 +8,7 @@ namespace at { namespace native {
 
 using namespace at::sparse;
 
-IntTensor _to_csr_int( const IntTensor& rowIndices, int64_t dim, int64_t nnz) {
+IntTensor _to_csr_int(const IntTensor& rowIndices, int64_t dim, int64_t nnz) {
 
   TORCH_CHECK(rowIndices.is_hammerblade(), "row Indices should be on hammerblade");
 
@@ -17,27 +17,35 @@ IntTensor _to_csr_int( const IntTensor& rowIndices, int64_t dim, int64_t nnz) {
   uint32_t dim_uint = (uint32_t)(dim);
   uint32_t nnz_uint = (uint32_t)(nnz);
   hb_offload_kernel(csr, rowIndices, dim_uint, nnz_uint, "tensorlib_coo_to_csr");
-
-/*
-  int32_t* indices = rowIndices.data_ptr<int32_t>();
-
-  if (nnz > 0) {
-    auto csr_accessor = csr.accessor<int32_t, 1>();
-    //Convert the sparse matrix to CSR format
-    at::parallel_for(0, nnz, 10000, [&](int64_t start, int64_t end) {
-      int64_t h, hp0, hp1;
-      for (auto i = start; i < end; i++) {
-        hp0 = indices[i];
-        hp1 = (i+1 == nnz) ?  dim : indices[i+1];
-        if (hp0 != hp1) for (h = hp0; h < hp1; h++) {
-          csr_accessor[h+1] = i+1;
-        }
-      }
-    });
-  }
-*/
-  return csr;
 }
+
+void _to_c2sr(const IntTensor& rowIndices, 
+              IntTensor& csr,
+              IntTensor& c2sr,
+              IntTensor& colindices,
+              IntTensor& c2sr_colindices,
+              Tensor& values,
+              Tensor& c2sr_values,
+              int64_t dim,
+              int64_t nnz) {
+
+  int dim_int = (int)(dim);
+  int nnz_int = (int)(nnz);
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+  device_args.push_back(create_device_tensor(rowIndices, device_ptrs));
+  device_args.push_back(create_device_tensor(csr, device_ptrs));
+  device_args.push_back(create_device_tensor(c2sr, device_ptrs));
+  device_args.push_back(create_device_tensor(colindices, device_ptrs));
+  device_args.push_back(create_device_tensor(c2sr_colindices, device_ptrs));
+  device_args.push_back(create_device_tensor(values, device_ptrs));
+  device_args.push_back(create_device_tensor(c2sr_values, device_ptrs));
+  device_args.push_back(create_device_scalar(dim_int));
+  device_args.push_back(create_device_scalar(nnz_int));
+
+  c10::hammerblade::offload_kernel("tensorlib_coo_to_c2sr", device_args);
+  cleanup_device(device_args, device_ptrs);
+}  
 
 Tensor _sparse_mm_hb(const SparseTensor& sparse, const Tensor& dense) {
 
@@ -93,19 +101,26 @@ Tensor mv_hb_sparse(const SparseTensor& sparse, const Tensor& dense) {
   
   int64_t nnz = sparse._nnz();
   int64_t dim = sparse.size(0);
+  int64_t dim1 = sparse.size(1); 
+  int64_t estimate = dim * dim1;
+ 
 
   IntTensor indices = sparse._indices();
   TORCH_CHECK(indices.dtype() == at::kInt, "Indices on HammerBlade should be int32");
   IntTensor colIndices = indices.select(0, 1);
   TORCH_CHECK(colIndices.is_hammerblade(), "colIndices show be HammerBlade Tensor");
   IntTensor rowIndices = indices.select(0, 0);
-  IntTensor csr_hb = _to_csr_int(rowIndices, dim, nnz);
-
   Tensor values = sparse._values();
 
-  Tensor result = at::zeros({dim}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
+  IntTensor csr = at::empty({dim + 1}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
+  IntTensor c2sr = at::empty({2 * dim}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
+  IntTensor c2sr_colindices = at::empty({estimate}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
+  Tensor c2sr_values = at::empty({estimate}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
+  _to_c2sr(rowIndices, csr, c2sr, colIndices, c2sr_colindices, values, c2sr_values, dim, nnz);
 
-  hb_offload_kernel(result, csr_hb, colIndices, values, dense, "tensorlib_spmv");
+  Tensor result = at::empty({dim}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
+
+  hb_offload_kernel(result, c2sr, c2sr_colindices, c2sr_values, dense, "tensorlib_spmv");
   return result;
 }   
 }}
