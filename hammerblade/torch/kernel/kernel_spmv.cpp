@@ -19,7 +19,6 @@ extern "C" {
     auto indices = HBTensor<int>(_indices);
     auto values = HBTensor<float>(_values);
     auto vector = HBTensor<float>(_dense_vector);
-;
     uint32_t m = result.numel();
 
     size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
