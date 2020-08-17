@@ -6642,17 +6642,34 @@
     SparseHammerBlade: sddmm_hb
 
   # sampled dense-[dense transpose] matrix product (self = sparse)
-- func: sddtmm(Tensor self, Tensor mat1, Tensor mat2) -> Tensor
+- func: sddtmm(Tensor self, Tensor mat1, Tensor mat2t) -> Tensor
   use_c10_dispatcher: full
   variants: function, method
   dispatch:
     SparseCPU: sddtmm_cpu
     SparseHammerBlade: sddtmm_hb
+
+  # [sampled transpose] dense-[dense transpose] matrix product [transpose] (self = sparse)
+  # computes (b@c.T).T, sampled by self.T
+- func: stddtmmt(Tensor self, Tensor mat1, Tensor mat2t) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: stddtmmt_cpu
+    SparseHammerBlade: stddtmmt_hb
     
-  # dense-sparse matrix product
+  # dense-[sparse transpose] matrix product
 - func: dstmm(Tensor self, Tensor mat2t) -> Tensor
   use_c10_dispatcher: full
   variants: function, method
   dispatch:
     SparseCPU: dstmm_cpu
     SparseHammerBlade: dstmm_hb
+
+  # dense-[sparse transpose] matrix product [transposed]
+- func: dstmmt(Tensor self, Tensor mat2t) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: dstmmt_cpu
+    SparseHammerBlade: dstmmt_hb

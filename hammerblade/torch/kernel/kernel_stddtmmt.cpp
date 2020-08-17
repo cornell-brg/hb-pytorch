@@ -1,5 +1,5 @@
 //====================================================================
-// Sampled dense-denseT matrix multiply
+// SampledT dense-denseT matrix multiply T
 // 08/17/2020 Andrew Pareles (amp342@cornell.edu)
 //====================================================================
 
@@ -9,7 +9,7 @@
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_sddtmm(
+  __attribute__ ((noinline))  int tensorlib_stddtmmt(
           hb_tensor_t* out_p, //destination
           hb_tensor_t* col_p, //cols
           hb_tensor_t* row_p, //rows
@@ -19,8 +19,9 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    auto cols = HBTensor<int>(col_p);
-    auto rows = HBTensor<int>(row_p);
+    // SWAP ROW AND COL, since dealing with s.t
+    auto cols = HBTensor<int>(row_p);
+    auto rows = HBTensor<int>(col_p);
     auto b = HBTensor<float>(b_p);
     auto c = HBTensor<float>(c_p);
     auto res = HBTensor<float>(out_p);
@@ -36,7 +37,7 @@ extern "C" {
       for (int dot = 0; dot < dp_len; dot++){
         sum += b(row, dot) * c(col, dot);
       }
-      res(row, col) = sum;
+      res(col, row) = sum;
     });
 
     //   End profiling
@@ -46,6 +47,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_sddtmm, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_stddtmmt, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 
 }

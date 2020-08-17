@@ -14,80 +14,18 @@ QUERY_IDX = 100
 LAMBDA = 1
 
 # Data files. (Ask Adrian for these.)
-DATA_MAT = '/home/amp342/Emulator/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-mat.npz'
-DATA_VECS = '/home/amp342/Emulator/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-vecs.npy'
+DATA_MAT = '/home/amp342/Cosim/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-mat.npz'
+DATA_VECS = '/home/amp342/Cosim/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-vecs.npy'
 
-
-def swmd_numpy(r, c, vecs, niters):
-    # I=(r > 0)
-    sel = r.squeeze() > 0
-
-    # r=r(I)
-    r = r[sel].reshape(-1, 1).astype(numpy.float64)
-
-    # M=M(I,:)
-    M = cdist(vecs[sel], vecs).astype(numpy.float64)
-
-    # x=ones(length(r), size(c,2)) / length(r)
-    a_dim = r.shape[0]
-    b_nobs = c.shape[1]
-    x = numpy.ones((a_dim, b_nobs)) / a_dim
-
-    # K=exp(-lambda * M)
-    K = numpy.exp(- M * LAMBDA)
-    K_div_r = K / r
-    K_T = K.T
-
-    # This version uses a fixed number of iterations instead of running
-    # until convergence.
-    for it in range(niters):
-        print('starting iteration {}'.format(it))
-
-        u = 1.0 / x
-
-        # Here's where a better implementation is possible by doing the
-        # SDDMM thing and avoiding the dense matrix/matrix multiply. We do the
-        # slow thing for now.
-        K_T_times_u = K_T @ u
-        one_over_K_T_times_u = 1 / (K_T_times_u)
-        v = c.multiply(one_over_K_T_times_u)
-
-        x = K_div_r @ v.tocsc()
-
-    out = (u * ((K * M) @ v)).sum(axis=0)
-    return out
-
-
-
-def _dsmp(a, b):
-    """Dense/sparse matrix product.
-    """
-    out = torch.zeros((a.shape[0], b.shape[1]))
-    for k in range(b._nnz()):
-        bi, bj = tuple(b._indices()[:, k].tolist())
-        bx = b._values()[k]
-        for i in range(a.shape[0]):
-            out[i, bj] += a[i, bi] * bx
-    return out
-
-
-
-def _sddmm(a, b, c):
-    """Only compute certain entries of b@c, based on the entries of a:
-    For all i,j with a_ij!=0, compute (b@c)_ij, where `a` is sparse, `b` and `c`
-    are dense, and `@` is matrix product. Returns a sparse matrix of (b@c)_ij.
-    """
-    outvals = torch.zeros(a._nnz())
-    for k in range(a._nnz()):
-        ai, aj = tuple(a._indices()[:, k].tolist())
-        brow = b[ai, :]
-        ccol = c[:, aj]
-        outvals[k] = torch.dot(brow, ccol)
+def dense_to_sparse(m):
+    m_coo = m.tocoo()
     return torch.sparse.FloatTensor(
-        a._indices(),
-        outvals,
-        a.shape,
+        torch.LongTensor(numpy.vstack((m_coo.row, m_coo.col))),
+        torch.FloatTensor(m_coo.data),
+        torch.Size(m_coo.shape),
     )
+
+
 def swmd_torch(r, c, vecs, niters):
     # Convert arrays to PyTorch tensors.
     r = torch.FloatTensor(r)
@@ -118,80 +56,40 @@ def swmd_torch(r, c, vecs, niters):
     # K=exp(-lambda * M)
     K = torch.exp(- M * LAMBDA)
     K_div_r = K / r
-    K_T = K.T
 
     for it in range(niters):
         print('starting iteration {}'.format(it))
 
         u = 1.0 / x
 
-        # OLD:
-        # v = c * (1.0 / _sddmm(c, K_T, u))
-        # x = _dsmp(K_div_r, v)
-
-        # true: v = c * (1.0 / torch.sddtmm(c, K_T, u.t()))
         # Interesting property: sddtmm(a,b,c).T = sddtmm(a.T,c,b)
-        #TODO reformat u to u.t and K to K.t
-        vT = cT * (1.0 / torch.sddtmm(cT, u.t(), K_T))
-        
         # Compute `c * 1/(K_T @ u)` using a hand-rolled SDDMM.
-        # WRONG: vT = cT * (1.0 / torch.sddtmm(cT, u, K))
+        # v = c * (1.0 / _sddmm(c, K_T, u))
+        # v = c * (1.0 / torch.sddtmm(c, K_T, u.t()))
+        # vT = cT * (1.0 / torch.sddtmm(cT, uT, K_T))
+        # vT = cT * (1.0 / torch.stddtmm(c, uT, K_T))
+        vT = cT * (1.0 / torch.stddtmmt(cT, K, u))
+        # in the future, vT should return a sparse tensor. Since that's not supported, for now, we convert it to one
+        vT = dense_to_sparse(vT)
+        # custom dstmm.t():
+        # x = _dsmp(K_div_r, v)
+        # x = torch.dstmm(K_div_r, vT)
+        xT = torch.dstmmt(K_div_r, vT)
 
-        # PyTorch doesn't support dense/sparse matrix multiply (only
-        # sparse/dense), so I had to write my own. :'(
-        x = torch.dstmm(K_div_r, vT)
-
-    out = (u * _dsmp(K * M, v)).sum(axis=0)
+    out = (u * dstmm(K * M, vT)).sum(axis=0)
     return out
 
 
-def add_args(parser):
-    parser.add_argument('-n', '--niters', default=16, type=int,
-                        help="number of iterations")
-    parser.add_argument('-d', '--dump', default=False, action='store_true',
-                        help="dump result to a file")
-    parser.add_argument('-p', '--numpy', default=False, action='store_true',
-                        help="use NumPy version instead of PyTorch")
-    parser.add_argument('-c', '--compare', default=False, action='store_true',
-                        help="compare NumPy and PyTorch output")
+
+# Load data.
+vecs = numpy.load(DATA_VECS)
+mat = scipy.sparse.load_npz(DATA_MAT)
+mat = mat[:, :N_DOCS]  # Use a subset of the data.
+
+# The query vector.
+r = numpy.asarray(mat[:, QUERY_IDX].todense()).squeeze()
 
 
-if __name__ == "__main__":
-    args = parse_model_args(add_args)
-
-    # Load data.
-    vecs = numpy.load(DATA_VECS)
-    mat = scipy.sparse.load_npz(DATA_MAT)
-    mat = mat[:, :N_DOCS]  # Use a subset of the data.
-    print('data loaded')
-
-    # The query vector.
-    r = numpy.asarray(mat[:, QUERY_IDX].todense()).squeeze()
-
-    # The kernel itself.
-    if args.compare:
-        # Compare the output of the reference Numpy version and our PyTorch
-        # version to ensure the output matches.
-        print('starting numpy')
-        scores_numpy = torch.FloatTensor(
-            swmd_numpy(r, mat, vecs, niters=args.niters)
-        )
-        print('starting torch')
-        scores_torch = swmd_torch(r, mat, vecs, niters=args.niters)
-        print('done')
-        print(scores_torch)
-        print(scores_numpy)
-        if torch.allclose(scores_torch, scores_numpy, atol=0.01):
-            print('success! :)')
-        else:
-            print('failure :(')
-            sys.exit(1)
-    else:
-        # Run a single version of the kernel.
-        kernel = swmd_numpy if args.numpy else swmd_torch
-        scores = kernel(r, mat, vecs,
-                        niters=args.niters)
-
-    # Dump output.
-    if args.dump:
-        numpy.savetxt('scores_out.txt', scores, fmt='%.8e')
+# BEGIN PROFILING HERE
+scores = swmd_torch(r, mat, vecs,niters=1)
+# END PROFILING HERE
