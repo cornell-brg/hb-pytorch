@@ -38,7 +38,8 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
     int32_t size = arr[0];
     while (i >= size) {
       index = i - size;
-      size += arr[++j];
+      j++;
+      size += arr[j];
     }
     if (j == 0) {
       index = i;
