@@ -54,14 +54,6 @@ extern "C" {
     
     //Generate nnz of each row, store into c2sr(dim) ~ c2sr(2 * dim - 1)
     end = dim;
-    for (size_t j = start; j < end; j = j + thread_num) {
-      c2sr(dim + j) = csr(j + 1) - csr(j);
-      printf("c2sr(%d + %d) is %d\n", dim, j, c2sr(dim + j));
-    }
-    
-    printf("pass generate nnz of each row\n");
-    g_barrier.sync();
-
     // Generate the pointer to the first nnz element of each row in corresponding slot, store into c2sr(0) ~ c2sr(dim - 1)
     for (size_t k = start; k < end; k = k + thread_num) {
       int sum = 0;
@@ -71,33 +63,28 @@ extern "C" {
         int t = k;
         int temp = t - NUM_OF_SLOTS;
         for (; t >= 0 ; t = t - NUM_OF_SLOTS) {
-          sum = sum + c2sr(dim + t);     
+          sum = sum + csr(t + 1) - csr(t);     
         }
       }
-      
       c2sr(k) = sum;
-      printf("c2sr(%d) is %d\n", k, c2sr(k)); 
+//      printf("c2sr(%d) is %d\n", k, c2sr(k)); 
     }
-    
-    printf("pass generating the pointer of the fist nnz element of each row\n");
+//    printf("pass generating the pointer of the fist nnz element of each row\n");
     g_barrier.sync();
 
     //Reorganize the data in colindices and values
     for(size_t l = start; l < end; l = l + thread_num) {
-      printf("l is %d\n", l);
-      for(int32_t m = c2sr(l), n = csr(l); m < c2sr(l) + c2sr(dim + l) && n < csr(l + 1); m++, n++) {
+//      printf("l is %d\n", l);
+      for(int32_t m = c2sr(l), n = csr(l); m < c2sr(l) + csr(l + 1) - csr(l) && n < csr(l+1); m++, n++) {
         int idx = convert_idx(m, dim, l);
-        printf("Got m is %d, l is %d and idx is %d\n", m, l, idx);
-        if(idx >= num_element){
-          printf("m is %d and idx is %d, but total number of element in c2sr values is only %d\n", m, idx, num_element);
-        }
+//        printf("Got m is %d, l is %d and idx is %d\n", m, l, idx);
         c2sr_colindices(idx) = colindices(n);
-        printf("c2sr_colindices(%d) is %d\n", idx, c2sr_colindices(idx));
+//        printf("c2sr_colindices(%d) is %d\n", idx, c2sr_colindices(idx));
         c2sr_values(idx) = values(n);
       }
     }  
     
-    printf("successful finish coo_to_c2sr");
+//    printf("successful finish coo_to_c2sr");
     bsg_cuda_print_stat_kernel_end();   
     g_barrier.sync();
     return 0;

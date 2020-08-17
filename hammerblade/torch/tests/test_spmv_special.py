@@ -3,7 +3,7 @@ import torch.nn.functional as F
 
 def test_spmv_1():
     m = torch.nn.Threshold(0.95, 0)
-    input = torch.rand(10, 50)
+    input = torch.rand(50, 50)
     xv = torch.rand(50)
     xs = m(input).to_sparse()
     print(xs)

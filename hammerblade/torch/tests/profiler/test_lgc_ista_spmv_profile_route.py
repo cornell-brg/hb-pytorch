@@ -115,7 +115,7 @@ def spy_sparse2torch_sparse(data):
 def test_torch_ista(seeds, adj, size, alpha, rho, iters):
     out = torch.empty(0)
     for seed in tqdm(seeds):
-        t = time()
+#        t = time()
         s = np.zeros(adj.shape[0])
         s[seed] = 1
 
@@ -131,16 +131,16 @@ def test_torch_ista(seeds, adj, size, alpha, rho, iters):
         Q = D - ((1 - alpha) / 2) * (D + adj)
         Q = Dn_sqrt @ Q @ Dn_sqrt
         # Convert numpy float64 data to torch float32 tensor
-        t1 = time()
+#        t1 = time()
         Q = spy_sparse2torch_sparse(Q)
         
         d_sqrt = torch.from_numpy(d_sqrt).float()
         dn_sqrt = torch.from_numpy(dn_sqrt).float()
         s = torch.from_numpy(s).float()
-        numpy_time = t1 -t
-        convert_time = time() - t1
-        print('numpy cpu time = %f' % numpy_time, file=sys.stderr)
-        print('numpy to pytorch convertion time = %f' % convert_time, file=sys.stderr)
+#        numpy_time = t1 - t
+#        convert_time = time() - t1
+#        print('numpy cpu time = %f' % numpy_time, file=sys.stderr)
+#        print('numpy to pytorch convertion time = %f' % convert_time, file=sys.stderr)
         q = torch.zeros(size)        
         rad = rho * alpha * d_sqrt
         grad0 = -alpha * dn_sqrt * s
@@ -164,7 +164,7 @@ def parse_args():
     parser.add_argument('--alpha', type=float, default=0.15)
     parser.add_argument('--pnib-epsilon', type=float, default=1e-6)
     parser.add_argument('--ista-rho', type=float, default=1e-5)
-    parser.add_argument('--ista-iters', type=int, default=50)
+    parser.add_argument('--ista-iters', type=int, default=1)
     args = parser.parse_args()
     
     # !! In order to check accuracy, you _must_ use these parameters !!
@@ -172,7 +172,7 @@ def parse_args():
     assert args.alpha == 0.15
     assert args.pnib_epsilon == 1e-6
     assert args.ista_rho == 1e-5
-    assert args.ista_iters == 50
+    assert args.ista_iters == 1
     
     return args
 
@@ -214,13 +214,13 @@ if __name__ == "__main__":
     print('ista: elapsed = %f' % ista_elapsed, file=sys.stderr)
     t1 = time()
 
-#    with open('lgc_ista.json') as route:
-#        data = json.load(route)
-#    torch.hammerblade.profiler.route.set_route_from_json(data)
-#    torch.hammerblade.profiler.enable()
+    with open('lgc_ista.json') as route:
+        data = json.load(route)
+    torch.hammerblade.profiler.route.set_route_from_json(data)
+    torch.hammerblade.profiler.enable()
     t = time()
     torch_out = test_torch_ista(ista_seeds, adj, size, alpha=args.alpha, rho=args.ista_rho, iters=args.ista_iters)
-#    torch.hammerblade.profiler.disable()
+    torch.hammerblade.profiler.disable()
 
     torch_ista_elapsed = time() - t1
     print('torch ista: elapsed = %f' % torch_ista_elapsed, file=sys.stderr)

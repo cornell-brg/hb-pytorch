@@ -102,7 +102,7 @@ Tensor mv_hb_sparse(const SparseTensor& sparse, const Tensor& dense) {
   int64_t nnz = sparse._nnz();
   int64_t dim = sparse.size(0);
   int64_t dim1 = sparse.size(1); 
-  int64_t estimate = dim * dim1;
+  int64_t estimate = dim * dim1 * 0.3;
  
 
   IntTensor indices = sparse._indices();
@@ -113,14 +113,14 @@ Tensor mv_hb_sparse(const SparseTensor& sparse, const Tensor& dense) {
   Tensor values = sparse._values();
 
   IntTensor csr = at::empty({dim + 1}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
-  IntTensor c2sr = at::empty({2 * dim}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
+  IntTensor c2sr = at::empty({dim}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
   IntTensor c2sr_colindices = at::empty({estimate}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
   Tensor c2sr_values = at::empty({estimate}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
   _to_c2sr(rowIndices, csr, c2sr, colIndices, c2sr_colindices, values, c2sr_values, dim, nnz);
 
   Tensor result = at::empty({dim}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
 
-  hb_offload_kernel(result, c2sr, c2sr_colindices, c2sr_values, dense, "tensorlib_spmv");
+  hb_offload_kernel(result, csr, c2sr, c2sr_colindices, c2sr_values, dense, "tensorlib_spmv");
   return result;
 }   
 }}

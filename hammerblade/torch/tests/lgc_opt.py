@@ -80,6 +80,7 @@ def ista(seeds, adj, alpha, rho, iters):
     Q = Dn_sqrt @ Q @ Dn_sqrt
     numpy_time = time() - t
     print('pure numpy cpu time = %f' % numpy_time, file=sys.stderr)
+    spmv_time = 0.0
     for seed in tqdm(seeds):
         # Make personalized distribution
         s = np.zeros(adj.shape[0])
@@ -94,9 +95,11 @@ def ista(seeds, adj, alpha, rho, iters):
         # Run
         for _ in range(iters):
             q    = np.maximum(q - grad - rad, 0)
+            t1 = time()
             grad = grad0 + Q @ q
-        
+            spmv_time = spmv_time + time() - t1
         out.append(q * d_sqrt)
+    print('pure numpy cpu time = %f' % spmv_time, file=sys.stderr)
     
     return np.column_stack(out)
 
