@@ -4,8 +4,8 @@
 //====================================================================
 
 #define BLOCK_DIM 8 // sqrt(4KB/4 byte/4 data matrix) = 15 max
-#define SYSTOLIC_X_DIM 2
-#define SYSTOLIC_Y_DIM 2
+#define SYSTOLIC_X_DIM 14
+#define SYSTOLIC_Y_DIM 6
 #include <kernel_common.hpp>
 #include <kernel_addmm.hpp>
 
@@ -285,7 +285,7 @@ extern "C" {
                         };
 
     // schedule
-    if (__bsg_id == 0 || __bsg_x > 2 || __bsg_y > 2) {
+    if (__bsg_id == 0 || __bsg_x > SYSTOLIC_X_DIM || __bsg_y > SYSTOLIC_Y_DIM) {
       // do nothing
     } else if (__bsg_x == 0 && __bsg_y != 0) {
       // row DMA
