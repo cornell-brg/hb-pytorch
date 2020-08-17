@@ -74,7 +74,7 @@ def swmd_torch(r, c, vecs, niters):
         # custom dstmm.t():
         # x = _dsmp(K_div_r, v)
         # x = torch.dstmm(K_div_r, vT)
-        xT = torch.dstmmt(K_div_r, vT)
+        x = torch.dstmmt(K_div_r, vT)
 
     out = (u * dstmm(K * M, vT)).sum(axis=0)
     return out
