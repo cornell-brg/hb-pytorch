@@ -9,6 +9,50 @@
 
 #include <kernel_common.hpp>
 
+// emulate mulh
+
+inline int32_t mulh(int32_t a, int32_t b) {
+  
+  int16_t ah = (a & 0xffff0000) >> 16;
+  int16_t al = (a & 0xffff);
+  int16_t bh = (a & 0xffff0000) >> 16;
+  int16_t bl = (b & 0xffff);
+  
+  int32_t ahbh = ah * bh;
+  int32_t alhb_h = (al * bh + bl * ah) >> 16;
+  int32_t alhb_l = ((al * bh + bl * ah) & 0xffff) << 16;
+  int32_t total_l = alhb_l + al * bl;
+  int32_t carry = 0;
+  
+  if (total_l - alhb_l != al * bl) {
+    carry = 1;
+  }
+  
+  int32_t _mulh = ahbh + alhb_h + carry;
+  return _mulh;
+}
+
+inline int64_t mulh(int64_t a, int64_t b) {
+  
+  int16_t ah = (a & 0xffff0000) >> 16;
+  int16_t al = (a & 0xffff);
+  int16_t bh = (a & 0xffff0000) >> 16;
+  int16_t bl = (b & 0xffff);
+  
+  int32_t ahbh = ah * bh;
+  int32_t alhb_h = (al * bh + bl * ah) >> 16;
+  int32_t alhb_l = ((al * bh + bl * ah) & 0xffff) << 16;
+  int32_t total_l = alhb_l + al * bl;
+  int32_t carry = 0;
+  
+  if (total_l - alhb_l != al * bl) {
+    carry = 1;
+  }
+  
+  int32_t _mulh = ahbh + alhb_h + carry;
+  return _mulh;
+}
+
 // As with all HB kernels, We wrap them with extern "C" to prevent name
 // mangling.
 
