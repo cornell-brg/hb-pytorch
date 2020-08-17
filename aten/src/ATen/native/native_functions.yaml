@@ -6605,6 +6605,7 @@
 
 # Python binding will be created for you automatically
 # You would be able to call it by torch.vvadd()
+
 - func: vvadd(Tensor self, Tensor other) -> Tensor
   use_c10_dispatcher: full
   variants: function
