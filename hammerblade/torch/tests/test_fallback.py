@@ -41,16 +41,6 @@ def test_native_1():
     torch.hammerblade.profiler.disable()
     assert torch.allclose(hb.cpu(), cpu)
 
-@pytest.mark.xfail
-def test_native_1F():
-    x = torch.randn(2, 3)
-    cpu = torch.cat((x, x, x), 0)
-    h = x.hammerblade()
-    torch.hammerblade.profiler.enable()
-    hb = torch.cat((h, h, h), 0)
-    torch.hammerblade.profiler.disable()
-    assert torch.allclose(hb.cpu(), cpu)
-
 def test_complex_1():
     unfold = nn.Unfold(kernel_size=(2, 3))
     input = torch.randn(2, 5, 3, 4)
