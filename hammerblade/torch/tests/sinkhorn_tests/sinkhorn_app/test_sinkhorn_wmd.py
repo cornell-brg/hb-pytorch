@@ -26,16 +26,15 @@ def dense_to_sparse(m):
     )
 
 
-def swmd_torch(r, c, vecs, niters):
+def swmd_torch(r, cT, vecs, niters):
     # Convert arrays to PyTorch tensors.
     r = torch.FloatTensor(r)
-    c_coo = c.tocoo()
-    c = torch.sparse.FloatTensor(
+    c_coo = cT.tocoo()
+    cT = torch.sparse.FloatTensor(
         torch.LongTensor(numpy.vstack((c_coo.row, c_coo.col))),
         torch.FloatTensor(c_coo.data),
         torch.Size(c_coo.shape),
     )
-    cT = c.t()
 
     vecs = torch.FloatTensor(vecs)
 
@@ -51,32 +50,34 @@ def swmd_torch(r, c, vecs, niters):
     # x=ones(length(r), size(c,2)) / length(r)
     a_dim = r.shape[0]
     b_nobs = cT.shape[0]
-    x = torch.ones((a_dim, b_nobs)) / a_dim
+    xT = torch.ones((b_nobs, a_dim)) / a_dim
 
     # K=exp(-lambda * M)
     K = torch.exp(- M * LAMBDA)
     K_div_r = K / r
+    K_T = K.T
 
     for it in range(niters):
         print('starting iteration {}'.format(it))
 
-        u = 1.0 / x
+        uT = 1.0 / xT
 
-        # Interesting property: sddtmm(a,b,c).T = sddtmm(a.T,c,b)
+        # Interesting property: sddtmmt(a,b,c) = sddtmm(a.T,c,b)
         # Compute `c * 1/(K_T @ u)` using a hand-rolled SDDMM.
         # v = c * (1.0 / _sddmm(c, K_T, u))
-        # v = c * (1.0 / torch.sddtmm(c, K_T, u.t()))
-        # vT = cT * (1.0 / torch.sddtmm(cT, uT, K_T))
-        # vT = cT * (1.0 / torch.stddtmm(c, uT, K_T))
-        vT = cT * (1.0 / torch.stddtmmt(cT, K, u))
+        # v = c * (1.0 / torch.sddtmm(c, K_T, uT)
+        vT = cT * (1.0 / torch.sddtmm(cT, uT, K_T)
+
         # in the future, vT should return a sparse tensor. Since that's not supported, for now, we convert it to one
         vT = dense_to_sparse(vT)
+
         # custom dstmm.t():
         # x = _dsmp(K_div_r, v)
         # x = torch.dstmm(K_div_r, vT)
-        x = torch.dstmmt(K_div_r, vT)
-
-    out = (u * dstmm(K * M, vT)).sum(axis=0)
+        xT = torch.dstmmt(K_div_r, vT)
+        
+    out = (u.t() * dstmm(K * M, vT)).sum(axis=0)
+    # out = (u * (v @ (K_T * M_T)).sum(axis=1)
     return out
 
 
@@ -89,7 +90,8 @@ mat = mat[:, :N_DOCS]  # Use a subset of the data.
 # The query vector.
 r = numpy.asarray(mat[:, QUERY_IDX].todense()).squeeze()
 
-
+# mat could theoretically be stored as its transpose, so don't count 
+matT = mat.T 
 # BEGIN PROFILING HERE
-scores = swmd_torch(r, mat, vecs,niters=1)
+scores = swmd_torch(r, matT, vecs, niters=1)
 # END PROFILING HERE
