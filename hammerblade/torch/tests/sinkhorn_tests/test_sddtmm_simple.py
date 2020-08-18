@@ -1,5 +1,5 @@
 """
-Profiler tests for sddmm
+Profiler tests for sddtmm
 08/18/2020 Andrew Pareles (amp342@cornell.edu)
 """
 
