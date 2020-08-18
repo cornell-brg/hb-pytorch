@@ -26,6 +26,7 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
   int32_t dim = *dim_p;
   int32_t arr[BUF_SIZE];
 
+  // collect tensors' size
   for(size_t i = 0; i < length; i++) {
     HBTensor<float> tensor(tensors_p[i]);
     arr[i] = tensor.numel();
