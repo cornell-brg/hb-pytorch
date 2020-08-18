@@ -50,7 +50,7 @@ def test_cat_2_hypothesis(inputs):
     x2 = torch.tensor(inputs[1])
     x3 = torch.tensor(inputs[2])
     _test_torch_cat(x1, x2, x3)
-    
+
 def test_cat_3():
     x = torch.randn(3, 4, 5)
     _test_torch_cat(x, x, x)
@@ -68,7 +68,7 @@ def test_cat_3_hypothesis(inputs):
     x2 = torch.tensor(inputs[1])
     x3 = torch.tensor(inputs[2])
     _test_torch_cat(x1, x2, x3)
-    
+
 def test_cat_error_1():
     x = torch.randn(3, 4, 5, 2).hammerblade()
     with pytest.raises(RuntimeError):
