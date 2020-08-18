@@ -77,10 +77,8 @@ print("uT size", uT.size())
 print("K_T size", K_T.size())
 
 
-print("Running vT")
-vT = cT * (1.0 / torch.sddtmm(cT, uT, K_T))
-print("converting vT to sparse")
-vT = dense_to_sparse(vT)
+print("getting vT")
+vT = torch.load(DIR + 'data/vT_tensor.pt')
 
 print("Done with vT, now to dstmmt, the main test:")
 print("Multiply the total time by ", N_DOCS / N_DATASET_TO_USE)
