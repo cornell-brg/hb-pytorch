@@ -12,7 +12,7 @@ using namespace at::sparse;
 - csc(A) = csr(A.Transpose)
 ==> csc(A) = csr('rowIndices' = A.T's rowIndices (!= A's colIndices since they're not sorted)).
 */
-Tensor _to_csc(const IntTensor& aTrowIndices, int64_t dim, int64_t nnz) {
+Tensor _to_csc2(const IntTensor& aTrowIndices, int64_t dim, int64_t nnz) {
     Tensor csc = at::zeros({dim + 1}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
     hb_offload_kernel(csc, aTrowIndices, dim, nnz, "tensorlib_coo_to_csr");
     return csc;
@@ -43,7 +43,7 @@ Tensor dstmmt_hb(const Tensor& a_dense, const SparseTensor& bT_sparse) {
   int64_t b_nnz = bT_sparse._nnz();
   int64_t b_dim = bT_sparse.size(0);
   
-  IntTensor b_csc = _to_csc(b_colIndices, b_dim, b_nnz);
+  IntTensor b_csc = _to_csc2(b_colIndices, b_dim, b_nnz);
 
   hb_offload_kernel(result, a_dense, b_csc, b_rowIndices, b_values, "tensorlib_dstmmt");
   return result;
