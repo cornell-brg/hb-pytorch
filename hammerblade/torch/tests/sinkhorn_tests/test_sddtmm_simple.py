@@ -32,10 +32,12 @@ def test_torch_sddtmm(a, b, c):
 
     torch.hammerblade.profiler.enable()
 
-    torch.sddtmm(ah, bh, ch)
-
+    res = torch.sddtmm(ah, bh, ch)
+    
     torch.hammerblade.profiler.disable()
-
+    
+    print(res)
+    
 vecs = numpy.load(DATA_VECS)
 mat = scipy.sparse.load_npz(DATA_MAT)
 mat = mat[:, :N_DOCS]  # Use a subset of the data.
