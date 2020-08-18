@@ -96,10 +96,11 @@ def ista(seeds, adj, alpha, rho, iters):
         for _ in range(iters):
             q    = np.maximum(q - grad - rad, 0)
             t1 = time()
-            grad = grad0 + Q @ q
+            grad = Q @ q
+            grad = grad + grad0
             spmv_time = spmv_time + time() - t1
         out.append(q * d_sqrt)
-    print('pure numpy cpu time = %f' % spmv_time, file=sys.stderr)
+    print('only spmv time = %f' % spmv_time, file=sys.stderr)
     
     return np.column_stack(out)
 
@@ -191,7 +192,7 @@ if __name__ == "__main__":
     # PNIB: Use first `num_seeds` nodes as seeds
     # ISTA: Faster algorithm, so use more seeds to get roughly comparable total runtime
 #    pnib_seeds = list(range(args.num_seeds))
-    ista_seeds = list(range(16))
+    ista_seeds = list(range(1))
     
     # --
     # Run Parallel PR-Nibble

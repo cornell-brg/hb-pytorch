@@ -21,8 +21,12 @@ extern "C" {
     size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
     size_t start = __bsg_id;
     size_t end = nnz;
+    uint32_t tag = 0;
 
-    bsg_cuda_print_stat_kernel_start();
+    bsg_cuda_print_stat_start(tag);
+    if(__bsg_id == 0) {
+      csr(0) = 0;
+    }
 
     int h, hp0, hp1;
     for (size_t i = start; i < end; i = i + thread_num) {
@@ -33,7 +37,7 @@ extern "C" {
       }
     }
 
-    bsg_cuda_print_stat_kernel_end();   
+    bsg_cuda_print_stat_end(tag);   
     g_barrier.sync();
     return 0;
   }
