@@ -25,14 +25,6 @@ def test_cat_1_dif_sizes():
     z = torch.tensor([])
     _test_torch_cat(x, y, z)
 
-@settings(deadline=None)
-@given(inputs=hu.tensors1d(n=3))
-def test_cat_1_hypothesis(inputs):
-    x1 = torch.tensor(inputs[0])
-    x2 = torch.tensor(inputs[1])
-    x3 = torch.tensor(inputs[2])
-    _test_torch_cat(x1, x2, x3)
-
 def test_cat_2():
     x = torch.randn(3, 4)
     _test_torch_cat(x, x, x)
@@ -42,14 +34,6 @@ def test_cat_2_dif_sizes():
     y = torch.randn(2, 4)
     z = torch.randn(4, 4)
     _test_torch_cat(x, y, z)
-
-@settings(deadline=None)
-@given(inputs=hu.tensors(n=3, min_dim=2, max_dim=2))
-def test_cat_2_hypothesis(inputs):
-    x1 = torch.tensor(inputs[0])
-    x2 = torch.tensor(inputs[1])
-    x3 = torch.tensor(inputs[2])
-    _test_torch_cat(x1, x2, x3)
 
 def test_cat_3():
     x = torch.randn(3, 4, 5)
@@ -62,8 +46,8 @@ def test_cat_3_dif_sizes():
     _test_torch_cat(x, y, z)
 
 @settings(deadline=None)
-@given(inputs=hu.tensors(n=3, min_dim=3, max_dim=3))
-def test_cat_3_hypothesis(inputs):
+@given(inputs=hu.tensors(n=3, min_dim=1, max_dim=3))
+def test_cat_hypothesis(inputs):
     x1 = torch.tensor(inputs[0])
     x2 = torch.tensor(inputs[1])
     x3 = torch.tensor(inputs[2])
