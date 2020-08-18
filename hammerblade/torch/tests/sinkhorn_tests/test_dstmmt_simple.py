@@ -1,5 +1,5 @@
 """
-Profiler tests for dense-sparseT matrix product (dstmm) kernel
+Profiler tests for dense-sparseT matrix product (dstmmt) kernel
 08/18/2020 Andrew Pareles (amp342@cornell.edu)
 """
 
@@ -8,7 +8,7 @@ import torch
 import scipy.sparse
 import numpy
 import json
-with open(DIR + 'cmd_dstmm.json',) as f:
+with open(DIR + 'cmd_dstmmt.json',) as f:
     route = json.load(f)
     torch.hammerblade.profiler.route.set_route_from_json(route)
 
