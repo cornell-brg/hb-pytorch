@@ -6633,14 +6633,6 @@
 #   variants: function
 #   dispatch:
 
-  #sampled dense-dense matrix product (self = sparse)
-- func: sddmm(Tensor self, Tensor mat1, Tensor mat2) -> Tensor
-  use_c10_dispatcher: full
-  variants: function, method
-  dispatch:
-    SparseCPU: sddmm_cpu
-    SparseHammerBlade: sddmm_hb
-
   # sampled dense-[dense transpose] matrix product (self = sparse)
 - func: sddtmm(Tensor self, Tensor mat1, Tensor mat2t) -> Tensor
   use_c10_dispatcher: full

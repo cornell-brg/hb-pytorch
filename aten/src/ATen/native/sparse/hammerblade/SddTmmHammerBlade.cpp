@@ -8,7 +8,7 @@ namespace at { namespace native {
 using namespace at::sparse;
 
 // computes (b@c.T), sampled by self
-Tensor sddtmm_hb(const SparseTensor& sample, const Tensor& b, const Tensor& c) {
+SparseTensor sddtmm_hb(const SparseTensor& sample, const Tensor& b, const Tensor& c) {
 
   TORCH_CHECK(sample.is_hammerblade(), "SddTmm: expected 'sample' to be a HammerBlade tensor");
   TORCH_CHECK(b.is_hammerblade(), "SddTmm: expected 'b' to be a HammerBlade tensor");
@@ -25,16 +25,24 @@ Tensor sddtmm_hb(const SparseTensor& sample, const Tensor& b, const Tensor& c) {
   
   IntTensor indices = sample._indices();
   TORCH_CHECK(indices.dtype() == at::kInt, "Indices on HammerBlade should be int32, but got ", indices.dtype());
-  IntTensor colIndices = indices.select(0, 1);
-  TORCH_CHECK(colIndices.is_hammerblade(), "colIndices must be HammerBlade Tensor");
-  IntTensor rowIndices = indices.select(0, 0);
-  TORCH_CHECK(rowIndices.is_hammerblade(), "rowIndices must be HammerBlade Tensor");
+  TORCH_CHECK(indices.is_hammerblade(), "indices must be HammerBlade Tensor");
   TORCH_CHECK(b.size(0) == sample.size(0) && c.size(0) == sample.size(1),"SddTmm sample dimension mismatch: sample was shape ",sample.size(0)," by ",sample.size(1),", but (b@c.T) is shape ",b.size(0)," by ",c.size(0));
 
-  Tensor result = at::zeros({b.size(0), c.size(0)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
+  Tensor result_indices = at::zeros({b.size(0), c.size(0)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
+  Tensor result_vals = at::zeros(sample._nnz(), {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
 
-  hb_offload_kernel(result, colIndices, rowIndices, b, c, "tensorlib_sddtmm");
-  return result;
+  hb_offload_kernel(result_indices, result_vals, indices, b, c, "tensorlib_sddtmm");
+
+  //Create HB sparse tensor (from SparseLLCopy):
+  TensorTypeId type_id = TensorTypeId::SparseHammerBladeTensorId;
+  SparseTensor sparse_tensor = detail::make_tensor<SparseTensorImpl>(TensorTypeSet(type_id), result_vals.options().dtype());
+  get_sparse_impl(sparse_tensor)->resize_(sample.sparse_dim(), sample.dense_dim(), sample.sizes());
+  get_sparse_impl(sparse_tensor)->set_indices_and_values_unsafe(result_indices, result_vals);
+  if(sample.is_coalesced()) {
+    get_sparse_impl(sparse_tensor)->set_coalesced(true);
+  }
+
+  return sparse_tensor;
 }
    
 }}

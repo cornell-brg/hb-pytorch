@@ -17,7 +17,7 @@ def sddmm_expected(a, b, c):
         a._indices(),
         outvals,
         a.shape,
-    ).to_dense()
+    )
 
 def _test_torch_sddtmm(a, b, c):
     expected_tensor = sddmm_expected(a, b, c.t())
