@@ -6640,16 +6640,6 @@
   dispatch:
     SparseCPU: sddtmm_cpu
     SparseHammerBlade: sddtmm_hb
-
-  # [sampled transpose] dense-[dense transpose] matrix product [transpose] (self = sparse)
-  # computes (b@c.T).T, sampled by self.T
-  # Right now, returns a dense matrix, when it should return sparse. Can model off of sddtmm to fix.
-- func: stddtmmt(Tensor self, Tensor mat1, Tensor mat2t) -> Tensor
-  use_c10_dispatcher: full
-  variants: function, method
-  dispatch:
-    SparseCPU: stddtmmt_cpu
-    SparseHammerBlade: stddtmmt_hb
     
   # dense-[sparse transpose] matrix product
 - func: dstmm(Tensor self, Tensor mat2t) -> Tensor

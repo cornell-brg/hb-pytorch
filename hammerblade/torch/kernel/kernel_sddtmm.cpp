@@ -16,7 +16,7 @@ extern "C" {
   __attribute__ ((noinline))  int tensorlib_sddtmm(
           hb_tensor_t* result_inds_p, //destination
           hb_tensor_t* result_vals_p, //destination
-          hb_tensor_t* inds_p, //cols
+          hb_tensor_t* inds_p, //indices
           hb_tensor_t* b_p, //dense
           hb_tensor_t* c_p //dense
           ) { 
