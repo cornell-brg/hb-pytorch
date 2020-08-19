@@ -37,13 +37,13 @@ python print_trace.py --mode lo
 *Prints the line trace of all tiles in lo mode*
 ```
 python print_trace.py --mode lo
-                       --mid 4 9
+                      --mid 4 9
 ```
 *Prints the line trace of tiles [4-9) in mid, and all else in lo)*
 ```
 python print_trace.py --lo 0 3
-                     --mid 5 9
-                     --hi 10 11
+                      --mid 5 9
+                      --hi 10 11
 ```
 *Prints the line trace of tiles [0-3) in lo, [5-9) in mid, [10-11) in hi)*
 
