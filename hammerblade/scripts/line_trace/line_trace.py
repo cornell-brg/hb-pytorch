@@ -93,7 +93,7 @@ class Trace:
 
 
     # List of types of integer instructions executed by the core
-    _INSTRS_LIST    = ["local_ld" : 'lld',
+    _INSTRS_LIST    = {"local_ld" : 'lld',
                        "local_st": 'lst',
                        "remote_ld_dram": 'ldr',
                        "remote_ld_global": 'lgl',
@@ -164,11 +164,11 @@ class Trace:
                        "csrrwi": 'cwi',
                        "csrrsi": 'csi',
                        "csrrci": 'cci',
-                       "unknown": 'unk']
+                       "unknown": 'unk'}
 
 
     # List of types of floating point instructions executed by the core
-    _FP_INSTRS_LIST = ["fadd": 'fad',
+    _FP_INSTRS_LIST = {"fadd": 'fad',
                        "fsub": 'fsu',
                        "fmul": 'fmu',
                        "fsgnj": 'fgj',
@@ -191,7 +191,7 @@ class Trace:
                        "fclass": 'fcl',
                        "fmv_x_w": 'fxw',
                        "fdiv": 'fdi',
-                       "fsqrt": 'fsq']
+                       "fsqrt": 'fsq'}
 
     def __init__(self, trace_file, tile_list, start_pc, end_pc, ff):
         if ff:
