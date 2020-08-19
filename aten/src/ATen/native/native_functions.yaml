@@ -6643,6 +6643,7 @@
 
   # [sampled transpose] dense-[dense transpose] matrix product [transpose] (self = sparse)
   # computes (b@c.T).T, sampled by self.T
+  # Right now, returns a dense matrix, when it should return sparse. Can model off of sddtmm to fix.
 - func: stddtmmt(Tensor self, Tensor mat1, Tensor mat2t) -> Tensor
   use_c10_dispatcher: full
   variants: function, method

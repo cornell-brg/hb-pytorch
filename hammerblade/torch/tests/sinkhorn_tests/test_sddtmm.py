@@ -27,11 +27,12 @@ def _test_torch_sddtmm(a, b, c):
     got_hb = torch.sddtmm(ah, bh, ch)
     got_device = got_hb.device
     got_tensor = got_hb.cpu()
+    # compare HB with calculated sddtmm in python
     assert got_device == torch.device("hammerblade")
-    assert torch.equal(got_tensor, expected_tensor)
-    # compare with CPU
+    assert torch.equal(got_tensor.to_dense(), expected_tensor.to_dense())
+    # compare HB with CPU
     expected_tensor_cpu = torch.sddtmm(a, b, c)
-    assert torch.equal(got_tensor, expected_tensor_cpu)
+    assert torch.equal(got_tensor.to_dense(), expected_tensor_cpu.to_dense())
 
 
 def test_torch_sddtmm_1():

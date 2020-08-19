@@ -27,7 +27,7 @@ extern "C" {
 
     auto b = HBTensor<float>(b_p);
     auto c = HBTensor<float>(c_p);
-    auto res_indices = HBTensor<float>(result_inds_p);
+    auto res_indices = HBTensor<int>(result_inds_p);
     auto res_vals = HBTensor<float>(result_vals_p);
     
     auto dp_len = b.dim(1); // i.e. b.size(1) or c.size(1)

@@ -1294,7 +1294,8 @@ void sddtmm_kernel_cpu(
   const SparseTensor& a_sparse_tensor,
   const Tensor& b_dense_tensor,
   const Tensor& c_dense_tensor,
-  Tensor& out_tensor){
+  Tensor& out_indices,
+  Tensor& out_vals){
     
   if ( b_dense_tensor.scalar_type() != ScalarType::Float
     || c_dense_tensor.scalar_type() != ScalarType::Float ) {
@@ -1313,7 +1314,8 @@ void sddtmm_kernel_cpu(
   auto a_indices = indices.accessor<int64_t, 2>();
   auto b_dense = b_dense_tensor.accessor<scalar_t, 2>();
   auto c_dense = c_dense_tensor.accessor<scalar_t, 2>();
-  auto out = out_tensor.accessor<scalar_t, 2>();
+  auto res_indices = out_indices.accessor<int64_t, 2>();
+  auto res_vals = out_vals.accessor<scalar_t, 1>();
 
   int dot_len = b_dense.size(1);
   for (int k = 0; k < a_sparse_tensor._nnz(); k++) {
@@ -1323,19 +1325,33 @@ void sddtmm_kernel_cpu(
     float dot_total = 0;
     for (int i = 0; i < dot_len; i++)
       dot_total += b_dense[row][i] * c_dense[col][i];
-      
-    out[row][col] = dot_total;
+
+    // update indices & vals
+    res_indices[0][k] = row;
+    res_indices[1][k] = col;
+    res_vals[k] = dot_total;
   }
 }
-Tensor sddtmm_cpu(
+SparseTensor sddtmm_cpu(
   const SparseTensor& a_sparse_tensor,
   const Tensor& b_dense_tensor,
   const Tensor& c_dense_tensor) {
-  Tensor out_tensor = at::zeros({b_dense_tensor.size(0), c_dense_tensor.size(0)}, {at::requires_grad().device(at::kCPU).dtype(at::kFloat)});
+  
+  Tensor result_indices = at::zeros({2, a_sparse_tensor._nnz()}, {at::requires_grad().device(at::kCPU).dtype(at::kLong)});
+  Tensor result_vals = at::zeros(a_sparse_tensor._nnz(), {at::requires_grad().device(at::kCPU).dtype(at::kFloat)});
+
   AT_DISPATCH_ALL_TYPES(b_dense_tensor.scalar_type(), "sddtmm_cpu", [&]{
-    sddtmm_kernel_cpu<scalar_t>(a_sparse_tensor, b_dense_tensor, c_dense_tensor, out_tensor);
+    sddtmm_kernel_cpu<scalar_t>(a_sparse_tensor, b_dense_tensor, c_dense_tensor, result_indices, result_vals);
   });
-  return out_tensor;
+
+  //Create CPU sparse tensor (from SparseLLCopy):
+  SparseTensor sparse_tensor = detail::make_tensor<SparseTensorImpl>(TensorTypeSet(TensorTypeId::SparseCPUTensorId), result_vals.options().dtype());
+  get_sparse_impl(sparse_tensor)->resize_(a_sparse_tensor.sparse_dim(), a_sparse_tensor.dense_dim(), a_sparse_tensor.sizes());
+  get_sparse_impl(sparse_tensor)->set_indices_and_values_unsafe(result_indices, result_vals);
+  if(a_sparse_tensor.is_coalesced()) {
+    get_sparse_impl(sparse_tensor)->set_coalesced(true);
+  }
+  return sparse_tensor;
 }
 
 
