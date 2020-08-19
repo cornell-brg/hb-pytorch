@@ -41,13 +41,13 @@ python print_trace.py --mode lo
 python print_trace.py --mode lo
                       --mid 4 9
 ```
-*Prints the line trace of tiles [4-9) in mid, and all else in `lo`)*
+*Prints the line trace of tiles [4-9) in mid, and all else in `lo`*
 ```
 python print_trace.py --lo 0 3
                       --mid 5 9
                       --hi 10 11
 ```
-*Prints the line trace of tiles [0-3) in `lo`, [5-9) in `mid`, [10-11) in `hi`)*
+*Prints the line trace of tiles [0-3) in `lo`, [5-9) in `mid`, [10-11) in `hi`*
 
 
 ***Note:** compress_trace.py creates a file trace.obj in the active directory; ensure that print_trace.py is run from the same directory so that it can access trace.obj*
