@@ -8,9 +8,10 @@
 #
 #   Usage:
 #       python compress_trace.py --trace {vanilla_operaton_trace.csv}
-#                                --startpc {Starting PC (of kernel) for the beginning of line trace}
-#                                --endpc {Ending PC (of kernel) for the ending of line trace}
+#                                --startpc {optional} {Starting PC (of kernel) for the beginning of line trace}
+#                                --endpc {optional} {Ending PC (of kernel) for the ending of line trace}
 #                                --fastnfake {optional} {Flag to generate line trace of 4x4 Bladerunner}
+#   Note: if startpc and endpc are not specified, line trace is generated for the entire trace file
 #   Example:
 #       python compress_trace.py --trace vanilla_operation_trace.py
 #                                --startpc 1cd2c
@@ -32,18 +33,22 @@ if __name__ == "__main__":
 
     parser.add_argument("--trace", default="vanilla_operation_trace.csv", type=str,
                         help="Vanilla operation log file")
-    parser.add_argument("--startpc", type=str, required=True, 
+    parser.add_argument("--startpc", type=str,
                         help="Starting PC of trace")
-    parser.add_argument("--endpc", type=str, required=True, 
+    parser.add_argument("--endpc", type=str, 
                         help="Ending PC of trace")
     parser.add_argument("--fastnfake", action="store_true", default=False,
                         help="Change machine config")
     
     args = parser.parse_args()
-    tile_list = list(range(128))
+
+    if args.startpc is None:
+        args.startpc = 'xx'
+    if args.endpc is None:
+        args.endpc = 'xx'
     
     # Creating a Trace object for all trace information between startpc and endpc
-    TraceObj = Trace(args.trace, tile_list, args.startpc, args.endpc, args.fastnfake)
+    TraceObj = Trace(args.trace, args.startpc, args.endpc, args.fastnfake)
     
     # Store the trace object in binary file
     trace_file = open('trace.obj', 'wb')

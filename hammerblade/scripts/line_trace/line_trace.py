@@ -10,9 +10,10 @@
 #
 #   Step 1: Compress the .csv trace file with compress_trace.py
 #       python compress_trace.py --trace {vanilla_operaton_trace.csv}
-#                                --startpc {Starting PC (of kernel) for the beginning of line trace}
-#                                --endpc {Ending PC (of kernel) for the ending of line trace}
+#                                --startpc {optional} {Starting PC (of kernel) for the beginning of line trace}
+#                                --endpc {optional} {Ending PC (of kernel) for the ending of line trace}
 #                                --fastnfake {optional} {Flag to generate line trace of 4x4 Bladerunner}
+#   Note: if startpc and endpc are not specified, line trace is generated for the entire trace file
 #   Example:
 #       python compress_trace.py --trace vanilla_operation_trace.py
 #                                --startpc 1cd2c
@@ -193,7 +194,7 @@ class Trace:
                        "fdiv": 'fdi',
                        "fsqrt": 'fsq'}
 
-    def __init__(self, trace_file, tile_list, start_pc, end_pc, ff):
+    def __init__(self, trace_file, start_pc, end_pc, ff):
         if ff:
             self._TILE_Y_DIM = 4
             self._TILE_X_DIM = 4
@@ -220,19 +221,24 @@ class Trace:
                 tile_x = int(row["x"])
                 tile_y = int(row["y"])
 
-                if (tile_x, tile_y) in traces:
-                    if row["pc"] == start_pc:
+                if row["pc"] == start_pc or start_pc == 'xx':
+                    if not traces[(tile_x, tile_y)]["inrange"]:
                         traces[(tile_x, tile_y)]["inrange"] = True
-                        if self.start_cycle == -1:
-                            self.start_cycle = int(row["cycle"])
-                    
-                    if traces[(tile_x, tile_y)]["inrange"]:
-                        traces[(tile_x, tile_y)]["instr"][int(row["cycle"])] = row["operation"]
-                    
-                    if row["pc"] == end_pc:
-                        self.end_cycle = int(row["cycle"])
-                        traces[(tile_x, tile_y)]["inrange"] = False
-
+                    if self.start_cycle == -1:
+                        self.start_cycle = int(row["cycle"])
+                
+                if traces[(tile_x, tile_y)]["inrange"]:
+                    traces[(tile_x, tile_y)]["instr"][int(row["cycle"])] = row["operation"]
+                
+                if row["pc"] == end_pc:
+                    traces[(tile_x, tile_y)]["inrange"] = False
+                    self.end_cycle = int(row["cycle"])
+                
+                if end_pc == 'xx':
+                    self.end_cycle= int(row["cycle"])
+        
+        print("Start cycle: " + str(self.start_cycle) + " end cycle: " + str(self.end_cycle))
+        
         return traces            
 
     def set_mode(self, mode, start, end, all_tiles = False):
