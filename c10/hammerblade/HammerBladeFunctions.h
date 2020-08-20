@@ -17,6 +17,7 @@
 /*
  * inlcude bsg_manycore.h here
  */
+#include <bsg_manycore.h>
 #include <bsg_manycore_cuda.h>
 #include <bsg_manycore_printing.h>
 
@@ -40,6 +41,8 @@ C10_HAMMERBLADE_API void* memcpy_device_to_host(void *dst, const void *src, uint
 C10_HAMMERBLADE_API void* DMA_host_to_device(void *dst, const void *src, uint32_t nbytes);
 C10_HAMMERBLADE_API void* DMA_device_to_host(void *dst, const void *src, uint32_t nbytes);
 C10_HAMMERBLADE_API void offload_kernel(const char* kernel, std::vector<eva_t> args);
+C10_HAMMERBLADE_API void enable_hb_trace();
+C10_HAMMERBLADE_API void disable_hb_trace();
 
 extern std::atomic<int> hb_device_status;
 

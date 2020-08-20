@@ -258,6 +258,7 @@ stats/
 *.cosim
 *.vpd
 *.riscv
+*.dis
 *.cosim.daidir/
 *.cosim.tmp/
 ucli.key

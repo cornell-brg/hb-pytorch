@@ -1,0 +1,564 @@
+['lgc_ista_data_new_format_11/full-00.std']
+['lgc_ista_data_new_format_11/chunk-cosim.std']
+Emulating CUDALite...
+Emulation barrier init'ed with 1 threads
+PyTorch configed with 1 * 1 HB device
+HB startup config kernel applied
+
+  0%|          | 0/1 [00:00<?, ?it/s]
+100%|██████████| 1/1 [00:00<00:00, 54.56it/s] ATen profiler collecting ...
+
+ista: elapsed = 0.020312
+
+  0%|          | 0/1 [00:00<?, ?it/s]at top level kernel at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::sub(const at::Tensor&, const at::Tensor&, c10::Scalar)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::sub(const at::Tensor&, const at::Tensor&, c10::Scalar)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::max(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::SparseCPUType::{anonymous}::mv(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+redispatching...
+@#ACTUALS#@__self;[5157]<|>other;[5157]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&);1773
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free;20
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@;148
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);10
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::native::mul_stub::mul_stub();103
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@;1385
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);26
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;8
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub();1323
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__free;63
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__malloc;57
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__memcpy;61
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@OFFLOAD_KERNEL@__tensorlib_mul;894
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@OFFLOAD_KERNEL@__tensorlib_mul<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);105
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;24
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;21
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+
+100%|██████████| 1/1 [00:00<00:00,  3.80it/s]
+100%|██████████| 1/1 [00:00<00:00,  3.79it/s]
+torch ista: elapsed = 0.265608
++ COSIM_PYTHON_EXE=/home/zz546/bsg_bladerunner//bsg_replicant/examples/python/test_loader
++ [[ ! -f /home/zz546/bsg_bladerunner//bsg_replicant/examples/python/test_loader ]]
++ eval '/home/zz546/bsg_bladerunner//bsg_replicant/examples/python/test_loader +ntb_random_seed_automatic +c_args="/scratch/users/zz546/hb-pytorch/hammerblade/torch/tests/profiler/test_lgc_ista_spmv_profile_route.py"' '| grep -v ": instantiating\|\[.*_PROFILER\]"'
+++ grep -v ': instantiating\|\[.*_PROFILER\]'
+++ /home/zz546/bsg_bladerunner//bsg_replicant/examples/python/test_loader +ntb_random_seed_automatic +c_args=/scratch/users/zz546/hb-pytorch/hammerblade/torch/tests/profiler/test_lgc_ista_spmv_profile_route.py
+Chronologic VCS simulator copyright 1991-2018
+Contains Synopsys proprietary information.
+Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Aug  3 00:02 2020
+NOTE: automatic random seed used: 3668514007
+==================== BSG MACHINE SETTINGS: ====================
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_X                 =          16
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_Y                 =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_SET               =          16
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_WAY               =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_BLOCK_SIZE_WORDS  =          32
+[INFO][TESTBENCH] BSG_MACHINE_MAX_EPA_WIDTH            =          28
+[INFO][TESTBENCH] BSG_MACHINE_MEM_CFG                  = e_vcache_blocking_test_dramsim3_hbm2_4gb_x128
+tb.card.fpga.CL.core_clk_gen with cycle_time_p      400000
+tb.card.fpga.CL.clk_gen with cycle_time_p        1000
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+BSG INFO: bsg_nonsynth_dpi_rom (initial begin)
+BSG INFO:     Instantiation: tb.card.fpga.CL.trace_control
+BSG INFO:     width_p:                 2
+BSG INFO:     init_o_p:      00
+BSG INFO:     use_input_p:   0
+BSG INFO:     use_output_p:  1
+BSG INFO:     debug_p:       0
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[1].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[2].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[3].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[4].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[5].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[6].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[7].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler tb.card.fpga.CL.network.manycore_wrapper.manycore.y[8].x[15].tile.proc.h.z.vcore.vcore_prof
+## ----------------------------------------------------------------
+## MANYCORE HETERO TYPE CONFIGUREATIONS
+## ----------------------------------------------------------------
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## ----------------------------------------------------------------
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+WARNING: Behavioral models for independent clock FIFO configurations do not model synchronization delays. The behavioral models are functionally correct, and will represent the behavior of the configured FIFO. See the FIFO Generator User Guide for more information.
+BSG INFO: test_python Regression Test
+"/home/zz546/bsg_bladerunner/bsg_manycore/v/bsg_manycore_endpoint_standard.v", 354: tb.card.fpga.CL.mcl_to_axil.mc_ep_to_fifos.epsd.genblk3.unnamed$$_0: started at 194608000ps failed at 194608000ps
+	Offending '((out_credits_o === 'x) || (out_credits_o > 5'b0))'
+## out of remote store credits(= 0) x,y= 0, 1 displaying only once (tb.card.fpga.CL.mcl_to_axil.mc_ep_to_fifos.epsd)
+##   (this may be a performance problem; or normal behavior)
+[INFO][RX] Unfreezing tile t=223103729000, x= 0, y= 2
+[INFO][RX] Unfreezing tile t=223108530000, x= 1, y= 2
+[INFO][RX] Unfreezing tile t=223114131000, x= 2, y= 2
+[INFO][RX] Unfreezing tile t=223120532000, x= 3, y= 2
+[INFO][RX] Unfreezing tile t=223127733000, x= 4, y= 2
+[INFO][RX] Unfreezing tile t=223135734000, x= 5, y= 2
+[INFO][RX] Unfreezing tile t=223144535000, x= 6, y= 2
+[INFO][RX] Unfreezing tile t=223154136000, x= 7, y= 2
+[INFO][RX] Unfreezing tile t=223164537000, x= 8, y= 2
+[INFO][RX] Unfreezing tile t=223175738000, x= 9, y= 2
+[INFO][RX] Unfreezing tile t=223187739000, x=10, y= 2
+[INFO][RX] Unfreezing tile t=223200540000, x=11, y= 2
+[INFO][RX] Unfreezing tile t=223214400000, x=12, y= 2
+[INFO][RX] Unfreezing tile t=223229200000, x=13, y= 2
+[INFO][RX] Unfreezing tile t=223244800000, x=14, y= 2
+[INFO][RX] Unfreezing tile t=223261200000, x=15, y= 2
+[INFO][RX] Unfreezing tile t=223268930000, x= 0, y= 3
+[INFO][RX] Unfreezing tile t=223274531000, x= 1, y= 3
+[INFO][RX] Unfreezing tile t=223280932000, x= 2, y= 3
+[INFO][RX] Unfreezing tile t=223288133000, x= 3, y= 3
+[INFO][RX] Unfreezing tile t=223296134000, x= 4, y= 3
+[INFO][RX] Unfreezing tile t=223304935000, x= 5, y= 3
+[INFO][RX] Unfreezing tile t=223314536000, x= 6, y= 3
+[INFO][RX] Unfreezing tile t=223324937000, x= 7, y= 3
+[INFO][RX] Unfreezing tile t=223336138000, x= 8, y= 3
+[INFO][RX] Unfreezing tile t=223348139000, x= 9, y= 3
+[INFO][RX] Unfreezing tile t=223360940000, x=10, y= 3
+[INFO][RX] Unfreezing tile t=223374800000, x=11, y= 3
+[INFO][RX] Unfreezing tile t=223389600000, x=12, y= 3
+[INFO][RX] Unfreezing tile t=223405200000, x=13, y= 3
+[INFO][RX] Unfreezing tile t=223421600000, x=14, y= 3
+[INFO][RX] Unfreezing tile t=223438800000, x=15, y= 3
+[INFO][RX] Unfreezing tile t=223446931000, x= 0, y= 4
+[INFO][RX] Unfreezing tile t=223453332000, x= 1, y= 4
+[INFO][RX] Unfreezing tile t=223460533000, x= 2, y= 4
+[INFO][RX] Unfreezing tile t=223468534000, x= 3, y= 4
+[INFO][RX] Unfreezing tile t=223477335000, x= 4, y= 4
+[INFO][RX] Unfreezing tile t=223486936000, x= 5, y= 4
+[INFO][RX] Unfreezing tile t=223497337000, x= 6, y= 4
+[INFO][RX] Unfreezing tile t=223508538000, x= 7, y= 4
+[INFO][RX] Unfreezing tile t=223520539000, x= 8, y= 4
+[INFO][RX] Unfreezing tile t=223533340000, x= 9, y= 4
+[INFO][RX] Unfreezing tile t=223547200000, x=10, y= 4
+[INFO][RX] Unfreezing tile t=223562000000, x=11, y= 4
+[INFO][RX] Unfreezing tile t=223577600000, x=12, y= 4
+[INFO][RX] Unfreezing tile t=223594000000, x=13, y= 4
+[INFO][RX] Unfreezing tile t=223611200000, x=14, y= 4
+[INFO][RX] Unfreezing tile t=223629200000, x=15, y= 4
+[INFO][RX] Unfreezing tile t=223637732000, x= 0, y= 5
+[INFO][RX] Unfreezing tile t=223644933000, x= 1, y= 5
+[INFO][RX] Unfreezing tile t=223652934000, x= 2, y= 5
+[INFO][RX] Unfreezing tile t=223661735000, x= 3, y= 5
+[INFO][RPyTorch configed with 16 * 8 HB device
+HB startup config kernel applied
+
+  0%|          | 0/1 [00:00<?, ?it/s]
+100%|##########| 1/1 [00:00<00:00, 31.05it/s] ATen profiler collecting ...
+
+ista: elapsed = 0.040458
+
+  0%|          | 0/1 [00:00<?, ?it/s]at top level kernel at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::sub(const at::Tensor&, const at::Tensor&, c10::Scalar)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::sub(const at::Tensor&, const at::Tensor&, c10::Scalar)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::max(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::SparseCPUType::{anonymous}::mv(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+redispatching...
+@#ACTUALS#@__self;[5157]<|>other;[5157]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&);1256600457
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free;10
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@;88
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);20
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::native::mul_stub::mul_stub();20
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@;563676178
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);72
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;26
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub();563676049
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__free;98
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__malloc;37
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__memcpy;4478936
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@OFFLOAD_KERNEL@__tensorlib_mul;559196600
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@OFFLOAD_KERNEL@__tensorlib_mul<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);692923856
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;692923673
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;25
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+
+100%|##########| 1/1 [20:56<00:00, 1256.86s/it]
+100%|##########| 1/1 [20:56<00:00, 1256.87s/it]
+torch ista: elapsed = 1256.869368
+X] Unfreezing tile t=223671336000, x= 4, y= 5
+[INFO][RX] Unfreezing tile t=223681737000, x= 5, y= 5
+[INFO][RX] Unfreezing tile t=223692938000, x= 6, y= 5
+[INFO][RX] Unfreezing tile t=223704939000, x= 7, y= 5
+[INFO][RX] Unfreezing tile t=223717740000, x= 8, y= 5
+[INFO][RX] Unfreezing tile t=223731600000, x= 9, y= 5
+[INFO][RX] Unfreezing tile t=223746400000, x=10, y= 5
+[INFO][RX] Unfreezing tile t=223762000000, x=11, y= 5
+[INFO][RX] Unfreezing tile t=223778400000, x=12, y= 5
+[INFO][RX] Unfreezing tile t=223795600000, x=13, y= 5
+[INFO][RX] Unfreezing tile t=223813600000, x=14, y= 5
+[INFO][RX] Unfreezing tile t=223832400000, x=15, y= 5
+[INFO][RX] Unfreezing tile t=223841333000, x= 0, y= 6
+[INFO][RX] Unfreezing tile t=223849334000, x= 1, y= 6
+[INFO][RX] Unfreezing tile t=223858135000, x= 2, y= 6
+[INFO][RX] Unfreezing tile t=223867736000, x= 3, y= 6
+[INFO][RX] Unfreezing tile t=223878137000, x= 4, y= 6
+[INFO][RX] Unfreezing tile t=223889338000, x= 5, y= 6
+[INFO][RX] Unfreezing tile t=223901339000, x= 6, y= 6
+[INFO][RX] Unfreezing tile t=223914140000, x= 7, y= 6
+[INFO][RX] Unfreezing tile t=223928000000, x= 8, y= 6
+[INFO][RX] Unfreezing tile t=223942800000, x= 9, y= 6
+[INFO][RX] Unfreezing tile t=223958400000, x=10, y= 6
+[INFO][RX] Unfreezing tile t=223974800000, x=11, y= 6
+[INFO][RX] Unfreezing tile t=223992000000, x=12, y= 6
+[INFO][RX] Unfreezing tile t=224010000000, x=13, y= 6
+[INFO][RX] Unfreezing tile t=224028800000, x=14, y= 6
+[INFO][RX] Unfreezing tile t=224048400000, x=15, y= 6
+[INFO][RX] Unfreezing tile t=224057734000, x= 0, y= 7
+[INFO][RX] Unfreezing tile t=224066535000, x= 1, y= 7
+[INFO][RX] Unfreezing tile t=224076136000, x= 2, y= 7
+[INFO][RX] Unfreezing tile t=224086537000, x= 3, y= 7
+[INFO][RX] Unfreezing tile t=224097738000, x= 4, y= 7
+[INFO][RX] Unfreezing tile t=224109739000, x= 5, y= 7
+[INFO][RX] Unfreezing tile t=224122540000, x= 6, y= 7
+[INFO][RX] Unfreezing tile t=224136400000, x= 7, y= 7
+[INFO][RX] Unfreezing tile t=224151200000, x= 8, y= 7
+[INFO][RX] Unfreezing tile t=224166800000, x= 9, y= 7
+[INFO][RX] Unfreezing tile t=224183200000, x=10, y= 7
+[INFO][RX] Unfreezing tile t=224200400000, x=11, y= 7
+[INFO][RX] Unfreezing tile t=224218400000, x=12, y= 7
+[INFO][RX] Unfreezing tile t=224237200000, x=13, y= 7
+[INFO][RX] Unfreezing tile t=224256800000, x=14, y= 7
+[INFO][RX] Unfreezing tile t=224277200000, x=15, y= 7
+[INFO][RX] Unfreezing tile t=224286935000, x= 0, y= 8
+[INFO][RX] Unfreezing tile t=224296536000, x= 1, y= 8
+[INFO][RX] Unfreezing tile t=224306937000, x= 2, y= 8
+[INFO][RX] Unfreezing tile t=224318138000, x= 3, y= 8
+[INFO][RX] Unfreezing tile t=224330139000, x= 4, y= 8
+[INFO][RX] Unfreezing tile t=224342940000, x= 5, y= 8
+[INFO][RX] Unfreezing tile t=224356800000, x= 6, y= 8
+[INFO][RX] Unfreezing tile t=224371600000, x= 7, y= 8
+[INFO][RX] Unfreezing tile t=224387200000, x= 8, y= 8
+[INFO][RX] Unfreezing tile t=224403600000, x= 9, y= 8
+[INFO][RX] Unfreezing tile t=224420800000, x=10, y= 8
+[INFO][RX] Unfreezing tile t=224438800000, x=11, y= 8
+[INFO][RX] Unfreezing tile t=224457600000, x=12, y= 8
+[INFO][RX] Unfreezing tile t=224477200000, x=13, y= 8
+[INFO][RX] Unfreezing tile t=224497600000, x=14, y= 8
+[INFO][RX] Unfreezing tile t=224518800000, x=15, y= 8
+[INFO][RX] Unfreezing tile t=224528936000, x= 0, y= 9
+[INFO][RX] Unfreezing tile t=224539337000, x= 1, y= 9
+[INFO][RX] Unfreezing tile t=224550538000, x= 2, y= 9
+[INFO][RX] Unfreezing tile t=224562539000, x= 3, y= 9
+[INFO][RX] Unfreezing tile t=224575340000, x= 4, y= 9
+[INFO][RX] Unfreezing tile t=224589200000, x= 5, y= 9
+[INFO][RX] Unfreezing tile t=224604000000, x= 6, y= 9
+[INFO][RX] Unfreezing tile t=224619600000, x= 7, y= 9
+[INFO][RX] Unfreezing tile t=224636000000, x= 8, y= 9
+[INFO][RX] Unfreezing tile t=224653200000, x= 9, y= 9
+[INFO][RX] Unfreezing tile t=224671200000, x=10, y= 9
+[INFO][RX] Unfreezing tile t=224690000000, x=11, y= 9
+[INFO][RX] Unfreezing tile t=224709600000, x=12, y= 9
+[INFO][RX] Unfreezing tile t=224730000000, x=13, y= 9
+[INFO][RX] Unfreezing tile t=224751200000, x=14, y= 9
+[INFO][RX] Unfreezing tile t=224768951000, x=15, y= 9
+BSG REGRESSION TEST [32mPASSED[0m
+BSG REGRESSION TEST [32mPASSED[0m
+BSG COSIM PASS: Test passed!
+$finish called from file "/home/zz546/bsg_bladerunner/bsg_replicant/libraries/platforms/aws-vcs/machine_wrapper.sv", line 60.
+Fatal: "/home/zz546/bsg_bladerunner/basejump_stl/bsg_test/bsg_nonsynth_dpi_gpio.v", 62: tb.card.fpga.CL.trace_control: at time 280074620000 ps
+BSG ERROR (tb.card.fpga.CL.trace_control): final block executed before fini() was called
+$finish called from file "/home/zz546/bsg_bladerunner/basejump_stl/bsg_test/bsg_nonsynth_dpi_gpio.v", line 62.
+$finish at simulation time         280074620000
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 280074620000 ps
+self;[5157]<|>other;[5157]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&);1773
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free;20
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@;148
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);10
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::native::mul_stub::mul_stub();103
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@;1385
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);26
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;8
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub();1323
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__free;63
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__malloc;57
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__memcpy;61
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@OFFLOAD_KERNEL@__tensorlib_mul;894
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@OFFLOAD_KERNEL@__tensorlib_mul<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);105
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;24
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;21
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+self;[5157]<|>other;[5157]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&);1256600457
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free;10
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@;88
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);20
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::native::mul_stub::mul_stub();20
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@;563676178
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);72
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;26
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub();563676049
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__free;98
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__malloc;37
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__memcpy;4478936
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@OFFLOAD_KERNEL@__tensorlib_mul;559196600
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@OFFLOAD_KERNEL@__tensorlib_mul<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);692923856
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;692923673
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;25
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+|- Node(@CPU_LOG@ : 148.0)
+  |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 10.0)
+  |- Node(at::native::mul_stub::mul_stub() : 103.0)
+|- Node(@HB_LOG@ : 481.0)
+  |- Node(at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 46.0)
+    |- Node(@BSG_API_CALL@__malloc : 0.0)
+      |- Node(@TRIM@ : 0.0)
+  |- Node(at::native::mul_stub::mul_stub() : 378.0)
+    |- Node(@BSG_API_CALL@__free : 0.0)
+      |- Node(@TRIM@ : 0.0)
+    |- Node(@BSG_API_CALL@__malloc : 0.0)
+      |- Node(@TRIM@ : 0.0)
+    |- Node(@BSG_API_CALL@__memcpy : 0.0)
+      |- Node(@TRIM@ : 0.0)
+    |- Node(@OFFLOAD_KERNEL@__tensorlib_mul : 0.0)
+      |- Node(@TRIM@ : 0.0)
+total time on HB = 26.186
+Actual self - full:[5157] <> chunk:[5157]
+Actual other - full:[5157] <> chunk:[5157]
+==CPU=LOG==
+
+digraph {
+0 [ shape=record label = "@CPU_LOG@|148.00"];
+1 [ shape=record label = "empty|10.00"];
+2 [ shape=record label = "mul_stub|103.00"];
+0 -> 1;
+0 -> 2;
+}
+
+
+==HB=LOG==
+
+digraph {
+0 [ shape=record label = "@HB_LOG@|481.00"];
+1 [ shape=record label = "empty|46.00"];
+2 [ shape=record label = "@BSG_API_CALL@__malloc|0.00"];
+4 [ shape=record label = "mul_stub|378.00"];
+5 [ shape=record label = "@BSG_API_CALL@__free|0.00"];
+7 [ shape=record label = "@BSG_API_CALL@__malloc|0.00"];
+9 [ shape=record label = "@BSG_API_CALL@__memcpy|0.00"];
+11 [ shape=record label = "@OFFLOAD_KERNEL@__tensorlib_mul|0.00"];
+0 -> 1;
+0 -> 4;
+1 -> 2;
+4 -> 5;
+4 -> 7;
+4 -> 9;
+4 -> 11;
+}
+
+
+==TEXT==
+
++-----------------------+---------------+--------------------+--------------------+-----------------+---------------------+-----------------+-------------------+
+|        ATen OP        |     Input     |     Full  Size     |     Chunk Size     |    Xeon Time    |    HB Total Time    |    Host Time    |    Device Time    |
++-----------------------+---------------+--------------------+--------------------+-----------------+---------------------+-----------------+-------------------+
+| mul                   | self          | [5157]             | [5157]             |            0.15 |                0.51 |            0.48 |              0.03 |
+|                       | other         | [5157]             | [5157]             |                 |                     |                 |                   |
++-----------------------+---------------+--------------------+--------------------+-----------------+---------------------+-----------------+-------------------+
+

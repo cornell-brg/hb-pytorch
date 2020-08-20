@@ -1,0 +1,63 @@
+Emulating CUDALite...
+Emulation barrier init'ed with 1 threads
+PyTorch configed with 1 * 1 HB device
+HB startup config kernel applied
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 49.47it/s] ATen profiler collecting ...
+
+ista: elapsed = 0.022457
+  0%|          | 0/1 [00:00<?, ?it/s]at top level kernel at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+redispatching...
+@#ACTUALS#@__self;[5157]<|>other;[5157]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&);1645
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free;21
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@;149
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);10
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::native::mul_stub::mul_stub();102
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@;1241
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);28
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;9
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub();1177
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__free;63
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__malloc;57
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__memcpy;64
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@OFFLOAD_KERNEL@__tensorlib_mul;726
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::native::mul_stub::mul_stub()<|>@OFFLOAD_KERNEL@__tensorlib_mul<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);111
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;30
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;16
+at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+at top level kernel at::Tensor at::CPUType::{anonymous}::clone(const at::Tensor&, c10::optional<c10::MemoryFormat>)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::sub(const at::Tensor&, const at::Tensor&, c10::Scalar)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::sub(const at::Tensor&, const at::Tensor&, c10::Scalar)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::max(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::SparseCPUType::{anonymous}::mv(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+100%|██████████| 1/1 [00:00<00:00,  3.77it/s]100%|██████████| 1/1 [00:00<00:00,  3.76it/s]
+torch ista: elapsed = 0.267747
+
