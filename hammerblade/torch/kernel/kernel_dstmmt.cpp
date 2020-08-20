@@ -29,8 +29,8 @@ extern "C" {
     auto b_rows = HBTensor<int>(b_rows_p);
     auto b_vals = HBTensor<float>(b_values_p);
 
-    auto a_nrows = res.dim(0);
-    auto b_ncols = res.dim(1);
+    auto a_nrows = res.dim(1);
+    auto b_ncols = res.dim(0);
     auto nnz = b_vals.numel();
 
     // for each row of a, do the multiplication

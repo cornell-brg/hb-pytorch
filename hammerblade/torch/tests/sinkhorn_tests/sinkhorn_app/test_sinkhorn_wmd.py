@@ -14,8 +14,8 @@ QUERY_IDX = 100
 LAMBDA = 1
 
 # Data files. (Ask Adrian for these.)
-DATA_MAT = '/home/amp342/Cosim/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-mat.npz'
-DATA_VECS = '/home/amp342/Cosim/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-vecs.npy'
+DATA_MAT = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-mat.npz'
+DATA_VECS = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-vecs.npy'
 
 def dense_to_sparse(m):
     m_coo = m.tocoo()
@@ -29,11 +29,11 @@ def dense_to_sparse(m):
 def swmd_torch(r, cT, vecs, niters):
     # Convert arrays to PyTorch tensors.
     r = torch.FloatTensor(r)
-    c_coo = cT.tocoo()
+    cT_coo = cT.tocoo()
     cT = torch.sparse.FloatTensor(
-        torch.LongTensor(numpy.vstack((c_coo.row, c_coo.col))),
-        torch.FloatTensor(c_coo.data),
-        torch.Size(c_coo.shape),
+        torch.LongTensor(numpy.vstack((cT_coo.row, cT_coo.col))),
+        torch.FloatTensor(cT_coo.data),
+        torch.Size(cT_coo.shape),
     )
 
     vecs = torch.FloatTensor(vecs)
@@ -66,18 +66,16 @@ def swmd_torch(r, cT, vecs, niters):
         # Compute `c * 1/(K_T @ u)` using a hand-rolled SDDMM.
         # v = c * (1.0 / _sddmm(c, K_T, u))
         # v = c * (1.0 / torch.sddtmm(c, K_T, uT)
-        vT = cT * (1.0 / torch.sddtmm(cT, uT, K_T))
-
-        # in the future, vT should return a sparse tensor. Since that's not supported, for now, we convert it to one
-        vT = dense_to_sparse(vT)
-
+        # vT = cT * (1.0 / torch.sddtmm(cT, uT, K_T))
+        vT = cT * torch.sddtmm(cT, uT, K_T)
         # custom dstmm.t():
         # x = _dsmp(K_div_r, v)
         # x = torch.dstmm(K_div_r, vT)
         xT = torch.dstmmt(K_div_r, vT)
-        
-    out = (uT.t() * dstmm(K * M, vT)).sum(axis=0)
-    # out = (uT * (vT @ (K_T * M.t())).sum(axis=1)
+
+    out = (uT.t() * torch.dstmm(K * M, vT)).sum(axis=0)
+    # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
+    #Note: M is huge compared to uT, so use the sum(axis=0) instead of sum(axis=1) line
     return out
 
 
@@ -85,13 +83,20 @@ def swmd_torch(r, cT, vecs, niters):
 # Load data.
 vecs = numpy.load(DATA_VECS)
 mat = scipy.sparse.load_npz(DATA_MAT)
+print("vecs size:", vecs.shape)
+print("mat size:", mat.shape)
 mat = mat[:, :N_DOCS]  # Use a subset of the data.
 
 # The query vector.
 r = numpy.asarray(mat[:, QUERY_IDX].todense()).squeeze()
 
 # mat could theoretically be stored as its transpose, so don't count 
-matT = mat.T 
+matT = mat.T
+
 # BEGIN PROFILING HERE
+torch.hammerblade.profiler.enable()
 scores = swmd_torch(r, matT, vecs, niters=1)
+torch.hammerblade.profiler.disable()
 # END PROFILING HERE
+
+print(torch.hammerblade.profiler.exec_time.raw_stack())

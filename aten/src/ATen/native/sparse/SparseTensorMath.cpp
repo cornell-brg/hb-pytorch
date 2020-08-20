@@ -1439,8 +1439,8 @@ void dstmmt_kernel(
   auto b_vals = b_vals_tensor.accessor<scalar_t, 1>();
   auto res = res_tensor.accessor<scalar_t, 2>();
 
-  auto a_nrows = res.size(0);
-  auto b_ncols = res.size(1);
+  auto a_nrows = res.size(1);
+  auto b_ncols = res.size(0);
   auto nnz = b_vals.size(0);
 
   float sum;

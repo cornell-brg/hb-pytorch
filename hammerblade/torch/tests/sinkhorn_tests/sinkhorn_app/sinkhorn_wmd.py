@@ -14,8 +14,8 @@ QUERY_IDX = 100
 LAMBDA = 1
 
 # Data files. (Ask Adrian for these.)
-DATA_MAT = '/home/amp342/Emulator/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-mat.npz'
-DATA_VECS = '/home/amp342/Emulator/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-vecs.npy'
+DATA_MAT = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-mat.npz'
+DATA_VECS = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-vecs.npy'
 
 
 def swmd_numpy(r, c, vecs, niters):
