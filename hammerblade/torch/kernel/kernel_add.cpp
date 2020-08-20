@@ -88,13 +88,10 @@ int tensorlib_add_Long( hb_tensor_t* t0_p, hb_tensor_t* t1_p,
   hb_tiled_foreach(
     [alpha](long long a, long long b) {
 	  std::cout << "alpha: " << alpha << std::endl;
-      int32_t ah = (alpha & 0xffff0000) >> 32;
-      int32_t al = (alpha & 0xffff);
-      int32_t bh = (b & 0xffff0000) >> 32;
-      int32_t bl = (b & 0xffff);
-      std::cout << ((ah * bl + al * bh) << 32 )<< std::endl;
-      std::cout << ((ah * bl + al * bh) << 32) + mulh(al, bl) << std::endl;
-      std::cout << ((ah * bl + al * bh) << 32) + mulh(al, bl) + al * bl + a << std::endl;
+      int32_t ah = (alpha & 0xffffffff00000000) >> 32;
+      int32_t al = (alpha & 0xffffffff);
+      int32_t bh = (b & 0xffffffff00000000) >> 32;
+      int32_t bl = (b & 0xffffffff);
       return ((ah * bl + al * bh) << 32) + mulh(al, bl) + al * bl + a;
   },
   c, a, b);
