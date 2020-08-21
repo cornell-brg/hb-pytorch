@@ -19,6 +19,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <c10/probe/HBProfiler.h>
+#include <c10/hammerblade/HammerBladeFunctions.h>
 
 #include <torch/csrc/THP.h>
 #include <torch/csrc/DynamicTypes.h>
@@ -526,6 +527,16 @@ static PyObject * THPModule_hbProfilerEnd(PyObject *module, PyObject *noargs) {
   Py_RETURN_NONE;
 }
 
+static PyObject * THPModule_hbEnableTrace(PyObject *module, PyObject *noargs) {
+  c10::hammerblade::enable_hb_trace();
+  Py_RETURN_NONE;
+}
+
+static PyObject * THPModule_hbDisableTrace(PyObject *module, PyObject *noargs) {
+  c10::hammerblade::disable_hb_trace();
+  Py_RETURN_NONE;
+}
+
 #ifdef PROFILE_ATEN
 static PyObject * THPModule_hbProfilerExecTimeRawStack(PyObject *module, PyObject *noargs) {
   return PyUnicode_FromString(c10::probe::exec_time_raw_stack().c_str());
@@ -650,6 +661,8 @@ static PyMethodDef TorchMethods[] = {
   {"_get_qengine", (PyCFunction)THPModule_qEngine, METH_NOARGS, nullptr},
   {"_set_qengine", (PyCFunction)THPModule_setQEngine, METH_O, nullptr},
   {"_supported_qengines", (PyCFunction)THPModule_supportedQEngines, METH_NOARGS, nullptr},
+  {"hb_trace_enable", (PyCFunction)THPModule_hbEnableTrace, METH_NOARGS,  nullptr},
+  {"hb_trace_disable", (PyCFunction)THPModule_hbDisableTrace, METH_NOARGS,  nullptr},
   {"_hb_profiler_start", (PyCFunction)THPModule_hbProfilerStart, METH_NOARGS,  nullptr},
   {"_hb_profiler_end",   (PyCFunction)THPModule_hbProfilerEnd,   METH_NOARGS,  nullptr},
 #ifdef PROFILE_ATEN
