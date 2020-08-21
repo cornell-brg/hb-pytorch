@@ -30,6 +30,14 @@ void offload_tensor_scalar_impl(std::vector<Tensor> tensors, std::vector<eva_t> 
                                 const char* kernel);
 
 //==============================================
+// Offloading helper which takes a list of TensorList,
+// a list of tensors and a list of scalars
+//==============================================
+
+void offload_tensorlist_scalar_impl(TensorList list, std::vector<Tensor> tensors,
+                                    std::vector<eva_t> device_scalars, const char* kernel);
+
+//==============================================
 // hb_offload_kernel
 //
 // Tensors args, Scalar args, kernel name
