@@ -1234,56 +1234,20 @@ Tensor mv_sparse(const SparseTensor& self, const Tensor& vec)
 
 
 
-template <typename scalar_t>
-void sddmm_kernel_cpu(
-  const SparseTensor& a_sparse_tensor,
-  const Tensor& b_dense_tensor,
-  const Tensor& c_dense_tensor,
-  Tensor& out_tensor){
-    
-  if ( b_dense_tensor.scalar_type() != ScalarType::Float
-    || c_dense_tensor.scalar_type() != ScalarType::Float ) {
-    AT_ERROR("Sddmm is implemented for Float type only for matrices b and c"); 
-  }
+SparseTensor sparse_reciprocal_cpu(SparseTensor& self) {
+  TORCH_CHECK(self.is_coalesced(), "sparse_reciprocal_cpu only supports a coalesced tensor");
+  int64_t nnz = self._nnz();
+  Tensor vals = self._values();
 
-  TORCH_CHECK(b_dense_tensor.size(0) == a_sparse_tensor.size(0) && c_dense_tensor.size(1) == a_sparse_tensor.size(1),"Sddmm sample dimension mismatch: sample was shape ",a_sparse_tensor.size(0)," by ",a_sparse_tensor.size(1),", but b@c is shape ",b_dense_tensor.size(0)," by ",c_dense_tensor.size(1));
-  TORCH_CHECK(a_sparse_tensor.sparse_dim() == 2, "We do not support hybrid sparse tensor for 'a' in sddmm!");
-  TORCH_CHECK(b_dense_tensor.dim() == 2 && c_dense_tensor.dim() == 2, "Expected 2D matrixes for 'a' and 'b', but got ", b_dense_tensor.dim(), " and ", c_dense_tensor.dim(), " tensors");
-
-  auto indices = a_sparse_tensor._indices();
-  TORCH_CHECK(indices.dtype() == at::kLong, "Indices should be long, but got ", indices.dtype());
-
-  auto a_indices = indices.accessor<int64_t, 2>();
-  auto b_dense = b_dense_tensor.accessor<scalar_t, 2>();
-  auto c_dense = c_dense_tensor.accessor<scalar_t, 2>();
-  auto out = out_tensor.accessor<scalar_t, 2>();
-
-  int dot_len = b_dense.size(1);
-  for (int k = 0; k < a_sparse_tensor._nnz(); k++) {
-    int ai = a_indices[0][k]; //0
-    int aj = a_indices[1][k];  //1
-
-    float dot_total = 0;
-    for (int i = 0; i < dot_len; i++)
-      dot_total += b_dense[ai][i] * c_dense[i][aj];
-      
-    out[ai][aj] = dot_total;
-  }
-}
-Tensor sddmm_cpu(
-  const SparseTensor& a_sparse_tensor,
-  const Tensor& b_dense_tensor,
-  const Tensor& c_dense_tensor) {
-  Tensor out_tensor = at::zeros(a_sparse_tensor.sizes(), {at::requires_grad().device(at::kCPU).dtype(at::kFloat)});
-  AT_DISPATCH_ALL_TYPES(b_dense_tensor.scalar_type(), "sddmm_cpu", [&]{
-    sddmm_kernel_cpu<scalar_t>(a_sparse_tensor, b_dense_tensor, c_dense_tensor, out_tensor);
+  AT_DISPATCH_ALL_TYPES(self.scalar_type(), "sparse_reciprocal_cpu", [&]{
+    auto out = vals.accessor<scalar_t, 1>();
+    for (int i = 0; i < nnz; i++){
+      out[i] = 1 / out[i];
+    }  
   });
-  return out_tensor;
+
+  return self;
 }
-
-
-
-
 
 
 
@@ -1302,7 +1266,7 @@ void sddtmm_kernel_cpu(
     AT_ERROR("SddTmm is implemented for Float type only for matrices b and c"); 
   }
 
-  TORCH_CHECK(a_sparse_tensor.sparse_dim() == 2, "We do not support hybrid sparse tensor for 'a' in sddmm!");
+  TORCH_CHECK(a_sparse_tensor.sparse_dim() == 2, "We do not support hybrid sparse tensor for 'a' in sddtmm!");
   TORCH_CHECK(b_dense_tensor.dim() == 2 && c_dense_tensor.dim() == 2, "Expected 2D matrixes for 'a' and 'b', but got ", b_dense_tensor.dim(), " and ", c_dense_tensor.dim(), " tensors");
   TORCH_CHECK(b_dense_tensor.size(1) == c_dense_tensor.size(1), "Matrix multiply dimension mismatch: 'b' dim 1 = ", b_dense_tensor.size(1), ", 'c'.T dim 0 = ", c_dense_tensor.size(1));
 

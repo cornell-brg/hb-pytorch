@@ -66,8 +66,9 @@ def swmd_torch(r, cT, vecs, niters):
         # Compute `c * 1/(K_T @ u)` using a hand-rolled SDDMM.
         # v = c * (1.0 / _sddmm(c, K_T, u))
         # v = c * (1.0 / torch.sddtmm(c, K_T, uT)
-        # vT = cT * (1.0 / torch.sddtmm(cT, uT, K_T))
-        vT = cT * torch.sddtmm(cT, uT, K_T)
+        vT = cT * torch.sddtmm(cT, uT, K_T).sparse_reciprocal()
+        # vT = cT * torch.sddtmm(cT, uT, K_T)
+        
         # custom dstmm.t():
         # x = _dsmp(K_div_r, v)
         # x = torch.dstmm(K_div_r, vT)
