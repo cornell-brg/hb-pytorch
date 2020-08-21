@@ -103,8 +103,8 @@ int tensorlib_add_Long( hb_tensor_t* t0_p, hb_tensor_t* t1_p,
       uint32_t bh = b >> 32;
       uint32_t bl = b & 0xffffffff;
       uint32_t albl = al * bl;
-      int64_t mul = ((int64_t)(ah * bl + al * bh) << 32) + (int64_t)(((uint64_t)mulh(al,bl)) << 32) + albl;
-      return mul + a;
+      int64_t ab2 = ((int64_t)(ah * bl + al * bh) << 32) + (int64_t)(((uint64_t)mulh(al,bl)) << 32) + albl;
+      return ab2 + a;
   },
   c, a, b);
 
