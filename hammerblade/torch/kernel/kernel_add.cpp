@@ -8,30 +8,41 @@
 // Date    : 03/05/2020, 07/13/2020
 
 #include <kernel_common.hpp>
+#include <iostream>
+#include <cstdint>
 
 // emulate mulh
 
-inline int32_t mulh(int32_t a, int32_t b) {
-  
-  int16_t ah = (a & 0xffff0000) >> 16;
-  int16_t al = (a & 0xffff);
-  int16_t bh = (b & 0xffff0000) >> 16;
-  int16_t bl = (b & 0xffff);
-  
-  int32_t ahbh = ah * bh;
-  int32_t alhb_h = (al * bh + bl * ah) >> 16;
-  int32_t alhb_l = ((al * bh + bl * ah) & 0xffff) << 16;
-  int32_t total_l = alhb_l + al * bl;
-  int32_t carry = 0;
-  
-  if (total_l - alhb_l != al * bl) {
+inline uint32_t mulh(uint32_t a, uint32_t b) {
+
+  uint32_t ah = (a & 0xffff0000) >> 16;
+  uint32_t al = (a & 0xffff);
+  uint32_t bh = (b & 0xffff0000) >> 16;
+  uint32_t bl = (b & 0xffff);
+
+  uint32_t ahbh = ah * bh;
+  uint32_t albl = al * bl;
+  uint32_t albh = al * bh + bl * ah;
+  uint32_t albh_carry = 0;
+
+  if (albh < al * bh || albh < bl * ah) {
+    albh_carry = 1;
+  }
+
+  uint32_t albh_h = albh >> 16;
+  uint32_t albh_l = (albh & 0xffff) << 16;
+  uint32_t total_l = albh_l + albl;
+  uint32_t carry = 0;
+
+  if (total_l < albh_l || total_l < albl) {
     carry = 1;
   }
-  
-  int32_t _mulh = ahbh + alhb_h + carry;
-  std::cout << _mulh << std::endl;
+
+  uint32_t _mulh = ahbh + albh_h + carry + (albh_carry << 16);
+
   return _mulh;
 }
+
 
 // As with all HB kernels, We wrap them with extern "C" to prevent name
 // mangling.
@@ -87,12 +98,13 @@ int tensorlib_add_Long( hb_tensor_t* t0_p, hb_tensor_t* t1_p,
 
   hb_tiled_foreach(
     [alpha](long long a, long long b) {
-	  std::cout << "alpha: " << alpha << std::endl;
-      int32_t ah = (alpha & 0xffffffff00000000) >> 32;
-      int32_t al = (alpha & 0xffffffff);
-      int32_t bh = (b & 0xffffffff00000000) >> 32;
-      int32_t bl = (b & 0xffffffff);
-      return ((ah * bl + al * bh) << 32) + (mulh(al, bl) << 32) + al * bl + a;
+      uint32_t ah = alpha >> 32;
+      uint32_t al = alpha & 0xffffffff;
+      uint32_t bh = b >> 32;
+      uint32_t bl = b & 0xffffffff;
+      uint32_t albl = al * bl;
+      int64_t ab2 = ((int64_t)(ah * bl + al * bh) << 32) + (int64_t)(((uint64_t)mulh(al,bl)) << 32) + albl;
+      return ab2 + a;
   },
   c, a, b);
 
