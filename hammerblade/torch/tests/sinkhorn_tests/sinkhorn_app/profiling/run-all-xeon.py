@@ -17,7 +17,7 @@ print()
 print("total number of jobs: " + str(len(route)))
 
 for i in range(len(route)):
-  for j in range(1): # range(5) is default
+  for j in range(5): # range(5) is default
     cmd = copy.deepcopy(route)
     cmd[i]['offload'] = True
     fancy_print(cmd)

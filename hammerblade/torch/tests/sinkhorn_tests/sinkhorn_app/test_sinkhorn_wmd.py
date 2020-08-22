@@ -55,10 +55,6 @@ def swmd_torch(r, cT, vecs, niters):
     K_div_r = K / r
     K_T = K.T
 
-    # BEGIN PROFILING HERE
-    torch.hammerblade.profiler.route.set_route_from_json(data)
-    torch.hammerblade.profiler.enable()
-
     for it in range(niters):
         print('starting iteration {}'.format(it))
 
@@ -82,9 +78,6 @@ def swmd_torch(r, cT, vecs, niters):
     # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
     #Note: M is huge compared to uT, so use the sum(axis=0) instead of sum(axis=1) line
     
-    # END PROFILING HERE
-    torch.hammerblade.profiler.disable()
-
     return out
 
 
@@ -101,7 +94,20 @@ r = numpy.asarray(mat[:, QUERY_IDX].todense()).squeeze()
 # mat could theoretically be stored as its transpose, so don't count 
 matT = mat.T
 
+
+torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)")
+torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)")
+torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::sddtmm(const at::Tensor&, const at::Tensor&, const at::Tensor&)")
+
+# BEGIN PROFILING HERE
+torch.hammerblade.profiler.route.set_route_from_json(data)
+torch.hammerblade.profiler.enable()
+
 scores = swmd_torch(r, matT, vecs, niters=1)
 
-print(torch.hammerblade.profiler.exec_time.raw_stack())
+torch.hammerblade.profiler.disable()
+# END PROFILING HERE
+
+# print(torch.hammerblade.profiler.exec_time.raw_stack())
 # print(torch.hammerblade.profiler.chart.json())
+print("done")

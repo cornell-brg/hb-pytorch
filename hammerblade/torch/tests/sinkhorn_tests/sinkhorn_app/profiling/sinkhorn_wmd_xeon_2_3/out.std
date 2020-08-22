@@ -1,0 +1,105 @@
+Emulating CUDALite...
+Emulation barrier init'ed with 1 threads
+PyTorch configed with 1 * 1 HB device
+HB startup config kernel applied
+ ATen profiler collecting ...
+at top level kernel at::Tensor at::SparseCPUType::{anonymous}::sddtmm(const at::Tensor&, const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+at top level kernel at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)
+should I redispatch? 1/0
+redispatching...
+@#ACTUALS#@__self;[19, 100000]<|>mat2t;[5000, 100000]<|>
+#TOP_LEVEL_FUNC#__at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&);291134
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free;42
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@;138765
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);14
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::SparseCPUType::{anonymous}::_indices(const at::Tensor&);1
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::SparseCPUType::{anonymous}::_values(const at::Tensor&);7
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::select(const at::Tensor&, int64_t, int64_t);80
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::select(const at::Tensor&, int64_t, int64_t)<|>at::Tensor at::CPUType::{anonymous}::as_strided(const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::optional<long int>);12
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::select(const at::Tensor&, int64_t, int64_t)<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&);731
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);27
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&);627
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar);584
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub();522
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&);117
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar);99
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub();71
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>int64_t at::SparseCPUType::{anonymous}::_nnz(const at::Tensor&);15
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>int64_t at::SparseCPUType::{anonymous}::_nnz(const at::Tensor&)<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);1
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>int64_t at::SparseCPUType::{anonymous}::sparse_dim(const at::Tensor&);3
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@CPU_LOG@<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);6
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@;138429
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__free;328
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__malloc;192
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__memcpy;204
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@OFFLOAD_KERNEL@__tensorlib_coo_to_csr;4426
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@OFFLOAD_KERNEL@__tensorlib_coo_to_csr<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@OFFLOAD_KERNEL@__tensorlib_dstmm;129312
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>@OFFLOAD_KERNEL@__tensorlib_dstmm<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::SparseHammerBladeType::{anonymous}::_indices(const at::Tensor&);1
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::SparseHammerBladeType::{anonymous}::_values(const at::Tensor&);1
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::select(const at::Tensor&, int64_t, int64_t);100
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::select(const at::Tensor&, int64_t, int64_t)<|>at::Tensor at::HammerBladeType::{anonymous}::as_strided(const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::optional<long int>);13
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::select(const at::Tensor&, int64_t, int64_t)<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);2
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&);2725
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);107
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;46
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::HammerBladeType::{anonymous}::zero_(at::Tensor&);2548
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::HammerBladeType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar);2509
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::HammerBladeType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub();2454
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::HammerBladeType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub()<|>@BSG_API_CALL@__free;121
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::HammerBladeType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub()<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::HammerBladeType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub()<|>@BSG_API_CALL@__malloc;94
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::HammerBladeType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub()<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::HammerBladeType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub()<|>@BSG_API_CALL@__memcpy;95
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::HammerBladeType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub()<|>@BSG_API_CALL@__memcpy<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::HammerBladeType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub()<|>@OFFLOAD_KERNEL@__tensorlib_fill;1695
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&)<|>at::Tensor& at::HammerBladeType::{anonymous}::zero_(at::Tensor&)<|>at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar)<|>at::native::fill_stub::fill_stub()<|>@OFFLOAD_KERNEL@__tensorlib_fill<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>int64_t at::SparseHammerBladeType::{anonymous}::_nnz(const at::Tensor&);18
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>int64_t at::SparseHammerBladeType::{anonymous}::_nnz(const at::Tensor&)<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);1
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>int64_t at::SparseHammerBladeType::{anonymous}::sparse_dim(const at::Tensor&);25
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>@HB_LOG@<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);4
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&);5487
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;5387
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;31
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&);8184
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma;429
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__dma<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__free;26
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__free<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc;39
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);60
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc;21
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>)<|>@BSG_API_CALL@__malloc<|>@TRIM@;0
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::_indices(const at::Tensor&);3
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::_values(const at::Tensor&);1
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>at::Tensor at::TypeDefault::to(const at::Tensor&, c10::ScalarType, bool, bool, c10::optional<c10::MemoryFormat>);7176
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>at::Tensor at::TypeDefault::to(const at::Tensor&, c10::ScalarType, bool, bool, c10::optional<c10::MemoryFormat>)<|>at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>);16
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>at::Tensor at::TypeDefault::to(const at::Tensor&, c10::ScalarType, bool, bool, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool);7090
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>at::Tensor at::TypeDefault::to(const at::Tensor&, c10::ScalarType, bool, bool, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>at::native::copy_stub::copy_stub();6999
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>at::Tensor at::TypeDefault::to(const at::Tensor&, c10::ScalarType, bool, bool, c10::optional<c10::MemoryFormat>)<|>at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool)<|>int64_t at::TypeDefault::stride(const at::Tensor&, int64_t);2
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>at::Tensor& at::HammerBladeType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>);7
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>bool at::SparseCPUType::{anonymous}::is_coalesced(const at::Tensor&);1
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>int64_t at::SparseCPUType::{anonymous}::dense_dim(const at::Tensor&);3
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>int64_t at::SparseCPUType::{anonymous}::sparse_dim(const at::Tensor&);1
+at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)<|>at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&)<|>int64_t at::TypeDefault::size(const at::Tensor&, int64_t);3
+
+#TOP_LEVEL_FUNC_END#__at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)
+vecs size: (100000, 300)
+mat size: (100000, 558535)
+starting iteration 0
+done
+ne

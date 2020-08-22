@@ -8,7 +8,7 @@
         "signature": "at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)"
     },
     {
-        "offload": false,
+        "offload": true,
         "signature": "at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)"
     }
 ]

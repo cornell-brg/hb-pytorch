@@ -1,6 +1,6 @@
 [
     {
-        "offload": false,
+        "offload": true,
         "signature": "at::Tensor at::SparseCPUType::{anonymous}::sddtmm(const at::Tensor&, const at::Tensor&, const at::Tensor&)"
     },
     {
