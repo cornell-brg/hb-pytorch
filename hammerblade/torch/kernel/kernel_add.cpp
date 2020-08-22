@@ -8,7 +8,6 @@
 // Date    : 03/05/2020, 07/13/2020
 
 #include <kernel_common.hpp>
-#include <iostream>
 #include <cstdint>
 
 // emulate mulh
