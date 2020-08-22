@@ -8,6 +8,12 @@ import torch
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
 from utils import parse_model_args, train, inference, save_model  # noqa
 
+torch.hammerblade.init()
+
+import json
+with open('sinkhorn_wmd.json',) as route:
+    data = json.load(route)
+
 # Kernel parameters.
 N_DOCS = 5000
 QUERY_IDX = 100
@@ -16,14 +22,6 @@ LAMBDA = 1
 # Data files. (Ask Adrian for these.)
 DATA_MAT = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-mat.npz'
 DATA_VECS = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-vecs.npy'
-
-def dense_to_sparse(m):
-    m_coo = m.tocoo()
-    return torch.sparse.FloatTensor(
-        torch.LongTensor(numpy.vstack((m_coo.row, m_coo.col))),
-        torch.FloatTensor(m_coo.data),
-        torch.Size(m_coo.shape),
-    )
 
 
 def swmd_torch(r, cT, vecs, niters):
@@ -57,6 +55,10 @@ def swmd_torch(r, cT, vecs, niters):
     K_div_r = K / r
     K_T = K.T
 
+    # BEGIN PROFILING HERE
+    torch.hammerblade.profiler.route.set_route_from_json(data)
+    torch.hammerblade.profiler.enable()
+
     for it in range(niters):
         print('starting iteration {}'.format(it))
 
@@ -66,8 +68,10 @@ def swmd_torch(r, cT, vecs, niters):
         # Compute `c * 1/(K_T @ u)` using a hand-rolled SDDMM.
         # v = c * (1.0 / _sddmm(c, K_T, u))
         # v = c * (1.0 / torch.sddtmm(c, K_T, uT)
-        vT = cT * torch.sddtmm(cT, uT, K_T).sparse_reciprocal()
-        # vT = cT * torch.sddtmm(cT, uT, K_T)
+        # vT = cT * torch.sddtmm(cT, uT, K_T).sparse_reciprocal()
+        
+        # NOTE: NEED TO ADD RECIPROCAL
+        vT = cT * torch.sddtmm(cT, uT, K_T)
         
         # custom dstmm.t():
         # x = _dsmp(K_div_r, v)
@@ -77,8 +81,11 @@ def swmd_torch(r, cT, vecs, niters):
     out = (uT.t() * torch.dstmm(K * M, vT)).sum(axis=0)
     # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
     #Note: M is huge compared to uT, so use the sum(axis=0) instead of sum(axis=1) line
-    return out
+    
+    # END PROFILING HERE
+    torch.hammerblade.profiler.disable()
 
+    return out
 
 
 # Load data.
@@ -94,10 +101,7 @@ r = numpy.asarray(mat[:, QUERY_IDX].todense()).squeeze()
 # mat could theoretically be stored as its transpose, so don't count 
 matT = mat.T
 
-# BEGIN PROFILING HERE
-torch.hammerblade.profiler.enable()
 scores = swmd_torch(r, matT, vecs, niters=1)
-torch.hammerblade.profiler.disable()
-# END PROFILING HERE
 
 print(torch.hammerblade.profiler.exec_time.raw_stack())
+# print(torch.hammerblade.profiler.chart.json())

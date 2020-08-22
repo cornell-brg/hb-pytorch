@@ -4,7 +4,7 @@ import json
 import copy
 import subprocess
 
-sys.path.append('~/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/scripts/')
+sys.path.append('/scratch/users/zz546/hb-pytorch/hammerblade/scripts/')
 
 from compare_aten_op import compare, average_aten_op
 
@@ -28,7 +28,7 @@ def compare_wrapper(full, chunk, stats):
 # Read kernels
 # ======================================================
 
-with open('lgc_ista.json',) as f:
+with open('sinkhorn_wmd.json',) as f:
   route = json.load(f)
 
 fancy_print(route)
@@ -43,14 +43,14 @@ print("total number of jobs: " + str(len(route)))
 kernels = []
 
 for i in range(len(route)):
-  hb_name = "lgc_ista_hb_%d" % i
-  name = "lgc_ista_data_new_format_%d" % i
+  hb_name = "sinkhorn_wmd_hb_%d" % i
+  name = "sinkhorn_wmd_data_new_format_%d" % i
   # work dir
   sh_cmd = "mkdir -p " + name
   print(sh_cmd)
   os.system(sh_cmd)
   for j in range(5):
-    xeon_name = "lgc_ista_xeon_%d_%d" % (i, j)
+    xeon_name = "sinkhorn_wmd_xeon_%d_%d" % (i, j)
     # collect full stack
     sh_cmd = "cp " + xeon_name + "/out.std " + name + ("/full-%02d.std" % j)
     print(sh_cmd)
@@ -60,7 +60,7 @@ for i in range(len(route)):
   print(sh_cmd)
   os.system(sh_cmd)
   # run uw's profiling data tool
-  sh_cmd = "(cd " + hb_name + "; python /home/zz546/bsg_bladerunner/bsg_manycore/software/py/vanilla_parser/stats_parser.py --stats vanilla_stats.csv)"
+  sh_cmd = "(cd " + hb_name + "; python /home/amp342/Emulator/bsg_manycore/software/py/vanilla_parser/stats_parser.py --stats vanilla_stats.csv)"
   print(sh_cmd)
   os.system(sh_cmd)
   # collect output
@@ -83,7 +83,7 @@ for i in range(len(route)):
   # ======================================================
 
   # run postprocessing script for cross check
-  sh_cmd = "python /scratch/users/zz546/hb-pytorch/hammerblade/scripts/compare_aten_op.py --full {0}/full-00.std --chunk {0}/chunk-cosim.std --manycore-stats {0}/manycore_stats.log > {0}/cross_check.txt 2>&1".format(name)
+  sh_cmd = "python /home/amp342/Emulator/hb-pytorch/hammerblade/scripts/compare_aten_op.py --full {0}/full-00.std --chunk {0}/chunk-cosim.std --manycore-stats {0}/manycore_stats.log > {0}/cross_check.txt 2>&1".format(name)
   print(sh_cmd)
   os.system(sh_cmd)
 

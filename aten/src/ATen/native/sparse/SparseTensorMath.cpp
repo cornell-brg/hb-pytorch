@@ -1234,20 +1234,20 @@ Tensor mv_sparse(const SparseTensor& self, const Tensor& vec)
 
 
 
-SparseTensor sparse_reciprocal_cpu(SparseTensor& self) {
-  TORCH_CHECK(self.is_coalesced(), "sparse_reciprocal_cpu only supports a coalesced tensor");
-  int64_t nnz = self._nnz();
-  Tensor vals = self._values();
+// SparseTensor sparse_reciprocal_cpu(SparseTensor& self) {
+//   TORCH_CHECK(self.is_coalesced(), "_reciprocal_out_sparse_cpu only supports a coalesced tensor");
+//   int64_t nnz = self._nnz();
+//   Tensor vals = self._values();
 
-  AT_DISPATCH_ALL_TYPES(self.scalar_type(), "sparse_reciprocal_cpu", [&]{
-    auto out = vals.accessor<scalar_t, 1>();
-    for (int i = 0; i < nnz; i++){
-      out[i] = 1 / out[i];
-    }  
-  });
+//   AT_DISPATCH_ALL_TYPES(self.scalar_type(), "_reciprocal_out_sparse_cpu", [&]{
+//     auto out = vals.accessor<scalar_t, 1>();
+//     for (int i = 0; i < nnz; i++){
+//       out[i] = 1 / out[i];
+//     }  
+//   });
 
-  return self;
-}
+//   return self;
+// }
 
 
 

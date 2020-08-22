@@ -6661,9 +6661,9 @@
     SparseHammerBlade: dstmmt_hb
 
   # 1.0 / self
-- func: sparse_reciprocal.out(Tensor(a!) self) -> Tensor(a!)
-  use_c10_dispatcher: full
-  variants: function, method
-  dispatch:
-    SparseCPU: sparse_reciprocal_cpu
+# - func: sparse_reciprocal(Tensor self) -> Tensor
+#   use_c10_dispatcher: full
+#   variants: function, method
+#   dispatch:
+#     SparseCPU: sparse_reciprocal_cpu
     # SparseHammerBlade: dstmmt_hb
