@@ -6,7 +6,7 @@
 #
 #   @author: Krithik Ranjan (kr397@cornell.edu) 08/19/20
 #
-#   Usage: 
+#   Usage:
 #
 #   Step 1: Compress the .csv trace file with compress_trace.py
 #       python compress_trace.py --trace {vanilla_operaton_trace.csv}
@@ -20,17 +20,17 @@
 #                                --endpc 1cd80
 #
 #   Step 2: Prints the line trace between two PCs specified while running compress_trace.py
-#   
-#   For every tile, the instructions can be printed in either 'lo', 'mid', 'hi' 
+#
+#   For every tile, the instructions can be printed in either 'lo', 'mid', 'hi'
 #   - lo: single character code for stalls (listed below), '@' for instruction
 #   - mid: three character code for stalls and instructions (listed below)
 #   - hi: first fifteen characters of all stalls and instructions
-#       
+#
 #       python print_trace.py --mode {optional} {print mode for all tiles; 'lo', 'mid', 'hi'}
 #                             --lo {optional} {range of tiles to print in 'lo' mode}
 #                             --mid {optional} {range of tiles to print in 'mid' mode}
 #                             --hi {optional} {range of tiles to print in 'hi' mode}
-#   
+#
 #   Note: at least one of mode, lo, mid, hi must be provided to print the line trace
 #
 #   Example:
@@ -72,7 +72,7 @@ class Trace:
                       "stall_amo_rl" : ['a', '#rl'],
 
                       "stall_bypass" : ['r', '#bp'],
-                      "stall_lr_aq" : ['r', '#lr'],
+                      "stall_lr_aq" : ['L', '#lr'],
                       "stall_fence" : ['r', '#fe'],
                       "stall_remote_req" : ['r', '#rr'],
                       "stall_remote_credit" : ['r', '#rc'],
@@ -205,10 +205,10 @@ class Trace:
         self.traces = self.__parse_traces(trace_file, start_pc, end_pc)
 
 
-    
+
     def __parse_traces(self, trace_file, start_pc, end_pc):
         traces = {}
-        
+
         for tile in range(self._TILE_X_DIM * self._TILE_Y_DIM):
             tile_x = tile % self._TILE_X_DIM
             tile_y = tile // self._TILE_X_DIM
@@ -226,20 +226,20 @@ class Trace:
                         traces[(tile_x, tile_y)]["inrange"] = True
                     if self.start_cycle == -1:
                         self.start_cycle = int(row["cycle"])
-                
+
                 if traces[(tile_x, tile_y)]["inrange"]:
                     traces[(tile_x, tile_y)]["instr"][int(row["cycle"])] = row["operation"]
-                
+
                 if row["pc"] == end_pc:
                     traces[(tile_x, tile_y)]["inrange"] = False
                     self.end_cycle = int(row["cycle"])
-                
+
                 if end_pc == 'xx':
                     self.end_cycle= int(row["cycle"])
-        
+
         print("Start cycle: " + str(self.start_cycle) + " end cycle: " + str(self.end_cycle))
-        
-        return traces            
+
+        return traces
 
     def set_mode(self, mode, start, end, all_tiles = False):
         if all_tiles:
@@ -280,7 +280,7 @@ class Trace:
                 print(str(tile[1]).ljust(3), end=' ')
             elif self.traces[tile]["mode"] == 'hi':
                 print(str(tile[1]).ljust(15), end=' ')
-            
+
         print()
 
         for cycle in range(self.start_cycle, self.end_cycle+1):
@@ -289,8 +289,8 @@ class Trace:
             for tile in self.traces:
                 self.__print_op(self.traces[tile], cycle)
             print()
-        
-                
+
+
     def __print_op(self, tile_trace, cycle):
         if tile_trace["mode"] == 'lo':
             if cycle in tile_trace["instr"]:
@@ -326,4 +326,4 @@ class Trace:
                     print(op[:op_len], end=' ')
             else:
                 print('               ', end=' ')
-            
+

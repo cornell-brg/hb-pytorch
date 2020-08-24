@@ -5,17 +5,17 @@
 #   Step 2 in line trace generation
 #
 #   @author: Krithik Ranjan (kr397@cornell.edu) 08/19/20
-#   
-#   For every tile, the instructions can be printed in either 'lo', 'mid', 'hi' 
+#
+#   For every tile, the instructions can be printed in either 'lo', 'mid', 'hi'
 #   - lo: single character code for stalls (listed in line_trace.py), '@' for instruction
-#   - mid: three character code for stalls and instructions (listed in line_trace.py) 
+#   - mid: three character code for stalls and instructions (listed in line_trace.py)
 #   - hi: first fifteen characters of all stalls and instructions
-#       
+#
 #       python print_trace.py --mode {optional} {print mode for all tiles; 'lo', 'mid', 'hi'}
 #                             --lo {optional} {range of tiles to print in 'lo' mode}
 #                             --mid {optional} {range of tiles to print in 'mid' mode}
 #                             --hi {optional} {range of tiles to print in 'hi' mode}
-#   
+#
 #   Note: at least one of mode, lo, mid, hi must be provided to print the line trace
 #
 #   Example:
@@ -41,16 +41,16 @@ import csv
 
 
 if __name__ == "__main__":
-    
+
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--mode", type=str, 
+    parser.add_argument("--mode", type=str,
                         help="Mode to print the trace of all tiles")
-    parser.add_argument("--lo", nargs=2, type=int,  
+    parser.add_argument("--lo", nargs=2, type=int, action='append',
                         help="Range of tiles to print in lo-res")
-    parser.add_argument("--mid", nargs=2, type=int,  
+    parser.add_argument("--mid", nargs=2, type=int, action='append',
                         help="Range of tiles to print in mid-res")
-    parser.add_argument("--hi", nargs=2, type=int,  
+    parser.add_argument("--hi", nargs=2, type=int, action='append',
                         help="Range of tiles to print in hi-res")
 
 
@@ -63,11 +63,14 @@ if __name__ == "__main__":
     if args.mode is not None:
         TraceObj.set_mode(args.mode, 0, 0, all_tiles=True)
     if args.lo is not None:
-        TraceObj.set_mode('lo', args.lo[0], args.lo[1])
+        for _range in args.lo:
+          TraceObj.set_mode('lo', _range[0], _range[1])
     if args.mid is not None:
-        TraceObj.set_mode('mid', args.mid[0], args.mid[1])
+        for _range in args.mid:
+          TraceObj.set_mode('mid', _range[0], _range[1])
     if args.hi is not None:
-        TraceObj.set_mode('hi', args.hi[0], args.hi[1])
+        for _range in args.hi:
+          TraceObj.set_mode('hi', _range[0], _range[1])
 
     if args.mode is None and args.lo is None and args.mid is None and args.hi is None:
         print("Incorrect arguments")
