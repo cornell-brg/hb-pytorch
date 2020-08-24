@@ -194,7 +194,7 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
     // ----------------------------------------------
     // Start the logger (vanilla.log)
     // ----------------------------------------------
-    C10_HB_CHECK(hb_mc_manycore_log_enable((&_hb_device)->mc));
+    // C10_HB_CHECK(hb_mc_manycore_log_enable((&_hb_device)->mc));
   }
 #endif
 
@@ -206,7 +206,7 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
     // ----------------------------------------------
     // Disable the tracer and the logger
     // ----------------------------------------------
-    C10_HB_CHECK(hb_mc_manycore_log_disable((&_hb_device)->mc));
+    // C10_HB_CHECK(hb_mc_manycore_log_disable((&_hb_device)->mc));
     C10_HB_CHECK(hb_mc_manycore_trace_disable((&_hb_device)->mc));
   }
 #endif
