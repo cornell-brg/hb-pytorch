@@ -6,8 +6,8 @@ APP_SCRIPT := test_sinkhorn_simple.py
 KERNELS := 0 1 2
 
 ALL_LOGS := $(KERNELS:%=run_%/manycore_stats.log) cpu_run/log.txt
-.PHONY: logs
-logs: $(ALL_LOGS)
+results.csv: $(ALL_LOGS) collect.py
+	python collect.py > $@
 
 run_%/vanilla_stats.csv: $(APP_SCRIPT)
 	mkdir -p run_$*
