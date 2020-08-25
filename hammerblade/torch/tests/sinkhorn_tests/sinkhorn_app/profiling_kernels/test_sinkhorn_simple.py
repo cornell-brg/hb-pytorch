@@ -20,6 +20,9 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
 DATA_MAT = os.path.join(DATA_DIR, 'cache-mat.npz')
 DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 
+# Kernel "routing" file.
+ROUTE_JSON = os.path.join(os.path.dirname(__file__), 'sinkhorn_wmd.json')
+
 
 def swmd_torch(r, cT, vecs, niters):
     """The actual Sinkhorn WMD kernel.
@@ -132,7 +135,7 @@ def sinkhorn_test():
         # Set up HammerBlade "routing," which tells kernels to run on HB
         # instead of on the CPU.
         if on_hb:
-            with open('sinkhorn_wmd.json') as f:
+            with open(ROUTE_JSON) as f:
                 route_data = json.load(f)
             for i, kernel in enumerate(route_data):
                 # Mark kernel for offload.
