@@ -3,6 +3,7 @@ import re
 
 ROUTE_JSON = 'sinkhorn_wmd.json'
 HB_STATS = 'run_{}/manycore_stats.log'
+CPU_LOG = 'cpu_run/log.txt'
 
 
 def cycles_from_stats(stats):
@@ -22,6 +23,26 @@ def kernel_name(sig):
     return re.search(r'::(\w+)\(', sig).group(1)
 
 
+def times_from_log(log):
+    """Given a CPU execution log, look for the output from
+    `hammerblade.profiler.stats` that breaks down the amount of wall-clock
+    time spent in each kernel. Generate (kernel, time) pairs.
+    """
+    in_report = False
+    for line in log.splitlines():
+        if 'Kernel execution time' in line:
+            in_report = True
+            continue
+        
+        if in_report:
+            kernel, tm, pct = line.strip().split()
+            if kernel.startswith('aten::'):
+                _, kernel = kernel.split('::')
+            if 'time_in_roi' in kernel:
+                break
+            yield kernel, float(tm)
+
+
 def collect():
     with open(ROUTE_JSON) as f:
         kernels = json.load(f)
@@ -34,8 +55,13 @@ def collect():
             stats_txt = f.read()
         hb_cycles[kernel_name(kernel['signature'])] = \
             cycles_from_stats(stats_txt)
-
     print(hb_cycles)
+
+    # Load CPU time breakdown.
+    with open(CPU_LOG) as f:
+        log_txt = f.read()
+    cpu_times = dict(times_from_log(log_txt))
+    print(cpu_times)
 
 
 if __name__ == '__main__':
