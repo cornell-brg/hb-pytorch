@@ -75,7 +75,9 @@ def swmd_torch(r, cT, vecs, niters):
     # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
     #Note: M is huge compared to uT, so use the sum(axis=0) instead of sum(axis=1) line
     end_time = time()
-    print("elapsed:", end_time - start_time)
+    elapsed = end_time - start_time
+    print("elapsed:", elapsed)
+    print("elapsed * 16:", elapsed * 16)
 
     return out
 

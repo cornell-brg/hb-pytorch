@@ -5,7 +5,7 @@ HB startup config kernel applied
  ATen profiler collecting ...
 vecs size: (100000, 300)
 mat shape: (100000, 256)
-elapsed: 3.3133509159088135
+elapsed: 3.3236680030822754
 [
     {
         "offload": false,
