@@ -15,27 +15,18 @@ with open('sinkhorn_wmd.json',) as route:
     data = json.load(route)
 
 # Kernel parameters.
-N_DOCS = 5000
+N_DOCS = 4096
+N_FRACTION = 16 # use N_DOCS/N_FRACTION of the data
 QUERY_IDX = 100
 LAMBDA = 1
 
 # Data files. (Ask Adrian for these.)
-DATA_MAT = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-mat.npz'
-DATA_VECS = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/data/cache-vecs.npy'
+TESTS = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/'
+DATA_MAT = TESTS + 'sinkhorn_tests/sinkhorn_app/data/cache-mat.npz'
+DATA_VECS = TESTS + 'sinkhorn_tests/sinkhorn_app/data/cache-vecs.npy'
 
 
 def swmd_torch(r, cT, vecs, niters):
-    # Convert arrays to PyTorch tensors.
-    r = torch.FloatTensor(r)
-    cT_coo = cT.tocoo()
-    cT = torch.sparse.FloatTensor(
-        torch.LongTensor(numpy.vstack((cT_coo.row, cT_coo.col))),
-        torch.FloatTensor(cT_coo.data),
-        torch.Size(cT_coo.shape),
-    )
-
-    vecs = torch.FloatTensor(vecs)
-
     # I=(r > 0)
     sel = r > 0
 
@@ -54,6 +45,7 @@ def swmd_torch(r, cT, vecs, niters):
     K = torch.exp(- M * LAMBDA)
     K_div_r = K / r
     K_T = K.T
+    
 
     for it in range(niters):
         print('starting iteration {}'.format(it))
@@ -94,6 +86,16 @@ r = numpy.asarray(mat[:, QUERY_IDX].todense()).squeeze()
 # mat could theoretically be stored as its transpose, so don't count 
 matT = mat.T
 
+# Convert arrays to PyTorch tensors.
+r = torch.FloatTensor(r)
+cT_coo = cT.tocoo()
+cT = torch.sparse.FloatTensor(
+    torch.LongTensor(numpy.vstack((cT_coo.row, cT_coo.col))),
+    torch.FloatTensor(cT_coo.data),
+    torch.Size(cT_coo.shape),
+)
+
+vecs = torch.FloatTensor(vecs)
 
 torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)")
 torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)")

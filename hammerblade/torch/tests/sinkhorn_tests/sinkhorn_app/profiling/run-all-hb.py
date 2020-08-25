@@ -34,7 +34,7 @@ for i in range(len(route)): # embedding_back
   sh_cmd = "cp -r data/ " + name + "/"
   print(sh_cmd)
   os.system(sh_cmd)
-  script = "(cd " + name + "; pycosim /home/amp342/Emulator/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/test_sinkhorn_wmd.py > out.std 2>&1)"
+  script = "(cd " + name + "; pycosim /home/amp342/Cosim/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/test_sinkhorn_wmd.py > out.std 2>&1)"
   with open(name + "/run.sh", 'w') as outfile:
     outfile.write(script)
   print("starting cosim job ...")

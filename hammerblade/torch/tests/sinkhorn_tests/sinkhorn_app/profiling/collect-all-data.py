@@ -4,7 +4,7 @@ import json
 import copy
 import subprocess
 
-sys.path.append('/home/amp342/Emulator/hb-pytorch/hammerblade/scripts/')
+sys.path.append('/home/amp342/Cosim/hb-pytorch/hammerblade/scripts/')
 
 from compare_aten_op import compare, average_aten_op
 
