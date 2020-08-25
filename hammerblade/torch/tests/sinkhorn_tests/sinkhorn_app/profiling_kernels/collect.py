@@ -26,12 +26,16 @@ def collect():
     with open(ROUTE_JSON) as f:
         kernels = json.load(f)
 
-    # Load all statistics.
+    # Load all HB cycles statistics.
+    hb_cycles = {}
     for i, kernel in enumerate(kernels):
         stats_fn = HB_STATS.format(i)
         with open(stats_fn) as f:
             stats_txt = f.read()
-        print(kernel_name(kernel['signature']), cycles_from_stats(stats_txt))
+        hb_cycles[kernel_name(kernel['signature'])] = \
+            cycles_from_stats(stats_txt)
+
+    print(hb_cycles)
 
 
 if __name__ == '__main__':

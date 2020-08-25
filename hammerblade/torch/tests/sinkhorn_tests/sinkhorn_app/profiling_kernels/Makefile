@@ -5,8 +5,8 @@ APP_SCRIPT := test_sinkhorn_simple.py
 # There are three kernels to offload individually.
 KERNELS := 0 1 2
 
+ALL_LOGS := $(KERNELS:%=run_%/manycore_stats.log) cpu_run/log.txt
 .PHONY: logs
-ALL_LOGS := $(KERNELS:%=run_%/manycore_stats.log)
 logs: $(ALL_LOGS)
 
 run_%/vanilla_stats.csv: $(APP_SCRIPT)
@@ -16,3 +16,7 @@ run_%/vanilla_stats.csv: $(APP_SCRIPT)
 run_%/manycore_stats.log: run_%/vanilla_stats.csv
 	cd run_$* ; PYTHONPATH=$(MCPY_DIR) python -m vanilla_parser
 	cd run_$* ; mv stats/manycore_stats.log .
+
+cpu_run/log.txt: $(APP_SCRIPT)
+	mkdir -p cpu_run
+	cd cpu_run ; PYTHONPATH=$(PYTORCH_DIR) python ../$(APP_SCRIPT) > log.txt

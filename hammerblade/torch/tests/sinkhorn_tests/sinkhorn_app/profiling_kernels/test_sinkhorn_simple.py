@@ -10,8 +10,7 @@ from utils import parse_model_args, train, inference, save_model  # noqa
 from time import time
 
 # Kernel parameters.
-N_FRACTION = 16 * 16  # use N_DOCS/N_FRACTION of the data
-N_DOCS = int(4096 / N_FRACTION)
+TOTAL_DOCS = 4096
 QUERY_IDX = 5  # Was 100; lowered to allow even smaller runs.
 LAMBDA = 1
 
@@ -85,14 +84,14 @@ def swmd_torch(r, cT, vecs, niters):
     return out
 
 
-def load_data():
+def load_data(n_docs):
     """Load data for the Sinkhorn WMD kernel.
     """
     # Load data.
     vecs = numpy.load(DATA_VECS)
     mat = scipy.sparse.load_npz(DATA_MAT)
     print("vecs size:", vecs.shape)
-    mat = mat[:, :N_DOCS]  # Use a subset of the data.
+    mat = mat[:, :n_docs]  # Use a subset of the data.
     print("mat shape:", mat.shape)
     # The query vector.
     r = numpy.asarray(mat[:, QUERY_IDX].todense()).squeeze()
@@ -129,6 +128,7 @@ def sinkhorn_test():
     else:
         on_hb = False
 
+    # Set up HammerBlade cosim stuff.
     if on_hb:
         torch.hammerblade.init()
 
@@ -148,9 +148,13 @@ def sinkhorn_test():
 
             torch.hammerblade.profiler.route.set_route_from_json(route_data)
 
+    # Set the size of the run. Use TOTAL_DOCS/data_fraction of the data.
+    data_fraction = 16 * 16 if on_hb else 1  # Tiny subset on HB.
+    n_docs = TOTAL_DOCS // data_fraction
+
     # Load data and run the kernel.
-    print('loading data')
-    r, cT, vecs = load_data()
+    print('loading data for {} docs'.format(n_docs))
+    r, cT, vecs = load_data(n_docs)
     print('done loading data; running kernel')
     scores = swmd_torch(r, cT, vecs, niters=1)
 
@@ -163,7 +167,7 @@ def sinkhorn_test():
         print(torch.hammerblade.profiler.stats())
     print("done")
     print("Multiply sddtmm, dstmmt, and dstmm times by",
-          N_FRACTION, "for true time on real dataset.")
+          data_fraction, "for true time on real dataset.")
 
 
 if __name__ == '__main__':
