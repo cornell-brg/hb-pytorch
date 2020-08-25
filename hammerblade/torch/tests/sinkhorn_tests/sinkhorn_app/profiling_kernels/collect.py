@@ -7,6 +7,10 @@ ROUTE_JSON = 'sinkhorn_wmd.json'
 HB_STATS = 'run_{}/manycore_stats.log'
 CPU_LOG = 'cpu_run/log.txt'
 
+HB_FREQ = 10 ** 9  # 1 GHz.
+HB_MACHINE_FRAC = 16  # Simulating 1/16th of the machine.
+HB_DATA_FRAC = 16 * 16  # Used this fraction of the CPU's data.
+
 
 def cycles_from_stats(stats):
     """Given the text contents of a `manycore_stats.log` file, extract the
@@ -45,6 +49,25 @@ def times_from_log(log):
             yield kernel, float(tm)
 
 
+def hb_cycles_to_time(cycles):
+    """Compute seconds from simulation cycles, assuming weak scaling and the
+    hardware frequence.
+    """
+    # The scale factor is the amount slower we would run if we used *all* the
+    # data. If we were simulating the *full* machine, this would just be
+    # `HB_DATA_FRAC`, i.e., how much *less* data HB had to process than the
+    # CPU. However, we simulate only `HB_MACHINE_FRAC` of the machine and
+    # assume that expanding the data by *that* amount would lead to the same
+    # execution time.
+    scale_factor = HB_DATA_FRAC / HB_MACHINE_FRAC
+
+    # The amount of "real" time we simulated for, according to the machine
+    # frequency.
+    sim_secs = cycles / HB_FREQ
+
+    return sim_secs * scale_factor
+
+
 def collect():
     with open(ROUTE_JSON) as f:
         kernels = json.load(f)
@@ -66,7 +89,7 @@ def collect():
     # Dump a CSV.
     writer = csv.DictWriter(
         sys.stdout,
-        ['kernel', 'cpu_time', 'hb_cycles']
+        ['kernel', 'cpu_time', 'hb_cycles', 'hb_time']
     )
     writer.writeheader()
     for kernel in sorted(set(hb_cycles).union(cpu_times)):
@@ -74,6 +97,8 @@ def collect():
             'kernel': kernel,
             'cpu_time': cpu_times.get(kernel),
             'hb_cycles': hb_cycles.get(kernel),
+            'hb_time': hb_cycles_to_time(hb_cycles[kernel])
+                       if kernel in hb_cycles else '',
         })
 
 
