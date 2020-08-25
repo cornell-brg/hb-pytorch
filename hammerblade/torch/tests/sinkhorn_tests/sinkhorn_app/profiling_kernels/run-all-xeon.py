@@ -4,7 +4,7 @@ import json
 import copy
 import subprocess
 
-TEST_DIR = os.path.join(os.path.dirname(__file__), '..', 'test_sinkhorn_wmd_kernels.py')
+TEST_DIR = os.path.join(os.path.dirname(__file__), '..', 'test_sinkhorn_simple.py')
 
 def fancy_print(route):
   for waypoint in route:

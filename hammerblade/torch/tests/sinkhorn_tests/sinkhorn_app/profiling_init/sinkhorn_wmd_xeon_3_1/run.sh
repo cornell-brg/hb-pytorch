@@ -1,0 +1,1 @@
+(cd sinkhorn_wmd_xeon_3_1; python ../test_sinkhorn_init.py > out.std 2>&1)

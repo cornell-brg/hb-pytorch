@@ -1,1 +1,1 @@
-(cd sinkhorn_wmd_hb_1; pycosim ../test_sinkhorn_simple.py > out.std 2>&1)
+(cd sinkhorn_wmd_hb_1; pycosim ../test_sinkhorn_simple.py --hb > out.std 2>&1)
