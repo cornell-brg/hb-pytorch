@@ -3,6 +3,7 @@ import scipy.sparse
 import os
 import sys
 import torch
+import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
 from utils import parse_model_args, train, inference, save_model  # noqa
@@ -112,19 +113,28 @@ def load_data():
 
 def sinkhorn_test():
     # Use `--hb` to run in HammerBlade mode. Otherwise, we run all native.
-    HB = '--hb' in sys.argv
-    if HB:
+    on_hb = '--hb' in sys.argv
+
+    if on_hb:
         torch.hammerblade.init()
 
-    # import json
-    # with open('sinkhorn_wmd.json',) as route:
-    #     data = json.load(route)
+        # Set up HammerBlade "routing," which tells kernels to run on HB
+        # instead of on the CPU.
+        if on_hb:
+            with open('sinkhorn_wmd.json') as f:
+                route_data = json.load(f)
+            for kernel in route_data:
+                print('offloading kernel', kernel['signature'])
+                kernel['offload'] = True
+            torch.hammerblade.profiler.route.set_route_from_json(route_data)
 
+    # Load data and run the kernel.
     print('loading data')
     r, cT, vecs = load_data()
     print('done loading data; running kernel')
     scores = swmd_torch(r, cT, vecs, niters=1)
 
+    # Dump profiling results.
     print(torch.hammerblade.profiler.stats())
     print("done")
     print("Multiply sddtmm, dstmmt, and dstmm times by",
