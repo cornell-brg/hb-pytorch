@@ -19,17 +19,19 @@ QUERY_IDX = int(100 / Q_FRACTION)  # Was 100; lowered to allow even smaller runs
 LAMBDA = 1
 
 start_time = None
-def begin_profile():
-    start_time = time()
+def begin_profile(on_hb):
+    if (not on_hb):
+        start_time = time()
     torch.hammerblade.profiler.enable()
 
-def end_profile(mult=None):
+def end_profile(on_hb, mult=None):
     torch.hammerblade.profiler.disable()
-    end_time = time()
-    elapsed = end_time - start_time
-    print("elapsed time:", elapsed)
-    if mult:
-        print("elapsed time *",mult,":", elapsed*mult)
+    if (not on_hb):
+        end_time = time()
+        elapsed = end_time - start_time
+        print("elapsed time:", elapsed)
+        if mult:
+            print("elapsed time *",mult,":", elapsed*mult)
 
 def load_data():
     """Load data for the Sinkhorn WMD kernel.
@@ -79,9 +81,9 @@ def sinkhorn_test():
     # Load data and run the kernel.
     print('loading data')
 
-    begin_profile()
+    begin_profile(on_hb)
     r, cT, vecs = load_data()
-    end_profile(Q_FRACTION)
+    end_profile(on_hb, Q_FRACTION)
 
     print('done loading data')
 

@@ -19,17 +19,67 @@ QUERY_IDX = int(100 / Q_FRACTION)  # Was 100; lowered to allow even smaller runs
 LAMBDA = 1
 
 start_time = None
-def begin_profile():
-    start_time = time()
+def begin_profile(on_hb):
+    if (not on_hb):
+        start_time = time()
     torch.hammerblade.profiler.enable()
 
-def end_profile(mult=None):
+def end_profile(on_hb, mult=None):
     torch.hammerblade.profiler.disable()
-    end_time = time()
-    elapsed = end_time - start_time
-    print("elapsed time:", elapsed)
-    if mult:
-        print("elapsed time *",mult,":", elapsed*mult)
+    if (not on_hb):
+        end_time = time()
+        elapsed = end_time - start_time
+        print("elapsed time:", elapsed)
+        if mult:
+            print("elapsed time *",mult,":", elapsed*mult)
+
+
+def swmd_torch(r, cT, vecs, niters):
+    """The actual Sinkhorn WMD kernel.
+    """
+    # I=(r > 0)
+    sel = r > 0
+
+    # r=r(I)
+    r = r[sel].reshape(-1, 1)
+
+    # M=M(I,:)
+    M = torch.cdist(vecs[sel], vecs)
+
+    # x=ones(length(r), size(c,2)) / length(r)
+    a_dim = r.shape[0]
+    b_nobs = cT.shape[0]
+    xT = torch.ones((b_nobs, a_dim)) / a_dim
+
+    # K=exp(-lambda * M)
+    K = torch.exp(- M * LAMBDA)
+    K_div_r = K / r
+    K_T = K.T
+
+    for it in range(niters):
+        print('starting iteration {}'.format(it))
+
+        uT = 1.0 / xT
+
+        # Interesting property: sddtmmt(a,b,c) = sddtmm(a.T,c,b)
+        # Compute `c * 1/(K_T @ u)` using a hand-rolled SDDMM.
+        # v = c * (1.0 / _sddmm(c, K_T, u))
+        # v = c * (1.0 / torch.sddtmm(c, K_T, uT)
+        # vT = cT * torch.sddtmm(cT, uT, K_T).sparse_reciprocal()
+        
+        # NOTE: NEED TO ADD RECIPROCAL
+        vT = cT * torch.sddtmm(cT, uT, K_T)
+        
+        # custom dstmm.t():
+        # x = _dsmp(K_div_r, v)
+        # x = torch.dstmm(K_div_r, vT)
+        xT = torch.dstmmt(K_div_r, vT)
+
+    # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
+    #Note: M is huge compared to uT, so use the sum(axis=0) instead of sum(axis=1) line
+    out = (uT.t() * torch.dstmm(K * M, vT)).sum(axis=0)
+    return out
+
 
 def load_data():
     """Load data for the Sinkhorn WMD kernel.
@@ -81,9 +131,9 @@ def sinkhorn_test():
     r, cT, vecs = load_data()
     print('done loading data; running kernel')
 
-    begin_profile()
+    begin_profile(on_hb)
     scores = swmd_torch(r, cT, vecs, niters=1)
-    end_profile(N_FRACTION)
+    end_profile(on_hb, N_FRACTION)
 
     # Dump profiling results.
     print(torch.hammerblade.profiler.stats())

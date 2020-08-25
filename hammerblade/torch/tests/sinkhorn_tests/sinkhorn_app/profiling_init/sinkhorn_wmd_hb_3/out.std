@@ -5,8 +5,8 @@
 ++ grep -v ': instantiating\|\[.*_PROFILER\]'
 Chronologic VCS simulator copyright 1991-2018
 Contains Synopsys proprietary information.
-Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Aug 25 13:18 2020
-NOTE: automatic random seed used: 1665783140
+Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Aug 25 13:29 2020
+NOTE: automatic random seed used: 1605922781
 BSG INFO: bsg_nonsynth_dpi_rom (initial begin)
 BSG INFO:     Instantiation: manycore_tb_top.trace_control
 BSG INFO:     width_p:                 2
@@ -372,13 +372,6 @@ __________ ___________  _______________________________
 [INFO][RX] Unfreezing tilPyTorch configed with 16 * 8 HB device
 HB startup config kernel applied
  ATen profiler collecting ...
-Traceback (most recent call last):
-  File "../test_sinkhorn_init.py", line 102, in <module>
-  File "../test_sinkhorn_init.py", line 85, in sinkhorn_test
-    
-  File "../test_sinkhorn_init.py", line 30, in end_profile
-    print("elapsed time:", elapsed)
-TypeError: unsupported operand type(s) for -: 'float' and 'NoneType'
 e t=785149000000, x=13, y= 9
 [INFO][RX] Unfreezing tile t=785208000000, x=14, y= 9
 [INFO][RX] Unfreezing tile t=785269000000, x=15, y= 9
@@ -390,8 +383,32 @@ offloading kernel at::Tensor at::CPUType::{anonymous}::div(const at::Tensor&, co
 loading data
 vecs size: (100000, 300)
 mat shape: (100000, 16)
-BSG REGRESSION TEST [31mFAILED[0m
-BSG REGRESSION TEST [31mFAILED[0m
+done loading data
+Kernel execution time:
+aten::empty                        0.00 0.0%
+aten::sparse_coo_tensor            0.00 0.0%
+aten::to                           0.09 6.5%
+aten::set_                         0.00 0.0%
+other                              1.28 93.5%
+time_in_roi                        1.36 100.0%
+
+------------------------------------------------------------
+
+Kernels used on CPU but not yet implemented on HB:
+==========================================================================
+ Native kernels that are used but not implemented for HammerBlade:
+==========================================================================
+Function                                                                                                                                                                               Times
+at::native::max_kernel::max_kernel()                                                                                                                                                   1
+at::native::min_kernel::min_kernel()                                                                                                                                                   1
+aten::_sparse_coo_tensor_with_dims_and_tensors                                                                                                                                         1
+
+------------------------------------------------------------
+
+
+done
+BSG REGRESSION TEST [32mPASSED[0m
+BSG REGRESSION TEST [32mPASSED[0m
 BSG COSIM PASS: Test passed!
 $finish called from file "/home/amp342/Cosim/bsg_bladerunner/bsg_replicant/libraries/platforms/dpi-verilator/hardware/dpi_top.sv", line 815.
 Fatal: "/home/amp342/Cosim/bsg_bladerunner/basejump_stl/bsg_test/bsg_nonsynth_dpi_gpio.v", 62: manycore_tb_top.trace_control: at time 861723500001 ps
