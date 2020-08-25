@@ -1,6 +1,5 @@
 import numpy
 import scipy.sparse
-from scipy.spatial.distance import cdist
 import os
 import sys
 import torch
@@ -27,6 +26,8 @@ DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 
 
 def swmd_torch(r, cT, vecs, niters):
+    """The actual Sinkhorn WMD kernel.
+    """
     # I=(r > 0)
     sel = r > 0
 
@@ -86,6 +87,8 @@ def swmd_torch(r, cT, vecs, niters):
 
 
 def load_data():
+    """Load data for the Sinkhorn WMD kernel.
+    """
     # Load data.
     vecs = numpy.load(DATA_VECS)
     mat = scipy.sparse.load_npz(DATA_MAT)
