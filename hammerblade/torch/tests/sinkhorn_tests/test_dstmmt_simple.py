@@ -3,7 +3,8 @@ Profiler tests for dense-sparseT matrix product (dstmmt) kernel
 08/18/2020 Andrew Pareles (amp342@cornell.edu)
 """
 
-DIR = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/'
+TESTS = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/'
+DIR = TESTS + 'sinkhorn_tests/'
 import torch
 import scipy.sparse
 import numpy

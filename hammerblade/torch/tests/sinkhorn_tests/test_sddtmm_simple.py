@@ -3,7 +3,8 @@ Profiler tests for sddtmm
 08/18/2020 Andrew Pareles (amp342@cornell.edu)
 """
 
-DIR = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/'
+TESTS = '/home/amp342/Cosim/bsg_bladerunner/hb-pytorch/hammerblade/torch/tests/'
+DIR = TESTS + 'sinkhorn_tests/'
 import torch
 import scipy.sparse
 import numpy
@@ -23,7 +24,7 @@ QUERY_IDX = 100
 LAMBDA = 1
 
 # FOR TESTING
-N_DATASET_TO_USE = 50
+FRACTION_DATA = 16
 
 def test_torch_sddtmm(a, b, c):
     ah = a.hammerblade()
