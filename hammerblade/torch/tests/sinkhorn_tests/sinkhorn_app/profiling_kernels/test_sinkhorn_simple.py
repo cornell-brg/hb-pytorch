@@ -8,11 +8,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
 from utils import parse_model_args, train, inference, save_model  # noqa
 from time import time
 
-# Use `--hb` to run in HammerBlade mode. Otherwise, we run all native.
-HB = '--hb' in sys.argv
-if HB:
-    torch.hammerblade.init()
-
 # Kernel parameters.
 N_FRACTION = 16 # use N_DOCS/N_FRACTION of the data
 N_DOCS = int(4096 / N_FRACTION)
@@ -116,6 +111,11 @@ def load_data():
 
 
 def sinkhorn_test():
+    # Use `--hb` to run in HammerBlade mode. Otherwise, we run all native.
+    HB = '--hb' in sys.argv
+    if HB:
+        torch.hammerblade.init()
+
     # import json
     # with open('sinkhorn_wmd.json',) as route:
     #     data = json.load(route)
@@ -127,7 +127,8 @@ def sinkhorn_test():
 
     print(torch.hammerblade.profiler.stats())
     print("done")
-    print("Multiply sddtmm, dstmmt, and dstmm times by ", N_FRACTION, " for true time on real dataset.")
+    print("Multiply sddtmm, dstmmt, and dstmm times by",
+          N_FRACTION, "for true time on real dataset.")
 
 
 if __name__ == '__main__':
