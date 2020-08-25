@@ -1,0 +1,264 @@
++ COSIM_PYTHON_EXE=/home/amp342/Cosim/bsg_bladerunner/bsg_replicant/examples/python/test_loader
++ [[ ! -f /home/amp342/Cosim/bsg_bladerunner/bsg_replicant/examples/python/test_loader ]]
++ eval '/home/amp342/Cosim/bsg_bladerunner/bsg_replicant/examples/python/test_loader +ntb_random_seed_automatic +c_args="../test_sinkhorn_simple.py"' '| grep -v ": instantiating\|\[.*_PROFILER\]"'
+++ /home/amp342/Cosim/bsg_bladerunner/bsg_replicant/examples/python/test_loader +ntb_random_seed_automatic +c_args=../test_sinkhorn_simple.py
+++ grep -v ': instantiating\|\[.*_PROFILER\]'
+Chronologic VCS simulator copyright 1991-2018
+Contains Synopsys proprietary information.
+Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Aug 25 11:41 2020
+NOTE: automatic random seed used: 3177873990
+BSG INFO: bsg_nonsynth_dpi_rom (initial begin)
+BSG INFO:     Instantiation: manycore_tb_top.trace_control
+BSG INFO:     width_p:                 2
+BSG INFO:     init_o_p:      00
+BSG INFO:     use_input_p:   0
+BSG INFO:     use_output_p:  1
+BSG INFO:     debug_p:       1
+manycore_tb_top.core_clk_gen with cycle_time_p     1000000
+BSG INFO: bsg_nonsynth_dpi_from_fifo (initial begin)
+BSG INFO:     Instantiation: manycore_tb_top.mc_dpi.f2d_req_i
+BSG INFO:     width_p =         128
+BSG INFO:     debug_p = 0
+BSG INFO: bsg_nonsynth_dpi_from_fifo (initial begin)
+BSG INFO:     Instantiation: manycore_tb_top.mc_dpi.f2d_rsp_i
+BSG INFO:     width_p =         128
+BSG INFO:     debug_p = 0
+BSG INFO: bsg_nonsynth_dpi_to_fifo (initial begin)
+BSG INFO:     Instantiation: manycore_tb_top.mc_dpi.d2f_req_i
+BSG INFO:     width_p =         128
+BSG INFO:     debug_p = 0
+BSG INFO: bsg_nonsynth_dpi_rom (initial begin)
+BSG INFO:     Instantiation: manycore_tb_top.mc_dpi.rom
+BSG INFO:     width_p:                32
+BSG INFO:     els_p:                  33
+BSG INFO:     debug_p:       0
+BSG INFO:     arr_p[          0]:     0x00040201
+BSG INFO:     arr_p[          1]:     0x08252020
+BSG INFO:     arr_p[          2]:     0x0000001c
+BSG INFO:     arr_p[          3]:     0x00000020
+BSG INFO:     arr_p[          4]:     0x00000010
+BSG INFO:     arr_p[          5]:     0x00000008
+BSG INFO:     arr_p[          6]:     0x00000000
+BSG INFO:     arr_p[          7]:     0x00000001
+BSG INFO:     arr_p[          8]:     0x00000000
+BSG INFO:     arr_p[          9]:     0x000db468
+BSG INFO:     arr_p[         10]:     0x06c8e5a6
+BSG INFO:     arr_p[         11]:     0x0cda5c32
+BSG INFO:     arr_p[         12]:     0x00000008
+BSG INFO:     arr_p[         13]:     0x00000010
+BSG INFO:     arr_p[         14]:     0x00000020
+BSG INFO:     arr_p[         15]:     0x00000020
+BSG INFO:     arr_p[         16]:     0x00000020
+BSG INFO:     arr_p[         17]:     0x00000020
+BSG INFO:     arr_p[         18]:     0x00000100
+BSG INFO:     arr_p[         19]:     0x00000010
+BSG INFO:     arr_p[         20]:     0x33535244
+BSG INFO:     arr_p[         21]:     0x00000002
+BSG INFO:     arr_p[         22]:     0x02000000
+BSG INFO:     arr_p[         23]:     0x0000000e
+BSG INFO:     arr_p[         24]:     0x00000002
+BSG INFO:     arr_p[         25]:     0x00000002
+BSG INFO:     arr_p[         26]:     0x00000006
+BSG INFO:     arr_p[         27]:     0x00000005
+BSG INFO:     arr_p[         28]:     0x0000000b
+BSG INFO:     arr_p[         29]:     0x0000001b
+BSG INFO:     arr_p[         30]:     0x00000019
+BSG INFO:     arr_p[         31]:     0x00000005
+BSG INFO:     arr_p[         32]:     0x00000000
+BSG INFO: bsg_nonsynth_dpi_manycore (initial begin)
+BSG INFO:     Instantiation:     manycore_tb_top.mc_dpi
+BSG INFO:     x_cord_width_p:              4
+BSG INFO:     y_cord_width_p:              4
+BSG INFO:     addr_width_p:               28
+BSG INFO:     data_width_p:               32
+BSG INFO:     max_out_credits_p:          16
+BSG INFO:     ep_fifo_els_p:               4
+BSG INFO:     dpi_fifo_els_p:             32
+BSG INFO:     debug_p:           0
+BSG INFO: bsg_nonsynth_dpi_cycle_counter (initial begin)
+BSG INFO:     Instantiation: manycore_tb_top.ctr
+BSG INFO:     width_p =          64
+BSG INFO:     debug_p = 0
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6]. ATen profiler collecting ...
+x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[15].tile.proc.h.z.vcore.vcore_prof
+==================== BSG MACHINE SETTINGS: ====================
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_X                 =          16
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_Y                 =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_SET               =          16
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_WAY               =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_BLOCK_SIZE_WORDS  =          32
+[INFO][TESTBENCH] BSG_MACHINE_MAX_EPA_WIDTH            =          28
+[INFO][TESTBENCH] BSG_MACHINE_MEM_CFG                  = e_vcache_blocking_test_dramsim3_hbm2_4gb_x128
+BSG INFO: test_python Regression Test
+loading data
+vecs size: (100000, 300)
+mat shape: (100000, 256)
+done loading data; running kernel
+starting iteration 0
+elapsed: 0.03950834274291992
+elapsed * 16: 0.6321334838867188
+Kernel execution time:
+aten::mul                          0.01 14.7%
+aten::dstmm                        0.00 1.6%
+aten::dstmmt                       0.00 1.5%
+aten::mul                          0.00 6.4%
+aten::sddtmm                       0.03 74.0%
+aten::reciprocal                   0.00 0.2%
+aten::sum                          0.00 0.1%
+aten::t                            0.00 0.0%
+other                              0.00 1.5%
+time_in_roi                        0.04 100.0%
+
+------------------------------------------------------------
+
+Kernels used on CPU but not yet implemented on HB:
+==========================================================================
+ Native kernels that are used but not implemented for HammerBlade:
+==========================================================================
+Function                                                                                                                                                                               Times
+at::native::reciprocal_stub::reciprocal_stub()                                                                                                                                         1
+aten::coalesce                                                                                                                                                                         2
+aten::mul                                                                                                                                                                              1
+aten::mul_out                                                                                                                                                                          1
+
+------------------------------------------------------------
+
+
+done
+Multiply sddtmm, dstmmt, and dstmm times by 16 for true time on real dataset.
+BSG REGRESSION TEST [32mPASSED[0m
+BSG REGRESSION TEST [32mPASSED[0m
+BSG COSIM PASS: Test passed!
+$finish called from file "/home/amp342/Cosim/bsg_bladerunner/bsg_replicant/libraries/platforms/dpi-verilator/hardware/dpi_top.sv", line 815.
+$finish at simulation time                    0
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 0 ps
+CPU Time:      6.660 seconds;       Data structure size:  24.7Mb
+Tue Aug 25 11:41:12 2020

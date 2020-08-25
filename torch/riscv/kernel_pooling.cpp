@@ -40,32 +40,23 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    // Preliminary single tile implementation
-    //
-    // Grows O(^4) with image size:
-    //   N x C x H x W
-    //   Kernel loops are constant-time
-    if(__bsg_id == 0) {
-      for(uint32_t n = 0; n < N; ++n)
-        for(uint32_t c = 0; c < C; ++c)
-          for(uint32_t yh = 0; yh < Hout; ++yh)
-            for(uint32_t yw = 0; yw < Wout; ++yw) {
-              y(n, c, yh, yw) = std::numeric_limits<float>::lowest();
+    hb_tiled_for(bsg_tiles_X * bsg_tiles_Y,
+                 [&](size_t n, size_t c, size_t yh, size_t yw) {
+      y(n, c, yh, yw) = std::numeric_limits<float>::lowest();
 
-              for(uint32_t kh = 0; kh < Kh; ++kh)
-                for(uint32_t kw = 0; kw < Kw; ++kw) {
-                  int32_t xh = Sh * yh - Ph + kh;
-                  int32_t xw = Sw * yw - Pw + kw;
+      for(uint32_t kh = 0; kh < Kh; ++kh)
+        for(uint32_t kw = 0; kw < Kw; ++kw) {
+          int32_t xh = Sh * yh - Ph + kh;
+          int32_t xw = Sw * yw - Pw + kw;
 
-                  if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-                    if(x(n, c, xh, xw) > y(n, c, yh, yw)) {
-                      y(n, c, yh, yw) = x(n, c, xh, xw);
-                      ind(n, c, yh, yw) = xh * Win + xw;
-                    }
-                  }
-                }
+          if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
+            if(x(n, c, xh, xw) > y(n, c, yh, yw)) {
+              y(n, c, yh, yw) = x(n, c, xh, xw);
+              ind(n, c, yh, yw) = xh * Win + xw;
             }
-    }
+          }
+        }
+    }, N, C, Hout, Wout);
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
@@ -103,23 +94,29 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    if(__bsg_id == 0) {
-      for(uint32_t n = 0; n < N; ++n)
-        for(uint32_t c = 0; c < C; ++c)
-          for(uint32_t xh = 0; xh < Hin; ++xh)
-            for(uint32_t xw = 0; xw < Win; ++xw)
-              x(n, c, xh, xw) = 0.0f;
+    hb_tiled_foreach([]() {return 0.0;}, x);
+    g_barrier.sync();
 
-      for(uint32_t n = 0; n < N; ++n)
-        for(uint32_t c = 0; c < C; ++c)
-          for(uint32_t yh = 0; yh < Hout; ++yh)
-            for(uint32_t yw = 0; yw < Wout; ++yw) {
-              int32_t xh = ind(n, c, yh, yw) / Win;
-              int32_t xw = ind(n, c, yh, yw) % Win;
+    hb_tiled_for(bsg_tiles_X * bsg_tiles_Y,
+                 [&](size_t n, size_t c, size_t xh, size_t xw) {
+      for(uint32_t kh = 0; kh < Kh; ++kh)
+        for(uint32_t kw = 0; kw < Kw; ++kw) {
+          uint32_t rel_h = xh - kh + Ph;
+          uint32_t rel_w = xw - kw + Pw;
 
-              x(n, c, xh, xw) += y(n, c, yh, yw);
-            }
-    }
+          if((rel_h % Sh != 0) || (rel_w % Sw != 0))
+            continue;
+
+          uint32_t yh = rel_h / Sh;
+          uint32_t yw = rel_w / Sw;
+
+          if(yh >= 0 && yh < Hout && yw >= 0 && yw < Wout
+             && xh == ind(n, c, yh, yw) / Win
+             && xw == ind(n, c, yh, yw) % Win) {
+            x(n, c, xh, xw) += y(n, c, yh, yw);
+          } // else 0
+        }
+    }, N, C, Hin, Win);
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();

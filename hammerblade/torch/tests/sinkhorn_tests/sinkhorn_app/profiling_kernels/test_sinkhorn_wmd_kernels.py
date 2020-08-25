@@ -16,9 +16,9 @@ with open('sinkhorn_wmd.json',) as route:
     data = json.load(route)
 
 # Kernel parameters.
-N_FRACTION = 16 # use N_DOCS/N_FRACTION of the data
+N_FRACTION = 16*16 # use N_DOCS/N_FRACTION of the data
 N_DOCS = int(4096 / N_FRACTION)
-QUERY_IDX = 100
+QUERY_IDX = 5
 LAMBDA = 1
 
 # Data files. (Ask Adrian for these.)

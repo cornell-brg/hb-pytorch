@@ -10,9 +10,9 @@ from utils import parse_model_args, train, inference, save_model  # noqa
 from time import time
 
 # Kernel parameters.
-N_FRACTION = 16 * 16  # use N_DOCS/N_FRACTION of the data
+N_FRACTION = 16  # use N_DOCS/N_FRACTION of the data
 N_DOCS = int(4096 / N_FRACTION)
-QUERY_IDX = 5  # Was 100; lowered to allow even smaller runs.
+QUERY_IDX = 100  # Was 100; lowered to allow even smaller runs.
 LAMBDA = 1
 
 # Data files. (Ask Adrian for these.)
