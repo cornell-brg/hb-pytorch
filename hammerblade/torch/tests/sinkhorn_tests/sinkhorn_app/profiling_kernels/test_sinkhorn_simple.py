@@ -124,8 +124,13 @@ def sinkhorn_test():
             with open('sinkhorn_wmd.json') as f:
                 route_data = json.load(f)
             for kernel in route_data:
+                # Mark kernel for offload.
                 print('offloading kernel', kernel['signature'])
                 kernel['offload'] = True
+
+                # Set up a "chart" "beacon" (?).
+                torch.hammerblade.profiler.chart.add(kernel['signature'])
+
             torch.hammerblade.profiler.route.set_route_from_json(route_data)
 
     # Load data and run the kernel.
@@ -135,7 +140,12 @@ def sinkhorn_test():
     scores = swmd_torch(r, cT, vecs, niters=1)
 
     # Dump profiling results.
-    print(torch.hammerblade.profiler.stats())
+    if on_hb:
+        # This is not very helpful but at least lists the HB kernels.
+        print(torch.hammerblade.profiler.chart.json())
+    else:
+        # These are wall-clock times. They work on HB but are hilarious.
+        print(torch.hammerblade.profiler.stats())
     print("done")
     print("Multiply sddtmm, dstmmt, and dstmm times by",
           N_FRACTION, "for true time on real dataset.")
