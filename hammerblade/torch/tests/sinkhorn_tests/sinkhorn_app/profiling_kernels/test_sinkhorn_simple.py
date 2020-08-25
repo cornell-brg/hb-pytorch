@@ -9,11 +9,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
 from utils import parse_model_args, train, inference, save_model  # noqa
 from time import time
 
-torch.hammerblade.init()
-
-# import json
-# with open('sinkhorn_wmd.json',) as route:
-#     data = json.load(route)
+# Use `--hb` to run in HammerBlade mode. Otherwise, we run all native.
+HB = '--hb' in sys.argv
+if HB:
+    torch.hammerblade.init()
 
 # Kernel parameters.
 N_FRACTION = 16 # use N_DOCS/N_FRACTION of the data
@@ -22,11 +21,7 @@ QUERY_IDX = 100
 LAMBDA = 1
 
 # Data files. (Ask Adrian for these.)
-DATA_DIR = os.path.join(
-    os.path.dirname(__file__),
-    '..',
-    'data',
-)
+DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
 DATA_MAT = os.path.join(DATA_DIR, 'cache-mat.npz')
 DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 
@@ -90,31 +85,47 @@ def swmd_torch(r, cT, vecs, niters):
     return out
 
 
-# Load data.
-vecs = numpy.load(DATA_VECS)
-mat = scipy.sparse.load_npz(DATA_MAT)
-print("vecs size:", vecs.shape)
-mat = mat[:, :N_DOCS]  # Use a subset of the data.
-print("mat shape:", mat.shape)
-# The query vector.
-r = numpy.asarray(mat[:, QUERY_IDX].todense()).squeeze()
+def load_data():
+    # Load data.
+    vecs = numpy.load(DATA_VECS)
+    mat = scipy.sparse.load_npz(DATA_MAT)
+    print("vecs size:", vecs.shape)
+    mat = mat[:, :N_DOCS]  # Use a subset of the data.
+    print("mat shape:", mat.shape)
+    # The query vector.
+    r = numpy.asarray(mat[:, QUERY_IDX].todense()).squeeze()
 
-# mat could theoretically be stored as its transpose, so don't count 
-matT = mat.T
+    # mat could theoretically be stored as its transpose, so don't count 
+    matT = mat.T
 
-# Convert arrays to PyTorch tensors.
-r = torch.FloatTensor(r)
-cT_coo = matT.tocoo()
-cT = torch.sparse.FloatTensor(
-    torch.LongTensor(numpy.vstack((cT_coo.row, cT_coo.col))),
-    torch.FloatTensor(cT_coo.data),
-    torch.Size(cT_coo.shape),
-)
+    # Convert arrays to PyTorch tensors.
+    r = torch.FloatTensor(r)
+    cT_coo = matT.tocoo()
+    cT = torch.sparse.FloatTensor(
+        torch.LongTensor(numpy.vstack((cT_coo.row, cT_coo.col))),
+        torch.FloatTensor(cT_coo.data),
+        torch.Size(cT_coo.shape),
+    )
 
-vecs = torch.FloatTensor(vecs)
+    vecs = torch.FloatTensor(vecs)
 
-scores = swmd_torch(r, cT, vecs, niters=1)
+    return r, cT, vecs
 
-print(torch.hammerblade.profiler.stats())
-print("done")
-print("Multiply sddtmm, dstmmt, and dstmm times by ", N_FRACTION, " for true time on real dataset.")
+
+def sinkhorn_test():
+    # import json
+    # with open('sinkhorn_wmd.json',) as route:
+    #     data = json.load(route)
+
+    print('loading data')
+    r, cT, vecs = load_data()
+    print('done loading data; running kernel')
+    scores = swmd_torch(r, cT, vecs, niters=1)
+
+    print(torch.hammerblade.profiler.stats())
+    print("done")
+    print("Multiply sddtmm, dstmmt, and dstmm times by ", N_FRACTION, " for true time on real dataset.")
+
+
+if __name__ == '__main__':
+    sinkhorn_test()
