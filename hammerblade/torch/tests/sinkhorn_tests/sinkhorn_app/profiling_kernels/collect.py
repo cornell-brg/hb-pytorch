@@ -1,5 +1,7 @@
 import json
 import re
+import csv
+import sys
 
 ROUTE_JSON = 'sinkhorn_wmd.json'
 HB_STATS = 'run_{}/manycore_stats.log'
@@ -55,13 +57,24 @@ def collect():
             stats_txt = f.read()
         hb_cycles[kernel_name(kernel['signature'])] = \
             cycles_from_stats(stats_txt)
-    print(hb_cycles)
 
     # Load CPU time breakdown.
     with open(CPU_LOG) as f:
         log_txt = f.read()
     cpu_times = dict(times_from_log(log_txt))
-    print(cpu_times)
+
+    # Dump a CSV.
+    writer = csv.DictWriter(
+        sys.stdout,
+        ['kernel', 'cpu_time', 'hb_cycles']
+    )
+    writer.writeheader()
+    for kernel in sorted(set(hb_cycles).union(cpu_times)):
+        writer.writerow({
+            'kernel': kernel,
+            'cpu_time': cpu_times.get(kernel),
+            'hb_cycles': hb_cycles.get(kernel),
+        })
 
 
 if __name__ == '__main__':
