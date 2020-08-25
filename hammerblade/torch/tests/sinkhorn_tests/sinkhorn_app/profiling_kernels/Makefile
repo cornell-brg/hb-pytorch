@@ -1,0 +1,18 @@
+PYTORCH_DIR := $(BRG_BSG_BLADERUNNER_DIR)/hb-pytorch
+MCPY_DIR := $(BRG_BSG_BLADERUNNER_DIR)/bsg_manycore/software/py
+APP_SCRIPT := test_sinkhorn_simple.py
+
+# There are three kernels to offload individually.
+KERNELS := 0 1 2
+
+.PHONY: logs
+ALL_LOGS := $(KERNELS:%=run_%/manycore_stats.log)
+logs: $(ALL_LOGS)
+
+run_%/vanilla_stats.csv:
+	mkdir -p run_$*
+	cd run_$* ; PYTHONPATH=$(PYTORCH_DIR) pycosim ../$(APP_SCRIPT) --hb $* > log.txt
+
+run_%/manycore_stats.log: run_%/vanilla_stats.csv
+	cd run_$* ; PYTHONPATH=$(MCPY_DIR) python -m vanilla_parser
+	cd run_$* ; mv stats/vanilla_stats.csv .

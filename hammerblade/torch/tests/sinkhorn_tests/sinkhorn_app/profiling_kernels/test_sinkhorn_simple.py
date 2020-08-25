@@ -113,7 +113,18 @@ def load_data():
 
 def sinkhorn_test():
     # Use `--hb` to run in HammerBlade mode. Otherwise, we run all native.
-    on_hb = '--hb' in sys.argv
+    # Optionally add a number to offload only a specific kernel.
+    args = sys.argv[1:]
+    if '--hb' in args:
+        on_hb = True
+        args.remove('--hb')
+        if args:
+            # The index of the specific kernel to offload.
+            kernel_idx = int(args[0])
+        else:
+            kernel_idx = None
+    else:
+        on_hb = False
 
     if on_hb:
         torch.hammerblade.init()
@@ -123,10 +134,11 @@ def sinkhorn_test():
         if on_hb:
             with open('sinkhorn_wmd.json') as f:
                 route_data = json.load(f)
-            for kernel in route_data:
+            for i, kernel in enumerate(route_data):
                 # Mark kernel for offload.
-                print('offloading kernel', kernel['signature'])
-                kernel['offload'] = True
+                if kernel_idx is None or kernel_idx == i:
+                    print('offloading kernel', kernel['signature'])
+                    kernel['offload'] = True
 
                 # Set up a "chart" "beacon" (?).
                 torch.hammerblade.profiler.chart.add(kernel['signature'])
