@@ -1,0 +1,14 @@
+Emulating CUDALite...
+Emulation barrier init'ed with 1 threads
+PyTorch configed with 1 * 1 HB device
+HB startup config kernel applied
+vecs size: (100000, 300)
+mat shape: (100000, 4096)
+Traceback (most recent call last):
+  File "/home/amp342/Emulator/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/profiling_kernels/test_sinkhorn_wmd_kernels.py", line 108, in <module>
+    scores = swmd_torch(r, cT, vecs, niters=1)
+  File "/home/amp342/Emulator/hb-pytorch/hammerblade/torch/tests/sinkhorn_tests/sinkhorn_app/profiling_kernels/test_sinkhorn_wmd_kernels.py", line 38, in swmd_torch
+    M = torch.cdist(vecs[sel], vecs)
+  File "/home/amp342/Emulator/hb-pytorch/torch/functional.py", line 671, in cdist
+    return torch._C._VariableFunctions.cdist(x1, x2, p, None)
+KeyboardInterrupt
