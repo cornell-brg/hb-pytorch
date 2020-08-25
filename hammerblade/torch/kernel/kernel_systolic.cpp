@@ -155,15 +155,19 @@ extern "C" {
     auto tile_task = [&] (int rr, int rc, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
 
                           // wait until buffer is loaded
-                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f)), 1);
                           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f)), 1);
 
-                          // do compute
-                          if (partial_block) {
-                            compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
-                          } else {
-                            compute_simple(sp_result, sp_mat1, sp_mat2);
+                          if (__bsg_y < SYSTOLIC_Y_DIM) {
+                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
+                            // copy mat2 to S
+                            spcpy(sp_mat2_remote, sp_mat2);
+                            asm volatile("": : :"memory");
+                            *mat2_f_S   = 1;
+                            *mat2_f_S_r = 1;
                           }
+
+                          // wait until buffer is loaded
+                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f)), 1);
 
                           // copy what we have worked on to the next tile
                           if (__bsg_x < SYSTOLIC_X_DIM) {
@@ -175,13 +179,11 @@ extern "C" {
                             *mat1_f_E_r = 1;
                           }
 
-                          if (__bsg_y < SYSTOLIC_Y_DIM) {
-                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
-                            // copy mat2 to S
-                            spcpy(sp_mat2_remote, sp_mat2);
-                            asm volatile("": : :"memory");
-                            *mat2_f_S   = 1;
-                            *mat2_f_S_r = 1;
+                          // do compute
+                          if (partial_block) {
+                            compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
+                          } else {
+                            compute_simple(sp_result, sp_mat1, sp_mat2);
                           }
 
                           // flag that we are done with the buffer
