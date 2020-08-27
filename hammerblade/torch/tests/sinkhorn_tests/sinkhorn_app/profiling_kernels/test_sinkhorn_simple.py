@@ -6,11 +6,18 @@ import torch
 import json
 from time import time
 
+# Kernel parameters.
+TOTAL_DOCS = 4096
+QUERY_IDX = 5  # Was 100; lowered to allow even smaller runs.
+LAMBDA = 1
+
 # Data files. (Ask Adrian for these.)
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
 DATA_MAT = os.path.join(DATA_DIR, 'cache-mat.npz')
 DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 
+# Kernel "routing" file.
+ROUTE_JSON = os.path.join(os.path.dirname(__file__), 'sinkhorn_wmd.json')
 # Kernel parameters.
 N_FRACTION = 16*16  # use N_DOCS/N_FRACTION of the data
 N_DOCS = int(4096 / N_FRACTION)
@@ -81,14 +88,14 @@ def swmd_torch(r, cT, vecs, niters):
     return out
 
 
-def load_data():
+def load_data(n_docs):
     """Load data for the Sinkhorn WMD kernel.
     """
     # Load data.
     vecs = numpy.load(DATA_VECS)
     mat = scipy.sparse.load_npz(DATA_MAT)
     print("vecs size:", vecs.shape)
-    mat = mat[:, :N_DOCS]  # Use a subset of the data.
+    mat = mat[:, :n_docs]  # Use a subset of the data.
     print("mat shape:", mat.shape)
     # The query vector.
     r = numpy.asarray(mat[:, QUERY_IDX].todense()).squeeze()
@@ -112,23 +119,46 @@ def load_data():
 
 def sinkhorn_test():
     # Use `--hb` to run in HammerBlade mode. Otherwise, we run all native.
-    on_hb = '--hb' in sys.argv
+    # Optionally add a number to offload only a specific kernel.
+    args = sys.argv[1:]
+    if '--hb' in args:
+        on_hb = True
+        args.remove('--hb')
+        if args:
+            # The index of the specific kernel to offload.
+            kernel_idx = int(args[0])
+        else:
+            kernel_idx = None
+    else:
+        on_hb = False
 
+    # Set up HammerBlade cosim stuff.
     if on_hb:
         torch.hammerblade.init()
 
         # Set up HammerBlade "routing," which tells kernels to run on HB
         # instead of on the CPU.
-        with open('sinkhorn_wmd.json') as f:
-            route_data = json.load(f)
-        for kernel in route_data:
-            print('offloading kernel', kernel['signature'])
-            kernel['offload'] = True
-        torch.hammerblade.profiler.route.set_route_from_json(route_data)
+        if on_hb:
+            with open(ROUTE_JSON) as f:
+                route_data = json.load(f)
+            for i, kernel in enumerate(route_data):
+                # Mark kernel for offload.
+                if kernel_idx is None or kernel_idx == i:
+                    print('offloading kernel', kernel['signature'])
+                    kernel['offload'] = True
+
+                # Set up a "chart" "beacon" (?).
+                torch.hammerblade.profiler.chart.add(kernel['signature'])
+
+            torch.hammerblade.profiler.route.set_route_from_json(route_data)
+
+    # Set the size of the run. Use TOTAL_DOCS/data_fraction of the data.
+    data_fraction = 16 * 16 if on_hb else 1  # Tiny subset on HB.
+    n_docs = TOTAL_DOCS // data_fraction
 
     # Load data and run the kernel.
-    print('loading data')
-    r, cT, vecs = load_data()
+    print('loading data for {} docs'.format(n_docs))
+    r, cT, vecs = load_data(n_docs)
     print('done loading data; running kernel')
 
     begin_profile(on_hb)
@@ -136,8 +166,14 @@ def sinkhorn_test():
     end_profile(on_hb, N_FRACTION)
 
     # Dump profiling results.
-    print(torch.hammerblade.profiler.stats())
+    if on_hb:
+        # This is not very helpful but at least lists the HB kernels.
+        print(torch.hammerblade.profiler.chart.json())
+    else:
+        # These are wall-clock times. They work on HB but are hilarious.
+        print(torch.hammerblade.profiler.stats())
     print("done")
+
 
 # torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)")
 # torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)")
