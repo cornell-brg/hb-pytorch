@@ -19,26 +19,26 @@ DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 # Kernel "routing" file.
 ROUTE_JSON = os.path.join(os.path.dirname(__file__), 'sinkhorn_wmd.json')
 # Kernel parameters.
-N_FRACTION = 16*16  # use N_DOCS/N_FRACTION of the data
-N_DOCS = int(4096 / N_FRACTION)
-Q_FRACTION = 20  # use QUERY_IDX/Q_FRACTION of the data
-QUERY_IDX = int(100 / Q_FRACTION)  # Was 100; lowered to allow even smaller runs.
+N_DOCS = 4096
+N_FRACTION = 16 # fraction of data to use on hb, i.e. 1/(16 * this value)
+QUERY_IDX = 5  # Was 100; lowered to allow even smaller runs.
 LAMBDA = 1
 
 def begin_profile(on_hb):
+    start_time = None
     if (not on_hb):
         start_time = time()
     torch.hammerblade.profiler.enable()
     return start_time
 
-def end_profile(on_hb, start_time, mult=None):
+def end_profile(on_hb, start_time):
     torch.hammerblade.profiler.disable()
-    if (not on_hb):
+    if (start_time):
         end_time = time()
         elapsed = end_time - start_time
         print("elapsed time:", elapsed)
-        if mult:
-            print("elapsed time *",mult,":", elapsed*mult)
+        if on_hb:
+            print("elapsed time *N_FRACTION=(",N_FRACTION,"):", elapsed*N_FRACTION)
 
 
 def swmd_torch(r, cT, vecs, niters):
@@ -152,7 +152,7 @@ def sinkhorn_test():
             torch.hammerblade.profiler.route.set_route_from_json(route_data)
 
     # Set the size of the run. Use TOTAL_DOCS/data_fraction of the data.
-    data_fraction = 16 * 16 if on_hb else 1  # Tiny subset on HB.
+    data_fraction = 16 * N_FRACTION if on_hb else 1  # Tiny subset on HB.
     n_docs = TOTAL_DOCS // data_fraction
 
     # Load data and run the kernel.
@@ -162,7 +162,7 @@ def sinkhorn_test():
 
     start_time = begin_profile(on_hb)
     scores = swmd_torch(r, cT, vecs, niters=1)
-    end_profile(on_hb, start_time, N_FRACTION)
+    end_profile(on_hb, start_time)
 
     # Dump profiling results.
     if on_hb:
