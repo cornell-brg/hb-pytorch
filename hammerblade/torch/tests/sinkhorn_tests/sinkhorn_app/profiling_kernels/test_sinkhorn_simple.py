@@ -25,13 +25,13 @@ Q_FRACTION = 20  # use QUERY_IDX/Q_FRACTION of the data
 QUERY_IDX = int(100 / Q_FRACTION)  # Was 100; lowered to allow even smaller runs.
 LAMBDA = 1
 
-start_time = None
 def begin_profile(on_hb):
     if (not on_hb):
         start_time = time()
     torch.hammerblade.profiler.enable()
+    return start_time
 
-def end_profile(on_hb, mult=None):
+def end_profile(on_hb, start_time, mult=None):
     torch.hammerblade.profiler.disable()
     if (not on_hb):
         end_time = time()
@@ -138,17 +138,16 @@ def sinkhorn_test():
 
         # Set up HammerBlade "routing," which tells kernels to run on HB
         # instead of on the CPU.
-        if on_hb:
-            with open(ROUTE_JSON) as f:
-                route_data = json.load(f)
-            for i, kernel in enumerate(route_data):
-                # Mark kernel for offload.
-                if kernel_idx is None or kernel_idx == i:
-                    print('offloading kernel', kernel['signature'])
-                    kernel['offload'] = True
+        with open(ROUTE_JSON) as f:
+            route_data = json.load(f)
+        for i, kernel in enumerate(route_data):
+            # Mark kernel for offload.
+            if kernel_idx is None or kernel_idx == i:
+                print('offloading kernel', kernel['signature'])
+                kernel['offload'] = True
 
-                # Set up a "chart" "beacon" (?).
-                torch.hammerblade.profiler.chart.add(kernel['signature'])
+            # Set up a "chart" "beacon" (?).
+            torch.hammerblade.profiler.chart.add(kernel['signature'])
 
             torch.hammerblade.profiler.route.set_route_from_json(route_data)
 
@@ -161,9 +160,9 @@ def sinkhorn_test():
     r, cT, vecs = load_data(n_docs)
     print('done loading data; running kernel')
 
-    begin_profile(on_hb)
+    start_time = begin_profile(on_hb)
     scores = swmd_torch(r, cT, vecs, niters=1)
-    end_profile(on_hb, N_FRACTION)
+    end_profile(on_hb, start_time, N_FRACTION)
 
     # Dump profiling results.
     if on_hb:
