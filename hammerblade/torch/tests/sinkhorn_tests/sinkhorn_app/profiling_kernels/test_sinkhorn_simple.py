@@ -149,7 +149,7 @@ def sinkhorn_test():
             # Set up a "chart" "beacon" (?).
             torch.hammerblade.profiler.chart.add(kernel['signature'])
 
-            torch.hammerblade.profiler.route.set_route_from_json(route_data)
+        torch.hammerblade.profiler.route.set_route_from_json(route_data)
 
     # Set the size of the run. Use TOTAL_DOCS/data_fraction of the data.
     data_fraction = 16 * N_FRACTION if on_hb else 1  # Tiny subset on HB.
@@ -178,7 +178,7 @@ def sinkhorn_test():
 # torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)")
 # torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::sddtmm(const at::Tensor&, const at::Tensor&, const at::Tensor&)")
 
-# print(torch.hammerblade.profiler.exec_time.raw_stack())
+print(torch.hammerblade.profiler.exec_time.raw_stack())
 # print(torch.hammerblade.profiler.chart.json())
 
 if __name__ == '__main__':
