@@ -4,9 +4,6 @@ import os
 import sys
 import torch
 import json
-
-sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
-from utils import parse_model_args, train, inference, save_model  # noqa
 from time import time
 
 # Kernel parameters.
@@ -21,6 +18,27 @@ DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 
 # Kernel "routing" file.
 ROUTE_JSON = os.path.join(os.path.dirname(__file__), 'sinkhorn_wmd.json')
+# Kernel parameters.
+N_FRACTION = 16*16  # use N_DOCS/N_FRACTION of the data
+N_DOCS = int(4096 / N_FRACTION)
+Q_FRACTION = 20  # use QUERY_IDX/Q_FRACTION of the data
+QUERY_IDX = int(100 / Q_FRACTION)  # Was 100; lowered to allow even smaller runs.
+LAMBDA = 1
+
+start_time = None
+def begin_profile(on_hb):
+    if (not on_hb):
+        start_time = time()
+    torch.hammerblade.profiler.enable()
+
+def end_profile(on_hb, mult=None):
+    torch.hammerblade.profiler.disable()
+    if (not on_hb):
+        end_time = time()
+        elapsed = end_time - start_time
+        print("elapsed time:", elapsed)
+        if mult:
+            print("elapsed time *",mult,":", elapsed*mult)
 
 
 def swmd_torch(r, cT, vecs, niters):
@@ -45,11 +63,6 @@ def swmd_torch(r, cT, vecs, niters):
     K_div_r = K / r
     K_T = K.T
 
-    # BEGIN PROFILING HERE
-    start_time = time()
-    # torch.hammerblade.profiler.route.set_route_from_json(data)
-    torch.hammerblade.profiler.enable()
-
     for it in range(niters):
         print('starting iteration {}'.format(it))
 
@@ -69,18 +82,9 @@ def swmd_torch(r, cT, vecs, niters):
         # x = torch.dstmm(K_div_r, vT)
         xT = torch.dstmmt(K_div_r, vT)
 
-    out = (uT.t() * torch.dstmm(K * M, vT)).sum(axis=0)
-    
-    # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
     #Note: M is huge compared to uT, so use the sum(axis=0) instead of sum(axis=1) line
-
-    # END PROFILING HERE
-    torch.hammerblade.profiler.disable()
-    end_time = time()
-    elapsed = end_time - start_time
-    print("elapsed:", elapsed)
-    print("elapsed * 16:", elapsed * 16)
-
+    # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
+    out = (uT.t() * torch.dstmm(K * M, vT)).sum(axis=0)
     return out
 
 
@@ -156,7 +160,10 @@ def sinkhorn_test():
     print('loading data for {} docs'.format(n_docs))
     r, cT, vecs = load_data(n_docs)
     print('done loading data; running kernel')
+
+    begin_profile(on_hb)
     scores = swmd_torch(r, cT, vecs, niters=1)
+    end_profile(on_hb, N_FRACTION)
 
     # Dump profiling results.
     if on_hb:
@@ -166,9 +173,14 @@ def sinkhorn_test():
         # These are wall-clock times. They work on HB but are hilarious.
         print(torch.hammerblade.profiler.stats())
     print("done")
-    print("Multiply sddtmm, dstmmt, and dstmm times by",
-          data_fraction, "for true time on real dataset.")
 
+
+# torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)")
+# torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)")
+# torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::sddtmm(const at::Tensor&, const at::Tensor&, const at::Tensor&)")
+
+# print(torch.hammerblade.profiler.exec_time.raw_stack())
+# print(torch.hammerblade.profiler.chart.json())
 
 if __name__ == '__main__':
     sinkhorn_test()

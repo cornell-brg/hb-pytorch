@@ -4,7 +4,7 @@ import json
 import copy
 import subprocess
 
-TESTS = '/home/amp342/Emulator/hb-pytorch/hammerblade/torch/tests/'
+TEST_DIR = os.path.join(os.path.dirname(__file__), '..', 'test_sinkhorn_simple.py')
 
 def fancy_print(route):
   for waypoint in route:
@@ -33,10 +33,10 @@ for i in range(len(route)): # embedding_back
   os.system(sh_cmd)
   with open(name + "/sinkhorn_wmd.json", 'w') as outfile:
     json.dump(cmd, outfile, indent=4, sort_keys=True)
-  sh_cmd = "cp -r data/ " + name + "/"
-  print(sh_cmd)
-  os.system(sh_cmd)
-  script = "(cd " + name + "; pycosim "+ TESTS + "sinkhorn_tests/sinkhorn_app/profiling_kernels/test_sinkhorn_wmd_kernels.py > out.std 2>&1)"
+  # sh_cmd = "cp -r data/ " + name + "/"
+  # print(sh_cmd)
+  # os.system(sh_cmd)
+  script = "(cd " + name + "; pycosim "+ TEST_DIR + " --hb > out.std 2>&1)"
   with open(name + "/run.sh", 'w') as outfile:
     outfile.write(script)
   print("starting cosim job ...")
