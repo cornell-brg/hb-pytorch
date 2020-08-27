@@ -75,8 +75,8 @@ def swmd_torch(r, cT, vecs, niters):
         # x = torch.dstmm(K_div_r, vT)
         xT = torch.dstmmt(K_div_r, vT)
 
-    # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
     #Note: M is huge compared to uT, so use the sum(axis=0) instead of sum(axis=1) line
+    # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
     out = (uT.t() * torch.dstmm(K * M, vT)).sum(axis=0)
     return out
 
