@@ -60,19 +60,19 @@ def swmd_torch(r, cT, vecs, niters):
         # v = c * (1.0 / _sddmm(c, K_T, u))
         # v = c * (1.0 / torch.sddtmm(c, K_T, uT)
         # vT = cT * torch.sddtmm(cT, uT, K_T).sparse_reciprocal()
-        
+
         # NOTE: NEED TO ADD RECIPROCAL
         vT = cT * torch.sddtmm(cT, uT, K_T)
-        
+
         # custom dstmm.t():
         # x = _dsmp(K_div_r, v)
         # x = torch.dstmm(K_div_r, vT)
         xT = torch.dstmmt(K_div_r, vT)
 
     out = (uT.t() * torch.dstmm(K * M, vT)).sum(axis=0)
-    
+
     # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
-    #Note: M is huge compared to uT, so use the sum(axis=0) instead of sum(axis=1) line
+    # Note: M is huge compared to uT, so use the sum(axis=0) instead of sum(axis=1) line
 
     # END PROFILING HERE
     torch.hammerblade.profiler.disable()
