@@ -189,8 +189,8 @@ def collect(summary):
         print('CPU time: {:.3f} s'.format(cpu_total_time))
         print('CPU+HB time: {:.3f} s'.format(hb_total_time))
         print('Speedup: {:.1f}x'.format(cpu_total_time / hb_total_time))
-        print('CPU kernel energy: {:.3f} J'.format(cpu_kern_energy))
-        print('HB kernel energy: {:.3f} uJ'.format(hb_kern_energy * 10**6))
+        print('CPU kernel energy: {:.1f} J'.format(cpu_kern_energy))
+        print('HB kernel energy: {:.1f} mJ'.format(hb_kern_energy * 10**3))
         print('Energy ratio: {:.0f}x'.format(cpu_kern_energy / hb_kern_energy))
 
     else:
