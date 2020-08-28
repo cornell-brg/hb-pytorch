@@ -78,16 +78,31 @@ def total_times_from_tree(log):
             yield kernel, secs
 
 
-def trimmed_times_from_tree(log):
+def trimmed_times_from_tree(log, marker='@HB_LOG@'):
     cur_kernel = None
     cur_total = None
+    in_marker = False
     for level, sig, secs in parse_tree(log):
         # Check for a new top-level kernel.
         if level == 1:
             if cur_kernel is not None:
                 yield cur_kernel, cur_total
             cur_kernel = kernel_name(sig) if sig.startswith('at::') else sig
+            if marker:
+                cur_total = None
+                in_marker = False
+            else:
+                cur_total = secs
+            continue
+
+        if level == 2 and sig == marker:
+            in_marker = True
             cur_total = secs
+            continue
+        if level == 2:
+            in_marker = False
+            continue
+        if not in_marker:
             continue
 
         # Check for trimmed functions.
