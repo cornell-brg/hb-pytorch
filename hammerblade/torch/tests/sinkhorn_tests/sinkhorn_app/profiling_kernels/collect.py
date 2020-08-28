@@ -160,7 +160,8 @@ def collect(summary):
         hb_host_times[kname] = trimmed_times[kname]
 
         # Run energy model, convert to joules.
-        hb_energies[kname] = energy_7nm(stats_txt) / 10**6
+        energy = energy_7nm(stats_txt) * HB_DATA_FRAC
+        hb_energies[kname] = energy / 10**6
 
     # Load CPU time breakdown.
     with open(CPU_LOG) as f:
