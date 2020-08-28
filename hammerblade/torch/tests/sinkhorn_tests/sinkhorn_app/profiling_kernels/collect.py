@@ -5,6 +5,7 @@ import sys
 
 ROUTE_JSON = 'sinkhorn_wmd.json'
 HB_STATS = 'run_{}/manycore_stats.log'
+HB_LOG = 'run_{}/log.txt'
 CPU_LOG = 'cpu_run/log.txt'
 
 HB_FREQ = 10 ** 9  # 1 GHz.
@@ -49,11 +50,10 @@ def times_from_log(log):
             yield kernel, float(tm)
 
 
-def times_from_tree(log):
+def parse_tree(log):
     """Given an execution log from any run, look for the "tree" output
-    from `hammerblade.profiler.exec_time.raw_stack` that breaks down
-    CPU-side execution time for the functions within a kernel
-    invocation. Generate (kernel, time) pairs.
+    from `hammerblade.profiler.exec_time.raw_stack` and parse it into
+    (level, function, time) tuples.
     """
     for line in log.splitlines():
         if line.strip().startswith('|- Node'):
@@ -62,15 +62,20 @@ def times_from_tree(log):
             match = re.search(r'Node\((.*) : (\d+\.\d+)\)', line)
             sig, tm = match.groups()
 
-            if sig.startswith('at::'):
-                kernel = kernel_name(sig)
-            else:
-                kernel = sig
-
             micros = int(tm.split('.')[0])  # Data reported in microseconds.
 
-            if level == 1:
-                yield kernel, micros / 10**6
+            yield level, sig, micros / 10**6
+
+
+def times_from_tree(log):
+    """Given an execution log from any run, use the `raw_stack` tree to
+    get the total execution time for top-level kernel invocations.
+    Generate (kernel, time) pairs.
+    """
+    for level, sig, secs in parse_tree(log):
+        if level == 1:
+            kernel = kernel_name(sig) if sig.startswith('at::') else sig
+            yield kernel, secs
 
 
 def hb_cycles_to_time(cycles):
@@ -96,9 +101,10 @@ def collect():
     with open(ROUTE_JSON) as f:
         kernels = json.load(f)
 
-    # Load all HB cycles statistics.
+    # Load results from every HB run (one per kernel).
     hb_cycles = {}
     for i, kernel in enumerate(kernels):
+        # Load HB cycles from statistics dump.
         stats_fn = HB_STATS.format(i)
         with open(stats_fn) as f:
             stats_txt = f.read()
