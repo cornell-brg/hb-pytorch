@@ -67,7 +67,7 @@ def parse_tree(log):
             yield level, sig, micros / 10**6
 
 
-def times_from_tree(log):
+def total_times_from_tree(log):
     """Given an execution log from any run, use the `raw_stack` tree to
     get the total execution time for top-level kernel invocations.
     Generate (kernel, time) pairs.
@@ -76,6 +76,34 @@ def times_from_tree(log):
         if level == 1:
             kernel = kernel_name(sig) if sig.startswith('at::') else sig
             yield kernel, secs
+
+
+def trimmed_times_from_tree(log):
+    last_level = None
+    last_secs = 0.0
+    cur_kernel = None
+    cur_total = None
+
+    for level, sig, secs in parse_tree(log):
+        # If we are at an equal or lower level than the immediate
+        # predecessor, then that predecessor was a leaf.
+        if last_level is not None and level <= last_level:
+            cur_total += last_secs
+        last_level = level
+        last_secs = secs
+
+        # Check for a new top-level kernel.
+        if level == 1:
+            if cur_kernel is not None:
+                yield cur_kernel, cur_total
+            cur_kernel = kernel_name(sig) if sig.startswith('at::') else sig
+            cur_total = 0.0
+
+    # Last item was a leaf.
+    cur_total += last_secs
+
+    # Emit final kernel.
+    yield cur_kernel, cur_total
 
 
 def hb_cycles_to_time(cycles):
@@ -114,7 +142,7 @@ def collect():
     # Load CPU time breakdown.
     with open(CPU_LOG) as f:
         log_txt = f.read()
-    cpu_times = dict(times_from_tree(log_txt))
+    cpu_times = dict(total_times_from_tree(log_txt))
 
     # Dump a CSV.
     writer = csv.DictWriter(
