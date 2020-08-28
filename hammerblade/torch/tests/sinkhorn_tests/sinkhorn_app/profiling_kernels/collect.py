@@ -14,6 +14,8 @@ HB_FREQ = 10 ** 9  # 1 GHz.
 HB_MACHINE_FRAC = 16  # Simulating 1/16th of the machine.
 HB_DATA_FRAC = 16  # Used this fraction of the CPU's data.
 
+CPU_TDP = 165  # Xeon power (watts).
+
 
 def cycles_from_stats(stats):
     """Given the text contents of a `manycore_stats.log` file, extract the
@@ -187,14 +189,15 @@ def collect(summary):
         # Dump a CSV.
         writer = csv.DictWriter(
             sys.stdout,
-            ['kernel', 'cpu_time', 'hb_cycles', 'hb_time', 'hb_host_time',
-             'hb_energy']
+            ['kernel', 'cpu_time', 'cpu_energy', 'hb_cycles', 'hb_time',
+             'hb_host_time', 'hb_energy', 'hb_host_energy']
         )
         writer.writeheader()
         for kernel, cpu_time in cpu_times:
             writer.writerow({
                 'kernel': kernel,
                 'cpu_time': cpu_time,
+                'cpu_energy': cpu_time * CPU_TDP,
                 'hb_cycles': hb_cycles.get(kernel),
                 'hb_time': (hb_cycles_to_time(hb_cycles[kernel])
                             if kernel in hb_cycles else ''),
@@ -202,6 +205,8 @@ def collect(summary):
                                  if kernel in hb_host_times else ''),
                 'hb_energy': (hb_energies[kernel]
                               if kernel in hb_energies else ''),
+                'hb_host_energy': (hb_host_times[kernel] * CPU_TDP
+                                   if kernel in hb_host_times else ''),
             })
 
 
