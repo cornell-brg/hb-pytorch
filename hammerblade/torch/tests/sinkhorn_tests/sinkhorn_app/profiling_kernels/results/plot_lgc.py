@@ -71,9 +71,9 @@ def plot_bar(kernels):
     ind = np.arange(N)
     print(ind)
     width = 0.3
-    plt.bar(ind - width, numpy_xeon_time, width, align='center', label='Intel Xeon Gold 6242\n16C/32T @2.8GHz w/ 6xDDR4\nNumPy Parallel Version w/ BLAS', edgecolor='black')
-    plt.bar(ind, pytorch_xeon_time, width, align='center', label='Intel Xeon Gold 6242\n16C/32T @2.8GHz w/ 6xDDR4\nPyTorch Parallel Version w/ BLAS', edgecolor='black')
-    plt.bar(ind + width, device_time, width, align='center', label='HammerBlade\n2K cores @ 1 GHz w/ 32xHBM2\nPyTorch HB/CUDA-Lite Port', edgecolor='black')
+    plt.bar(ind - width, numpy_xeon_time, width, align='center', label='Xeon + NumPy', edgecolor='black')
+    plt.bar(ind, pytorch_xeon_time, width, align='center', label='Xeon + PyTorch', edgecolor='black')
+    plt.bar(ind + width, device_time, width, align='center', label='HammerBlade + PyTorch\n2048 cores @ 1 GHz', edgecolor='black')
     plt.bar(ind + width, host_time, width, align='center', bottom=device_time, label='HammerBlade Host', edgecolor='black')
 
     # for i in range(len(kernels)):
@@ -81,7 +81,7 @@ def plot_bar(kernels):
 
 #    plt.xlabel('Numpy and Pytorch Tensor Operators Used in Lgc-ista', fontsize=15)
     plt.ylabel('Execution Time (ms)', fontsize=15)
-    plt.title('Comparison of Intel Xeon vs. HammerBlade on SDH Sparse Workload lgc-ista', fontsize=17, fontweight='bold')
+    plt.title('LGC-ISTA', fontsize=17, fontweight='bold')
     plt.ylim(0, 25000)
 #    plt.text(pytorch_xeon_time[])
 
