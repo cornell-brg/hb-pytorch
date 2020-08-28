@@ -79,28 +79,20 @@ def total_times_from_tree(log):
 
 
 def trimmed_times_from_tree(log):
-    last_level = None
-    last_secs = 0.0
     cur_kernel = None
     cur_total = None
-
     for level, sig, secs in parse_tree(log):
-        # If we are at an equal or lower level than the immediate
-        # predecessor, then that predecessor was a leaf.
-        if last_level is not None and level <= last_level:
-            cur_total += last_secs
-        last_level = level
-        last_secs = secs
-
         # Check for a new top-level kernel.
         if level == 1:
             if cur_kernel is not None:
                 yield cur_kernel, cur_total
             cur_kernel = kernel_name(sig) if sig.startswith('at::') else sig
-            cur_total = 0.0
+            cur_total = secs
+            continue
 
-    # Last item was a leaf.
-    cur_total += last_secs
+        # Check for trimmed functions.
+        if '@BSG_API_CALL@' in sig or '@OFFLOAD_KERNEL@' in sig:
+            cur_total -= secs  # Trim this time!
 
     # Emit final kernel.
     yield cur_kernel, cur_total
