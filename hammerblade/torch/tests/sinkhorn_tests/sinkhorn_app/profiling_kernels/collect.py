@@ -159,8 +159,8 @@ def collect(summary):
         trimmed_times = dict(trimmed_times_from_tree(log_txt))
         hb_host_times[kname] = trimmed_times[kname]
 
-        # Run energy model.
-        hb_energies[kname] = energy_7nm(stats_txt)
+        # Run energy model, convert to joules.
+        hb_energies[kname] = energy_7nm(stats_txt) / 10**6
 
     # Load CPU time breakdown.
     with open(CPU_LOG) as f:
@@ -190,7 +190,7 @@ def collect(summary):
         writer = csv.DictWriter(
             sys.stdout,
             ['kernel', 'cpu_time', 'cpu_energy', 'hb_cycles', 'hb_time',
-             'hb_host_time', 'hb_energy', 'hb_host_energy']
+             'hb_host_time', 'hb_energy']
         )
         writer.writeheader()
         for kernel, cpu_time in cpu_times:
@@ -205,8 +205,6 @@ def collect(summary):
                                  if kernel in hb_host_times else ''),
                 'hb_energy': (hb_energies[kernel]
                               if kernel in hb_energies else ''),
-                'hb_host_energy': (hb_host_times[kernel] * CPU_TDP
-                                   if kernel in hb_host_times else ''),
             })
 
 
