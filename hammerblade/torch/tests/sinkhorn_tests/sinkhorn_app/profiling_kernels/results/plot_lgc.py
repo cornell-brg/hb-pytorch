@@ -27,7 +27,8 @@ class DataPoint:
                 host = self.host,
                 device = self.device)
 
-def parse_data(filename):
+
+def parse_table(filename):
     with open(filename, "r") as f:
         data = f.readlines()
     kernels = []
@@ -92,10 +93,9 @@ def plot_bar(kernels):
 #    plt.yscale('log')
     plt.legend(loc='best', frameon=True, fancybox=False, framealpha=1, labelspacing=0.7, fontsize=15)
     plt.tight_layout()
-    plt.show()
+    plt.savefig('results.pdf')
 
 
-# ad-hoc testing
 if __name__ == "__main__":
-    kernels = parse_data("august.txt")
-    plot_bar(kernels)
+    lgc_data = parse_table("august.txt")
+    plot_bar(lgc_data)
