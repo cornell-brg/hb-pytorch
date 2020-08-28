@@ -18,9 +18,9 @@ def cycles_from_stats(stats):
     total number of cycles for the kernel execution.
     """
     lines = stats.splitlines()
-    overview = lines[3]
-    cycles = int(overview.split()[6])
-    return cycles
+    for line in lines:
+        if line.startswith('kernel'):
+            return int(line.split()[6])
 
 
 def kernel_name(sig):
