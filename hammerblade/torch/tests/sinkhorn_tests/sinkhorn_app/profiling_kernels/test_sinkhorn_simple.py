@@ -158,13 +158,11 @@ def sinkhorn_test():
     print('done loading data; running kernel')
     scores = swmd_torch(r, cT, vecs, niters=1)
 
-    # Dump profiling results.
-    if on_hb:
-        # This is not very helpful but at least lists the HB kernels.
-        print(torch.hammerblade.profiler.chart.json())
-    else:
-        # These are wall-clock times. They work on HB but are hilarious.
-        print(torch.hammerblade.profiler.stats())
+    # Dump profiling results, including both the overall statistics and the
+    # invocation "tree" that breaks down every call stack.
+    print(torch.hammerblade.profiler.stats(trimming=True))
+    print(torch.hammerblade.profiler.exec_time.raw_stack())
+
     print("done")
     print("Multiply sddtmm, dstmmt, and dstmm times by",
           data_fraction, "for true time on real dataset.")
