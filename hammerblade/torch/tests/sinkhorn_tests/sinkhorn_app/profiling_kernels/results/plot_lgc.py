@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import csv
 
 font = {'family' : 'normal',
         'weight' : 'regular',
@@ -47,12 +48,24 @@ def parse_table(filename):
     return kernels
 
 
+def parse_csv(filename):
+    with open(filename) as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if row['hb_time']:
+                yield DataPoint(
+                    row['kernel'],
+                    0.0,  # No NumPy.
+                    float(row['cpu_time']),
+                    float(row['hb_host_time']),
+                    float(row['hb_time']),
+                )
+
 # ---------------------------------------------------------
 # Plot
 # ---------------------------------------------------------
 
-def plot_bar(kernels):
-
+def plot_bar(kernels, outfile):
     N = len(kernels)
     print(N)
     numpy_xeon_time = [k.numpy_xeon for k in kernels]
@@ -93,9 +106,12 @@ def plot_bar(kernels):
 #    plt.yscale('log')
     plt.legend(loc='best', frameon=True, fancybox=False, framealpha=1, labelspacing=0.7, fontsize=15)
     plt.tight_layout()
-    plt.savefig('results.pdf')
+    plt.savefig(outfile)
 
 
 if __name__ == "__main__":
     lgc_data = parse_table("august.txt")
-    plot_bar(lgc_data)
+    plot_bar(lgc_data, 'lgc.pdf')
+
+    swmd_data = list(parse_csv('results.csv'))
+    plot_bar(swmd_data, 'swmd.pdf')
