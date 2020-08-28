@@ -74,7 +74,7 @@ def parse_csv(filename):
 # Plot
 # ---------------------------------------------------------
 
-def plot_bar(kernels, title, outfile):
+def plot_bar(kernels, yticks, title, outfile):
     N = len(kernels)
     print(N)
     numpy_xeon_time = [k.numpy_xeon for k in kernels]
@@ -104,10 +104,10 @@ def plot_bar(kernels, title, outfile):
 #    plt.xlabel('Numpy and Pytorch Tensor Operators Used in Lgc-ista', fontsize=15)
     plt.ylabel('Execution Time (s)', fontsize=15)
     plt.title(title, fontsize=17, fontweight='bold')
-    plt.ylim(0, 25)
+    plt.ylim(0, max(yticks))
 #    plt.text(pytorch_xeon_time[])
 
-    ylabel = np.array([0, 5, 10, 15, 20, 25])
+    ylabel = np.array(yticks)
 
     plt.xticks(ind, [k.name for k in kernels], rotation=70, fontsize=15)
     plt.yticks(ylabel, fontsize=15)
@@ -119,7 +119,9 @@ def plot_bar(kernels, title, outfile):
 
 if __name__ == "__main__":
     lgc_data = parse_table("august.txt")
-    plot_bar(lgc_data, 'LGC-ISTA', 'lgc.pdf')
+    plot_bar(lgc_data, (0, 5, 10, 15, 20, 25),
+             'LGC-ISTA', 'lgc.pdf')
 
     swmd_data = list(parse_csv('results.csv'))
-    plot_bar(swmd_data, 'Sinkhorn WMD', 'swmd.pdf')
+    plot_bar(swmd_data, (0.00, 0.02, 0.04, 0.06, 0.08, 0.10),
+             'Sinkhorn WMD', 'swmd.pdf')
