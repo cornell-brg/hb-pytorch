@@ -27,11 +27,8 @@ def energy_7nm(log_text):
     inst = [ x for x in lines if 'stall_depend_global_load ' in x ][0]
     stall_depend_global_load = float(inst.split()[1])
 
-    inst = [ x for x in lines if 'stall_depend_shared_load ' in x ][0]
-    stall_depend_shared_load = float(inst.split()[1])
 
-
-    calc_stalls = stalls - stall_imul - stall_idiv - stall_depend_dram_load - stall_depend_group_load - stall_depend_global_load - stall_depend_shared_load
+    calc_stalls = stalls - stall_imul - stall_idiv - stall_depend_dram_load - stall_depend_group_load - stall_depend_global_load
 
     remote_load_dram = 0 # = stall_depend_remote_load_dram * 0.01 * 256 # 100 stall cycles per each load, each load is 256 bits? LIN?
     energy_stalls = calc_stalls * 6.4 * 0.25# Rough estimation for stalls
@@ -117,9 +114,6 @@ def energy_7nm(log_text):
     inst = [ x for x in lines if 'instr_remote_ld_group ' in x ][0]
     remote_ld_group  = float(inst.split()[1]) * 19.96 * 0.25 # Load
 
-    inst = [ x for x in lines if 'instr_remote_ld_shared ' in x ][0]
-    remote_ld_shared  = float(inst.split()[1]) * 19.96 * 0.25 # Load
-
     inst = [ x for x in lines if 'instr_remote_st_dram ' in x ][0]
     remote_st_dram  = float(inst.split()[1]) * 256.0 # Store 256 bits in DRAM each bit consumes 1 pJ energy
 
@@ -128,9 +122,6 @@ def energy_7nm(log_text):
 
     inst = [ x for x in lines if 'instr_remote_st_group ' in x ][0]
     remote_st_group  = float(inst.split()[1]) * 17.17 * 0.25 # Store
-
-    inst = [ x for x in lines if 'instr_remote_st_shared ' in x ][0]
-    remote_st_shared  = float(inst.split()[1]) * 17.17 * 0.25 # Store
 
     inst = [ x for x in lines if 'instr_local_flw ' in x ][0]
     local_flw  = float(inst.split()[1]) * 19.96 * 0.25 # Load floating
@@ -147,9 +138,6 @@ def energy_7nm(log_text):
     inst = [ x for x in lines if 'instr_remote_flw_group ' in x ][0]
     remote_flw_group  = float(inst.split()[1]) * 19.96 * 0.25 # Load from DRAM
 
-    inst = [ x for x in lines if 'instr_remote_flw_shared ' in x ][0]
-    remote_flw_shared  = float(inst.split()[1]) * 19.96 * 0.25 # Load from DRAM
-
     inst = [ x for x in lines if 'instr_remote_fsw_dram ' in x ][0]
     remote_fsw_dram  = float(inst.split()[1]) * 256.0 # Store from DRAM
 
@@ -158,9 +146,6 @@ def energy_7nm(log_text):
 
     inst = [ x for x in lines if 'instr_remote_fsw_group ' in x ][0]
     remote_fsw_group  = float(inst.split()[1]) * 17.17 * 0.25 # Store from DRAM
-
-    inst = [ x for x in lines if 'instr_remote_fsw_shared ' in x ][0]
-    remote_fsw_shared  = float(inst.split()[1]) * 17.17 * 0.25 # Store from DRAM
 
     inst = [ x for x in lines if 'instr_lr ' in x ][0]
     lr  = float(inst.split()[1]) * 19.96 * 0.25 # Load
@@ -292,7 +277,7 @@ def energy_7nm(log_text):
     inst = [ x for x in lines if 'instr_total ' in x ][0]
     total = float(inst.split()[1])
 
-    calc_total = ic_miss + bubbles + energy_stalls + remote_load_dram + fadd + fsub + fmul + fsgnj + fsgnjn + fsgnjx + fmin + fmax + fcvt_s_w + fcvt_s_wu + fmv_w_x + fmadd + fmsub + fnmadd + fnmsub + feq + flt + fle + fcvt_w_s + fcvt_wu_s + fclass + fmv_x_w + local_ld + local_st + remote_ld_dram + remote_ld_global + remote_ld_group + remote_ld_shared + remote_st_dram + remote_st_global + remote_st_group + remote_st_shared + local_flw + local_fsw + remote_flw_dram + remote_flw_global + remote_flw_group + remote_flw_shared + remote_fsw_dram  +remote_fsw_global + remote_fsw_group + remote_fsw_shared + lr + lr_aq + amoswap + amoor + beq + bne + blt + bge + bltu + bgeu + jalr + jal + sll + slli + srl + srli + sra + srai + add + addi + sub + lui + auipc + xor + xori + or_ + ori + and_ + andi + slt + slti + sltu + sltiu + mul + div + divu + rem + remu + fence
+    calc_total = ic_miss + bubbles + energy_stalls + remote_load_dram + fadd + fsub + fmul + fsgnj + fsgnjn + fsgnjx + fmin + fmax + fcvt_s_w + fcvt_s_wu + fmv_w_x + fmadd + fmsub + fnmadd + fnmsub + feq + flt + fle + fcvt_w_s + fcvt_wu_s + fclass + fmv_x_w + local_ld + local_st + remote_ld_dram + remote_ld_global + remote_ld_group + remote_st_dram + remote_st_global + remote_st_group + local_flw + local_fsw + remote_flw_dram + remote_flw_global + remote_flw_group + remote_fsw_dram  +remote_fsw_global + remote_fsw_group + lr + lr_aq + amoswap + amoor + beq + bne + blt + bge + bltu + bgeu + jalr + jal + sll + slli + srl + srli + sra + srai + add + addi + sub + lui + auipc + xor + xori + or_ + ori + and_ + andi + slt + slti + sltu + sltiu + mul + div + divu + rem + remu + fence
     total_energy = calc_total * 0.001 *.001 # from pJ to uJ
     return total_energy
 
