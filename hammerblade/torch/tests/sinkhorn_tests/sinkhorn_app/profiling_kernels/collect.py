@@ -3,6 +3,8 @@ import re
 import csv
 import sys
 
+from calc_7nm import energy_7nm
+
 ROUTE_JSON = 'sinkhorn_wmd.json'
 HB_STATS = 'run_{}/manycore_stats.log'
 HB_LOG = 'run_{}/log.txt'
@@ -139,6 +141,7 @@ def collect():
     # Load results from every HB run (one per kernel).
     hb_cycles = {}
     hb_host_times = {}
+    hb_energies = {}
     for i, kernel in enumerate(kernels):
         kname = kernel_name(kernel['signature'])
         # Load HB cycles from statistics dump.
@@ -154,6 +157,9 @@ def collect():
         trimmed_times = dict(trimmed_times_from_tree(log_txt))
         hb_host_times[kname] = trimmed_times[kname]
 
+        # Run energy model.
+        hb_energies[kname] = energy_7nm(stats_txt)
+
     # Load CPU time breakdown.
     with open(CPU_LOG) as f:
         log_txt = f.read()
@@ -163,7 +169,8 @@ def collect():
     # Dump a CSV.
     writer = csv.DictWriter(
         sys.stdout,
-        ['kernel', 'cpu_time', 'hb_cycles', 'hb_time', 'hb_host_time']
+        ['kernel', 'cpu_time', 'hb_cycles', 'hb_time', 'hb_host_time',
+         'hb_energy']
     )
     writer.writeheader()
     for kernel, cpu_time in cpu_times:
@@ -175,7 +182,8 @@ def collect():
                         if kernel in hb_cycles else ''),
             'hb_host_time': (hb_host_times[kernel]
                              if kernel in hb_host_times else ''),
-
+            'hb_energy': (hb_energies[kernel]
+                          if kernel in hb_energies else ''),
         })
 
 
