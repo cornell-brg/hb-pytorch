@@ -39,7 +39,7 @@ def times_from_log(log):
         if 'Kernel execution time' in line:
             in_report = True
             continue
-        
+
         if in_report:
             kernel, tm, pct = line.strip().split()
             if kernel.startswith('aten::'):
@@ -97,8 +97,8 @@ def collect():
             'kernel': kernel,
             'cpu_time': cpu_times.get(kernel),
             'hb_cycles': hb_cycles.get(kernel),
-            'hb_time': hb_cycles_to_time(hb_cycles[kernel])
-                       if kernel in hb_cycles else '',
+            'hb_time': (hb_cycles_to_time(hb_cycles[kernel])
+                        if kernel in hb_cycles else ''),
         })
 
 
