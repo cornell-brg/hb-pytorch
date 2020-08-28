@@ -49,6 +49,30 @@ def times_from_log(log):
             yield kernel, float(tm)
 
 
+def times_from_tree(log):
+    """Given an execution log from any run, look for the "tree" output
+    from `hammerblade.profiler.exec_time.raw_stack` that breaks down
+    CPU-side execution time for the functions within a kernel
+    invocation. Generate (kernel, time) pairs.
+    """
+    for line in log.splitlines():
+        if line.strip().startswith('|- Node'):
+            indent, rest = line.split('|-', 1)
+            level = len(indent) // 2
+            match = re.search(r'Node\((.*) : (\d+\.\d+)\)', line)
+            sig, tm = match.groups()
+
+            if sig.startswith('at::'):
+                kernel = kernel_name(sig)
+            else:
+                kernel = sig
+
+            micros = int(tm.split('.')[0])  # Data reported in microseconds.
+
+            if level == 1:
+                yield kernel, micros / 10**6
+
+
 def hb_cycles_to_time(cycles):
     """Compute seconds from simulation cycles, assuming weak scaling and the
     hardware frequence.
@@ -84,7 +108,7 @@ def collect():
     # Load CPU time breakdown.
     with open(CPU_LOG) as f:
         log_txt = f.read()
-    cpu_times = dict(times_from_log(log_txt))
+    cpu_times = dict(times_from_tree(log_txt))
 
     # Dump a CSV.
     writer = csv.DictWriter(
