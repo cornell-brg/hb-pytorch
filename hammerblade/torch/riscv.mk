@@ -90,10 +90,10 @@ $(KERNEL_CSRCS): %.c : $(KERNEL_DIR)/%.c
 $(KERNEL_CPPSRCS): %.cpp : $(KERNEL_DIR)/%.cpp
 	cp $^ $@
 
-kernel.riscv: LINK_SCRIPT=$(SCRIPT_DIR)/hb_pytorch_link.ld
+#kernel.riscv: LINK_SCRIPT=$(SCRIPT_DIR)/hb_pytorch_link.ld
 kernel.riscv: $(SPMD_COMMON_OBJECTS) $(BSG_MANYCORE_LIB) crt.o
-kernel.riscv: $(KERNEL_OBJS)
-	$(RISCV_LINK) $(KERNEL_OBJS) $(SPMD_COMMON_OBJECTS) \
+kernel.riscv: $(LINK_SCRIPT) $(KERNEL_OBJS)
+	$(RISCV_LINK) -Wl,-M $(KERNEL_OBJS) $(SPMD_COMMON_OBJECTS) \
 		-L. -l:$(BSG_MANYCORE_LIB) -o $@ $(filter-out -nostdlib,$(RISCV_LINK_OPTS))
 
 $(KERNEL_DIS): %.dis: %.o
