@@ -172,11 +172,15 @@ def collect(summary):
         # Summarize a few overall results.
         cpu_total_time = 0.0
         hb_total_time = 0.0
+        hb_kern_energy = 0.0
+        cpu_kern_energy = 0.0
         for kernel, cpu_time in cpu_times:
             cpu_total_time += cpu_time
             if kernel in hb_cycles:
                 hb_total_time += hb_cycles_to_time(hb_cycles[kernel]) \
                     + hb_host_times[kernel]
+                hb_kern_energy += hb_energies[kernel]
+                cpu_kern_energy += cpu_time * CPU_TDP
             else:
                 # Where we don't have a kernel, charge us for CPU execution.
                 hb_total_time += cpu_time
@@ -184,6 +188,9 @@ def collect(summary):
         print('CPU time: {:.3f} s'.format(cpu_total_time))
         print('CPU+HB time: {:.3f} s'.format(hb_total_time))
         print('Speedup: {:.1f}x'.format(cpu_total_time / hb_total_time))
+        print('CPU kernel energy: {:.3f} J'.format(cpu_kern_energy))
+        print('HB kernel energy: {:.3f} uJ'.format(hb_kern_energy * 10**6))
+        print('Energy ratio: {:.0f}x'.format(cpu_kern_energy / hb_kern_energy))
 
     else:
         # Dump a CSV.
