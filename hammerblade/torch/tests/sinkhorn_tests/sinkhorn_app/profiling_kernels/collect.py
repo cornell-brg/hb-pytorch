@@ -9,7 +9,7 @@ CPU_LOG = 'cpu_run/log.txt'
 
 HB_FREQ = 10 ** 9  # 1 GHz.
 HB_MACHINE_FRAC = 16  # Simulating 1/16th of the machine.
-HB_DATA_FRAC = 16 * 16  # Used this fraction of the CPU's data.
+HB_DATA_FRAC = 16  # Used this fraction of the CPU's data.
 
 
 def cycles_from_stats(stats):

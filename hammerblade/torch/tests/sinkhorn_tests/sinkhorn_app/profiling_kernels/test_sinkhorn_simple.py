@@ -149,7 +149,7 @@ def sinkhorn_test():
             torch.hammerblade.profiler.route.set_route_from_json(route_data)
 
     # Set the size of the run. Use TOTAL_DOCS/data_fraction of the data.
-    data_fraction = 16 * 16 if on_hb else 1  # Tiny subset on HB.
+    data_fraction = 16 if on_hb else 1  # Subset on HB.
     n_docs = TOTAL_DOCS // data_fraction
 
     # Load data and run the kernel.
