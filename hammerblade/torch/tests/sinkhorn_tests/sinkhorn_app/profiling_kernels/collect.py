@@ -142,7 +142,8 @@ def collect():
     # Load CPU time breakdown.
     with open(CPU_LOG) as f:
         log_txt = f.read()
-    cpu_times = dict(total_times_from_tree(log_txt))
+    cpu_times = list(total_times_from_tree(log_txt))
+    assert set(k for k, _ in cpu_times).issuperset(hb_cycles)
 
     # Dump a CSV.
     writer = csv.DictWriter(
@@ -150,10 +151,10 @@ def collect():
         ['kernel', 'cpu_time', 'hb_cycles', 'hb_time', 'hb_host_time']
     )
     writer.writeheader()
-    for kernel in sorted(set(hb_cycles).union(cpu_times)):
+    for kernel, cpu_time in cpu_times:
         writer.writerow({
             'kernel': kernel,
-            'cpu_time': cpu_times.get(kernel),
+            'cpu_time': cpu_time,
             'hb_cycles': hb_cycles.get(kernel),
             'hb_time': (hb_cycles_to_time(hb_cycles[kernel])
                         if kernel in hb_cycles else ''),
