@@ -74,7 +74,7 @@ def parse_csv(filename):
 # Plot
 # ---------------------------------------------------------
 
-def plot_bar(kernels, yticks, title, outfile):
+def plot_bar(kernels, yticks, legend, title, outfile):
     N = len(kernels)
     print(N)
     numpy_xeon_time = [k.numpy_xeon for k in kernels]
@@ -93,10 +93,17 @@ def plot_bar(kernels, yticks, title, outfile):
     ind = np.arange(N)
     print(ind)
     width = 0.3
-    plt.bar(ind - width, numpy_xeon_time, width, align='center', label='Xeon + NumPy', edgecolor='black')
-    plt.bar(ind, pytorch_xeon_time, width, align='center', label='Xeon + PyTorch', edgecolor='black')
-    plt.bar(ind + width, device_time, width, align='center', label='HammerBlade + PyTorch\n2048 cores @ 1 GHz', edgecolor='black')
-    plt.bar(ind + width, host_time, width, align='center', bottom=device_time, label='HammerBlade Host', edgecolor='black')
+    if any(numpy_xeon_time):
+        plt.bar(ind - width, numpy_xeon_time, width, align='center',
+                label='Xeon + NumPy', edgecolor='black', color='#003f5c')
+    plt.bar(ind, pytorch_xeon_time, width, align='center',
+            label='Xeon + PyTorch', edgecolor='black', color='#58508d')
+    plt.bar(ind + width, device_time, width, align='center',
+            label='HammerBlade + PyTorch\n2048 cores @ 1 GHz',
+            edgecolor='black', color='#bc5090')
+    plt.bar(ind + width, host_time, width, align='center',
+            bottom=device_time, label='HammerBlade Host',
+            edgecolor='black', color='#ffa600')
 
     # for i in range(len(kernels)):
     #     plt.text(ind[i] - 0.20, xeon_time[i] + 0.05, ("{:3.1f}".format(xeon_time[i])))
@@ -112,16 +119,18 @@ def plot_bar(kernels, yticks, title, outfile):
     plt.xticks(ind, [k.name for k in kernels], rotation=70, fontsize=15)
     plt.yticks(ylabel, fontsize=15)
 #    plt.yscale('log')
-    plt.legend(loc='best', frameon=True, fancybox=False, framealpha=1, labelspacing=0.7, fontsize=15)
+    if legend:
+        plt.legend(loc='best', frameon=True, fancybox=False, framealpha=1,
+                   labelspacing=0.7, fontsize=15)
     plt.tight_layout()
     plt.savefig(outfile)
 
 
 if __name__ == "__main__":
     lgc_data = parse_table("august.txt")
-    plot_bar(lgc_data, (0, 5, 10, 15, 20, 25),
+    plot_bar(lgc_data, (0, 5, 10, 15, 20, 25), True,
              'LGC-ISTA', 'lgc.pdf')
 
     swmd_data = list(parse_csv('results.csv'))
-    plot_bar(swmd_data, (0.00, 0.02, 0.04, 0.06, 0.08, 0.10),
+    plot_bar(swmd_data, (0.00, 0.02, 0.04, 0.06, 0.08, 0.10), False,
              'Sinkhorn WMD', 'swmd.pdf')
