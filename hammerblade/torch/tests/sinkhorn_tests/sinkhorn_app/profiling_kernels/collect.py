@@ -134,7 +134,7 @@ def hb_cycles_to_time(cycles):
     return sim_secs * scale_factor
 
 
-def collect():
+def collect(summary):
     with open(ROUTE_JSON) as f:
         kernels = json.load(f)
 
@@ -166,26 +166,44 @@ def collect():
     cpu_times = list(total_times_from_tree(log_txt))
     assert set(k for k, _ in cpu_times).issuperset(hb_cycles)
 
-    # Dump a CSV.
-    writer = csv.DictWriter(
-        sys.stdout,
-        ['kernel', 'cpu_time', 'hb_cycles', 'hb_time', 'hb_host_time',
-         'hb_energy']
-    )
-    writer.writeheader()
-    for kernel, cpu_time in cpu_times:
-        writer.writerow({
-            'kernel': kernel,
-            'cpu_time': cpu_time,
-            'hb_cycles': hb_cycles.get(kernel),
-            'hb_time': (hb_cycles_to_time(hb_cycles[kernel])
-                        if kernel in hb_cycles else ''),
-            'hb_host_time': (hb_host_times[kernel]
-                             if kernel in hb_host_times else ''),
-            'hb_energy': (hb_energies[kernel]
-                          if kernel in hb_energies else ''),
-        })
+    if summary:
+        # Summarize a few overall results.
+        cpu_total_time = 0.0
+        hb_total_time = 0.0
+        for kernel, cpu_time in cpu_times:
+            cpu_total_time += cpu_time
+            if kernel in hb_cycles:
+                hb_total_time += hb_cycles_to_time(hb_cycles[kernel]) \
+                    + hb_host_times[kernel]
+            else:
+                # Where we don't have a kernel, charge us for CPU execution.
+                hb_total_time += cpu_time
+
+        print('CPU time: {:.3f} s'.format(cpu_total_time))
+        print('CPU+HB time: {:.3f} s'.format(hb_total_time))
+        print('Speedup: {:.1f}x'.format(cpu_total_time / hb_total_time))
+
+    else:
+        # Dump a CSV.
+        writer = csv.DictWriter(
+            sys.stdout,
+            ['kernel', 'cpu_time', 'hb_cycles', 'hb_time', 'hb_host_time',
+             'hb_energy']
+        )
+        writer.writeheader()
+        for kernel, cpu_time in cpu_times:
+            writer.writerow({
+                'kernel': kernel,
+                'cpu_time': cpu_time,
+                'hb_cycles': hb_cycles.get(kernel),
+                'hb_time': (hb_cycles_to_time(hb_cycles[kernel])
+                            if kernel in hb_cycles else ''),
+                'hb_host_time': (hb_host_times[kernel]
+                                 if kernel in hb_host_times else ''),
+                'hb_energy': (hb_energies[kernel]
+                              if kernel in hb_energies else ''),
+            })
 
 
 if __name__ == '__main__':
-    collect()
+    collect('-s' in sys.argv)
