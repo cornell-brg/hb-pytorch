@@ -123,13 +123,21 @@ def collect():
 
     # Load results from every HB run (one per kernel).
     hb_cycles = {}
+    hb_host_times = {}
     for i, kernel in enumerate(kernels):
+        kname = kernel_name(kernel['signature'])
         # Load HB cycles from statistics dump.
         stats_fn = HB_STATS.format(i)
         with open(stats_fn) as f:
             stats_txt = f.read()
-        hb_cycles[kernel_name(kernel['signature'])] = \
-            cycles_from_stats(stats_txt)
+        hb_cycles[kname] = cycles_from_stats(stats_txt)
+
+        # Load host-side times from the log.
+        log_fn = HB_LOG.format(i)
+        with open(log_fn) as f:
+            log_txt = f.read()
+        trimmed_times = dict(trimmed_times_from_tree(log_txt))
+        hb_host_times[kname] = trimmed_times[kname]
 
     # Load CPU time breakdown.
     with open(CPU_LOG) as f:
@@ -139,7 +147,7 @@ def collect():
     # Dump a CSV.
     writer = csv.DictWriter(
         sys.stdout,
-        ['kernel', 'cpu_time', 'hb_cycles', 'hb_time']
+        ['kernel', 'cpu_time', 'hb_cycles', 'hb_time', 'hb_host_time']
     )
     writer.writeheader()
     for kernel in sorted(set(hb_cycles).union(cpu_times)):
@@ -149,6 +157,9 @@ def collect():
             'hb_cycles': hb_cycles.get(kernel),
             'hb_time': (hb_cycles_to_time(hb_cycles[kernel])
                         if kernel in hb_cycles else ''),
+            'hb_host_time': (hb_host_times[kernel]
+                             if kernel in hb_host_times else ''),
+
         })
 
 
