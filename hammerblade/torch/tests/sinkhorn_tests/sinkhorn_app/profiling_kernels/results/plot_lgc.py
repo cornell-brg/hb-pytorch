@@ -39,6 +39,15 @@ def parse_table(filename):
         d = d.split("|")
         print(d)
         name = "".join(d[1].split())
+
+        # Skip non-kernels for plot.
+        if name in ('total', 'data_transfer'):
+            continue
+
+        # Skip insignificant kernels for plot.
+        if name in ('zeros', 'clone'):
+            continue
+
         numpy_xeon = float(d[2]) / 10**3
         pytorch_xeon = float(d[3]) / 10**3
         host = float(d[4]) / 10**3
@@ -102,7 +111,6 @@ def plot_bar(kernels, title, outfile):
 
     plt.xticks(ind, [k.name for k in kernels], rotation=70, fontsize=15)
     plt.yticks(ylabel, fontsize=15)
-    plt.hlines(ylabel, xmin=0, xmax=9, colors='grey', linestyles='dashed')
 #    plt.yscale('log')
     plt.legend(loc='best', frameon=True, fancybox=False, framealpha=1, labelspacing=0.7, fontsize=15)
     plt.tight_layout()
