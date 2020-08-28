@@ -82,7 +82,7 @@ def plot_bar(kernels, yticks, legend, title, outfile):
     host_time = [k.host for k in kernels]
     device_time = [k.device for k in kernels]
 
-    plt.figure(figsize=(13,7), dpi=80)
+    plt.figure(figsize=(2 * N, 7), dpi=80)
 
     ax = plt.subplot(1,1,1)
     ax.spines['bottom'].set_linewidth(3)
