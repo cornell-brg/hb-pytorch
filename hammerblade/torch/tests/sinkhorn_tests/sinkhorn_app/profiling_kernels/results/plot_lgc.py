@@ -39,10 +39,10 @@ def parse_table(filename):
         d = d.split("|")
         print(d)
         name = "".join(d[1].split())
-        numpy_xeon = float(d[2])
-        pytorch_xeon = float(d[3])
-        host = float(d[4])
-        device = float(d[5])
+        numpy_xeon = float(d[2]) / 10**3
+        pytorch_xeon = float(d[3]) / 10**3
+        host = float(d[4]) / 10**3
+        device = float(d[5]) / 10**3
         kernels.append(DataPoint(name, numpy_xeon, pytorch_xeon, host, device))
         print(kernels[-1])
     return kernels
@@ -65,7 +65,7 @@ def parse_csv(filename):
 # Plot
 # ---------------------------------------------------------
 
-def plot_bar(kernels, outfile):
+def plot_bar(kernels, title, outfile):
     N = len(kernels)
     print(N)
     numpy_xeon_time = [k.numpy_xeon for k in kernels]
@@ -93,12 +93,12 @@ def plot_bar(kernels, outfile):
     #     plt.text(ind[i] - 0.20, xeon_time[i] + 0.05, ("{:3.1f}".format(xeon_time[i])))
 
 #    plt.xlabel('Numpy and Pytorch Tensor Operators Used in Lgc-ista', fontsize=15)
-    plt.ylabel('Execution Time (ms)', fontsize=15)
-    plt.title('LGC-ISTA', fontsize=17, fontweight='bold')
-    plt.ylim(0, 25000)
+    plt.ylabel('Execution Time (s)', fontsize=15)
+    plt.title(title, fontsize=17, fontweight='bold')
+    plt.ylim(0, 25)
 #    plt.text(pytorch_xeon_time[])
 
-    ylabel = np.array([0, 5000, 10000, 15000, 20000, 25000])
+    ylabel = np.array([0, 5, 10, 15, 20, 25])
 
     plt.xticks(ind, [k.name for k in kernels], rotation=70, fontsize=15)
     plt.yticks(ylabel, fontsize=15)
@@ -111,7 +111,7 @@ def plot_bar(kernels, outfile):
 
 if __name__ == "__main__":
     lgc_data = parse_table("august.txt")
-    plot_bar(lgc_data, 'lgc.pdf')
+    plot_bar(lgc_data, 'LGC-ISTA', 'lgc.pdf')
 
     swmd_data = list(parse_csv('results.csv'))
-    plot_bar(swmd_data, 'swmd.pdf')
+    plot_bar(swmd_data, 'Sinkhorn WMD', 'swmd.pdf')
