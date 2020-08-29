@@ -3,7 +3,7 @@ MCPY_DIR := $(BRG_BSG_BLADERUNNER_DIR)/bsg_manycore/software/py
 APP_SCRIPT := test_sinkhorn_simple.py
 
 # There are three kernels to offload individually.
-KERNELS := 0 1 2 3
+KERNELS := 0 1 2
 
 ALL_LOGS := $(KERNELS:%=run_%/manycore_stats.log) cpu_run/log.txt
 results.csv: $(ALL_LOGS) collect.py

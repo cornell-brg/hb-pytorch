@@ -20,7 +20,7 @@ DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 ROUTE_JSON = os.path.join(os.path.dirname(__file__), 'sinkhorn_wmd.json')
 # Kernel parameters.
 N_DOCS = 4096
-N_FRACTION = 16 * 16 # fraction of data to use on hb, i.e. 1/(this value)
+HB_DATA_FRAC = 16 # fraction of data to use on hb, i.e. 1/(this value)
 QUERY_IDX = 5  # Was 100; lowered to allow even smaller runs.
 LAMBDA = 1
 
@@ -148,7 +148,7 @@ def sinkhorn_test():
         torch.hammerblade.profiler.route.set_route_from_json(route_data)
 
     # Set the size of the run. Use TOTAL_DOCS/data_fraction of the data.
-    data_fraction = N_FRACTION if on_hb else 1  # Tiny subset on HB.
+    data_fraction = HB_DATA_FRAC if on_hb else 1  # Tiny subset on HB.
     n_docs = TOTAL_DOCS // data_fraction
 
     # Load data and run the kernel.
