@@ -71,7 +71,6 @@ def swmd_torch(r, cT, vecs, niters):
         # v = c * (1.0 / torch.sddtmm(c, K_T, uT)
         # vT = cT * torch.sddtmm(cT, uT, K_T).sparse_reciprocal()
         
-        # NOTE: NEED TO ADD RECIPROCAL
         vT = cT * torch.sddtmm(cT, uT, K_T)
         
         # custom dstmm.t():
@@ -168,14 +167,14 @@ def sinkhorn_test():
     else:
         # These are wall-clock times. They work on HB but are hilarious.
         print(torch.hammerblade.profiler.stats())
+        # print(torch.hammerblade.profiler.exec_time.raw_stack())
     print("done")
-
 
 # torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)")
 # torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)")
 # torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::sddtmm(const at::Tensor&, const at::Tensor&, const at::Tensor&)")
 
-print(torch.hammerblade.profiler.exec_time.raw_stack())
+# print(torch.hammerblade.profiler.exec_time.raw_stack())
 # print(torch.hammerblade.profiler.chart.json())
 
 if __name__ == '__main__':

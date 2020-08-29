@@ -1231,27 +1231,38 @@ Tensor mv_sparse(const SparseTensor& self, const Tensor& vec)
   return result.squeeze(-1);
 }
 
+// --------------------------------------------------------------------
+// reciprocal_(SparseTensor) -> SparseTensor
+//
+// reciprocal_(a) returns 1.0 / a 
+// ** and modifies a to be 1.0 / a!! **
+// a must be a coalesced tensor
+// --------------------------------------------------------------------
 
+SparseTensor& _sparse_reciprocal__cpu(SparseTensor& self) {
+  TORCH_CHECK(self.is_coalesced(), "_sparse_reciprocal__cpu only supports a coalesced tensor");
+  int64_t nnz = self._nnz(); // = vals.numel()
+  Tensor vals = self._values();
 
+  AT_DISPATCH_ALL_TYPES(self.scalar_type(), "_sparse_reciprocal__cpu", [&]{
+    auto out = vals.accessor<scalar_t, 1>();
+    for (int i = 0; i < nnz; i++){
+      out[i] = 1 / out[i];
+    }
+  });
 
-// SparseTensor _reciprocal__sparse_cpu(Tensor& self) {
-//   TORCH_CHECK(self.is_coalesced(), "_reciprocal__sparse_cpu only supports a coalesced tensor");
-//   int64_t nnz = self._nnz();
-//   Tensor vals = self._values();
+  return self;
+}
 
-//   AT_DISPATCH_ALL_TYPES(self.scalar_type(), "_reciprocal__sparse_cpu", [&]{
-//     auto out = vals.accessor<scalar_t, 1>();
-//     for (int i = 0; i < nnz; i++){
-//       out[i] = 1 / out[i];
-//     }  
-//   });
+// --------------------------------------------------------------------
+// Sinkhorn Functions
+// --------------------------------------------------------------------
 
-//   return self;
-// }
-
-
-
-
+// --------------------------------------------------------------------
+// sddtmm(SparseTensor, Tensor, Tensor) -> SparseTensor
+//
+// sddtmm(a, b, c) returns (b@c.T) at locations were a is nonzero
+// --------------------------------------------------------------------
 
 template <typename scalar_t>
 void sddtmm_kernel_cpu(
@@ -1318,8 +1329,11 @@ SparseTensor sddtmm_cpu(
   return sparse_tensor;
 }
 
-
-
+// --------------------------------------------------------------------
+// dstmm(Tensor, SparseTensor) -> Tensor
+// 
+// dstmm(a, b) returns a@b.T
+// --------------------------------------------------------------------
 
 template <typename scalar_t>
 void dstmm_kernel(
@@ -1384,10 +1398,11 @@ Tensor dstmm_cpu(
   return out_dense;
 }
 
-
-
-
-
+// --------------------------------------------------------------------
+// dstmmt(Tensor, SparseTensor) -> Tensor
+//
+// dstmmt(a, b) returns (a@b.T).T
+// --------------------------------------------------------------------
 
 template <typename scalar_t>
 void dstmmt_kernel(
