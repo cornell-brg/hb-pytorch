@@ -18,7 +18,7 @@ extern "C" {
     auto numel = out.numel();
 
     hb_tiled_for(numel, [&](size_t i) {
-      out(i) = 1 / out(i);
+      out(i) = 1.0 / out(i);
     });
 
     //   End profiling

@@ -19,10 +19,12 @@ DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 # Kernel "routing" file.
 ROUTE_JSON = os.path.join(os.path.dirname(__file__), 'sinkhorn_wmd.json')
 # Kernel parameters.
-N_DOCS = 4096
 HB_DATA_FRAC = 16 # fraction of data to use on hb, i.e. 1/(this value)
 QUERY_IDX = 5  # Was 100; lowered to allow even smaller runs.
 LAMBDA = 1
+N_ITERS = 1
+
+SAVE_FILE = '' #'scores.out'
 
 def begin_profile(on_hb):
     start_time = None
@@ -69,9 +71,8 @@ def swmd_torch(r, cT, vecs, niters):
         # Compute `c * 1/(K_T @ u)` using a hand-rolled SDDMM.
         # v = c * (1.0 / _sddmm(c, K_T, u))
         # v = c * (1.0 / torch.sddtmm(c, K_T, uT)
-        # vT = cT * torch.sddtmm(cT, uT, K_T).sparse_reciprocal()
-        
-        vT = cT * torch.sddtmm(cT, uT, K_T)
+        # vT = cT * 1.0 / torch.sddtmm(cT, uT, K_T)
+        vT = cT * torch.sreciprocal_(torch.sddtmm(cT, uT, K_T))
         
         # custom dstmm.t():
         # x = _dsmp(K_div_r, v)
@@ -106,7 +107,7 @@ def load_data(n_docs):
         torch.LongTensor(numpy.vstack((cT_coo.row, cT_coo.col))),
         torch.FloatTensor(cT_coo.data),
         torch.Size(cT_coo.shape),
-    )
+    ).coalesce()
 
     vecs = torch.FloatTensor(vecs)
 
@@ -157,8 +158,10 @@ def sinkhorn_test():
     print('done loading data; running kernel')
 
     start_time = begin_profile(on_hb)
-    scores = swmd_torch(r, cT, vecs, niters=1)
+    scores = swmd_torch(r, cT, vecs, niters=N_ITERS)
     end_profile(on_hb, start_time)
+    if (SAVE_FILE):
+        torch.save(scores, SAVE_FILE)
 
     # Dump profiling results.
     if on_hb:
