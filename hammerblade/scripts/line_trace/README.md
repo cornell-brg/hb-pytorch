@@ -62,7 +62,11 @@ python print_trace.py --lo 0 3
                       --hi 10 11
 ```
 *Prints the line trace of tiles [0-3) in `lo`, [5-9) in `mid`, [10-11) in `hi`*
-
+```
+python print_trace.py --full 5 10
+                      --full 20 24
+```
+*Prints the line trace of tiles [5-10) and [20-24) in `full`*
 
 ***Note:** compress_trace.py creates a file trace.obj in the active directory; ensure that print_trace.py is run from the same directory so that it can access trace.obj*
 ***Note:** compress_asm.py generates a fule kernel.dic in the active directory; ensure that print_trace.py is run from the same directory*

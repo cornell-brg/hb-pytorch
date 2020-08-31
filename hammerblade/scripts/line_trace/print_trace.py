@@ -28,6 +28,9 @@
 #                             --mid 5 9
 #                             --hi 10 11
 #           (prints the line trace of tiles [0-3) in lo, [5-9) in mid, [10-11) in hi)
+#       python print_trace.py --full 5 10
+#                             --full 20 24
+#           (prints the line trace of tiles [5-10) and [20-24) in full)   
 #
 #   Note: Must be run after compress_trace.py, in the same directory
 #   Refer to line_trace.py for complete line trace generation instructions
@@ -46,15 +49,15 @@ if __name__ == "__main__":
 
     parser.add_argument("--mode", type=str, 
                         help="Mode to print the trace of all tiles")
-    parser.add_argument("--lo", nargs=2, type=int,  
+    parser.add_argument("--lo", nargs=2, type=int, action='append',  
                         help="Range of tiles to print in lo-res")
-    parser.add_argument("--mid", nargs=2, type=int,  
+    parser.add_argument("--mid", nargs=2, type=int, action='append',  
                         help="Range of tiles to print in mid-res")
-    parser.add_argument("--hi", nargs=2, type=int,  
+    parser.add_argument("--hi", nargs=2, type=int, action='append',
                         help="Range of tiles to print in hi-res")
-    parser.add_argument("--pc", nargs=2, type=int,
+    parser.add_argument("--pc", nargs=2, type=int, action='append',
                         help="Range of tiles to print in pc mode")
-    parser.add_argument("--full", nargs=2, type=int, 
+    parser.add_argument("--full", nargs=2, type=int, action='append',
                         help="Range of tiles to print in full mode")
 
     # Read trace object from trace.obj
@@ -66,15 +69,20 @@ if __name__ == "__main__":
     if args.mode is not None:
         TraceObj.set_mode(args.mode, 0, 0, all_tiles=True)
     if args.lo is not None:
-        TraceObj.set_mode('lo', args.lo[0], args.lo[1])
+        for _range in args.lo:
+            TraceObj.set_mode('lo', _range[0], _range[1])
     if args.mid is not None:
-        TraceObj.set_mode('mid', args.mid[0], args.mid[1])
+        for _range in args.mid:
+            TraceObj.set_mode('mid', _range[0], _range[1])
     if args.hi is not None:
-        TraceObj.set_mode('hi', args.hi[0], args.hi[1])
+        for _range in args.hi:
+            TraceObj.set_mode('hi', _range[0], _range[1])
     if args.pc is not None:
-        TraceObj.set_mode('pc', args.pc[0], args.pc[1])
+        for _range in args.pc:
+            TraceObj.set_mode('pc', _range[0], _range[1])
     if args.full is not None:
-        TraceObj.set_mode('full', args.full[0], args.full[1])
+        for _range in args.full:
+            TraceObj.set_mode('full', _range[0], _range[1])
 
     if args.mode is None and args.lo is None and args.mid is None and args.hi is None and args.pc is None and args.full is None:
         print("Incorrect arguments")
