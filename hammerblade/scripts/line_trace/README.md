@@ -17,14 +17,28 @@ python compress_trace.py --trace vanilla_operation_trace.py
                          --startpc 1cd2c
                          --endpc 1cd80
 ```
+
+**Step 1b (optional)**: Compress the disassembly of PyTorch to use while printing trace in 'full' mode
+```
+python compress_asm.py --asm {path to disassembly file}
+```
+***Note:** this step needs to be performed before printing the trace in 'full' mode (step 2)*
+
+Example: 
+```
+python compress_asm.py --asm /work/global/kr397/hb-pytorch/torch/riscv/kernel.dis   
+```
+
 **Step 2:** Prints the line trace between two PCs specified while running compress_trace.py
 
-For every tile, the instructions can be printed in either `'lo'`, `'mid'`, `'hi'`: 
+For every tile, the instructions can be printed in either `'lo'`, `'mid'`, `'hi'`, `'pc'` or `'full'`: 
 - lo: single character code for stalls (listed below), `'@'` for instruction
 - mid: 3 character code for stalls and instructions (listed below)
 - hi: first 15 characters of all stalls and instructions
+- pc: lowest two bytes of the PC of every instruction, `##ff` for stalls
+- full: lowest two bytes of the PC + first 15 characters of actual instruction from asm, `##<complete stall code>` for stalls
 
-***Note:** at least one of mode, `lo`, `mid`, `hi` must be provided to print the line trace*
+***Note:** at least one of all modes must be provided to print the line trace*
 
 ```
 python print_trace.py --mode {optional} {print mode for all tiles; 'lo', 'mid', 'hi'}
@@ -51,6 +65,7 @@ python print_trace.py --lo 0 3
 
 
 ***Note:** compress_trace.py creates a file trace.obj in the active directory; ensure that print_trace.py is run from the same directory so that it can access trace.obj*
+***Note:** compress_asm.py generates a fule kernel.dic in the active directory; ensure that print_trace.py is run from the same directory*
 
 ### Key ###
 **Integer instructions:**
@@ -155,36 +170,36 @@ python print_trace.py --lo 0 3
 **Stalls:**
 ```
 # Stall type : [lo code, mid code]
-"stall_depend_dram_load" : ['l', '#dl'],
-"stall_depend_group_load" : ['l', '#gl'] ,
-"stall_depend_global_load" : ['l', '#gl'],
-"stall_depend_local_load" : ['l', '#ll'],
+"stall_depend_dram_load" : ['D', '#DL'],
+"stall_depend_group_load" : ['O', '#GR'] ,
+"stall_depend_global_load" : ['G', '#GL'],
+"stall_depend_local_load" : ['L', '#LL'],
 
-"stall_depend_idiv" : ['d', '#id'],
-"stall_depend_fdiv" : ['d', '#fd'],
-"stall_depend_imul" : ['d', '#im'],
+"stall_depend_idiv" : ['H', '#ID'],
+"stall_depend_fdiv" : ['Q', '#FD'],
+"stall_depend_imul" : ['X', '#IM'],
 
-"stall_amo_aq" : ['a', '#aq'],
-"stall_amo_rl" : ['a', '#rl'],
+"stall_amo_aq" : ['M', '#AQ'],
+"stall_amo_rl" : ['K', '#RL'],
 
-"stall_bypass" : ['r', '#bp'],
-"stall_lr_aq" : ['r', '#lr'],
-"stall_fence" : ['r', '#fe'],
-"stall_remote_req" : ['r', '#rr'],
-"stall_remote_credit" : ['r', '#rc'],
+"stall_bypass" : ['Y', '#BP'],
+"stall_lr_aq" : ['A', '#LR'],
+"stall_fence" : ['F', '#FE'],
+"stall_remote_req" : ['R', '#RR'],
+"stall_remote_credit" : ['T', '#RC'],
 
-"stall_fdiv_busy" : ['b', '#fb'],
-"stall_idiv_busy" : ['b', '#ib'],
+"stall_fdiv_busy" : ['V', '#FB'],
+"stall_idiv_busy" : ['U', '#IB'],
 
-"stall_fcsr" : ['f', '#fc'],
-"stall_remote_ld" : ['f', '#ld'],
+"stall_fcsr" : ['S', '#FC'],
+"stall_remote_ld" : ['E', '#LD'],
 
-"stall_remote_flw_wb" : ['w', '#fl'],
+"stall_remote_flw_wb" : ['W', '#FL'],
 
-"bubble_branch_miss" : ['j', '#bm'],
-"bubble_jalr_miss" : ['j', '#jm'],
+"bubble_branch_miss" : ['B', '#BM'],
+"bubble_jalr_miss" : ['J', '#JM'],
 
-"stall_ifetch_wait" : ['i', '#if'],
-"bubble_icache_miss" : ['i', '#ic'],
-"icache_miss" : ['i', '#im']
+"stall_ifetch_wait" : ['F', '#IF'],
+"bubble_icache_miss" : ['I', '#IC'],
+"icache_miss" : ['C', '#IM']
 ```
