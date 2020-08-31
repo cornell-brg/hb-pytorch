@@ -45,6 +45,8 @@ python print_trace.py --mode {optional} {print mode for all tiles; 'lo', 'mid', 
                       --lo {optional} {range of tiles to print in 'lo' mode}
                       --mid {optional} {range of tiles to print in 'mid' mode}
                       --hi {optional} {range of tiles to print in 'hi' mode}
+                      --pc {optional} {range of tiles to print in 'pc' mode}
+                      --full {optional} range of tiles to print in 'full' mode}
 ```
 Example:
 ```
@@ -60,8 +62,9 @@ python print_trace.py --mode lo
 python print_trace.py --lo 0 3
                       --mid 5 9
                       --hi 10 11
+                      --full 16 20
 ```
-*Prints the line trace of tiles [0-3) in `lo`, [5-9) in `mid`, [10-11) in `hi`*
+*Prints the line trace of tiles [0-3) in `lo`, [5-9) in `mid`, [10-11) in `hi`, [16, 20) in `full`*
 
 
 ***Note:** compress_trace.py creates a file trace.obj in the active directory; ensure that print_trace.py is run from the same directory so that it can access trace.obj*
