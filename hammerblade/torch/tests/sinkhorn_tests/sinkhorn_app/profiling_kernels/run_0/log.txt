@@ -1,7 +1,7 @@
 Chronologic VCS simulator copyright 1991-2018
 Contains Synopsys proprietary information.
-Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Aug 31 17:06 2020
-NOTE: automatic random seed used: 2464347349
+Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Aug 31 17:47 2020
+NOTE: automatic random seed used: 1853096121
 BSG INFO: bsg_nonsynth_dpi_rom (initial begin)
 BSG INFO:     Instantiation: manycore_tb_top.trace_control
 BSG INFO:     width_p:                 2
@@ -368,38 +368,341 @@ __________ ___________  _______________________________
 [INFO][RX] Unfreezing tile t=789018000000, x=14, y= 9
 [INFO][RX] Unfreezing tile t=789079000000, x=15, y= 9
 offloading kernel at::Tensor at::SparseCPUType::{anonymous}::sddtmm(const at::Tensor&, const at::Tensor&, const at::Tensor&)
-loading data for 4 docs
+loading data for 256 docs
 vecs size: (100000, 300)
-mat shape: (100000, 4)
+mat shape: (100000, 256)
 done loading data; running kernel
 starting iteration 0
-[
-    {
-        "offload": false,
-        "signature": "at::Tensor at::SparseCPUType::{anonymous}::sddtmm(const at::Tensor&, const at::Tensor&, const at::Tensor&)"
-    },
-    {
-        "offload": false,
-        "signature": "at::Tensor& at::SparseCPUType::{anonymous}::sreciprocal_(at::Tensor&)"
-    },
-    {
-        "offload": false,
-        "signature": "at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)"
-    },
-    {
-        "offload": false,
-        "signature": "at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)"
-    }
-]
+Kernel execution time:
+aten::div                          0.01 0.5%
+aten::gt                           0.00 0.0%
+aten::mul                          0.01 1.3%
+aten::dstmm                        0.00 0.1%
+aten::dstmmt                       0.00 0.3%
+aten::mul                          0.00 0.0%
+aten::sddtmm                       0.05 4.2%
+aten::cdist                        1.01 91.5%
+aten::exp                          0.01 0.7%
+aten::index                        0.00 0.1%
+aten::neg                          0.01 0.5%
+aten::numpy_T                      0.00 0.0%
+aten::ones                         0.00 0.0%
+aten::reciprocal                   0.00 0.0%
+aten::reshape                      0.00 0.0%
+aten::sum                          0.00 0.0%
+aten::t                            0.00 0.0%
+aten::to                           0.00 0.0%
+aten::sreciprocal_                 0.00 0.0%
+other                              0.01 0.8%
+time_in_roi                        1.11 100.0%
 
+------------------------------------------------------------
+
+Kernels used on CPU but not yet implemented on HB:
+==========================================================================
+ Native kernels that are used but not implemented for HammerBlade:
+==========================================================================
+Function                                                                                                                                                                               Times
+at::native::gt_stub::gt_stub()                                                                                                                                                         1
+at::native::index_stub::index_stub()                                                                                                                                                   2
+at::native::pow_tensor_scalar_stub::pow_tensor_scalar_stub()                                                                                                                           2
+at::native::reciprocal_stub::reciprocal_stub()                                                                                                                                         1
+aten::coalesce                                                                                                                                                                         2
+aten::llcopy                                                                                                                                                                           1
+aten::mul                                                                                                                                                                              1
+aten::mul_out                                                                                                                                                                          1
+
+------------------------------------------------------------
+
+
+|- Node(time_in_roi : 895921406.0)
+  |- Node(at::Tensor at::CPUType::{anonymous}::div(const at::Tensor&, const at::Tensor&) : 5202.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 16.0)
+    |- Node(at::Tensor at::TypeDefault::to(const at::Tensor&, c10::ScalarType, bool, bool, c10::optional<c10::MemoryFormat>) : 26.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 1.0)
+      |- Node(at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool) : 12.0)
+        |- Node(at::native::copy_stub::copy_stub() : 2.0)
+    |- Node(at::native::div_stub::div_stub() : 5097.0)
+  |- Node(at::Tensor at::CPUType::{anonymous}::gt(const at::Tensor&, c10::Scalar) : 354.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 16.0)
+    |- Node(at::Tensor& at::CPUType::{anonymous}::gt_out(at::Tensor&, const at::Tensor&, const at::Tensor&) : 243.0)
+      |- Node(at::Tensor at::TypeDefault::to(const at::Tensor&, c10::ScalarType, bool, bool, c10::optional<c10::MemoryFormat>) : 48.0)
+        |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 2.0)
+        |- Node(at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool) : 24.0)
+          |- Node(at::native::copy_stub::copy_stub() : 10.0)
+      |- Node(at::Tensor& at::CPUType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>) : 5.0)
+      |- Node(at::native::gt_stub::gt_stub() : 62.0)
+      |- Node(c10::Scalar at::TypeDefault::item(const at::Tensor&) : 29.0)
+        |- Node(c10::Scalar at::CPUType::{anonymous}::_local_scalar_dense(const at::Tensor&) : 8.0)
+  |- Node(at::Tensor at::CPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&) : 14707.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 34.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::empty_strided(c10::IntArrayRef, c10::IntArrayRef, const c10::TensorOptions&) : 5.0)
+    |- Node(at::Tensor at::TypeDefault::to(const at::Tensor&, c10::ScalarType, bool, bool, c10::optional<c10::MemoryFormat>) : 50.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 2.0)
+      |- Node(at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool) : 23.0)
+        |- Node(at::native::copy_stub::copy_stub() : 5.0)
+    |- Node(at::native::mul_stub::mul_stub() : 14505.0)
+  |- Node(at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&) : 721.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 4.0)
+    |- Node(at::Tensor at::SparseCPUType::{anonymous}::_indices(const at::Tensor&) : 0.0)
+    |- Node(at::Tensor at::SparseCPUType::{anonymous}::_values(const at::Tensor&) : 0.0)
+    |- Node(at::Tensor at::TypeDefault::select(const at::Tensor&, int64_t, int64_t) : 19.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::as_strided(const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::optional<long int>) : 4.0)
+      |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+    |- Node(at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&) : 19.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 2.0)
+      |- Node(at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&) : 10.0)
+        |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 7.0)
+          |- Node(at::native::fill_stub::fill_stub() : 3.0)
+    |- Node(at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&) : 15.0)
+      |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 11.0)
+        |- Node(at::native::fill_stub::fill_stub() : 3.0)
+    |- Node(int64_t at::SparseCPUType::{anonymous}::_nnz(const at::Tensor&) : 4.0)
+      |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+    |- Node(int64_t at::SparseCPUType::{anonymous}::sparse_dim(const at::Tensor&) : 1.0)
+    |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 1.0)
+  |- Node(at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&) : 2974.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 3.0)
+    |- Node(at::Tensor at::SparseCPUType::{anonymous}::_indices(const at::Tensor&) : 0.0)
+    |- Node(at::Tensor at::SparseCPUType::{anonymous}::_values(const at::Tensor&) : 0.0)
+    |- Node(at::Tensor at::TypeDefault::select(const at::Tensor&, int64_t, int64_t) : 14.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::as_strided(const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::optional<long int>) : 1.0)
+      |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+    |- Node(at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&) : 17.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 1.0)
+      |- Node(at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&) : 9.0)
+        |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 5.0)
+          |- Node(at::native::fill_stub::fill_stub() : 1.0)
+    |- Node(at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&) : 10.0)
+      |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 6.0)
+        |- Node(at::native::fill_stub::fill_stub() : 1.0)
+    |- Node(int64_t at::SparseCPUType::{anonymous}::_nnz(const at::Tensor&) : 3.0)
+      |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+    |- Node(int64_t at::SparseCPUType::{anonymous}::sparse_dim(const at::Tensor&) : 0.0)
+    |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+  |- Node(at::Tensor at::SparseCPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&) : 484.0)
+    |- Node(at::Tensor at::SparseCPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 41.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 2.0)
+      |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+    |- Node(at::Tensor& at::SparseCPUType::{anonymous}::mul_out(at::Tensor&, const at::Tensor&, const at::Tensor&) : 414.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 5.0)
+      |- Node(at::Tensor at::SparseCPUType::{anonymous}::_indices(const at::Tensor&) : 0.0)
+      |- Node(at::Tensor at::SparseCPUType::{anonymous}::_values(const at::Tensor&) : 0.0)
+      |- Node(at::Tensor at::SparseCPUType::{anonymous}::coalesce(const at::Tensor&) : 8.0)
+        |- Node(bool at::SparseCPUType::{anonymous}::is_coalesced(const at::Tensor&) : 0.0)
+      |- Node(at::Tensor at::TypeDefault::narrow(const at::Tensor&, int64_t, int64_t, int64_t) : 34.0)
+        |- Node(at::Tensor at::TypeDefault::slice(const at::Tensor&, int64_t, int64_t, int64_t, int64_t) : 17.0)
+          |- Node(at::Tensor at::CPUType::{anonymous}::as_strided(const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::optional<long int>) : 3.0)
+        |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+      |- Node(at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&) : 18.0)
+        |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 14.0)
+          |- Node(at::native::fill_stub::fill_stub() : 6.0)
+      |- Node(at::Tensor& at::SparseCPUType::{anonymous}::_coalesced_(at::Tensor&, bool) : 0.0)
+      |- Node(at::Tensor& at::TypeDefault::resize_as_(at::Tensor&, const at::Tensor&, c10::optional<c10::MemoryFormat>) : 39.0)
+        |- Node(at::Tensor& at::CPUType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>) : 0.0)
+        |- Node(int64_t at::SparseCPUType::{anonymous}::dense_dim(const at::Tensor&) : 0.0)
+        |- Node(int64_t at::SparseCPUType::{anonymous}::sparse_dim(const at::Tensor&) : 0.0)
+        |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+      |- Node(int64_t at::SparseCPUType::{anonymous}::_nnz(const at::Tensor&) : 9.0)
+        |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+      |- Node(int64_t at::SparseCPUType::{anonymous}::sparse_dim(const at::Tensor&) : 0.0)
+      |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+  |- Node(at::Tensor at::SparseCPUType::{anonymous}::sddtmm(const at::Tensor&, const at::Tensor&, const at::Tensor&) : 894859827.0)
+    |- Node(@BSG_API_CALL@__free : 31.0)
+      |- Node(@TRIM@ : 0.0)
+    |- Node(@CPU_LOG@ : 44174.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 2.0)
+      |- Node(at::Tensor at::SparseCPUType::{anonymous}::_indices(const at::Tensor&) : 0.0)
+      |- Node(at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&) : 130.0)
+        |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 14.0)
+        |- Node(at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&) : 91.0)
+          |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 79.0)
+            |- Node(at::native::fill_stub::fill_stub() : 58.0)
+      |- Node(at::Tensor& at::CPUType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>) : 1.0)
+      |- Node(bool at::SparseCPUType::{anonymous}::is_coalesced(const at::Tensor&) : 0.0)
+      |- Node(int64_t at::SparseCPUType::{anonymous}::_nnz(const at::Tensor&) : 17886.0)
+        |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 8.0)
+      |- Node(int64_t at::SparseCPUType::{anonymous}::dense_dim(const at::Tensor&) : 1.0)
+      |- Node(int64_t at::SparseCPUType::{anonymous}::sparse_dim(const at::Tensor&) : 0.0)
+      |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+    |- Node(@HB_LOG@ : 836603310.0)
+      |- Node(@BSG_API_CALL@__free : 107.0)
+        |- Node(@TRIM@ : 0.0)
+      |- Node(@BSG_API_CALL@__malloc : 47.0)
+        |- Node(@TRIM@ : 0.0)
+      |- Node(@BSG_API_CALL@__memcpy : 427307.0)
+        |- Node(@TRIM@ : 0.0)
+      |- Node(@OFFLOAD_KERNEL@__tensorlib_sddtmm : 740220382.0)
+        |- Node(@TRIM@ : 0.0)
+      |- Node(at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 25.0)
+        |- Node(@BSG_API_CALL@__malloc : 6.0)
+          |- Node(@TRIM@ : 0.0)
+      |- Node(at::Tensor at::SparseHammerBladeType::{anonymous}::_indices(const at::Tensor&) : 0.0)
+      |- Node(at::Tensor at::TypeDefault::zeros(c10::IntArrayRef, const c10::TensorOptions&) : 95954840.0)
+        |- Node(at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 47.0)
+          |- Node(@BSG_API_CALL@__malloc : 17.0)
+            |- Node(@TRIM@ : 0.0)
+        |- Node(at::Tensor& at::HammerBladeType::{anonymous}::zero_(at::Tensor&) : 95954741.0)
+          |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 95954715.0)
+            |- Node(at::native::fill_stub::fill_stub() : 95954677.0)
+              |- Node(@BSG_API_CALL@__free : 46.0)
+                |- Node(@TRIM@ : 0.0)
+              |- Node(@BSG_API_CALL@__malloc : 32.0)
+                |- Node(@TRIM@ : 0.0)
+              |- Node(@BSG_API_CALL@__memcpy : 544388.0)
+                |- Node(@TRIM@ : 0.0)
+              |- Node(@OFFLOAD_KERNEL@__tensorlib_fill : 95409963.0)
+                |- Node(@TRIM@ : 0.0)
+      |- Node(at::Tensor& at::HammerBladeType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>) : 1.0)
+      |- Node(bool at::SparseHammerBladeType::{anonymous}::is_coalesced(const at::Tensor&) : 0.0)
+      |- Node(int64_t at::SparseHammerBladeType::{anonymous}::_nnz(const at::Tensor&) : 31.0)
+        |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 2.0)
+      |- Node(int64_t at::SparseHammerBladeType::{anonymous}::dense_dim(const at::Tensor&) : 4.0)
+      |- Node(int64_t at::SparseHammerBladeType::{anonymous}::sparse_dim(const at::Tensor&) : 4.0)
+      |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 5.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::llcopy(const at::Tensor&) : 24508931.0)
+      |- Node(@BSG_API_CALL@__dma : 24508832.0)
+        |- Node(@TRIM@ : 0.0)
+      |- Node(@BSG_API_CALL@__malloc : 15.0)
+        |- Node(@TRIM@ : 0.0)
+    |- Node(at::Tensor at::SparseCPUType::{anonymous}::llcopy(const at::Tensor&) : 33703056.0)
+      |- Node(@BSG_API_CALL@__dma : 33702533.0)
+        |- Node(@TRIM@ : 0.0)
+      |- Node(@BSG_API_CALL@__free : 22.0)
+        |- Node(@TRIM@ : 0.0)
+      |- Node(@BSG_API_CALL@__malloc : 16.0)
+        |- Node(@TRIM@ : 0.0)
+      |- Node(at::Tensor at::HammerBladeType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 89.0)
+        |- Node(@BSG_API_CALL@__malloc : 22.0)
+          |- Node(@TRIM@ : 0.0)
+      |- Node(at::Tensor at::SparseCPUType::{anonymous}::_indices(const at::Tensor&) : 1.0)
+      |- Node(at::Tensor at::SparseCPUType::{anonymous}::_values(const at::Tensor&) : 1.0)
+      |- Node(at::Tensor at::TypeDefault::to(const at::Tensor&, c10::ScalarType, bool, bool, c10::optional<c10::MemoryFormat>) : 59.0)
+        |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 3.0)
+        |- Node(at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool) : 44.0)
+          |- Node(at::native::copy_stub::copy_stub() : 28.0)
+          |- Node(int64_t at::TypeDefault::stride(const at::Tensor&, int64_t) : 1.0)
+      |- Node(at::Tensor& at::HammerBladeType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>) : 15.0)
+      |- Node(bool at::SparseCPUType::{anonymous}::is_coalesced(const at::Tensor&) : 1.0)
+      |- Node(int64_t at::SparseCPUType::{anonymous}::dense_dim(const at::Tensor&) : 5.0)
+      |- Node(int64_t at::SparseCPUType::{anonymous}::sparse_dim(const at::Tensor&) : 1.0)
+      |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 2.0)
+  |- Node(at::Tensor at::TypeDefault::cdist(const at::Tensor&, const at::Tensor&, double, c10::optional<long int>) : 1013534.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::pow(const at::Tensor&, c10::Scalar) : 76408.0)
+      |- Node(at::Tensor at::TypeDefault::empty_like(const at::Tensor&, c10::optional<c10::MemoryFormat>) : 58.0)
+        |- Node(at::Tensor at::CPUType::{anonymous}::empty_strided(c10::IntArrayRef, c10::IntArrayRef, const c10::TensorOptions&) : 25.0)
+      |- Node(at::native::pow_tensor_scalar_stub::pow_tensor_scalar_stub() : 76291.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef) : 67.0)
+      |- Node(at::Tensor at::TypeDefault::alias(const at::Tensor&) : 8.0)
+      |- Node(at::Tensor& at::CPUType::{anonymous}::set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef) : 22.0)
+        |- Node(at::Tensor& at::native::legacy::cpu::_th_set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef) : 6.0)
+    |- Node(at::Tensor at::TypeDefault::cat(at::TensorList, int64_t) : 95704.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::_cat(at::TensorList, int64_t) : 95668.0)
+        |- Node(at::Tensor at::native::legacy::cpu::_th_cat(at::TensorList, int64_t) : 95648.0)
+    |- Node(at::Tensor at::TypeDefault::contiguous(const at::Tensor&, c10::MemoryFormat) : 1.0)
+    |- Node(at::Tensor at::TypeDefault::expand(const at::Tensor&, c10::IntArrayRef, bool) : 18.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::as_strided(const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::optional<long int>) : 2.0)
+    |- Node(at::Tensor at::TypeDefault::matmul(const at::Tensor&, const at::Tensor&) : 795674.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&) : 795637.0)
+        |- Node(at::Tensor at::native::legacy::cpu::_th_mm(const at::Tensor&, const at::Tensor&) : 795617.0)
+          |- Node(at::Tensor& at::CPUType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>) : 21.0)
+          |- Node(at::Tensor& at::CPUType::{anonymous}::zero_(at::Tensor&) : 5672.0)
+            |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 5656.0)
+              |- Node(at::native::fill_stub::fill_stub() : 5636.0)
+          |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 1.0)
+    |- Node(at::Tensor at::TypeDefault::mul(const at::Tensor&, c10::Scalar) : 107.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 2.0)
+      |- Node(at::Tensor at::TypeDefault::to(const at::Tensor&, c10::ScalarType, bool, bool, c10::optional<c10::MemoryFormat>) : 35.0)
+        |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 2.0)
+        |- Node(at::Tensor& at::TypeDefault::copy_(at::Tensor&, const at::Tensor&, bool) : 15.0)
+          |- Node(at::native::copy_stub::copy_stub() : 3.0)
+      |- Node(at::native::mul_stub::mul_stub() : 12.0)
+    |- Node(at::Tensor at::TypeDefault::ones_like(const at::Tensor&, c10::optional<c10::MemoryFormat>) : 142.0)
+      |- Node(at::Tensor at::TypeDefault::empty_like(const at::Tensor&, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 29.0)
+        |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 11.0)
+      |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 72.0)
+        |- Node(at::native::fill_stub::fill_stub() : 54.0)
+    |- Node(at::Tensor at::TypeDefault::sum(const at::Tensor&, c10::IntArrayRef, bool, c10::optional<c10::ScalarType>) : 11140.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 12.0)
+      |- Node(at::native::sum_stub::sum_stub() : 11069.0)
+        |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 69.0)
+          |- Node(at::native::fill_stub::fill_stub() : 54.0)
+    |- Node(at::Tensor at::TypeDefault::transpose(const at::Tensor&, int64_t, int64_t) : 40.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::as_strided(const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::optional<long int>) : 7.0)
+    |- Node(at::Tensor& at::CPUType::{anonymous}::clamp_min_(at::Tensor&, c10::Scalar) : 1096.0)
+      |- Node(at::Tensor& at::CPUType::{anonymous}::clamp_min_out(at::Tensor&, const at::Tensor&, c10::Scalar) : 1064.0)
+        |- Node(at::native::clamp_min_stub::clamp_min_stub() : 1020.0)
+    |- Node(at::Tensor& at::TypeDefault::sqrt_(at::Tensor&) : 1564.0)
+      |- Node(at::Tensor& at::TypeDefault::sqrt_out(at::Tensor&, const at::Tensor&) : 1543.0)
+        |- Node(at::native::sqrt_stub::sqrt_stub() : 1522.0)
+    |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+  |- Node(at::Tensor at::TypeDefault::exp(const at::Tensor&) : 8054.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 3.0)
+    |- Node(at::Tensor& at::CPUType::{anonymous}::exp_out(at::Tensor&, const at::Tensor&) : 8014.0)
+      |- Node(at::Tensor& at::CPUType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>) : 15.0)
+      |- Node(at::native::exp_stub::exp_stub() : 7956.0)
+  |- Node(at::Tensor at::TypeDefault::index(const at::Tensor&, at::TensorList) : 994.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::as_strided(const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::optional<long int>) : 9.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 5.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::nonzero(const at::Tensor&) : 621.0)
+      |- Node(at::Tensor at::native::legacy::cpu::_th_nonzero(const at::Tensor&) : 611.0)
+    |- Node(at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef) : 106.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef) : 68.0)
+        |- Node(at::Tensor at::TypeDefault::alias(const at::Tensor&) : 7.0)
+        |- Node(at::Tensor& at::CPUType::{anonymous}::set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef) : 19.0)
+          |- Node(at::Tensor& at::native::legacy::cpu::_th_set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef) : 3.0)
+    |- Node(at::Tensor at::TypeDefault::select(const at::Tensor&, int64_t, int64_t) : 37.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::as_strided(const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::optional<long int>) : 4.0)
+      |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+    |- Node(at::native::index_stub::index_stub() : 24.0)
+    |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 1.0)
+    |- Node(int64_t at::TypeDefault::stride(const at::Tensor&, int64_t) : 1.0)
+  |- Node(at::Tensor at::TypeDefault::neg(const at::Tensor&) : 5723.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 1.0)
+    |- Node(at::Tensor& at::CPUType::{anonymous}::neg_out(at::Tensor&, const at::Tensor&) : 5692.0)
+      |- Node(at::Tensor& at::CPUType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>) : 18.0)
+      |- Node(at::native::neg_stub::neg_stub() : 5653.0)
+  |- Node(at::Tensor at::TypeDefault::numpy_T(const at::Tensor&) : 70.0)
+    |- Node(at::Tensor at::TypeDefault::permute(const at::Tensor&, c10::IntArrayRef) : 20.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::as_strided(const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::optional<long int>) : 6.0)
+  |- Node(at::Tensor at::TypeDefault::ones(c10::IntArrayRef, const c10::TensorOptions&) : 63.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 11.0)
+    |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 16.0)
+      |- Node(at::native::fill_stub::fill_stub() : 6.0)
+  |- Node(at::Tensor at::TypeDefault::reciprocal(const at::Tensor&) : 75.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 2.0)
+    |- Node(at::Tensor& at::CPUType::{anonymous}::reciprocal_out(at::Tensor&, const at::Tensor&) : 46.0)
+      |- Node(at::Tensor& at::CPUType::{anonymous}::resize_(at::Tensor&, c10::IntArrayRef, c10::optional<c10::MemoryFormat>) : 3.0)
+      |- Node(at::native::reciprocal_stub::reciprocal_stub() : 13.0)
+  |- Node(at::Tensor at::TypeDefault::reshape(const at::Tensor&, c10::IntArrayRef) : 62.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::view(const at::Tensor&, c10::IntArrayRef) : 18.0)
+      |- Node(at::Tensor at::TypeDefault::alias(const at::Tensor&) : 1.0)
+      |- Node(at::Tensor& at::CPUType::{anonymous}::set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef) : 9.0)
+        |- Node(at::Tensor& at::native::legacy::cpu::_th_set_(at::Tensor&, c10::Storage, int64_t, c10::IntArrayRef, c10::IntArrayRef) : 5.0)
+  |- Node(at::Tensor at::TypeDefault::sum(const at::Tensor&, c10::IntArrayRef, bool, c10::optional<c10::ScalarType>) : 39.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::as_strided(const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::optional<long int>) : 1.0)
+    |- Node(at::Tensor at::CPUType::{anonymous}::empty(c10::IntArrayRef, const c10::TensorOptions&, c10::optional<c10::MemoryFormat>) : 2.0)
+    |- Node(at::native::sum_stub::sum_stub() : 14.0)
+      |- Node(at::Tensor& at::TypeDefault::fill_(at::Tensor&, c10::Scalar) : 5.0)
+        |- Node(at::native::fill_stub::fill_stub() : 1.0)
+  |- Node(at::Tensor at::TypeDefault::t(const at::Tensor&) : 26.0)
+    |- Node(at::Tensor at::TypeDefault::transpose(const at::Tensor&, int64_t, int64_t) : 7.0)
+      |- Node(at::Tensor at::CPUType::{anonymous}::as_strided(const at::Tensor&, c10::IntArrayRef, c10::IntArrayRef, c10::optional<long int>) : 2.0)
+  |- Node(at::Tensor at::TypeDefault::to(const at::Tensor&, const c10::TensorOptions&, bool, bool, c10::optional<c10::MemoryFormat>) : 13.0)
+  |- Node(at::Tensor& at::SparseCPUType::{anonymous}::sreciprocal_(at::Tensor&) : 89.0)
+    |- Node(at::Tensor at::SparseCPUType::{anonymous}::_values(const at::Tensor&) : 1.0)
+    |- Node(bool at::SparseCPUType::{anonymous}::is_coalesced(const at::Tensor&) : 0.0)
+    |- Node(int64_t at::SparseCPUType::{anonymous}::_nnz(const at::Tensor&) : 4.0)
+      |- Node(int64_t at::TypeDefault::size(const at::Tensor&, int64_t) : 0.0)
+  |- Node(other : 8395.0)
 done
 BSG REGRESSION TEST [32mPASSED[0m
 BSG REGRESSION TEST [32mPASSED[0m
 BSG COSIM PASS: Test passed!
 $finish called from file "/home/amp342/Cosim/bsg_bladerunner/bsg_replicant/libraries/platforms/dpi-verilator/hardware/dpi_top.sv", line 815.
-Fatal: "/home/amp342/Cosim/bsg_bladerunner/basejump_stl/bsg_test/bsg_nonsynth_dpi_gpio.v", 62: manycore_tb_top.trace_control: at time 1230687500001 ps
+Fatal: "/home/amp342/Cosim/bsg_bladerunner/basejump_stl/bsg_test/bsg_nonsynth_dpi_gpio.v", 62: manycore_tb_top.trace_control: at time 1753365500001 ps
 BSG ERROR (manycore_tb_top.trace_control): final block executed before fini() was called
 $finish called from file "/home/amp342/Cosim/bsg_bladerunner/basejump_stl/bsg_test/bsg_nonsynth_dpi_gpio.v", line 62.
-$finish at simulation time        1230687500001
+$finish at simulation time        1753365500001
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 1230687500001 ps
+Time: 1753365500001 ps
