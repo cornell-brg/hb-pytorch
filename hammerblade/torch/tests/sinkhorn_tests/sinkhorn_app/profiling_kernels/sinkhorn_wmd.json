@@ -5,6 +5,10 @@
     },
     {
         "offload": false,
+        "signature": "at::Tensor& at::SparseCPUType::{anonymous}::sreciprocal_(at::Tensor&)"
+    },
+    {
+        "offload": false,
         "signature": "at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)"
     },
     {
