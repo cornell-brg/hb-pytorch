@@ -19,7 +19,8 @@ DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 # Kernel "routing" file.
 ROUTE_JSON = os.path.join(os.path.dirname(__file__), 'sinkhorn_wmd.json')
 # Kernel parameters.
-HB_DATA_FRAC = 16*16*4 # fraction of data to use on hb, i.e. 1/(this value)
+HB_DATA_FRAC = 16 # fraction of data to use on hb, i.e. 1/(this value)
+
 LAMBDA = 1
 N_ITERS = 1
 
@@ -148,6 +149,7 @@ def sinkhorn_test():
         torch.hammerblade.profiler.route.set_route_from_json(route_data)
 
     # Set the size of the run. Use TOTAL_DOCS/data_fraction of the data.
+
     data_fraction = HB_DATA_FRAC if on_hb else 1  # Tiny subset on HB.
     n_docs = TOTAL_DOCS // data_fraction
 
@@ -162,14 +164,11 @@ def sinkhorn_test():
     if (SAVE_FILE):
         torch.save(scores, SAVE_FILE)
 
-    # Dump profiling results.
-    if on_hb:
-        # This is not very helpful but at least lists the HB kernels.
-        print(torch.hammerblade.profiler.chart.json())
-    else:
-        # These are wall-clock times. They work on HB but are hilarious.
-        print(torch.hammerblade.profiler.stats())
-        # print(torch.hammerblade.profiler.exec_time.raw_stack())
+    # Dump profiling results, including both the overall statistics and the
+    # invocation "tree" that breaks down every call stack.
+    print(torch.hammerblade.profiler.stats(trimming=True))
+    print(torch.hammerblade.profiler.exec_time.raw_stack())
+
     print("done")
 
 # torch.hammerblade.profiler.chart.add("at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)")

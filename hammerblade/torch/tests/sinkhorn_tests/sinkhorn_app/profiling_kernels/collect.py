@@ -3,6 +3,8 @@ import re
 import csv
 import sys
 
+from calc_7nm import energy_7nm
+
 ROUTE_JSON = 'sinkhorn_wmd.json'
 HB_STATS = 'run_{}/manycore_stats.log'
 HB_LOG = 'run_{}/log.txt'
@@ -11,6 +13,9 @@ CPU_LOG = 'cpu_run/log.txt'
 HB_FREQ = 10 ** 9  # 1 GHz.
 HB_MACHINE_FRAC = 16  # Simulating 1/16th of the machine.
 HB_DATA_FRAC = 16  # Used this fraction of the CPU's data.
+
+CPU_TDP = 165  # Xeon power (watts).
+
 
 
 def cycles_from_stats(stats):
@@ -78,16 +83,32 @@ def total_times_from_tree(log):
             yield kernel, secs
 
 
-def trimmed_times_from_tree(log):
+def trimmed_times_from_tree(log, marker='@HB_LOG@'):
     cur_kernel = None
     cur_total = None
+    in_marker = False
+
     for level, sig, secs in parse_tree(log):
         # Check for a new top-level kernel.
         if level == 1:
             if cur_kernel is not None:
                 yield cur_kernel, cur_total
             cur_kernel = kernel_name(sig) if sig.startswith('at::') else sig
+            if marker:
+                cur_total = None
+                in_marker = False
+            else:
+                cur_total = secs
+            continue
+
+        if level == 2 and sig == marker:
+            in_marker = True
             cur_total = secs
+            continue
+        if level == 2:
+            in_marker = False
+            continue
+        if not in_marker:
             continue
 
         # Check for trimmed functions.
@@ -117,13 +138,14 @@ def hb_cycles_to_time(cycles):
     return sim_secs * scale_factor
 
 
-def collect():
+def collect(summary):
     with open(ROUTE_JSON) as f:
         kernels = json.load(f)
 
     # Load results from every HB run (one per kernel).
     hb_cycles = {}
     hb_host_times = {}
+    hb_energies = {}
     for i, kernel in enumerate(kernels):
         kname = kernel_name(kernel['signature'])
         # Load HB cycles from statistics dump.
@@ -139,30 +161,62 @@ def collect():
         trimmed_times = dict(trimmed_times_from_tree(log_txt))
         hb_host_times[kname] = trimmed_times[kname]
 
+        # Run energy model, convert to joules.
+        energy = energy_7nm(stats_txt) * HB_DATA_FRAC
+        hb_energies[kname] = energy / 10**6
+
     # Load CPU time breakdown.
     with open(CPU_LOG) as f:
         log_txt = f.read()
     cpu_times = list(total_times_from_tree(log_txt))
     assert set(k for k, _ in cpu_times).issuperset(hb_cycles)
 
-    # Dump a CSV.
-    writer = csv.DictWriter(
-        sys.stdout,
-        ['kernel', 'cpu_time', 'hb_cycles', 'hb_time', 'hb_host_time']
-    )
-    writer.writeheader()
-    for kernel, cpu_time in cpu_times:
-        writer.writerow({
-            'kernel': kernel,
-            'cpu_time': cpu_time,
-            'hb_cycles': hb_cycles.get(kernel),
-            'hb_time': (hb_cycles_to_time(hb_cycles[kernel])
-                        if kernel in hb_cycles else ''),
-            'hb_host_time': (hb_host_times[kernel]
-                             if kernel in hb_host_times else ''),
+    if summary:
+        # Summarize a few overall results.
+        cpu_total_time = 0.0
+        hb_total_time = 0.0
+        hb_kern_energy = 0.0
+        cpu_kern_energy = 0.0
+        for kernel, cpu_time in cpu_times:
+            cpu_total_time += cpu_time
+            if kernel in hb_cycles:
+                hb_total_time += hb_cycles_to_time(hb_cycles[kernel]) \
+                    + hb_host_times[kernel]
+                hb_kern_energy += hb_energies[kernel]
+                cpu_kern_energy += cpu_time * CPU_TDP
+            else:
+                # Where we don't have a kernel, charge us for CPU execution.
+                hb_total_time += cpu_time
 
-        })
+        print('CPU time: {:.3f} s'.format(cpu_total_time))
+        print('CPU+HB time: {:.3f} s'.format(hb_total_time))
+        print('Speedup: {:.1f}x'.format(cpu_total_time / hb_total_time))
+        print('CPU kernel energy: {:.1f} J'.format(cpu_kern_energy))
+        print('HB kernel energy: {:.1f} mJ'.format(hb_kern_energy * 10**3))
+        print('Energy ratio: {:.0f}x'.format(cpu_kern_energy / hb_kern_energy))
+
+    else:
+        # Dump a CSV.
+        writer = csv.DictWriter(
+            sys.stdout,
+            ['kernel', 'cpu_time', 'cpu_energy', 'hb_cycles', 'hb_time',
+             'hb_host_time', 'hb_energy']
+        )
+        writer.writeheader()
+        for kernel, cpu_time in cpu_times:
+            writer.writerow({
+                'kernel': kernel,
+                'cpu_time': cpu_time,
+                'cpu_energy': cpu_time * CPU_TDP,
+                'hb_cycles': hb_cycles.get(kernel),
+                'hb_time': (hb_cycles_to_time(hb_cycles[kernel])
+                            if kernel in hb_cycles else ''),
+                'hb_host_time': (hb_host_times[kernel]
+                                 if kernel in hb_host_times else ''),
+                'hb_energy': (hb_energies[kernel]
+                              if kernel in hb_energies else ''),
+            })
 
 
 if __name__ == '__main__':
-    collect()
+    collect('-s' in sys.argv)
