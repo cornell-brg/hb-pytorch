@@ -52,7 +52,10 @@ if __name__ == "__main__":
                         help="Range of tiles to print in mid-res")
     parser.add_argument("--hi", nargs=2, type=int,  
                         help="Range of tiles to print in hi-res")
-
+    parser.add_argument("--pc", nargs=2, type=int,
+                        help="Range of tiles to print in pc mode")
+    parser.add_argument("--full", nargs=2, type=int, 
+                        help="Range of tiles to print in full mode")
 
     # Read trace object from trace.obj
     trace_file = open('trace.obj', 'rb')
@@ -68,9 +71,18 @@ if __name__ == "__main__":
         TraceObj.set_mode('mid', args.mid[0], args.mid[1])
     if args.hi is not None:
         TraceObj.set_mode('hi', args.hi[0], args.hi[1])
+    if args.pc is not None:
+        TraceObj.set_mode('pc', args.pc[0], args.pc[1])
+    if args.full is not None:
+        TraceObj.set_mode('full', args.full[0], args.full[1])
 
-    if args.mode is None and args.lo is None and args.mid is None and args.hi is None:
+    if args.mode is None and args.lo is None and args.mid is None and args.hi is None and args.pc is None and args.full is None:
         print("Incorrect arguments")
     else:
-        TraceObj.print_trace()
+        if args.mode == 'full' or args.full is not None:
+            asm = open('kernel.dic', 'rb')
+            dic = pickle.load(asm)
+            TraceObj.print_trace(dic)
+        else:
+            TraceObj.print_trace()
 
