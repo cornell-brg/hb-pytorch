@@ -8,7 +8,7 @@ from time import time
 
 # Kernel parameters.
 TOTAL_DOCS = 4096
-QUERY_IDX = 5  # Was 100; lowered to allow even smaller runs.
+QUERY_IDX = 3  # Was 100; lowered to allow even smaller runs.
 LAMBDA = 1
 
 # Data files. (Ask Adrian for these.)
@@ -19,8 +19,7 @@ DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 # Kernel "routing" file.
 ROUTE_JSON = os.path.join(os.path.dirname(__file__), 'sinkhorn_wmd.json')
 # Kernel parameters.
-HB_DATA_FRAC = 16 # fraction of data to use on hb, i.e. 1/(this value)
-QUERY_IDX = 5  # Was 100; lowered to allow even smaller runs.
+HB_DATA_FRAC = 16*16*4 # fraction of data to use on hb, i.e. 1/(this value)
 LAMBDA = 1
 N_ITERS = 1
 
@@ -90,8 +89,8 @@ def load_data(n_docs):
     """
     # Load data.
     vecs = numpy.load(DATA_VECS)
-    mat = scipy.sparse.load_npz(DATA_MAT)
     print("vecs size:", vecs.shape)
+    mat = scipy.sparse.load_npz(DATA_MAT)
     mat = mat[:, :n_docs]  # Use a subset of the data.
     print("mat shape:", mat.shape)
     # The query vector.

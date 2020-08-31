@@ -1,7 +1,7 @@
 Chronologic VCS simulator copyright 1991-2018
 Contains Synopsys proprietary information.
-Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Aug 28 16:19 2020
-NOTE: automatic random seed used: 674676515
+Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Aug 31 17:06 2020
+NOTE: automatic random seed used: 2464347349
 BSG INFO: bsg_nonsynth_dpi_rom (initial begin)
 BSG INFO:     Instantiation: manycore_tb_top.trace_control
 BSG INFO:     width_p:                 2
@@ -211,12 +211,195 @@ BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[15].tile.proc.h.z.vco
 [INFO][TESTBENCH] BSG_MACHINE_MAX_EPA_WIDTH            =          28
 [INFO][TESTBENCH] BSG_MACHINE_MEM_CFG                  = e_vcache_blocking_test_dramsim3_hbm2_4gb_x128
 BSG INFO: test_python Regression Test
-BSG REGRESSION TEST [31mFAILED[0m
-BSG REGRESSION TEST [31mFAILED[0m
+## ----------------------------------------------------------------
+## MANYCORE HETERO TYPE CONFIGUREATIONS
+## ----------------------------------------------------------------
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## ----------------------------------------------------------------
+__________ ___________  _______________________________
+\______   \\_   _____/ /   _____/\_   _____/\__    ___/
+ |       _/ |    __)_  \_____  \  |    __)_   |    |   
+ |    |   \ |        \ /        \ |        \  |    |  0->1 time =          0
+ |____|_  //_______  //_______  //_______  /  |____|   
+ ASYNC  \/         \/         \/         \/            
+__________ ___________  _______________________________
+\______   \\_   _____/ /   _____/\_   _____/\__    ___/
+ |       _/ |    __)_  \_____  \  |    __)_   |    |   
+ |    |   \ |        \ /        \ |        \  |    |  1->0 time =   15000000
+ |____|_  //_______  //_______  //_______  /  |____|   
+ ASYNC  \/         \/         \/         \/            
+"/home/amp342/Cosim/bsg_bladerunner/bsg_manycore/v/bsg_manycore_endpoint_standard.v", 354: manycore_tb_top.mc_dpi.mc_ep_to_fifos.epsd.genblk3.unnamed$$_0: started at 36000000ps failed at 36000000ps
+	Offending '((out_credits_o === 'x) || (out_credits_o > 5'b0))'
+## out of remote store credits(= 0) x,y= 0, 1 displaying only once (manycore_tb_top.mc_dpi.mc_ep_to_fifos.epsd)
+##   (this may be a performance problem; or normal behavior)
+[INFO][RX] Unfreezing tile t=784020000000, x= 0, y= 2
+[INFO][RX] Unfreezing tile t=784039000000, x= 1, y= 2
+[INFO][RX] Unfreezing tile t=784060000000, x= 2, y= 2
+[INFO][RX] Unfreezing tile t=784083000000, x= 3, y= 2
+[INFO][RX] Unfreezing tile t=784108000000, x= 4, y= 2
+[INFO][RX] Unfreezing tile t=784135000000, x= 5, y= 2
+[INFO][RX] Unfreezing tile t=784164000000, x= 6, y= 2
+[INFO][RX] Unfreezing tile t=784195000000, x= 7, y= 2
+[INFO][RX] Unfreezing tile t=784228000000, x= 8, y= 2
+[INFO][RX] Unfreezing tile t=784263000000, x= 9, y= 2
+[INFO][RX] Unfreezing tile t=784300000000, x=10, y= 2
+[INFO][RX] Unfreezing tile t=784339000000, x=11, y= 2
+[INFO][RX] Unfreezing tile t=784380000000, x=12, y= 2
+[INFO][RX] Unfreezing tile t=784423000000, x=13, y= 2
+[INFO][RX] Unfreezing tile t=784468000000, x=14, y= 2
+[INFO][RX] Unfreezing tile t=784515000000, x=15, y= 2
+[INFO][RX] Unfreezing tile t=784546000000, x= 0, y= 3
+[INFO][RX] Unfreezing tile t=784567000000, x= 1, y= 3
+[INFO][RX] Unfreezing tile t=784590000000, x= 2, y= 3
+[INFO][RX] Unfreezing tile t=784615000000, x= 3, y= 3
+[INFO][RX] Unfreezing tile t=784642000000, x= 4, y= 3
+[INFO][RX] Unfreezing tile t=784671000000, x= 5, y= 3
+[INFO][RX] Unfreezing tile t=784702000000, x= 6, y= 3
+[INFO][RX] Unfreezing tile t=784735000000, x= 7, y= 3
+[INFO][RX] Unfreezing tile t=784770000000, x= 8, y= 3
+[INFO][RX] Unfreezing tile t=784807000000, x= 9, y= 3
+[INFO][RX] Unfreezing tile t=784846000000, x=10, y= 3
+[INFO][RX] Unfreezing tile t=784887000000, x=11, y= 3
+[INFO][RX] Unfreezing tile t=784930000000, x=12, y= 3
+[INFO][RX] Unfreezing tile t=784975000000, x=13, y= 3
+[INFO][RX] Unfreezing tile t=785022000000, x=14, y= 3
+[INFO][RX] Unfreezing tile t=785071000000, x=15, y= 3
+[INFO][RX] Unfreezing tile t=785104000000, x= 0, y= 4
+[INFO][RX] Unfreezing tile t=785127000000, x= 1, y= 4
+[INFO][RX] Unfreezing tile t=785152000000, x= 2, y= 4
+[INFO][RX] Unfreezing tile t=785179000000, x= 3, y= 4
+[INFO][RX] Unfreezing tile t=785208000000, x= 4, y= 4
+[INFO][RX] Unfreezing tile t=785239000000, x= 5, y= 4
+[INFO][RX] Unfreezing tile t=785272000000, x= 6, y= 4
+[INFO][RX] Unfreezing tile t=785307000000, x= 7, y= 4
+[INFO][RX] Unfreezing tile t=785344000000, x= 8, y= 4
+[INFO][RX] Unfreezing tile t=785383000000, x= 9, y= 4
+[INFO][RX] Unfreezing tile t=785424000000, x=10, y= 4
+[INFO][RX] Unfreezing tile t=785467000000, x=11, y= 4
+[INFO][RX] Unfreezing tile t=785512000000, x=12, y= 4
+[INFO][RX] Unfreezing tile t=785559000000, x=13, y= 4
+[INFO][RX] Unfreezing tile t=785608000000, x=14, y= 4
+[INFO][RX] Unfreezing tile t=785659000000, x=15, y= 4
+[INFO][RX] Unfreezing tile t=785694000000, x= 0, y= 5
+[INFO][RX] Unfreezing tile t=785719000000, x= 1, y= 5
+[INFO][RX] Unfreezing tile t=785746000000, x= 2, y= 5
+[INFO][RX] Unfreezing tile t=785775000000, x= 3, y= 5
+[INFO][RX] Unfreezing tile t=785806000000, x= 4, y= 5
+[INFO][RX] Unfreezing tile t=785839000000, x= 5, y= 5
+[INFO][RX] Unfreezing tile t=785874000000, x= 6, y= 5
+[INFO][RX] Unfreezing tile t=785911000000, x= 7, y= 5
+[INFO][RX] Unfreezing tile t=785950000000, x= 8, y= 5
+[INFO][RX] Unfreezing tile t=785991000000, x= 9, y= 5
+[INFO][RX] Unfreezing tile t=786034000000, x=10, y= 5
+[INFO][RX] Unfreezing tile t=786079000000, x=11, y= 5
+[INFO][RX] Unfreezing tile t=786126000000, x=12, y= 5
+[INFO][RX] Unfreezing tile t=786175000000, x=13, y= 5
+[INFO][RX] Unfreezing tile t=786226000000, x=14, y= 5
+[INFO][RX] Unfreezing tile t=786279000000, x=15, y= 5
+[INFO][RX] Unfreezing tile t=786316000000, x= 0, y= 6
+[INFO][RX] Unfreezing tile t=786343000000, x= 1, y= 6
+[INFO][RX] Unfreezing tile t=786372000000, x= 2, y= 6
+[INFO][RX] Unfreezing tile t=786403000000, x= 3, y= 6
+[INFO][RX] Unfreezing tile t=786436000000, x= 4, y= 6
+[INFO][RX] Unfreezing tile t=786471000000, x= 5, y= 6
+[INFO][RX] Unfreezing tile t=786508000000, x= 6, y= 6
+[INFO][RX] Unfreezing tile t=786547000000, x= 7, y= 6
+[INFO][RX] Unfreezing tile t=786588000000, x= 8, y= 6
+[INFO][RX] Unfreezing tile t=786631000000, x= 9, y= 6
+[INFO][RX] Unfreezing tile t=786676000000, x=10, y= 6
+[INFO][RX] Unfreezing tile t=786723000000, x=11, y= 6
+[INFO][RX] Unfreezing tile t=786772000000, x=12, y= 6
+[INFO][RX] Unfreezing tile t=786823000000, x=13, y= 6
+[INFO][RX] Unfreezing tile t=786876000000, x=14, y= 6
+[INFO][RX] Unfreezing tile t=786931000000, x=15, y= 6
+[INFO][RX] Unfreezing tile t=786970000000, x= 0, y= 7
+[INFO][RX] Unfreezing tile t=786999000000, x= 1, y= 7
+[INFO][RX] Unfreezing tile t=787030000000, x= 2, y= 7
+[INFO][RX] Unfreezing tile t=787063000000, x= 3, y= 7
+[INFO][RX] Unfreezing tile t=787098000000, x= 4, y= 7
+[INFO][RX] Unfreezing tile t=787135000000, x= 5, y= 7
+[INFO][RX] Unfreezing tile t=787174000000, x= 6, y= 7
+[INFO][RX] Unfreezing tile t=787215000000, x= 7, y= 7
+[INFO][RX] Unfreezing tile t=787258000000, x= 8, y= 7
+[INFO][RX] Unfreezing tile t=787303000000, x= 9, y= 7
+[INFO][RX] Unfreezing tile t=787350000000, x=10, y= 7
+[INFO][RX] Unfreezing tile t=787399000000, x=11, y= 7
+[INFO][RX] Unfreezing tile t=787450000000, x=12, y= 7
+[INFO][RX] Unfreezing tile t=787503000000, x=13, y= 7
+[INFO][RX] Unfreezing tile t=787558000000, x=14, y= 7
+[INFO][RX] Unfreezing tile t=787615000000, x=15, y= 7
+[INFO][RX] Unfreezing tile t=787656000000, x= 0, y= 8
+[INFO][RX] Unfreezing tile t=787687000000, x= 1, y= 8
+[INFO][RX] Unfreezing tile t=787720000000, x= 2, y= 8
+[INFO][RX] Unfreezing tile t=787755000000, x= 3, y= 8
+[INFO][RX] Unfreezing tile t=787792000000, x= 4, y= 8
+[INFO][RX] Unfreezing tile t=787831000000, x= 5, y= 8
+[INFO][RX] Unfreezing tile t=787872000000, x= 6, y= 8
+[INFO][RX] Unfreezing tile t=787915000000, x= 7, y= 8
+[INFO][RX] Unfreezing tile t=787960000000, x= 8, y= 8
+[INFO][RX] Unfreezing tile t=788007000000, x= 9, y= 8
+[INFO][RX] Unfreezing tile t=788056000000, x=10, y= 8
+[INFO][RX] Unfreezing tile t=788107000000, x=11, y= 8
+[INFO][RX] Unfreezing tile t=788160000000, x=12, y= 8
+[INFO][RX] Unfreezing tile t=788215000000, x=13, y= 8
+[INFO][RX] Unfreezing tile t=788272000000, x=14, y= 8
+[INFO][RX] Unfreezing tile t=788331000000, x=15, y= 8
+[INFO][RX] Unfreezing tile t=788374000000, x= 0, y= 9
+[INFO][RX] Unfreezing tile t=788407000000, x= 1, y= 9
+[INFO][RX] Unfreezing tile t=788442000000, x= 2, y= 9
+[INFO][RX] Unfreezing tile t=788479000000, x= 3, y= 9
+[INFO][RX] Unfreezing tile t=788518000000, x= 4, y= 9
+[INFO][RX] Unfreezing tile t=788559000000, x= 5, y= 9
+[INFO][RX] Unfreezing tile t=788602000000, x= 6, y= 9
+[INFO][RX] Unfreezing tile t=788647000000, x= 7, y= 9
+[INFO][RX] Unfreezing tile t=788694000000, x= 8, y= 9
+[INFO][RX] Unfreezing tile t=788743000000, x= 9, y= 9
+[INFO][RX] Unfreezing tile t=788794000000, x=10, y= 9
+[INFO][RX] Unfreezing tile t=788847000000, x=11, y= 9
+[INFO][RX] Unfreezing tile t=788902000000, x=12, y= 9
+[INFO][RX] Unfreezing tile t=788959000000, x=13, y= 9
+[INFO][RX] Unfreezing tile t=789018000000, x=14, y= 9
+[INFO][RX] Unfreezing tile t=789079000000, x=15, y= 9
+offloading kernel at::Tensor at::SparseCPUType::{anonymous}::sddtmm(const at::Tensor&, const at::Tensor&, const at::Tensor&)
+loading data for 4 docs
+vecs size: (100000, 300)
+mat shape: (100000, 4)
+done loading data; running kernel
+starting iteration 0
+[
+    {
+        "offload": false,
+        "signature": "at::Tensor at::SparseCPUType::{anonymous}::sddtmm(const at::Tensor&, const at::Tensor&, const at::Tensor&)"
+    },
+    {
+        "offload": false,
+        "signature": "at::Tensor& at::SparseCPUType::{anonymous}::sreciprocal_(at::Tensor&)"
+    },
+    {
+        "offload": false,
+        "signature": "at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)"
+    },
+    {
+        "offload": false,
+        "signature": "at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)"
+    }
+]
+
+done
+BSG REGRESSION TEST [32mPASSED[0m
+BSG REGRESSION TEST [32mPASSED[0m
 BSG COSIM PASS: Test passed!
 $finish called from file "/home/amp342/Cosim/bsg_bladerunner/bsg_replicant/libraries/platforms/dpi-verilator/hardware/dpi_top.sv", line 815.
-$finish at simulation time                    0
+Fatal: "/home/amp342/Cosim/bsg_bladerunner/basejump_stl/bsg_test/bsg_nonsynth_dpi_gpio.v", 62: manycore_tb_top.trace_control: at time 1230687500001 ps
+BSG ERROR (manycore_tb_top.trace_control): final block executed before fini() was called
+$finish called from file "/home/amp342/Cosim/bsg_bladerunner/basejump_stl/bsg_test/bsg_nonsynth_dpi_gpio.v", line 62.
+$finish at simulation time        1230687500001
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 0 ps
-CPU Time:      4.550 seconds;       Data structure size:  24.7Mb
-Fri Aug 28 16:19:42 2020
+Time: 1230687500001 ps

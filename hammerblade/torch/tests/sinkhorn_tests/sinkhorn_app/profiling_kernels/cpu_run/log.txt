@@ -3,19 +3,19 @@ vecs size: (100000, 300)
 mat shape: (100000, 4096)
 done loading data; running kernel
 starting iteration 0
-elapsed time: 1.652350902557373
+elapsed time: 1.6384873390197754
 Kernel execution time:
-aten::div                          0.01 0.4%
+aten::div                          0.01 0.3%
 aten::gt                           0.00 0.0%
-aten::mul                          0.02 1.0%
+aten::mul                          0.01 0.8%
 aten::dstmm                        0.01 0.5%
-aten::dstmmt                       0.01 0.8%
-aten::mul                          0.04 2.2%
-aten::sddtmm                       0.50 30.4%
-aten::cdist                        1.05 63.6%
-aten::exp                          0.01 0.5%
+aten::dstmmt                       0.01 0.6%
+aten::mul                          0.00 0.3%
+aten::sddtmm                       0.58 35.5%
+aten::cdist                        1.00 61.0%
+aten::exp                          0.01 0.4%
 aten::index                        0.00 0.1%
-aten::neg                          0.01 0.4%
+aten::neg                          0.01 0.3%
 aten::numpy_T                      0.00 0.0%
 aten::ones                         0.00 0.0%
 aten::reciprocal                   0.00 0.0%
@@ -23,8 +23,9 @@ aten::reshape                      0.00 0.0%
 aten::sum                          0.00 0.0%
 aten::t                            0.00 0.0%
 aten::to                           0.00 0.0%
+aten::sreciprocal_                 0.00 0.0%
 other                              0.00 0.3%
-time_in_roi                        1.65 100.0%
+time_in_roi                        1.64 100.0%
 
 ------------------------------------------------------------
 
