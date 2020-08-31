@@ -1,0 +1,419 @@
++ COSIM_PYTHON_EXE=/home/amp342/Cosim/bsg_bladerunner/bsg_replicant/examples/python/test_loader
++ [[ ! -f /home/amp342/Cosim/bsg_bladerunner/bsg_replicant/examples/python/test_loader ]]
++ eval '/home/amp342/Cosim/bsg_bladerunner/bsg_replicant/examples/python/test_loader +ntb_random_seed_automatic +c_args="../test_sinkhorn_init.py' '--hb"' '| grep -v ": instantiating\|\[.*_PROFILER\]"'
+++ /home/amp342/Cosim/bsg_bladerunner/bsg_replicant/examples/python/test_loader +ntb_random_seed_automatic '+c_args=../test_sinkhorn_init.py --hb'
+++ grep -v ': instantiating\|\[.*_PROFILER\]'
+Chronologic VCS simulator copyright 1991-2018
+Contains Synopsys proprietary information.
+Compiler version O-2018.09-SP2_Full64; Runtime version O-2018.09-SP2_Full64;  Aug 25 13:29 2020
+NOTE: automatic random seed used: 3499975068
+BSG INFO: bsg_nonsynth_dpi_rom (initial begin)
+BSG INFO:     Instantiation: manycore_tb_top.trace_control
+BSG INFO:     width_p:                 2
+BSG INFO:     init_o_p:      00
+BSG INFO:     use_input_p:   0
+BSG INFO:     use_output_p:  1
+BSG INFO:     debug_p:       1
+manycore_tb_top.core_clk_gen with cycle_time_p     1000000
+BSG INFO: bsg_nonsynth_dpi_from_fifo (initial begin)
+BSG INFO:     Instantiation: manycore_tb_top.mc_dpi.f2d_req_i
+BSG INFO:     width_p =         128
+BSG INFO:     debug_p = 0
+BSG INFO: bsg_nonsynth_dpi_from_fifo (initial begin)
+BSG INFO:     Instantiation: manycore_tb_top.mc_dpi.f2d_rsp_i
+BSG INFO:     width_p =         128
+BSG INFO:     debug_p = 0
+BSG INFO: bsg_nonsynth_dpi_to_fifo (initial begin)
+BSG INFO:     Instantiation: manycore_tb_top.mc_dpi.d2f_req_i
+BSG INFO:     width_p =         128
+BSG INFO:     debug_p = 0
+BSG INFO: bsg_nonsynth_dpi_rom (initial begin)
+BSG INFO:     Instantiation: manycore_tb_top.mc_dpi.rom
+BSG INFO:     width_p:                32
+BSG INFO:     els_p:                  33
+BSG INFO:     debug_p:       0
+BSG INFO:     arr_p[          0]:     0x00040201
+BSG INFO:     arr_p[          1]:     0x08252020
+BSG INFO:     arr_p[          2]:     0x0000001c
+BSG INFO:     arr_p[          3]:     0x00000020
+BSG INFO:     arr_p[          4]:     0x00000010
+BSG INFO:     arr_p[          5]:     0x00000008
+BSG INFO:     arr_p[          6]:     0x00000000
+BSG INFO:     arr_p[          7]:     0x00000001
+BSG INFO:     arr_p[          8]:     0x00000000
+BSG INFO:     arr_p[          9]:     0x000db468
+BSG INFO:     arr_p[         10]:     0x06c8e5a6
+BSG INFO:     arr_p[         11]:     0x0cda5c32
+BSG INFO:     arr_p[         12]:     0x00000008
+BSG INFO:     arr_p[         13]:     0x00000010
+BSG INFO:     arr_p[         14]:     0x00000020
+BSG INFO:     arr_p[         15]:     0x00000020
+BSG INFO:     arr_p[         16]:     0x00000020
+BSG INFO:     arr_p[         17]:     0x00000020
+BSG INFO:     arr_p[         18]:     0x00000100
+BSG INFO:     arr_p[         19]:     0x00000010
+BSG INFO:     arr_p[         20]:     0x33535244
+BSG INFO:     arr_p[         21]:     0x00000002
+BSG INFO:     arr_p[         22]:     0x02000000
+BSG INFO:     arr_p[         23]:     0x0000000e
+BSG INFO:     arr_p[         24]:     0x00000002
+BSG INFO:     arr_p[         25]:     0x00000002
+BSG INFO:     arr_p[         26]:     0x00000006
+BSG INFO:     arr_p[         27]:     0x00000005
+BSG INFO:     arr_p[         28]:     0x0000000b
+BSG INFO:     arr_p[         29]:     0x0000001b
+BSG INFO:     arr_p[         30]:     0x00000019
+BSG INFO:     arr_p[         31]:     0x00000005
+BSG INFO:     arr_p[         32]:     0x00000000
+BSG INFO: bsg_nonsynth_dpi_manycore (initial begin)
+BSG INFO:     Instantiation:     manycore_tb_top.mc_dpi
+BSG INFO:     x_cord_width_p:              4
+BSG INFO:     y_cord_width_p:              4
+BSG INFO:     addr_width_p:               28
+BSG INFO:     data_width_p:               32
+BSG INFO:     max_out_credits_p:          16
+BSG INFO:     ep_fifo_els_p:               4
+BSG INFO:     dpi_fifo_els_p:             32
+BSG INFO:     debug_p:           0
+BSG INFO: bsg_nonsynth_dpi_cycle_counter (initial begin)
+BSG INFO:     Instantiation: manycore_tb_top.ctr
+BSG INFO:     width_p =          64
+BSG INFO:     debug_p = 0
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[1].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[2].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[3].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[4].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[5].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[6].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[7].x[15].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[0].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[1].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[2].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[3].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[4].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[5].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[6].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[7].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[8].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[9].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[10].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[11].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[12].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[13].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[14].tile.proc.h.z.vcore.vcore_prof
+BSG INFO: Profiler manycore_tb_top.network.manycore.y[8].x[15].tile.proc.h.z.vcore.vcore_prof
+==================== BSG MACHINE SETTINGS: ====================
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_X                 =          16
+[INFO][TESTBENCH] BSG_MACHINE_GLOBAL_Y                 =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_SET               =          16
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_WAY               =           8
+[INFO][TESTBENCH] BSG_MACHINE_VCACHE_BLOCK_SIZE_WORDS  =          32
+[INFO][TESTBENCH] BSG_MACHINE_MAX_EPA_WIDTH            =          28
+[INFO][TESTBENCH] BSG_MACHINE_MEM_CFG                  = e_vcache_blocking_test_dramsim3_hbm2_4gb_x128
+BSG INFO: test_python Regression Test
+## ----------------------------------------------------------------
+## MANYCORE HETERO TYPE CONFIGUREATIONS
+## ----------------------------------------------------------------
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+## ----------------------------------------------------------------
+__________ ___________  _______________________________
+\______   \\_   _____/ /   _____/\_   _____/\__    ___/
+ |       _/ |    __)_  \_____  \  |    __)_   |    |   
+ |    |   \ |        \ /        \ |        \  |    |  0->1 time =          0
+ |____|_  //_______  //_______  //_______  /  |____|   
+ ASYNC  \/         \/         \/         \/            
+__________ ___________  _______________________________
+\______   \\_   _____/ /   _____/\_   _____/\__    ___/
+ |       _/ |    __)_  \_____  \  |    __)_   |    |   
+ |    |   \ |        \ /        \ |        \  |    |  1->0 time =   15000000
+ |____|_  //_______  //_______  //_______  /  |____|   
+ ASYNC  \/         \/         \/         \/            
+"/home/amp342/Cosim/bsg_bladerunner/bsg_manycore/v/bsg_manycore_endpoint_standard.v", 354: manycore_tb_top.mc_dpi.mc_ep_to_fifos.epsd.genblk3.unnamed$$_0: started at 36000000ps failed at 36000000ps
+	Offending '((out_credits_o === 'x) || (out_credits_o > 5'b0))'
+## out of remote store credits(= 0) x,y= 0, 1 displaying only once (manycore_tb_top.mc_dpi.mc_ep_to_fifos.epsd)
+##   (this may be a performance problem; or normal behavior)
+[INFO][RX] Unfreezing tile t=780210000000, x= 0, y= 2
+[INFO][RX] Unfreezing tile t=780229000000, x= 1, y= 2
+[INFO][RX] Unfreezing tile t=780250000000, x= 2, y= 2
+[INFO][RX] Unfreezing tile t=780273000000, x= 3, y= 2
+[INFO][RX] Unfreezing tile t=780298000000, x= 4, y= 2
+[INFO][RX] Unfreezing tile t=780325000000, x= 5, y= 2
+[INFO][RX] Unfreezing tile t=780354000000, x= 6, y= 2
+[INFO][RX] Unfreezing tile t=780385000000, x= 7, y= 2
+[INFO][RX] Unfreezing tile t=780418000000, x= 8, y= 2
+[INFO][RX] Unfreezing tile t=780453000000, x= 9, y= 2
+[INFO][RX] Unfreezing tile t=780490000000, x=10, y= 2
+[INFO][RX] Unfreezing tile t=780529000000, x=11, y= 2
+[INFO][RX] Unfreezing tile t=780570000000, x=12, y= 2
+[INFO][RX] Unfreezing tile t=780613000000, x=13, y= 2
+[INFO][RX] Unfreezing tile t=780658000000, x=14, y= 2
+[INFO][RX] Unfreezing tile t=780705000000, x=15, y= 2
+[INFO][RX] Unfreezing tile t=780736000000, x= 0, y= 3
+[INFO][RX] Unfreezing tile t=780757000000, x= 1, y= 3
+[INFO][RX] Unfreezing tile t=780780000000, x= 2, y= 3
+[INFO][RX] Unfreezing tile t=780805000000, x= 3, y= 3
+[INFO][RX] Unfreezing tile t=780832000000, x= 4, y= 3
+[INFO][RX] Unfreezing tile t=780861000000, x= 5, y= 3
+[INFO][RX] Unfreezing tile t=780892000000, x= 6, y= 3
+[INFO][RX] Unfreezing tile t=780925000000, x= 7, y= 3
+[INFO][RX] Unfreezing tile t=780960000000, x= 8, y= 3
+[INFO][RX] Unfreezing tile t=780997000000, x= 9, y= 3
+[INFO][RX] Unfreezing tile t=781036000000, x=10, y= 3
+[INFO][RX] Unfreezing tile t=781077000000, x=11, y= 3
+[INFO][RX] Unfreezing tile t=781120000000, x=12, y= 3
+[INFO][RX] Unfreezing tile t=781165000000, x=13, y= 3
+[INFO][RX] Unfreezing tile t=781212000000, x=14, y= 3
+[INFO][RX] Unfreezing tile t=781261000000, x=15, y= 3
+[INFO][RX] Unfreezing tile t=781294000000, x= 0, y= 4
+[INFO][RX] Unfreezing tile t=781317000000, x= 1, y= 4
+[INFO][RX] Unfreezing tile t=781342000000, x= 2, y= 4
+[INFO][RX] Unfreezing tile t=781369000000, x= 3, y= 4
+[INFO][RX] Unfreezing tile t=781398000000, x= 4, y= 4
+[INFO][RX] Unfreezing tile t=781429000000, x= 5, y= 4
+[INFO][RX] Unfreezing tile t=781462000000, x= 6, y= 4
+[INFO][RX] Unfreezing tile t=781497000000, x= 7, y= 4
+[INFO][RX] Unfreezing tile t=781534000000, x= 8, y= 4
+[INFO][RX] Unfreezing tile t=781573000000, x= 9, y= 4
+[INFO][RX] Unfreezing tile t=781614000000, x=10, y= 4
+[INFO][RX] Unfreezing tile t=781657000000, x=11, y= 4
+[INFO][RX] Unfreezing tile t=781702000000, x=12, y= 4
+[INFO][RX] Unfreezing tile t=781749000000, x=13, y= 4
+[INFO][RX] Unfreezing tile t=781798000000, x=14, y= 4
+[INFO][RX] Unfreezing tile t=781849000000, x=15, y= 4
+[INFO][RX] Unfreezing tile t=781884000000, x= 0, y= 5
+[INFO][RX] Unfreezing tile t=781909000000, x= 1, y= 5
+[INFO][RX] Unfreezing tile t=781936000000, x= 2, y= 5
+[INFO][RX] Unfreezing tile t=781965000000, x= 3, y= 5
+[INFO][RX] Unfreezing tile t=781996000000, x= 4, y= 5
+[INFO][RX] Unfreezing tile t=782029000000, x= 5, y= 5
+[INFO][RX] Unfreezing tile t=782064000000, x= 6, y= 5
+[INFO][RX] Unfreezing tile t=782101000000, x= 7, y= 5
+[INFO][RX] Unfreezing tile t=782140000000, x= 8, y= 5
+[INFO][RX] Unfreezing tile t=782181000000, x= 9, y= 5
+[INFO][RX] Unfreezing tile t=782224000000, x=10, y= 5
+[INFO][RX] Unfreezing tile t=782269000000, x=11, y= 5
+[INFO][RX] Unfreezing tile t=782316000000, x=12, y= 5
+[INFO][RX] Unfreezing tile t=782365000000, x=13, y= 5
+[INFO][RX] Unfreezing tile t=782416000000, x=14, y= 5
+[INFO][RX] Unfreezing tile t=782469000000, x=15, y= 5
+[INFO][RX] Unfreezing tile t=782506000000, x= 0, y= 6
+[INFO][RX] Unfreezing tile t=782533000000, x= 1, y= 6
+[INFO][RX] Unfreezing tile t=782562000000, x= 2, y= 6
+[INFO][RX] Unfreezing tile t=782593000000, x= 3, y= 6
+[INFO][RX] Unfreezing tile t=782626000000, x= 4, y= 6
+[INFO][RX] Unfreezing tile t=782661000000, x= 5, y= 6
+[INFO][RX] Unfreezing tile t=782698000000, x= 6, y= 6
+[INFO][RX] Unfreezing tile t=782737000000, x= 7, y= 6
+[INFO][RX] Unfreezing tile t=782778000000, x= 8, y= 6
+[INFO][RX] Unfreezing tile t=782821000000, x= 9, y= 6
+[INFO][RX] Unfreezing tile t=782866000000, x=10, y= 6
+[INFO][RX] Unfreezing tile t=782913000000, x=11, y= 6
+[INFO][RX] Unfreezing tile t=782962000000, x=12, y= 6
+[INFO][RX] Unfreezing tile t=783013000000, x=13, y= 6
+[INFO][RX] Unfreezing tile t=783066000000, x=14, y= 6
+[INFO][RX] Unfreezing tile t=783121000000, x=15, y= 6
+[INFO][RX] Unfreezing tile t=783160000000, x= 0, y= 7
+[INFO][RX] Unfreezing tile t=783189000000, x= 1, y= 7
+[INFO][RX] Unfreezing tile t=783220000000, x= 2, y= 7
+[INFO][RX] Unfreezing tile t=783253000000, x= 3, y= 7
+[INFO][RX] Unfreezing tile t=783288000000, x= 4, y= 7
+[INFO][RX] Unfreezing tile t=783325000000, x= 5, y= 7
+[INFO][RX] Unfreezing tile t=783364000000, x= 6, y= 7
+[INFO][RX] Unfreezing tile t=783405000000, x= 7, y= 7
+[INFO][RX] Unfreezing tile t=783448000000, x= 8, y= 7
+[INFO][RX] Unfreezing tile t=783493000000, x= 9, y= 7
+[INFO][RX] Unfreezing tile t=783540000000, x=10, y= 7
+[INFO][RX] Unfreezing tile t=783589000000, x=11, y= 7
+[INFO][RX] Unfreezing tile t=783640000000, x=12, y= 7
+[INFO][RX] Unfreezing tile t=783693000000, x=13, y= 7
+[INFO][RX] Unfreezing tile t=783748000000, x=14, y= 7
+[INFO][RX] Unfreezing tile t=783805000000, x=15, y= 7
+[INFO][RX] Unfreezing tile t=783846000000, x= 0, y= 8
+[INFO][RX] Unfreezing tile t=783877000000, x= 1, y= 8
+[INFO][RX] Unfreezing tile t=783910000000, x= 2, y= 8
+[INFO][RX] Unfreezing tile t=783945000000, x= 3, y= 8
+[INFO][RX] Unfreezing tile t=783982000000, x= 4, y= 8
+[INFO][RX] Unfreezing tile t=784021000000, x= 5, y= 8
+[INFO][RX] Unfreezing tile t=784062000000, x= 6, y= 8
+[INFO][RX] Unfreezing tile t=784105000000, x= 7, y= 8
+[INFO][RX] Unfreezing tile t=784150000000, x= 8, y= 8
+[INFO][RX] Unfreezing tile t=784197000000, x= 9, y= 8
+[INFO][RX] Unfreezing tile t=784246000000, x=10, y= 8
+[INFO][RX] Unfreezing tile t=784297000000, x=11, y= 8
+[INFO][RX] Unfreezing tile t=784350000000, x=12, y= 8
+[INFO][RX] Unfreezing tile t=784405000000, x=13, y= 8
+[INFO][RX] Unfreezing tile t=784462000000, x=14, y= 8
+[INFO][RX] Unfreezing tile t=784521000000, x=15, y= 8
+[INFO][RX] Unfreezing tile t=784564000000, x= 0, y= 9
+[INFO][RX] Unfreezing tile t=784597000000, x= 1, y= 9
+[INFO][RX] Unfreezing tile t=784632000000, x= 2, y= 9
+[INFO][RX] Unfreezing tile t=784669000000, x= 3, y= 9
+[INFO][RX] Unfreezing tile t=784708000000, x= 4, y= 9
+[INFO][RX] Unfreezing tile t=784749000000, x= 5, y= 9
+[INFO][RX] Unfreezing tile t=784792000000, x= 6, y= 9
+[INFO][RX] Unfreezing tile t=784837000000, x= 7, y= 9
+[INFO][RX] Unfreezing tile t=784884000000, x= 8, y= 9
+[INFO][RX] Unfreezing tile t=784933000000, x= 9, y= 9
+[INFO][RX] Unfreezing tile t=784984000000, x=10, y= 9
+[INFO][RX] Unfreezing tile t=785037000000, x=11, y= 9
+[INFO][RX] Unfreezing tile t=785092000000, x=12, y= 9
+[INFO][RX] Unfreezing tilPyTorch configed with 16 * 8 HB device
+HB startup config kernel applied
+ ATen profiler collecting ...
+e t=785149000000, x=13, y= 9
+[INFO][RX] Unfreezing tile t=785208000000, x=14, y= 9
+[INFO][RX] Unfreezing tile t=785269000000, x=15, y= 9
+offloading kernel at::Tensor at::CPUType::{anonymous}::gt(const at::Tensor&, c10::Scalar)
+offloading kernel at::Tensor at::TypeDefault::cdist(const at::Tensor&, const at::Tensor&, double, c10::optional<long int>)
+offloading kernel at::Tensor at::CPUType::{anonymous}::div(const at::Tensor&, const at::Tensor&)
+offloading kernel at::Tensor at::TypeDefault::exp(const at::Tensor&)
+offloading kernel at::Tensor at::CPUType::{anonymous}::div(const at::Tensor&, const at::Tensor&)
+loading data
+vecs size: (100000, 300)
+mat shape: (100000, 16)
+done loading data
+Kernel execution time:
+aten::empty                        0.00 0.0%
+aten::sparse_coo_tensor            0.00 0.0%
+aten::to                           0.14 9.8%
+aten::set_                         0.00 0.0%
+other                              1.28 90.2%
+time_in_roi                        1.42 100.0%
+
+------------------------------------------------------------
+
+Kernels used on CPU but not yet implemented on HB:
+==========================================================================
+ Native kernels that are used but not implemented for HammerBlade:
+==========================================================================
+Function                                                                                                                                                                               Times
+at::native::max_kernel::max_kernel()                                                                                                                                                   1
+at::native::min_kernel::min_kernel()                                                                                                                                                   1
+aten::_sparse_coo_tensor_with_dims_and_tensors                                                                                                                                         1
+
+------------------------------------------------------------
+
+
+done
+BSG REGRESSION TEST [32mPASSED[0m
+BSG REGRESSION TEST [32mPASSED[0m
+BSG COSIM PASS: Test passed!
+$finish called from file "/home/amp342/Cosim/bsg_bladerunner/bsg_replicant/libraries/platforms/dpi-verilator/hardware/dpi_top.sv", line 815.
+Fatal: "/home/amp342/Cosim/bsg_bladerunner/basejump_stl/bsg_test/bsg_nonsynth_dpi_gpio.v", 62: manycore_tb_top.trace_control: at time 861723500001 ps
+BSG ERROR (manycore_tb_top.trace_control): final block executed before fini() was called
+$finish called from file "/home/amp342/Cosim/bsg_bladerunner/basejump_stl/bsg_test/bsg_nonsynth_dpi_gpio.v", line 62.
+$finish at simulation time         861723500001
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 861723500001 ps

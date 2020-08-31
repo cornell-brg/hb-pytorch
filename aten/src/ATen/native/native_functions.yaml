@@ -2220,6 +2220,7 @@
   dispatch:
     CPU: _reciprocal__cpu
     CUDA: _reciprocal__cuda
+    HammerBlade: _reciprocal__hb
 
 - func: reciprocal.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
@@ -6637,14 +6638,25 @@
 #   dispatch:
 
   # sampled dense-[dense transpose] matrix product (self = sparse)
+  # returns a sparse tensor
 - func: sddtmm(Tensor self, Tensor mat1, Tensor mat2t) -> Tensor
   use_c10_dispatcher: full
   variants: function, method
   dispatch:
     SparseCPU: sddtmm_cpu
     SparseHammerBlade: sddtmm_hb
+
+  # sampled dense-[dense transpose] matrix product (self = sparse)
+  # returns a dense tensor
+- func: sddtmmd(Tensor self, Tensor mat1, Tensor mat2t) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: sddtmmd_cpu
+    SparseHammerBlade: sddtmmd_hb
     
   # dense-[sparse transpose] matrix product
+  # returns a dense tensor
 - func: dstmm(Tensor self, Tensor mat2t) -> Tensor
   use_c10_dispatcher: full
   variants: function, method
@@ -6653,9 +6665,19 @@
     SparseHammerBlade: dstmm_hb
 
   # dense-[sparse transpose] matrix product [transposed]
+  # returns a dense tensor
 - func: dstmmt(Tensor self, Tensor mat2t) -> Tensor
   use_c10_dispatcher: full
   variants: function, method
   dispatch:
     SparseCPU: dstmmt_cpu
     SparseHammerBlade: dstmmt_hb
+
+  # sampled reciprocal - reciprocal_, but ignoring entries that are 0
+  # returns a sparse tensor
+- func: sreciprocal_(Tensor(a!) self) -> Tensor(a!)
+  supports_named_tensor: True
+  variants: function, method
+  dispatch:
+    SparseCPU: _sampled_reciprocal__cpu
+    SparseHammerBlade: _sampled_reciprocal__hb

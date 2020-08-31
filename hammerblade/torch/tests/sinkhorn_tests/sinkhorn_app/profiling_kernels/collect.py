@@ -17,6 +17,7 @@ HB_DATA_FRAC = 16  # Used this fraction of the CPU's data.
 CPU_TDP = 165  # Xeon power (watts).
 
 
+
 def cycles_from_stats(stats):
     """Given the text contents of a `manycore_stats.log` file, extract the
     total number of cycles for the kernel execution.
@@ -86,6 +87,7 @@ def trimmed_times_from_tree(log, marker='@HB_LOG@'):
     cur_kernel = None
     cur_total = None
     in_marker = False
+
     for level, sig, secs in parse_tree(log):
         # Check for a new top-level kernel.
         if level == 1:

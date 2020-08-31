@@ -1231,27 +1231,15 @@ Tensor mv_sparse(const SparseTensor& self, const Tensor& vec)
   return result.squeeze(-1);
 }
 
+// --------------------------------------------------------------------
+// Sinkhorn Functions
+// --------------------------------------------------------------------
 
-
-
-// SparseTensor _reciprocal__sparse_cpu(Tensor& self) {
-//   TORCH_CHECK(self.is_coalesced(), "_reciprocal__sparse_cpu only supports a coalesced tensor");
-//   int64_t nnz = self._nnz();
-//   Tensor vals = self._values();
-
-//   AT_DISPATCH_ALL_TYPES(self.scalar_type(), "_reciprocal__sparse_cpu", [&]{
-//     auto out = vals.accessor<scalar_t, 1>();
-//     for (int i = 0; i < nnz; i++){
-//       out[i] = 1 / out[i];
-//     }  
-//   });
-
-//   return self;
-// }
-
-
-
-
+// --------------------------------------------------------------------
+// sddtmm(SparseTensor, Tensor, Tensor) -> SparseTensor
+//
+// sddtmm(a, b, c) returns (b@c.T) at locations were a is nonzero
+// --------------------------------------------------------------------
 
 template <typename scalar_t>
 void sddtmm_kernel_cpu(
@@ -1318,8 +1306,70 @@ SparseTensor sddtmm_cpu(
   return sparse_tensor;
 }
 
+// --------------------------------------------------------------------
+// sddtmmd(SparseTensor, Tensor, Tensor) -> Tensor
+//
+// sddtmmd(a, b, c) returns (b@c.T) at locations were a is nonzero
+// --------------------------------------------------------------------
 
+template <typename scalar_t>
+void sddtmmd_kernel_cpu(
+  const SparseTensor& a_sparse_tensor,
+  const Tensor& b_dense_tensor,
+  const Tensor& c_dense_tensor,
+  Tensor& out_tensor){
 
+  if ( b_dense_tensor.scalar_type() != ScalarType::Float
+    || c_dense_tensor.scalar_type() != ScalarType::Float ) {
+    AT_ERROR("Sddtmmd is implemented for Float type only for matrices b and c"); 
+  }
+
+  TORCH_CHECK(a_sparse_tensor.sparse_dim() == 2, "We do not support hybrid sparse tensor for 'a' in sddtmm!");
+  TORCH_CHECK(b_dense_tensor.dim() == 2 && c_dense_tensor.dim() == 2, "Expected 2D matrixes for 'a' and 'b', but got ", b_dense_tensor.dim(), " and ", c_dense_tensor.dim(), " tensors");
+  TORCH_CHECK(b_dense_tensor.size(1) == c_dense_tensor.size(1), "Matrix multiply dimension mismatch: 'b' dim 1 = ", b_dense_tensor.size(1), ", 'c'.T dim 0 = ", c_dense_tensor.size(1));
+
+  TORCH_CHECK(b_dense_tensor.size(0) == a_sparse_tensor.size(0) && c_dense_tensor.size(0) == a_sparse_tensor.size(1),"SddTmm sample dimension mismatch: sample was shape ",a_sparse_tensor.size(0)," by ",a_sparse_tensor.size(1),", but b@c is shape ",b_dense_tensor.size(0)," by ",c_dense_tensor.size(0));
+
+  auto indices = a_sparse_tensor._indices();
+  TORCH_CHECK(indices.dtype() == at::kLong, "Indices should be long, but got ", indices.dtype());
+
+  auto a_indices = indices.accessor<int64_t, 2>();
+  auto b_dense = b_dense_tensor.accessor<scalar_t, 2>();
+  auto c_dense = c_dense_tensor.accessor<scalar_t, 2>();
+  auto out = out_tensor.accessor<scalar_t, 2>();
+
+  int dot_len = b_dense.size(1);
+  for (int k = 0; k < a_sparse_tensor._nnz(); k++) {
+    int row = a_indices[0][k]; //0
+    int col = a_indices[1][k];  //1
+
+    float dot_total = 0;
+    for (int i = 0; i < dot_len; i++)
+      dot_total += b_dense[row][i] * c_dense[col][i];
+
+    // update out
+    out[row][col] = dot_total;
+  }
+}
+SparseTensor sddtmmd_cpu(
+  const SparseTensor& a_sparse_tensor,
+  const Tensor& b_dense_tensor,
+  const Tensor& c_dense_tensor) {
+  
+  Tensor result = at::zeros(a_sparse_tensor.sizes(), {at::requires_grad().device(at::kCPU).dtype(at::kFloat)});
+
+  AT_DISPATCH_ALL_TYPES(b_dense_tensor.scalar_type(), "sddtmmd_cpu", [&]{
+    sddtmmd_kernel_cpu<scalar_t>(a_sparse_tensor, b_dense_tensor, c_dense_tensor, result);
+  });
+
+  return result;
+}
+
+// --------------------------------------------------------------------
+// dstmm(Tensor, SparseTensor) -> Tensor
+// 
+// dstmm(a, b) returns a@b.T
+// --------------------------------------------------------------------
 
 template <typename scalar_t>
 void dstmm_kernel(
@@ -1384,10 +1434,11 @@ Tensor dstmm_cpu(
   return out_dense;
 }
 
-
-
-
-
+// --------------------------------------------------------------------
+// dstmmt(Tensor, SparseTensor) -> Tensor
+//
+// dstmmt(a, b) returns (a@b.T).T
+// --------------------------------------------------------------------
 
 template <typename scalar_t>
 void dstmmt_kernel(
@@ -1452,6 +1503,29 @@ Tensor dstmmt_cpu(
   return out_dense;
 }
 
+
+// --------------------------------------------------------------------
+// sreciprocal_(SparseTensor) -> SparseTensor
+//
+// sreciprocal_(a) returns 1.0 / a, ignoring a's zero entries
+// ** and modifies a **
+// a must be a coalesced tensor
+// --------------------------------------------------------------------
+
+SparseTensor& _sampled_reciprocal__cpu(SparseTensor& self) {
+  TORCH_CHECK(self.is_coalesced(), "_sampled_reciprocal__cpu only supports a coalesced tensor");
+  int64_t nnz = self._nnz(); // = vals.numel()
+  Tensor vals = self._values();
+
+  AT_DISPATCH_ALL_TYPES(self.scalar_type(), "_sampled_reciprocal__cpu", [&]{
+    auto out = vals.accessor<scalar_t, 1>();
+    for (int i = 0; i < nnz; i++){
+      out[i] = 1 / out[i];
+    }
+  });
+
+  return self;
+}
 
 
 }} // namespace at::native
