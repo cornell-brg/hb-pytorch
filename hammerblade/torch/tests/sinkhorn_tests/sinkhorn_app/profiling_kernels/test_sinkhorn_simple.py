@@ -8,8 +8,11 @@ from time import time
 
 # Kernel parameters.
 TOTAL_DOCS = 4096
-QUERY_IDX = 3  # Was 100; lowered to allow even smaller runs.
+QUERY_IDX = 5  # Was 100; lowered to allow even smaller runs.
+HB_DATA_FRAC = 16 # fraction of data to use on hb, i.e. 1/(this value)
 LAMBDA = 1
+N_ITERS = 1
+SAVE_FILE = '' #'scores.out'
 
 # Data files. (Ask Adrian for these.)
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
@@ -18,13 +21,7 @@ DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 
 # Kernel "routing" file.
 ROUTE_JSON = os.path.join(os.path.dirname(__file__), 'sinkhorn_wmd.json')
-# Kernel parameters.
-HB_DATA_FRAC = 16 # fraction of data to use on hb, i.e. 1/(this value)
 
-LAMBDA = 1
-N_ITERS = 1
-
-SAVE_FILE = '' #'scores.out'
 
 def begin_profile(on_hb):
     start_time = None

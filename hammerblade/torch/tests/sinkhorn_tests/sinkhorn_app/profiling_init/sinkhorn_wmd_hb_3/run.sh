@@ -1,1 +1,0 @@
-(cd sinkhorn_wmd_hb_3; pycosim ../test_sinkhorn_init.py --hb > out.std 2>&1)
