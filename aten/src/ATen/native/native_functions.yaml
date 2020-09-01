@@ -6612,3 +6612,7 @@
   variants: function
   dispatch:
     HammerBlade: vvadd_hb
+
+- func: eyeriss_convolution(Tensor self, Tensor weight, Tensor? bias, int[] padding, int[] stride, int[] dilation, int groups) -> Tensor
+  dispatch:
+    HammerBlade: eyeriss_convolution
