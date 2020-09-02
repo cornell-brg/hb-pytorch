@@ -24,9 +24,51 @@ extern "C" {
     HBTensor<float> imap(input);
     HBTensor<float> filter(weight);
 
+    // Eyeriss buffers
+    //
     //   imap[#images][#in__channel][row][col]
     //   omap[#images][#out_channel][row][col]
     // filter[#filter][#in__channel][ROW][COL]
+
+    float filter_buf[FILTER_BUF_SIZE];
+    float   imap_buf[IMAP_BUF_SIZE];
+    float   psum_buf[PSUM_BUF_SIZE];
+
+    // sync flags
+    // 0 -> ready to load
+    // 1 -> ready to use
+
+    volatile unsigned int  filter_A_f      = 0;
+    volatile unsigned int  filter_A_f_E    = 0;
+    volatile unsigned int *filter_A_f_E_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&filter_A_f));
+    volatile unsigned int *filter_A_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&filter_A_f_E));
+
+    volatile unsigned int  psum_A_f        = 0;
+    volatile unsigned int  psum_A_f_N      = 0;
+    volatile unsigned int *psum_A_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,&psum_A_f));
+    volatile unsigned int *psum_A_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,&psum_A_f_N));
+
+    volatile unsigned int  imap_A_f        = 0;
+    volatile unsigned int  imap_A_f_NE     = 0;
+    volatile unsigned int *imap_A_f_NE_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y-1,&imap_A_f));
+    volatile unsigned int *imap_A_f_SW_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y+1,&imap_A_f_NE));
+
+    // proxy flags for supporting double buffering
+ 
+    volatile unsigned int *filter_f        = &filter_A_f;
+    volatile unsigned int *filter_f_E      = &filter_A_f_E;
+    volatile unsigned int *filter_f_E_r    = filter_A_f_E_r;
+    volatile unsigned int *filter_f_W_r    = filter_A_f_W_r;
+
+    volatile unsigned int *psum_f          = &psum_A_f;
+    volatile unsigned int *psum_f_N        = & psum_A_f_N;
+    volatile unsigned int *psum_f_N_r      = psum_A_f_N_r;
+    volatile unsigned int *psum_f_S_r      = psum_A_f_S_r;
+
+    volatile unsigned int *imap_f          = &imap_A_f;
+    volatile unsigned int *imap_f_NE       = imap_A_f_NE;
+    volatile unsigned int *imap_f_NE_r     = imap_A_f_NE_r;
+    volatile unsigned int *imap_f_SW_r     = imap_A_f_SW_r;
 
     // Conv2d parameters
     auto N    = omap.dim(0); // number of minibatches
@@ -38,11 +80,6 @@ extern "C" {
     auto Win  = imap.dim(3);
     auto Kh   = filter.dim(2);
     auto Kw   = filter.dim(3);
-
-    // Eyeriss buffers
-    float filter_buf[FILTER_BUF_SIZE];
-    float   imap_buf[IMAP_BUF_SIZE];
-    float   psum_buf[PSUM_BUF_SIZE];
 
     // config
     // 0 -- idle       -- do nothing
