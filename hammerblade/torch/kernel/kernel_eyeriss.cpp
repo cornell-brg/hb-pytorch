@@ -164,14 +164,23 @@ extern "C" {
       case 3:
         // compute
         for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
+          // TODO -- wait for filter
+          // TODO -- pass filter along
           for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
+            // TODO -- wait for imap
+            // TODO -- pass imap along
+            // TODO -- wait for psum
             for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
               for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
                 // compute for each (filter,image) pair
                 std::cout << "compute (" << filter_id + filters << ", " << images + image_id << ")" << std::endl;
               }
             }
+            // TODO -- pass psum along
+            // TODO -- flag psum free
+            // TODO -- flag imap free
           }
+          // TODO -- flag filter free
           std::cout << " -- end of a pass -- " << std::endl;
         }
         break;
