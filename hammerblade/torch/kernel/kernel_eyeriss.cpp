@@ -100,22 +100,23 @@ extern "C" {
 
     // config
     // 0 -- idle       -- do nothing
-    // 1 -- filter DMA -- push to 2 to the east
+    // 1 -- filter DMA -- push to 2 to the East
     // 2 -- imap DMA   -- push to NE
-    // 3 -- compute    -- push to NE
+    // 3 -- psum DMA   -- push to 2 to the North
+    // 4 -- compute    -- push to NE & N
 
     char eyeriss_2x2_config[4][4] = {
-        {1, 0, 3, 3},
-        {1, 2, 3, 3},
+        {1, 0, 4, 4},
+        {1, 2, 4, 4},
         {0, 2, 2, 0},
-        {0, 0, 0, 0}
+        {0, 0, 3, 3}
     };
 
     char debug_config[4][4] = {
-        {0, 0, 3, 0},
         {0, 0, 0, 0},
         {0, 0, 0, 0},
-        {0, 0, 0, 0}
+        {0, 0, 0, 0},
+        {0, 0, 3, 0}
     };
 
     // active config
@@ -124,7 +125,7 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
 
     // tile task dispatch
-    char tile_config = mc_config[bsg_x][bsg_y];
+    char tile_config = mc_config[bsg_y][bsg_x];
     switch (tile_config) {
       case 0:
         // nothing
@@ -135,6 +136,7 @@ extern "C" {
           size_t buf_offset = 0;
           for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
             // TODO -- channel
+            std::cout << " out channel - " << filter_id+filters << " row - " << bsg_y << std::endl;
             for (size_t col = 0; col < Wk; col++) {
               filter_buf[buf_offset] = filter(filter_id+filters,0,bsg_y,col);
               std::cout << "last filter data copied - " << filter_buf[buf_offset] << std::endl;
@@ -151,6 +153,7 @@ extern "C" {
             size_t buf_offset = 0;
             for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
               // TODO -- channel
+              std::cout << "image - " << image_id+images << " row - " << (bsg_x-1)+(bsg_y-1) << std::endl;
               for (size_t col = 0; col < Win; col++) {
                 imap_buf[buf_offset] = imap(image_id+images,0,(bsg_x-1)+(bsg_y-1),col);
                 std::cout << "last imap data copied - " << imap_buf[buf_offset] << std::endl;
@@ -162,6 +165,26 @@ extern "C" {
         }
         break;
       case 3:
+        // psum DMA
+        for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
+          for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
+            size_t buf_offset = 0;
+            for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
+              for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
+                // TODO -- channel
+                std::cout << "image - " << image_id+images << " out channel - " << filter_id+filters << " row - " << bsg_x-2 << std::endl;
+                for (size_t col = 0; col < Wout; col++) {
+                  psum_buf[buf_offset] = omap(image_id+images,filter_id+filters,bsg_x-2,col);
+                  std::cout << "last psum data copied - " << psum_buf[buf_offset] << std::endl;
+                  buf_offset++;
+                }
+              }
+            }
+          }
+          std::cout << " -- end of a pass -- " << std::endl;
+        }
+        break;
+      case 4:
         // compute
         for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
           // TODO -- wait for filter
