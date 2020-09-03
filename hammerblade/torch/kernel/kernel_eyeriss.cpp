@@ -9,6 +9,7 @@
 #define FILTER_BUF_SIZE 128
 #define   IMAP_BUF_SIZE 256
 #define   PSUM_BUF_SIZE  64
+#define       LOAD_PSUM   0
 
 // Eyeriss config
 // we use filter-use scheme -- filter stays constant within a process pass
@@ -234,12 +235,21 @@ extern "C" {
             // wait until remote psum buffer is ready
             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
             //bsg_printf(" -- buffer ready\n");
-            for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
-              for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
-                // TODO -- channel
-                for (size_t col = 0; col < Wout; col++) {
-                  psum_buf_remote[buf_offset] = omap(image_id+images,filter_id+filters,bsg_x-2,col);
-                  buf_offset++;
+
+            // brand new psum
+            if (!LOAD_PSUM) {
+              for (size_t offset = 0; offset < PSUM_BUF_SIZE; offset++) {
+                psum_buf_remote[offset] = 0;
+              }
+            } else {
+              // read from previous psum
+              for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
+                for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
+                  // TODO -- channel
+                  for (size_t col = 0; col < Wout; col++) {
+                    psum_buf_remote[buf_offset] = omap(image_id+images,filter_id+filters,bsg_x-2,col);
+                    buf_offset++;
+                  }
                 }
               }
             }
@@ -317,7 +327,13 @@ extern "C" {
               }
               imap_offset += Win;
             }
-            // pass psum along
+
+            // signal imap free
+            asm volatile("": : :"memory");
+            *imap_f = 0;
+            *imap_f_SW_r = 0;
+
+            // pass psum along OR write back to global memory
             if (PASS_PSUM) {
               //bsg_printf(" -- -- passing psum buffer\n");
               // wait until remote psum buffer is ready
@@ -329,14 +345,24 @@ extern "C" {
               asm volatile("": : :"memory");
               *psum_f_N = 1;
               *psum_f_N_r = 1;
+            } else {
+              // write back to omap
+              size_t buf_offset = 0;
+              for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
+                for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
+                  // TODO -- channel
+                  for (size_t col = 0; col < Wout; col++) {
+                    omap(image_id+images,filter_id+filters,bsg_x-2,col) = psum_buf_remote[buf_offset];
+                    buf_offset++;
+                  }
+                }
+              }
             }
 
             // signal psum and imap free
             asm volatile("": : :"memory");
             *psum_f = 0;
             *psum_f_S_r = 0;
-            *imap_f = 0;
-            *imap_f_SW_r = 0;
           }
           // signal filter free
           asm volatile("": : :"memory");
