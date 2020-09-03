@@ -92,6 +92,16 @@ extern "C" {
       psum_A_f_S_r = NULL;
     }
 
+    // first col of PE
+    if (bsg_x == 2) {
+      filter_A_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-2,bsg_y,&filter_A_f_E)); // West x 2
+    }
+
+    // bottom row of PE
+    if (bsg_y == 1) {
+      psum_A_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&psum_A_f_N));  // South x 2
+    }
+
     // proxy flags for supporting double buffering
 
     volatile unsigned int *filter_f        = &filter_A_f;
