@@ -113,10 +113,10 @@ extern "C" {
     };
 
     char debug_config[4][4] = {
+        {0, 0, 4, 0},
         {0, 0, 0, 0},
         {0, 0, 0, 0},
-        {0, 0, 0, 0},
-        {0, 0, 3, 0}
+        {0, 0, 0, 0}
     };
 
     // active config
@@ -136,14 +136,14 @@ extern "C" {
           size_t buf_offset = 0;
           for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
             // TODO -- channel
-            std::cout << " out channel - " << filter_id+filters << " row - " << bsg_y << std::endl;
+            // std::cout << " out channel - " << filter_id+filters << " row - " << bsg_y << std::endl;
             for (size_t col = 0; col < Wk; col++) {
               filter_buf[buf_offset] = filter(filter_id+filters,0,bsg_y,col);
-              std::cout << "last filter data copied - " << filter_buf[buf_offset] << std::endl;
+              // std::cout << "last filter data copied - " << filter_buf[buf_offset] << std::endl;
               buf_offset++;
             }
           }
-          std::cout << " -- end of a pass -- " << std::endl;
+          // std::cout << " -- end of a pass -- " << std::endl;
         }
         break;
       case 2:
@@ -153,15 +153,15 @@ extern "C" {
             size_t buf_offset = 0;
             for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
               // TODO -- channel
-              std::cout << "image - " << image_id+images << " row - " << (bsg_x-1)+(bsg_y-1) << std::endl;
+              // std::cout << "image - " << image_id+images << " row - " << (bsg_x-1)+(bsg_y-1) << std::endl;
               for (size_t col = 0; col < Win; col++) {
                 imap_buf[buf_offset] = imap(image_id+images,0,(bsg_x-1)+(bsg_y-1),col);
-                std::cout << "last imap data copied - " << imap_buf[buf_offset] << std::endl;
+                // std::cout << "last imap data copied - " << imap_buf[buf_offset] << std::endl;
                 buf_offset++;
               }
             }
           }
-          std::cout << " -- end of a pass -- " << std::endl;
+          // std::cout << " -- end of a pass -- " << std::endl;
         }
         break;
       case 3:
@@ -172,16 +172,16 @@ extern "C" {
             for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
               for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
                 // TODO -- channel
-                std::cout << "image - " << image_id+images << " out channel - " << filter_id+filters << " row - " << bsg_x-2 << std::endl;
+                // std::cout << "image - " << image_id+images << " out channel - " << filter_id+filters << " row - " << bsg_x-2 << std::endl;
                 for (size_t col = 0; col < Wout; col++) {
                   psum_buf[buf_offset] = omap(image_id+images,filter_id+filters,bsg_x-2,col);
-                  std::cout << "last psum data copied - " << psum_buf[buf_offset] << std::endl;
+                  // std::cout << "last psum data copied - " << psum_buf[buf_offset] << std::endl;
                   buf_offset++;
                 }
               }
             }
           }
-          std::cout << " -- end of a pass -- " << std::endl;
+          // std::cout << " -- end of a pass -- " << std::endl;
         }
         break;
       case 4:
@@ -193,18 +193,33 @@ extern "C" {
             // TODO -- wait for imap
             // TODO -- pass imap along
             // TODO -- wait for psum
+            size_t   imap_offset = 0;
+            size_t   psum_offset = 0;
             for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
+              size_t filter_offset = 0;
               for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
                 // compute for each (filter,image) pair
-                std::cout << "compute (" << filter_id + filters << ", " << images + image_id << ")" << std::endl;
+                // std::cout << "compute (" << filter_id + filters << ", " << images + image_id << ")" << std::endl;
+                // conv 1d -- just meant to be functional
+                for (size_t window = 0; window < Wout; window++) {
+                  for (size_t filter_weight = 0; filter_weight < Wk; filter_weight++) {
+                    // std::cout << "read psum - " << psum_offset + window << " imap - " << imap_offset + window + filter_weight << " filter - " << filter_offset + filter_weight << std::endl;
+                    psum_buf[psum_offset + window] +=
+                      imap_buf[imap_offset + window + filter_weight] * filter_buf[filter_offset + filter_weight];
+                    // std::cout << "psum == " << psum_buf[psum_offset + window] << std::endl;
+                  }
+                }
+                psum_offset += Wout;
+                filter_offset += Wk;
               }
+              imap_offset += Win;
             }
             // TODO -- pass psum along
             // TODO -- flag psum free
             // TODO -- flag imap free
           }
           // TODO -- flag filter free
-          std::cout << " -- end of a pass -- " << std::endl;
+          // std::cout << " -- end of a pass -- " << std::endl;
         }
         break;
       default:
