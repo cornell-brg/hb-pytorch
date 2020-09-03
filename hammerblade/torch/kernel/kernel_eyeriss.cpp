@@ -352,7 +352,7 @@ extern "C" {
                 for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
                   // TODO -- channel
                   for (size_t col = 0; col < Wout; col++) {
-                    omap(image_id+images,filter_id+filters,bsg_x-2,col) = psum_buf_remote[buf_offset];
+                    omap(image_id+images,filter_id+filters,bsg_x-2,col) = psum_buf[buf_offset];
                     buf_offset++;
                   }
                 }
