@@ -340,8 +340,8 @@ extern "C" {
           }
           // signal filter free
           asm volatile("": : :"memory");
-          filter_f = 0;
-          filter_f_W_r = 0;
+          *filter_f = 0;
+          *filter_f_W_r = 0;
 
           // std::cout << " -- end of a pass -- " << std::endl;
         }
