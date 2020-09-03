@@ -14,6 +14,9 @@
 // we use filter-use scheme -- filter stays constant within a process pass
 #define IMAGES_PER_BURST 1
 #define FILTERS_PER_PROCESSING_PASS 2
+#define PASS_PSUM (bsg_y > 0)
+#define PASS_IMAP (bsg_x < 3 && bsg_y >0)
+#define PASS_FILTER (bsg_x < 3)
 
 extern "C" {
 
@@ -155,14 +158,14 @@ extern "C" {
     };
 
     char debug_config[4][4] = {
-        {0, 0, 4, 0},
-        {0, 0, 0, 0},
-        {0, 0, 0, 0},
-        {0, 0, 0, 0}
+        {1, 0, 4, 4},
+        {1, 2, 4, 4},
+        {0, 2, 2, 0},
+        {0, 0, 3, 3}
     };
 
     // active config
-    char (&mc_config)[4][4] = eyeriss_2x2_config;
+    char (&mc_config)[4][4] = debug_config;
 
     bsg_cuda_print_stat_kernel_start();
 
@@ -177,8 +180,10 @@ extern "C" {
         for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
           size_t buf_offset = 0;
 
+          //bsg_printf("in filter DMA\n");
           // wait until remote filter buffer is ready
           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f_E)), 0);
+          //bsg_printf(" -- buffer ready\n");
           for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
             // TODO -- channel
             for (size_t col = 0; col < Wk; col++) {
@@ -189,6 +194,7 @@ extern "C" {
           asm volatile("": : :"memory");
           *filter_f_E = 1;
           *filter_f_E_r = 1;
+          //bsg_printf(" -- buffer copying done\n");
 
           // std::cout << " -- end of a pass -- " << std::endl;
         }
@@ -199,8 +205,10 @@ extern "C" {
           for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
             size_t buf_offset = 0;
 
+            //bsg_printf("in imap DMA\n");
             // wait until remote imap buffer is ready
             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_NE)), 0);
+            //bsg_printf(" -- buffer ready\n");
             for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
               // TODO -- channel
               for (size_t col = 0; col < Win; col++) {
@@ -211,6 +219,7 @@ extern "C" {
             asm volatile("": : :"memory");
             *imap_f_NE = 1;
             *imap_f_NE_r = 1;
+            //bsg_printf(" -- buffer copying done\n");
           }
           // std::cout << " -- end of a pass -- " << std::endl;
         }
@@ -221,8 +230,10 @@ extern "C" {
           for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
             size_t buf_offset = 0;
 
+            //bsg_printf("in psum DMA\n");
             // wait until remote psum buffer is ready
             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
+            //bsg_printf(" -- buffer ready\n");
             for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
               for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
                 // TODO -- channel
@@ -235,6 +246,7 @@ extern "C" {
             asm volatile("": : :"memory");
             *psum_f_N = 1;
             *psum_f_N_r = 1;
+            //bsg_printf(" -- buffer copying done\n");
           }
           // std::cout << " -- end of a pass -- " << std::endl;
         }
@@ -243,13 +255,17 @@ extern "C" {
         // compute
         for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
 
+          //bsg_printf("in compute PE\n");
           // wait until filter buf is filled
           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f)), 1);
+          //bsg_printf(" -- filter buffer filled\n");
 
           // pass filter along
-          if (bsg_x < 3) {
+          if (PASS_FILTER) {
+            //bsg_printf(" -- -- passing filter buffer\n");
             // wait until remote filter buffer is ready
             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f_E)), 0);
+            //bsg_printf(" -- -- next filter buffer ready\n");
             for (size_t offset = 0; offset < FILTER_BUF_SIZE; offset++) {
               filter_buf_remote[offset] = filter_buf[offset];
             }
@@ -262,11 +278,14 @@ extern "C" {
 
             // wait until imap buf is filled
             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f)), 1);
+            //bsg_printf(" -- imap buffer filled\n");
 
             // pass imap along
-            if (bsg_x < 3) {
+            if (PASS_IMAP) {
+              //bsg_printf(" -- -- passing imap buffer\n");
               // wait until remote imap buffer is ready
               bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_NE)), 0);
+              //bsg_printf(" -- -- next imap buffer ready\n");
               for (size_t offset = 0; offset < IMAP_BUF_SIZE; offset++) {
                 imap_buf_remote[offset] = imap_buf[offset];
               }
@@ -277,6 +296,7 @@ extern "C" {
 
             // wait until psum buf is filled
             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f)), 1);
+            //bsg_printf(" -- psum buffer filled\n");
 
             size_t   imap_offset = 0;
             size_t   psum_offset = 0;
@@ -298,9 +318,11 @@ extern "C" {
               imap_offset += Win;
             }
             // pass psum along
-            if (bsg_y > 1) {
+            if (PASS_PSUM) {
+              //bsg_printf(" -- -- passing psum buffer\n");
               // wait until remote psum buffer is ready
               bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
+              //bsg_printf(" -- -- next psum buffer ready\n");
               for (size_t offset = 0; offset < PSUM_BUF_SIZE; offset++) {
                 psum_buf_remote[offset] = psum_buf[offset];
               }
@@ -313,8 +335,8 @@ extern "C" {
             asm volatile("": : :"memory");
             *psum_f = 0;
             *psum_f_S_r = 0;
-            *filter_f = 0;
-            *filter_f_W_r = 0;
+            *imap_f = 0;
+            *imap_f_SW_r = 0;
           }
           // signal filter free
           asm volatile("": : :"memory");
