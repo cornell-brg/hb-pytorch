@@ -35,15 +35,36 @@ extern "C" {
     //   omap[#images]     [#out_channel][row][col]
     // filter[#out_channel][#in_channel] [ROW][COL]
 
-    float filter_buf[FILTER_BUF_SIZE];
-    float   imap_buf[IMAP_BUF_SIZE];
-    float   psum_buf[PSUM_BUF_SIZE];
+    float filter_buf_A[FILTER_BUF_SIZE];
+    float   imap_buf_A[IMAP_BUF_SIZE];
+    float   psum_buf_A[PSUM_BUF_SIZE];
+
+    float *filter_buf = filter_buf_A;
+    float   *imap_buf =   imap_buf_A;
+    float   *psum_buf =   psum_buf_A;
+
+    float *filter_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,filter_buf_A)); // East
+    float   *imap_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y-1,imap_buf_A)); // NorthEast
+    float   *psum_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,psum_buf_A));   // North
+
+    // filter DMA
+    if (bsg_x == 0) {
+      filter_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,filter_buf_A)); // East x 2
+    }
+
+    // psum DMA
+    if (bsg_y == 3) {
+      psum_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,psum_buf_A));   // North x 2
+    }
+
+    float *filter_buf_remote = filter_buf_A_remote;
+    float   *imap_buf_remote =   imap_buf_A_remote;
+    float   *psum_buf_remote =   psum_buf_A_remote;
 
     // sync flags
     // 0 -> ready to load
     // 1 -> ready to use
 
-    /*
     volatile unsigned int  filter_A_f      = 0;
     volatile unsigned int  filter_A_f_E    = 0;
     volatile unsigned int *filter_A_f_E_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&filter_A_f));
@@ -59,6 +80,18 @@ extern "C" {
     volatile unsigned int *imap_A_f_NE_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y-1,&imap_A_f));
     volatile unsigned int *imap_A_f_SW_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y+1,&imap_A_f_NE));
 
+    // filter DMA
+    if (bsg_x == 0) {
+      filter_A_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,&filter_A_f)); // East x 2
+      filter_A_f_W_r = NULL;
+    }
+
+    // psum DMA
+    if (bsg_y == 3) {
+      psum_A_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,&psum_A_f));  // North x 2
+      psum_A_f_S_r = NULL;
+    }
+
     // proxy flags for supporting double buffering
 
     volatile unsigned int *filter_f        = &filter_A_f;
@@ -67,15 +100,14 @@ extern "C" {
     volatile unsigned int *filter_f_W_r    = filter_A_f_W_r;
 
     volatile unsigned int *psum_f          = &psum_A_f;
-    volatile unsigned int *psum_f_N        = & psum_A_f_N;
+    volatile unsigned int *psum_f_N        = &psum_A_f_N;
     volatile unsigned int *psum_f_N_r      = psum_A_f_N_r;
     volatile unsigned int *psum_f_S_r      = psum_A_f_S_r;
 
     volatile unsigned int *imap_f          = &imap_A_f;
-    volatile unsigned int *imap_f_NE       = imap_A_f_NE;
+    volatile unsigned int *imap_f_NE       = &imap_A_f_NE;
     volatile unsigned int *imap_f_NE_r     = imap_A_f_NE_r;
     volatile unsigned int *imap_f_SW_r     = imap_A_f_SW_r;
-    */
 
     // Conv2d parameters
     auto N    = omap.dim(0); // number of minibatches
@@ -120,7 +152,7 @@ extern "C" {
     };
 
     // active config
-    char (&mc_config)[4][4] = debug_config;
+    char (&mc_config)[4][4] = eyeriss_2x2_config;
 
     bsg_cuda_print_stat_kernel_start();
 
@@ -134,15 +166,20 @@ extern "C" {
         // filter DMA
         for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
           size_t buf_offset = 0;
+
+          // wait until remote filter buffer is ready
+          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f_E)), 0);
           for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
             // TODO -- channel
-            // std::cout << " out channel - " << filter_id+filters << " row - " << bsg_y << std::endl;
             for (size_t col = 0; col < Wk; col++) {
-              filter_buf[buf_offset] = filter(filter_id+filters,0,bsg_y,col);
-              // std::cout << "last filter data copied - " << filter_buf[buf_offset] << std::endl;
+              filter_buf_remote[buf_offset] = filter(filter_id+filters,0,bsg_y,col);
               buf_offset++;
             }
           }
+          asm volatile("": : :"memory");
+          *filter_f_E = 1;
+          *filter_f_E_r = 1;
+
           // std::cout << " -- end of a pass -- " << std::endl;
         }
         break;
@@ -151,15 +188,19 @@ extern "C" {
         for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
           for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
             size_t buf_offset = 0;
+
+            // wait until remote imap buffer is ready
+            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_NE)), 0);
             for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
               // TODO -- channel
-              // std::cout << "image - " << image_id+images << " row - " << (bsg_x-1)+(bsg_y-1) << std::endl;
               for (size_t col = 0; col < Win; col++) {
-                imap_buf[buf_offset] = imap(image_id+images,0,(bsg_x-1)+(bsg_y-1),col);
-                // std::cout << "last imap data copied - " << imap_buf[buf_offset] << std::endl;
+                imap_buf_remote[buf_offset] = imap(image_id+images,0,(bsg_x-1)+(bsg_y-1),col);
                 buf_offset++;
               }
             }
+            asm volatile("": : :"memory");
+            *imap_f_NE = 1;
+            *imap_f_NE_r = 1;
           }
           // std::cout << " -- end of a pass -- " << std::endl;
         }
@@ -169,17 +210,21 @@ extern "C" {
         for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
           for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
             size_t buf_offset = 0;
+
+            // wait until remote psum buffer is ready
+            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
             for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
               for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
                 // TODO -- channel
-                // std::cout << "image - " << image_id+images << " out channel - " << filter_id+filters << " row - " << bsg_x-2 << std::endl;
                 for (size_t col = 0; col < Wout; col++) {
-                  psum_buf[buf_offset] = omap(image_id+images,filter_id+filters,bsg_x-2,col);
-                  // std::cout << "last psum data copied - " << psum_buf[buf_offset] << std::endl;
+                  psum_buf_remote[buf_offset] = omap(image_id+images,filter_id+filters,bsg_x-2,col);
                   buf_offset++;
                 }
               }
             }
+            asm volatile("": : :"memory");
+            *psum_f_N = 1;
+            *psum_f_N_r = 1;
           }
           // std::cout << " -- end of a pass -- " << std::endl;
         }
@@ -187,26 +232,54 @@ extern "C" {
       case 4:
         // compute
         for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
-          // TODO -- wait for filter
-          // TODO -- pass filter along
+
+          // wait until filter buf is filled
+          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f)), 1);
+
+          // pass filter along
+          if (bsg_x < 3) {
+            // wait until remote filter buffer is ready
+            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f_E)), 0);
+            for (size_t offset = 0; offset < FILTER_BUF_SIZE; offset++) {
+              filter_buf_remote[offset] = filter_buf[offset];
+            }
+            asm volatile("": : :"memory");
+            *filter_f_E = 1;
+            *filter_f_E_r = 1;
+          }
+
           for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
-            // TODO -- wait for imap
-            // TODO -- pass imap along
-            // TODO -- wait for psum
+
+            // wait until imap buf is filled
+            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f)), 1);
+
+            // pass imap along
+            if (bsg_x < 3) {
+              // wait until remote imap buffer is ready
+              bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_NE)), 0);
+              for (size_t offset = 0; offset < IMAP_BUF_SIZE; offset++) {
+                imap_buf_remote[offset] = imap_buf[offset];
+              }
+              asm volatile("": : :"memory");
+              *imap_f_NE = 1;
+              *imap_f_NE_r = 1;
+            }
+
+            // wait until psum buf is filled
+            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f)), 1);
+
             size_t   imap_offset = 0;
             size_t   psum_offset = 0;
             for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
               size_t filter_offset = 0;
               for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
-                // compute for each (filter,image) pair
-                // std::cout << "compute (" << filter_id + filters << ", " << images + image_id << ")" << std::endl;
                 // conv 1d -- just meant to be functional
+                // sliding window
                 for (size_t window = 0; window < Wout; window++) {
+                  // dot product between window and filter
                   for (size_t filter_weight = 0; filter_weight < Wk; filter_weight++) {
-                    // std::cout << "read psum - " << psum_offset + window << " imap - " << imap_offset + window + filter_weight << " filter - " << filter_offset + filter_weight << std::endl;
                     psum_buf[psum_offset + window] +=
                       imap_buf[imap_offset + window + filter_weight] * filter_buf[filter_offset + filter_weight];
-                    // std::cout << "psum == " << psum_buf[psum_offset + window] << std::endl;
                   }
                 }
                 psum_offset += Wout;
@@ -214,11 +287,30 @@ extern "C" {
               }
               imap_offset += Win;
             }
-            // TODO -- pass psum along
-            // TODO -- flag psum free
-            // TODO -- flag imap free
+            // pass psum along
+            if (bsg_y > 1) {
+              // wait until remote psum buffer is ready
+              bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
+              for (size_t offset = 0; offset < PSUM_BUF_SIZE; offset++) {
+                psum_buf_remote[offset] = psum_buf[offset];
+              }
+              asm volatile("": : :"memory");
+              *psum_f_N = 1;
+              *psum_f_N_r = 1;
+            }
+
+            // signal psum and imap free
+            asm volatile("": : :"memory");
+            *psum_f = 0;
+            *psum_f_S_r = 0;
+            *filter_f = 0;
+            *filter_f_W_r = 0;
           }
-          // TODO -- flag filter free
+          // signal filter free
+          asm volatile("": : :"memory");
+          filter_f = 0;
+          filter_f_W_r = 0;
+
           // std::cout << " -- end of a pass -- " << std::endl;
         }
         break;
