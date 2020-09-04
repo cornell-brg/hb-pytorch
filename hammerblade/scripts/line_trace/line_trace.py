@@ -19,17 +19,28 @@
 #                                --startpc 1cd2c
 #                                --endpc 1cd80
 #
+#   Step 1b (optional): Compress the disassembly of PyTorch to use while printing trace in 'full' mode
+#       python compress_asm.py --asm {path to disassembly file}
+#   Note: this step needs to be performed before printing the trace in 'full' mode (step 2)
+#   Example:
+#       python compress_asm.py --asm /work/global/kr397/hb-pytorch/torch/riscv/kernel.dis
+#
 #   Step 2: Prints the line trace between two PCs specified while running compress_trace.py
 #
-#   For every tile, the instructions can be printed in either 'lo', 'mid', 'hi'
+#   For every tile, the instructions can be printed in either 'lo', 'mid', 'hi', 'pc' or 'full'
 #   - lo: single character code for stalls (listed below), '@' for instruction
 #   - mid: three character code for stalls and instructions (listed below)
 #   - hi: first fifteen characters of all stalls and instructions
+#   - pc: lowest two bytes of the PC of every instruction, ##ff for stalls
+#   - full: lowest two bytes of the PC + first 15 characters of actual instruction from asm,
+#           ##<complete stall code> for stalls
 #
 #       python print_trace.py --mode {optional} {print mode for all tiles; 'lo', 'mid', 'hi'}
 #                             --lo {optional} {range of tiles to print in 'lo' mode}
 #                             --mid {optional} {range of tiles to print in 'mid' mode}
 #                             --hi {optional} {range of tiles to print in 'hi' mode}
+#                             --pc {optional} {range of tiles to print in 'pc' mode}
+#                             --full {optional} {range of tiles to print in 'full' mode}
 #
 #   Note: at least one of mode, lo, mid, hi must be provided to print the line trace
 #
@@ -46,11 +57,16 @@
 #
 #   Note: compress_trace.py generates a file trace.obj in the active directory; ensure that
 #   print_trace.py is run from the same directory so that it can access trace.obj
-#
+#   Note: compress_asm.py generates a file kernel.dic in the active directory; ensure that
+#   print_trace.py in 'full' mode is run from the same directory
 
 
 import csv
 import argparse
+
+#import colorama
+#from colorama import Fore, Back, Style
+#colorama.init(autoreset=True)
 
 class Trace:
 
@@ -59,38 +75,38 @@ class Trace:
 
     # List of types of stalls incurred by the core
     # Stall type : [lo code, mid code]
-    _STALLS_LIST   = {"stall_depend_dram_load" : ['l', '#dl'],
-                      "stall_depend_group_load" : ['l', '#gl'] ,
-                      "stall_depend_global_load" : ['l', '#gl'],
-                      "stall_depend_local_load" : ['l', '#ll'],
+    _STALLS_LIST   = {"stall_depend_dram_load" : ['D', '#DL'],
+                      "stall_depend_group_load" : ['O', '#GR'] ,
+                      "stall_depend_global_load" : ['G', '#GL'],
+                      "stall_depend_local_load" : ['L', '#LL'],
 
-                      "stall_depend_idiv" : ['d', '#id'],
-                      "stall_depend_fdiv" : ['d', '#fd'],
-                      "stall_depend_imul" : ['d', '#im'],
+                      "stall_depend_idiv" : ['H', '#ID'],
+                      "stall_depend_fdiv" : ['Q', '#FD'],
+                      "stall_depend_imul" : ['X', '#IM'],
 
-                      "stall_amo_aq" : ['a', '#aq'],
-                      "stall_amo_rl" : ['a', '#rl'],
+                      "stall_amo_aq" : ['M', '#AQ'],
+                      "stall_amo_rl" : ['K', '#RL'],
 
-                      "stall_bypass" : ['r', '#bp'],
-                      "stall_lr_aq" : ['L', '#lr'],
-                      "stall_fence" : ['r', '#fe'],
-                      "stall_remote_req" : ['r', '#rr'],
-                      "stall_remote_credit" : ['r', '#rc'],
+                      "stall_bypass" : ['Y', '#BP'],
+                      "stall_lr_aq" : ['A', '#LR'],
+                      "stall_fence" : ['F', '#FE'],
+                      "stall_remote_req" : ['R', '#RR'],
+                      "stall_remote_credit" : ['T', '#RC'],
 
-                      "stall_fdiv_busy" : ['b', '#fb'],
-                      "stall_idiv_busy" : ['b', '#ib'],
+                      "stall_fdiv_busy" : ['V', '#FB'],
+                      "stall_idiv_busy" : ['U', '#IB'],
 
-                      "stall_fcsr" : ['f', '#fc'],
-                      "stall_remote_ld" : ['f', '#ld'],
+                      "stall_fcsr" : ['S', '#FC'],
+                      "stall_remote_ld" : ['E', '#LD'],
 
-                      "stall_remote_flw_wb" : ['w', '#fl'],
+                      "stall_remote_flw_wb" : ['W', '#FL'],
 
-                      "bubble_branch_miss" : ['j', '#bm'],
-                      "bubble_jalr_miss" : ['j', '#jm'],
+                      "bubble_branch_miss" : ['B', '#BM'],
+                      "bubble_jalr_miss" : ['J', '#JM'],
 
-                      "stall_ifetch_wait" : ['i', '#if'],
-                      "bubble_icache_miss" : ['i', '#ic'],
-                      "icache_miss" : ['i', '#im']}
+                      "stall_ifetch_wait" : ['F', '#IF'],
+                      "bubble_icache_miss" : ['I', '#IC'],
+                      "icache_miss" : ['C', '#IM']}
 
 
     # List of types of integer instructions executed by the core
@@ -228,7 +244,7 @@ class Trace:
                         self.start_cycle = int(row["cycle"])
 
                 if traces[(tile_x, tile_y)]["inrange"]:
-                    traces[(tile_x, tile_y)]["instr"][int(row["cycle"])] = row["operation"]
+                    traces[(tile_x, tile_y)]["instr"][int(row["cycle"])] = [row["pc"], row["operation"]]
 
                 if row["pc"] == end_pc:
                     traces[(tile_x, tile_y)]["inrange"] = False
@@ -251,10 +267,10 @@ class Trace:
             tile_y = tile // self._TILE_X_DIM
             self.traces[(tile_x, tile_y)]["mode"] = mode
 
-    def print_trace(self):
+    def print_trace(self, asm = None):
         print("Start cycle: " + str(self.start_cycle) + " End cycle: " + str(self.end_cycle))
 
-        print("Tiles", end='\t')
+        print('Tiles', end='\t')
         for tile in self.traces:
             if self.traces[tile]["mode"]  == 'lo':
                 if tile[0] >= 10:
@@ -271,6 +287,16 @@ class Trace:
                     print(hex(tile[0]).lstrip('0x').ljust(15), end=' ')
                 else:
                     print(str(tile[0]).ljust(15), end=' ')
+            elif self.traces[tile]["mode"] == 'pc':
+                if tile[0] >= 10:
+                    print(hex(tile[0]).lstrip('0x').ljust(4), end=' ')
+                else:
+                    print(str(tile[0]).ljust(4), end=' ')
+            elif self.traces[tile]["mode"]  == 'full':
+                if tile[0] >= 10:
+                    print(hex(tile[0]).lstrip('0x').ljust(20), end=' ')
+                else:
+                    print(str(tile[0]).ljust(20), end=' ')
 
         print("\nCycles", end='\t')
         for tile in self.traces:
@@ -280,6 +306,13 @@ class Trace:
                 print(str(tile[1]).ljust(3), end=' ')
             elif self.traces[tile]["mode"] == 'hi':
                 print(str(tile[1]).ljust(15), end=' ')
+<<<<<<< HEAD
+=======
+            elif self.traces[tile]["mode"] == 'pc':
+                print(str(tile[1]).ljust(4), end=' ')
+            elif self.traces[tile]["mode"] == 'full':
+                print(str(tile[1]).ljust(20), end=' ')
+>>>>>>> master
 
         print()
 
@@ -287,28 +320,39 @@ class Trace:
             print(cycle, end='\t')
 
             for tile in self.traces:
-                self.__print_op(self.traces[tile], cycle)
+                self.__print_op(self.traces[tile], cycle, asm)
             print()
+<<<<<<< HEAD
 
 
     def __print_op(self, tile_trace, cycle):
+=======
+
+
+    def __print_op(self, tile_trace, cycle, asm = None):
+>>>>>>> master
         if tile_trace["mode"] == 'lo':
             if cycle in tile_trace["instr"]:
-                op = tile_trace["instr"][cycle]
+                op = tile_trace["instr"][cycle][1]
                 if op in self._INSTRS_LIST or op in self._FP_INSTRS_LIST:
+                    #print('\033[30;106m' + '@' + '\033[0m', end='')
                     print('@', end='')
+                    #print(Fore.BLACK + Back.CYAN + '@', end='')
                 elif op in self._STALLS_LIST:
                     print(self._STALLS_LIST[op][0], end='')
+                    #print('\033[101m' + self._STALLS_LIST[op][0] + '\033[0m', end='')
                 else:
                     print('0', end='')
             else :
                 print(' ', end='')
         elif tile_trace["mode"] == 'mid':
             if cycle in tile_trace["instr"]:
-                op = tile_trace["instr"][cycle]
+                op = tile_trace["instr"][cycle][1]
                 if op in self._INSTRS_LIST:
+                    #print(Fore.BLACK + Back.CYAN + self._INSTRS_LIST[op], end=' ')
                     print(self._INSTRS_LIST[op], end=' ')
                 elif op in self._FP_INSTRS_LIST:
+                    #print(Fore.BLACK + Back.CYAN + self._FP_INSTRS_LIST[op], end=' ')
                     print(self._FP_INSTRS_LIST[op], end=' ')
                 elif op in self._STALLS_LIST:
                     print(self._STALLS_LIST[op][1], end=' ')
@@ -319,11 +363,65 @@ class Trace:
         elif tile_trace["mode"] == 'hi':
             if cycle in tile_trace["instr"]:
                 op_len = 15
-                op = tile_trace["instr"][cycle]
+                op = tile_trace["instr"][cycle][1]
                 if len(op) < op_len:
                     print(op.ljust(op_len), end=' ')
                 else:
                     print(op[:op_len], end=' ')
             else:
                 print('               ', end=' ')
+<<<<<<< HEAD
 
+=======
+        elif tile_trace["mode"] == 'pc':
+            if cycle in tile_trace["instr"]:
+                pc = tile_trace["instr"][cycle][0]
+                pc_len = 4
+                if len(pc) < pc_len:
+                    pc = pc.ljust(pc_len)
+                else:
+                    pc = pc[(-1)*pc_len:]
+
+                if pc == 'fffc':
+                    print('##FF', end=' ')
+                else:
+                    print(pc, end=' ')
+                    #print(Fore.BLACK + Back.CYAN + pc, end=' ')
+            else :
+                print('    ', end='')
+        elif tile_trace["mode"] == 'full':
+            if cycle in tile_trace["instr"]:
+                pc = tile_trace["instr"][cycle][0]
+                op = tile_trace["instr"][cycle][1]
+                op_len = 20
+                pc_len = 4
+
+                if pc == 'fffffffc':
+                    if op in self._STALLS_LIST:
+                        ind = op.index('_')
+                        op = '##' + op[ind+1:]
+                    else:
+                        op = 'fffc ' + op
+                else:
+                    instr = asm[pc]
+                    op = pc[(-1)*pc_len:]
+                    for st in instr:
+                        op = op + ' ' + st
+
+                if len(op) < op_len:
+                    print(op.ljust(op_len), end=' ')
+                    #if op[:2] == '##':
+                    #    print(op.ljust(op_len), end=' ')
+                    #else:
+                    #    print(Fore.BLACK + Back.CYAN + op.ljust(op_len), end=' ')
+                else:
+                    print(op[:op_len], end=' ')
+                    #if op[:2] == '##':
+                    #    print(op[:op_len], end=' ')
+                    #else:
+                    #    print(Fore.BLACK + Back.CYAN + op[:op_len], end=' ')
+            else:
+                print('                    ', end='')
+
+
+>>>>>>> master

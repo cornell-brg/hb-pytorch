@@ -12,9 +12,9 @@ bsg_barrier g_barrier;
 bsg_barrier<bsg_tiles_X, bsg_tiles_Y> g_barrier;
 #endif // HB_EMUL
 
-// This is just Newlib's memcpy with __remote annotations
-__remote void* hb_memcpy(__remote void* NOALIAS aa,
-               const __remote void* NOALIAS bb,
+// This is just Newlib's memcpy with bsg_attr_remote annotations
+bsg_attr_remote void* hb_memcpy(bsg_attr_remote void* bsg_attr_noalias aa,
+               const bsg_attr_remote void* bsg_attr_noalias bb,
                size_t n) {
   #define unlikely(X) __builtin_expect (!!(X), 0)
 
@@ -24,9 +24,9 @@ __remote void* hb_memcpy(__remote void* NOALIAS aa,
     *(a - 1) = tt; \
   }
 
-  __remote char *a = (__remote char *)aa;
-  const __remote char *b = (const __remote char *)bb;
-  __remote char *end = a + n;
+  bsg_attr_remote char *a = (bsg_attr_remote char *)aa;
+  const bsg_attr_remote char *b = (const bsg_attr_remote char *)bb;
+  bsg_attr_remote char *end = a + n;
   uintptr_t msk = sizeof (long) - 1;
   if (unlikely ((((uintptr_t)a & msk) != ((uintptr_t)b & msk))
            || n < sizeof (long)))
@@ -42,9 +42,9 @@ small:
     while ((uintptr_t)a & msk)
       BODY (a, b, char);
 
-  __remote long *la = (__remote long *)a;
-  const __remote long *lb = (const __remote long *)b;
-  __remote long *lend = (__remote long *)((uintptr_t)end & ~msk);
+  bsg_attr_remote long *la = (bsg_attr_remote long *)a;
+  const bsg_attr_remote long *lb = (const bsg_attr_remote long *)b;
+  bsg_attr_remote long *lend = (bsg_attr_remote long *)((uintptr_t)end & ~msk);
 
   if (unlikely (la < (lend - 8)))
     {
@@ -74,8 +74,8 @@ small:
   while (la < lend)
     BODY (la, lb, long);
 
-  a = (__remote char *)la;
-  b = (const __remote char *)lb;
+  a = (bsg_attr_remote char *)la;
+  b = (const bsg_attr_remote char *)lb;
   if (unlikely (a < end))
     goto small;
   return aa;

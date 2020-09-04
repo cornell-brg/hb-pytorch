@@ -87,8 +87,8 @@ class HBTensorImpl {
         HB_FIX_WAW_HAZARD(sizes);
       }
 
-    __remote char* data_ptr() {
-      return (__remote char*)data;
+    bsg_attr_remote char* data_ptr() {
+      return (bsg_attr_remote char*)data;
     }
 
     IT* get_strides() {
@@ -120,7 +120,7 @@ class HBTensorImpl {
       const uint32_t n = sizeof(index_arr) / sizeof(index_arr[0]);
 
       uint32_t offset = 0;
-      UNROLL(DEFAULT_STRIDES) for(int i=0; i< n; ++i) {
+      bsg_unroll(DEFAULT_STRIDES) for(int i=0; i< n; ++i) {
         offset += index_arr[i] * strides[i];
       }
 
@@ -165,19 +165,19 @@ class HBTensorImpl {
 };
 
 template <typename DT, int32_t dims=-1>
-class HBTensor : public HBTensorImpl<__remote DT, uint32_t> {
+class HBTensor : public HBTensorImpl<bsg_attr_remote DT, uint32_t> {
   private:
     uint32_t strides[dims];
     uint32_t sizes[dims];
 
   public:
     HBTensor(hb_tensor_t* t) :
-      HBTensorImpl<__remote DT, uint32_t>(
+      HBTensorImpl<bsg_attr_remote DT, uint32_t>(
         t->N,
         (uint32_t) dims,
         strides,
         sizes,
-        (__remote DT*) ((intptr_t) t->data)
+        (bsg_attr_remote DT*) ((intptr_t) t->data)
       ) {
         //hb_assert_msg(
         //  t->dims == dims,
@@ -195,19 +195,19 @@ class HBTensor : public HBTensorImpl<__remote DT, uint32_t> {
 };
 
 template <typename DT>
-class HBTensor<DT, -1> : public HBTensorImpl<__remote DT, uint32_t> {
+class HBTensor<DT, -1> : public HBTensorImpl<bsg_attr_remote DT, uint32_t> {
   private:
     uint32_t strides[DEFAULT_STRIDES];
     uint32_t sizes[DEFAULT_STRIDES];
 
   public:
     HBTensor(hb_tensor_t* t) :
-      HBTensorImpl<__remote DT, uint32_t>(
+      HBTensorImpl<bsg_attr_remote DT, uint32_t>(
         t->N,
         t->dims,
         strides,
         sizes,
-        (__remote DT*) ((intptr_t) t->data)
+        (bsg_attr_remote DT*) ((intptr_t) t->data)
       ) {
         //hb_assert_msg(
         //  t->dims <= DEFAULT_STRIDES,

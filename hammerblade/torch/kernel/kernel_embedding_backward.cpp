@@ -21,9 +21,9 @@ extern "C" {
     int32_t padding_idx = *padding_idx_p;
     int32_t num_weights = *num_weights_p;
     int32_t numel = *numel_p;
-    __remote float* grad_weight_data = (__remote float*)grad_weight.data_ptr();
-    __remote float* grad_data = (__remote float*)grad.data_ptr();
-    __remote int32_t* index_data = (__remote int32_t*)index.data_ptr();
+    bsg_attr_remote float* grad_weight_data = (bsg_attr_remote float*)grad_weight.data_ptr();
+    bsg_attr_remote float* grad_data = (bsg_attr_remote float*)grad.data_ptr();
+    bsg_attr_remote int32_t* index_data = (bsg_attr_remote int32_t*)index.data_ptr();
 
     bsg_cuda_print_stat_kernel_start();
 
@@ -65,8 +65,8 @@ extern "C" {
         if (k >= pod_start && k < pod_end) {
           float scale = 1.0;
           // add is handled by the entire pod
-          __remote float* dst = grad_weight_data + k * grad_weight.get_strides()[0] + start * grad_weight.get_strides()[1];
-          __remote float* src = grad_data + i * grad.get_strides()[0] + start * grad.get_strides()[1];
+          bsg_attr_remote float* dst = grad_weight_data + k * grad_weight.get_strides()[0] + start * grad_weight.get_strides()[1];
+          bsg_attr_remote float* src = grad_data + i * grad.get_strides()[0] + start * grad.get_strides()[1];
           for (size_t j=start; j<end; j++) {
             *dst += *src * scale;
             dst++;
