@@ -14,12 +14,12 @@
 // Eyeriss config
 // we use filter-use scheme -- filter stays constant within a process pass
 #define IMAGES_PER_BURST 1
-#define FILTERS_PER_PROCESSING_PASS 2
-#define EYERISS_ROW 2
-#define EYERISS_COL 2
+#define FILTERS_PER_PROCESSING_PASS 3
+#define EYERISS_ROW 5
+#define EYERISS_COL 14
 
-#define DEVICE_X (EYERISS_ROW + 2)
-#define DEVICE_Y (EYERISS_COL + 2)
+#define DEVICE_X (EYERISS_COL + 2)
+#define DEVICE_Y (EYERISS_ROW + 2)
 #define PASS_PSUM (bsg_y > 0)
 #define PASS_IMAP (bsg_x < (DEVICE_X - 1) && bsg_y >0)
 #define PASS_FILTER (bsg_x < (DEVICE_X - 1))
@@ -62,7 +62,7 @@ extern "C" {
     }
 
     // psum DMA
-    if (bsg_y == 3) {
+    if (bsg_y == (DEVICE_Y - 1)) {
       psum_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,psum_buf_A));   // North x 2
     }
 
@@ -96,7 +96,7 @@ extern "C" {
     }
 
     // psum DMA
-    if (bsg_y == 3) {
+    if (bsg_y == (DEVICE_Y - 1)) {
       psum_A_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,&psum_A_f));  // North x 2
       psum_A_f_S_r = NULL;
     }
@@ -107,7 +107,7 @@ extern "C" {
     }
 
     // bottom row of PE
-    if (bsg_y == 1) {
+    if (bsg_y == (EYERISS_ROW - 1)) {
       psum_A_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&psum_A_f_N));  // South x 2
     }
 
@@ -181,8 +181,19 @@ extern "C" {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     };
 
+    char eyeriss_5x14_lenet[8][16] = {
+        {1, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+        {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0},
+        {0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
     // active config
-    char (&mc_config)[8][16] = eyeriss_2x2_debug;
+    char (&mc_config)[8][16] = eyeriss_5x14_lenet;
 
     bsg_cuda_print_stat_kernel_start();
 
@@ -261,7 +272,6 @@ extern "C" {
               // read from previous psum
               for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
                 for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
-                  // TODO -- channel
                   for (size_t col = 0; col < Wout; col++) {
                     psum_buf_remote[buf_offset] = omap(image_id+images,filter_id+filters,bsg_x-2,col);
                     buf_offset++;
@@ -366,7 +376,6 @@ extern "C" {
               size_t buf_offset = 0;
               for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
                 for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
-                  // TODO -- channel
                   for (size_t col = 0; col < Wout; col++) {
                     omap(image_id+images,filter_id+filters,bsg_x-2,col) = psum_buf[buf_offset];
                     buf_offset++;
