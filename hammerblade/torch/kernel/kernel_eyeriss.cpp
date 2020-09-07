@@ -15,9 +15,14 @@
 // we use filter-use scheme -- filter stays constant within a process pass
 #define IMAGES_PER_BURST 1
 #define FILTERS_PER_PROCESSING_PASS 2
+#define EYERISS_ROW 2
+#define EYERISS_COL 2
+
+#define DEVICE_X (EYERISS_ROW + 2)
+#define DEVICE_Y (EYERISS_COL + 2)
 #define PASS_PSUM (bsg_y > 0)
-#define PASS_IMAP (bsg_x < 3 && bsg_y >0)
-#define PASS_FILTER (bsg_x < 3)
+#define PASS_IMAP (bsg_x < (DEVICE_X - 1) && bsg_y >0)
+#define PASS_FILTER (bsg_x < (DEVICE_X - 1))
 
 extern "C" {
 
@@ -151,22 +156,33 @@ extern "C" {
     // 3 -- psum DMA   -- push to 2 to the North
     // 4 -- compute    -- push to NE & N
 
-    char eyeriss_2x2_config[4][4] = {
-        {1, 0, 4, 4},
-        {1, 2, 4, 4},
-        {0, 2, 2, 0},
-        {0, 0, 3, 3}
-    };
+    // char eyeriss_2x2_config[4][4] = {
+    //     {1, 0, 4, 4},
+    //     {1, 2, 4, 4},
+    //     {0, 2, 2, 0},
+    //     {0, 0, 3, 3}
+    // };
 
-    char debug_config[4][4] = {
-        {1, 0, 4, 4},
-        {1, 2, 4, 4},
-        {0, 2, 2, 0},
-        {0, 0, 3, 3}
+    // char debug_config[4][4] = {
+    //     {1, 0, 4, 4},
+    //     {1, 2, 4, 4},
+    //     {0, 2, 2, 0},
+    //     {0, 0, 3, 3}
+    // };
+
+    char eyeriss_2x2_debug[8][16] = {
+        {1, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {1, 2, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     };
 
     // active config
-    char (&mc_config)[4][4] = debug_config;
+    char (&mc_config)[8][16] = eyeriss_2x2_debug;
 
     bsg_cuda_print_stat_kernel_start();
 
