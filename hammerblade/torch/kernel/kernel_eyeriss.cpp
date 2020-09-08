@@ -6,14 +6,14 @@
 #include <kernel_common.hpp>
 
 // Eyeriss buffer setup
-#define FILTER_BUF_SIZE 128
-#define   IMAP_BUF_SIZE 256
-#define   PSUM_BUF_SIZE  64
+#define FILTER_BUF_SIZE  16 // 5 * 3 = 15 -> 16
+#define   IMAP_BUF_SIZE  64 // 32 *2 = 64
+#define   PSUM_BUF_SIZE 168 // 28 * 3 * 2 = 168
 #define       LOAD_PSUM   0
 
 // Eyeriss config
 // we use filter-use scheme -- filter stays constant within a process pass
-#define IMAGES_PER_BURST 1
+#define IMAGES_PER_BURST 2
 #define FILTERS_PER_PROCESSING_PASS 3
 #define EYERISS_ROW 5
 #define EYERISS_COL 14
