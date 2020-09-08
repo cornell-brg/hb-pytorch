@@ -18,6 +18,7 @@ extern "C" {
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
+    
     // Use a single tile only
     if (__bsg_id == 0) {
       // Add 1 to each element
@@ -25,6 +26,7 @@ extern "C" {
         result(i) = self(i) + 1;
       }
     }
+    
 
     //   End profiling
     bsg_cuda_print_stat_kernel_end();

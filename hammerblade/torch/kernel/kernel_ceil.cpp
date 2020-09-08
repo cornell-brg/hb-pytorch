@@ -3,6 +3,9 @@
 // 05/19/2020 Kofi Efah (kae87)
 //====================================================================
 
+// Uses hb_tiled_foreach_unroll with an unrolling factor of 6
+// Tested to be optimum for 4x4 Bladerunner
+
 #include <kernel_common.hpp>
 #include <cmath>
 
@@ -15,11 +18,10 @@ extern "C" {
     auto input = HBTensor<float>(t1_p);
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
-    hb_tiled_foreach(
+    hb_tiled_foreach_unroll<1>(res, input,
       [&](float a) {
         return ceil(a);
-      },
-      res, input);
+      });
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
 

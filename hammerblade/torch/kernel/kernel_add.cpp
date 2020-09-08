@@ -7,12 +7,17 @@
 // Authors : Lin Cheng Bandhav Veluri
 // Date    : 03/05/2020, 07/13/2020
 
+// Uses hb_tiled_foreach_unroll
+// Optimum unrolling for 4x4 Bladerunner: 8
+// Optimum unrolling for 8x16 Bladerunner: 6
+
 #include <kernel_common.hpp>
 #include <cstdint>
 
 // emulate mulh
 
-inline uint32_t mulh(uint32_t a, uint32_t b) {
+
+extern "C" {
 
   uint32_t ah = (a & 0xffff0000) >> 16;
   uint32_t al = (a & 0xffff);
@@ -24,9 +29,8 @@ inline uint32_t mulh(uint32_t a, uint32_t b) {
   uint32_t albh = al * bh + bl * ah;
   uint32_t albh_carry = 0;
 
-  if (albh < al * bh || albh < bl * ah) {
-    albh_carry = 1;
-  }
+    
+    
 
   uint32_t albh_h = albh >> 16;
   uint32_t albh_l = (albh & 0xffff) << 16;
@@ -64,11 +68,10 @@ int tensorlib_add( hb_tensor_t* t0_p, hb_tensor_t* t1_p,
 
   bsg_cuda_print_stat_kernel_start();
 
-  hb_tiled_foreach(
-    [alpha](float a, float b) {
+  hb_tiled_foreach_unroll<4>(c, a, b,
+    [&](float a, float b) {
       return a + alpha * b;
-  },
-  c, a, b);
+  });
 
   bsg_cuda_print_stat_kernel_end();
   g_barrier.sync();
