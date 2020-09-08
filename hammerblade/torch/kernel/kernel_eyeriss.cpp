@@ -24,6 +24,37 @@
 #define PASS_IMAP (bsg_x < (DEVICE_X - 1) && bsg_y >0)
 #define PASS_FILTER (bsg_x < (DEVICE_X - 1))
 
+template <size_t TRANS_SIZE>
+inline void spm_cpy(float* dst, float* src) {
+  size_t i = 0;
+  for (;i < TRANS_SIZE - 7; i += 8) {
+    register float tmp0 = *(src + 0);
+    register float tmp1 = *(src + 1);
+    register float tmp2 = *(src + 2);
+    register float tmp3 = *(src + 3);
+    register float tmp4 = *(src + 4);
+    register float tmp5 = *(src + 5);
+    register float tmp6 = *(src + 6);
+    register float tmp7 = *(src + 7);
+    asm volatile("": : :"memory");
+    *(dst + 0) = tmp0;
+    *(dst + 1) = tmp1;
+    *(dst + 2) = tmp2;
+    *(dst + 3) = tmp3;
+    *(dst + 4) = tmp4;
+    *(dst + 5) = tmp5;
+    *(dst + 6) = tmp6;
+    *(dst + 7) = tmp7;
+    src += 8;
+    dst += 8;
+  }
+  for (;i < TRANS_SIZE; i++) {
+    *dst = *src;
+    dst++;
+    src++;
+  }
+}
+
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_eyeriss(
@@ -195,6 +226,196 @@ extern "C" {
     // active config
     char (&mc_config)[8][16] = eyeriss_5x14_lenet;
 
+    // functors
+    auto filterDMA = [&]() {
+      for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
+        size_t buf_offset = 0;
+
+        //bsg_printf("in filter DMA\n");
+        // wait until remote filter buffer is ready
+        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f_E)), 0);
+        //bsg_printf(" -- buffer ready\n");
+        for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
+          // TODO -- channel
+          for (size_t col = 0; col < Wk; col++) {
+            filter_buf_remote[buf_offset] = filter(filter_id+filters,0,bsg_y,col);
+            buf_offset++;
+          }
+        }
+        asm volatile("": : :"memory");
+        *filter_f_E = 1;
+        *filter_f_E_r = 1;
+        //bsg_printf(" -- buffer copying done\n");
+
+        // std::cout << " -- end of a pass -- " << std::endl;
+      }
+    };
+
+    auto imapDMA = [&]() {
+      for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
+        for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
+          size_t buf_offset = 0;
+
+          //bsg_printf("in imap DMA\n");
+          // wait until remote imap buffer is ready
+          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_NE)), 0);
+          //bsg_printf(" -- buffer ready\n");
+          for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
+            // TODO -- channel
+            for (size_t col = 0; col < Win; col++) {
+              imap_buf_remote[buf_offset] = imap(image_id+images,0,(bsg_x-1)+(bsg_y-1),col);
+              buf_offset++;
+            }
+          }
+          asm volatile("": : :"memory");
+          *imap_f_NE = 1;
+          *imap_f_NE_r = 1;
+          //bsg_printf(" -- buffer copying done\n");
+        }
+        // std::cout << " -- end of a pass -- " << std::endl;
+      }
+    };
+
+    auto psumDMA = [&]() {
+      for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
+        for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
+          size_t buf_offset = 0;
+
+          //bsg_printf("in psum DMA\n");
+          // wait until remote psum buffer is ready
+          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
+          //bsg_printf(" -- buffer ready\n");
+
+          // brand new psum
+          if (!LOAD_PSUM) {
+            for (size_t offset = 0; offset < PSUM_BUF_SIZE; offset++) {
+              psum_buf_remote[offset] = 0;
+            }
+          } else {
+            // read from previous psum
+            for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
+              for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
+                for (size_t col = 0; col < Wout; col++) {
+                  psum_buf_remote[buf_offset] = omap(image_id+images,filter_id+filters,bsg_x-2,col);
+                  buf_offset++;
+                }
+              }
+            }
+          }
+          asm volatile("": : :"memory");
+          *psum_f_N = 1;
+          *psum_f_N_r = 1;
+          //bsg_printf(" -- buffer copying done\n");
+        }
+        // std::cout << " -- end of a pass -- " << std::endl;
+      }
+    };
+
+    auto computePE = [&]() {
+      for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
+
+        //bsg_printf("in compute PE\n");
+        // wait until filter buf is filled
+        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f)), 1);
+        //bsg_printf(" -- filter buffer filled\n");
+
+        // pass filter along
+        if (PASS_FILTER) {
+          //bsg_printf(" -- -- passing filter buffer\n");
+          // wait until remote filter buffer is ready
+          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f_E)), 0);
+          //bsg_printf(" -- -- next filter buffer ready\n");
+          spm_cpy<FILTER_BUF_SIZE>(filter_buf_remote, filter_buf);
+          asm volatile("": : :"memory");
+          *filter_f_E = 1;
+          *filter_f_E_r = 1;
+        }
+
+        for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
+
+          // wait until imap buf is filled
+          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f)), 1);
+          //bsg_printf(" -- imap buffer filled\n");
+
+          // pass imap along
+          if (PASS_IMAP) {
+            //bsg_printf(" -- -- passing imap buffer\n");
+            // wait until remote imap buffer is ready
+            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_NE)), 0);
+            //bsg_printf(" -- -- next imap buffer ready\n");
+            spm_cpy<IMAP_BUF_SIZE>(imap_buf_remote, imap_buf);
+            asm volatile("": : :"memory");
+            *imap_f_NE = 1;
+            *imap_f_NE_r = 1;
+          }
+
+          // wait until psum buf is filled
+          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f)), 1);
+          //bsg_printf(" -- psum buffer filled\n");
+
+          size_t   imap_offset = 0;
+          size_t   psum_offset = 0;
+          for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
+            size_t filter_offset = 0;
+            for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
+              // conv 1d -- just meant to be functional
+              // sliding window
+              for (size_t window = 0; window < Wout; window++) {
+                // dot product between window and filter
+                for (size_t filter_weight = 0; filter_weight < Wk; filter_weight++) {
+                  psum_buf[psum_offset + window] +=
+                    imap_buf[imap_offset + window + filter_weight] * filter_buf[filter_offset + filter_weight];
+                }
+              }
+              psum_offset += Wout;
+              filter_offset += Wk;
+            }
+            imap_offset += Win;
+          }
+
+          // signal imap free
+          asm volatile("": : :"memory");
+          *imap_f = 0;
+          *imap_f_SW_r = 0;
+
+          // pass psum along OR write back to global memory
+          if (PASS_PSUM) {
+            //bsg_printf(" -- -- passing psum buffer\n");
+            // wait until remote psum buffer is ready
+            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
+            //bsg_printf(" -- -- next psum buffer ready\n");
+            spm_cpy<PSUM_BUF_SIZE>(psum_buf_remote, psum_buf);
+            asm volatile("": : :"memory");
+            *psum_f_N = 1;
+            *psum_f_N_r = 1;
+          } else {
+            // write back to omap
+            size_t buf_offset = 0;
+            for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
+              for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
+                for (size_t col = 0; col < Wout; col++) {
+                  omap(image_id+images,filter_id+filters,bsg_x-2,col) = psum_buf[buf_offset];
+                  buf_offset++;
+                }
+              }
+            }
+          }
+
+          // signal psum and imap free
+          asm volatile("": : :"memory");
+          *psum_f = 0;
+          *psum_f_S_r = 0;
+        }
+        // signal filter free
+        asm volatile("": : :"memory");
+        *filter_f = 0;
+        *filter_f_W_r = 0;
+
+        // std::cout << " -- end of a pass -- " << std::endl;
+      }
+    };
+
+    // main loop entrance
     bsg_cuda_print_stat_kernel_start();
 
     // tile task dispatch
@@ -205,197 +426,19 @@ extern "C" {
         break;
       case 1:
         // filter DMA
-        for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
-          size_t buf_offset = 0;
-
-          //bsg_printf("in filter DMA\n");
-          // wait until remote filter buffer is ready
-          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f_E)), 0);
-          //bsg_printf(" -- buffer ready\n");
-          for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
-            // TODO -- channel
-            for (size_t col = 0; col < Wk; col++) {
-              filter_buf_remote[buf_offset] = filter(filter_id+filters,0,bsg_y,col);
-              buf_offset++;
-            }
-          }
-          asm volatile("": : :"memory");
-          *filter_f_E = 1;
-          *filter_f_E_r = 1;
-          //bsg_printf(" -- buffer copying done\n");
-
-          // std::cout << " -- end of a pass -- " << std::endl;
-        }
+        filterDMA();
         break;
       case 2:
         // imap DMA
-        for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
-          for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
-            size_t buf_offset = 0;
-
-            //bsg_printf("in imap DMA\n");
-            // wait until remote imap buffer is ready
-            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_NE)), 0);
-            //bsg_printf(" -- buffer ready\n");
-            for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
-              // TODO -- channel
-              for (size_t col = 0; col < Win; col++) {
-                imap_buf_remote[buf_offset] = imap(image_id+images,0,(bsg_x-1)+(bsg_y-1),col);
-                buf_offset++;
-              }
-            }
-            asm volatile("": : :"memory");
-            *imap_f_NE = 1;
-            *imap_f_NE_r = 1;
-            //bsg_printf(" -- buffer copying done\n");
-          }
-          // std::cout << " -- end of a pass -- " << std::endl;
-        }
+        imapDMA();
         break;
       case 3:
         // psum DMA
-        for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
-          for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
-            size_t buf_offset = 0;
-
-            //bsg_printf("in psum DMA\n");
-            // wait until remote psum buffer is ready
-            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
-            //bsg_printf(" -- buffer ready\n");
-
-            // brand new psum
-            if (!LOAD_PSUM) {
-              for (size_t offset = 0; offset < PSUM_BUF_SIZE; offset++) {
-                psum_buf_remote[offset] = 0;
-              }
-            } else {
-              // read from previous psum
-              for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
-                for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
-                  for (size_t col = 0; col < Wout; col++) {
-                    psum_buf_remote[buf_offset] = omap(image_id+images,filter_id+filters,bsg_x-2,col);
-                    buf_offset++;
-                  }
-                }
-              }
-            }
-            asm volatile("": : :"memory");
-            *psum_f_N = 1;
-            *psum_f_N_r = 1;
-            //bsg_printf(" -- buffer copying done\n");
-          }
-          // std::cout << " -- end of a pass -- " << std::endl;
-        }
+        psumDMA();
         break;
       case 4:
         // compute
-        for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
-
-          //bsg_printf("in compute PE\n");
-          // wait until filter buf is filled
-          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f)), 1);
-          //bsg_printf(" -- filter buffer filled\n");
-
-          // pass filter along
-          if (PASS_FILTER) {
-            //bsg_printf(" -- -- passing filter buffer\n");
-            // wait until remote filter buffer is ready
-            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f_E)), 0);
-            //bsg_printf(" -- -- next filter buffer ready\n");
-            for (size_t offset = 0; offset < FILTER_BUF_SIZE; offset++) {
-              filter_buf_remote[offset] = filter_buf[offset];
-            }
-            asm volatile("": : :"memory");
-            *filter_f_E = 1;
-            *filter_f_E_r = 1;
-          }
-
-          for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
-
-            // wait until imap buf is filled
-            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f)), 1);
-            //bsg_printf(" -- imap buffer filled\n");
-
-            // pass imap along
-            if (PASS_IMAP) {
-              //bsg_printf(" -- -- passing imap buffer\n");
-              // wait until remote imap buffer is ready
-              bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_NE)), 0);
-              //bsg_printf(" -- -- next imap buffer ready\n");
-              for (size_t offset = 0; offset < IMAP_BUF_SIZE; offset++) {
-                imap_buf_remote[offset] = imap_buf[offset];
-              }
-              asm volatile("": : :"memory");
-              *imap_f_NE = 1;
-              *imap_f_NE_r = 1;
-            }
-
-            // wait until psum buf is filled
-            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f)), 1);
-            //bsg_printf(" -- psum buffer filled\n");
-
-            size_t   imap_offset = 0;
-            size_t   psum_offset = 0;
-            for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
-              size_t filter_offset = 0;
-              for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
-                // conv 1d -- just meant to be functional
-                // sliding window
-                for (size_t window = 0; window < Wout; window++) {
-                  // dot product between window and filter
-                  for (size_t filter_weight = 0; filter_weight < Wk; filter_weight++) {
-                    psum_buf[psum_offset + window] +=
-                      imap_buf[imap_offset + window + filter_weight] * filter_buf[filter_offset + filter_weight];
-                  }
-                }
-                psum_offset += Wout;
-                filter_offset += Wk;
-              }
-              imap_offset += Win;
-            }
-
-            // signal imap free
-            asm volatile("": : :"memory");
-            *imap_f = 0;
-            *imap_f_SW_r = 0;
-
-            // pass psum along OR write back to global memory
-            if (PASS_PSUM) {
-              //bsg_printf(" -- -- passing psum buffer\n");
-              // wait until remote psum buffer is ready
-              bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
-              //bsg_printf(" -- -- next psum buffer ready\n");
-              for (size_t offset = 0; offset < PSUM_BUF_SIZE; offset++) {
-                psum_buf_remote[offset] = psum_buf[offset];
-              }
-              asm volatile("": : :"memory");
-              *psum_f_N = 1;
-              *psum_f_N_r = 1;
-            } else {
-              // write back to omap
-              size_t buf_offset = 0;
-              for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
-                for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
-                  for (size_t col = 0; col < Wout; col++) {
-                    omap(image_id+images,filter_id+filters,bsg_x-2,col) = psum_buf[buf_offset];
-                    buf_offset++;
-                  }
-                }
-              }
-            }
-
-            // signal psum and imap free
-            asm volatile("": : :"memory");
-            *psum_f = 0;
-            *psum_f_S_r = 0;
-          }
-          // signal filter free
-          asm volatile("": : :"memory");
-          *filter_f = 0;
-          *filter_f_W_r = 0;
-
-          // std::cout << " -- end of a pass -- " << std::endl;
-        }
+        computePE();
         break;
       default:
         hb_assert_msg(false, "invalid tile task config");
