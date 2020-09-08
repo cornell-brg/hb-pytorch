@@ -51,62 +51,66 @@ extern "C" {
       for (int j = 0; j < m2_num_blk_per_col; j += BSG_TILE_GROUP_X_DIM) {
         int rr = i + __bsg_y;
         int rc = j + __bsg_x;
-        int res_dim_y = rr == m1_num_blk_per_row - 1 ? m1_last_blk_dim_y : BLOCK_DIM;
-        int res_dim_x = rc == m2_num_blk_per_col - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
-        int partial_block = (res_dim_y != BLOCK_DIM) || (res_dim_x != BLOCK_DIM);
 
-        // initialize scratchpad result (init to 0's)
-        // memset(sp_result, 0, res_dim_y * res_dim_x * sizeof(float));
-        for (int sp = 0; sp < BLOCK_DIM * BLOCK_DIM; sp += 16) {
-            sp_result[sp +  0] = 0;
-            sp_result[sp +  1] = 0;
-            sp_result[sp +  2] = 0;
-            sp_result[sp +  3] = 0;
-            sp_result[sp +  4] = 0;
-            sp_result[sp +  5] = 0;
-            sp_result[sp +  6] = 0;
-            sp_result[sp +  7] = 0;
-            sp_result[sp +  8] = 0;
-            sp_result[sp +  9] = 0;
-            sp_result[sp + 10] = 0;
-            sp_result[sp + 11] = 0;
-            sp_result[sp + 12] = 0;
-            sp_result[sp + 13] = 0;
-            sp_result[sp + 14] = 0;
-            sp_result[sp + 15] = 0;
-        }
+        if ((rr < m1_num_blk_per_row) && (rc < m2_num_blk_per_col)) {
 
-        // process mat1 and mat2 for this result block
-        // only care about blocks of mat1 in row rr
-        // and blocks of mat2 in col rc
-        for (int mat1x = 0, mat2y = 0; mat1x < m1_num_blk_per_col && mat2y < m2_num_blk_per_row; mat1x++, mat2y++) {
-            // calculate current block dimensions
-            int mid_dim = mat1x == m1_num_blk_per_col - 1 ? m1_last_blk_dim_x : BLOCK_DIM;
-            partial_block = partial_block || (mid_dim != BLOCK_DIM);
+          int res_dim_y = rr == m1_num_blk_per_row - 1 ? m1_last_blk_dim_y : BLOCK_DIM;
+          int res_dim_x = rc == m2_num_blk_per_col - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
+          int partial_block = (res_dim_y != BLOCK_DIM) || (res_dim_x != BLOCK_DIM);
 
-            // load mat1 and mat2 into scratchpad
+          // initialize scratchpad result (init to 0's)
+          // memset(sp_result, 0, res_dim_y * res_dim_x * sizeof(float));
+          for (int sp = 0; sp < BLOCK_DIM * BLOCK_DIM; sp += 16) {
+              sp_result[sp +  0] = 0;
+              sp_result[sp +  1] = 0;
+              sp_result[sp +  2] = 0;
+              sp_result[sp +  3] = 0;
+              sp_result[sp +  4] = 0;
+              sp_result[sp +  5] = 0;
+              sp_result[sp +  6] = 0;
+              sp_result[sp +  7] = 0;
+              sp_result[sp +  8] = 0;
+              sp_result[sp +  9] = 0;
+              sp_result[sp + 10] = 0;
+              sp_result[sp + 11] = 0;
+              sp_result[sp + 12] = 0;
+              sp_result[sp + 13] = 0;
+              sp_result[sp + 14] = 0;
+              sp_result[sp + 15] = 0;
+          }
 
-            // unrolled version
-            if (partial_block) { // general case
-                dram_to_sp(sp_mat1, mat1, res_dim_y, mid_dim, rr, mat1x);
-                dram_to_sp(sp_mat2, mat2, mid_dim, res_dim_x, mat2y, rc);
-                compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
-            } else {
-                dram_to_sp_simple(sp_mat1, mat1, rr, mat1x);
-                dram_to_sp_simple(sp_mat2, mat2, mat2y, rc);
-                compute_simple(sp_result, sp_mat1, sp_mat2);
-            }
-            // end: unrolled version
+          // process mat1 and mat2 for this result block
+          // only care about blocks of mat1 in row rr
+          // and blocks of mat2 in col rc
+          for (int mat1x = 0, mat2y = 0; mat1x < m1_num_blk_per_col && mat2y < m2_num_blk_per_row; mat1x++, mat2y++) {
+              // calculate current block dimensions
+              int mid_dim = mat1x == m1_num_blk_per_col - 1 ? m1_last_blk_dim_x : BLOCK_DIM;
+              partial_block = partial_block || (mid_dim != BLOCK_DIM);
 
-        }
+              // load mat1 and mat2 into scratchpad
 
-        // copy this block back into DRAM
-        for (int i = 0; i < res_dim_y; i++) {
-            for (int j = 0; j < res_dim_x; j++) {
-                // unrolled version
-                result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * res_dim_x + j];
-                // end: unrolled version
-            }
+              // unrolled version
+              if (partial_block) { // general case
+                  dram_to_sp(sp_mat1, mat1, res_dim_y, mid_dim, rr, mat1x);
+                  dram_to_sp(sp_mat2, mat2, mid_dim, res_dim_x, mat2y, rc);
+                  compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
+              } else {
+                  dram_to_sp_simple(sp_mat1, mat1, rr, mat1x);
+                  dram_to_sp_simple(sp_mat2, mat2, mat2y, rc);
+                  compute_simple(sp_result, sp_mat1, sp_mat2);
+              }
+              // end: unrolled version
+
+          }
+
+          // copy this block back into DRAM
+          for (int i = 0; i < res_dim_y; i++) {
+              for (int j = 0; j < res_dim_x; j++) {
+                  // unrolled version
+                  result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * res_dim_x + j];
+                  // end: unrolled version
+              }
+          }
         }
       }
     }
