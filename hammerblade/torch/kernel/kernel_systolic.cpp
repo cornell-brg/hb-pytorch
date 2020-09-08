@@ -68,18 +68,22 @@ inline void gemm_main_loop(HBTensor<float, 2> mat1,
         int partial_block = (res_dim_y != BLOCK_DIM) || (res_dim_x != BLOCK_DIM);
 
         // init code for each output block
-        tile_init();
+        if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
+          tile_init();
+        }
 
         for (int mat1x = 0; mat1x < m1_num_blk_per_row; mat1x++) {
             int mid_dim = mat1x == m1_num_blk_per_row - 1 ? m1_last_blk_dim_x : BLOCK_DIM;
             partial_block = partial_block || (mid_dim != BLOCK_DIM);
 
             // main task
-            tile_task(rr, rc, mat1x, res_dim_x, res_dim_y, mid_dim, partial_block);
+            tile_task(rr, rc, m1_num_blk_per_col, m2_num_blk_per_row, mat1x, res_dim_x, res_dim_y, mid_dim, partial_block);
         }
 
         // finishing up code for each output block
-        tile_finish(rr, rc, res_dim_x, res_dim_y);
+        if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
+          tile_finish(rr, rc, res_dim_x, res_dim_y);
+        }
       }
     }
 }
@@ -152,7 +156,7 @@ extern "C" {
 
     auto tile_init = [&] { reset_sp(sp_result); };
 
-    auto tile_task = [&] (int rr, int rc, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
+    auto tile_task = [&] (int rr, int rc, int m1_num_blk_per_col, int m2_num_blk_per_row, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
 
                           // wait until buffer is loaded
                           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f)), 1);
@@ -160,7 +164,9 @@ extern "C" {
                           if (__bsg_y < SYSTOLIC_Y_DIM) {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
                             // copy mat2 to S
-                            spcpy(sp_mat2_remote, sp_mat2);
+                            if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
+                              spcpy(sp_mat2_remote, sp_mat2);
+                            }
                             asm volatile("": : :"memory");
                             *mat2_f_S   = 1;
                             *mat2_f_S_r = 1;
@@ -173,17 +179,21 @@ extern "C" {
                           if (__bsg_x < SYSTOLIC_X_DIM) {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
                             // copy mat1 to E
-                            spcpy(sp_mat1_remote, sp_mat1);
+                            if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
+                              spcpy(sp_mat1_remote, sp_mat1);
+                            }
                             asm volatile("": : :"memory");
                             *mat1_f_E   = 1;
                             *mat1_f_E_r = 1;
                           }
 
-                          // do compute
-                          if (partial_block) {
-                            compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
-                          } else {
-                            compute_simple(sp_result, sp_mat1, sp_mat2);
+                          if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
+                            // do compute
+                            if (partial_block) {
+                              compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
+                            } else {
+                              compute_simple(sp_result, sp_mat1, sp_mat2);
+                            }
                           }
 
                           // flag that we are done with the buffer
@@ -223,14 +233,16 @@ extern "C" {
                           }
                       };
 
-    auto col_dma_task = [&] (int rr, int rc, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
+    auto col_dma_task = [&] (int rr, int rc, int m1_num_blk_per_col, int m2_num_blk_per_row, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
 
                           // wait until buffer is ready
                           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
-                          if (partial_block) {
-                            dram_to_sp(sp_mat2_remote, mat2, mid_dim, res_dim_x, mat1x, rc);
-                          } else {
-                            dram_to_sp_simple(sp_mat2_remote, mat2, mat1x, rc);
+                          if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
+                            if (partial_block) {
+                              dram_to_sp(sp_mat2_remote, mat2, mid_dim, res_dim_x, mat1x, rc);
+                            } else {
+                              dram_to_sp_simple(sp_mat2_remote, mat2, mat1x, rc);
+                            }
                           }
                           asm volatile("": : :"memory");
                           *mat2_f_S   = 1;
@@ -250,14 +262,16 @@ extern "C" {
                           }
                       };
 
-    auto row_dma_task = [&] (int rr, int rc, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
+    auto row_dma_task = [&] (int rr, int rc, int m1_num_blk_per_col, int m2_num_blk_per_row, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
 
                           // wait until buffer is ready
                           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
-                          if (partial_block) {
-                            dram_to_sp(sp_mat1_remote, mat1, res_dim_y, mid_dim, rr, mat1x);
-                          } else {
-                            dram_to_sp_simple(sp_mat1_remote, mat1, rr, mat1x);
+                          if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
+                            if (partial_block) {
+                              dram_to_sp(sp_mat1_remote, mat1, res_dim_y, mid_dim, rr, mat1x);
+                            } else {
+                              dram_to_sp_simple(sp_mat1_remote, mat1, rr, mat1x);
+                            }
                           }
                           asm volatile("": : :"memory");
                           *mat1_f_E   = 1;
