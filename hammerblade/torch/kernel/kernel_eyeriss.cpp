@@ -26,32 +26,57 @@
 
 template <size_t TRANS_SIZE>
 inline void spm_cpy(float* dst, float* src) {
-  size_t i = 0;
-  for (;i < TRANS_SIZE - 7; i += 8) {
-    register float tmp0 = *(src + 0);
-    register float tmp1 = *(src + 1);
-    register float tmp2 = *(src + 2);
-    register float tmp3 = *(src + 3);
-    register float tmp4 = *(src + 4);
-    register float tmp5 = *(src + 5);
-    register float tmp6 = *(src + 6);
-    register float tmp7 = *(src + 7);
-    asm volatile("": : :"memory");
-    *(dst + 0) = tmp0;
-    *(dst + 1) = tmp1;
-    *(dst + 2) = tmp2;
-    *(dst + 3) = tmp3;
-    *(dst + 4) = tmp4;
-    *(dst + 5) = tmp5;
-    *(dst + 6) = tmp6;
-    *(dst + 7) = tmp7;
-    src += 8;
-    dst += 8;
-  }
-  for (;i < TRANS_SIZE; i++) {
-    *dst = *src;
-    dst++;
-    src++;
+  // compile time branch
+  if (TRANS_SIZE % 8 == 0) {
+    for (size_t i = 0; i < TRANS_SIZE; i += 8) {
+      register float tmp0 = *(src + 0);
+      register float tmp1 = *(src + 1);
+      register float tmp2 = *(src + 2);
+      register float tmp3 = *(src + 3);
+      register float tmp4 = *(src + 4);
+      register float tmp5 = *(src + 5);
+      register float tmp6 = *(src + 6);
+      register float tmp7 = *(src + 7);
+      asm volatile("": : :"memory");
+      *(dst + 0) = tmp0;
+      *(dst + 1) = tmp1;
+      *(dst + 2) = tmp2;
+      *(dst + 3) = tmp3;
+      *(dst + 4) = tmp4;
+      *(dst + 5) = tmp5;
+      *(dst + 6) = tmp6;
+      *(dst + 7) = tmp7;
+      src += 8;
+      dst += 8;
+    }
+  } else {
+    size_t i = 0;
+    for (;i < TRANS_SIZE - 7; i += 8) {
+      register float tmp0 = *(src + 0);
+      register float tmp1 = *(src + 1);
+      register float tmp2 = *(src + 2);
+      register float tmp3 = *(src + 3);
+      register float tmp4 = *(src + 4);
+      register float tmp5 = *(src + 5);
+      register float tmp6 = *(src + 6);
+      register float tmp7 = *(src + 7);
+      asm volatile("": : :"memory");
+      *(dst + 0) = tmp0;
+      *(dst + 1) = tmp1;
+      *(dst + 2) = tmp2;
+      *(dst + 3) = tmp3;
+      *(dst + 4) = tmp4;
+      *(dst + 5) = tmp5;
+      *(dst + 6) = tmp6;
+      *(dst + 7) = tmp7;
+      src += 8;
+      dst += 8;
+    }
+    for (;i < TRANS_SIZE; i++) {
+      *dst = *src;
+      dst++;
+      src++;
+    }
   }
 }
 
@@ -314,14 +339,29 @@ extern "C" {
     auto computePE = [&]() {
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
 
-        //bsg_printf("in compute PE\n");
         // wait until filter buf is filled
         bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f)), 1);
-        //bsg_printf(" -- filter buffer filled\n");
+
+        // load filters into registers
+        // we are doing 3 filters per pass, and the filter has 5 weights each
+        register float filter_w_0_0 = filter_buf[0];
+        register float filter_w_0_1 = filter_buf[1];
+        register float filter_w_0_2 = filter_buf[2];
+        register float filter_w_0_3 = filter_buf[3];
+        register float filter_w_0_4 = filter_buf[4];
+        register float filter_w_1_0 = filter_buf[5];
+        register float filter_w_1_1 = filter_buf[6];
+        register float filter_w_1_2 = filter_buf[7];
+        register float filter_w_1_3 = filter_buf[8];
+        register float filter_w_1_4 = filter_buf[9];
+        register float filter_w_2_0 = filter_buf[10];
+        register float filter_w_2_1 = filter_buf[11];
+        register float filter_w_2_2 = filter_buf[12];
+        register float filter_w_2_3 = filter_buf[13];
+        register float filter_w_2_4 = filter_buf[14];
 
         // pass filter along
         if (PASS_FILTER) {
-          //bsg_printf(" -- -- passing filter buffer\n");
           // wait until remote filter buffer is ready
           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f_E)), 0);
           //bsg_printf(" -- -- next filter buffer ready\n");
@@ -335,14 +375,11 @@ extern "C" {
 
           // wait until imap buf is filled
           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f)), 1);
-          //bsg_printf(" -- imap buffer filled\n");
 
           // pass imap along
           if (PASS_IMAP) {
-            //bsg_printf(" -- -- passing imap buffer\n");
             // wait until remote imap buffer is ready
             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_NE)), 0);
-            //bsg_printf(" -- -- next imap buffer ready\n");
             spm_cpy<IMAP_BUF_SIZE>(imap_buf_remote, imap_buf);
             asm volatile("": : :"memory");
             *imap_f_NE = 1;
@@ -356,6 +393,7 @@ extern "C" {
           size_t   imap_offset = 0;
           size_t   psum_offset = 0;
           for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
+            /*
             size_t filter_offset = 0;
             for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
               // conv 1d -- just meant to be functional
@@ -370,6 +408,39 @@ extern "C" {
               psum_offset += Wout;
               filter_offset += Wk;
             }
+            */
+            for (size_t window = 0; window < Wout; window++) {
+              // load psum for (this window, 3 filters)
+              register float psum_0 = psum_buf[psum_offset + window + 0];
+              register float psum_1 = psum_buf[psum_offset + window + 28]; // hacky -- we know it's 28 at compile time
+              register float psum_2 = psum_buf[psum_offset + window + 56];
+              register float imap_0 = imap_buf[imap_offset + window + 0];
+              register float imap_1 = imap_buf[imap_offset + window + 1];
+              register float imap_2 = imap_buf[imap_offset + window + 2];
+              register float imap_3 = imap_buf[imap_offset + window + 3];
+              register float imap_4 = imap_buf[imap_offset + window + 4];
+              // fmadd
+              psum_0 += imap_0 * filter_w_0_0;
+              psum_1 += imap_0 * filter_w_1_0;
+              psum_2 += imap_0 * filter_w_2_0;
+              psum_0 += imap_1 * filter_w_0_1;
+              psum_1 += imap_1 * filter_w_1_1;
+              psum_2 += imap_1 * filter_w_2_1;
+              psum_0 += imap_2 * filter_w_0_2;
+              psum_1 += imap_2 * filter_w_1_2;
+              psum_2 += imap_2 * filter_w_2_2;
+              psum_0 += imap_3 * filter_w_0_3;
+              psum_1 += imap_3 * filter_w_1_3;
+              psum_2 += imap_3 * filter_w_2_3;
+              psum_0 += imap_4 * filter_w_0_4;
+              psum_1 += imap_4 * filter_w_1_4;
+              psum_2 += imap_4 * filter_w_2_4;
+              // write back
+              psum_buf[psum_offset + window + 0] = psum_0;
+              psum_buf[psum_offset + window + 28] = psum_1;
+              psum_buf[psum_offset + window + 56] = psum_2;
+            }
+            psum_offset += Wout * FILTERS_PER_PROCESSING_PASS;
             imap_offset += Win;
           }
 
