@@ -24,11 +24,10 @@ int tensorlib_tanh( hb_tensor_t* t0_p, hb_tensor_t* t1_p)
   auto input = HBTensor<float>(t1_p);
 
   bsg_cuda_print_stat_kernel_start();
-  hb_tiled_foreach(
+  hb_tiled_foreach( res, input,
     [](float a) {
       return tanh(a);
-  },
-  res, input);
+  });
 
   bsg_cuda_print_stat_kernel_end();
   return 0;

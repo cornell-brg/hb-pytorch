@@ -27,10 +27,12 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach_unroll<1>(c, a, b,
+    if (__bsg_id < 8) {
+    hb_tiled_foreach_unroll<4>(c, a, b,
       [&](float a, float b) {
         return a + alpha * b;
     });
+    }
     
 
     bsg_cuda_print_stat_kernel_end();
