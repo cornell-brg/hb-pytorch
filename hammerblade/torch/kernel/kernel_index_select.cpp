@@ -15,9 +15,9 @@ extern "C" {
     HBTensor<float> self(self_p);
     HBTensor<float> result(result_p);
     HBTensor<int32_t> index(index_p);
-    __remote float* self_data = (__remote float*)self.data_ptr();
-    __remote float* result_data = (__remote float*)result.data_ptr();
-    __remote int32_t* index_data = (__remote int32_t*)index.data_ptr();
+    bsg_attr_remote float* self_data = (bsg_attr_remote float*)self.data_ptr();
+    bsg_attr_remote float* result_data = (bsg_attr_remote float*)result.data_ptr();
+    bsg_attr_remote int32_t* index_data = (bsg_attr_remote int32_t*)index.data_ptr();
 
     bsg_cuda_print_stat_kernel_start();
 

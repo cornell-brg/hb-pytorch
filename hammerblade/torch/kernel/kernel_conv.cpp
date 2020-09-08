@@ -52,7 +52,7 @@ static int convolution_forward(
                     [&](size_t co, size_t tg_size_co) {
         // Load the filter w(co, ci, :, :) to dmem
         uint32_t w_offset = w.offset(co, ci, 0, 0);
-        auto w_ptr = (__remote float*) w.data_ptr();
+        auto w_ptr = (bsg_attr_remote float*) w.data_ptr();
         load_weights(W_local, w_ptr, w_offset, Kh, Kw);
 
         hb_blocked_for(tg_size_co, Hout, [&](size_t yh, size_t tg_size_yh) {

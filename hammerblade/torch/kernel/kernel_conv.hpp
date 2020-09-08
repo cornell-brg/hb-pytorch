@@ -13,7 +13,7 @@ const uint32_t KhBufSize = 5;
 const uint32_t KwBufSize = 5;
 
 inline void load_weights(float wl[KhBufSize][KwBufSize],
-                         __remote float* NOALIAS wr,
+                         bsg_attr_remote float* bsg_attr_noalias wr,
                          uint32_t offset, uint32_t Kh, uint32_t Kw) {
   for(int i = 0; i < Kh; ++i) {
     for(int j = 0; j < Kw; ++j) {
@@ -125,7 +125,7 @@ int convolution_forward_template(
                     [&](size_t co, size_t tg_size_co) {
         // Load the filter w(co, ci, :, :) to dmem
         uint32_t w_offset = w.offset(co, ci, 0, 0);
-        auto w_ptr = (__remote float*) w.data_ptr();
+        auto w_ptr = (bsg_attr_remote float*) w.data_ptr();
         load_weights(W_local, w_ptr, w_offset, Kh, Kw);
 
         hb_blocked_for(tg_size_co, Hout, [&](size_t yh, size_t tg_size_yh) {
