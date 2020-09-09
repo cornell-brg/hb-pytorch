@@ -253,26 +253,26 @@ extern "C" {
 
     // functors
     auto filterDMA = [&]() {
-      for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
-        size_t buf_offset = 0;
 
-        //bsg_printf("in filter DMA\n");
+      float* src_base = (float*)filter.data_ptr();
+      uint32_t* src_strides = filter.get_strides();
+      src_base += 0 * src_strides[1] + bsg_y * src_strides[2];
+
+      for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
+
+        size_t buf_offset = 0;
         // wait until remote filter buffer is ready
         bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f_E)), 0);
-        //bsg_printf(" -- buffer ready\n");
         for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
-          // TODO -- channel
           for (size_t col = 0; col < Wk; col++) {
-            filter_buf_remote[buf_offset] = filter(filter_id+filters,0,bsg_y,col);
+            filter_buf_remote[buf_offset] = *(src_base + col); // src_strides[3] has to be 1 filter(filter_id+filters,0,bsg_y,col);
             buf_offset++;
           }
+          src_base += src_strides[0];
         }
         asm volatile("": : :"memory");
         *filter_f_E = 1;
         *filter_f_E_r = 1;
-        //bsg_printf(" -- buffer copying done\n");
-
-        // std::cout << " -- end of a pass -- " << std::endl;
       }
     };
 
@@ -393,7 +393,7 @@ extern "C" {
           size_t   imap_offset = 0;
           size_t   psum_offset = 0;
           for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
-            /*
+            /* This is the general functional code
             size_t filter_offset = 0;
             for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
               // conv 1d -- just meant to be functional
