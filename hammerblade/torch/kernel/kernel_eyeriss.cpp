@@ -310,14 +310,23 @@ extern "C" {
           for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
             for (size_t col = 0; col < Win; col += 8) {
               // imap_buf_remote[buf_offset] = imap(image_id+images,0,(bsg_x-1)+(bsg_y-1),col);
-              imap_buf_remote[buf_offset + 0] = *(src_ptr + col + 0);
-              imap_buf_remote[buf_offset + 1] = *(src_ptr + col + 1);
-              imap_buf_remote[buf_offset + 2] = *(src_ptr + col + 2);
-              imap_buf_remote[buf_offset + 3] = *(src_ptr + col + 3);
-              imap_buf_remote[buf_offset + 4] = *(src_ptr + col + 4);
-              imap_buf_remote[buf_offset + 5] = *(src_ptr + col + 5);
-              imap_buf_remote[buf_offset + 6] = *(src_ptr + col + 6);
-              imap_buf_remote[buf_offset + 7] = *(src_ptr + col + 7);
+              register float tmp0 = *(src_ptr + col + 0);
+              register float tmp1 = *(src_ptr + col + 1);
+              register float tmp2 = *(src_ptr + col + 2);
+              register float tmp3 = *(src_ptr + col + 3);
+              register float tmp4 = *(src_ptr + col + 4);
+              register float tmp5 = *(src_ptr + col + 5);
+              register float tmp6 = *(src_ptr + col + 6);
+              register float tmp7 = *(src_ptr + col + 7);
+              asm volatile("": : :"memory");
+              imap_buf_remote[buf_offset + 0] = tmp0;
+              imap_buf_remote[buf_offset + 1] = tmp1;
+              imap_buf_remote[buf_offset + 2] = tmp2;
+              imap_buf_remote[buf_offset + 3] = tmp3;
+              imap_buf_remote[buf_offset + 4] = tmp4;
+              imap_buf_remote[buf_offset + 5] = tmp5;
+              imap_buf_remote[buf_offset + 6] = tmp6;
+              imap_buf_remote[buf_offset + 7] = tmp7;
               buf_offset += 8;
             }
             src_ptr += src_strides[0];
@@ -394,6 +403,7 @@ extern "C" {
         register float filter_w_2_2 = filter_buf[12];
         register float filter_w_2_3 = filter_buf[13];
         register float filter_w_2_4 = filter_buf[14];
+        asm volatile("": : :"memory");
 
         // pass filter along
         if (PASS_FILTER) {
@@ -444,36 +454,120 @@ extern "C" {
               filter_offset += Wk;
             }
             */
-            for (size_t window = 0; window < Wout; window++) {
+            // unroll the inner loop by 4, so we can simulate the ring buffer
+            for (size_t window = 0; window < Wout; window += 4) {
               // load psum for (this window, 3 filters)
-              register float psum_0 = psum_buf[psum_offset + window + 0];
-              register float psum_1 = psum_buf[psum_offset + window + 28]; // hacky -- we know it's 28 at compile time
-              register float psum_2 = psum_buf[psum_offset + window + 56];
               register float imap_0 = imap_buf[imap_offset + window + 0];
               register float imap_1 = imap_buf[imap_offset + window + 1];
               register float imap_2 = imap_buf[imap_offset + window + 2];
               register float imap_3 = imap_buf[imap_offset + window + 3];
               register float imap_4 = imap_buf[imap_offset + window + 4];
-              // fmadd
-              psum_0 += imap_0 * filter_w_0_0;
-              psum_1 += imap_0 * filter_w_1_0;
-              psum_2 += imap_0 * filter_w_2_0;
-              psum_0 += imap_1 * filter_w_0_1;
-              psum_1 += imap_1 * filter_w_1_1;
-              psum_2 += imap_1 * filter_w_2_1;
-              psum_0 += imap_2 * filter_w_0_2;
-              psum_1 += imap_2 * filter_w_1_2;
-              psum_2 += imap_2 * filter_w_2_2;
-              psum_0 += imap_3 * filter_w_0_3;
-              psum_1 += imap_3 * filter_w_1_3;
-              psum_2 += imap_3 * filter_w_2_3;
-              psum_0 += imap_4 * filter_w_0_4;
-              psum_1 += imap_4 * filter_w_1_4;
-              psum_2 += imap_4 * filter_w_2_4;
+              register float imap_5 = imap_buf[imap_offset + window + 5];
+              register float imap_6 = imap_buf[imap_offset + window + 6];
+              register float imap_7 = imap_buf[imap_offset + window + 7];
+
+              register float psum_00 = psum_buf[psum_offset + window + 0];
+              register float psum_10 = psum_buf[psum_offset + window + 28]; // hacky -- we know it's 28 at compile time
+              register float psum_20 = psum_buf[psum_offset + window + 56];
+
+              register float psum_01 = psum_buf[psum_offset + window + 1];
+              register float psum_11 = psum_buf[psum_offset + window + 29];
+              register float psum_21 = psum_buf[psum_offset + window + 57];
+              asm volatile("": : :"memory");
+
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_00) : "f"(imap_0), "f"(filter_w_0_0));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_10) : "f"(imap_0), "f"(filter_w_1_0));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_20) : "f"(imap_0), "f"(filter_w_2_0));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_00) : "f"(imap_1), "f"(filter_w_0_1));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_10) : "f"(imap_1), "f"(filter_w_1_1));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_20) : "f"(imap_1), "f"(filter_w_2_1));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_00) : "f"(imap_2), "f"(filter_w_0_2));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_10) : "f"(imap_2), "f"(filter_w_1_2));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_20) : "f"(imap_2), "f"(filter_w_2_2));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_00) : "f"(imap_3), "f"(filter_w_0_3));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_10) : "f"(imap_3), "f"(filter_w_1_3));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_20) : "f"(imap_3), "f"(filter_w_2_3));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_00) : "f"(imap_4), "f"(filter_w_0_4));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_10) : "f"(imap_4), "f"(filter_w_1_4));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_20) : "f"(imap_4), "f"(filter_w_2_4));
+
               // write back
-              psum_buf[psum_offset + window + 0] = psum_0;
-              psum_buf[psum_offset + window + 28] = psum_1;
-              psum_buf[psum_offset + window + 56] = psum_2;
+              psum_buf[psum_offset + window +  0] = psum_00;
+              psum_buf[psum_offset + window + 28] = psum_10;
+              psum_buf[psum_offset + window + 56] = psum_20;
+
+              register float psum_02 = psum_buf[psum_offset + window + 2];
+              register float psum_12 = psum_buf[psum_offset + window + 30];
+              register float psum_22 = psum_buf[psum_offset + window + 58];
+              asm volatile("": : :"memory");
+
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_01) : "f"(imap_1), "f"(filter_w_0_0));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_11) : "f"(imap_1), "f"(filter_w_1_0));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_21) : "f"(imap_1), "f"(filter_w_2_0));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_01) : "f"(imap_2), "f"(filter_w_0_1));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_11) : "f"(imap_2), "f"(filter_w_1_1));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_21) : "f"(imap_2), "f"(filter_w_2_1));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_01) : "f"(imap_3), "f"(filter_w_0_2));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_11) : "f"(imap_3), "f"(filter_w_1_2));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_21) : "f"(imap_3), "f"(filter_w_2_2));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_01) : "f"(imap_4), "f"(filter_w_0_3));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_11) : "f"(imap_4), "f"(filter_w_1_3));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_21) : "f"(imap_4), "f"(filter_w_2_3));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_01) : "f"(imap_5), "f"(filter_w_0_4));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_11) : "f"(imap_5), "f"(filter_w_1_4));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_21) : "f"(imap_5), "f"(filter_w_2_4));
+
+              // write back
+              psum_buf[psum_offset + window +  1] = psum_01;
+              psum_buf[psum_offset + window + 29] = psum_11;
+              psum_buf[psum_offset + window + 57] = psum_21;
+
+              register float psum_03 = psum_buf[psum_offset + window + 3];
+              register float psum_13 = psum_buf[psum_offset + window + 31];
+              register float psum_23 = psum_buf[psum_offset + window + 59];
+              asm volatile("": : :"memory");
+
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_02) : "f"(imap_2), "f"(filter_w_0_0));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_12) : "f"(imap_2), "f"(filter_w_1_0));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_22) : "f"(imap_2), "f"(filter_w_2_0));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_02) : "f"(imap_3), "f"(filter_w_0_1));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_12) : "f"(imap_3), "f"(filter_w_1_1));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_22) : "f"(imap_3), "f"(filter_w_2_1));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_02) : "f"(imap_4), "f"(filter_w_0_2));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_12) : "f"(imap_4), "f"(filter_w_1_2));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_22) : "f"(imap_4), "f"(filter_w_2_2));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_02) : "f"(imap_5), "f"(filter_w_0_3));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_12) : "f"(imap_5), "f"(filter_w_1_3));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_22) : "f"(imap_5), "f"(filter_w_2_3));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_02) : "f"(imap_6), "f"(filter_w_0_4));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_12) : "f"(imap_6), "f"(filter_w_1_4));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_22) : "f"(imap_6), "f"(filter_w_2_4));
+
+              // write back
+              psum_buf[psum_offset + window +  2] = psum_02;
+              psum_buf[psum_offset + window + 30] = psum_12;
+              psum_buf[psum_offset + window + 58] = psum_22;
+
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_03) : "f"(imap_3), "f"(filter_w_0_0));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_13) : "f"(imap_3), "f"(filter_w_1_0));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_23) : "f"(imap_3), "f"(filter_w_2_0));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_03) : "f"(imap_4), "f"(filter_w_0_1));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_13) : "f"(imap_4), "f"(filter_w_1_1));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_23) : "f"(imap_4), "f"(filter_w_2_1));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_03) : "f"(imap_5), "f"(filter_w_0_2));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_13) : "f"(imap_5), "f"(filter_w_1_2));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_23) : "f"(imap_5), "f"(filter_w_2_2));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_03) : "f"(imap_6), "f"(filter_w_0_3));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_13) : "f"(imap_6), "f"(filter_w_1_3));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_23) : "f"(imap_6), "f"(filter_w_2_3));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_03) : "f"(imap_7), "f"(filter_w_0_4));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_13) : "f"(imap_7), "f"(filter_w_1_4));
+              asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_23) : "f"(imap_7), "f"(filter_w_2_4));
+
+              // write back
+              psum_buf[psum_offset + window +  3] = psum_03;
+              psum_buf[psum_offset + window + 31] = psum_13;
+              psum_buf[psum_offset + window + 59] = psum_23;
             }
             psum_offset += Wout * FILTERS_PER_PROCESSING_PASS;
             imap_offset += Win;
