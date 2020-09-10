@@ -291,27 +291,41 @@ extern "C" {
     };
 
     auto imapDMA = [&]() {
+
+      float* src_base = (float*)imap.data_ptr();
+      uint32_t* src_strides = imap.get_strides();
+      // XXX: hacky -- there is only one channel -- always == 0
+      src_base += 0 * src_strides[1] + ((bsg_x-1)+(bsg_y-1)) * src_strides[2];
+
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
+
+        float* src_ptr = src_base;
+
         for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
+
           size_t buf_offset = 0;
 
-          //bsg_printf("in imap DMA\n");
           // wait until remote imap buffer is ready
           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_NE)), 0);
-          //bsg_printf(" -- buffer ready\n");
           for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
-            // TODO -- channel
-            for (size_t col = 0; col < Win; col++) {
-              imap_buf_remote[buf_offset] = imap(image_id+images,0,(bsg_x-1)+(bsg_y-1),col);
-              buf_offset++;
+            for (size_t col = 0; col < Win; col += 8) {
+              // imap_buf_remote[buf_offset] = imap(image_id+images,0,(bsg_x-1)+(bsg_y-1),col);
+              imap_buf_remote[buf_offset + 0] = *(src_ptr + col + 0);
+              imap_buf_remote[buf_offset + 1] = *(src_ptr + col + 1);
+              imap_buf_remote[buf_offset + 2] = *(src_ptr + col + 2);
+              imap_buf_remote[buf_offset + 3] = *(src_ptr + col + 3);
+              imap_buf_remote[buf_offset + 4] = *(src_ptr + col + 4);
+              imap_buf_remote[buf_offset + 5] = *(src_ptr + col + 5);
+              imap_buf_remote[buf_offset + 6] = *(src_ptr + col + 6);
+              imap_buf_remote[buf_offset + 7] = *(src_ptr + col + 7);
+              buf_offset += 8;
             }
+            src_ptr += src_strides[0];
           }
           asm volatile("": : :"memory");
           *imap_f_NE = 1;
           *imap_f_NE_r = 1;
-          //bsg_printf(" -- buffer copying done\n");
         }
-        // std::cout << " -- end of a pass -- " << std::endl;
       }
     };
 
@@ -320,18 +334,26 @@ extern "C" {
         for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
           size_t buf_offset = 0;
 
-          //bsg_printf("in psum DMA\n");
           // wait until remote psum buffer is ready
           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
-          //bsg_printf(" -- buffer ready\n");
 
           // brand new psum
           if (!LOAD_PSUM) {
-            for (size_t offset = 0; offset < PSUM_BUF_SIZE; offset++) {
-              psum_buf_remote[offset] = 0;
+            // All buffers need to be a multiply of 8
+            for (size_t offset = 0; offset < PSUM_BUF_SIZE; offset += 8) {
+              psum_buf_remote[offset + 0] = 0;
+              psum_buf_remote[offset + 1] = 0;
+              psum_buf_remote[offset + 2] = 0;
+              psum_buf_remote[offset + 3] = 0;
+              psum_buf_remote[offset + 4] = 0;
+              psum_buf_remote[offset + 5] = 0;
+              psum_buf_remote[offset + 6] = 0;
+              psum_buf_remote[offset + 7] = 0;
             }
           } else {
+            // XXX: not used in LeNet-5 conv-1
             // read from previous psum
+            /*
             for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
               for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
                 for (size_t col = 0; col < Wout; col++) {
@@ -340,13 +362,12 @@ extern "C" {
                 }
               }
             }
+            */
           }
           asm volatile("": : :"memory");
           *psum_f_N = 1;
           *psum_f_N_r = 1;
-          //bsg_printf(" -- buffer copying done\n");
         }
-        // std::cout << " -- end of a pass -- " << std::endl;
       }
     };
 
