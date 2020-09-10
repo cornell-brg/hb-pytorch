@@ -19,9 +19,9 @@
 #define EYERISS_COL 14
 
 #define DEVICE_X (EYERISS_COL + 2)
-#define DEVICE_Y (EYERISS_ROW + 2)
-#define PASS_PSUM (bsg_y > 0)
-#define PASS_IMAP (bsg_x < (DEVICE_X - 1) && bsg_y >0)
+#define DEVICE_Y (EYERISS_ROW + 3)
+#define PASS_PSUM (bsg_y > 1)
+#define PASS_IMAP (bsg_x < (DEVICE_X - 1) && bsg_y > 1)
 #define PASS_FILTER (bsg_x < (DEVICE_X - 1))
 
 template <size_t TRANS_SIZE>
@@ -193,7 +193,7 @@ extern "C" {
     }
 
     // bottom row of PE
-    if (bsg_y == (EYERISS_ROW - 1)) {
+    if (bsg_y == (DEVICE_Y - 3)) {
       psum_A_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&psum_A_f_N));  // South x 2
       psum_B_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&psum_B_f_N));  // South x 2
     }
@@ -269,6 +269,7 @@ extern "C" {
     };
 
     char eyeriss_5x14_lenet[8][16] = {
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {1, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
         {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
         {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
@@ -276,7 +277,6 @@ extern "C" {
         {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
         {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0},
         {0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
     // active config
@@ -288,7 +288,7 @@ extern "C" {
       float* src_base = (float*)filter.data_ptr();
       uint32_t* src_strides = filter.get_strides();
       // XXX: hacky -- there is only one channel -- always == 0
-      src_base += 0 * src_strides[1] + bsg_y * src_strides[2];
+      src_base += 0 * src_strides[1] + (bsg_y-1) * src_strides[2];
 
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
 
@@ -337,7 +337,7 @@ extern "C" {
       float* src_base = (float*)imap.data_ptr();
       uint32_t* src_strides = imap.get_strides();
       // XXX: hacky -- there is only one channel -- always == 0
-      src_base += 0 * src_strides[1] + ((bsg_x-1)+(bsg_y-1)) * src_strides[2];
+      src_base += 0 * src_strides[1] + ((bsg_x-1)+(bsg_y-2)) * src_strides[2];
 
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
 
