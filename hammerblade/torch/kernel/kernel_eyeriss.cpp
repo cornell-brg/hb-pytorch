@@ -104,6 +104,10 @@ extern "C" {
     float   imap_buf_A[IMAP_BUF_SIZE];
     float   psum_buf_A[PSUM_BUF_SIZE];
 
+    float filter_buf_B[FILTER_BUF_SIZE];
+    float   imap_buf_B[IMAP_BUF_SIZE];
+    float   psum_buf_B[PSUM_BUF_SIZE];
+
     float *filter_buf = filter_buf_A;
     float   *imap_buf =   imap_buf_A;
     float   *psum_buf =   psum_buf_A;
@@ -112,14 +116,20 @@ extern "C" {
     float   *imap_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y-1,imap_buf_A)); // NorthEast
     float   *psum_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,psum_buf_A));   // North
 
+    float *filter_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,filter_buf_B)); // East
+    float   *imap_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y-1,imap_buf_B)); // NorthEast
+    float   *psum_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,psum_buf_B));   // North
+
     // filter DMA
     if (bsg_x == 0) {
       filter_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,filter_buf_A)); // East x 2
+      filter_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,filter_buf_B)); // East x 2
     }
 
     // psum DMA
     if (bsg_y == (DEVICE_Y - 1)) {
       psum_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,psum_buf_A));   // North x 2
+      psum_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,psum_buf_B));   // North x 2
     }
 
     float *filter_buf_remote = filter_buf_A_remote;
@@ -145,26 +155,47 @@ extern "C" {
     volatile unsigned int *imap_A_f_NE_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y-1,&imap_A_f));
     volatile unsigned int *imap_A_f_SW_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y+1,&imap_A_f_NE));
 
+    volatile unsigned int  filter_B_f      = 0;
+    volatile unsigned int  filter_B_f_E    = 0;
+    volatile unsigned int *filter_B_f_E_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&filter_B_f));
+    volatile unsigned int *filter_B_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&filter_B_f_E));
+
+    volatile unsigned int  psum_B_f        = 0;
+    volatile unsigned int  psum_B_f_N      = 0;
+    volatile unsigned int *psum_B_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,&psum_B_f));
+    volatile unsigned int *psum_B_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,&psum_B_f_N));
+
+    volatile unsigned int  imap_B_f        = 0;
+    volatile unsigned int  imap_B_f_NE     = 0;
+    volatile unsigned int *imap_B_f_NE_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y-1,&imap_B_f));
+    volatile unsigned int *imap_B_f_SW_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y+1,&imap_B_f_NE));
+
     // filter DMA
     if (bsg_x == 0) {
       filter_A_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,&filter_A_f)); // East x 2
       filter_A_f_W_r = NULL;
+      filter_B_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,&filter_B_f)); // East x 2
+      filter_B_f_W_r = NULL;
     }
 
     // psum DMA
     if (bsg_y == (DEVICE_Y - 1)) {
       psum_A_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,&psum_A_f));  // North x 2
       psum_A_f_S_r = NULL;
+      psum_B_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,&psum_B_f));  // North x 2
+      psum_B_f_S_r = NULL;
     }
 
     // first col of PE
     if (bsg_x == 2) {
       filter_A_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-2,bsg_y,&filter_A_f_E)); // West x 2
+      filter_B_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-2,bsg_y,&filter_B_f_E)); // West x 2
     }
 
     // bottom row of PE
     if (bsg_y == (EYERISS_ROW - 1)) {
       psum_A_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&psum_A_f_N));  // South x 2
+      psum_B_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&psum_B_f_N));  // South x 2
     }
 
     // proxy flags for supporting double buffering
@@ -287,6 +318,17 @@ extern "C" {
         asm volatile("": : :"memory");
         *filter_f_E = 1;
         *filter_f_E_r = 1;
+
+        // switch buffer
+        if (filter_buf_remote == filter_buf_A_remote) {
+          filter_buf_remote = filter_buf_B_remote;
+          filter_f_E        = &filter_B_f_E;
+          filter_f_E_r      = filter_B_f_E_r;
+        } else {
+          filter_buf_remote = filter_buf_A_remote;
+          filter_f_E        = &filter_A_f_E;
+          filter_f_E_r      = filter_A_f_E_r;
+        }
       }
     };
 
@@ -334,6 +376,17 @@ extern "C" {
           asm volatile("": : :"memory");
           *imap_f_NE = 1;
           *imap_f_NE_r = 1;
+
+          // switch buffer
+          if (imap_buf_remote == imap_buf_A_remote) {
+            imap_buf_remote = imap_buf_B_remote;
+            imap_f_NE       = &imap_B_f_NE;
+            imap_f_NE_r     = imap_B_f_NE_r;
+          } else {
+            imap_buf_remote = imap_buf_A_remote;
+            imap_f_NE       = &imap_A_f_NE;
+            imap_f_NE_r     = imap_A_f_NE_r;
+          }
         }
       }
     };
@@ -376,6 +429,17 @@ extern "C" {
           asm volatile("": : :"memory");
           *psum_f_N = 1;
           *psum_f_N_r = 1;
+
+          // switch buffer
+          if (psum_buf_remote == psum_buf_A_remote) {
+            psum_buf_remote = psum_buf_B_remote;
+            psum_f_N = &psum_B_f_N;
+            psum_f_N_r = psum_B_f_N_r;
+          } else {
+            psum_buf_remote = psum_buf_A_remote;
+            psum_f_N = &psum_A_f_N;
+            psum_f_N_r = psum_A_f_N_r;
+          }
         }
       }
     };
@@ -605,12 +669,57 @@ extern "C" {
           asm volatile("": : :"memory");
           *psum_f = 0;
           *psum_f_S_r = 0;
+
+          // switch buffer
+          if (psum_buf == psum_buf_A) {
+            psum_buf        = psum_buf_B;
+            psum_f          = &psum_B_f;
+            psum_f_S_r      = psum_B_f_S_r;
+            psum_buf_remote = psum_buf_B_remote;
+            psum_f_N        = &psum_B_f_N;
+            psum_f_N_r      = psum_B_f_N_r;
+            imap_buf        = imap_buf_B;
+            imap_f          = &imap_B_f;
+            imap_f_SW_r     = imap_B_f_SW_r;
+            imap_buf_remote = imap_buf_B_remote;
+            imap_f_NE       = &imap_B_f_NE;
+            imap_f_NE_r     = imap_B_f_NE_r;
+          } else {
+            psum_buf        = psum_buf_A;
+            psum_f          = &psum_A_f;
+            psum_f_S_r      = psum_A_f_S_r;
+            psum_buf_remote = psum_buf_A_remote;
+            psum_f_N        = &psum_A_f_N;
+            psum_f_N_r      = psum_A_f_N_r;
+            imap_buf        = imap_buf_A;
+            imap_f          = &imap_A_f;
+            imap_f_SW_r     = imap_A_f_SW_r;
+            imap_buf_remote = imap_buf_A_remote;
+            imap_f_NE       = &imap_A_f_NE;
+            imap_f_NE_r     = imap_A_f_NE_r;
+          }
         }
         // signal filter free
         asm volatile("": : :"memory");
         *filter_f = 0;
         *filter_f_W_r = 0;
 
+        // switch buffer
+        if (filter_buf == filter_buf_A) {
+          filter_buf        = filter_buf_B;
+          filter_f          = &filter_B_f;
+          filter_f_W_r      = filter_B_f_W_r;
+          filter_buf_remote = filter_buf_B_remote;
+          filter_f_E        = &filter_B_f_E;
+          filter_f_E_r      = filter_B_f_E_r;
+        } else {
+          filter_buf        = filter_buf_A;
+          filter_f          = &filter_A_f;
+          filter_f_W_r      = filter_A_f_W_r;
+          filter_buf_remote = filter_buf_A_remote;
+          filter_f_E        = &filter_A_f_E;
+          filter_f_E_r      = filter_A_f_E_r;
+        }
         // std::cout << " -- end of a pass -- " << std::endl;
       }
     };
