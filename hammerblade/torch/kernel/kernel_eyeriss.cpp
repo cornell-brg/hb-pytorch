@@ -256,6 +256,7 @@ extern "C" {
 
       float* src_base = (float*)filter.data_ptr();
       uint32_t* src_strides = filter.get_strides();
+      // XXX: hacky -- there is only one channel -- always == 0
       src_base += 0 * src_strides[1] + bsg_y * src_strides[2];
 
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
@@ -264,10 +265,23 @@ extern "C" {
         // wait until remote filter buffer is ready
         bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f_E)), 0);
         for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
-          for (size_t col = 0; col < Wk; col++) {
-            filter_buf_remote[buf_offset] = *(src_base + col); // src_strides[3] has to be 1 filter(filter_id+filters,0,bsg_y,col);
-            buf_offset++;
-          }
+          // for (size_t col = 0; col < Wk; col++) {
+          //   filter_buf_remote[buf_offset] = *(src_base + col); // src_strides[3] has to be 1
+          //   buf_offset++;
+          // }
+          // Unroll -- here we know Wk == 5
+          register float filter_w_0 = *(src_base + 0);
+          register float filter_w_1 = *(src_base + 1);
+          register float filter_w_2 = *(src_base + 2);
+          register float filter_w_3 = *(src_base + 3);
+          register float filter_w_4 = *(src_base + 4);
+          asm volatile("": : :"memory");
+          filter_buf_remote[buf_offset + 0] = filter_w_0;
+          filter_buf_remote[buf_offset + 1] = filter_w_1;
+          filter_buf_remote[buf_offset + 2] = filter_w_2;
+          filter_buf_remote[buf_offset + 3] = filter_w_3;
+          filter_buf_remote[buf_offset + 4] = filter_w_4;
+          buf_offset += 5;
           src_base += src_strides[0];
         }
         asm volatile("": : :"memory");
