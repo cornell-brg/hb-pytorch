@@ -20,7 +20,6 @@
 
 #define DEVICE_X (EYERISS_COL + 2)
 #define DEVICE_Y (EYERISS_ROW + 3)
-#define PASS_PSUM (bsg_y > 1)
 #define PASS_IMAP (bsg_x < (DEVICE_X - 1) && bsg_y > 1)
 #define PASS_FILTER (bsg_x < (DEVICE_X - 1))
 
@@ -269,7 +268,7 @@ extern "C" {
     };
 
     char eyeriss_5x14_lenet[8][16] = {
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
         {1, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
         {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
         {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
@@ -439,6 +438,39 @@ extern "C" {
             psum_buf_remote = psum_buf_A_remote;
             psum_f_N = &psum_A_f_N;
             psum_f_N_r = psum_A_f_N_r;
+          }
+        }
+      }
+    };
+
+    auto psumWBDMA = [&]() {
+      for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
+        for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
+          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f)), 1);
+          // write back to omap
+          size_t buf_offset = 0;
+          for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
+            for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
+              for (size_t col = 0; col < Wout; col++) {
+                omap(image_id+images,filter_id+filters,bsg_x-2,col) = psum_buf[buf_offset];
+                buf_offset++;
+              }
+            }
+          }
+          // signal psum and imap free
+          asm volatile("": : :"memory");
+          *psum_f = 0;
+          *psum_f_S_r = 0;
+
+          // switch buffer
+          if (psum_buf == psum_buf_A) {
+            psum_buf        = psum_buf_B;
+            psum_f          = &psum_B_f;
+            psum_f_S_r      = psum_B_f_S_r;
+          } else {
+            psum_buf        = psum_buf_A;
+            psum_f          = &psum_A_f;
+            psum_f_S_r      = psum_A_f_S_r;
           }
         }
       }
@@ -642,28 +674,13 @@ extern "C" {
           *imap_f = 0;
           *imap_f_SW_r = 0;
 
-          // pass psum along OR write back to global memory
-          if (PASS_PSUM) {
-            //bsg_printf(" -- -- passing psum buffer\n");
-            // wait until remote psum buffer is ready
-            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
-            //bsg_printf(" -- -- next psum buffer ready\n");
-            spm_cpy<PSUM_BUF_SIZE>(psum_buf_remote, psum_buf);
-            asm volatile("": : :"memory");
-            *psum_f_N = 1;
-            *psum_f_N_r = 1;
-          } else {
-            // write back to omap
-            size_t buf_offset = 0;
-            for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
-              for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
-                for (size_t col = 0; col < Wout; col++) {
-                  omap(image_id+images,filter_id+filters,bsg_x-2,col) = psum_buf[buf_offset];
-                  buf_offset++;
-                }
-              }
-            }
-          }
+          // pass psum along
+          // wait until remote psum buffer is ready
+          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
+          spm_cpy<PSUM_BUF_SIZE>(psum_buf_remote, psum_buf);
+          asm volatile("": : :"memory");
+          *psum_f_N = 1;
+          *psum_f_N_r = 1;
 
           // signal psum and imap free
           asm volatile("": : :"memory");
@@ -748,6 +765,10 @@ extern "C" {
       case 4:
         // compute
         computePE();
+        break;
+      case 5:
+        // psum write back DMA
+        psumWBDMA();
         break;
       default:
         hb_assert_msg(false, "invalid tile task config");
