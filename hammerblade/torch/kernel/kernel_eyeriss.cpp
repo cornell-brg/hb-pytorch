@@ -444,18 +444,28 @@ extern "C" {
     };
 
     auto psumWBDMA = [&]() {
+
+      float* dest_base = (float*)omap.data_ptr();
+      uint32_t* dest_strides = omap.get_strides();
+      dest_base += (bsg_x-2) * dest_strides[2];
+
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
+        float* dest_pass = dest_base + filters * dest_strides[1];
         for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f)), 1);
           // write back to omap
           size_t buf_offset = 0;
           for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
+            float* dest_ptr = dest_pass;
             for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
               for (size_t col = 0; col < Wout; col++) {
-                omap(image_id+images,filter_id+filters,bsg_x-2,col) = psum_buf[buf_offset];
+                //omap(image_id+images,filter_id+filters,bsg_x-2,col) = psum_buf[buf_offset];
+                *(dest_ptr + col) = psum_buf[buf_offset];
                 buf_offset++;
               }
+              dest_ptr += dest_strides[1];
             }
+            dest_pass += dest_strides[0];
           }
           // signal psum and imap free
           asm volatile("": : :"memory");
@@ -742,6 +752,7 @@ extern "C" {
     };
 
     // main loop entrance
+    g_barrier.sync();
     bsg_cuda_print_stat_kernel_start();
 
     // tile task dispatch
