@@ -306,13 +306,10 @@ class Trace:
                 print(str(tile[1]).ljust(3), end=' ')
             elif self.traces[tile]["mode"] == 'hi':
                 print(str(tile[1]).ljust(15), end=' ')
-<<<<<<< HEAD
-=======
             elif self.traces[tile]["mode"] == 'pc':
                 print(str(tile[1]).ljust(4), end=' ')
             elif self.traces[tile]["mode"] == 'full':
                 print(str(tile[1]).ljust(20), end=' ')
->>>>>>> master
 
         print()
 
@@ -322,15 +319,9 @@ class Trace:
             for tile in self.traces:
                 self.__print_op(self.traces[tile], cycle, asm)
             print()
-<<<<<<< HEAD
-
-
-    def __print_op(self, tile_trace, cycle):
-=======
 
 
     def __print_op(self, tile_trace, cycle, asm = None):
->>>>>>> master
         if tile_trace["mode"] == 'lo':
             if cycle in tile_trace["instr"]:
                 op = tile_trace["instr"][cycle][1]
@@ -370,9 +361,6 @@ class Trace:
                     print(op[:op_len], end=' ')
             else:
                 print('               ', end=' ')
-<<<<<<< HEAD
-
-=======
         elif tile_trace["mode"] == 'pc':
             if cycle in tile_trace["instr"]:
                 pc = tile_trace["instr"][cycle][0]
@@ -424,4 +412,3 @@ class Trace:
                 print('                    ', end='')
 
 
->>>>>>> master
