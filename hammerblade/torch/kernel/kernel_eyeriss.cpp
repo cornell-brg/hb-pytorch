@@ -458,10 +458,18 @@ extern "C" {
           for (size_t image_id = 0; image_id < IMAGES_PER_BURST; image_id++) {
             float* dest_ptr = dest_pass;
             for (size_t filter_id = 0; filter_id < FILTERS_PER_PROCESSING_PASS; filter_id++) {
-              for (size_t col = 0; col < Wout; col++) {
-                //omap(image_id+images,filter_id+filters,bsg_x-2,col) = psum_buf[buf_offset];
-                *(dest_ptr + col) = psum_buf[buf_offset];
-                buf_offset++;
+              // XXX: this unroll by 4 decision is made with input knowledge
+              for (size_t col = 0; col < Wout; col += 4) {
+                register float tmp0 = psum_buf[buf_offset + 0];
+                register float tmp1 = psum_buf[buf_offset + 1];
+                register float tmp2 = psum_buf[buf_offset + 2];
+                register float tmp3 = psum_buf[buf_offset + 3];
+                asm volatile("": : :"memory");
+                *(dest_ptr + col + 0) = tmp0;
+                *(dest_ptr + col + 1) = tmp1;
+                *(dest_ptr + col + 2) = tmp2;
+                *(dest_ptr + col + 3) = tmp3;
+                buf_offset += 4;
               }
               dest_ptr += dest_strides[1];
             }
