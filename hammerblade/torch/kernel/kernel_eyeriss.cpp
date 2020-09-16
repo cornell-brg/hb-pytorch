@@ -15,13 +15,6 @@
 // we use filter-use scheme -- filter stays constant within a process pass
 #define IMAGES_PER_BURST 2
 #define FILTERS_PER_PROCESSING_PASS 3
-#define EYERISS_ROW 5
-#define EYERISS_COL 14
-
-#define DEVICE_X (EYERISS_COL + 2)
-#define DEVICE_Y (EYERISS_ROW + 3)
-#define PASS_IMAP (bsg_x < (DEVICE_X - 1) && bsg_y > 1)
-#define PASS_FILTER (bsg_x < (DEVICE_X - 1))
 
 template <size_t TRANS_SIZE>
 inline void spm_cpy(float* dst, float* src) {
@@ -93,6 +86,51 @@ extern "C" {
     HBTensor<float> imap(input);
     HBTensor<float> filter(weight);
 
+    // config
+    // 0 -- idle       -- do nothing
+    // 1 -- filter DMA -- push to 2 to the East
+    // 2 -- imap DMA   -- push to NE
+    // 3 -- psum DMA   -- push to 2 to the North
+    // 4 -- compute    -- push to NE & N
+
+    char eyeriss_5x14_lenet[8][16] = {
+        {0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+        {1, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+        {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0},
+        {0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+    };
+
+    // appendix -- defines what should you do
+    // 0000     -- normal passing
+    // 0001     -- do not pass fliter
+    // 0010     -- do not pass imap
+    // 0100     -- psum is 2 to the South
+    // 1000     -- filter is 2 to the East
+
+    char eyeriss_5x14_lenet_appendix[8][16] = {
+        {0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0xa, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3},
+        {0, 0, 8,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+        {0, 0, 8,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+        {0, 0, 8,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+        {0, 0, 0xc, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7},
+        {0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    // active config
+    char (&mc_config)[8][16] = eyeriss_5x14_lenet;
+    char (&mc_append)[8][16] = eyeriss_5x14_lenet_appendix;
+    char tile_config = mc_config[bsg_y][bsg_x];
+    char tile_append = -1;
+    if (tile_config == 4) {
+      tile_append = mc_append[bsg_y][bsg_x];
+    }
+
     // Eyeriss buffers
     //
     //   imap[#images]     [#in_channel] [row][col]
@@ -120,13 +158,13 @@ extern "C" {
     float   *psum_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,psum_buf_B));   // North
 
     // filter DMA
-    if (bsg_x == 0) {
+    if (tile_config == 1) {
       filter_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,filter_buf_A)); // East x 2
       filter_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,filter_buf_B)); // East x 2
     }
 
     // psum DMA
-    if (bsg_y == (DEVICE_Y - 1)) {
+    if (tile_config == 3) {
       psum_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,psum_buf_A));   // North x 2
       psum_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,psum_buf_B));   // North x 2
     }
@@ -170,7 +208,7 @@ extern "C" {
     volatile unsigned int *imap_B_f_SW_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y+1,&imap_B_f_NE));
 
     // filter DMA
-    if (bsg_x == 0) {
+    if (tile_config == 1) {
       filter_A_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,&filter_A_f)); // East x 2
       filter_A_f_W_r = NULL;
       filter_B_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,&filter_B_f)); // East x 2
@@ -178,7 +216,7 @@ extern "C" {
     }
 
     // psum DMA
-    if (bsg_y == (DEVICE_Y - 1)) {
+    if (tile_config == 3) {
       psum_A_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,&psum_A_f));  // North x 2
       psum_A_f_S_r = NULL;
       psum_B_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,&psum_B_f));  // North x 2
@@ -186,13 +224,13 @@ extern "C" {
     }
 
     // first col of PE
-    if (bsg_x == 2) {
+    if (tile_config == 4 && (tile_append & 8)) {
       filter_A_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-2,bsg_y,&filter_A_f_E)); // West x 2
       filter_B_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-2,bsg_y,&filter_B_f_E)); // West x 2
     }
 
     // bottom row of PE
-    if (bsg_y == (DEVICE_Y - 3)) {
+    if (tile_config == 4 && (tile_append & 4)) {
       psum_A_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&psum_A_f_N));  // South x 2
       psum_B_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&psum_B_f_N));  // South x 2
     }
@@ -224,62 +262,6 @@ extern "C" {
     auto Win  = imap.dim(3);
     auto Hk   = filter.dim(2);
     auto Wk   = filter.dim(3);
-
-    // std::cout << "N = "    << N << std::endl;
-    // std::cout << "Cout = " << Cout << std::endl;
-    // std::cout << "Hout = " << Hout << std::endl;
-    // std::cout << "Wout = " << Wout << std::endl;
-    // std::cout << "Cin = "  << Cin << std::endl;
-    // std::cout << "Hin = "  << Hin << std::endl;
-    // std::cout << "Win = "  << Win << std::endl;
-    // std::cout << "Hk = "   << Hk << std::endl;
-    // std::cout << "Wk = "   << Wk << std::endl;
-
-    // config
-    // 0 -- idle       -- do nothing
-    // 1 -- filter DMA -- push to 2 to the East
-    // 2 -- imap DMA   -- push to NE
-    // 3 -- psum DMA   -- push to 2 to the North
-    // 4 -- compute    -- push to NE & N
-
-    // char eyeriss_2x2_config[4][4] = {
-    //     {1, 0, 4, 4},
-    //     {1, 2, 4, 4},
-    //     {0, 2, 2, 0},
-    //     {0, 0, 3, 3}
-    // };
-
-    // char debug_config[4][4] = {
-    //     {1, 0, 4, 4},
-    //     {1, 2, 4, 4},
-    //     {0, 2, 2, 0},
-    //     {0, 0, 3, 3}
-    // };
-
-    char eyeriss_2x2_debug[8][16] = {
-        {1, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {1, 2, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-    };
-
-    char eyeriss_5x14_lenet[8][16] = {
-        {0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
-        {1, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-        {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0},
-        {0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
-    };
-
-    // active config
-    char (&mc_config)[8][16] = eyeriss_5x14_lenet;
 
     // functors
     auto filterDMA = [&]() {
@@ -520,7 +502,7 @@ extern "C" {
         asm volatile("": : :"memory");
 
         // pass filter along
-        if (PASS_FILTER) {
+        if (!(tile_append & 1)) {
           // wait until remote filter buffer is ready
           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (filter_f_E)), 0);
           //bsg_printf(" -- -- next filter buffer ready\n");
@@ -536,7 +518,7 @@ extern "C" {
           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f)), 1);
 
           // pass imap along
-          if (PASS_IMAP) {
+          if (!(tile_append & 2)) {
             // wait until remote imap buffer is ready
             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_NE)), 0);
             spm_cpy<IMAP_BUF_SIZE>(imap_buf_remote, imap_buf);
@@ -764,7 +746,6 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
 
     // tile task dispatch
-    char tile_config = mc_config[bsg_y][bsg_x];
     switch (tile_config) {
       case 0:
         // nothing
