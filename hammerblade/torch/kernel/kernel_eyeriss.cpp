@@ -93,17 +93,27 @@ extern "C" {
     // 3 -- psum DMA   -- push to 2 to the North
     // 4 -- compute    -- push to NE & N
 
-    char eyeriss_5x14_lenet[8][16] = {
-        {0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
-        {1, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-        {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-        {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0},
-        {0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
-    };
+    // char eyeriss_5x14_lenet[8][16] = {
+    //     {0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+    //     {1, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+    //     {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+    //     {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+    //     {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+    //     {1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+    //     {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0},
+    //     {0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+    // };
 
+    char eyeriss_5x14_lenet[8][16] = {
+        {0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {3, 2, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0},
+        {3, 2, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0},
+        {3, 2, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0},
+        {3, 2, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0},
+        {3, 2, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0},
+        {3, 0, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0},
+    };
     // appendix -- defines what should you do
     // 0000     -- normal passing
     // 0001     -- do not pass fliter
@@ -111,15 +121,26 @@ extern "C" {
     // 0100     -- psum is 2 to the South
     // 1000     -- filter is 2 to the East
 
+    // char eyeriss_5x14_lenet_appendix[8][16] = {
+    //     {0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0xa, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3},
+    //     {0, 0, 8,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+    //     {0, 0, 8,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+    //     {0, 0, 8,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
+    //     {0, 0, 0xc, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7},
+    //     {0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //     {0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // };
+
     char eyeriss_5x14_lenet_appendix[8][16] = {
-        {0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0xa, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3},
-        {0, 0, 8,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
-        {0, 0, 8,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
-        {0, 0, 8,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},
-        {0, 0, 0xc, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7},
-        {0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0xc, 8, 8, 8, 0xa, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 4,   0, 0, 0, 2,   0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 4,   0, 0, 0, 2,   0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 4,   0, 0, 0, 2,   0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 4,   0, 0, 0, 2,   0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 7,   3, 3, 3, 3,   0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
     // active config
@@ -149,24 +170,24 @@ extern "C" {
     float   *imap_buf =   imap_buf_A;
     float   *psum_buf =   psum_buf_A;
 
-    float *filter_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,filter_buf_A)); // East
-    float   *imap_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y-1,imap_buf_A)); // NorthEast
-    float   *psum_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,psum_buf_A));   // North
+    float *filter_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,filter_buf_A)); // East
+    float   *imap_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y+1,imap_buf_A)); // NorthEast
+    float   *psum_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,psum_buf_A));   // North
 
-    float *filter_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,filter_buf_B)); // East
-    float   *imap_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y-1,imap_buf_B)); // NorthEast
-    float   *psum_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,psum_buf_B));   // North
+    float *filter_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,filter_buf_B)); // East
+    float   *imap_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y+1,imap_buf_B)); // NorthEast
+    float   *psum_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,psum_buf_B));   // North
 
     // filter DMA
     if (tile_config == 1) {
-      filter_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,filter_buf_A)); // East x 2
-      filter_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,filter_buf_B)); // East x 2
+      filter_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,filter_buf_A)); // East x 2
+      filter_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,filter_buf_B)); // East x 2
     }
 
     // psum DMA
     if (tile_config == 3) {
-      psum_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,psum_buf_A));   // North x 2
-      psum_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,psum_buf_B));   // North x 2
+      psum_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,psum_buf_A));   // North x 2
+      psum_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,psum_buf_B));   // North x 2
     }
 
     float *filter_buf_remote = filter_buf_A_remote;
@@ -179,60 +200,60 @@ extern "C" {
 
     volatile unsigned int  filter_A_f      = 0;
     volatile unsigned int  filter_A_f_E    = 0;
-    volatile unsigned int *filter_A_f_E_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&filter_A_f));
-    volatile unsigned int *filter_A_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&filter_A_f_E));
+    volatile unsigned int *filter_A_f_E_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,&filter_A_f));
+    volatile unsigned int *filter_A_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,&filter_A_f_E));
 
     volatile unsigned int  psum_A_f        = 0;
     volatile unsigned int  psum_A_f_N      = 0;
-    volatile unsigned int *psum_A_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,&psum_A_f));
-    volatile unsigned int *psum_A_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,&psum_A_f_N));
+    volatile unsigned int *psum_A_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&psum_A_f));
+    volatile unsigned int *psum_A_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&psum_A_f_N));
 
     volatile unsigned int  imap_A_f        = 0;
     volatile unsigned int  imap_A_f_NE     = 0;
-    volatile unsigned int *imap_A_f_NE_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y-1,&imap_A_f));
-    volatile unsigned int *imap_A_f_SW_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y+1,&imap_A_f_NE));
+    volatile unsigned int *imap_A_f_NE_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y+1,&imap_A_f));
+    volatile unsigned int *imap_A_f_SW_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y-1,&imap_A_f_NE));
 
     volatile unsigned int  filter_B_f      = 0;
     volatile unsigned int  filter_B_f_E    = 0;
-    volatile unsigned int *filter_B_f_E_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&filter_B_f));
-    volatile unsigned int *filter_B_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&filter_B_f_E));
+    volatile unsigned int *filter_B_f_E_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,&filter_B_f));
+    volatile unsigned int *filter_B_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,&filter_B_f_E));
 
     volatile unsigned int  psum_B_f        = 0;
     volatile unsigned int  psum_B_f_N      = 0;
-    volatile unsigned int *psum_B_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,&psum_B_f));
-    volatile unsigned int *psum_B_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,&psum_B_f_N));
+    volatile unsigned int *psum_B_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&psum_B_f));
+    volatile unsigned int *psum_B_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&psum_B_f_N));
 
     volatile unsigned int  imap_B_f        = 0;
     volatile unsigned int  imap_B_f_NE     = 0;
-    volatile unsigned int *imap_B_f_NE_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y-1,&imap_B_f));
-    volatile unsigned int *imap_B_f_SW_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y+1,&imap_B_f_NE));
+    volatile unsigned int *imap_B_f_NE_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y+1,&imap_B_f));
+    volatile unsigned int *imap_B_f_SW_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y-1,&imap_B_f_NE));
 
     // filter DMA
     if (tile_config == 1) {
-      filter_A_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,&filter_A_f)); // East x 2
+      filter_A_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&filter_A_f)); // East x 2
       filter_A_f_W_r = NULL;
-      filter_B_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,&filter_B_f)); // East x 2
+      filter_B_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&filter_B_f)); // East x 2
       filter_B_f_W_r = NULL;
     }
 
     // psum DMA
     if (tile_config == 3) {
-      psum_A_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,&psum_A_f));  // North x 2
+      psum_A_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,&psum_A_f));  // North x 2
       psum_A_f_S_r = NULL;
-      psum_B_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,&psum_B_f));  // North x 2
+      psum_B_f_N_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+2,bsg_y,&psum_B_f));  // North x 2
       psum_B_f_S_r = NULL;
     }
 
     // first col of PE
     if (tile_config == 4 && (tile_append & 8)) {
-      filter_A_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-2,bsg_y,&filter_A_f_E)); // West x 2
-      filter_B_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-2,bsg_y,&filter_B_f_E)); // West x 2
+      filter_A_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,&filter_A_f_E)); // West x 2
+      filter_B_f_W_r  = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-2,&filter_B_f_E)); // West x 2
     }
 
     // bottom row of PE
     if (tile_config == 4 && (tile_append & 4)) {
-      psum_A_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&psum_A_f_N));  // South x 2
-      psum_B_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&psum_B_f_N));  // South x 2
+      psum_A_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-2,bsg_y,&psum_A_f_N));  // South x 2
+      psum_B_f_S_r    = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-2,bsg_y,&psum_B_f_N));  // South x 2
     }
 
     // proxy flags for supporting double buffering
@@ -269,7 +290,7 @@ extern "C" {
       float* src_base = (float*)filter.data_ptr();
       uint32_t* src_strides = filter.get_strides();
       // XXX: hacky -- there is only one channel -- always == 0
-      src_base += 0 * src_strides[1] + (bsg_y-1) * src_strides[2];
+      src_base += 0 * src_strides[1] + (6 - bsg_x) * src_strides[2];
 
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
 
@@ -318,7 +339,7 @@ extern "C" {
       float* src_base = (float*)imap.data_ptr();
       uint32_t* src_strides = imap.get_strides();
       // XXX: hacky -- there is only one channel -- always == 0
-      src_base += 0 * src_strides[1] + ((bsg_x-1)+(bsg_y-2)) * src_strides[2];
+      src_base += 0 * src_strides[1] + ((bsg_y-1)+(5-bsg_x)) * src_strides[2];
 
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
 
@@ -429,7 +450,7 @@ extern "C" {
 
       float* dest_base = (float*)omap.data_ptr();
       uint32_t* dest_strides = omap.get_strides();
-      dest_base += (bsg_x-2) * dest_strides[2];
+      dest_base += (bsg_y-2) * dest_strides[2];
 
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
         float* dest_pass = dest_base + filters * dest_strides[1];
