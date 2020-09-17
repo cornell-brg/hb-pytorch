@@ -105,14 +105,14 @@ extern "C" {
     // };
 
     char eyeriss_5x14_lenet[8][16] = {
-        {0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {3, 2, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0},
-        {3, 2, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0},
-        {3, 2, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0},
-        {3, 2, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0},
-        {3, 2, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0},
-        {3, 0, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0},
+        {0, 2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0},
+        {3, 2, 4, 4, 4, 4, 4, 5, 3, 2, 4, 4, 4, 4, 4, 5},
+        {3, 2, 4, 4, 4, 4, 4, 5, 3, 2, 4, 4, 4, 4, 4, 5},
+        {3, 2, 4, 4, 4, 4, 4, 5, 3, 2, 4, 4, 4, 4, 4, 5},
+        {3, 2, 4, 4, 4, 4, 4, 5, 3, 2, 4, 4, 4, 4, 4, 5},
+        {3, 2, 4, 4, 4, 4, 4, 5, 3, 2, 4, 4, 4, 4, 4, 5},
+        {3, 0, 4, 4, 4, 4, 4, 5, 3, 0, 4, 4, 4, 4, 4, 5},
     };
     // appendix -- defines what should you do
     // 0000     -- normal passing
@@ -120,6 +120,8 @@ extern "C" {
     // 0010     -- do not pass imap
     // 0100     -- psum is 2 to the South
     // 1000     -- filter is 2 to the East
+    //
+    // for DMAs, the appendix defines the row idx
 
     // char eyeriss_5x14_lenet_appendix[8][16] = {
     //     {0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -133,24 +135,21 @@ extern "C" {
     // };
 
     char eyeriss_5x14_lenet_appendix[8][16] = {
-        {0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0xc, 8, 8, 8, 0xa, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 4,   0, 0, 0, 2,   0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 4,   0, 0, 0, 2,   0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 4,   0, 0, 0, 2,   0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 4,   0, 0, 0, 2,   0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 7,   3, 3, 3, 3,   0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 4,   3, 2, 1, 0,   0, 0,  0, 4,   3, 2, 1, 0,   0},
+        {0, 4, 3,   2, 1, 0, 0,   0, 0, 10, 9,   8, 7, 6, 0,   0},
+        {0, 5, 0xc, 8, 8, 8, 0xa, 0, 0, 11, 0xc, 8, 8, 8, 0xa, 6},
+        {0, 6, 4,   0, 0, 0, 2,   1, 0, 12, 4,   0, 0, 0, 2,   7},
+        {0, 7, 4,   0, 0, 0, 2,   2, 0, 13, 4,   0, 0, 0, 2,   8},
+        {0, 8, 4,   0, 0, 0, 2,   3, 0, 14, 4,   0, 0, 0, 2,   9},
+        {0, 9, 4,   0, 0, 0, 2,   4, 0, 15, 4,   0, 0, 0, 2,   10},
+        {0, 0, 7,   3, 3, 3, 3,   5, 0,  0, 7,   3, 3, 3, 3,   11},
     };
 
     // active config
     char (&mc_config)[8][16] = eyeriss_5x14_lenet;
     char (&mc_append)[8][16] = eyeriss_5x14_lenet_appendix;
     char tile_config = mc_config[bsg_y][bsg_x];
-    char tile_append = -1;
-    if (tile_config == 4) {
-      tile_append = mc_append[bsg_y][bsg_x];
-    }
+    char tile_append = mc_append[bsg_y][bsg_x];
 
     // Eyeriss buffers
     //
@@ -290,7 +289,7 @@ extern "C" {
       float* src_base = (float*)filter.data_ptr();
       uint32_t* src_strides = filter.get_strides();
       // XXX: hacky -- there is only one channel -- always == 0
-      src_base += 0 * src_strides[1] + (6 - bsg_x) * src_strides[2];
+      src_base += 0 * src_strides[1] + (uint32_t)tile_append * src_strides[2];
 
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
 
@@ -339,7 +338,7 @@ extern "C" {
       float* src_base = (float*)imap.data_ptr();
       uint32_t* src_strides = imap.get_strides();
       // XXX: hacky -- there is only one channel -- always == 0
-      src_base += 0 * src_strides[1] + ((bsg_y-1)+(5-bsg_x)) * src_strides[2];
+      src_base += 0 * src_strides[1] + (uint32_t)tile_append * src_strides[2];
 
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
 
@@ -450,7 +449,7 @@ extern "C" {
 
       float* dest_base = (float*)omap.data_ptr();
       uint32_t* dest_strides = omap.get_strides();
-      dest_base += (bsg_y-2) * dest_strides[2];
+      dest_base += (uint32_t)tile_append * dest_strides[2];
 
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
         float* dest_pass = dest_base + filters * dest_strides[1];
