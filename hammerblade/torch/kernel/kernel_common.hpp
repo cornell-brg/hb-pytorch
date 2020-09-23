@@ -31,8 +31,8 @@
 #include <hb_spatial_for.hpp>
 #include <hb_common.hpp>
 
-__remote void* hb_memcpy(__remote void* NOALIAS dest,
-                         const __remote void* NOALIAS src,
+bsg_attr_remote void* hb_memcpy(bsg_attr_remote void* bsg_attr_noalias dest,
+                         const bsg_attr_remote void* bsg_attr_noalias src,
                          size_t n);
 
 //====================================================================
