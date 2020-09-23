@@ -48,42 +48,26 @@ inline void gemm_main_loop(HBTensor<float, 2> mat1,
     int c2 = mat2.dim(1);
 
     // calculate number of row and col blocks in each matrix
-    int m1_num_blk_per_col = (r1 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m1 per row
-    int m1_num_blk_per_row = (c1 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m1 per col
-    int m2_num_blk_per_col = (r2 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m2 per row
-    int m2_num_blk_per_row = (c2 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m2 per col
-
-    // calculate dimensions of the last row and col block in each matrix
-    int m1_last_blk_dim_x = c1 % BLOCK_DIM == 0 ? BLOCK_DIM : c1 % BLOCK_DIM; // x dimension of last block of mat1
-    int m1_last_blk_dim_y = r1 % BLOCK_DIM == 0 ? BLOCK_DIM : r1 % BLOCK_DIM; // y dimension of last block of mat1
-    int m2_last_blk_dim_x = c2 % BLOCK_DIM == 0 ? BLOCK_DIM : c2 % BLOCK_DIM; // x dimension of last block of mat2
-    int m2_last_blk_dim_y = r2 % BLOCK_DIM == 0 ? BLOCK_DIM : r2 % BLOCK_DIM; // y dimension of last block of mat2
+    int m1_num_blk_per_col = (r1 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m1 per col
+    int m1_num_blk_per_row = (c1 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m1 per row
+    int m2_num_blk_per_col = (r2 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m2 per col
+    int m2_num_blk_per_row = (c2 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m2 per row
 
     for (int i = 0; i < m1_num_blk_per_col; i += SYSTOLIC_Y_DIM) {
       for (int j = 0; j < m2_num_blk_per_row; j += SYSTOLIC_X_DIM) {
         int rr = i + __sys_y;
         int rc = j + __sys_x;
-        int res_dim_y = rr == m1_num_blk_per_col - 1 ? m1_last_blk_dim_y : BLOCK_DIM;
-        int res_dim_x = rc == m2_num_blk_per_row - 1 ? m2_last_blk_dim_x : BLOCK_DIM;
-        int partial_block = (res_dim_y != BLOCK_DIM) || (res_dim_x != BLOCK_DIM);
 
         // init code for each output block
-        if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
-          tile_init();
-        }
+        tile_init();
 
         for (int mat1x = 0; mat1x < m1_num_blk_per_row; mat1x++) {
-            int mid_dim = mat1x == m1_num_blk_per_row - 1 ? m1_last_blk_dim_x : BLOCK_DIM;
-            partial_block = partial_block || (mid_dim != BLOCK_DIM);
-
             // main task
-            tile_task(rr, rc, m1_num_blk_per_col, m2_num_blk_per_row, mat1x, res_dim_x, res_dim_y, mid_dim, partial_block);
+            tile_task(rr, rc, mat1x);
         }
 
         // finishing up code for each output block
-        if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
-          tile_finish(rr, rc, res_dim_x, res_dim_y);
-        }
+        tile_finish(rr, rc);
       }
     }
 }
@@ -156,7 +140,7 @@ extern "C" {
 
     auto tile_init = [&] { reset_sp(sp_result); };
 
-    auto tile_task = [&] (int rr, int rc, int m1_num_blk_per_col, int m2_num_blk_per_row, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
+    auto tile_task = [&] (int rr, int rc, int mat1x) {
 
                           // wait until buffer is loaded
                           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f)), 1);
@@ -164,9 +148,7 @@ extern "C" {
                           if (__bsg_y < SYSTOLIC_Y_DIM) {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
                             // copy mat2 to S
-                            if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
-                              spcpy(sp_mat2_remote, sp_mat2);
-                            }
+                            spcpy(sp_mat2_remote, sp_mat2);
                             asm volatile("": : :"memory");
                             *mat2_f_S   = 1;
                             *mat2_f_S_r = 1;
@@ -179,22 +161,14 @@ extern "C" {
                           if (__bsg_x < SYSTOLIC_X_DIM) {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
                             // copy mat1 to E
-                            if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
-                              spcpy(sp_mat1_remote, sp_mat1);
-                            }
+                            spcpy(sp_mat1_remote, sp_mat1);
                             asm volatile("": : :"memory");
                             *mat1_f_E   = 1;
                             *mat1_f_E_r = 1;
                           }
 
-                          if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
-                            // do compute
-                            if (partial_block) {
-                              compute(sp_result, sp_mat1, sp_mat2, res_dim_y, res_dim_x, mid_dim);
-                            } else {
-                              compute_simple(sp_result, sp_mat1, sp_mat2);
-                            }
-                          }
+                          // do compute
+                          compute_simple(sp_result, sp_mat1, sp_mat2);
 
                           // flag that we are done with the buffer
                           asm volatile("": : :"memory");
@@ -233,17 +207,11 @@ extern "C" {
                           }
                       };
 
-    auto col_dma_task = [&] (int rr, int rc, int m1_num_blk_per_col, int m2_num_blk_per_row, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
+    auto col_dma_task = [&] (int rr, int rc, int mat1x) {
 
                           // wait until buffer is ready
                           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
-                          if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
-                            if (partial_block) {
-                              dram_to_sp(sp_mat2_remote, mat2, mid_dim, res_dim_x, mat1x, rc);
-                            } else {
-                              dram_to_sp_simple(sp_mat2_remote, mat2, mat1x, rc);
-                            }
-                          }
+                          dram_to_sp_simple(sp_mat2_remote, mat2, mat1x, rc);
                           asm volatile("": : :"memory");
                           *mat2_f_S   = 1;
                           *mat2_f_S_r = 1;
@@ -262,17 +230,11 @@ extern "C" {
                           }
                       };
 
-    auto row_dma_task = [&] (int rr, int rc, int m1_num_blk_per_col, int m2_num_blk_per_row, int mat1x, int res_dim_x, int res_dim_y, int mid_dim, int partial_block) {
+    auto row_dma_task = [&] (int rr, int rc, int mat1x) {
 
                           // wait until buffer is ready
                           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
-                          if ((rr < m1_num_blk_per_col) && (rc < m2_num_blk_per_row)) {
-                            if (partial_block) {
-                              dram_to_sp(sp_mat1_remote, mat1, res_dim_y, mid_dim, rr, mat1x);
-                            } else {
-                              dram_to_sp_simple(sp_mat1_remote, mat1, rr, mat1x);
-                            }
-                          }
+                          dram_to_sp_simple(sp_mat1_remote, mat1, rr, mat1x);
                           asm volatile("": : :"memory");
                           *mat1_f_E   = 1;
                           *mat1_f_E_r = 1;
@@ -291,11 +253,11 @@ extern "C" {
                           }
                       };
 
-    auto tile_finish = [&] (int rr, int rc, int res_dim_x, int res_dim_y) {
+    auto tile_finish = [&] (int rr, int rc) {
                             // copy this block back into DRAM
-                            for (int i = 0; i < res_dim_y; i++) {
-                              for (int j = 0; j < res_dim_x; j++) {
-                                result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * res_dim_x + j];
+                            for (int i = 0; i < BLOCK_DIM; i++) {
+                              for (int j = 0; j < BLOCK_DIM; j++) {
+                                result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * BLOCK_DIM + j];
                               }
                             }
                         };
@@ -305,10 +267,10 @@ extern "C" {
       // do nothing
     } else if (__bsg_x == 0 && __bsg_y != 0) {
       // row DMA
-      gemm_main_loop(mat1, mat2, __bsg_x, __bsg_y-1, [] {}, row_dma_task, [] (int rr, int rc, int res_dim_x, int res_dim_y) {});
+      gemm_main_loop(mat1, mat2, __bsg_x, __bsg_y-1, [] {}, row_dma_task, [] (int rr, int rc) {});
     } else if (__bsg_y == 0 && __bsg_x != 0) {
       // col DMA
-      gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y, [] {}, col_dma_task, [] (int rr, int rc, int res_dim_x, int res_dim_y) {});
+      gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y, [] {}, col_dma_task, [] (int rr, int rc) {});
     } else {
       // PE
       gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y-1, tile_init, tile_task, tile_finish);
