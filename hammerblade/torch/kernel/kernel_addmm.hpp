@@ -83,43 +83,249 @@ inline void compute_simple(
         dest[dest_base + 3 * BLOCK_DIM + 3] = res33;
       }
     }
-    /*
-    for (int i = 0; i < BLOCK_DIM; i++) {
-        int dest_row_offset = i * BLOCK_DIM;
-        int mat1_row_offset = i * BLOCK_DIM;
-        register float res0 = dest[dest_row_offset + 0];
-        register float res1 = dest[dest_row_offset + 1];
-        register float res2 = dest[dest_row_offset + 2];
-        register float res3 = dest[dest_row_offset + 3];
-        register float res4 = dest[dest_row_offset + 4];
-        register float res5 = dest[dest_row_offset + 5];
-        register float res6 = dest[dest_row_offset + 6];
-        register float res7 = dest[dest_row_offset + 7];
-        int mat2_row_offset = 0;
-        for (int k = 0; k < BLOCK_DIM; k++) {
-            register float mat1 = sp_mat1[mat1_row_offset + k];
-            res0 += (mat1 * sp_mat2[mat2_row_offset + 0]);
-            res1 += (mat1 * sp_mat2[mat2_row_offset + 1]);
-            res2 += (mat1 * sp_mat2[mat2_row_offset + 2]);
-            res3 += (mat1 * sp_mat2[mat2_row_offset + 3]);
-            res4 += (mat1 * sp_mat2[mat2_row_offset + 4]);
-            res5 += (mat1 * sp_mat2[mat2_row_offset + 5]);
-            res6 += (mat1 * sp_mat2[mat2_row_offset + 6]);
-            res7 += (mat1 * sp_mat2[mat2_row_offset + 7]);
-            mat2_row_offset += BLOCK_DIM;
-        }
-        dest[dest_row_offset + 0] = res0;
-        dest[dest_row_offset + 1] = res1;
-        dest[dest_row_offset + 2] = res2;
-        dest[dest_row_offset + 3] = res3;
-        dest[dest_row_offset + 4] = res4;
-        dest[dest_row_offset + 5] = res5;
-        dest[dest_row_offset + 6] = res6;
-        dest[dest_row_offset + 7] = res7;
-    }
-    */
 }
 
+inline void compute_and_copy_both(
+          float* dest,
+          float* sp_mat1,
+          float* sp_mat2,
+          float* remote_mat1,
+          float* remote_mat2) {
+    for (int iii = 0; iii < BLOCK_DIM; iii += 4) {
+      for(int jjj = 0; jjj < BLOCK_DIM; jjj += 4) {
+        int dest_base = iii * BLOCK_DIM + jjj;
+        register float res00 = dest[dest_base + 0             + 0];
+        register float res01 = dest[dest_base + 0             + 1];
+        register float res02 = dest[dest_base + 0             + 2];
+        register float res03 = dest[dest_base + 0             + 3];
+        register float res10 = dest[dest_base + BLOCK_DIM     + 0];
+        register float res11 = dest[dest_base + BLOCK_DIM     + 1];
+        register float res12 = dest[dest_base + BLOCK_DIM     + 2];
+        register float res13 = dest[dest_base + BLOCK_DIM     + 3];
+        register float res20 = dest[dest_base + 2 * BLOCK_DIM + 0];
+        register float res21 = dest[dest_base + 2 * BLOCK_DIM + 1];
+        register float res22 = dest[dest_base + 2 * BLOCK_DIM + 2];
+        register float res23 = dest[dest_base + 2 * BLOCK_DIM + 3];
+        register float res30 = dest[dest_base + 3 * BLOCK_DIM + 0];
+        register float res31 = dest[dest_base + 3 * BLOCK_DIM + 1];
+        register float res32 = dest[dest_base + 3 * BLOCK_DIM + 2];
+        register float res33 = dest[dest_base + 3 * BLOCK_DIM + 3];
+        for(int kkk = 0; kkk < BLOCK_DIM; kkk++) {
+          // for iiii in 0...4
+          //   for jjjj in 0...4
+          int mat1_base = kkk + iii * BLOCK_DIM;
+          register float mat1_0 = sp_mat1[mat1_base + 0];
+          register float mat1_1 = sp_mat1[mat1_base + BLOCK_DIM];
+          register float mat1_2 = sp_mat1[mat1_base + 2 * BLOCK_DIM];
+          register float mat1_3 = sp_mat1[mat1_base + 3 * BLOCK_DIM];
+          remote_mat1[mat1_base + 0]             = mat1_0;
+          remote_mat1[mat1_base + BLOCK_DIM]     = mat1_1;
+          remote_mat1[mat1_base + 2 * BLOCK_DIM] = mat1_2;
+          remote_mat1[mat1_base + 3 * BLOCK_DIM] = mat1_3;
+          int mat2_base = kkk * BLOCK_DIM + jjj;
+          register float mat2_0 = sp_mat2[mat2_base + 0];
+          register float mat2_1 = sp_mat2[mat2_base + 1];
+          register float mat2_2 = sp_mat2[mat2_base + 2];
+          register float mat2_3 = sp_mat2[mat2_base + 3];
+          remote_mat2[mat2_base + 0] = mat2_0;
+          remote_mat2[mat2_base + 1] = mat2_1;
+          remote_mat2[mat2_base + 2] = mat2_2;
+          remote_mat2[mat2_base + 3] = mat2_3;
+          // compute
+          res00 += mat1_0 * mat2_0;
+          res01 += mat1_0 * mat2_1;
+          res02 += mat1_0 * mat2_2;
+          res03 += mat1_0 * mat2_3;
+          res10 += mat1_1 * mat2_0;
+          res11 += mat1_1 * mat2_1;
+          res12 += mat1_1 * mat2_2;
+          res13 += mat1_1 * mat2_3;
+          res20 += mat1_2 * mat2_0;
+          res21 += mat1_2 * mat2_1;
+          res22 += mat1_2 * mat2_2;
+          res23 += mat1_2 * mat2_3;
+          res30 += mat1_3 * mat2_0;
+          res31 += mat1_3 * mat2_1;
+          res32 += mat1_3 * mat2_2;
+          res33 += mat1_3 * mat2_3;
+        }
+        dest[dest_base + 0             + 0] = res00;
+        dest[dest_base + 0             + 1] = res01;
+        dest[dest_base + 0             + 2] = res02;
+        dest[dest_base + 0             + 3] = res03;
+        dest[dest_base + BLOCK_DIM     + 0] = res10;
+        dest[dest_base + BLOCK_DIM     + 1] = res11;
+        dest[dest_base + BLOCK_DIM     + 2] = res12;
+        dest[dest_base + BLOCK_DIM     + 3] = res13;
+        dest[dest_base + 2 * BLOCK_DIM + 0] = res20;
+        dest[dest_base + 2 * BLOCK_DIM + 1] = res21;
+        dest[dest_base + 2 * BLOCK_DIM + 2] = res22;
+        dest[dest_base + 2 * BLOCK_DIM + 3] = res23;
+        dest[dest_base + 3 * BLOCK_DIM + 0] = res30;
+        dest[dest_base + 3 * BLOCK_DIM + 1] = res31;
+        dest[dest_base + 3 * BLOCK_DIM + 2] = res32;
+        dest[dest_base + 3 * BLOCK_DIM + 3] = res33;
+      }
+    }
+}
+
+inline void compute_and_copy_east(
+          float* dest,
+          float* sp_mat1,
+          float* sp_mat2,
+          float* remote_mat1) {
+    for (int iii = 0; iii < BLOCK_DIM; iii += 4) {
+      for(int jjj = 0; jjj < BLOCK_DIM; jjj += 4) {
+        int dest_base = iii * BLOCK_DIM + jjj;
+        register float res00 = dest[dest_base + 0             + 0];
+        register float res01 = dest[dest_base + 0             + 1];
+        register float res02 = dest[dest_base + 0             + 2];
+        register float res03 = dest[dest_base + 0             + 3];
+        register float res10 = dest[dest_base + BLOCK_DIM     + 0];
+        register float res11 = dest[dest_base + BLOCK_DIM     + 1];
+        register float res12 = dest[dest_base + BLOCK_DIM     + 2];
+        register float res13 = dest[dest_base + BLOCK_DIM     + 3];
+        register float res20 = dest[dest_base + 2 * BLOCK_DIM + 0];
+        register float res21 = dest[dest_base + 2 * BLOCK_DIM + 1];
+        register float res22 = dest[dest_base + 2 * BLOCK_DIM + 2];
+        register float res23 = dest[dest_base + 2 * BLOCK_DIM + 3];
+        register float res30 = dest[dest_base + 3 * BLOCK_DIM + 0];
+        register float res31 = dest[dest_base + 3 * BLOCK_DIM + 1];
+        register float res32 = dest[dest_base + 3 * BLOCK_DIM + 2];
+        register float res33 = dest[dest_base + 3 * BLOCK_DIM + 3];
+        for(int kkk = 0; kkk < BLOCK_DIM; kkk++) {
+          // for iiii in 0...4
+          //   for jjjj in 0...4
+          int mat1_base = kkk + iii * BLOCK_DIM;
+          register float mat1_0 = sp_mat1[mat1_base + 0];
+          register float mat1_1 = sp_mat1[mat1_base + BLOCK_DIM];
+          register float mat1_2 = sp_mat1[mat1_base + 2 * BLOCK_DIM];
+          register float mat1_3 = sp_mat1[mat1_base + 3 * BLOCK_DIM];
+          remote_mat1[mat1_base + 0]             = mat1_0;
+          remote_mat1[mat1_base + BLOCK_DIM]     = mat1_1;
+          remote_mat1[mat1_base + 2 * BLOCK_DIM] = mat1_2;
+          remote_mat1[mat1_base + 3 * BLOCK_DIM] = mat1_3;
+          int mat2_base = kkk * BLOCK_DIM + jjj;
+          register float mat2_0 = sp_mat2[mat2_base + 0];
+          register float mat2_1 = sp_mat2[mat2_base + 1];
+          register float mat2_2 = sp_mat2[mat2_base + 2];
+          register float mat2_3 = sp_mat2[mat2_base + 3];
+          // compute
+          res00 += mat1_0 * mat2_0;
+          res01 += mat1_0 * mat2_1;
+          res02 += mat1_0 * mat2_2;
+          res03 += mat1_0 * mat2_3;
+          res10 += mat1_1 * mat2_0;
+          res11 += mat1_1 * mat2_1;
+          res12 += mat1_1 * mat2_2;
+          res13 += mat1_1 * mat2_3;
+          res20 += mat1_2 * mat2_0;
+          res21 += mat1_2 * mat2_1;
+          res22 += mat1_2 * mat2_2;
+          res23 += mat1_2 * mat2_3;
+          res30 += mat1_3 * mat2_0;
+          res31 += mat1_3 * mat2_1;
+          res32 += mat1_3 * mat2_2;
+          res33 += mat1_3 * mat2_3;
+        }
+        dest[dest_base + 0             + 0] = res00;
+        dest[dest_base + 0             + 1] = res01;
+        dest[dest_base + 0             + 2] = res02;
+        dest[dest_base + 0             + 3] = res03;
+        dest[dest_base + BLOCK_DIM     + 0] = res10;
+        dest[dest_base + BLOCK_DIM     + 1] = res11;
+        dest[dest_base + BLOCK_DIM     + 2] = res12;
+        dest[dest_base + BLOCK_DIM     + 3] = res13;
+        dest[dest_base + 2 * BLOCK_DIM + 0] = res20;
+        dest[dest_base + 2 * BLOCK_DIM + 1] = res21;
+        dest[dest_base + 2 * BLOCK_DIM + 2] = res22;
+        dest[dest_base + 2 * BLOCK_DIM + 3] = res23;
+        dest[dest_base + 3 * BLOCK_DIM + 0] = res30;
+        dest[dest_base + 3 * BLOCK_DIM + 1] = res31;
+        dest[dest_base + 3 * BLOCK_DIM + 2] = res32;
+        dest[dest_base + 3 * BLOCK_DIM + 3] = res33;
+      }
+    }
+}
+
+inline void compute_and_copy_south(
+          float* dest,
+          float* sp_mat1,
+          float* sp_mat2,
+          float* remote_mat2) {
+    for (int iii = 0; iii < BLOCK_DIM; iii += 4) {
+      for(int jjj = 0; jjj < BLOCK_DIM; jjj += 4) {
+        int dest_base = iii * BLOCK_DIM + jjj;
+        register float res00 = dest[dest_base + 0             + 0];
+        register float res01 = dest[dest_base + 0             + 1];
+        register float res02 = dest[dest_base + 0             + 2];
+        register float res03 = dest[dest_base + 0             + 3];
+        register float res10 = dest[dest_base + BLOCK_DIM     + 0];
+        register float res11 = dest[dest_base + BLOCK_DIM     + 1];
+        register float res12 = dest[dest_base + BLOCK_DIM     + 2];
+        register float res13 = dest[dest_base + BLOCK_DIM     + 3];
+        register float res20 = dest[dest_base + 2 * BLOCK_DIM + 0];
+        register float res21 = dest[dest_base + 2 * BLOCK_DIM + 1];
+        register float res22 = dest[dest_base + 2 * BLOCK_DIM + 2];
+        register float res23 = dest[dest_base + 2 * BLOCK_DIM + 3];
+        register float res30 = dest[dest_base + 3 * BLOCK_DIM + 0];
+        register float res31 = dest[dest_base + 3 * BLOCK_DIM + 1];
+        register float res32 = dest[dest_base + 3 * BLOCK_DIM + 2];
+        register float res33 = dest[dest_base + 3 * BLOCK_DIM + 3];
+        for(int kkk = 0; kkk < BLOCK_DIM; kkk++) {
+          // for iiii in 0...4
+          //   for jjjj in 0...4
+          int mat1_base = kkk + iii * BLOCK_DIM;
+          register float mat1_0 = sp_mat1[mat1_base + 0];
+          register float mat1_1 = sp_mat1[mat1_base + BLOCK_DIM];
+          register float mat1_2 = sp_mat1[mat1_base + 2 * BLOCK_DIM];
+          register float mat1_3 = sp_mat1[mat1_base + 3 * BLOCK_DIM];
+          int mat2_base = kkk * BLOCK_DIM + jjj;
+          register float mat2_0 = sp_mat2[mat2_base + 0];
+          register float mat2_1 = sp_mat2[mat2_base + 1];
+          register float mat2_2 = sp_mat2[mat2_base + 2];
+          register float mat2_3 = sp_mat2[mat2_base + 3];
+          remote_mat2[mat2_base + 0] = mat2_0;
+          remote_mat2[mat2_base + 1] = mat2_1;
+          remote_mat2[mat2_base + 2] = mat2_2;
+          remote_mat2[mat2_base + 3] = mat2_3;
+          // compute
+          res00 += mat1_0 * mat2_0;
+          res01 += mat1_0 * mat2_1;
+          res02 += mat1_0 * mat2_2;
+          res03 += mat1_0 * mat2_3;
+          res10 += mat1_1 * mat2_0;
+          res11 += mat1_1 * mat2_1;
+          res12 += mat1_1 * mat2_2;
+          res13 += mat1_1 * mat2_3;
+          res20 += mat1_2 * mat2_0;
+          res21 += mat1_2 * mat2_1;
+          res22 += mat1_2 * mat2_2;
+          res23 += mat1_2 * mat2_3;
+          res30 += mat1_3 * mat2_0;
+          res31 += mat1_3 * mat2_1;
+          res32 += mat1_3 * mat2_2;
+          res33 += mat1_3 * mat2_3;
+        }
+        dest[dest_base + 0             + 0] = res00;
+        dest[dest_base + 0             + 1] = res01;
+        dest[dest_base + 0             + 2] = res02;
+        dest[dest_base + 0             + 3] = res03;
+        dest[dest_base + BLOCK_DIM     + 0] = res10;
+        dest[dest_base + BLOCK_DIM     + 1] = res11;
+        dest[dest_base + BLOCK_DIM     + 2] = res12;
+        dest[dest_base + BLOCK_DIM     + 3] = res13;
+        dest[dest_base + 2 * BLOCK_DIM + 0] = res20;
+        dest[dest_base + 2 * BLOCK_DIM + 1] = res21;
+        dest[dest_base + 2 * BLOCK_DIM + 2] = res22;
+        dest[dest_base + 2 * BLOCK_DIM + 3] = res23;
+        dest[dest_base + 3 * BLOCK_DIM + 0] = res30;
+        dest[dest_base + 3 * BLOCK_DIM + 1] = res31;
+        dest[dest_base + 3 * BLOCK_DIM + 2] = res32;
+        dest[dest_base + 3 * BLOCK_DIM + 3] = res33;
+      }
+    }
+}
 // XXX: in the test case, 1024x32 @ 32x1024 case, there is no partial blocks
 
 inline void compute(

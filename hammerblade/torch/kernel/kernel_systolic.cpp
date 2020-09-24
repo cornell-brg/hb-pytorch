@@ -88,7 +88,9 @@ extern "C" {
     // 1 -- row DMA
     // 2 -- col DMA
     // 3 -- compute
+    // 4 -- compute and cpy concurrently
 
+    /*
     char systolic_6x14_gemm[8][16] = {
       {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0},
       {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
@@ -97,6 +99,18 @@ extern "C" {
       {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
       {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
       {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    };
+    */
+
+    char systolic_6x14_gemm_compute_and_cpy[8][16] = {
+      {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0},
+      {1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
+      {1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
+      {1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
+      {1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
+      {1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
+      {1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
       {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
@@ -117,7 +131,7 @@ extern "C" {
     };
 
     // Activate config
-    char (&mc_config)[8][16] = systolic_6x14_gemm;
+    char (&mc_config)[8][16] = systolic_6x14_gemm_compute_and_cpy;
     char (&mc_append)[8][16] = systolic_6x14_gemm_appdenix;
     char tile_config = mc_config[bsg_y][bsg_x];
     char tile_append = mc_append[bsg_y][bsg_x];
@@ -244,6 +258,82 @@ extern "C" {
                           }
                       };
 
+    auto tile_task_compute_while_cpy = [&] (int rr, int rc, int mat1x) {
+
+                          // wait until buffer is loaded
+                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f)), 1);
+
+                          // wait until buffer is loaded
+                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f)), 1);
+
+                          if (tile_append == 0) {
+                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
+                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
+                            // compute and cpy
+                            compute_and_copy_both(sp_result, sp_mat1, sp_mat2, sp_mat1_remote, sp_mat2_remote);
+                            asm volatile("": : :"memory");
+                            *mat2_f_S   = 1;
+                            *mat2_f_S_r = 1;
+                            *mat1_f_E   = 1;
+                            *mat1_f_E_r = 1;
+                          }
+                          // copy to right only
+                          else if (tile_append == 1) {
+                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
+                            compute_and_copy_east(sp_result, sp_mat1, sp_mat2, sp_mat1_remote);
+                            asm volatile("": : :"memory");
+                            *mat1_f_E   = 1;
+                            *mat1_f_E_r = 1;
+                          }
+                          // copy downward only
+                          else if (tile_append == 2) {
+                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
+                            compute_and_copy_south(sp_result, sp_mat1, sp_mat2, sp_mat2_remote);
+                            asm volatile("": : :"memory");
+                            *mat2_f_S   = 1;
+                            *mat2_f_S_r = 1;
+                          }
+                          // copy nothing case
+                          else if (tile_append == 3) {
+                            compute_simple(sp_result, sp_mat1, sp_mat2);
+                          }
+
+                          // flag that we are done with the buffer
+                          asm volatile("": : :"memory");
+                          *mat1_f     = 0;
+                          *mat1_f_W_r = 0;
+                          *mat2_f     = 0;
+                          *mat2_f_N_r = 0;
+
+                          // switch buffer
+                          if (sp_mat1 == sp_mat1_A) {
+                            sp_mat1    = sp_mat1_B;
+                            sp_mat2    = sp_mat2_B;
+                            sp_mat1_remote = sp_mat1_B_remote;
+                            sp_mat2_remote = sp_mat2_B_remote;
+                            mat1_f     = &mat1_B_f;
+                            mat1_f_E   = &mat1_B_f_E;
+                            mat1_f_E_r =  mat1_B_f_E_r;
+                            mat1_f_W_r =  mat1_B_f_W_r;
+                            mat2_f     = &mat2_B_f;
+                            mat2_f_S   = &mat2_B_f_S;
+                            mat2_f_S_r =  mat2_B_f_S_r;
+                            mat2_f_N_r =  mat2_B_f_N_r;
+                          } else {
+                            sp_mat1    = sp_mat1_A;
+                            sp_mat2    = sp_mat2_A;
+                            sp_mat1_remote = sp_mat1_A_remote;
+                            sp_mat2_remote = sp_mat2_A_remote;
+                            mat1_f     = &mat1_A_f;
+                            mat1_f_E   = &mat1_A_f_E;
+                            mat1_f_E_r =  mat1_A_f_E_r;
+                            mat1_f_W_r =  mat1_A_f_W_r;
+                            mat2_f     = &mat2_A_f;
+                            mat2_f_S   = &mat2_A_f_S;
+                            mat2_f_S_r =  mat2_A_f_S_r;
+                            mat2_f_N_r =  mat2_A_f_N_r;
+                          }
+                      };
     auto col_dma_task = [&] (int rr, int rc, int mat1x) {
 
                           // wait until buffer is ready
@@ -319,6 +409,9 @@ extern "C" {
         // PE
         gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y-1, tile_init, tile_task, tile_finish);
         break;
+      case 4:
+        // PE but do copy and compute at the same time
+        gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y-1, tile_init, tile_task_compute_while_cpy, tile_finish);
     }
 
 
