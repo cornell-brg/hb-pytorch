@@ -62,8 +62,8 @@ inline void gemm_main_loop(HBTensor<float, 2> mat1,
         tile_init();
 
         for (int mat1x = 0; mat1x < m1_num_blk_per_row; mat1x++) {
-            // main task
-            tile_task(rr, rc, mat1x);
+          // main task
+          tile_task(rr, rc, mat1x);
         }
 
         // finishing up code for each output block
@@ -82,6 +82,45 @@ extern "C" {
     auto mat1 = HBTensor<float, 2>(_mat1);
     auto mat2 = HBTensor<float, 2>(_mat2);
     auto result = HBTensor<float, 2>(_result);
+
+    // Config
+    // 0 -- idle
+    // 1 -- row DMA
+    // 2 -- col DMA
+    // 3 -- compute
+
+    char systolic_6x14_gemm[8][16] = {
+      {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    // Appendix
+    // 0000 -- normal passing
+    // 0001 -- do not pass down
+    // 0010 -- do not pass right
+
+    char systolic_6x14_gemm_appdenix[8][16] = {
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    // Activate config
+    char (&mc_config)[8][16] = systolic_6x14_gemm;
+    char (&mc_append)[8][16] = systolic_6x14_gemm_appdenix;
+    char tile_config = mc_config[bsg_y][bsg_x];
+    char tile_append = mc_append[bsg_y][bsg_x];
 
     // buffers -- with double buffering
     float sp_result[BLOCK_DIM * BLOCK_DIM];
@@ -136,8 +175,6 @@ extern "C" {
     volatile unsigned int *mat2_f_S_r =  mat2_A_f_S_r;
     volatile unsigned int *mat2_f_N_r =  mat2_A_f_N_r;
 
-    bsg_cuda_print_stat_kernel_start();
-
     auto tile_init = [&] { reset_sp(sp_result); };
 
     auto tile_task = [&] (int rr, int rc, int mat1x) {
@@ -145,7 +182,7 @@ extern "C" {
                           // wait until buffer is loaded
                           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f)), 1);
 
-                          if (__bsg_y < SYSTOLIC_Y_DIM) {
+                          if (!(tile_append & 0x1)) {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
                             // copy mat2 to S
                             spcpy(sp_mat2_remote, sp_mat2);
@@ -158,7 +195,7 @@ extern "C" {
                           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f)), 1);
 
                           // copy what we have worked on to the next tile
-                          if (__bsg_x < SYSTOLIC_X_DIM) {
+                          if (!(tile_append & 0x2)) {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
                             // copy mat1 to E
                             spcpy(sp_mat1_remote, sp_mat1);
@@ -262,19 +299,41 @@ extern "C" {
                             }
                         };
 
+
+    bsg_cuda_print_stat_kernel_start();
+
     // schedule
-    if (__bsg_id == 0 || __bsg_x > SYSTOLIC_X_DIM || __bsg_y > SYSTOLIC_Y_DIM) {
-      // do nothing
-    } else if (__bsg_x == 0 && __bsg_y != 0) {
-      // row DMA
-      gemm_main_loop(mat1, mat2, __bsg_x, __bsg_y-1, [] {}, row_dma_task, [] (int rr, int rc) {});
-    } else if (__bsg_y == 0 && __bsg_x != 0) {
-      // col DMA
-      gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y, [] {}, col_dma_task, [] (int rr, int rc) {});
-    } else {
-      // PE
-      gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y-1, tile_init, tile_task, tile_finish);
+    switch (tile_config) {
+      case 0:
+        // nothing
+        break;
+      case 1:
+        // row DMA
+        gemm_main_loop(mat1, mat2, __bsg_x, __bsg_y-1, [] {}, row_dma_task, [] (int rr, int rc) {});
+        break;
+      case 2:
+        // col DMA
+        gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y, [] {}, col_dma_task, [] (int rr, int rc) {});
+        break;
+      case 3:
+        // PE
+        gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y-1, tile_init, tile_task, tile_finish);
+        break;
     }
+
+
+    // if (__bsg_id == 0 || __bsg_x > SYSTOLIC_X_DIM || __bsg_y > SYSTOLIC_Y_DIM) {
+    //   // do nothing
+    // } else if (__bsg_x == 0 && __bsg_y != 0) {
+    //   // row DMA
+    //   gemm_main_loop(mat1, mat2, __bsg_x, __bsg_y-1, [] {}, row_dma_task, [] (int rr, int rc) {});
+    // } else if (__bsg_y == 0 && __bsg_x != 0) {
+    //   // col DMA
+    //   gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y, [] {}, col_dma_task, [] (int rr, int rc) {});
+    // } else {
+    //   // PE
+    //   gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y-1, tile_init, tile_task, tile_finish);
+    // }
 
     bsg_cuda_print_stat_kernel_end();
 
