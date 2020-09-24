@@ -270,7 +270,8 @@ extern "C" {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
                             // compute and cpy
-                            compute_and_copy_both(sp_result, sp_mat1, sp_mat2, sp_mat1_remote, sp_mat2_remote);
+                            // template <bool EAST, bool SOUTH>
+                            compute_and_copy<true,true>(sp_result, sp_mat1, sp_mat2, sp_mat1_remote, sp_mat2_remote);
                             asm volatile("": : :"memory");
                             *mat2_f_S   = 1;
                             *mat2_f_S_r = 1;
@@ -280,7 +281,8 @@ extern "C" {
                           // copy to right only
                           else if (tile_append == 1) {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
-                            compute_and_copy_east(sp_result, sp_mat1, sp_mat2, sp_mat1_remote);
+                            // template <bool EAST, bool SOUTH>
+                            compute_and_copy<true,false>(sp_result, sp_mat1, sp_mat2, sp_mat1_remote, sp_mat2_remote);
                             asm volatile("": : :"memory");
                             *mat1_f_E   = 1;
                             *mat1_f_E_r = 1;
@@ -288,7 +290,8 @@ extern "C" {
                           // copy downward only
                           else if (tile_append == 2) {
                             bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
-                            compute_and_copy_south(sp_result, sp_mat1, sp_mat2, sp_mat2_remote);
+                            // template <bool EAST, bool SOUTH>
+                            compute_and_copy<false,true>(sp_result, sp_mat1, sp_mat2, sp_mat1_remote, sp_mat2_remote);
                             asm volatile("": : :"memory");
                             *mat2_f_S   = 1;
                             *mat2_f_S_r = 1;
