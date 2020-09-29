@@ -60,7 +60,7 @@ for i in range(len(route)):
   print(sh_cmd)
   os.system(sh_cmd)
   # run uw's profiling data tool
-  sh_cmd = "(cd " + hb_name + "; python /home/zz546/bsg_bladerunner/bsg_manycore/software/py/vanilla_parser/stats_parser.py --stats vanilla_stats.csv --vcache-stats vcache_stats.csv)"
+  sh_cmd = "(cd " + hb_name + "; python /home/zz546/bsg_bladerunner/bsg_manycore/software/py/vanilla_parser/stats_parser.py --stats vanilla_stats.csv --vcache-stats vcache_stats.csv --tile)"
   print(sh_cmd)
   os.system(sh_cmd)
   # collect output
