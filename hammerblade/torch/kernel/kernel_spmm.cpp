@@ -1,6 +1,6 @@
 //============================================================================
-// Sparse matrix multiply dense matrix kernel
-// 04/05/2020 Zhongyuan Zhao, Michael Rivera (zz546@cornell.edu)
+// Sparse matrix multiply dense matrix (SpMM) kernel
+// 04/05/2020 Zhongyuan Zhao (zz546@cornell.edu)
 //============================================================================
 
 #include <kernel_common.hpp>

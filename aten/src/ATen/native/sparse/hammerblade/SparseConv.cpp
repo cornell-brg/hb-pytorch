@@ -1,3 +1,7 @@
+//============================================================================
+// Pytorch C++ layer for sparse convolution operator
+// 05/08/2020 Zhongyuan Zhao (zz546@cornell.edu)
+//============================================================================
 #include <ATen/ATen.h>
 #include <ATen/NativeFunctions.h>
 #include <ATen/native/sparse/SparseTensorMath.h>

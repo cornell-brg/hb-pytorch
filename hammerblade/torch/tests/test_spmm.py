@@ -1,3 +1,7 @@
+"""
+Unit tests for torch.mm kernel, specifically, spmm operation
+04/05/2020 Zhongyuan Zhao (zz546@cornell.edu)
+"""
 import torch 
 
 #We select three test functions to test torch.mm and torch.sparse.mm for sparse mm tensor operation

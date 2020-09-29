@@ -1,3 +1,7 @@
+//============================================================================
+// Pytorch C++ layer for low level data copy for sparse tensor
+// 07/09/2020 Zhongyuan Zhao (zz546@cornell.edu)
+//============================================================================
 #include <ATen/ATen.h>
 #include <ATen/Dispatch.h>
 #include <ATen/native/Resize.h>

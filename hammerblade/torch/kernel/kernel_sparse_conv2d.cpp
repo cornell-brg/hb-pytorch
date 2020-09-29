@@ -1,6 +1,6 @@
 //====================================================================
-// Sparse convolution kernel
-// 05/08/2020 Zhongyuan Zhao
+// The direct pparse convolution kernel
+// 05/08/2020 Zhongyuan Zhao (zz546@cornell.edu)
 //====================================================================
 
 #include <kernel_common.hpp>

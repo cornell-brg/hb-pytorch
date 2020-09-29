@@ -1,3 +1,7 @@
+//============================================================================
+// Pytorch C++ layer for elementwise sparse tensor operators
+// 03/22/2020 Zhongyuan Zhao (zz546@cornell.edu)
+//============================================================================
 #include <ATen/ATen.h>
 #include <ATen/NativeFunctions.h>
 #include <ATen/hammerblade/HammerBladeContext.h>

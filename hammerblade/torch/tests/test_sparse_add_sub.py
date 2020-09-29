@@ -1,7 +1,6 @@
 """
-Zhang-Group tests on Pytorch => tests of offloading sparse kernels
-March 22, 2020
-Zhongyuan Zhao
+Unit test for torch.add/torch.sub kernels
+03/22/2020 Zhongyuan Zhao (zz546@cornell.edu)
 """
 
 import torch

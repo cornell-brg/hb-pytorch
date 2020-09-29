@@ -1,6 +1,6 @@
 """
 Unit tests for sddmm kernel
-06/30/2020 Andrew Pareles (amp342@cornell.edu)
+07/30/2020 Andrew Pareles (amp342@cornell.edu)
 """
 import torch
 
@@ -28,10 +28,11 @@ def _test_torch_sddmm(a, b, c):
     got_hb = torch.sddmm(ah, bh, ch)
     got_device = got_hb.device
     got_tensor = got_hb.cpu()
-    print(got_tensor)
-    print(expected_tensor)
     assert got_device == torch.device("hammerblade")
     assert torch.equal(got_tensor, expected_tensor)
+    # compare with CPU
+    expected_tensor_cpu = torch.sddmm(a, b, c)
+    assert torch.equal(got_tensor, expected_tensor_cpu)
 
 
 def test_torch_sddmm_1():
