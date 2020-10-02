@@ -8,7 +8,7 @@
 namespace at { namespace native {
 namespace {
 
-void and_kernel_hb(TensorIterator& iter) {
+static void and_kernel_hb(TensorIterator& iter) {
   AT_DISPATCH_FLOAT_AND_INTS(iter.dtype(), "and_hb", [&]() {
       offload_iterator_reduce_op_impl<scalar_t>(iter, "tensorlib_and");
       });
