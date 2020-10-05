@@ -18,6 +18,7 @@ template<int N, typename T>
 struct Unroll {
   inline static void reset_buffer(T* buf);
   inline static void fill_buffer(T* src, T* buf);
+  inline static void drain_buffer(T* buf, T* dest);
 };
 
 template<int N, typename T>
@@ -32,10 +33,17 @@ inline void Unroll<N, T>::fill_buffer(T* src, T* buf) {
   Unroll<N-1, T>::fill_buffer(src, buf);
 }
 
+template<int N, typename T>
+inline void Unroll<N, T>::drain_buffer(T* buf, T* dest) {
+  ((bsg_attr_remote T*) dest)[N] = buf[N];
+  Unroll<N-1, T>::drain_buffer(buf, dest);
+}
+
 template<typename T>
 struct Unroll<0, T> {
   inline static void reset_buffer(T* buf);
   inline static void fill_buffer(T* src, T* buf);
+  inline static void drain_buffer(T* buf, T* dest);
 };
 
 template<typename T>
@@ -45,8 +53,14 @@ inline void Unroll<0, T>::reset_buffer(T* buf) {
 
 template<typename T>
 inline void Unroll<0, T>::fill_buffer(T* src, T* buf) {
-  buf[0] = src[0];
+  buf[0] = ((bsg_attr_remote T*) src)[0];
 }
+
+template<typename T>
+inline void Unroll<0, T>::drain_buffer(T* buf, T* dest) {
+  ((bsg_attr_remote T*) dest)[0] = buf[0];
+}
+
 
 // conv related helpers
 
@@ -69,6 +83,15 @@ inline void fill_imap_buffer(float* src, float* buf, size_t y_step) {
     Unroll<DIM-1, float>::fill_buffer(src, buf);
     buf += DIM;
     src += y_step;
+  }
+}
+
+template<int DIM>
+inline void drain_omap_buffer(float* buf, float* dest, size_t y_step) {
+  for (size_t i = 0; i < DIM; i++) {
+    Unroll<DIM-1, float>::drain_buffer(buf, dest);
+    buf += DIM;
+    dest += y_step;
   }
 }
 
@@ -117,10 +140,36 @@ extern "C" {
     hb_assert(NUM_FILTERS == Cout);
 
 
+    auto filterDMA = [&](size_t filter_id, size_t channel_id) {
+      float* filter_src_base = (float*)filter.data_ptr();
+      uint32_t* filter_src_strides = filter.get_strides();
+      filter_src_base += filter_id * filter_src_strides[0] + channel_id * filter_src_strides[1];
+      fill_filter_buffer<FILTER_DIM>(filter_src_base, filter_buf);
+    };
+
+    auto imapDMA = [&](size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
+      size_t imap_x = block_x * BLOCK_DIM;
+      size_t imap_y = block_y * BLOCK_DIM;
+      float* imap_src_base = (float*)imap.data_ptr();
+      uint32_t* imap_src_strides = imap.get_strides();
+      imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
+      imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
+      size_t y_step = imap_src_strides[2];
+      fill_imap_buffer<IMAP_DIM>(imap_src_base, imap_buf, y_step);
+    };
+
+    auto omapDMA = [&](size_t image_id, size_t filter_id, size_t block_x, size_t block_y) {
+      size_t omap_x = block_x * BLOCK_DIM;
+      size_t omap_y = block_y * BLOCK_DIM;
+      float* omap_src_base = (float*)omap.data_ptr();
+      uint32_t* omap_src_strides = omap.get_strides();
+      omap_src_base += image_id * omap_src_strides[0] + filter_id * omap_src_strides[1];
+      omap_src_base += omap_y * omap_src_strides[2] + omap_x * omap_src_strides[3];
+      size_t y_step = omap_src_strides[2];
+      drain_omap_buffer<BLOCK_DIM>(omap_buf, omap_src_base, y_step);
+    };
+
     bsg_cuda_print_stat_kernel_start();
-
-
-    std::cout << "(BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM) = " << (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM) << std::endl;
 
     // main loop
     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
@@ -141,20 +190,10 @@ extern "C" {
         for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
 
           // read in the image
-          size_t imap_x = block_x * BLOCK_DIM;
-          size_t imap_y = block_y * BLOCK_DIM;
-          float* imap_src_base = (float*)imap.data_ptr();
-          uint32_t* imap_src_strides = imap.get_strides();
-          imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
-          imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
-          size_t y_step = imap_src_strides[2];
-          fill_imap_buffer<IMAP_DIM>(imap_src_base, imap_buf, y_step);
+          imapDMA(image_id, channel_id, block_x, block_y);
 
           // read in the filter
-          float* filter_src_base = (float*)filter.data_ptr();
-          uint32_t* filter_src_strides = filter.get_strides();
-          filter_src_base += filter_id * filter_src_strides[0] + channel_id * filter_src_strides[1];
-          fill_filter_buffer<FILTER_DIM>(filter_src_base, filter_buf);
+          filterDMA(filter_id, channel_id);
 
           // do naive conv 2D on these buffers
           for (size_t y = 0; y < BLOCK_DIM; y++) {
@@ -172,18 +211,8 @@ extern "C" {
         } // channel
 
         // write omap back
-        size_t omap_x = block_x * BLOCK_DIM;
-        size_t omap_x_end = omap_x + BLOCK_DIM;
-        size_t omap_y = block_y * BLOCK_DIM;
-        size_t omap_y_end = omap_y + BLOCK_DIM;
+        omapDMA(image_id, filter_id, block_x, block_y);
 
-        size_t buf_idx = 0;
-        for (;omap_y < omap_y_end; omap_y++) {
-          for (size_t omap_xi = omap_x; omap_xi < omap_x_end; omap_xi++) {
-            omap(image_id, filter_id, omap_y, omap_xi) = omap_buf[buf_idx];
-            buf_idx++;
-          }
-        }
       } // if (idx < num_blocks)
     } // main loop
 
