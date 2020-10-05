@@ -13,6 +13,55 @@
 
 #define IMAP_DIM (BLOCK_DIM + FILTER_DIM - 1)
 
+// templated unrolling code by Krithik Ranjan
+template<int N, typename T>
+struct Unroll {
+  inline static void reset_buffer(T* buf);
+  inline static void fill_buffer(T* src, T* buf);
+};
+
+// reset omap buffer
+template<int N, typename T>
+inline void Unroll<N, T>::reset_buffer(T* buf) {
+  buf[N] = 0;
+  Unroll<N-1, T>::reset_buffer(buf);
+}
+
+template<int N, typename T>
+inline void Unroll<N, T>::fill_buffer(T* src, T* buf) {
+  buf[N] = ((bsg_attr_remote T*) src)[N];
+  Unroll<N-1, T>::fill_buffer(src, buf);
+}
+
+template<typename T>
+struct Unroll<0, T> {
+  inline static void reset_buffer(T* buf);
+  inline static void fill_buffer(T* src, T* buf);
+};
+
+template<typename T>
+inline void Unroll<0, T>::reset_buffer(T* buf) {
+  buf[0] = 0;
+}
+
+template<typename T>
+inline void Unroll<0, T>::fill_buffer(T* src, T* buf) {
+  buf[0] = src[0];
+}
+
+template<int DIM>
+inline void reset_buffer(float* buf) {
+  for (size_t i = 0; i < DIM; i++) {
+    Unroll<DIM-1, float>::reset_buffer(buf);
+    buf += DIM;
+  }
+}
+
+template<int DIM>
+inline void fill_filter_buffer(float* src, float* buf) {
+  Unroll<DIM*DIM-1, float>::fill_buffer(src, buf);
+}
+
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_conv_baseline(
@@ -77,9 +126,10 @@ extern "C" {
         size_t block_x = tmp % h_blocks_per_out_channel;
 
         // reset output buffer
-        for (size_t buf_idx = 0; buf_idx < BLOCK_DIM * BLOCK_DIM; buf_idx++) {
-          omap_buf[buf_idx] = 0;
-        }
+        // for (size_t buf_idx = 0; buf_idx < BLOCK_DIM * BLOCK_DIM; buf_idx++) {
+        //   omap_buf[buf_idx] = 0;
+        // }
+        reset_buffer<BLOCK_DIM>(omap_buf);
 
         for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
           // read in the image
@@ -97,13 +147,17 @@ extern "C" {
           }
 
           // read in the filter
-          buf_idx = 0;
-          for (size_t filter_y = 0; filter_y < FILTER_DIM; filter_y++) {
-            for (size_t filter_x = 0; filter_x < FILTER_DIM; filter_x++) {
-              filter_buf[buf_idx] = filter(filter_id, channel_id, filter_y, filter_x);
-              buf_idx++;
-            }
-          }
+          // buf_idx = 0;
+          // for (size_t filter_y = 0; filter_y < FILTER_DIM; filter_y++) {
+          //   for (size_t filter_x = 0; filter_x < FILTER_DIM; filter_x++) {
+          //     filter_buf[buf_idx] = filter(filter_id, channel_id, filter_y, filter_x);
+          //     buf_idx++;
+          //   }
+          // }
+          float* src_base = (float*)filter.data_ptr();
+          uint32_t* src_strides = filter.get_strides();
+          src_base += filter_id * src_strides[0] + channel_id * src_strides[1];
+          fill_filter_buffer<FILTER_DIM>(src_base, filter_buf);
 
           // do naive conv 2D on these buffers
           for (size_t y = 0; y < BLOCK_DIM; y++) {
