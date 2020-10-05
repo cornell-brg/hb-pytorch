@@ -20,7 +20,6 @@ struct Unroll {
   inline static void fill_buffer(T* src, T* buf);
 };
 
-// reset omap buffer
 template<int N, typename T>
 inline void Unroll<N, T>::reset_buffer(T* buf) {
   buf[N] = 0;
@@ -49,6 +48,8 @@ inline void Unroll<0, T>::fill_buffer(T* src, T* buf) {
   buf[0] = src[0];
 }
 
+// conv related helpers
+
 template<int DIM>
 inline void reset_buffer(float* buf) {
   for (size_t i = 0; i < DIM; i++) {
@@ -60,6 +61,15 @@ inline void reset_buffer(float* buf) {
 template<int DIM>
 inline void fill_filter_buffer(float* src, float* buf) {
   Unroll<DIM*DIM-1, float>::fill_buffer(src, buf);
+}
+
+template<int DIM>
+inline void fill_imap_buffer(float* src, float* buf, size_t y_step) {
+  for (size_t i = 0; i < DIM; i++) {
+    Unroll<DIM-1, float>::fill_buffer(src, buf);
+    buf += DIM;
+    src += y_step;
+  }
 }
 
 extern "C" {
@@ -126,38 +136,25 @@ extern "C" {
         size_t block_x = tmp % h_blocks_per_out_channel;
 
         // reset output buffer
-        // for (size_t buf_idx = 0; buf_idx < BLOCK_DIM * BLOCK_DIM; buf_idx++) {
-        //   omap_buf[buf_idx] = 0;
-        // }
         reset_buffer<BLOCK_DIM>(omap_buf);
 
         for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
+
           // read in the image
           size_t imap_x = block_x * BLOCK_DIM;
-          size_t imap_x_end = imap_x + IMAP_DIM;
           size_t imap_y = block_y * BLOCK_DIM;
-          size_t imap_y_end = imap_y + IMAP_DIM;
-
-          size_t buf_idx = 0;
-          for (;imap_y < imap_y_end; imap_y++) {
-            for (size_t imap_xi = imap_x; imap_xi < imap_x_end; imap_xi++) {
-              imap_buf[buf_idx] = imap(image_id, channel_id, imap_y, imap_xi);
-              buf_idx++;
-            }
-          }
+          float* imap_src_base = (float*)imap.data_ptr();
+          uint32_t* imap_src_strides = imap.get_strides();
+          imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
+          imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
+          size_t y_step = imap_src_strides[2];
+          fill_imap_buffer<IMAP_DIM>(imap_src_base, imap_buf, y_step);
 
           // read in the filter
-          // buf_idx = 0;
-          // for (size_t filter_y = 0; filter_y < FILTER_DIM; filter_y++) {
-          //   for (size_t filter_x = 0; filter_x < FILTER_DIM; filter_x++) {
-          //     filter_buf[buf_idx] = filter(filter_id, channel_id, filter_y, filter_x);
-          //     buf_idx++;
-          //   }
-          // }
-          float* src_base = (float*)filter.data_ptr();
-          uint32_t* src_strides = filter.get_strides();
-          src_base += filter_id * src_strides[0] + channel_id * src_strides[1];
-          fill_filter_buffer<FILTER_DIM>(src_base, filter_buf);
+          float* filter_src_base = (float*)filter.data_ptr();
+          uint32_t* filter_src_strides = filter.get_strides();
+          filter_src_base += filter_id * filter_src_strides[0] + channel_id * filter_src_strides[1];
+          fill_filter_buffer<FILTER_DIM>(filter_src_base, filter_buf);
 
           // do naive conv 2D on these buffers
           for (size_t y = 0; y < BLOCK_DIM; y++) {
