@@ -122,17 +122,7 @@ inline void conv2d_5x5(float* imap, float* filter, float* omap) {
         psum4 += imap4 * filter0;
         psum5 += imap5 * filter0;
         psum6 += imap6 * filter0;
-#else
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap0), "f"(filter0));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap1), "f"(filter0));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap2), "f"(filter0));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3) : "f"(imap3), "f"(filter0));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap4), "f"(filter0));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap5), "f"(filter0));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap6), "f"(filter0));
-#endif
 
-#ifdef HB_EMUL
         psum0 += imap1 * filter1;
         psum1 += imap2 * filter1;
         psum2 += imap3 * filter1;
@@ -140,17 +130,7 @@ inline void conv2d_5x5(float* imap, float* filter, float* omap) {
         psum4 += imap5 * filter1;
         psum5 += imap6 * filter1;
         psum6 += imap7 * filter1;
-#else
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap1), "f"(filter1));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap2), "f"(filter1));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap3), "f"(filter1));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3) : "f"(imap4), "f"(filter1));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap5), "f"(filter1));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap6), "f"(filter1));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap7), "f"(filter1));
-#endif
 
-#ifdef HB_EMUL
         psum0 += imap2 * filter2;
         psum1 += imap3 * filter2;
         psum2 += imap4 * filter2;
@@ -158,17 +138,7 @@ inline void conv2d_5x5(float* imap, float* filter, float* omap) {
         psum4 += imap6 * filter2;
         psum5 += imap7 * filter2;
         psum6 += imap8 * filter2;
-#else
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap2), "f"(filter2));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap3), "f"(filter2));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap4), "f"(filter2));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3) : "f"(imap5), "f"(filter2));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap6), "f"(filter2));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap7), "f"(filter2));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap8), "f"(filter2));
-#endif
 
-#ifdef HB_EMUL
         psum0 += imap3 * filter3;
         psum1 += imap4 * filter3;
         psum2 += imap5 * filter3;
@@ -176,17 +146,7 @@ inline void conv2d_5x5(float* imap, float* filter, float* omap) {
         psum4 += imap7 * filter3;
         psum5 += imap8 * filter3;
         psum6 += imap9 * filter3;
-#else
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap3), "f"(filter3));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap4), "f"(filter3));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap5), "f"(filter3));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3) : "f"(imap6), "f"(filter3));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap7), "f"(filter3));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap8), "f"(filter3));
-        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap9), "f"(filter3));
-#endif
 
-#ifdef HB_EMUL
         psum0 += imap4 * filter4;
         psum1 += imap5 * filter4;
         psum2 += imap6 * filter4;
@@ -195,6 +155,38 @@ inline void conv2d_5x5(float* imap, float* filter, float* omap) {
         psum5 += imap9 * filter4;
         psum6 += imap10 * filter4;
 #else
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap0), "f"(filter0));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap1), "f"(filter0));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap2), "f"(filter0));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3) : "f"(imap3), "f"(filter0));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap4), "f"(filter0));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap5), "f"(filter0));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap6), "f"(filter0));
+
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap1), "f"(filter1));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap2), "f"(filter1));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap3), "f"(filter1));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3) : "f"(imap4), "f"(filter1));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap5), "f"(filter1));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap6), "f"(filter1));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap7), "f"(filter1));
+
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap2), "f"(filter2));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap3), "f"(filter2));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap4), "f"(filter2));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3) : "f"(imap5), "f"(filter2));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap6), "f"(filter2));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap7), "f"(filter2));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap8), "f"(filter2));
+
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap3), "f"(filter3));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap4), "f"(filter3));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap5), "f"(filter3));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3) : "f"(imap6), "f"(filter3));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap7), "f"(filter3));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap8), "f"(filter3));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap9), "f"(filter3));
+
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap4), "f"(filter4));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap5), "f"(filter4));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap6), "f"(filter4));
