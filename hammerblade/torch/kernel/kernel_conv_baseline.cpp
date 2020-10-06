@@ -5,95 +5,15 @@
 // 10/02/2020 Lin Cheng
 //====================================================================
 
-#include <kernel_common.hpp>
-
 #define BLOCK_DIM   14
 #define FILTER_DIM   5
 #define NUM_FILTERS  6
 
 #define IMAP_DIM (BLOCK_DIM + FILTER_DIM - 1)
 
-// templated unrolling code by Krithik Ranjan
-template<int N, typename T>
-struct Unroll {
-  inline static void reset_buffer(T* buf);
-  inline static void fill_buffer(T* src, T* buf);
-  inline static void drain_buffer(T* buf, T* dest);
-};
+#include <kernel_common.hpp>
+#include <kernel_conv_baseline.hpp>
 
-template<int N, typename T>
-inline void Unroll<N, T>::reset_buffer(T* buf) {
-  buf[N] = 0;
-  Unroll<N-1, T>::reset_buffer(buf);
-}
-
-template<int N, typename T>
-inline void Unroll<N, T>::fill_buffer(T* src, T* buf) {
-  buf[N] = ((bsg_attr_remote T*) src)[N];
-  Unroll<N-1, T>::fill_buffer(src, buf);
-}
-
-template<int N, typename T>
-inline void Unroll<N, T>::drain_buffer(T* buf, T* dest) {
-  ((bsg_attr_remote T*) dest)[N] = buf[N];
-  Unroll<N-1, T>::drain_buffer(buf, dest);
-}
-
-template<typename T>
-struct Unroll<0, T> {
-  inline static void reset_buffer(T* buf);
-  inline static void fill_buffer(T* src, T* buf);
-  inline static void drain_buffer(T* buf, T* dest);
-};
-
-template<typename T>
-inline void Unroll<0, T>::reset_buffer(T* buf) {
-  buf[0] = 0;
-}
-
-template<typename T>
-inline void Unroll<0, T>::fill_buffer(T* src, T* buf) {
-  buf[0] = ((bsg_attr_remote T*) src)[0];
-}
-
-template<typename T>
-inline void Unroll<0, T>::drain_buffer(T* buf, T* dest) {
-  ((bsg_attr_remote T*) dest)[0] = buf[0];
-}
-
-
-// conv related helpers
-
-template<int DIM>
-inline void reset_buffer(float* buf) {
-  for (size_t i = 0; i < DIM; i++) {
-    Unroll<DIM-1, float>::reset_buffer(buf);
-    buf += DIM;
-  }
-}
-
-template<int DIM>
-inline void fill_filter_buffer(float* src, float* buf) {
-  Unroll<DIM*DIM-1, float>::fill_buffer(src, buf);
-}
-
-template<int DIM>
-inline void fill_imap_buffer(float* src, float* buf, size_t y_step) {
-  for (size_t i = 0; i < DIM; i++) {
-    Unroll<DIM-1, float>::fill_buffer(src, buf);
-    buf += DIM;
-    src += y_step;
-  }
-}
-
-template<int DIM>
-inline void drain_omap_buffer(float* buf, float* dest, size_t y_step) {
-  for (size_t i = 0; i < DIM; i++) {
-    Unroll<DIM-1, float>::drain_buffer(buf, dest);
-    buf += DIM;
-    dest += y_step;
-  }
-}
 
 extern "C" {
 
@@ -195,18 +115,8 @@ extern "C" {
           // read in the filter
           filterDMA(filter_id, channel_id);
 
-          // do naive conv 2D on these buffers
-          for (size_t y = 0; y < BLOCK_DIM; y++) {
-            for (size_t x = 0; x < BLOCK_DIM; x++) {
-              float psum = 0;
-              for (size_t yy = 0; yy < FILTER_DIM; yy++) {
-                for (size_t xx = 0; xx < FILTER_DIM; xx++) {
-                  psum += filter_buf[yy * FILTER_DIM + xx] * imap_buf[y * IMAP_DIM + x + yy * IMAP_DIM + xx];
-                }
-              }
-              omap_buf[y * BLOCK_DIM + x] += psum;
-            }
-          }
+          // do conv
+          conv2d_5x5(imap_buf, filter_buf, omap_buf);
 
         } // channel
 
