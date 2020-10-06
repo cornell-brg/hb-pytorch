@@ -228,6 +228,16 @@ extern "C" {
     volatile unsigned int *imap_B_f_NE_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y+1,&imap_B_f));
     volatile unsigned int *imap_B_f_SW_r   = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y-1,&imap_B_f_NE));
 
+    volatile unsigned int  psum_C_f        = 1;
+    volatile unsigned int  psum_C_f_N      = 0;
+    volatile unsigned int  psum_C_f_N_r    = 0;
+    volatile unsigned int  psum_C_f_S_r    = 0;
+
+    volatile unsigned int  imap_C_f        = 1;
+    volatile unsigned int  imap_C_f_NE     = 0;
+    volatile unsigned int  imap_C_f_NE_r   = 0;
+    volatile unsigned int  imap_C_f_SW_r   = 0;
+
     // filter DMA
     if (tile_config == 1) {
       filter_A_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+2,&filter_A_f)); // East x 2
@@ -272,6 +282,8 @@ extern "C" {
     volatile unsigned int *imap_f_NE       = &imap_A_f_NE;
     volatile unsigned int *imap_f_NE_r     = imap_A_f_NE_r;
     volatile unsigned int *imap_f_SW_r     = imap_A_f_SW_r;
+
+    bool buffer_A = true;
 
     // Conv2d parameters
     auto N    = omap.dim(0); // number of minibatches
@@ -498,6 +510,25 @@ extern "C" {
     };
 
     auto computePE = [&]() {
+
+      buffer_A = false;
+
+      psum_f          = &psum_C_f;
+      psum_f_N        = &psum_C_f_N;
+      psum_f_N_r      = &psum_C_f_N_r;
+      psum_f_S_r      = &psum_C_f_S_r;
+
+      imap_f          = &imap_C_f;
+      imap_f_NE       = &imap_C_f_NE;
+      imap_f_NE_r     = &imap_C_f_NE_r;
+      imap_f_SW_r     = &imap_C_f_SW_r;
+
+      imap_buf_remote =   imap_buf_B_remote;
+      psum_buf_remote =   psum_buf_B_remote;
+
+      imap_buf =   imap_buf_B;
+      psum_buf =   psum_buf_B;
+
       for (size_t filters = 0; filters < Cout; filters += FILTERS_PER_PROCESSING_PASS) {
 
         // wait until filter buf is filled
@@ -533,7 +564,12 @@ extern "C" {
           *filter_f_E_r = 1;
         }
 
-        for (size_t images = 0; images < N; images += IMAGES_PER_BURST) {
+        size_t total_images = N;
+        if (filters == 0) {
+          total_images += IMAGES_PER_BURST;
+        }
+
+        for (size_t images = 0; images < total_images; images += IMAGES_PER_BURST) {
 
           // wait until imap buf is filled
           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f)), 1);
@@ -551,6 +587,8 @@ extern "C" {
           // wait until psum buf is filled
           bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f)), 1);
           //bsg_printf(" -- psum buffer filled\n");
+
+          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
 
           size_t   imap_offset = 0;
           size_t   psum_offset = 0;
@@ -609,9 +647,9 @@ extern "C" {
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_20) : "f"(imap_4), "f"(filter_w_2_4));
 
               // write back
-              psum_buf[psum_offset + window +  0] = psum_00;
-              psum_buf[psum_offset + window + 28] = psum_10;
-              psum_buf[psum_offset + window + 56] = psum_20;
+              psum_buf_remote[psum_offset + window +  0] = psum_00;
+              psum_buf_remote[psum_offset + window + 28] = psum_10;
+              psum_buf_remote[psum_offset + window + 56] = psum_20;
 
               register float psum_02 = psum_buf[psum_offset + window + 2];
               register float psum_12 = psum_buf[psum_offset + window + 30];
@@ -635,9 +673,9 @@ extern "C" {
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_21) : "f"(imap_5), "f"(filter_w_2_4));
 
               // write back
-              psum_buf[psum_offset + window +  1] = psum_01;
-              psum_buf[psum_offset + window + 29] = psum_11;
-              psum_buf[psum_offset + window + 57] = psum_21;
+              psum_buf_remote[psum_offset + window +  1] = psum_01;
+              psum_buf_remote[psum_offset + window + 29] = psum_11;
+              psum_buf_remote[psum_offset + window + 57] = psum_21;
 
               register float psum_03 = psum_buf[psum_offset + window + 3];
               register float psum_13 = psum_buf[psum_offset + window + 31];
@@ -661,9 +699,9 @@ extern "C" {
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_22) : "f"(imap_6), "f"(filter_w_2_4));
 
               // write back
-              psum_buf[psum_offset + window +  2] = psum_02;
-              psum_buf[psum_offset + window + 30] = psum_12;
-              psum_buf[psum_offset + window + 58] = psum_22;
+              psum_buf_remote[psum_offset + window +  2] = psum_02;
+              psum_buf_remote[psum_offset + window + 30] = psum_12;
+              psum_buf_remote[psum_offset + window + 58] = psum_22;
 
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_03) : "f"(imap_3), "f"(filter_w_0_0));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_13) : "f"(imap_3), "f"(filter_w_1_0));
@@ -682,9 +720,9 @@ extern "C" {
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_23) : "f"(imap_7), "f"(filter_w_2_4));
 
               // write back
-              psum_buf[psum_offset + window +  3] = psum_03;
-              psum_buf[psum_offset + window + 31] = psum_13;
-              psum_buf[psum_offset + window + 59] = psum_23;
+              psum_buf_remote[psum_offset + window +  3] = psum_03;
+              psum_buf_remote[psum_offset + window + 31] = psum_13;
+              psum_buf_remote[psum_offset + window + 59] = psum_23;
             }
             psum_offset += Wout * FILTERS_PER_PROCESSING_PASS;
             imap_offset += Win;
@@ -697,8 +735,8 @@ extern "C" {
 
           // pass psum along
           // wait until remote psum buffer is ready
-          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
-          spm_cpy<PSUM_BUF_SIZE>(psum_buf_remote, psum_buf);
+          // bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (psum_f_N)), 0);
+          // spm_cpy<PSUM_BUF_SIZE>(psum_buf_remote, psum_buf);
           asm volatile("": : :"memory");
           *psum_f_N = 1;
           *psum_f_N_r = 1;
@@ -709,7 +747,7 @@ extern "C" {
           *psum_f_S_r = 0;
 
           // switch buffer
-          if (psum_buf == psum_buf_A) {
+          if (buffer_A) {
             psum_buf        = psum_buf_B;
             psum_f          = &psum_B_f;
             psum_f_S_r      = psum_B_f_S_r;
@@ -736,6 +774,7 @@ extern "C" {
             imap_f_NE       = &imap_A_f_NE;
             imap_f_NE_r     = imap_A_f_NE_r;
           }
+          buffer_A = !buffer_A;
         }
         // signal filter free
         asm volatile("": : :"memory");
