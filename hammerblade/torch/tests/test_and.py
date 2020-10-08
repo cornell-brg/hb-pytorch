@@ -6,8 +6,7 @@ Date    : 09/25/2020
 
 import torch
 import random
-from hypothesis import assume, given, settings
-import hypothesis.strategies as st
+from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
 
 torch.manual_seed(42)
