@@ -138,8 +138,10 @@ HBProfilerTrimLog::~HBProfilerTrimLog()
 }
 
 void HBProfilerTrimLog::trim_manual_log_exec_time(std::chrono::microseconds simulated) {
-  g_execution_time_profiler.log(g_curr_call_stack, simulated);
-  g_per_op_execution_time_profiler.log(g_curr_call_stack, simulated);
+  if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
+    g_execution_time_profiler.log(g_curr_call_stack, simulated);
+    g_per_op_execution_time_profiler.log(g_curr_call_stack, simulated);
+  }
 }
 
 }} // namespace c10::probe
