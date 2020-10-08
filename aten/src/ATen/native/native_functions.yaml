@@ -534,6 +534,7 @@
   use_c10_dispatcher: full
   supports_named_tensor: True
   variants: function, method
+  HammerBlade: not_kernel_hb
 
 - func: bitwise_not_(Tensor(a!) self) -> Tensor(a!)
   supports_named_tensor: True
