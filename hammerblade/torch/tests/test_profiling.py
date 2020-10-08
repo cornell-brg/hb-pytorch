@@ -49,6 +49,20 @@ def test_execution_time_2():
     assert stack.find("at::Tensor& at::native::legacy::cpu::_th_normal_(at::Tensor&, double, double, at::Generator*)") != -1
     assert stack.find("at::native::add_stub::add_stub()") != -1
 
+def test_execution_time_3():
+    x = torch.ones(100000)
+    torch.hammerblade.profiler.enable()
+    x = torch.randn(100000)
+    y = x + x
+    torch.hammerblade.profiler.disable()
+    z = x.hammerblade() + x.hammerblade()
+    stack = torch.hammerblade.profiler.exec_time.raw_stack()
+    assert stack.find("at::Tensor at::CPUType::{anonymous}::add(const at::Tensor&, const at::Tensor&, c10::Scalar)") != -1
+    assert stack.find("at::Tensor at::TypeDefault::randn(c10::IntArrayRef, const c10::TensorOptions&)") != -1
+    assert stack.find("at::Tensor at::TypeDefault::ones(c10::IntArrayRef, const c10::TensorOptions&)") == -1
+    assert stack.find("at::Tensor& at::native::legacy::cpu::_th_normal_(at::Tensor&, double, double, at::Generator*)") != -1
+    assert stack.find("at::native::add_stub::add_stub()") != -1
+
 def test_unimpl_1():
     x = torch.ones(100000)
     torch.hammerblade.profiler.enable()
