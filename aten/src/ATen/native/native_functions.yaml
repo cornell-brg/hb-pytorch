@@ -6599,9 +6599,9 @@
   dispatch:
     HammerBlade: vincr_hb
 
-- func: lu(Tensor self, bool pivot, bool get_infos) -> (Tensor factorization, Tensor pivots, Tensor infos)
+- func: lu_hammerblade(Tensor self) -> (Tensor factorization, Tensor pivots)
   use_c10_dispatcher: full
-  variants: function
+  variants: function, method
   dispatch:
     HammerBlade: lu_hb
 
