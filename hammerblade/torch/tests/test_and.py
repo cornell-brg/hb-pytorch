@@ -41,18 +41,18 @@ def test_and_2():
     _test_and(x1, x2)
 
 def test_and_3():
-    x = torch.randint(-2 ** 30, 2 ** 30 - 1, (1, 128))
-    y = torch.randint(-2 ** 30, 2 ** 30 - 1, (1, 128))
+    x = torch.randint(-2 ** 30, 2 ** 30 - 1, (1, 128)).to(torch.int32)
+    y = torch.randint(-2 ** 30, 2 ** 30 - 1, (1, 128)).to(torch.int32)
     _test_and(x, y)
 
 def test_and_4():
-    x = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32))
-    y = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32))
+    x = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32)).to(torch.int32)
+    y = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32)).to(torch.int32)
     _test_and(x, y)
 
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_and_hypothesis(inputs):
-    x1 = torch.tensor(inputs[0])
-    x2 = torch.tensor(inputs[1])
+    x1 = torch.tensor(inputs[0]).to(torch.int32)
+    x2 = torch.tensor(inputs[1]).to(torch.int32)
     _test_and(x1, x2)
