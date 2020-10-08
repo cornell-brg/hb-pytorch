@@ -66,7 +66,9 @@ ExecutionTimeLog::~ExecutionTimeLog() {
   auto delta = std::chrono::duration_cast<std::chrono::microseconds>
     (std::chrono::high_resolution_clock::now() - start);
   g_execution_time_profiler.log(stack, delta);
+#ifdef HB_REDISPATCH
   g_per_op_execution_time_profiler.log(stack, delta);
+#endif
 }
 
 }} // namespace c10::probe
