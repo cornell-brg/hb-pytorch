@@ -13,7 +13,7 @@ extern "C" {
 
     // Convert all low level pointers to Tensor objects
     HBTensor<float> factorization(factorization_p); // LU: m by n matrix
-    HBTensor<float> pivots(pivots_p); // P: m by 1 vector
+    HBTensor<int> pivots(pivots_p); // P: m by 1 vector
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
@@ -28,7 +28,7 @@ extern "C" {
 
         // initialize pivots to main diagonal
         for (int i = 0; i < pivots.numel(); i++) {
-            pivots(i) = i + 1;
+            pivots(i) = int(i + 1);
         }
 
         for (int i = 0; i < N; i++) { // for diagonal index

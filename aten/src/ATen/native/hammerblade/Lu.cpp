@@ -15,9 +15,10 @@ std::tuple<Tensor, Tensor> lu_hb(const Tensor& self) {
   // TODO: implement LU for non-square matrices and remove this check
   TORCH_CHECK(self.size(0) == self.size(1), "Square matrices expected, got ", self.size(0), " by ", self.size(1), " tensor");
 
+  // TODO: support non-square matrices
   //Tensor factorization = at::empty({self.size(0), self.size(1)}, self.options()); // mXn matrix, same as self
   Tensor factorization = at::clone(self); // mXn matrix, same as self
-  Tensor pivots = at::empty({self.size(0)}, self.options()); // mX1 vector
+  Tensor pivots = at::empty(self.size(0), self.options().dtype(at::kInt));
 
   hb_offload_kernel(factorization, pivots, "tensorlib_lu");
 

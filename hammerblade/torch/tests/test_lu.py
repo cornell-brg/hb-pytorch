@@ -22,6 +22,8 @@ def _test_torch_lu(x, atol=1e-8):
     print(fac_h)
     print("ham pivots")
     print(piv_h)
+    piv_h = piv_h.int().hammerblade()
+    print(piv_h.dtype)
 
 #    fac_c, piv_c, infos_c = x.lu(pivot=True, get_infos=True)
 #    print("cpu factorization")
@@ -50,7 +52,7 @@ def _test_torch_lu(x, atol=1e-8):
     # reconstruct P matrix
     pivots = torch.zeros_like(x)
     for i in range(0, len(piv_h.cpu())):
-        p = int(piv_h.cpu()[i])
+        p = piv_h.cpu()[i]
         pivots[i][p-1] = 1
 
     # calculate P*A and L*U
@@ -88,8 +90,8 @@ def test_torch_lu_basic5():
 
 def test_torch_lu_random():
     for i in range(0,50):
-        dim = random.randint(1,100)
-        x = torch.rand((dim,dim))
+        N = random.randint(1,100)
+        x = torch.rand((N,N))
         _test_torch_lu(x, atol=1e-5)
 
 @settings(deadline=None)
