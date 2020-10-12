@@ -15,6 +15,32 @@
 #include <kernel_common.hpp>
 #include <kernel_conv_baseline.hpp>
 
+inline void spcpy(float* dest, float* src) {
+  for (int i = 0; i < IMAP_DIM * IMAP_DIM; i += 9) {
+        register float tmp0 = *(src + 0);
+        register float tmp1 = *(src + 1);
+        register float tmp2 = *(src + 2);
+        register float tmp3 = *(src + 3);
+        register float tmp4 = *(src + 4);
+        register float tmp5 = *(src + 5);
+        register float tmp6 = *(src + 6);
+        register float tmp7 = *(src + 7);
+        register float tmp8 = *(src + 8);
+        asm volatile("": : :"memory");
+        *(dest + 0) = tmp0;
+        *(dest + 1) = tmp1;
+        *(dest + 2) = tmp2;
+        *(dest + 3) = tmp3;
+        *(dest + 4) = tmp4;
+        *(dest + 5) = tmp5;
+        *(dest + 6) = tmp6;
+        *(dest + 7) = tmp7;
+        *(dest + 8) = tmp8;
+        src += 9;
+        dest += 9;
+  }
+}
+
 extern "C" {
   __attribute__ ((noinline))  int tensorlib_conv_systolic(
     hb_tensor_t* output,
@@ -42,6 +68,14 @@ extern "C" {
     float filter_buf[FILTER_DIM * FILTER_DIM];  //   5x5 * 4 = 100B
     float omap_buf[BLOCK_DIM * BLOCK_DIM];      // 14x14 * 4 = 784B
     float imap_buf[IMAP_DIM * IMAP_DIM];        // 18x18 * 4 = 1296B
+
+    float* imap_buf_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,imap_buf));
+
+    // Flags
+    volatile unsigned int imap_f   = 0;
+    volatile unsigned int imap_f_E = 0;
+    volatile unsigned int *imap_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&imap_f));
+    volatile unsigned int *imap_f_W_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&imap_f_E));
 
     // Config
     // 0 -- idle
@@ -106,6 +140,7 @@ extern "C" {
       drain_omap_buffer<BLOCK_DIM>(omap_buf, omap_src_base, y_step);
     };
 
+
     auto compute_job = [&]() {
       // XXX: this works for single input channel only
       size_t filter_id = bsg_x % 8 - 1;
@@ -118,11 +153,28 @@ extern "C" {
 
       for (size_t idx = 0; idx < N; idx += 4) {
         size_t image_id = image_offset + idx;
+
+        // reset output buffer
+        reset_buffer<BLOCK_DIM>(omap_buf);
+
         // wait for imap
+        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f)), 1);
+
         // pass imap
+        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f_E)), 0);
+
+        // copy
+        spcpy(imap_buf_remote, imap_buf);
+        asm volatile("": : :"memory");
+        imap_f_E   = 1;
+        *imap_f_E_r = 1;
 
         // do compute
         conv2d_5x5(imap_buf, filter_buf, omap_buf);
+
+        asm volatile("": : :"memory");
+        imap_f     = 0;
+        *imap_f_W_r = 0;
 
         // write omap back
         omapDMA(image_id, filter_id, block_x, block_y);
@@ -130,11 +182,31 @@ extern "C" {
     };
 
     auto imapDMA_job = [&]() {
-      imapDMA(image_id, channel_id, block_x, block_y);
-      // pass imap
+      size_t block_x = bsg_x / 8;
+      size_t block_y = bsg_y % 2;
+      size_t channel_id = 0;
+      size_t image_offset = bsg_y / 2;
+
+      for (size_t idx = 0; idx < N; idx += 4) {
+        size_t image_id = image_offset + idx;
+        imapDMA(image_id, channel_id, block_x, block_y);
+        // pass imap
+        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f_E)), 0);
+        // copy
+        spcpy(imap_buf_remote, imap_buf);
+        asm volatile("": : :"memory");
+        imap_f_E   = 1;
+        *imap_f_E_r = 1;
+      }
     };
+
     auto polyA_job = [&]() {
-      // wait for imap
+      for (size_t idx = 0; idx < N; idx += 4) {
+        // wait for imap
+        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f)), 1);
+        imap_f     = 0;
+        *imap_f_W_r = 0;
+      }
     };
 
 
