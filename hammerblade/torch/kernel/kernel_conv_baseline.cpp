@@ -103,8 +103,8 @@ extern "C" {
         tmp = tmp % (Cout * blocks_per_out_channel);
         size_t filter_id = tmp / blocks_per_out_channel;
         tmp = tmp % blocks_per_out_channel;
-        size_t block_y = tmp / h_blocks_per_out_channel;
-        size_t block_x = tmp % h_blocks_per_out_channel;
+        size_t block_y = tmp / w_blocks_per_out_channel;
+        size_t block_x = tmp % w_blocks_per_out_channel;
 
         // reset output buffer
         reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
