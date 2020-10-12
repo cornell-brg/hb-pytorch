@@ -7,16 +7,18 @@
 //====================================================================
 
 // Layer setup
-#define BLOCK_DIM   14
-#define FILTER_DIM   5
-#define NUM_FILTERS  6
-#define IMAP_DIM (BLOCK_DIM + FILTER_DIM - 1)
+#define BLOCK_DIM_X   14
+#define BLOCK_DIM_Y   14
+#define FILTER_DIM     5
+#define NUM_FILTERS    6
+#define IMAP_DIM_X    (BLOCK_DIM_X + FILTER_DIM - 1)
+#define IMAP_DIM_Y    (BLOCK_DIM_Y + FILTER_DIM - 1)
 
 #include <kernel_common.hpp>
 #include <kernel_conv_baseline.hpp>
 
 inline void spcpy(float* dest, float* src) {
-  for (int i = 0; i < IMAP_DIM * IMAP_DIM; i += 9) {
+  for (int i = 0; i < IMAP_DIM_X * IMAP_DIM_Y; i += 9) {
         register float tmp0 = *(src + 0);
         register float tmp1 = *(src + 1);
         register float tmp2 = *(src + 2);
@@ -66,8 +68,8 @@ extern "C" {
 
     // Buffers
     float filter_buf[FILTER_DIM * FILTER_DIM];  //   5x5 * 4 = 100B
-    float omap_buf[BLOCK_DIM * BLOCK_DIM];      // 14x14 * 4 = 784B
-    float imap_buf[IMAP_DIM * IMAP_DIM];        // 18x18 * 4 = 1296B
+    float omap_buf[BLOCK_DIM_X * BLOCK_DIM_Y];      // 14x14 * 4 = 784B
+    float imap_buf[IMAP_DIM_X * IMAP_DIM_Y];        // 18x18 * 4 = 1296B
 
     float* imap_buf_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,imap_buf));
 
@@ -119,25 +121,25 @@ extern "C" {
     };
 
     auto imapDMA = [&](size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
-      size_t imap_x = block_x * BLOCK_DIM;
-      size_t imap_y = block_y * BLOCK_DIM;
+      size_t imap_x = block_x * BLOCK_DIM_X;
+      size_t imap_y = block_y * BLOCK_DIM_Y;
       float* imap_src_base = (float*)imap.data_ptr();
       uint32_t* imap_src_strides = imap.get_strides();
       imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
       imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
       size_t y_step = imap_src_strides[2];
-      fill_imap_buffer<IMAP_DIM>(imap_src_base, imap_buf, y_step);
+      fill_imap_buffer<IMAP_DIM_X, IMAP_DIM_Y>(imap_src_base, imap_buf, y_step);
     };
 
     auto omapDMA = [&](size_t image_id, size_t filter_id, size_t block_x, size_t block_y) {
-      size_t omap_x = block_x * BLOCK_DIM;
-      size_t omap_y = block_y * BLOCK_DIM;
+      size_t omap_x = block_x * BLOCK_DIM_X;
+      size_t omap_y = block_y * BLOCK_DIM_Y;
       float* omap_src_base = (float*)omap.data_ptr();
       uint32_t* omap_src_strides = omap.get_strides();
       omap_src_base += image_id * omap_src_strides[0] + filter_id * omap_src_strides[1];
       omap_src_base += omap_y * omap_src_strides[2] + omap_x * omap_src_strides[3];
       size_t y_step = omap_src_strides[2];
-      drain_omap_buffer<BLOCK_DIM>(omap_buf, omap_src_base, y_step);
+      drain_omap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf, omap_src_base, y_step);
     };
 
 
@@ -155,7 +157,7 @@ extern "C" {
         size_t image_id = image_offset + idx;
 
         // reset output buffer
-        reset_buffer<BLOCK_DIM>(omap_buf);
+        reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
 
         // wait for imap
         bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f)), 1);

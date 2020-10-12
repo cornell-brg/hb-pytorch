@@ -5,11 +5,13 @@
 // 10/02/2020 Lin Cheng
 //====================================================================
 
-#define BLOCK_DIM   14
-#define FILTER_DIM   5
-#define NUM_FILTERS  6
+#define BLOCK_DIM_X   14
+#define BLOCK_DIM_Y   14
+#define FILTER_DIM     5
+#define NUM_FILTERS    6
 
-#define IMAP_DIM (BLOCK_DIM + FILTER_DIM - 1)
+#define IMAP_DIM_X (BLOCK_DIM_X + FILTER_DIM - 1)
+#define IMAP_DIM_Y (BLOCK_DIM_Y + FILTER_DIM - 1)
 
 #include <kernel_common.hpp>
 #include <kernel_conv_baseline.hpp>
@@ -39,20 +41,20 @@ extern "C" {
     auto Hk   = filter.dim(2);
     auto Wk   = filter.dim(3);
 
-    size_t h_blocks_per_out_channel = Hout / BLOCK_DIM;
-    size_t w_blocks_per_out_channel = Wout / BLOCK_DIM;
-    if (Hout % BLOCK_DIM != 0) {
+    size_t h_blocks_per_out_channel = Hout / BLOCK_DIM_Y;
+    size_t w_blocks_per_out_channel = Wout / BLOCK_DIM_X;
+    if (Hout % BLOCK_DIM_Y != 0) {
       h_blocks_per_out_channel++;
     }
-    if (Wout % BLOCK_DIM != 0) {
+    if (Wout % BLOCK_DIM_X != 0) {
       w_blocks_per_out_channel++;
     }
     size_t blocks_per_out_channel = h_blocks_per_out_channel * w_blocks_per_out_channel;
     size_t num_blocks = N * Cout * blocks_per_out_channel;
 
     float filter_buf[FILTER_DIM * FILTER_DIM];  //   5x5 * 4 = 100B
-    float omap_buf[BLOCK_DIM * BLOCK_DIM];      // 14x14 * 4 = 784B
-    float imap_buf[IMAP_DIM * IMAP_DIM];        // 18x18 * 4 = 1296B
+    float omap_buf[BLOCK_DIM_X * BLOCK_DIM_Y];      // 14x14 * 4 = 784B
+    float imap_buf[IMAP_DIM_X * IMAP_DIM_Y];        // 18x18 * 4 = 1296B
 
     // cross check
     hb_assert(FILTER_DIM == Hk);
@@ -68,25 +70,25 @@ extern "C" {
     };
 
     auto imapDMA = [&](size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
-      size_t imap_x = block_x * BLOCK_DIM;
-      size_t imap_y = block_y * BLOCK_DIM;
+      size_t imap_x = block_x * BLOCK_DIM_X;
+      size_t imap_y = block_y * BLOCK_DIM_Y;
       float* imap_src_base = (float*)imap.data_ptr();
       uint32_t* imap_src_strides = imap.get_strides();
       imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
       imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
       size_t y_step = imap_src_strides[2];
-      fill_imap_buffer<IMAP_DIM>(imap_src_base, imap_buf, y_step);
+      fill_imap_buffer<IMAP_DIM_X, IMAP_DIM_Y>(imap_src_base, imap_buf, y_step);
     };
 
     auto omapDMA = [&](size_t image_id, size_t filter_id, size_t block_x, size_t block_y) {
-      size_t omap_x = block_x * BLOCK_DIM;
-      size_t omap_y = block_y * BLOCK_DIM;
+      size_t omap_x = block_x * BLOCK_DIM_X;
+      size_t omap_y = block_y * BLOCK_DIM_Y;
       float* omap_src_base = (float*)omap.data_ptr();
       uint32_t* omap_src_strides = omap.get_strides();
       omap_src_base += image_id * omap_src_strides[0] + filter_id * omap_src_strides[1];
       omap_src_base += omap_y * omap_src_strides[2] + omap_x * omap_src_strides[3];
       size_t y_step = omap_src_strides[2];
-      drain_omap_buffer<BLOCK_DIM>(omap_buf, omap_src_base, y_step);
+      drain_omap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf, omap_src_base, y_step);
     };
 
     bsg_cuda_print_stat_kernel_start();
@@ -105,7 +107,7 @@ extern "C" {
         size_t block_x = tmp % h_blocks_per_out_channel;
 
         // reset output buffer
-        reset_buffer<BLOCK_DIM>(omap_buf);
+        reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
 
         for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
 

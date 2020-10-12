@@ -53,11 +53,11 @@ inline void Unroll<0, T>::drain_buffer(T* buf, T* dest) {
 
 // conv related helpers
 
-template<int DIM>
+template<int DIM_X, int DIM_Y>
 inline void reset_buffer(float* buf) {
-  for (size_t i = 0; i < DIM; i++) {
-    Unroll<DIM-1, float>::reset_buffer(buf);
-    buf += DIM;
+  for (size_t i = 0; i < DIM_Y; i++) {
+    Unroll<DIM_X-1, float>::reset_buffer(buf);
+    buf += DIM_X;
   }
 }
 
@@ -66,52 +66,52 @@ inline void fill_filter_buffer(float* src, float* buf) {
   Unroll<DIM*DIM-1, float>::fill_buffer(src, buf);
 }
 
-template<int DIM>
+template<int DIM_X, int DIM_Y>
 inline void fill_imap_buffer(float* src, float* buf, size_t y_step) {
-  for (size_t i = 0; i < DIM; i++) {
-    Unroll<DIM-1, float>::fill_buffer(src, buf);
-    buf += DIM;
+  for (size_t i = 0; i < DIM_Y; i++) {
+    Unroll<DIM_X-1, float>::fill_buffer(src, buf);
+    buf += DIM_X;
     src += y_step;
   }
 }
 
-template<int DIM>
+template<int DIM_X, int DIM_Y>
 inline void drain_omap_buffer(float* buf, float* dest, size_t y_step) {
-  for (size_t i = 0; i < DIM; i++) {
-    Unroll<DIM-1, float>::drain_buffer(buf, dest);
-    buf += DIM;
+  for (size_t i = 0; i < DIM_Y; i++) {
+    Unroll<DIM_X-1, float>::drain_buffer(buf, dest);
+    buf += DIM_X;
     dest += y_step;
   }
 }
 
 
 inline void conv2d_5x5(float* imap, float* filter, float* omap) {
-  for (size_t y = 0; y < BLOCK_DIM; y++) {
-    for (size_t x = 0; x < BLOCK_DIM; x += 7) {
-      register float psum0 = omap[y * BLOCK_DIM + x + 0];
-      register float psum1 = omap[y * BLOCK_DIM + x + 1];
-      register float psum2 = omap[y * BLOCK_DIM + x + 2];
-      register float psum3 = omap[y * BLOCK_DIM + x + 3];
-      register float psum4 = omap[y * BLOCK_DIM + x + 4];
-      register float psum5 = omap[y * BLOCK_DIM + x + 5];
-      register float psum6 = omap[y * BLOCK_DIM + x + 6];
+  for (size_t y = 0; y < BLOCK_DIM_Y; y++) {
+    for (size_t x = 0; x < BLOCK_DIM_X; x += 7) {
+      register float psum0 = omap[y * BLOCK_DIM_X + x + 0];
+      register float psum1 = omap[y * BLOCK_DIM_X + x + 1];
+      register float psum2 = omap[y * BLOCK_DIM_X + x + 2];
+      register float psum3 = omap[y * BLOCK_DIM_X + x + 3];
+      register float psum4 = omap[y * BLOCK_DIM_X + x + 4];
+      register float psum5 = omap[y * BLOCK_DIM_X + x + 5];
+      register float psum6 = omap[y * BLOCK_DIM_X + x + 6];
       for (size_t yy = 0; yy < FILTER_DIM; yy++) {
         register float filter0 = filter[yy * FILTER_DIM + 0];
         register float filter1 = filter[yy * FILTER_DIM + 1];
         register float filter2 = filter[yy * FILTER_DIM + 2];
         register float filter3 = filter[yy * FILTER_DIM + 3];
         register float filter4 = filter[yy * FILTER_DIM + 4];
-        register float imap0  = imap[y * IMAP_DIM + x + yy * IMAP_DIM + 0];
-        register float imap1  = imap[y * IMAP_DIM + x + yy * IMAP_DIM + 1];
-        register float imap2  = imap[y * IMAP_DIM + x + yy * IMAP_DIM + 2];
-        register float imap3  = imap[y * IMAP_DIM + x + yy * IMAP_DIM + 3];
-        register float imap4  = imap[y * IMAP_DIM + x + yy * IMAP_DIM + 4];
-        register float imap5  = imap[y * IMAP_DIM + x + yy * IMAP_DIM + 5];
-        register float imap6  = imap[y * IMAP_DIM + x + yy * IMAP_DIM + 6];
-        register float imap7  = imap[y * IMAP_DIM + x + yy * IMAP_DIM + 7];
-        register float imap8  = imap[y * IMAP_DIM + x + yy * IMAP_DIM + 8];
-        register float imap9  = imap[y * IMAP_DIM + x + yy * IMAP_DIM + 9];
-        register float imap10 = imap[y * IMAP_DIM + x + yy * IMAP_DIM + 10];
+        register float imap0  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 0];
+        register float imap1  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 1];
+        register float imap2  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 2];
+        register float imap3  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 3];
+        register float imap4  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 4];
+        register float imap5  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 5];
+        register float imap6  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 6];
+        register float imap7  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 7];
+        register float imap8  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 8];
+        register float imap9  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 9];
+        register float imap10 = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 10];
         asm volatile("": : :"memory");
 
 #ifdef HB_EMUL
@@ -196,13 +196,13 @@ inline void conv2d_5x5(float* imap, float* filter, float* omap) {
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap10), "f"(filter4));
 #endif
       }
-      omap[y * BLOCK_DIM + x + 0] = psum0;
-      omap[y * BLOCK_DIM + x + 1] = psum1;
-      omap[y * BLOCK_DIM + x + 2] = psum2;
-      omap[y * BLOCK_DIM + x + 3] = psum3;
-      omap[y * BLOCK_DIM + x + 4] = psum4;
-      omap[y * BLOCK_DIM + x + 5] = psum5;
-      omap[y * BLOCK_DIM + x + 6] = psum6;
+      omap[y * BLOCK_DIM_X + x + 0] = psum0;
+      omap[y * BLOCK_DIM_X + x + 1] = psum1;
+      omap[y * BLOCK_DIM_X + x + 2] = psum2;
+      omap[y * BLOCK_DIM_X + x + 3] = psum3;
+      omap[y * BLOCK_DIM_X + x + 4] = psum4;
+      omap[y * BLOCK_DIM_X + x + 5] = psum5;
+      omap[y * BLOCK_DIM_X + x + 6] = psum6;
     }
   }
 }
