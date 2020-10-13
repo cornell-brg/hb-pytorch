@@ -73,15 +73,29 @@ extern "C" {
     // Buffers
     float filter_buf[FILTER_DIM * FILTER_DIM];  //   5x5 * 4 = 100B
     float omap_buf[BLOCK_DIM_X * BLOCK_DIM_Y];      // 14x14 * 4 = 784B
-    float imap_buf[IMAP_DIM_X * IMAP_DIM_Y];        // 18x18 * 4 = 1296B
+    float imap_buf_A[IMAP_DIM_X * IMAP_DIM_Y];        // 18x18 * 4 = 1296B
+    float imap_buf_B[IMAP_DIM_X * IMAP_DIM_Y];        // 18x18 * 4 = 1296B
 
-    float* imap_buf_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,imap_buf));
+    float* imap_buf_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,imap_buf_A));
+    float* imap_buf_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,imap_buf_B));
 
     // Flags
-    volatile unsigned int imap_f   = 0;
-    volatile unsigned int imap_f_E = 0;
-    volatile unsigned int *imap_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&imap_f));
-    volatile unsigned int *imap_f_W_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&imap_f_E));
+    volatile unsigned int imap_f_A   = 0;
+    volatile unsigned int imap_f_A_E = 0;
+    volatile unsigned int *imap_f_A_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&imap_f_A));
+    volatile unsigned int *imap_f_A_W_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&imap_f_A_E));
+
+    volatile unsigned int imap_f_B   = 0;
+    volatile unsigned int imap_f_B_E = 0;
+    volatile unsigned int *imap_f_B_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&imap_f_B));
+    volatile unsigned int *imap_f_B_W_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&imap_f_B_E));
+
+    float* imap_buf = imap_buf_A;
+    float* imap_buf_remote = imap_buf_A_remote;
+    volatile unsigned int* imap_f = &imap_f_A;
+    volatile unsigned int* imap_f_E = &imap_f_A_E;
+    volatile unsigned int* imap_f_E_r = imap_f_A_E_r;
+    volatile unsigned int* imap_f_W_r = imap_f_A_W_r;
 
     // Config
     // 0 -- idle
@@ -164,26 +178,44 @@ extern "C" {
         reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
 
         // wait for imap
-        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f)), 1);
+        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f)), 1);
 
         // pass imap
-        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f_E)), 0);
+        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_E)), 0);
 
         // copy
         spcpy(imap_buf_remote, imap_buf);
         asm volatile("": : :"memory");
-        imap_f_E   = 1;
+        *imap_f_E   = 1;
         *imap_f_E_r = 1;
 
         // do compute
         conv2d_5x5(imap_buf, filter_buf, omap_buf);
 
         asm volatile("": : :"memory");
-        imap_f     = 0;
+        *imap_f     = 0;
         *imap_f_W_r = 0;
 
         // write omap back
         omapDMA(image_id, filter_id, block_x, block_y);
+
+        asm volatile("": : :"memory");
+        // switch buffer
+        if (imap_f_E_r == imap_f_A_E_r) {
+          imap_buf = imap_buf_B;
+          imap_buf_remote = imap_buf_B_remote;
+          imap_f = &imap_f_B;
+          imap_f_E = &imap_f_B_E;
+          imap_f_E_r = imap_f_B_E_r;
+          imap_f_W_r = imap_f_B_W_r;
+        } else {
+          imap_buf = imap_buf_A;
+          imap_buf_remote = imap_buf_A_remote;
+          imap_f = &imap_f_A;
+          imap_f_E = &imap_f_A_E;
+          imap_f_E_r = imap_f_A_E_r;
+          imap_f_W_r = imap_f_A_W_r;
+        }
       }
     };
 
@@ -197,21 +229,45 @@ extern "C" {
         size_t image_id = image_offset + idx;
         imapDMA(image_id, channel_id, block_x, block_y);
         // pass imap
-        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f_E)), 0);
+        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f_E)), 0);
         // copy
         spcpy(imap_buf_remote, imap_buf);
         asm volatile("": : :"memory");
-        imap_f_E   = 1;
+        *imap_f_E   = 1;
         *imap_f_E_r = 1;
+
+        asm volatile("": : :"memory");
+        // switch buffer
+        if (imap_f_E_r == imap_f_A_E_r) {
+          imap_buf = imap_buf_B;
+          imap_buf_remote = imap_buf_B_remote;
+          imap_f_E = &imap_f_B_E;
+          imap_f_E_r = imap_f_B_E_r;
+        } else {
+          imap_buf = imap_buf_A;
+          imap_buf_remote = imap_buf_A_remote;
+          imap_f_E = &imap_f_A_E;
+          imap_f_E_r = imap_f_A_E_r;
+        }
       }
     };
 
     auto polyA_job = [&]() {
       for (size_t idx = 0; idx < N; idx += IMAP_PER_PASS) {
         // wait for imap
-        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f)), 1);
-        imap_f     = 0;
+        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (imap_f)), 1);
+        *imap_f     = 0;
         *imap_f_W_r = 0;
+
+        asm volatile("": : :"memory");
+        // switch buffer
+        if (imap_f_W_r == imap_f_A_W_r) {
+          imap_f = &imap_f_B;
+          imap_f_W_r = imap_f_B_W_r;
+        } else {
+          imap_f = &imap_f_A;
+          imap_f_W_r = imap_f_A_W_r;
+        }
       }
     };
 
