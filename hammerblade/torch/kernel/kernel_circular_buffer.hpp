@@ -19,6 +19,7 @@ namespace CircularBuffer{
   class FIFO{
     protected:
       unsigned int occ_idx = 0;
+      unsigned int occ_idx_nxt = 0;
       volatile unsigned int      occupancy [DEPTH] = {{0}};
       volatile unsigned int  occupancy_nxt [DEPTH] = {{0}};
       volatile unsigned int* occupancy_nxt_r = nullptr;
@@ -37,26 +38,31 @@ namespace CircularBuffer{
 
       __attribute__((always_inline))
       T *obtain_wr_ptr(){
-        volatile unsigned int *o = &(this->occupancy_nxt[this->occ_idx]);
+        // bsg_print_hexadecimal(0xFACEB00C);
+        volatile unsigned int *o = &(this->occupancy_nxt[this->occ_idx_nxt]);
         bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (o)), 0);
-        return this->buffer_remote + this->occ_idx * N;
+        // bsg_print_hexadecimal(0xFACEB00D);
+        return this->buffer_remote + this->occ_idx_nxt * N;
       }
 
       __attribute__((always_inline))
       int finish_wr_ptr(){
-        volatile unsigned int *o   = &(this->occupancy_nxt[this->occ_idx]);
-        volatile unsigned int *o_r = this->occupancy_nxt_r + this->occ_idx;
+        volatile unsigned int *o   = &(this->occupancy_nxt[this->occ_idx_nxt]);
+        volatile unsigned int *o_r = this->occupancy_nxt_r + this->occ_idx_nxt;
         asm volatile("": : :"memory");
         *o   = 1;
         *o_r = 1;
-        this->occ_idx = (this->occ_idx + 1) % DEPTH;
+        this->occ_idx_nxt = (this->occ_idx_nxt + 1) % DEPTH;
+        // bsg_print_hexadecimal(0xBEEFBEEF);
         return 0;
       }
 
       __attribute__((always_inline))
       T *obtain_rd_ptr(){
+        // bsg_print_hexadecimal(0xFACE);
         volatile unsigned int *o = &(this->occupancy[this->occ_idx]);
         bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (o)), 1);
+        // bsg_print_hexadecimal(0xFACF);
         return this->buffer + this->occ_idx * N;
       }
 
@@ -68,6 +74,7 @@ namespace CircularBuffer{
         *o   = 0;
         *o_r = 0;
         this->occ_idx = (this->occ_idx + 1) % DEPTH;
+        // bsg_print_hexadecimal(0xBEEF);
         return 0;
       }
 
