@@ -116,7 +116,7 @@ extern "C" {
       fill_filter_buffer<FILTER_DIM>(filter_src_base, filter_buf);
     };
 
-    auto imapDMA = [&](size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
+    auto imapDMA = [&](float* buf, size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
       size_t imap_x = block_x * BLOCK_DIM_X;
       size_t imap_y = block_y * BLOCK_DIM_Y;
       float* imap_src_base = (float*)imap.data_ptr();
@@ -124,7 +124,52 @@ extern "C" {
       imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
       imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
       size_t y_step = imap_src_strides[2];
-      fill_imap_buffer<IMAP_DIM_X, IMAP_DIM_Y>(imap_src_base, imap_buf, y_step);
+      // fill_imap_buffer<IMAP_DIM_X, IMAP_DIM_Y>(imap_src_base, buf, y_step);
+      // bsg_attr_remote is not doing its job here ... idk why
+      // it works for baseline
+      size_t buf_offset = 0;
+      for (size_t i = 0; i < IMAP_DIM_Y; i++) {
+        register float tmp00 = *(imap_src_base + 0);
+        register float tmp01 = *(imap_src_base + 1);
+        register float tmp02 = *(imap_src_base + 2);
+        register float tmp03 = *(imap_src_base + 3);
+        register float tmp04 = *(imap_src_base + 4);
+        register float tmp05 = *(imap_src_base + 5);
+        register float tmp06 = *(imap_src_base + 6);
+        register float tmp07 = *(imap_src_base + 7);
+        register float tmp08 = *(imap_src_base + 8);
+        register float tmp09 = *(imap_src_base + 9);
+        register float tmp10 = *(imap_src_base + 10);
+        register float tmp11 = *(imap_src_base + 11);
+        register float tmp12 = *(imap_src_base + 12);
+        register float tmp13 = *(imap_src_base + 13);
+        register float tmp14 = *(imap_src_base + 14);
+        register float tmp15 = *(imap_src_base + 15);
+        register float tmp16 = *(imap_src_base + 16);
+        register float tmp17 = *(imap_src_base + 17);
+        asm volatile("": : :"memory");
+        buf[buf_offset + 0]  = tmp00;
+        buf[buf_offset + 1]  = tmp01;
+        buf[buf_offset + 2]  = tmp02;
+        buf[buf_offset + 3]  = tmp03;
+        buf[buf_offset + 4]  = tmp04;
+        buf[buf_offset + 5]  = tmp05;
+        buf[buf_offset + 6]  = tmp06;
+        buf[buf_offset + 7]  = tmp07;
+        buf[buf_offset + 8]  = tmp08;
+        buf[buf_offset + 9]  = tmp09;
+        buf[buf_offset + 10] = tmp10;
+        buf[buf_offset + 11] = tmp11;
+        buf[buf_offset + 12] = tmp12;
+        buf[buf_offset + 13] = tmp13;
+        buf[buf_offset + 14] = tmp14;
+        buf[buf_offset + 15] = tmp15;
+        buf[buf_offset + 16] = tmp16;
+        buf[buf_offset + 17] = tmp17;
+
+        buf_offset += IMAP_DIM_X;
+        imap_src_base += y_step;
+      }
     };
 
     auto omapDMA = [&](size_t image_id, size_t filter_id, size_t block_x, size_t block_y) {
@@ -182,7 +227,7 @@ extern "C" {
 
       for (size_t idx = 0; idx < N; idx += 4) {
         size_t image_id = image_offset + idx;
-        imapDMA(image_id, channel_id, block_x, block_y);
+        imapDMA(imap_buf, image_id, channel_id, block_x, block_y);
         // pass imap
         float* imap_buf_remote = fifo.obtain_wr_ptr();
         // copy
