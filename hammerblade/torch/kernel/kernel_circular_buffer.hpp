@@ -29,7 +29,7 @@ namespace CircularBuffer{
       __attribute__((always_inline))
       FIFO<T, N, DEPTH>(unsigned int prv_y, unsigned int prv_x, unsigned int nxt_y, unsigned int nxt_x){
         // I know this is super confusing ...
-        // But trust me -- this is what is should look like
+        // But trust me -- this is what it should look like
         this->occupancy_prv_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(prv_x,prv_y,this->occupancy_nxt));
         this->occupancy_nxt_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(nxt_x,nxt_y,this->occupancy));
         this->buffer_remote = reinterpret_cast<T*>(bsg_tile_group_remote_pointer(nxt_x,nxt_y,this->buffer));
