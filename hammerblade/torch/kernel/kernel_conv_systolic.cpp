@@ -8,12 +8,11 @@
 
 // Layer setup
 #define BLOCK_DIM_X   14
-#define BLOCK_DIM_Y    7
+#define BLOCK_DIM_Y   14
 #define FILTER_DIM     5
 #define NUM_FILTERS    6
 #define IMAP_DIM_X    (BLOCK_DIM_X + FILTER_DIM - 1)
 #define IMAP_DIM_Y    (BLOCK_DIM_Y + FILTER_DIM - 1)
-#define IMAP_PER_PASS  2
 
 #include <kernel_common.hpp>
 #include <kernel_conv_baseline.hpp>
@@ -66,9 +65,6 @@ extern "C" {
     auto Win  = imap.dim(3);
     auto Hk   = filter.dim(2);
     auto Wk   = filter.dim(3);
-
-    size_t h_blocks_per_out_channel = Hout / BLOCK_DIM_Y;
-    size_t w_blocks_per_out_channel = Wout / BLOCK_DIM_X;
 
     // Buffers
     float filter_buf[FILTER_DIM * FILTER_DIM];  //   5x5 * 4 = 100B
@@ -151,13 +147,13 @@ extern "C" {
       // XXX: this works for single input channel only
       size_t filter_id = bsg_x % 8 - 1;
       size_t block_x = bsg_x / 8;
-      size_t block_y = bsg_y % h_blocks_per_out_channel;
+      size_t block_y = bsg_y % 2;
       size_t channel_id = 0;
-      size_t image_offset = bsg_y / h_blocks_per_out_channel;
+      size_t image_offset = bsg_y / 2;
 
       filterDMA(filter_id, channel_id);
 
-      for (size_t idx = 0; idx < N; idx += IMAP_PER_PASS) {
+      for (size_t idx = 0; idx < N; idx += 4) {
         size_t image_id = image_offset + idx;
 
         // reset output buffer
@@ -189,11 +185,11 @@ extern "C" {
 
     auto imapDMA_job = [&]() {
       size_t block_x = bsg_x / 8;
-      size_t block_y = bsg_y % h_blocks_per_out_channel;
+      size_t block_y = bsg_y % 2;
       size_t channel_id = 0;
-      size_t image_offset = bsg_y / h_blocks_per_out_channel;
+      size_t image_offset = bsg_y / 2;
 
-      for (size_t idx = 0; idx < N; idx += IMAP_PER_PASS) {
+      for (size_t idx = 0; idx < N; idx += 4) {
         size_t image_id = image_offset + idx;
         imapDMA(image_id, channel_id, block_x, block_y);
         // pass imap
@@ -207,7 +203,7 @@ extern "C" {
     };
 
     auto polyA_job = [&]() {
-      for (size_t idx = 0; idx < N; idx += IMAP_PER_PASS) {
+      for (size_t idx = 0; idx < N; idx += 4) {
         // wait for imap
         bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f)), 1);
         imap_f     = 0;
