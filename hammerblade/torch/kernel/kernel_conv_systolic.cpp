@@ -16,6 +16,7 @@
 
 #include <kernel_common.hpp>
 #include <kernel_conv_baseline.hpp>
+#include <kernel_circular_buffer.hpp>
 
 inline void spcpy(float* dest, float* src) {
   for (int i = 0; i < IMAP_DIM_X * IMAP_DIM_Y; i += 9) {
@@ -67,17 +68,12 @@ extern "C" {
     auto Wk   = filter.dim(3);
 
     // Buffers
-    float filter_buf[FILTER_DIM * FILTER_DIM];  //   5x5 * 4 = 100B
-    float omap_buf[BLOCK_DIM_X * BLOCK_DIM_Y];      // 14x14 * 4 = 784B
-    float imap_buf[IMAP_DIM_X * IMAP_DIM_Y];        // 18x18 * 4 = 1296B
+    float  filter_buf[FILTER_DIM * FILTER_DIM];  //   5x5 * 4 = 100B
+    float  omap_buf[BLOCK_DIM_X * BLOCK_DIM_Y];  // 14x14 * 4 = 784B
+    float* imap_buf;
 
-    float* imap_buf_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,imap_buf));
-
-    // Flags
-    volatile unsigned int imap_f   = 0;
-    volatile unsigned int imap_f_E = 0;
-    volatile unsigned int *imap_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&imap_f));
-    volatile unsigned int *imap_f_W_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&imap_f_E));
+    // Buffer
+    CircularBuffer::FIFO<float, IMAP_DIM_X * IMAP_DIM_Y, 1> fifo(bsg_y, bsg_x-1, bsg_y, bsg_x+1);
 
     // Config
     // 0 -- idle
@@ -158,25 +154,19 @@ extern "C" {
 
         // reset output buffer
         reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
-
         // wait for imap
-        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f)), 1);
-
+        imap_buf = fifo.obtain_rd_ptr();
         // pass imap
-        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f_E)), 0);
-
+        float* imap_buf_remote = fifo.obtain_wr_ptr();
         // copy
         spcpy(imap_buf_remote, imap_buf);
-        asm volatile("": : :"memory");
-        imap_f_E   = 1;
-        *imap_f_E_r = 1;
+
+        fifo.finish_wr_ptr();
 
         // do compute
         conv2d_5x5(imap_buf, filter_buf, omap_buf);
 
-        asm volatile("": : :"memory");
-        imap_f     = 0;
-        *imap_f_W_r = 0;
+        fifo.finish_rd_ptr();
 
         // write omap back
         omapDMA(image_id, filter_id, block_x, block_y);
@@ -184,6 +174,7 @@ extern "C" {
     };
 
     auto imapDMA_job = [&]() {
+      imap_buf = fifo.get_buffer(); // reuse
       size_t block_x = bsg_x / 8;
       size_t block_y = bsg_y % 2;
       size_t channel_id = 0;
@@ -193,21 +184,18 @@ extern "C" {
         size_t image_id = image_offset + idx;
         imapDMA(image_id, channel_id, block_x, block_y);
         // pass imap
-        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f_E)), 0);
+        float* imap_buf_remote = fifo.obtain_wr_ptr();
         // copy
         spcpy(imap_buf_remote, imap_buf);
-        asm volatile("": : :"memory");
-        imap_f_E   = 1;
-        *imap_f_E_r = 1;
+        fifo.finish_wr_ptr();
       }
     };
 
     auto polyA_job = [&]() {
       for (size_t idx = 0; idx < N; idx += 4) {
         // wait for imap
-        bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (&imap_f)), 1);
-        imap_f     = 0;
-        *imap_f_W_r = 0;
+        fifo.obtain_rd_ptr();
+        fifo.finish_rd_ptr();
       }
     };
 
