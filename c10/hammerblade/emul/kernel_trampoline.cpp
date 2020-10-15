@@ -2,11 +2,14 @@
 #include <emul_hb_device.h>
 #include <iostream>
 #include <thread>
+#include <mutex>
 
 std::map<std::string, std::function<int(uint32_t, uint64_t*, uint32_t, uint32_t, uint32_t)>> kernelMap;
 std::vector<std::function<int(uint32_t, uint64_t*, uint32_t, uint32_t, uint32_t)>> enqueued_kernel;
 std::vector<uint32_t>  enqueued_argc;
 std::vector<uint64_t*> enqueued_argv;
+std::map<uint32_t, void*> tile_frame_map;
+std::mutex frame_mutex;
 
 // HB device kernel logger
 #ifdef HB_ENABLE_KERNEL_LOG
@@ -65,5 +68,14 @@ int execute_kernels() {
     enqueued_argv.pop_back();
   }
 
+  tile_frame_map.clear();
+
   return HB_MC_SUCCESS;
+}
+
+void register_tile_frame(uint32_t id) {
+  std::lock_guard<std::mutex> guard(frame_mutex);
+  tile_frame_map[id] = __builtin_frame_address(1);
+  std::cout << "register tile " << id << "'s stack frame at " << tile_frame_map[id] << std::endl;
+  return;
 }

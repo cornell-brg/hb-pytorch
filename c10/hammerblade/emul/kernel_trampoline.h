@@ -29,6 +29,7 @@ extern std::map<std::string, std::function<int(uint32_t, uint64_t*, uint32_t, ui
 extern std::vector<std::function<int(uint32_t, uint64_t*, uint32_t, uint32_t, uint32_t)>> enqueued_kernel;
 extern std::vector<uint32_t>  enqueued_argc;
 extern std::vector<uint64_t*> enqueued_argv;
+extern std::map<uint32_t, void*> tile_frame_map;
 
 // HB device kernel logger
 #ifdef HB_ENABLE_KERNEL_LOG
@@ -40,6 +41,7 @@ extern std::vector<uint64_t*> enqueued_argv;
 
 void enqueue_kernel(const std::string &kernel, uint32_t argc, uint64_t* argv);
 int execute_kernels();
+void register_tile_frame(uint32_t id);
 
 typedef struct _kernel_registry_ {
     _kernel_registry_(std::string kernel_name,
@@ -70,6 +72,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 0);                                                                               \
     int err = kernel();                                                                               \
     LOG_KERNEL_CALL(#kernel);                                                                         \
@@ -84,6 +87,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 1);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
@@ -99,6 +103,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 2);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -116,6 +121,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 3);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -135,6 +141,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 4);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -156,6 +163,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 5);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -179,6 +187,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 6);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -204,6 +213,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 7);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -231,6 +241,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 8);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -260,6 +271,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 9);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -291,6 +303,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 10);                                                                              \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -324,6 +337,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 11);                                                                              \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -360,6 +374,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 12);                                                                              \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -399,6 +414,7 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
+    register_tile_frame(id);                                                                          \
     assert (argc == 13);                                                                              \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
