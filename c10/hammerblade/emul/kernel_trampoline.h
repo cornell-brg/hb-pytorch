@@ -19,6 +19,7 @@
 #include <cassert>
 #include <functional>
 #include <string>
+#include <tuple>
 #include <bsg_manycore_errno.h>
 
 #ifdef HB_ENABLE_KERNEL_LOG
@@ -29,7 +30,7 @@ extern std::map<std::string, std::function<int(uint32_t, uint64_t*, uint32_t, ui
 extern std::vector<std::function<int(uint32_t, uint64_t*, uint32_t, uint32_t, uint32_t)>> enqueued_kernel;
 extern std::vector<uint32_t>  enqueued_argc;
 extern std::vector<uint64_t*> enqueued_argv;
-extern std::map<uint32_t, void*> tile_frame_map;
+extern std::map<std::tuple<uint32_t, uint32_t>, void*> tile_frame_map;
 
 // HB device kernel logger
 #ifdef HB_ENABLE_KERNEL_LOG
@@ -41,7 +42,8 @@ extern std::map<uint32_t, void*> tile_frame_map;
 
 void enqueue_kernel(const std::string &kernel, uint32_t argc, uint64_t* argv);
 int execute_kernels();
-void register_tile_frame(uint32_t id);
+void* register_tile_frame(uint32_t __x, uint32_t __y);
+void* __bsg_tile_group_remote_pointer(uint32_t target_x, uint32_t target_y, volatile void* local, void* local_frame);
 
 typedef struct _kernel_registry_ {
     _kernel_registry_(std::string kernel_name,
@@ -49,6 +51,9 @@ typedef struct _kernel_registry_ {
         kernelMap[kernel_name] = kernel_ptr;
     }
 } kernel_registry;
+
+#define bsg_tile_group_remote_pointer(__x, __y, __local)                                              \
+__bsg_tile_group_remote_pointer(__x, __y, __local, __bsg_frame)
 
 #define HB_GET_MACRO(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,_14,NAME,...) NAME
 #define HB_EMUL_REG_KERNEL(...) HB_GET_MACRO(__VA_ARGS__, HB_EMUL_REG_KERNEL_14ARGS,                  \
@@ -72,7 +77,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 0);                                                                               \
     int err = kernel();                                                                               \
     LOG_KERNEL_CALL(#kernel);                                                                         \
@@ -87,7 +93,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 1);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     at0 arg0 = (at0)((intptr_t)_arg0);                                                                \
@@ -103,7 +110,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 2);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -121,7 +129,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 3);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -141,7 +150,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 4);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -163,7 +173,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 5);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -187,7 +198,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 6);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -213,7 +225,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 7);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -241,7 +254,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 8);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -271,7 +285,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 9);                                                                               \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -303,7 +318,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 10);                                                                              \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -337,7 +353,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 11);                                                                              \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -374,7 +391,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 12);                                                                              \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \
@@ -414,7 +432,8 @@ int trampoline_##kernel(const uint32_t argc, const uint64_t* argv,              
     __bsg_x = idx;                                                                                    \
     __bsg_y = idy;                                                                                    \
     __bsg_id = id;                                                                                    \
-    register_tile_frame(id);                                                                          \
+    __bsg_frame = register_tile_frame(idx, idy);                                                      \
+    g_barrier.sync();                                                                                 \
     assert (argc == 13);                                                                              \
     uint64_t _arg0 = argv[0];                                                                         \
     uint64_t _arg1 = argv[1];                                                                         \

@@ -20,8 +20,8 @@ namespace CircularBuffer{
     protected:
       unsigned int occ_idx = 0;
       unsigned int occ_idx_nxt = 0;
-      volatile unsigned int      occupancy [DEPTH] = {{0}};
-      volatile unsigned int  occupancy_nxt [DEPTH] = {{0}};
+      volatile unsigned int      occupancy [DEPTH] = {0};
+      volatile unsigned int  occupancy_nxt [DEPTH] = {0};
       volatile unsigned int* occupancy_nxt_r = nullptr;
       volatile unsigned int* occupancy_prv_r = nullptr;
       T buffer[N * DEPTH];

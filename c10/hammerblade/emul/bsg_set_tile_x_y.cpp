@@ -10,6 +10,7 @@ thread_local int __bsg_grid_dim_y = 1;      //The Y Dimensions of the grid of ti
 thread_local int __bsg_tile_group_id_x = 0; //The X Cord of the tile group within the grid
 thread_local int __bsg_tile_group_id_y = 0; //The Y Cord of the tile group within the grid
 thread_local int __bsg_tile_group_id = 0;   //The flat ID of the tile group within the grid
+thread_local void* __bsg_frame = nullptr;   //Pointer to the stack frame for SPM comm emulation
 
 
 void bsg_set_tile_x_y() {

@@ -93,6 +93,10 @@ static inline void bsg_cuda_print_stat_end(uint32_t tag) {
   return;
 }
 
+static inline void bsg_wait_local(int* addr, int value) {
+  return;
+}
+
 
 #define bsg_fail() assert (1==0 /* bsg_fail is called */)
 

@@ -8,7 +8,7 @@ std::map<std::string, std::function<int(uint32_t, uint64_t*, uint32_t, uint32_t,
 std::vector<std::function<int(uint32_t, uint64_t*, uint32_t, uint32_t, uint32_t)>> enqueued_kernel;
 std::vector<uint32_t>  enqueued_argc;
 std::vector<uint64_t*> enqueued_argv;
-std::map<uint32_t, void*> tile_frame_map;
+std::map<std::tuple<uint32_t, uint32_t>, void*> tile_frame_map;
 std::mutex frame_mutex;
 
 // HB device kernel logger
@@ -73,9 +73,20 @@ int execute_kernels() {
   return HB_MC_SUCCESS;
 }
 
-void register_tile_frame(uint32_t id) {
+void* register_tile_frame(uint32_t __x, uint32_t __y) {
   std::lock_guard<std::mutex> guard(frame_mutex);
-  tile_frame_map[id] = __builtin_frame_address(1);
-  std::cout << "register tile " << id << "'s stack frame at " << tile_frame_map[id] << std::endl;
-  return;
+  void* frame = __builtin_frame_address(1);
+  tile_frame_map[std::make_tuple(__x,__y)] = frame;
+  std::cout << "register tile (" << __y << "," << __x << ")'s stack frame at " << frame << std::endl;
+  return frame;
+}
+
+void* __bsg_tile_group_remote_pointer(uint32_t target_x, uint32_t target_y, volatile void* local, void* local_frame) {
+  std::lock_guard<std::mutex> guard(frame_mutex);
+  std::cout << std::hex << "local pointer " << (intptr_t)local << " -- local frame " << local_frame << std::endl;
+  intptr_t offset = (intptr_t)local_frame - (intptr_t)local;
+  std::cout << "offset = " << offset << std::endl;
+  intptr_t remote = (intptr_t)tile_frame_map[std::make_tuple(target_x,target_y)] - offset;
+  std::cout << "remote at " << remote << std::endl;
+  return (void*)remote;
 }
