@@ -49,6 +49,16 @@ def test_and_4():
     y = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32)).to(torch.int32)
     _test_and(x, y)
 
+def test_and_bool1():
+    x = torch.randint(0, 2, (16, 32)).to(torch.bool)
+    y = torch.randint(0, 2, (16, 32)).to(torch.bool)
+    _test_and(x, y)
+
+def test_and_bool2():
+    x = torch.randint(0, 2, (1, 128)).to(torch.bool)
+    y = torch.randint(0, 2, (1, 128)).to(torch.bool)
+    _test_and(x, y)
+
 @settings(deadline=None)
 @given(inputs=hu.tensors(n=2))
 def test_and_hypothesis(inputs):
