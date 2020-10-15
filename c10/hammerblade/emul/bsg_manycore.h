@@ -94,6 +94,7 @@ static inline void bsg_cuda_print_stat_end(uint32_t tag) {
 }
 
 static inline void bsg_wait_local(int* addr, int value) {
+  while(__sync_fetch_and_or(addr,0) != value);
   return;
 }
 
