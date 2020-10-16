@@ -8,6 +8,7 @@
 #define SYSTOLIC_Y_DIM 6
 #include <kernel_common.hpp>
 #include <kernel_addmm.hpp>
+#include <kernel_circular_buffer.hpp>
 
 inline void spcpy(float* dest, float* src) {
   for (int i = 0; i < BLOCK_DIM * BLOCK_DIM; i += 8) {
@@ -33,14 +34,16 @@ inline void spcpy(float* dest, float* src) {
   }
 }
 
-template <typename FuncInit, typename FuncMain, typename FuncWB>
-inline void gemm_main_loop(HBTensor<float, 2> mat1,
-                           HBTensor<float, 2> mat2,
-                           int __sys_x,
-                           int __sys_y,
-                           FuncInit tile_init,
-                           FuncMain tile_task,
-                           FuncWB   tile_finish) {
+extern "C" {
+
+  __attribute__ ((noinline))  int tensorlib_systolic(
+          hb_tensor_t* _result,
+          hb_tensor_t* _mat1,
+          hb_tensor_t* _mat2) {
+
+    auto mat1 = HBTensor<float, 2>(_mat1);
+    auto mat2 = HBTensor<float, 2>(_mat2);
+    auto result = HBTensor<float, 2>(_result);
 
     int r1 = mat1.dim(0);
     int c1 = mat1.dim(1);
@@ -53,345 +56,153 @@ inline void gemm_main_loop(HBTensor<float, 2> mat1,
     int m2_num_blk_per_col = (r2 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m2 per col
     int m2_num_blk_per_row = (c2 + BLOCK_DIM - 1) / BLOCK_DIM; // how many blocks in m2 per row
 
-    for (int i = 0; i < m1_num_blk_per_col; i += SYSTOLIC_Y_DIM) {
-      for (int j = 0; j < m2_num_blk_per_row; j += SYSTOLIC_X_DIM) {
-        int rr = i + __sys_y;
-        int rc = j + __sys_x;
-
-        // init code for each output block
-        tile_init();
-
-        for (int mat1x = 0; mat1x < m1_num_blk_per_row; mat1x++) {
-          // main task
-          tile_task(rr, rc, mat1x);
-        }
-
-        // finishing up code for each output block
-        tile_finish(rr, rc);
-      }
-    }
-}
-
-extern "C" {
-
-  __attribute__ ((noinline))  int tensorlib_systolic(
-          hb_tensor_t* _result,
-          hb_tensor_t* _mat1,
-          hb_tensor_t* _mat2) {
-
-    auto mat1 = HBTensor<float, 2>(_mat1);
-    auto mat2 = HBTensor<float, 2>(_mat2);
-    auto result = HBTensor<float, 2>(_result);
-
     // Config
     // 0 -- idle
     // 1 -- row DMA
     // 2 -- col DMA
     // 3 -- compute
-    // 4 -- compute and cpy concurrently
+    // 4 -- polyA - col
+    // 5 -- polyA - row
 
-    /*
     char systolic_6x14_gemm[8][16] = {
       {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0},
-      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
-      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
-      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
-      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
-      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
-      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0},
-      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    };
-    */
-
-    char systolic_6x14_gemm_compute_and_cpy[8][16] = {
-      {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0},
-      {1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
-      {1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
-      {1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
-      {1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
-      {1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
-      {1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
-      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    };
-
-    // Appendix
-    // 0000 -- normal passing
-    // 0001 -- do not pass down
-    // 0010 -- do not pass right
-
-    char systolic_6x14_gemm_appdenix[8][16] = {
-      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
-      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
-      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
-      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
-      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0},
-      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0},
-      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
+      {0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
+    //  {0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //  {1, 3, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //  {1, 3, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //  {0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
     // Activate config
-    char (&mc_config)[8][16] = systolic_6x14_gemm_compute_and_cpy;
-    char (&mc_append)[8][16] = systolic_6x14_gemm_appdenix;
+    char (&mc_config)[8][16] = systolic_6x14_gemm;
     char tile_config = mc_config[bsg_y][bsg_x];
-    char tile_append = mc_append[bsg_y][bsg_x];
 
     // buffers -- with double buffering
     float sp_result[BLOCK_DIM * BLOCK_DIM];
-    float sp_mat1_A[BLOCK_DIM * BLOCK_DIM];
-    float sp_mat2_A[BLOCK_DIM * BLOCK_DIM];
-    float sp_mat1_B[BLOCK_DIM * BLOCK_DIM];
-    float sp_mat2_B[BLOCK_DIM * BLOCK_DIM];
-    float *sp_mat1 = sp_mat1_A;
-    float *sp_mat2 = sp_mat2_A;
+    float* sp_mat1;
+    float* sp_mat2;
+    float* sp_mat1_remote;
+    float* sp_mat2_remote;
 
-    // pointer to buffers in neighbors
-    // mat1_remote are to the East
-    float *sp_mat1_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,sp_mat1_A));
-    float *sp_mat1_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,sp_mat1_B));
-    // mat2_remote are to the South
-    float *sp_mat2_A_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,sp_mat2_A));
-    float *sp_mat2_B_remote = reinterpret_cast<float*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,sp_mat2_B));
-    float *sp_mat1_remote = sp_mat1_A_remote;
-    float *sp_mat2_remote = sp_mat2_A_remote;
+    CircularBuffer::FIFO<float, BLOCK_DIM * BLOCK_DIM, 1> mat1_fifo(bsg_y, bsg_x-1, bsg_y, bsg_x+1);
+    CircularBuffer::FIFO<float, BLOCK_DIM * BLOCK_DIM, 1> mat2_fifo(bsg_y-1, bsg_x, bsg_y+1, bsg_x);
 
-    // sync flags
-    // we need a local variable on whatever we need wait_local -- mat1_f, mat2_f, mat1_f_E, mat2_f_S for compute
-    // 0 -> ready to load
-    // 1 -> ready to use
-    volatile unsigned int  mat1_A_f     = 0;
-    volatile unsigned int  mat1_A_f_E   = 0;
-    volatile unsigned int *mat1_A_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&mat1_A_f));
-    volatile unsigned int *mat1_A_f_W_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&mat1_A_f_E));
+    auto compute_task = [&] () {
 
-    volatile unsigned int  mat1_B_f     = 0;
-    volatile unsigned int  mat1_B_f_E   = 0;
-    volatile unsigned int *mat1_B_f_E_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x+1,bsg_y,&mat1_B_f));
-    volatile unsigned int *mat1_B_f_W_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x-1,bsg_y,&mat1_B_f_E));
+      for (int i = 0; i < m1_num_blk_per_col; i += SYSTOLIC_Y_DIM) {
+        for (int j = 0; j < m2_num_blk_per_row; j += SYSTOLIC_X_DIM) {
 
-    volatile unsigned int  mat2_A_f     = 0;
-    volatile unsigned int  mat2_A_f_S   = 0;
-    volatile unsigned int *mat2_A_f_S_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,&mat2_A_f));
-    volatile unsigned int *mat2_A_f_N_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,&mat2_A_f_S));
+          int rr = i + __bsg_y - 1;
+          int rc = j + __bsg_x - 1;
 
-    volatile unsigned int  mat2_B_f     = 0;
-    volatile unsigned int  mat2_B_f_S   = 0;
-    volatile unsigned int *mat2_B_f_S_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y+1,&mat2_B_f));
-    volatile unsigned int *mat2_B_f_N_r = reinterpret_cast<volatile unsigned int*>(bsg_tile_group_remote_pointer(bsg_x,bsg_y-1,&mat2_B_f_S));
+          reset_sp(sp_result);
 
-    volatile unsigned int *mat1_f     = &mat1_A_f;
-    volatile unsigned int *mat1_f_E   = &mat1_A_f_E;
-    volatile unsigned int *mat1_f_E_r =  mat1_A_f_E_r;
-    volatile unsigned int *mat1_f_W_r =  mat1_A_f_W_r;
+          for (int mat1x = 0; mat1x < m1_num_blk_per_row; mat1x++) {
+            // wait until buffer is loaded
+            sp_mat2 = mat2_fifo.obtain_rd_ptr();
 
-    volatile unsigned int *mat2_f     = &mat2_A_f;
-    volatile unsigned int *mat2_f_S   = &mat2_A_f_S;
-    volatile unsigned int *mat2_f_S_r =  mat2_A_f_S_r;
-    volatile unsigned int *mat2_f_N_r =  mat2_A_f_N_r;
+            sp_mat2_remote = mat2_fifo.obtain_wr_ptr();
+            // copy mat2 to S
+            spcpy(sp_mat2_remote, sp_mat2);
+            mat2_fifo.finish_wr_ptr();
 
-    auto tile_init = [&] { reset_sp(sp_result); };
+            // wait until buffer is loaded
+            sp_mat1 = mat1_fifo.obtain_rd_ptr();
 
-    auto tile_task = [&] (int rr, int rc, int mat1x) {
+            sp_mat1_remote = mat1_fifo.obtain_wr_ptr();
+            // copy mat2 to S
+            spcpy(sp_mat1_remote, sp_mat1);
+            mat1_fifo.finish_wr_ptr();
 
-                          // wait until buffer is loaded
-                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f)), 1);
 
-                          if (!(tile_append & 0x1)) {
-                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
-                            // copy mat2 to S
-                            spcpy(sp_mat2_remote, sp_mat2);
-                            asm volatile("": : :"memory");
-                            *mat2_f_S   = 1;
-                            *mat2_f_S_r = 1;
-                          }
+            // do compute
+            compute_simple(sp_result, sp_mat1, sp_mat2);
 
-                          // wait until buffer is loaded
-                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f)), 1);
+            // flag that we are done with the buffer
+            mat1_fifo.finish_rd_ptr();
+            mat2_fifo.finish_rd_ptr();
+          }
 
-                          // copy what we have worked on to the next tile
-                          if (!(tile_append & 0x2)) {
-                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
-                            // copy mat1 to E
-                            spcpy(sp_mat1_remote, sp_mat1);
-                            asm volatile("": : :"memory");
-                            *mat1_f_E   = 1;
-                            *mat1_f_E_r = 1;
-                          }
+          // write back
+          for (int i = 0; i < BLOCK_DIM; i++) {
+            for (int j = 0; j < BLOCK_DIM; j++) {
+              result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * BLOCK_DIM + j];
+            }
+          }
 
-                          // do compute
-                          compute_simple(sp_result, sp_mat1, sp_mat2);
+        }
+      }
+    };
 
-                          // flag that we are done with the buffer
-                          asm volatile("": : :"memory");
-                          *mat1_f     = 0;
-                          *mat1_f_W_r = 0;
-                          *mat2_f     = 0;
-                          *mat2_f_N_r = 0;
+    auto col_dma_task = [&] () {
+      for (int i = 0; i < m1_num_blk_per_col; i += SYSTOLIC_Y_DIM) {
+        for (int j = 0; j < m2_num_blk_per_row; j += SYSTOLIC_X_DIM) {
 
-                          // switch buffer
-                          if (sp_mat1 == sp_mat1_A) {
-                            sp_mat1    = sp_mat1_B;
-                            sp_mat2    = sp_mat2_B;
-                            sp_mat1_remote = sp_mat1_B_remote;
-                            sp_mat2_remote = sp_mat2_B_remote;
-                            mat1_f     = &mat1_B_f;
-                            mat1_f_E   = &mat1_B_f_E;
-                            mat1_f_E_r =  mat1_B_f_E_r;
-                            mat1_f_W_r =  mat1_B_f_W_r;
-                            mat2_f     = &mat2_B_f;
-                            mat2_f_S   = &mat2_B_f_S;
-                            mat2_f_S_r =  mat2_B_f_S_r;
-                            mat2_f_N_r =  mat2_B_f_N_r;
-                          } else {
-                            sp_mat1    = sp_mat1_A;
-                            sp_mat2    = sp_mat2_A;
-                            sp_mat1_remote = sp_mat1_A_remote;
-                            sp_mat2_remote = sp_mat2_A_remote;
-                            mat1_f     = &mat1_A_f;
-                            mat1_f_E   = &mat1_A_f_E;
-                            mat1_f_E_r =  mat1_A_f_E_r;
-                            mat1_f_W_r =  mat1_A_f_W_r;
-                            mat2_f     = &mat2_A_f;
-                            mat2_f_S   = &mat2_A_f_S;
-                            mat2_f_S_r =  mat2_A_f_S_r;
-                            mat2_f_N_r =  mat2_A_f_N_r;
-                          }
-                      };
+          int rc = j + __bsg_x - 1;
 
-    auto tile_task_compute_while_cpy = [&] (int rr, int rc, int mat1x) {
+          for (int mat1x = 0; mat1x < m1_num_blk_per_row; mat1x++) {
+            sp_mat2_remote = mat2_fifo.obtain_wr_ptr();
+            dram_to_sp_simple(sp_mat2_remote, mat2, mat1x, rc);
+            mat2_fifo.finish_wr_ptr();
+          }
 
-                          // wait until buffer is loaded
-                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f)), 1);
+        }
+      }
+    };
 
-                          // wait until buffer is loaded
-                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f)), 1);
+    auto row_dma_task = [&] () {
+      for (int i = 0; i < m1_num_blk_per_col; i += SYSTOLIC_Y_DIM) {
+        for (int j = 0; j < m2_num_blk_per_row; j += SYSTOLIC_X_DIM) {
 
-                          if (tile_append == 0) {
-                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
-                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
-                            // compute and cpy
-                            // template <bool EAST, bool SOUTH>
-                            compute_and_copy<true,true>(sp_result, sp_mat1, sp_mat2, sp_mat1_remote, sp_mat2_remote);
-                            asm volatile("": : :"memory");
-                            *mat2_f_S   = 1;
-                            *mat2_f_S_r = 1;
-                            *mat1_f_E   = 1;
-                            *mat1_f_E_r = 1;
-                          }
-                          // copy to right only
-                          else if (tile_append == 1) {
-                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
-                            // template <bool EAST, bool SOUTH>
-                            compute_and_copy<true,false>(sp_result, sp_mat1, sp_mat2, sp_mat1_remote, sp_mat2_remote);
-                            asm volatile("": : :"memory");
-                            *mat1_f_E   = 1;
-                            *mat1_f_E_r = 1;
-                          }
-                          // copy downward only
-                          else if (tile_append == 2) {
-                            bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
-                            // template <bool EAST, bool SOUTH>
-                            compute_and_copy<false,true>(sp_result, sp_mat1, sp_mat2, sp_mat1_remote, sp_mat2_remote);
-                            asm volatile("": : :"memory");
-                            *mat2_f_S   = 1;
-                            *mat2_f_S_r = 1;
-                          }
-                          // copy nothing case
-                          else if (tile_append == 3) {
-                            compute_simple(sp_result, sp_mat1, sp_mat2);
-                          }
+          int rr = i + __bsg_y - 1;
 
-                          // flag that we are done with the buffer
-                          asm volatile("": : :"memory");
-                          *mat1_f     = 0;
-                          *mat1_f_W_r = 0;
-                          *mat2_f     = 0;
-                          *mat2_f_N_r = 0;
+          for (int mat1x = 0; mat1x < m1_num_blk_per_row; mat1x++) {
+            sp_mat1_remote = mat1_fifo.obtain_wr_ptr();
+            dram_to_sp_simple(sp_mat1_remote, mat1, rr, mat1x);
+            mat1_fifo.finish_wr_ptr();
+          }
 
-                          // switch buffer
-                          if (sp_mat1 == sp_mat1_A) {
-                            sp_mat1    = sp_mat1_B;
-                            sp_mat2    = sp_mat2_B;
-                            sp_mat1_remote = sp_mat1_B_remote;
-                            sp_mat2_remote = sp_mat2_B_remote;
-                            mat1_f     = &mat1_B_f;
-                            mat1_f_E   = &mat1_B_f_E;
-                            mat1_f_E_r =  mat1_B_f_E_r;
-                            mat1_f_W_r =  mat1_B_f_W_r;
-                            mat2_f     = &mat2_B_f;
-                            mat2_f_S   = &mat2_B_f_S;
-                            mat2_f_S_r =  mat2_B_f_S_r;
-                            mat2_f_N_r =  mat2_B_f_N_r;
-                          } else {
-                            sp_mat1    = sp_mat1_A;
-                            sp_mat2    = sp_mat2_A;
-                            sp_mat1_remote = sp_mat1_A_remote;
-                            sp_mat2_remote = sp_mat2_A_remote;
-                            mat1_f     = &mat1_A_f;
-                            mat1_f_E   = &mat1_A_f_E;
-                            mat1_f_E_r =  mat1_A_f_E_r;
-                            mat1_f_W_r =  mat1_A_f_W_r;
-                            mat2_f     = &mat2_A_f;
-                            mat2_f_S   = &mat2_A_f_S;
-                            mat2_f_S_r =  mat2_A_f_S_r;
-                            mat2_f_N_r =  mat2_A_f_N_r;
-                          }
-                      };
-    auto col_dma_task = [&] (int rr, int rc, int mat1x) {
+        }
+      }
+    };
 
-                          // wait until buffer is ready
-                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat2_f_S)), 0);
-                          dram_to_sp_simple(sp_mat2_remote, mat2, mat1x, rc);
-                          asm volatile("": : :"memory");
-                          *mat2_f_S   = 1;
-                          *mat2_f_S_r = 1;
+    auto polyACol = [&]() {
+      for (int i = 0; i < m1_num_blk_per_col; i += SYSTOLIC_Y_DIM) {
+        for (int j = 0; j < m2_num_blk_per_row; j += SYSTOLIC_X_DIM) {
 
-                          // switch buffer
-                          if (sp_mat2_remote == sp_mat2_A_remote) {
-                            sp_mat2_remote = sp_mat2_B_remote;
-                            mat2_f     = &mat2_B_f;
-                            mat2_f_S   = &mat2_B_f_S;
-                            mat2_f_S_r =  mat2_B_f_S_r;
-                          } else {
-                            sp_mat2_remote = sp_mat2_A_remote;
-                            mat2_f     = &mat2_A_f;
-                            mat2_f_S   = &mat2_A_f_S;
-                            mat2_f_S_r =  mat2_A_f_S_r;
-                          }
-                      };
+          for (int mat1x = 0; mat1x < m1_num_blk_per_row; mat1x++) {
+            mat2_fifo.obtain_rd_ptr();
+            mat2_fifo.finish_rd_ptr();
+          }
 
-    auto row_dma_task = [&] (int rr, int rc, int mat1x) {
+        }
+      }
+    };
 
-                          // wait until buffer is ready
-                          bsg_wait_local(reinterpret_cast<int *> (const_cast<unsigned int*> (mat1_f_E)), 0);
-                          dram_to_sp_simple(sp_mat1_remote, mat1, rr, mat1x);
-                          asm volatile("": : :"memory");
-                          *mat1_f_E   = 1;
-                          *mat1_f_E_r = 1;
+    auto polyARow = [&]() {
+      for (int i = 0; i < m1_num_blk_per_col; i += SYSTOLIC_Y_DIM) {
+        for (int j = 0; j < m2_num_blk_per_row; j += SYSTOLIC_X_DIM) {
 
-                          // switch buffer
-                          if (sp_mat1_remote == sp_mat1_A_remote) {
-                            sp_mat1_remote = sp_mat1_B_remote;
-                            mat1_f     = &mat1_B_f;
-                            mat1_f_E   = &mat1_B_f_E;
-                            mat1_f_E_r =  mat1_B_f_E_r;
-                          } else {
-                            sp_mat1_remote = sp_mat1_A_remote;
-                            mat1_f     = &mat1_A_f;
-                            mat1_f_E   = &mat1_A_f_E;
-                            mat1_f_E_r =  mat1_A_f_E_r;
-                          }
-                      };
+          for (int mat1x = 0; mat1x < m1_num_blk_per_row; mat1x++) {
+            mat1_fifo.obtain_rd_ptr();
+            mat1_fifo.finish_rd_ptr();
+          }
 
-    auto tile_finish = [&] (int rr, int rc) {
-                            // copy this block back into DRAM
-                            for (int i = 0; i < BLOCK_DIM; i++) {
-                              for (int j = 0; j < BLOCK_DIM; j++) {
-                                result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * BLOCK_DIM + j];
-                              }
-                            }
-                        };
+        }
+      }
+    };
 
+    g_barrier.sync();
 
     bsg_cuda_print_stat_kernel_start();
 
@@ -402,19 +213,24 @@ extern "C" {
         break;
       case 1:
         // row DMA
-        gemm_main_loop(mat1, mat2, __bsg_x, __bsg_y-1, [] {}, row_dma_task, [] (int rr, int rc) {});
+        row_dma_task();
         break;
       case 2:
         // col DMA
-        gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y, [] {}, col_dma_task, [] (int rr, int rc) {});
+        col_dma_task();
         break;
       case 3:
         // PE
-        gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y-1, tile_init, tile_task, tile_finish);
+        compute_task();
         break;
       case 4:
-        // PE but do copy and compute at the same time
-        gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y-1, tile_init, tile_task_compute_while_cpy, tile_finish);
+        // PolyA Col
+        polyACol();
+        break;
+      case 5:
+        // PolyA Row
+        polyARow();
+        break;
     }
 
 
