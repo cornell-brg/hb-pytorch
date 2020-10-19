@@ -94,8 +94,8 @@ extern "C" {
     float* sp_mat1_remote;
     float* sp_mat2_remote;
 
-    CircularBuffer::FIFO<float, BLOCK_DIM * BLOCK_DIM, 1> mat1_fifo(bsg_y, bsg_x-1, bsg_y, bsg_x+1);
-    CircularBuffer::FIFO<float, BLOCK_DIM * BLOCK_DIM, 1> mat2_fifo(bsg_y-1, bsg_x, bsg_y+1, bsg_x);
+    CircularBuffer::FIFO<float, BLOCK_DIM * BLOCK_DIM, 2> mat1_fifo(bsg_y, bsg_x-1, bsg_y, bsg_x+1);
+    CircularBuffer::FIFO<float, BLOCK_DIM * BLOCK_DIM, 2> mat2_fifo(bsg_y-1, bsg_x, bsg_y+1, bsg_x);
 
     auto compute_task = [&] () {
 
