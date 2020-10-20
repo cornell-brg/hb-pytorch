@@ -45,24 +45,7 @@ extern "C" {
         int rc = j + __bsg_x;
 
         // initialize scratchpad result (init to 0's)
-        for (int sp = 0; sp < BLOCK_DIM * BLOCK_DIM; sp += 16) {
-            sp_result[sp +  0] = 0;
-            sp_result[sp +  1] = 0;
-            sp_result[sp +  2] = 0;
-            sp_result[sp +  3] = 0;
-            sp_result[sp +  4] = 0;
-            sp_result[sp +  5] = 0;
-            sp_result[sp +  6] = 0;
-            sp_result[sp +  7] = 0;
-            sp_result[sp +  8] = 0;
-            sp_result[sp +  9] = 0;
-            sp_result[sp + 10] = 0;
-            sp_result[sp + 11] = 0;
-            sp_result[sp + 12] = 0;
-            sp_result[sp + 13] = 0;
-            sp_result[sp + 14] = 0;
-            sp_result[sp + 15] = 0;
-        }
+        reset_sp(sp_result);
 
         // process mat1 and mat2 for this result block
         // only care about blocks of mat1 in row rr
@@ -74,11 +57,12 @@ extern "C" {
         }
 
         // copy this block back into DRAM
-        for (int i = 0; i < BLOCK_DIM; i++) {
-            for (int j = 0; j < BLOCK_DIM; j++) {
-                result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * BLOCK_DIM + j];
-            }
-        }
+        sp_to_dram(result, sp_result, rr, rc);
+        // for (int i = 0; i < BLOCK_DIM; i++) {
+        //     for (int j = 0; j < BLOCK_DIM; j++) {
+        //         result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * BLOCK_DIM + j];
+        //     }
+        // }
       }
     }
     //   End profiling

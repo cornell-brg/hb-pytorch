@@ -181,6 +181,74 @@ inline void dram_to_sp_simple(
     }
 }
 
+inline void sp_to_dram(
+          HBTensor<float, 2> dest,
+          float* src,
+          int r_idx,
+          int c_idx) {
+    float* dest_ptr = (float*)dest.data_ptr();
+    uint32_t* dest_strides = dest.get_strides();
+    float* dest_base = dest_ptr + (r_idx * BLOCK_DIM * dest_strides[0])
+                       + (c_idx * BLOCK_DIM * dest_strides[1]);
+    int row_offset = 0;
+    for (int i = 0; i < BLOCK_DIM; i++) {
+        float* dest_offset = dest_base;
+        if (BLOCK_DIM == 12) {
+            register float tmp0 = src[row_offset + 0];
+            register float tmp1 = src[row_offset + 1];
+            register float tmp2 = src[row_offset + 2];
+            register float tmp3 = src[row_offset + 3];
+            register float tmp4 = src[row_offset + 4];
+            register float tmp5 = src[row_offset + 5];
+            register float tmp6 = src[row_offset + 6];
+            register float tmp7 = src[row_offset + 7];
+            register float tmp8 = src[row_offset + 8];
+            register float tmp9 = src[row_offset + 9];
+            register float tmp10 = src[row_offset + 10];
+            register float tmp11 = src[row_offset + 11];
+            asm volatile("": : :"memory");
+            *(dest_offset + 0) = tmp0;
+            *(dest_offset + 1) = tmp1;
+            *(dest_offset + 2) = tmp2;
+            *(dest_offset + 3) = tmp3;
+            *(dest_offset + 4) = tmp4;
+            *(dest_offset + 5) = tmp5;
+            *(dest_offset + 6) = tmp6;
+            *(dest_offset + 7) = tmp7;
+            *(dest_offset + 8) = tmp8;
+            *(dest_offset + 9) = tmp9;
+            *(dest_offset + 10) = tmp10;
+            *(dest_offset + 11) = tmp11;
+            row_offset += 12;
+        }
+        else {
+            for (int j = 0; j < BLOCK_DIM; j += 8) {
+                register float tmp0 = src[row_offset + 0];
+                register float tmp1 = src[row_offset + 1];
+                register float tmp2 = src[row_offset + 2];
+                register float tmp3 = src[row_offset + 3];
+                register float tmp4 = src[row_offset + 4];
+                register float tmp5 = src[row_offset + 5];
+                register float tmp6 = src[row_offset + 6];
+                register float tmp7 = src[row_offset + 7];
+                asm volatile("": : :"memory");
+                *(dest_offset + 0) = tmp0;
+                *(dest_offset + 1) = tmp1;
+                *(dest_offset + 2) = tmp2;
+                *(dest_offset + 3) = tmp3;
+                *(dest_offset + 4) = tmp4;
+                *(dest_offset + 5) = tmp5;
+                *(dest_offset + 6) = tmp6;
+                *(dest_offset + 7) = tmp7;
+                dest_offset += 8;
+                row_offset += 8;
+            }
+        }
+        dest_base += dest_strides[0];
+    }
+}
+
+
 inline void reset_sp(float* dest) {
   // initialize scratchpad (init to 0's)
   for (int sp = 0; sp < BLOCK_DIM * BLOCK_DIM; sp += 16) {
