@@ -88,35 +88,6 @@ inline void compute_simple(
     }
 }
 
-
-// XXX: in the test case, 1024x32 @ 32x1024 case, there is no partial blocks
-
-inline void compute(
-          float* dest,
-          float* sp_mat1,
-          float* sp_mat2,
-          int dim_y,
-          int dim_x,
-          int mid_dim) {
-    for (int i = 0; i < dim_y; i++) {
-        int dest_row_offset = i * dim_x;
-        int mat1_row_offset = i * mid_dim;
-        for (int j = 0; j < dim_x; j++) {
-            int k = 0;
-            register float tmp_fix = 0.0f;
-            for (;k < mid_dim; k++) {
-                int mat1_idx = mat1_row_offset + k;
-                int mat2_idx = k * dim_x + j;
-                tmp_fix += sp_mat1[mat1_idx] * sp_mat2[mat2_idx];
-            }
-            dest[dest_row_offset + j] += tmp_fix;
-        }
-    }
-}
-
-// XXX: to get good performance, we assume matrix is contiguous in
-// memory
-
 inline void dram_to_sp_simple(
           float* dest,
           HBTensor<float, 2> src,
@@ -177,6 +148,73 @@ inline void dram_to_sp_simple(
                 dest[row_offset + 6] = tmp6;
                 dest[row_offset + 7] = tmp7;
                 src_offset += 8;
+                row_offset += 8;
+            }
+        }
+        src_base += src_strides[0];
+    }
+}
+
+inline void dram_to_sp_simple_transpose(
+          float* dest,
+          HBTensor<float, 2> src,
+          int r_idx,
+          int c_idx) {
+    float* src_ptr = (float*)src.data_ptr();
+    uint32_t* src_strides = src.get_strides();
+    float* src_base = src_ptr + (r_idx * BLOCK_DIM * src_strides[0])
+                      + (c_idx * BLOCK_DIM * src_strides[1]);
+    int row_offset = 0;
+    for (int i = 0; i < BLOCK_DIM; i++) {
+        float* src_offset = src_base;
+        if (BLOCK_DIM == 12) {
+            register float tmp0 = *(src_offset + 0 * src_strides[1]);
+            register float tmp1 = *(src_offset + 1 * src_strides[1]);
+            register float tmp2 = *(src_offset + 2 * src_strides[1]);
+            register float tmp3 = *(src_offset + 3 * src_strides[1]);
+            register float tmp4 = *(src_offset + 4 * src_strides[1]);
+            register float tmp5 = *(src_offset + 5 * src_strides[1]);
+            register float tmp6 = *(src_offset + 6 * src_strides[1]);
+            register float tmp7 = *(src_offset + 7 * src_strides[1]);
+            register float tmp8 = *(src_offset + 8 * src_strides[1]);
+            register float tmp9 = *(src_offset + 9 * src_strides[1]);
+            register float tmp10 = *(src_offset + 10 * src_strides[1]);
+            register float tmp11 = *(src_offset + 11 * src_strides[1]);
+            asm volatile("": : :"memory");
+            dest[row_offset + 0] = tmp0;
+            dest[row_offset + 1] = tmp1;
+            dest[row_offset + 2] = tmp2;
+            dest[row_offset + 3] = tmp3;
+            dest[row_offset + 4] = tmp4;
+            dest[row_offset + 5] = tmp5;
+            dest[row_offset + 6] = tmp6;
+            dest[row_offset + 7] = tmp7;
+            dest[row_offset + 8] = tmp8;
+            dest[row_offset + 9] = tmp9;
+            dest[row_offset + 10] = tmp10;
+            dest[row_offset + 11] = tmp11;
+            row_offset += 12;
+        }
+        else {
+            for (int j = 0; j < BLOCK_DIM; j += 8) {
+                register float tmp0 = *(src_offset + 0 * src_strides[1]);
+                register float tmp1 = *(src_offset + 1 * src_strides[1]);
+                register float tmp2 = *(src_offset + 2 * src_strides[1]);
+                register float tmp3 = *(src_offset + 3 * src_strides[1]);
+                register float tmp4 = *(src_offset + 4 * src_strides[1]);
+                register float tmp5 = *(src_offset + 5 * src_strides[1]);
+                register float tmp6 = *(src_offset + 6 * src_strides[1]);
+                register float tmp7 = *(src_offset + 7 * src_strides[1]);
+                asm volatile("": : :"memory");
+                dest[row_offset + 0] = tmp0;
+                dest[row_offset + 1] = tmp1;
+                dest[row_offset + 2] = tmp2;
+                dest[row_offset + 3] = tmp3;
+                dest[row_offset + 4] = tmp4;
+                dest[row_offset + 5] = tmp5;
+                dest[row_offset + 6] = tmp6;
+                dest[row_offset + 7] = tmp7;
+                src_offset += 8 * src_strides[1];
                 row_offset += 8;
             }
         }
