@@ -11,6 +11,9 @@
 //   iter 1 - mat1[0][1] * ( mat2[1][0], mat2[1][1], ..., mat2[1][7] )
 //   iter 2 - mat1[0][2] * ( mat2[2][0], mat2[2][1], ..., mat2[2][7] )
 
+#ifndef _ADDMM_H_
+#define _ADDMM_H_
+
 inline void compute_simple(
           float* dest,
           float* sp_mat1,
@@ -248,6 +251,95 @@ inline void sp_to_dram(
     }
 }
 
+inline void addmm_and_sp_to_dram(
+          HBTensor<float, 2> dest,
+          float* src,
+          float* input,
+          float alpha,
+          float beta,
+          int r_idx,
+          int c_idx) {
+    float* dest_ptr = (float*)dest.data_ptr();
+    uint32_t* dest_strides = dest.get_strides();
+    float* dest_base = dest_ptr + (r_idx * BLOCK_DIM * dest_strides[0])
+                       + (c_idx * BLOCK_DIM * dest_strides[1]);
+    int row_offset = 0;
+    for (int i = 0; i < BLOCK_DIM; i++) {
+        float* dest_offset = dest_base;
+        if (BLOCK_DIM == 12) {
+            register float tmp0 = src[row_offset + 0];
+            register float tmp1 = src[row_offset + 1];
+            register float tmp2 = src[row_offset + 2];
+            register float tmp3 = src[row_offset + 3];
+            register float tmp4 = src[row_offset + 4];
+            register float tmp5 = src[row_offset + 5];
+            register float tmp6 = src[row_offset + 6];
+            register float tmp7 = src[row_offset + 7];
+            register float tmp8 = src[row_offset + 8];
+            register float tmp9 = src[row_offset + 9];
+            register float tmp10 = src[row_offset + 10];
+            register float tmp11 = src[row_offset + 11];
+            register float input0 = beta * input[row_offset + 0];
+            register float input1 = beta * input[row_offset + 1];
+            register float input2 = beta * input[row_offset + 2];
+            register float input3 = beta * input[row_offset + 3];
+            register float input4 = beta * input[row_offset + 4];
+            register float input5 = beta * input[row_offset + 5];
+            register float input6 = beta * input[row_offset + 6];
+            register float input7 = beta * input[row_offset + 7];
+            register float input8 = beta * input[row_offset + 8];
+            register float input9 = beta * input[row_offset + 9];
+            register float input10 = beta * input[row_offset + 10];
+            register float input11 = beta * input[row_offset + 11];
+            asm volatile("": : :"memory");
+            *(dest_offset + 0) = alpha * tmp0 + input0;
+            *(dest_offset + 1) = alpha * tmp1 + input1;
+            *(dest_offset + 2) = alpha * tmp2 + input2;
+            *(dest_offset + 3) = alpha * tmp3 + input3;
+            *(dest_offset + 4) = alpha * tmp4 + input4;
+            *(dest_offset + 5) = alpha * tmp5 + input5;
+            *(dest_offset + 6) = alpha * tmp6 + input6;
+            *(dest_offset + 7) = alpha * tmp7 + input7;
+            *(dest_offset + 8) = alpha * tmp8 + input8;
+            *(dest_offset + 9) = alpha * tmp9 + input9;
+            *(dest_offset + 10) = alpha * tmp10 + input10;
+            *(dest_offset + 11) = alpha * tmp11 + input11;
+            row_offset += 12;
+        }
+        else {
+            for (int j = 0; j < BLOCK_DIM; j += 8) {
+                register float tmp0 = src[row_offset + 0];
+                register float tmp1 = src[row_offset + 1];
+                register float tmp2 = src[row_offset + 2];
+                register float tmp3 = src[row_offset + 3];
+                register float tmp4 = src[row_offset + 4];
+                register float tmp5 = src[row_offset + 5];
+                register float tmp6 = src[row_offset + 6];
+                register float tmp7 = src[row_offset + 7];
+                register float input0 = beta * input[row_offset + 0];
+                register float input1 = beta * input[row_offset + 1];
+                register float input2 = beta * input[row_offset + 2];
+                register float input3 = beta * input[row_offset + 3];
+                register float input4 = beta * input[row_offset + 4];
+                register float input5 = beta * input[row_offset + 5];
+                register float input6 = beta * input[row_offset + 6];
+                register float input7 = beta * input[row_offset + 7];
+                asm volatile("": : :"memory");
+                *(dest_offset + 0) = alpha * tmp0 + input0;
+                *(dest_offset + 1) = alpha * tmp1 + input1;
+                *(dest_offset + 2) = alpha * tmp2 + input2;
+                *(dest_offset + 3) = alpha * tmp3 + input3;
+                *(dest_offset + 4) = alpha * tmp4 + input4;
+                *(dest_offset + 5) = alpha * tmp5 + input5;
+                *(dest_offset + 6) = alpha * tmp6 + input6;
+                *(dest_offset + 7) = alpha * tmp7 + input7;
+                dest_offset += 8;
+                row_offset += 8;
+            }
+        }
+        dest_base += dest_strides[0];
+    }
+}
 
 inline void reset_sp(float* dest) {
   // initialize scratchpad (init to 0's)
@@ -271,129 +363,4 @@ inline void reset_sp(float* dest) {
   }
 }
 
-// XXX: in the test case, 1024x32 @ 32x1024 case, there is no partial blocks
-
-inline void dram_to_sp(
-          float* dest,
-          HBTensor<float, 2> src,
-          int dim_y,
-          int dim_x,
-          int r_idx,
-          int c_idx) {
-    for (int i = 0; i < dim_y; i++) {
-        int row_offset = i * dim_x;
-        int j = 0;
-        for (;j < dim_x - 8; j += 8) {
-            register float tmp0 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-            register float tmp1 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
-            register float tmp2 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
-            register float tmp3 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
-            register float tmp4 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
-            register float tmp5 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
-            register float tmp6 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
-            register float tmp7 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
-            asm volatile("": : :"memory");
-            dest[row_offset + j]     = tmp0;
-            dest[row_offset + j + 1] = tmp1;
-            dest[row_offset + j + 2] = tmp2;
-            dest[row_offset + j + 3] = tmp3;
-            dest[row_offset + j + 4] = tmp4;
-            dest[row_offset + j + 5] = tmp5;
-            dest[row_offset + j + 6] = tmp6;
-            dest[row_offset + j + 7] = tmp7;
-        }
-        // fixup
-        for (;j < dim_x; j++) {
-            dest[row_offset + j] = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-        }
-    }
-}
-
-// same as the dram_to_sp above but with coeff
-
-static void dram_to_sp_simple(
-          float* dest,
-          float coeff,
-          HBTensor<float, 2> src,
-          int dim_y,
-          int dim_x,
-          int r_idx,
-          int c_idx) {
-    for (int i = 0; i < dim_y; i++) {
-        int row_offset = i * dim_x;
-        int j = 0;
-        for (;j < dim_x; j += 8) {
-            register float tmp0 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-            register float tmp1 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
-            register float tmp2 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
-            register float tmp3 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
-            register float tmp4 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
-            register float tmp5 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
-            register float tmp6 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
-            register float tmp7 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
-            asm volatile("": : :"memory");
-            tmp0 = tmp0 * coeff;
-            tmp1 = tmp1 * coeff;
-            tmp2 = tmp2 * coeff;
-            tmp3 = tmp3 * coeff;
-            tmp4 = tmp4 * coeff;
-            tmp5 = tmp5 * coeff;
-            tmp6 = tmp6 * coeff;
-            tmp7 = tmp7 * coeff;
-            dest[row_offset + j]     = tmp0;
-            dest[row_offset + j + 1] = tmp1;
-            dest[row_offset + j + 2] = tmp2;
-            dest[row_offset + j + 3] = tmp3;
-            dest[row_offset + j + 4] = tmp4;
-            dest[row_offset + j + 5] = tmp5;
-            dest[row_offset + j + 6] = tmp6;
-            dest[row_offset + j + 7] = tmp7;
-        }
-    }
-}
-
-static void dram_to_sp(
-          float* dest,
-          float coeff,
-          HBTensor<float, 2> src,
-          int dim_y,
-          int dim_x,
-          int r_idx,
-          int c_idx) {
-    for (int i = 0; i < dim_y; i++) {
-        int row_offset = i * dim_x;
-        int j = 0;
-        for (;j < dim_x - 8; j += 8) {
-            register float tmp0 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-            register float tmp1 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 1);
-            register float tmp2 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 2);
-            register float tmp3 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 3);
-            register float tmp4 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 4);
-            register float tmp5 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 5);
-            register float tmp6 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 6);
-            register float tmp7 = src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j + 7);
-            asm volatile("": : :"memory");
-            tmp0 = tmp0 * coeff;
-            tmp1 = tmp1 * coeff;
-            tmp2 = tmp2 * coeff;
-            tmp3 = tmp3 * coeff;
-            tmp4 = tmp4 * coeff;
-            tmp5 = tmp5 * coeff;
-            tmp6 = tmp6 * coeff;
-            tmp7 = tmp7 * coeff;
-            dest[row_offset + j]     = tmp0;
-            dest[row_offset + j + 1] = tmp1;
-            dest[row_offset + j + 2] = tmp2;
-            dest[row_offset + j + 3] = tmp3;
-            dest[row_offset + j + 4] = tmp4;
-            dest[row_offset + j + 5] = tmp5;
-            dest[row_offset + j + 6] = tmp6;
-            dest[row_offset + j + 7] = tmp7;
-        }
-        // fixup
-        for (;j < dim_x; j++) {
-            dest[row_offset + j] = coeff * src(r_idx * BLOCK_DIM + i, c_idx * BLOCK_DIM + j);
-        }
-    }
-}
-
+#endif
