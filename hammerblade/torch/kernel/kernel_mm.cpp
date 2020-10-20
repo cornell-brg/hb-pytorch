@@ -58,11 +58,6 @@ extern "C" {
 
         // copy this block back into DRAM
         sp_to_dram(result, sp_result, rr, rc);
-        // for (int i = 0; i < BLOCK_DIM; i++) {
-        //     for (int j = 0; j < BLOCK_DIM; j++) {
-        //         result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * BLOCK_DIM + j];
-        //     }
-        // }
       }
     }
     //   End profiling
