@@ -73,14 +73,6 @@ extern "C" {
       {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
       {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
       {0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
-    //  {0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //  {1, 3, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //  {1, 3, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //  {0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
     // Activate config
@@ -134,12 +126,7 @@ extern "C" {
           }
 
           // write back
-          for (int i = 0; i < BLOCK_DIM; i++) {
-            for (int j = 0; j < BLOCK_DIM; j++) {
-              result(rr * BLOCK_DIM + i, rc * BLOCK_DIM + j) = sp_result[i * BLOCK_DIM + j];
-            }
-          }
-
+          sp_to_dram(result, sp_result, rr, rc);
         }
       }
     };
@@ -232,20 +219,6 @@ extern "C" {
         polyARow();
         break;
     }
-
-
-    // if (__bsg_id == 0 || __bsg_x > SYSTOLIC_X_DIM || __bsg_y > SYSTOLIC_Y_DIM) {
-    //   // do nothing
-    // } else if (__bsg_x == 0 && __bsg_y != 0) {
-    //   // row DMA
-    //   gemm_main_loop(mat1, mat2, __bsg_x, __bsg_y-1, [] {}, row_dma_task, [] (int rr, int rc) {});
-    // } else if (__bsg_y == 0 && __bsg_x != 0) {
-    //   // col DMA
-    //   gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y, [] {}, col_dma_task, [] (int rr, int rc) {});
-    // } else {
-    //   // PE
-    //   gemm_main_loop(mat1, mat2, __bsg_x-1, __bsg_y-1, tile_init, tile_task, tile_finish);
-    // }
 
     bsg_cuda_print_stat_kernel_end();
 
