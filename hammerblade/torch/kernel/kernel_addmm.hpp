@@ -155,7 +155,7 @@ inline void dram_to_sp_simple(
     }
 }
 
-inline void dram_to_sp_simple_transpose(
+inline void dram_to_sp_simple_generic(
           float* dest,
           HBTensor<float, 2> src,
           int r_idx,
