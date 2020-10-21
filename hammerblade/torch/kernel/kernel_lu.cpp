@@ -59,13 +59,64 @@ extern "C" {
                 pivots(idx_max_magnitude) = temp_pivot_idx;
             }
 
+/*
+            size_t n_blk = (N - i + BLOCK_DIM - 1) / BLOCK_DIM; // number of blocks
+            size_t last_blk_dim = N % BLOCK_DIM == 0 ? BLOCK_DIM : N % BLOCK_DIM;
+
+            // compute row and col
+            for (size_t b = 0; b < n_blk; b++) {
+                size_t curr_blk_dim = b == n_blk - 1 ? last_blk_dim : BLOCK_DIM;
+
+                // initialize scratchpad store
+                float sp_N[curr_blk_dim * curr_blk_dim];
+                float sp_W[curr_blk_dim * curr_blk_dim];
+
+                // initialize result store
+                float sp_res[curr_blk_dim];
+                memset(sp_res, 0, curr_blk_dim);
+
+                // load from DRAM to scratchpad
+                for (size_t s = 0; s < size; s++) {
+                    size_t r = s / BLOCK_DIM;
+                    size_t c = s % BLOCK_DIM;
+                    sp_N[s] = factorization(r, c);
+                    sp_W[s] = factorization(c, r);
+                }
+
+                // compute row and col
+                for (size_t s = 0; s < curr_blk_dim; s++) {
+                    sp_res_row[s] = 0;
+                    sp_res_col[s] = 0;
+                    for (size_t j = 0; j < N-i-1; j++) {
+                        sp_res_row[s] += sp_W[j] * sp_N[s+1 + j*];
+                        sp_res_col[s] += sp_W[s+1] * sp_N[j*BLOCK_DIM];
+                    }
+                    //sp_res_row[s] = factorization() - sp_res_row[s];
+
+                }
+
+                // write result back
+                for (size_t s = 0; s < curr_blk_dim; s++) {
+                    size_t offset = i + b * BLOCK_DIM + s;
+                    factorization(offset, i) -= sp_res_row[s];
+                    factorization(i, offset) = sp_res_col[s] / ;
+                }
+
+                // while blocks are loaded, compute next diagonal elm
+                // note that the checks here and the extra load from DRAM
+                // should probably be optimized away somehow...
+                if (b == 0 && i != N-1) factorization(i, i) = factorization(i+1, i+1) - row[0] * col[0];
+            }
+
+*/
+
+
             // original, non-blocked version
             for (size_t j = i + 1; j < N; j++) { // for each row below this diagonal
                 factorization(j, i) /= factorization(i, i); // calculate L below this diagonal
                 for (size_t k = i + 1; k < N; k++) { // for each column in this row
                     factorization(j, k) -= factorization(j, i) * factorization(i, k); // calculate what remains after taking out partial sum so far
                 }
-
             }
 
 
