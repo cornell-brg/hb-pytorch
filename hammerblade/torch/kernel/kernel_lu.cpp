@@ -4,6 +4,7 @@
 //====================================================================
 
 #include <kernel_common.hpp>
+#define BLOCK_DIM 2
 
 extern "C" {
 
@@ -12,30 +13,29 @@ extern "C" {
           hb_tensor_t* pivots_p) {
 
     // Convert all low level pointers to Tensor objects
-    HBTensor<float> factorization(factorization_p); // LU: m by n matrix
-    HBTensor<int> pivots(pivots_p); // P: m by 1 vector
+    HBTensor<float> factorization(factorization_p); // LU: m by n matrix (N by N for now)
+    HBTensor<int> pivots(pivots_p); // P: m by 1 vector (N by 1 for now)
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
     // Use a single tile only
     if (__bsg_id == 0) {
-
         int N = factorization.dim(0); // A is N by N
         float curr_magnitude;
         float max_magnitude;
         int idx_max_magnitude;
 
         // initialize pivots to main diagonal
-        for (int i = 0; i < pivots.numel(); i++) {
+        for (size_t i = 0; i < pivots.numel(); i++) {
             pivots(i) = int(i + 1);
         }
 
-        for (int i = 0; i < N; i++) { // for diagonal index
+        for (size_t i = 0; i < N; i++) { // for diagonal index
             idx_max_magnitude = i;
             max_magnitude = 0.0f;
             // find the row with the max magnitude first element
-            for (int k = i; k < N; k++) {
+            for (size_t k = i; k < N; k++) {
                 curr_magnitude = std::abs(factorization(k, i));
                 if (curr_magnitude > max_magnitude) {
                     idx_max_magnitude = k;
@@ -47,7 +47,7 @@ extern "C" {
             // needs pivoting
             if (idx_max_magnitude != i) {
                 // swap rows of A
-                for (int j = 0; j < N; j++) {
+                for (size_t j = 0; j < N; j++) {
                     float temp_val = factorization(i,j);
                     factorization(i,j) = factorization(idx_max_magnitude,j);
                     factorization(idx_max_magnitude,j) = temp_val;
@@ -59,13 +59,15 @@ extern "C" {
                 pivots(idx_max_magnitude) = temp_pivot_idx;
             }
 
-            for (int j = i + 1; j < N; j++) {
-                factorization(j, i) /= factorization(i, i);
-                for (int k = i + 1; k < N; k++) {
-                    factorization(j, k) -= factorization(j, i) * factorization(i, k);
+            // original, non-blocked version
+            for (size_t j = i + 1; j < N; j++) { // for each row below this diagonal
+                factorization(j, i) /= factorization(i, i); // calculate L below this diagonal
+                for (size_t k = i + 1; k < N; k++) { // for each column in this row
+                    factorization(j, k) -= factorization(j, i) * factorization(i, k); // calculate what remains after taking out partial sum so far
                 }
 
             }
+
 
 /*
             float lower, upper;

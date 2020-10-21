@@ -20,7 +20,7 @@ std::tuple<Tensor, Tensor> lu_hb(const Tensor& self) {
   Tensor factorization = at::clone(self); // mXn matrix, same as self
   Tensor pivots = at::empty(self.size(0), self.options().dtype(at::kInt));
 
-  hb_offload_kernel(factorization, pivots, "tensorlib_lu");
+  hb_offload_kernel(self, factorization, pivots, "tensorlib_lu");
 
   return std::tie(factorization, pivots);
 }

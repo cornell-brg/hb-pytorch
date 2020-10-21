@@ -9,5 +9,5 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
-make -C $DIR/hammerblade/torch -f riscv.mk clean regression
-make -C $DIR/hammerblade/torch -f riscv.mk clean
+make -C /work/global/kz73/work/emul/hb-pytorch/hammerblade/torch -f riscv.mk clean regression
+make -C /work/global/kz73/work/emul/hb-pytorch/hammerblade/torch -f riscv.mk clean
