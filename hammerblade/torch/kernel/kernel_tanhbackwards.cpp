@@ -20,7 +20,7 @@ extern "C" {
 __attribute__ ((noinline))
 int tensorlib_tanh_backward(hb_tensor_t* t0_p, hb_tensor_t* t1_p)
 {
-/*  auto res = HBTensor<float>(t0_p);
+  auto res = HBTensor<float>(t0_p);
   auto input = HBTensor<float>(t1_p);
 
   bsg_cuda_print_stat_kernel_start();
@@ -34,7 +34,7 @@ int tensorlib_tanh_backward(hb_tensor_t* t0_p, hb_tensor_t* t1_p)
   res, input);
 
   bsg_cuda_print_stat_kernel_end();
-*/  return 0;
+  return 0;
   }
 HB_EMUL_REG_KERNEL(tensorlib_tanh_backward, hb_tensor_t*, hb_tensor_t*)
 
