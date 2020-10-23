@@ -20,10 +20,10 @@ extern "C" {
     HBTensor<float> grad(grad_p);
     HBTensor<int64_t> index(index_p);
     HBTensor<int32_t> locks(locks_p);
-    int32_t padding_idx = *padding_idx_p;
-    int32_t num_weights = *num_weights_p;
-    int32_t numel = *numel_p;
-    uint32_t indices_numel = index.numel();
+    const int32_t padding_idx = *padding_idx_p;
+    const int32_t num_weights = *num_weights_p;
+    const int32_t numel = *numel_p;
+    const uint32_t indices_numel = index.numel();
 
     // numel = P
     // indices_numel = N
