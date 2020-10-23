@@ -16,14 +16,14 @@ Tensor embedding_hb(const Tensor & weight, const Tensor & indices,
   TORCH_CHECK( indices.is_contiguous(), "assuming indices to be contiguous" );
   TORCH_CHECK( indices.ndimension() == 2, "currently requires a batch" );
 
-  std::cout << "in embedding_hb" << std::endl;
-  std::cout << "indices.sizes() = " << indices.sizes() << std::endl;
-  std::cout << "indices.strides() = " << indices.strides() << std::endl;
+  // std::cout << "in embedding_hb" << std::endl;
+  // std::cout << "indices.sizes() = " << indices.sizes() << std::endl;
+  // std::cout << "indices.strides() = " << indices.strides() << std::endl;
 
   int32_t padding_idx_i32 = safe_downcast<int32_t, int64_t>(padding_idx);
   auto sum = at::zeros({indices.size(0), weight.size(-1)}, weight.options());
 
-  std::cout << "sum.sizes() = " << sum.sizes() << " sum.strides() = " << sum.strides() << std::endl;
+  // std::cout << "sum.sizes() = " << sum.sizes() << " sum.strides() = " << sum.strides() << std::endl;
 
   hb_offload_kernel(sum, weight, indices, padding_idx_i32,
                     "tensorlib_embedding_with_sum");
