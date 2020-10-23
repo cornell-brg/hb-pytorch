@@ -23,7 +23,7 @@ Tensor embedding_dense_backward_hb(
 
   int32_t padding_idx_i32 = safe_downcast<int32_t, int64_t>(padding_idx);
   int32_t num_weights_i32 = safe_downcast<int32_t, int64_t>(num_weights);
-  int32_t output_numel_i32 = safe_downcast<int32_t, int64_t>(grad_.size(-1));
+  int32_t output_numel_i32 = safe_downcast<int32_t, int64_t>(grad.size(-1));
 
   hb_offload_kernel(grad_weight, grad, indices, locks, padding_idx_i32,
                     num_weights_i32, output_numel_i32,
