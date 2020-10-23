@@ -23,8 +23,6 @@ extern "C" {
     const int32_t batch_size = indices.dim(0);
     const int32_t embeddings_per_batch = indices.dim(1);
 
-    std::cout << "padding_idx = " << padding_idx << " numel = " << numel << " indices_numel = " << indices_numel << " batch_size = " << batch_size << " embeddings_per_batch = " << embeddings_per_batch << std::endl;
-
     float acc[BUF_SIZE];
     // numel = P
     // indices_numel = N
