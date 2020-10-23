@@ -18,8 +18,8 @@ Tensor embedding_dense_backward_hb(
   checkScalarType("embedding_backward", indices_arg, kLong);
 
   int64_t numel = indices.numel();
-  auto grad_weight = at::zeros({num_weights, grad_.size(-1)}, grad_.options());
-  auto locks = at::zeros({10678}, grad_.options());
+  auto grad_weight = at::zeros({num_weights, grad.size(-1)}, grad.options());
+  auto locks = at::zeros({10678}, grad.options());
 
   int32_t padding_idx_i32 = safe_downcast<int32_t, int64_t>(padding_idx);
   int32_t num_weights_i32 = safe_downcast<int32_t, int64_t>(num_weights);
