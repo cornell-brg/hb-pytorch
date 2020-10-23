@@ -7,6 +7,30 @@
 namespace at {
 namespace native {
 
+// The idea here is to combine embedding with sum -- do reduction on the fly so we dont
+// have to deal with strange memory layout in sum
+Tensor embedding_hb(const Tensor & weight, const Tensor & indices,
+                 int64_t padding_idx, bool scale_grad_by_freq, bool sparse) {
+  auto indices_arg = TensorArg(indices, "indices", 1);
+  checkScalarType("embedding", indices_arg, kLong);
+  TORCH_CHECK( indices.is_contiguous(), "assuming indices to be contiguous" );
+  TORCH_CHECK( indices.ndimension() == 2, "currently requires a batch" );
+
+  std::cout << "in embedding_hb" << std::endl;
+  std::cout << "indices.sizes() = " << indices.sizes() << std::endl;
+  std::cout << "indices.strides() = " << indices.strides() << std::endl;
+
+  int32_t padding_idx_i32 = safe_downcast<int32_t, int64_t>(padding_idx);
+  auto sum = at::zeros({indices.size(0), weight.size(-1)}, weight.options());
+
+  std::cout << "sum.sizes() = " << sum.sizes() << " sum.strides() = " << sum.strides() << std::endl;
+
+  hb_offload_kernel(sum, weight, indices, padding_idx_i32,
+                    "tensorlib_embedding_with_sum");
+  return sum.view({indices.size(0), 1, weight.size(-1)});
+}
+
+
 Tensor embedding_dense_backward_hb(
     const Tensor & grad, const Tensor & indices, int64_t num_weights,
     int64_t padding_idx, bool scale_grad_by_freq) {

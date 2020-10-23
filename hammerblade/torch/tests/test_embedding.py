@@ -22,6 +22,17 @@ def _test_torch_nn_embedding(input, padding_idx=None):
     assert out_h.device == torch.device("hammerblade")
     assert torch.equal(out, out_h.cpu())
 
+def _test_torch_nn_embedding_with_sum(input, padding_idx=None):
+    if padding_idx is not None:
+        embedding = nn.Embedding(10, 3, padding_idx=padding_idx)
+    else:
+        embedding = nn.Embedding(10, 3)
+    embedding_h = copy.deepcopy(embedding).hammerblade()
+    out = embedding(input)
+    out_h = embedding_h(input.hammerblade())
+    assert out_h.device == torch.device("hammerblade")
+    assert torch.equal(out.sum(1), out_h.cpu().sum(1))
+
 def test_torch_nn_embedding_1():
     input = torch.LongTensor([1, 2, 4, 5])
     _test_torch_nn_embedding(input)
@@ -36,3 +47,13 @@ def test_torch_nn_embedding_3():
     input = torch.LongTensor([[0, 2, 0, 5], [4, 0, 0, 9]])
     _test_torch_nn_embedding(input)
     _test_torch_nn_embedding(input, padding_idx=0)
+
+def test_torch_nn_embedding_with_sum_1():
+    input = torch.LongTensor([[1, 2, 4, 5], [4, 3, 2, 9]])
+    _test_torch_nn_embedding_with_sum(input)
+    _test_torch_nn_embedding_with_sum(input, padding_idx=0)
+
+def test_torch_nn_embedding_with_sum_2():
+    input = torch.LongTensor([[0, 2, 0, 5], [4, 0, 0, 9]])
+    _test_torch_nn_embedding_with_sum(input)
+    _test_torch_nn_embedding_with_sum(input, padding_idx=0)
