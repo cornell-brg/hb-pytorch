@@ -56,7 +56,7 @@ extern "C" {
             dst++;
             src += grad_s1;
           }
-          bsg_amoswap_aq(lock_addr, 0);
+          bsg_amoswap_rl(lock_addr, 0);
           bsg_print_hexadecimal(0xfaceface);
         }
       }
@@ -69,7 +69,7 @@ extern "C" {
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_embedding_backward, hb_tensor_t*,
-                     hb_tensor_t*, hb_tensor_t*, int32_t*,
-                     int32_t*, int32_t*)
+                     hb_tensor_t*, hb_tensor_t*,  hb_tensor_t*,
+                     int32_t*, int32_t*, int32_t*)
 
 }
