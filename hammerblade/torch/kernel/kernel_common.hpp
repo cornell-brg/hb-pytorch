@@ -24,6 +24,7 @@
 #include "bsg_manycore.h"
 #include "bsg_set_tile_x_y.h"
 #include "bsg_tile_group_barrier.hpp"
+#include "bsg_manycore_atomic.h"
 #include "hb_tensor.hpp"
 #include <hb_assert.hpp>
 #include <hb_tiled_for.hpp>
