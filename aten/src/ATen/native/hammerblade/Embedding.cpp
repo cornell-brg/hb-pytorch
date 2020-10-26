@@ -21,7 +21,7 @@ Tensor embedding_hb(const Tensor & weight, const Tensor & indices,
   // std::cout << "indices.strides() = " << indices.strides() << std::endl;
 
   int32_t padding_idx_i32 = safe_downcast<int32_t, int64_t>(padding_idx);
-  auto sum = at::zeros({indices.size(0), weight.size(-1)}, weight.options());
+  auto sum = at::empty({indices.size(0), weight.size(-1)}, weight.options());
 
   // std::cout << "sum.sizes() = " << sum.sizes() << " sum.strides() = " << sum.strides() << std::endl;
 
