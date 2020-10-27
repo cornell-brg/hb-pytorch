@@ -5,7 +5,7 @@
 
 namespace at { namespace native {
 
-std::tuple<Tensor, Tensor> lu_hb(const Tensor& self) {
+Tensor cholesky_hb(const Tensor& self) {
 
   TORCH_CHECK(self.scalar_type() == ScalarType::Float, "HammerBlade lu is implemented for Float only");
 
@@ -16,13 +16,14 @@ std::tuple<Tensor, Tensor> lu_hb(const Tensor& self) {
   TORCH_CHECK(self.size(0) == self.size(1), "Square matrices expected, got ", self.size(0), " by ", self.size(1), " tensor");
 
   // TODO: support non-square matrices
-  //Tensor factorization = at::empty({self.size(0), self.size(1)}, self.options()); // mXn matrix, same as self
-  Tensor factorization = at::clone(self); // mXn matrix, same as self
-  Tensor pivots = at::empty(self.size(0), self.options().dtype(at::kInt));
+  Tensor factorization = at::zeros(self.sizes(), self.options()); // mXn matrix, same as self
+  //Tensor factorization = at::clone(self); // mXn matrix, same as self
+  //Tensor pivots = at::empty(self.size(0), self.options().dtype(at::kInt));
 
-  hb_offload_kernel(factorization, pivots, "tensorlib_lu");
+  hb_offload_kernel(self, factorization, "tensorlib_cholesky");
 
-  return std::tie(factorization, pivots);
+  //return std::tie(factorization, pivots);
+  return factorization;
 }
 
 }} // namespace at::native

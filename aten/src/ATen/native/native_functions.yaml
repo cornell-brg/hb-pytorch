@@ -6599,11 +6599,11 @@
   dispatch:
     HammerBlade: vincr_hb
 
-- func: lu_hammerblade(Tensor self) -> (Tensor factorization, Tensor pivots)
+- func: cholesky_hammerblade(Tensor self) -> Tensor
   use_c10_dispatcher: full
   variants: function, method
   dispatch:
-    HammerBlade: lu_hb
+    HammerBlade: cholesky_hb
 
 # Tutorial TODO:
 # Create an ATen operator vvadd, which takes 2 input arguments
