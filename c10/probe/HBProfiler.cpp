@@ -97,8 +97,10 @@ HBProfilerLog::HBProfilerLog(const std::string& func_name) {
     g_curr_call_stack.push_back(func_name);
     execution_time_log = new ExecutionTimeLog(g_curr_call_stack);
     if (hb_profiler_is_top_level()) {
-      g_per_op_execution_time_profiler.reset();
       g_execution_charter.log(func_name);
+#ifdef HB_REDISPATCH
+      g_per_op_execution_time_profiler.reset();
+#endif
     }
   }
 }
@@ -108,6 +110,7 @@ HBProfilerLog::~HBProfilerLog()
 {
   if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
     delete execution_time_log;
+#ifdef HB_REDISPATCH
     if (hb_profiler_is_top_level()) {
       std::string per_op_log = g_per_op_execution_time_profiler.str_dump();
       if (per_op_log.find("@CPU_LOG@") != std::string::npos) {
@@ -116,6 +119,7 @@ HBProfilerLog::~HBProfilerLog()
         std::cerr << "#TOP_LEVEL_FUNC_END#__" << g_curr_call_stack.back() << std::endl;
       }
     }
+#endif
     g_curr_call_stack.pop_back();
   }
 }
@@ -138,8 +142,12 @@ HBProfilerTrimLog::~HBProfilerTrimLog()
 }
 
 void HBProfilerTrimLog::trim_manual_log_exec_time(std::chrono::microseconds simulated) {
-  g_execution_time_profiler.log(g_curr_call_stack, simulated);
-  g_per_op_execution_time_profiler.log(g_curr_call_stack, simulated);
+  if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
+    g_execution_time_profiler.log(g_curr_call_stack, simulated);
+#ifdef HB_REDISPATCH
+    g_per_op_execution_time_profiler.log(g_curr_call_stack, simulated);
+#endif
+  }
 }
 
 }} // namespace c10::probe
