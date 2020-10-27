@@ -2,6 +2,15 @@
 kernel_common.o:     file format elf32-littleriscv
 
 
+Disassembly of section .group:
+
+00000000 <_ZN11bsg_barrierILi16ELi8EEC5Ev>:
+   0:	0001                	nop
+   2:	0000                	unimp
+   4:	0006                	c.slli	x0,0x1
+   6:	0000                	unimp
+   8:	00000007          	0x7
+
 Disassembly of section .text:
 
 00000000 <_Z9hb_memcpyPvPKvj>:
@@ -99,61 +108,95 @@ Disassembly of section .text:
  11c:	000007b7          	lui	x15,0x0
  120:	0007a283          	lw	x5,0(x15) # 0 <_Z9hb_memcpyPvPKvj>
  124:	000005b7          	lui	x11,0x0
- 128:	00058613          	mv	x12,x11
+ 128:	000006b7          	lui	x13,0x0
  12c:	00329313          	slli	x6,x5,0x3
  130:	006503b3          	add	x7,x10,x6
  134:	0003a023          	sw	x0,0(x7)
  138:	0003a223          	sw	x0,4(x7)
- 13c:	00060223          	sb	x0,4(x12)
- 140:	000602a3          	sb	x0,5(x12)
- 144:	00060323          	sb	x0,6(x12)
- 148:	000603a3          	sb	x0,7(x12)
- 14c:	00062023          	sw	x0,0(x12)
- 150:	00060623          	sb	x0,12(x12)
- 154:	000606a3          	sb	x0,13(x12)
- 158:	00060723          	sb	x0,14(x12)
- 15c:	000607a3          	sb	x0,15(x12)
- 160:	00000737          	lui	x14,0x0
- 164:	00a72023          	sw	x10,0(x14) # 0 <_Z9hb_memcpyPvPKvj>
- 168:	00062423          	sw	x0,8(x12)
- 16c:	00000513          	li	x10,0
- 170:	00008067          	ret
+ 13c:	00a5a023          	sw	x10,0(x11) # 0 <_Z9hb_memcpyPvPKvj>
+ 140:	00000813          	li	x16,0
+ 144:	00068513          	mv	x10,x13
+ 148:	01000613          	li	x12,16
+
+0000014c <.L21>:
+ 14c:	01050733          	add	x14,x10,x16
+ 150:	00070223          	sb	x0,4(x14)
+ 154:	00180813          	addi	x16,x16,1
+ 158:	fec81ae3          	bne	x16,x12,14c <.L21>
+ 15c:	00052023          	sw	x0,0(x10)
+ 160:	00050c23          	sb	x0,24(x10)
+ 164:	00050ca3          	sb	x0,25(x10)
+ 168:	00050d23          	sb	x0,26(x10)
+ 16c:	00050da3          	sb	x0,27(x10)
+ 170:	00050e23          	sb	x0,28(x10)
+ 174:	00050ea3          	sb	x0,29(x10)
+ 178:	00050f23          	sb	x0,30(x10)
+ 17c:	00050fa3          	sb	x0,31(x10)
+ 180:	00052a23          	sw	x0,20(x10)
+ 184:	00000513          	li	x10,0
+ 188:	00008067          	ret
 
 Disassembly of section .bss:
 
 00000000 <g_barrier>:
 	...
 
+Disassembly of section .text._ZN11bsg_barrierILi16ELi8EEC2Ev:
+
+00000000 <_ZN11bsg_barrierILi16ELi8EEC1Ev>:
+   0:	00052023          	sw	x0,0(x10)
+   4:	00052223          	sw	x0,4(x10)
+   8:	00052423          	sw	x0,8(x10)
+   c:	00052623          	sw	x0,12(x10)
+  10:	00052823          	sw	x0,16(x10)
+  14:	00000793          	li	x15,0
+  18:	01000693          	li	x13,16
+
+0000001c <.L24>:
+  1c:	00f50733          	add	x14,x10,x15
+  20:	00070223          	sb	x0,4(x14)
+  24:	00178793          	addi	x15,x15,1
+  28:	fed79ae3          	bne	x15,x13,1c <.L24>
+  2c:	00052023          	sw	x0,0(x10)
+  30:	00052a23          	sw	x0,20(x10)
+  34:	00052c23          	sw	x0,24(x10)
+  38:	00052e23          	sw	x0,28(x10)
+  3c:	00050c23          	sb	x0,24(x10)
+  40:	00050ca3          	sb	x0,25(x10)
+  44:	00050d23          	sb	x0,26(x10)
+  48:	00050da3          	sb	x0,27(x10)
+  4c:	00050e23          	sb	x0,28(x10)
+  50:	00050ea3          	sb	x0,29(x10)
+  54:	00050f23          	sb	x0,30(x10)
+  58:	00050fa3          	sb	x0,31(x10)
+  5c:	00052a23          	sw	x0,20(x10)
+  60:	00000393          	li	x7,0
+  64:	01000293          	li	x5,16
+
+00000068 <.L25>:
+  68:	00750333          	add	x6,x10,x7
+  6c:	00030223          	sb	x0,4(x6)
+  70:	00138393          	addi	x7,x7,1
+  74:	fe539ae3          	bne	x7,x5,68 <.L25>
+  78:	00052023          	sw	x0,0(x10)
+  7c:	00050c23          	sb	x0,24(x10)
+  80:	00050ca3          	sb	x0,25(x10)
+  84:	00050d23          	sb	x0,26(x10)
+  88:	00050da3          	sb	x0,27(x10)
+  8c:	00050e23          	sb	x0,28(x10)
+  90:	00050ea3          	sb	x0,29(x10)
+  94:	00050f23          	sb	x0,30(x10)
+  98:	00050fa3          	sb	x0,31(x10)
+  9c:	00052a23          	sw	x0,20(x10)
+  a0:	00008067          	ret
+
 Disassembly of section .text.startup:
 
 00000000 <_GLOBAL__sub_I_g_reduction_buffer>:
-   0:	000007b7          	lui	x15,0x0
-   4:	00078293          	mv	x5,x15
-   8:	0002a023          	sw	x0,0(x5)
-   c:	0002a223          	sw	x0,4(x5)
-  10:	00028223          	sb	x0,4(x5)
-  14:	000282a3          	sb	x0,5(x5)
-  18:	00028323          	sb	x0,6(x5)
-  1c:	000283a3          	sb	x0,7(x5)
-  20:	0002a023          	sw	x0,0(x5)
-  24:	0002a423          	sw	x0,8(x5)
-  28:	0002a623          	sw	x0,12(x5)
-  2c:	00028623          	sb	x0,12(x5)
-  30:	000286a3          	sb	x0,13(x5)
-  34:	00028723          	sb	x0,14(x5)
-  38:	000287a3          	sb	x0,15(x5)
-  3c:	0002a423          	sw	x0,8(x5)
-  40:	00028223          	sb	x0,4(x5)
-  44:	000282a3          	sb	x0,5(x5)
-  48:	00028323          	sb	x0,6(x5)
-  4c:	000283a3          	sb	x0,7(x5)
-  50:	0002a023          	sw	x0,0(x5)
-  54:	00028623          	sb	x0,12(x5)
-  58:	000286a3          	sb	x0,13(x5)
-  5c:	00028723          	sb	x0,14(x5)
-  60:	000287a3          	sb	x0,15(x5)
-  64:	0002a423          	sw	x0,8(x5)
-  68:	00008067          	ret
+   0:	00000537          	lui	x10,0x0
+   4:	00050513          	mv	x10,x10
+   8:	00000317          	auipc	x6,0x0
+   c:	00030067          	jr	x6 # 8 <_GLOBAL__sub_I_g_reduction_buffer+0x8>
 
 Disassembly of section .init_array:
 
@@ -174,8 +217,8 @@ Disassembly of section .comment:
    2:	203a4343          	fmadd.s	f6,f20,f3,f4,rmm
    6:	4728                	lw	x10,72(x14)
    8:	554e                	lw	x10,240(x2)
-   a:	2029                	jal	14 <_Z9hb_memcpyPvPKvj+0x14>
-   c:	2e39                	jal	32a <tensorlib_hb_startup+0x20e>
+   a:	2029                	jal	14 <_ZN11bsg_barrierILi16ELi8EEC5Ev+0x14>
+   c:	2e39                	jal	32a <.L21+0x1de>
    e:	2e32                	fld	f28,264(x2)
   10:	0030                	addi	x12,x2,8
 
@@ -205,11 +248,16 @@ Disassembly of section .eh_frame:
   3e:	0000                	unimp
   40:	0040                	addi	x8,x2,4
 	...
+  4e:	0000                	unimp
+  50:	0010                	0x10
+  52:	0000                	unimp
+  54:	0054                	addi	x13,x2,4
+	...
 
 Disassembly of section .riscv.attributes:
 
 00000000 <.riscv.attributes>:
-   0:	2a41                	jal	190 <tensorlib_hb_startup+0x74>
+   0:	2a41                	jal	190 <.L21+0x44>
    2:	0000                	unimp
    4:	7200                	flw	f8,32(x12)
    6:	7369                	lui	x6,0xffffa
@@ -222,7 +270,7 @@ Disassembly of section .riscv.attributes:
   16:	6932                	flw	f18,12(x2)
   18:	7032                	flw	f0,44(x2)
   1a:	5f30                	lw	x12,120(x14)
-  1c:	326d                	jal	fffff9c6 <tensorlib_hb_startup+0xfffff8aa>
+  1c:	326d                	jal	fffff9c6 <.L21+0xfffff87a>
   1e:	3070                	fld	f12,224(x8)
   20:	615f 7032 5f30      	0x5f307032615f
   26:	3266                	fld	f4,120(x2)

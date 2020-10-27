@@ -30,14 +30,16 @@ extern "C" {
     
     bsg_cuda_print_stat_kernel_start();
 
-    float temp[1];
+ //   float temp[1];
 
     for (uint32_t i = start; i < end; i = i + thread_num) {
-      temp[0] = 0.0;
+      float temp = 0.0;
       for(uint32_t col_index = csr(i); col_index < csr(i+1); col_index++) { //CSR MODE
-       temp[0] = temp[0] + values(col_index) * dense(indices(col_index)); //CSR mode
+        temp = temp + values(col_index) * dense(indices(col_index)); //CSR mode
+        //bsg_printf("values[%d] * vector[%d] + ", col_index, indices(col_index));
       }
-      result(i) = temp[0];   
+      result(i) = temp;
+      //bsg_printf("\nresult[%d] \n", i);
     }  
 
     bsg_cuda_print_stat_kernel_end();
