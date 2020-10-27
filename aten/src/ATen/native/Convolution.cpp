@@ -657,7 +657,7 @@ at::Tensor _convolution(
           input.contiguous(), weight, bias,
           params.padding, params.output_padding, params.stride, params.dilation, params.groups);
     } else {
-      output = at::eyeriss_convolution(
+      output = at::hb_convolution(
           input.contiguous(), weight, bias,
           params.padding, params.stride, params.dilation, params.groups);
     }

@@ -8,7 +8,7 @@
 #define BLOCK_DIM_X   14
 #define BLOCK_DIM_Y   14
 #define FILTER_DIM     5
-#define NUM_FILTERS    6
+#define NUM_FILTERS    1
 
 #define IMAP_DIM_X (BLOCK_DIM_X + FILTER_DIM - 1)
 #define IMAP_DIM_Y (BLOCK_DIM_Y + FILTER_DIM - 1)

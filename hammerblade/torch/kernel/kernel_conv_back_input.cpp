@@ -21,7 +21,7 @@
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_conv_baseline_back_input(
+  __attribute__ ((noinline))  int tensorlib_conv_back_input(
     hb_tensor_t* output,
     hb_tensor_t* input,
     hb_tensor_t* weight,
@@ -163,7 +163,6 @@ extern "C" {
       imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
       imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
       size_t y_step = imap_src_strides[2];
-      //fill_imap_buffer<IMAP_DIM_X, IMAP_DIM_Y>(imap_src_base, imap_buf, y_step);
       for (size_t r = 0; r < read_y; r++) {
         size_t row_offset = logical_start;
         float* row_src = imap_src_base;
@@ -205,6 +204,7 @@ extern "C" {
     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
       if (idx < num_blocks) {
 
+        // TODO: need correction
         // figure out what we are producing
         size_t tmp = idx;
         size_t image_id = tmp / (Cout * blocks_per_out_channel);
@@ -242,7 +242,7 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_conv_baseline_back_input, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+  HB_EMUL_REG_KERNEL(tensorlib_conv_back_input, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
                      hb_vector_t*, hb_vector_t*)
 
 }

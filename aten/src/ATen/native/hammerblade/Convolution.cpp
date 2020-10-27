@@ -175,7 +175,7 @@ Tensor hb_convolution_forward(
   device_args.push_back(create_device_vector(stride, true, device_ptrs));
 
   c10::hammerblade::offload_kernel(
-      "tensorlib_convolution_forward", device_args);
+      "tensorlib_conv_baseline", device_args);
   cleanup_device(device_args, device_ptrs);
 
   return *output;
@@ -223,7 +223,7 @@ Tensor hb_convolution_backward_input(
   device_args.push_back(create_device_vector(stride, true, device_ptrs));
 
   c10::hammerblade::offload_kernel(
-      "tensorlib_convolution_backward_input", device_args);
+      "tensorlib_conv_back_input", device_args);
   cleanup_device(device_args, device_ptrs);
 
   return *grad_input;
@@ -255,7 +255,7 @@ Tensor hb_convolution_backward_weight(
   device_args.push_back(create_device_vector(stride, true, device_ptrs));
 
   c10::hammerblade::offload_kernel(
-      "tensorlib_convolution_backward_weight", device_args);
+      "tensorlib_conv_back_weight", device_args);
   cleanup_device(device_args, device_ptrs);
 
   return grad_weight_t;
