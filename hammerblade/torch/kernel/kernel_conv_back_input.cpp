@@ -7,10 +7,10 @@
 
 #define BLOCK_DIM_X   16
 #define BLOCK_DIM_Y   16
-#define PADDING_X      4
-#define PADDING_Y      4
 #define FILTER_DIM     5
-#define NUM_FILTERS    1
+#define PADDING_X      (FILTER_DIM - 1)
+#define PADDING_Y      (FILTER_DIM - 1)
+#define NUM_FILTERS    6
 
 #define IMAP_DIM_X (BLOCK_DIM_X + FILTER_DIM - 1)
 #define IMAP_DIM_Y (BLOCK_DIM_Y + FILTER_DIM - 1)
@@ -34,10 +34,10 @@ extern "C" {
 
     // Conv2d parameters
     auto N    = omap.dim(0); // number of images in batch
-    auto Cout = omap.dim(1); // number of output channels
+    auto Cout = omap.dim(1); // number of channels
     auto Hout = omap.dim(2);
     auto Wout = omap.dim(3);
-    auto Cin  = imap.dim(1); // number of input channels
+    auto Cin  = imap.dim(1); // number of filters -- imap is grad
     auto Hin  = imap.dim(2);
     auto Win  = imap.dim(3);
     auto Hk   = filter.dim(2);
@@ -54,14 +54,14 @@ extern "C" {
     size_t blocks_per_out_channel = h_blocks_per_out_channel * w_blocks_per_out_channel;
     size_t num_blocks = N * Cout * blocks_per_out_channel;
 
-    float filter_buf[FILTER_DIM * FILTER_DIM];  //   5x5 * 4 = 100B
-    float omap_buf[BLOCK_DIM_X * BLOCK_DIM_Y];      // 14x14 * 4 = 784B
-    float imap_buf[IMAP_DIM_X * IMAP_DIM_Y];        // 18x18 * 4 = 1296B
+    float filter_buf[FILTER_DIM * FILTER_DIM];      //   5x5 * 4 = 100B
+    float omap_buf[BLOCK_DIM_X * BLOCK_DIM_Y];      // 16x16 * 4 = 1024B
+    float imap_buf[IMAP_DIM_X * IMAP_DIM_Y];        // 20x20 * 4 = 1600B
 
     // cross check
     hb_assert(FILTER_DIM == Hk);
     hb_assert(FILTER_DIM == Wk);
-    hb_assert(NUM_FILTERS == Cout);
+    hb_assert(NUM_FILTERS == Cin);
 
 
     // this one reads the filter in forward order
@@ -209,7 +209,7 @@ extern "C" {
         size_t tmp = idx;
         size_t image_id = tmp / (Cout * blocks_per_out_channel);
         tmp = tmp % (Cout * blocks_per_out_channel);
-        size_t filter_id = tmp / blocks_per_out_channel;
+        size_t channel_id = tmp / blocks_per_out_channel;
         tmp = tmp % blocks_per_out_channel;
         size_t block_y = tmp / w_blocks_per_out_channel;
         size_t block_x = tmp % w_blocks_per_out_channel;
@@ -217,10 +217,10 @@ extern "C" {
         // reset output buffer
         reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
 
-        for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
+        for (size_t filter_id = 0; filter_id < NUM_FILTERS; filter_id++) {
 
           // read in the image
-          imapDMA_padding(image_id, channel_id, block_x, block_y);
+          imapDMA_padding(image_id, filter_id, block_x, block_y);
 
           // read in the filter
           filterDMA_rotate(filter_id, channel_id);
@@ -228,10 +228,10 @@ extern "C" {
           // do conv
           conv2d_5x5_back(imap_buf, filter_buf, omap_buf);
 
-        } // channel
+        } // filter
 
         // write omap back
-        omapDMA(image_id, filter_id, block_x, block_y);
+        omapDMA(image_id, channel_id, block_x, block_y);
 
       } // if (idx < num_blocks)
     } // main loop
