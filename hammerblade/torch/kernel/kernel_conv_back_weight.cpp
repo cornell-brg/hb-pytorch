@@ -163,9 +163,7 @@ extern "C" {
                     float *imap_row = imap_ptr;
                     float *grad_row = grad_ptr;
                     for (size_t x = 0; x < BLOCK_DIM_X; x++) {
-                      psum += *imap_row * *grad_row;
-                      imap_row++;
-                      grad_row++;
+                      psum += imap_row[x] * grad_row[x];
                     }
                     imap_ptr += IMAP_DIM_X;
                     grad_ptr += BLOCK_DIM_X;
