@@ -1,0 +1,6 @@
+[
+    {
+        "offload": false,
+        "signature": "at::Tensor at::SparseHammerBladeType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)"
+    }
+]
