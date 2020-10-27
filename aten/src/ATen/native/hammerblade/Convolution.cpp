@@ -249,8 +249,8 @@ Tensor hb_convolution_backward_weight(
   std::vector<eva_t> device_args;
   std::vector<eva_t> device_ptrs;
   device_args.push_back(create_device_tensor(*grad_weight, device_ptrs));
-  device_args.push_back(create_device_tensor(*grad_output, device_ptrs));
   device_args.push_back(create_device_tensor(*input, device_ptrs));
+  device_args.push_back(create_device_tensor(*grad_output, device_ptrs));
   device_args.push_back(create_device_vector(padding, true, device_ptrs));
   device_args.push_back(create_device_vector(stride, true, device_ptrs));
 

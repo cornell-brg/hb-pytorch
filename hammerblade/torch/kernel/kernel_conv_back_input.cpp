@@ -204,7 +204,6 @@ extern "C" {
     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
       if (idx < num_blocks) {
 
-        // TODO: need correction
         // figure out what we are producing
         size_t tmp = idx;
         size_t image_id = tmp / (Cout * blocks_per_out_channel);
