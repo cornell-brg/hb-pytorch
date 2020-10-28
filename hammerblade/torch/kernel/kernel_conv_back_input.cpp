@@ -175,6 +175,7 @@ extern "C" {
         logical_start += IMAP_DIM_X;
       }
       // debug
+      /*
       size_t debug_offset = 0;
       for (size_t r = 0; r < IMAP_DIM_Y; r++) {
         for (size_t c = 0; c < IMAP_DIM_X; c++) {
@@ -185,6 +186,7 @@ extern "C" {
       }
       std::cout << std::endl;
       std::cout << std::endl;
+      */
     };
 
     auto omapDMA = [&](size_t image_id, size_t filter_id, size_t block_x, size_t block_y) {

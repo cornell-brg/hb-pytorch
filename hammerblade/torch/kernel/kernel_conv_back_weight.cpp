@@ -90,11 +90,12 @@ extern "C" {
     };
 
     auto filterDMA_wb = [&](size_t filter_id, size_t channel_id) {
-      float* filter_src_base = (float*)filter.data_ptr();
-      uint32_t* filter_src_strides = filter.get_strides();
-      filter_src_base += filter_id * filter_src_strides[0] + channel_id * filter_src_strides[1];
+      bsg_attr_remote float* filter_dst_base = (float*)filter.data_ptr();
+      uint32_t* filter_dst_strides = filter.get_strides();
+      filter_dst_base += filter_id * filter_dst_strides[0] + channel_id * filter_dst_strides[1];
+      bsg_unroll(FILTER_DIM * FILTER_DIM)
       for (size_t i = 0; i < FILTER_DIM * FILTER_DIM; i++) {
-        filter_src_base[i] = filter_buf[i];
+        filter_dst_base[i] = filter_buf[i];
       }
     };
 
@@ -123,24 +124,35 @@ extern "C" {
               gradDMA(image_id, filter_id, block_x, block_y);
 
               // do conv
-              // conv2d_5x5_back_weight(imap_buf, grad_buf, filter_buf);
+              // 5x5 is too large to unroll in both x and y directions
               for (size_t f_y = 0; f_y < FILTER_DIM; f_y++) {
-                for (size_t f_x = 0; f_x < FILTER_DIM; f_x++) {
-                  float* imap_ptr = imap_buf + f_x + f_y * IMAP_DIM_X;
-                  float* grad_ptr = grad_buf;
-                  float psum = 0;
-                  for (size_t y = 0; y < BLOCK_DIM_Y; y++) {
-                    float *imap_row = imap_ptr;
-                    float *grad_row = grad_ptr;
-                    for (size_t x = 0; x < BLOCK_DIM_X; x++) {
-                      psum += imap_row[x] * grad_row[x];
-                    }
-                    imap_ptr += IMAP_DIM_X;
-                    grad_ptr += BLOCK_DIM_X;
+                register float psum0 = 0;
+                register float psum1 = 0;
+                register float psum2 = 0;
+                register float psum3 = 0;
+                register float psum4 = 0;
+                float* imap_ptr = imap_buf + f_y * IMAP_DIM_X;
+                float* grad_ptr = grad_buf;
+                float* output = filter_buf + f_y * FILTER_DIM;
+                for (size_t y = 0; y < BLOCK_DIM_Y; y++) {
+                  float *imap_row = imap_ptr;
+                  float *grad_row = grad_ptr;
+                  bsg_unroll(4)
+                  for (size_t x = 0; x < BLOCK_DIM_X; x++) {
+                    psum0 += imap_row[x+0] * grad_row[x];
+                    psum1 += imap_row[x+1] * grad_row[x];
+                    psum2 += imap_row[x+2] * grad_row[x];
+                    psum3 += imap_row[x+3] * grad_row[x];
+                    psum4 += imap_row[x+4] * grad_row[x];
                   }
-                  float* output = filter_buf + f_x + f_y * FILTER_DIM;
-                  *output += psum;
+                  imap_ptr += IMAP_DIM_X;
+                  grad_ptr += BLOCK_DIM_X;
                 }
+                output[0] += psum0;
+                output[1] += psum1;
+                output[2] += psum2;
+                output[3] += psum3;
+                output[4] += psum4;
               }
 
             } // block
