@@ -63,8 +63,6 @@ extern "C" {
     if (Wk % BLOCK_DIM_X != 0) {
       w_blocks_per_out_channel++;
     }
-    std::cout << "Hk = " << Hk << " h_blocks_per_out_channel = " << h_blocks_per_out_channel << std::endl;
-    std::cout << "Wk = " << Wk << " w_blocks_per_out_channel = " << w_blocks_per_out_channel << std::endl;
     size_t blocks_per_out_channel = h_blocks_per_out_channel * w_blocks_per_out_channel;
     size_t num_blocks = N * Cout; // parallel over filter x channel
 
@@ -78,18 +76,6 @@ extern "C" {
       imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
       size_t y_step = imap_src_strides[2];
       fill_imap_buffer<IMAP_DIM_X, IMAP_DIM_Y>(imap_src_base, imap_buf, y_step);
-      // debug
-      std::cout << "imap" << std::endl;
-      size_t debug_offset = 0;
-      for (size_t r = 0; r < IMAP_DIM_Y; r++) {
-        for (size_t c = 0; c < IMAP_DIM_X; c++) {
-          std::cout << imap_buf[debug_offset] << " ";
-          debug_offset++;
-        }
-        std::cout << std::endl;
-      }
-      std::cout << std::endl;
-      std::cout << std::endl;
     };
 
     auto gradDMA = [&](size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
@@ -101,18 +87,6 @@ extern "C" {
       grad_src_base += grad_y * grad_src_strides[2] + grad_x * grad_src_strides[3];
       size_t y_step = grad_src_strides[2];
       fill_imap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(grad_src_base, grad_buf, y_step);
-      // debug
-      std::cout << "grad" << std::endl;
-      size_t debug_offset = 0;
-      for (size_t r = 0; r < BLOCK_DIM_Y; r++) {
-        for (size_t c = 0; c < BLOCK_DIM_X; c++) {
-          std::cout << grad_buf[debug_offset] << " ";
-          debug_offset++;
-        }
-        std::cout << std::endl;
-      }
-      std::cout << std::endl;
-      std::cout << std::endl;
     };
 
     auto filterDMA_wb = [&](size_t filter_id, size_t channel_id) {
@@ -135,16 +109,12 @@ extern "C" {
         size_t filter_id = idx / Cout;
         size_t channel_id = idx % Cout;
 
-        std::cout << "filter_id = " << filter_id << " channel_id = " << channel_id << std::endl;
-
         // reset output buffer
         reset_buffer<FILTER_DIM, FILTER_DIM>(filter_buf);
 
         for (size_t image_id = 0; image_id < N_imap; image_id++) {
           for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
             for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
-
-              std::cout << "block_x = " << block_x << " block_y = " << block_y << std::endl;
 
               // read in the image
               imapDMA(image_id, channel_id, block_x, block_y);
