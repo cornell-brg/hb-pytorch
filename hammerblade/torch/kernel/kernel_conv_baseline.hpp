@@ -308,6 +308,7 @@ inline void conv2d_5x5_back(float* imap, float* filter, float* omap) {
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap4), "f"(filter0));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap5), "f"(filter0));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap6), "f"(filter0));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum7) : "f"(imap7), "f"(filter0));
 
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap1), "f"(filter1));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap2), "f"(filter1));
@@ -316,6 +317,7 @@ inline void conv2d_5x5_back(float* imap, float* filter, float* omap) {
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap5), "f"(filter1));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap6), "f"(filter1));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap7), "f"(filter1));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum7) : "f"(imap8), "f"(filter1));
 
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap2), "f"(filter2));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap3), "f"(filter2));
@@ -324,6 +326,7 @@ inline void conv2d_5x5_back(float* imap, float* filter, float* omap) {
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap6), "f"(filter2));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap7), "f"(filter2));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap8), "f"(filter2));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum7) : "f"(imap9), "f"(filter2));
 
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap3), "f"(filter3));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap4), "f"(filter3));
@@ -332,6 +335,7 @@ inline void conv2d_5x5_back(float* imap, float* filter, float* omap) {
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap7), "f"(filter3));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap8), "f"(filter3));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap9), "f"(filter3));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum7) : "f"(imap10), "f"(filter3));
 
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap4), "f"(filter4));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap5), "f"(filter4));
@@ -340,6 +344,7 @@ inline void conv2d_5x5_back(float* imap, float* filter, float* omap) {
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4) : "f"(imap8), "f"(filter4));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5) : "f"(imap9), "f"(filter4));
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6) : "f"(imap10), "f"(filter4));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum7) : "f"(imap11), "f"(filter4));
 #endif
       }
       omap[y * BLOCK_DIM_X + x + 0] = psum0;
