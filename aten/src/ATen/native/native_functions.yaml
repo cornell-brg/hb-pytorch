@@ -4027,12 +4027,14 @@
   dispatch:
     CPU: bitwise_xor_out
     CUDA: bitwise_xor_out
+    HammerBlade: bitwise_xor_out
 
 - func: bitwise_xor.Scalar_out(Tensor self, Scalar other, *, Tensor(a!) out) -> Tensor(a!)
   variants: function
   dispatch:
     CPU: bitwise_xor_out
     CUDA: bitwise_xor_out
+    HammerBlade: bitwise_xor_out
 
 - func: bitwise_xor.Scalar(Tensor self, Scalar other) -> Tensor
   variants: method, function
