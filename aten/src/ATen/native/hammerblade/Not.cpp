@@ -10,7 +10,6 @@ namespace {
 
 void not_kernel_hb(TensorIterator& iter) {
   AT_DISPATCH_INTS_ONLY(iter.dtype(), "not_hb", [&]() {
-    std::cout << "host code dispatching";
     offload_op_unary(iter, "tensorlib_not");
   });
 }
