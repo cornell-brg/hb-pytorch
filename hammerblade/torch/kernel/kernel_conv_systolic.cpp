@@ -52,9 +52,9 @@ extern "C" {
     hb_vector_t* padding,
     hb_vector_t* strides) {
 
-    HBTensor<float> omap(output);
-    HBTensor<float> imap(input);
-    HBTensor<float> filter(weight);
+    HBTensor<float,4> omap(output);
+    HBTensor<float,4> imap(input);
+    HBTensor<float,4> filter(weight);
 
     // Conv2d parameters
     auto N    = omap.dim(0); // number of images in batch

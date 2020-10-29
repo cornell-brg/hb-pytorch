@@ -28,9 +28,9 @@ extern "C" {
     hb_vector_t* padding,
     hb_vector_t* strides) {
 
-    HBTensor<float> filter(output);
-    HBTensor<float> imap(input);
-    HBTensor<float> grad(weight);
+    HBTensor<float, 4> filter(output);
+    HBTensor<float, 4> imap(input);
+    HBTensor<float, 4> grad(weight);
 
     // extract parameters
     auto N      = filter.dim(0); // number of filters to calculate grad for
