@@ -115,8 +115,8 @@ extern "C" {
       imap_x = imap_x == 0 ? 0 : imap_x - PADDING;
       imap_y = imap_y == 0 ? 0 : imap_y - PADDING;
       size_t logical_start = 0; // starting offset of imap buffer writting
-      size_t read_x = 0;        // how many elements to read for a row
-      size_t read_y = 0;        // how many rows to read
+      size_t read_x = IMAP_DIM_X-PADDING;
+      size_t read_y = IMAP_DIM_Y-PADDING;
       // see if we need to add padding
       if (block_y == 0) {
         size_t imap_buf_offset = 0;
@@ -127,69 +127,38 @@ extern "C" {
           addPaddingH_1(0);
           // setup read data copy
           logical_start = PADDING*IMAP_DIM_X+PADDING;
-          read_x = IMAP_DIM_X-PADDING;
-          read_y = IMAP_DIM_Y-PADDING;
-        }
-        else if (block_x == w_blocks_per_out_channel-1) {
-          // add right padding
-          addPaddingH_1(IMAP_DIM_X-1);
-          logical_start = PADDING*IMAP_DIM_X;
-          read_x = IMAP_DIM_X-PADDING;
-          read_y = IMAP_DIM_Y-PADDING;
         } else {
-          // top only
+          // add right padding
+          addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = PADDING*IMAP_DIM_X;
-          read_x = IMAP_DIM_X;
-          read_y = IMAP_DIM_Y-PADDING;
         }
-      } else if (block_y == h_blocks_per_out_channel-1) {
+      } else if (block_y == h_blocks_per_out_channel-PADDING) {
         // add bottom padding
-        addPaddingW_1((IMAP_DIM_Y-1)*IMAP_DIM_X);
+        addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
         if (block_x == 0) {
           // add left padding
           addPaddingH_1(0);
           logical_start = PADDING;
           read_x = IMAP_DIM_X-PADDING;
           read_y = IMAP_DIM_Y-PADDING;
-        }
-        else if (block_x == w_blocks_per_out_channel-1) {
+        } else {
           // add right padding
           addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = 0;
-          read_x = IMAP_DIM_X-PADDING;
-          read_y = IMAP_DIM_Y-PADDING;
-        } else {
-          // bottom only
-          logical_start = 0;
-          read_x = IMAP_DIM_X;
-          read_y = IMAP_DIM_Y-PADDING;
         }
-      } else if (block_x == 0) {
-        // add left padding only
-        addPaddingH_1(0);
-        logical_start = PADDING;
-        read_x = IMAP_DIM_X-PADDING;
-        read_y = IMAP_DIM_Y;
-      } else if (block_x == w_blocks_per_out_channel-1) {
-        // add right padding only
-        addPaddingH_1(IMAP_DIM_X-PADDING);
-        logical_start = 0;
-        read_x = IMAP_DIM_X-PADDING;
-        read_y = IMAP_DIM_Y;
       } else {
-        // no padding is needed
-        logical_start = 0;
-        read_x = IMAP_DIM_X;
-        read_y = IMAP_DIM_Y;
+        // not possible here
+        hb_assert(false);
       }
-      float* imap_src_base = (float*)imap.data_ptr();
-      uint32_t* imap_src_strides = imap.get_strides();
+      bsg_attr_remote float* imap_src_base = (float*)imap.data_ptr();
+      const uint32_t* imap_src_strides = imap.get_strides();
       imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
       imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
       size_t y_step = imap_src_strides[2];
       for (size_t r = 0; r < read_y; r++) {
         size_t row_offset = logical_start;
-        float* row_src = imap_src_base;
+        bsg_attr_remote float* row_src = imap_src_base;
+        bsg_unroll(IMAP_DIM_X-PADDING)
         for (size_t c = 0; c < read_x; c++) {
           imap_buf[row_offset] = *row_src;
           row_src++;
@@ -198,6 +167,7 @@ extern "C" {
         imap_src_base += y_step;
         logical_start += IMAP_DIM_X;
       }
+      /*
       // debug
       size_t debug_offset = 0;
       for (size_t r = 0; r < IMAP_DIM_Y; r++) {
@@ -209,6 +179,7 @@ extern "C" {
       }
       std::cout << std::endl;
       std::cout << std::endl;
+      */
     };
 
     auto omapDMA = [&](size_t image_id, size_t filter_id, size_t block_x, size_t block_y) {
