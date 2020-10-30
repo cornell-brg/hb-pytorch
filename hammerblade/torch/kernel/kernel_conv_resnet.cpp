@@ -90,16 +90,23 @@ extern "C" {
       fill_imap_buffer<IMAP_DIM_X, IMAP_DIM_Y>(imap_src_base, imap_buf, y_step);
     };
 
-    auto addPadding = [&](size_t start, size_t row, size_t col, size_t y_step) {
-      for (size_t r = 0; r < row; r++) {
-        size_t offset = start;
-        for (size_t c = 0; c < col; c++) {
-          imap_buf[offset] = 0;
-          offset++;
-        }
-        start += y_step;
+    // add 1 col of zeros
+    auto addPaddingH_1 = [&](size_t start) {
+      bsg_unroll(IMAP_DIM_Y)
+      for (size_t r = 0; r < IMAP_DIM_Y; r++) {
+        imap_buf[start] = 0;
+        start += IMAP_DIM_X;
       }
     };
+
+    // add 1 row of zeros
+    auto addPaddingW_1 = [&](size_t start) {
+      bsg_unroll(IMAP_DIM_X)
+      for (size_t c = 0; c < IMAP_DIM_X; c++) {
+        imap_buf[start + c] = 0;
+      }
+    };
+
 
     auto imapDMA_padding = [&](size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
       size_t imap_x = block_x * BLOCK_DIM_X;
@@ -114,10 +121,10 @@ extern "C" {
       if (block_y == 0) {
         size_t imap_buf_offset = 0;
         // add top padding
-        addPadding(0, PADDING, IMAP_DIM_X, IMAP_DIM_X);
+        addPaddingW_1(0);
         if (block_x == 0) {
           // add left padding
-          addPadding(PADDING*IMAP_DIM_X, IMAP_DIM_Y-PADDING, PADDING, IMAP_DIM_X);
+          addPaddingH_1(0);
           // setup read data copy
           logical_start = PADDING*IMAP_DIM_X+PADDING;
           read_x = IMAP_DIM_X-PADDING;
@@ -125,7 +132,7 @@ extern "C" {
         }
         else if (block_x == w_blocks_per_out_channel-1) {
           // add right padding
-          addPadding(PADDING*IMAP_DIM_X+IMAP_DIM_X-PADDING, IMAP_DIM_Y-PADDING, PADDING, IMAP_DIM_X);
+          addPaddingH_1(IMAP_DIM_X-1);
           logical_start = PADDING*IMAP_DIM_X;
           read_x = IMAP_DIM_X-PADDING;
           read_y = IMAP_DIM_Y-PADDING;
@@ -137,17 +144,17 @@ extern "C" {
         }
       } else if (block_y == h_blocks_per_out_channel-1) {
         // add bottom padding
-        addPadding((IMAP_DIM_Y-PADDING)*IMAP_DIM_X, PADDING, IMAP_DIM_X, IMAP_DIM_X);
+        addPaddingW_1((IMAP_DIM_Y-1)*IMAP_DIM_X);
         if (block_x == 0) {
           // add left padding
-          addPadding(0, IMAP_DIM_Y-PADDING, PADDING, IMAP_DIM_X);
+          addPaddingH_1(0);
           logical_start = PADDING;
           read_x = IMAP_DIM_X-PADDING;
           read_y = IMAP_DIM_Y-PADDING;
         }
         else if (block_x == w_blocks_per_out_channel-1) {
           // add right padding
-          addPadding(IMAP_DIM_X-PADDING, IMAP_DIM_Y-PADDING, PADDING, IMAP_DIM_X);
+          addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = 0;
           read_x = IMAP_DIM_X-PADDING;
           read_y = IMAP_DIM_Y-PADDING;
@@ -159,13 +166,13 @@ extern "C" {
         }
       } else if (block_x == 0) {
         // add left padding only
-        addPadding(0, IMAP_DIM_Y, PADDING, IMAP_DIM_X);
+        addPaddingH_1(0);
         logical_start = PADDING;
         read_x = IMAP_DIM_X-PADDING;
         read_y = IMAP_DIM_Y;
       } else if (block_x == w_blocks_per_out_channel-1) {
         // add right padding only
-        addPadding(IMAP_DIM_X-PADDING, IMAP_DIM_Y, PADDING, IMAP_DIM_X);
+        addPaddingH_1(IMAP_DIM_X-PADDING);
         logical_start = 0;
         read_x = IMAP_DIM_X-PADDING;
         read_y = IMAP_DIM_Y;
