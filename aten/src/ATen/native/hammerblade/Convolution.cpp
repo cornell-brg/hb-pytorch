@@ -175,7 +175,7 @@ Tensor hb_convolution_forward(
   device_args.push_back(create_device_vector(stride, true, device_ptrs));
 
   c10::hammerblade::offload_kernel(
-      "tensorlib_conv_baseline", device_args);
+      "tensorlib_conv_resnet_32_3x3", device_args);
   cleanup_device(device_args, device_ptrs);
 
   return *output;
