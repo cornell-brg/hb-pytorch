@@ -18,7 +18,7 @@
 #include <kernel_common.hpp>
 #include <kernel_conv_baseline.hpp>
 
-inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
+inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
 
   // add 1 col of zeros
   auto addPaddingH_1 = [&](size_t start) {
@@ -212,7 +212,7 @@ extern "C" {
 
           // read in the image
           //imapDMA(image_id, channel_id, block_x, block_y);
-          imapDMA_padding(imap, imap_buf, image_id, channel_id, block_x, block_y);
+          imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
 
           // read in the filter
           filterDMA(filter_id, channel_id);
@@ -331,7 +331,7 @@ extern "C" {
         for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
 
           // read in the image
-          imapDMA_padding(imap, imap_buf, image_id, filter_id, block_x, block_y);
+          imapDMA_padding_systolic(imap, imap_buf, image_id, filter_id, block_x, block_y);
 
           // read in the filter
           filterDMA_rotate(filter_id, channel_id);
@@ -447,7 +447,7 @@ extern "C" {
             for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
 
               // read in the image
-              imapDMA_padding(imap, imap_buf, image_id, channel_id, block_x, block_y);
+              imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
 
               // read in the grad
               gradDMA(image_id, filter_id, block_x, block_y);
