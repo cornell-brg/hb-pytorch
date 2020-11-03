@@ -117,38 +117,31 @@ extern "C" {
       size_t logical_start = 0; // starting offset of imap buffer writting
       size_t read_x = IMAP_DIM_X-PADDING;
       size_t read_y = IMAP_DIM_Y-PADDING;
+      size_t block_id = block_y * 2 + block_x;
       // see if we need to add padding
-      if (block_y == 0) {
-        size_t imap_buf_offset = 0;
-        // add top padding
-        addPaddingW_1(0);
-        if (block_x == 0) {
-          // add left padding
-          addPaddingH_1(0);
-          // setup read data copy
+      switch (block_id) {
+        case 0:
+          addPaddingW_1(0); // top
+          addPaddingH_1(0); // left
           logical_start = PADDING*IMAP_DIM_X+PADDING;
-        } else {
-          // add right padding
+          break;
+        case 1:
+          addPaddingW_1(0);
           addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = PADDING*IMAP_DIM_X;
-        }
-      } else if (block_y == h_blocks_per_out_channel-PADDING) {
-        // add bottom padding
-        addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
-        if (block_x == 0) {
-          // add left padding
+          break;
+        case 2:
+          addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
           addPaddingH_1(0);
           logical_start = PADDING;
-          read_x = IMAP_DIM_X-PADDING;
-          read_y = IMAP_DIM_Y-PADDING;
-        } else {
-          // add right padding
+          break;
+        case 3:
+          addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
           addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = 0;
-        }
-      } else {
-        // not possible here
-        hb_assert(false);
+          break;
+        default:
+          hb_assert(false);
       }
       bsg_attr_remote float* imap_src_base = (float*)imap.data_ptr();
       const uint32_t* imap_src_strides = imap.get_strides();
