@@ -118,37 +118,34 @@ extern "C" {
       size_t read_x = IMAP_DIM_X-PADDING;
       size_t read_y = IMAP_DIM_Y-PADDING;
       size_t block_id = block_y * 2 + block_x;
+      size_t W_pad = -1;
       // see if we need to add padding
       switch (block_id) {
         case 0:
-          addPaddingH_1(0); // left
+          W_pad = 0;
+          addPaddingH_1(0);
           logical_start = PADDING*IMAP_DIM_X+PADDING;
-          goto top_pad;
           break;
         case 1:
+          W_pad = 0;
           addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = PADDING*IMAP_DIM_X;
-          goto top_pad;
           break;
         case 2:
+          W_pad = (IMAP_DIM_Y-PADDING)*IMAP_DIM_X;
           addPaddingH_1(0);
           logical_start = PADDING;
-          goto bot_pad;
           break;
         case 3:
+          W_pad = (IMAP_DIM_Y-PADDING)*IMAP_DIM_X;
           addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = 0;
-          goto bot_pad;
           break;
         default:
           hb_assert(false);
       }
-top_pad:
-      addPaddingW_1(0); // top padding
-      goto polyA;
-bot_pad:
-      addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X); // bot padding
-polyA:
+      addPaddingW_1(W_pad); // top / bot padding
+
       bsg_attr_remote float* imap_src_base = (float*)imap.data_ptr();
       const uint32_t* imap_src_strides = imap.get_strides();
       imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
@@ -341,39 +338,35 @@ polyA:
       size_t logical_start = 0; // starting offset of imap buffer writting
       size_t read_x = IMAP_DIM_X-PADDING;
       size_t read_y = IMAP_DIM_Y-PADDING;
+      size_t block_id = block_y * 2 + block_x;
+      size_t W_pad = -1;
       // see if we need to add padding
-      if (block_y == 0) {
-        size_t imap_buf_offset = 0;
-        // add top padding
-        addPaddingW_1(0);
-        if (block_x == 0) {
-          // add left padding
+      switch (block_id) {
+        case 0:
+          W_pad = 0;
           addPaddingH_1(0);
-          // setup read data copy
           logical_start = PADDING*IMAP_DIM_X+PADDING;
-        } else {
-          // add right padding
+          break;
+        case 1:
+          W_pad = 0;
           addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = PADDING*IMAP_DIM_X;
-        }
-      } else if (block_y == h_blocks_per_out_channel-PADDING) {
-        // add bottom padding
-        addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
-        if (block_x == 0) {
-          // add left padding
+          break;
+        case 2:
+          W_pad = (IMAP_DIM_Y-PADDING)*IMAP_DIM_X;
           addPaddingH_1(0);
           logical_start = PADDING;
-          read_x = IMAP_DIM_X-PADDING;
-          read_y = IMAP_DIM_Y-PADDING;
-        } else {
-          // add right padding
+          break;
+        case 3:
+          W_pad = (IMAP_DIM_Y-PADDING)*IMAP_DIM_X;
           addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = 0;
-        }
-      } else {
-        // not possible here
-        hb_assert(false);
+          break;
+        default:
+          hb_assert(false);
       }
+      addPaddingW_1(W_pad); // top / bot padding
+
       bsg_attr_remote float* imap_src_base = (float*)imap.data_ptr();
       const uint32_t* imap_src_strides = imap.get_strides();
       imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
@@ -552,39 +545,35 @@ polyA:
       size_t logical_start = 0; // starting offset of imap buffer writting
       size_t read_x = IMAP_DIM_X-PADDING;
       size_t read_y = IMAP_DIM_Y-PADDING;
+      size_t block_id = block_y * 2 + block_x;
+      size_t W_pad = -1;
       // see if we need to add padding
-      if (block_y == 0) {
-        size_t imap_buf_offset = 0;
-        // add top padding
-        addPaddingW_1(0);
-        if (block_x == 0) {
-          // add left padding
+      switch (block_id) {
+        case 0:
+          W_pad = 0;
           addPaddingH_1(0);
-          // setup read data copy
           logical_start = PADDING*IMAP_DIM_X+PADDING;
-        } else {
-          // add right padding
+          break;
+        case 1:
+          W_pad = 0;
           addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = PADDING*IMAP_DIM_X;
-        }
-      } else if (block_y == h_blocks_per_out_channel-PADDING) {
-        // add bottom padding
-        addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
-        if (block_x == 0) {
-          // add left padding
+          break;
+        case 2:
+          W_pad = (IMAP_DIM_Y-PADDING)*IMAP_DIM_X;
           addPaddingH_1(0);
           logical_start = PADDING;
-          read_x = IMAP_DIM_X-PADDING;
-          read_y = IMAP_DIM_Y-PADDING;
-        } else {
-          // add right padding
+          break;
+        case 3:
+          W_pad = (IMAP_DIM_Y-PADDING)*IMAP_DIM_X;
           addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = 0;
-        }
-      } else {
-        // not possible here
-        hb_assert(false);
+          break;
+        default:
+          hb_assert(false);
       }
+      addPaddingW_1(W_pad); // top / bot padding
+
       bsg_attr_remote float* imap_src_base = (float*)imap.data_ptr();
       const uint32_t* imap_src_strides = imap.get_strides();
       imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
