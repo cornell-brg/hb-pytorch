@@ -3,6 +3,14 @@
 // 10/06/2020 Lin Cheng
 //====================================================================
 
+template<int B_DIM_X, int B_DIM_Y>
+inline void spcpy(float* dest, float* src) {
+  bsg_unroll(B_DIM_X)
+  for (int i = 0; i < B_DIM_X * B_DIM_Y; i++) {
+    dest[i] = src[i];
+  }
+}
+
 // templated unrolling code by Krithik Ranjan
 template<int N, typename T>
 struct Unroll {

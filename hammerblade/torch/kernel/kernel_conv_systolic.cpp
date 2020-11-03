@@ -18,32 +18,6 @@
 #include <kernel_conv_baseline.hpp>
 #include <kernel_circular_buffer.hpp>
 
-inline void spcpy(float* dest, float* src) {
-  for (int i = 0; i < IMAP_DIM_X * IMAP_DIM_Y; i += 9) {
-        register float tmp0 = *(src + 0);
-        register float tmp1 = *(src + 1);
-        register float tmp2 = *(src + 2);
-        register float tmp3 = *(src + 3);
-        register float tmp4 = *(src + 4);
-        register float tmp5 = *(src + 5);
-        register float tmp6 = *(src + 6);
-        register float tmp7 = *(src + 7);
-        register float tmp8 = *(src + 8);
-        asm volatile("": : :"memory");
-        *(dest + 0) = tmp0;
-        *(dest + 1) = tmp1;
-        *(dest + 2) = tmp2;
-        *(dest + 3) = tmp3;
-        *(dest + 4) = tmp4;
-        *(dest + 5) = tmp5;
-        *(dest + 6) = tmp6;
-        *(dest + 7) = tmp7;
-        *(dest + 8) = tmp8;
-        src += 9;
-        dest += 9;
-  }
-}
-
 extern "C" {
   __attribute__ ((noinline))  int tensorlib_conv_systolic(
     hb_tensor_t* output,
@@ -204,7 +178,7 @@ extern "C" {
         // pass imap
         float* imap_buf_remote = fifo.obtain_wr_ptr();
         // copy
-        spcpy(imap_buf_remote, imap_buf);
+        spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
 
         fifo.finish_wr_ptr();
 
@@ -231,7 +205,7 @@ extern "C" {
         // pass imap
         float* imap_buf_remote = fifo.obtain_wr_ptr();
         // copy
-        spcpy(imap_buf_remote, imap_buf);
+        spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
         fifo.finish_wr_ptr();
       }
     };
