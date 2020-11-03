@@ -121,28 +121,34 @@ extern "C" {
       // see if we need to add padding
       switch (block_id) {
         case 0:
-          addPaddingW_1(0); // top
           addPaddingH_1(0); // left
           logical_start = PADDING*IMAP_DIM_X+PADDING;
+          goto top_pad;
           break;
         case 1:
-          addPaddingW_1(0);
           addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = PADDING*IMAP_DIM_X;
+          goto top_pad;
           break;
         case 2:
-          addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
           addPaddingH_1(0);
           logical_start = PADDING;
+          goto bot_pad;
           break;
         case 3:
-          addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
           addPaddingH_1(IMAP_DIM_X-PADDING);
           logical_start = 0;
+          goto bot_pad;
           break;
         default:
           hb_assert(false);
       }
+top_pad:
+      addPaddingW_1(0); // top padding
+      goto polyA;
+bot_pad:
+      addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X); // bot padding
+polyA:
       bsg_attr_remote float* imap_src_base = (float*)imap.data_ptr();
       const uint32_t* imap_src_strides = imap.get_strides();
       imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
