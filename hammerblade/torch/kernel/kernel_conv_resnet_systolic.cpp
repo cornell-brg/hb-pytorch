@@ -299,18 +299,6 @@ extern "C" {
       fill_filter_buffer_rotate<FILTER_DIM>(filter_src_base, filter_buf);
     };
 
-
-    auto imapDMA = [&](size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
-      size_t imap_x = block_x * BLOCK_DIM_X;
-      size_t imap_y = block_y * BLOCK_DIM_Y;
-      float* imap_src_base = (float*)imap.data_ptr();
-      uint32_t* imap_src_strides = imap.get_strides();
-      imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
-      imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
-      size_t y_step = imap_src_strides[2];
-      fill_imap_buffer<IMAP_DIM_X, IMAP_DIM_Y>(imap_src_base, imap_buf, y_step);
-    };
-
     auto omapDMA = [&](size_t image_id, size_t filter_id, size_t block_x, size_t block_y) {
       size_t omap_x = block_x * BLOCK_DIM_X;
       size_t omap_y = block_y * BLOCK_DIM_Y;
@@ -418,17 +406,6 @@ extern "C" {
     float imap_buf[IMAP_DIM_X * IMAP_DIM_Y];        // 18x18 * 4 = 1296B
     float grad_buf[BLOCK_DIM_X * BLOCK_DIM_Y];      // 14x14 * 4 = 784B
 
-
-    auto imapDMA = [&](size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
-      size_t imap_x = block_x * BLOCK_DIM_X;
-      size_t imap_y = block_y * BLOCK_DIM_Y;
-      float* imap_src_base = (float*)imap.data_ptr();
-      uint32_t* imap_src_strides = imap.get_strides();
-      imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
-      imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
-      size_t y_step = imap_src_strides[2];
-      fill_imap_buffer<IMAP_DIM_X, IMAP_DIM_Y>(imap_src_base, imap_buf, y_step);
-    };
 
     auto gradDMA = [&](size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
       size_t grad_x = block_x * BLOCK_DIM_X;
