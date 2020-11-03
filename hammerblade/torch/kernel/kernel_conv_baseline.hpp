@@ -360,31 +360,32 @@ inline void conv2d_5x5_back(float* imap, float* filter, float* omap) {
 }
 
 
+template<int B_DIM_X, int B_DIM_Y, int I_DIM_X, int I_DIM_Y, int F_DIM>
 inline void conv2d_3x3_16(float* imap, float* filter, float* omap) {
-  for (size_t y = 0; y < BLOCK_DIM_Y; y++) {
-    for (size_t x = 0; x < BLOCK_DIM_X; x += 8) {
-      register float psum0 = omap[y * BLOCK_DIM_X + x + 0];
-      register float psum1 = omap[y * BLOCK_DIM_X + x + 1];
-      register float psum2 = omap[y * BLOCK_DIM_X + x + 2];
-      register float psum3 = omap[y * BLOCK_DIM_X + x + 3];
-      register float psum4 = omap[y * BLOCK_DIM_X + x + 4];
-      register float psum5 = omap[y * BLOCK_DIM_X + x + 5];
-      register float psum6 = omap[y * BLOCK_DIM_X + x + 6];
-      register float psum7 = omap[y * BLOCK_DIM_X + x + 7];
-      for (size_t yy = 0; yy < FILTER_DIM; yy++) {
-        register float filter0 = filter[yy * FILTER_DIM + 0];
-        register float filter1 = filter[yy * FILTER_DIM + 1];
-        register float filter2 = filter[yy * FILTER_DIM + 2];
-        register float imap0  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 0];
-        register float imap1  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 1];
-        register float imap2  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 2];
-        register float imap3  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 3];
-        register float imap4  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 4];
-        register float imap5  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 5];
-        register float imap6  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 6];
-        register float imap7  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 7];
-        register float imap8  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 8];
-        register float imap9  = imap[y * IMAP_DIM_X + x + yy * IMAP_DIM_X + 9];
+  for (size_t y = 0; y < B_DIM_Y; y++) {
+    for (size_t x = 0; x < B_DIM_X; x += 8) {
+      register float psum0 = omap[y * B_DIM_X + x + 0];
+      register float psum1 = omap[y * B_DIM_X + x + 1];
+      register float psum2 = omap[y * B_DIM_X + x + 2];
+      register float psum3 = omap[y * B_DIM_X + x + 3];
+      register float psum4 = omap[y * B_DIM_X + x + 4];
+      register float psum5 = omap[y * B_DIM_X + x + 5];
+      register float psum6 = omap[y * B_DIM_X + x + 6];
+      register float psum7 = omap[y * B_DIM_X + x + 7];
+      for (size_t yy = 0; yy < F_DIM; yy++) {
+        register float filter0 = filter[yy * F_DIM + 0];
+        register float filter1 = filter[yy * F_DIM + 1];
+        register float filter2 = filter[yy * F_DIM + 2];
+        register float imap0  = imap[y * I_DIM_X + x + yy * I_DIM_X + 0];
+        register float imap1  = imap[y * I_DIM_X + x + yy * I_DIM_X + 1];
+        register float imap2  = imap[y * I_DIM_X + x + yy * I_DIM_X + 2];
+        register float imap3  = imap[y * I_DIM_X + x + yy * I_DIM_X + 3];
+        register float imap4  = imap[y * I_DIM_X + x + yy * I_DIM_X + 4];
+        register float imap5  = imap[y * I_DIM_X + x + yy * I_DIM_X + 5];
+        register float imap6  = imap[y * I_DIM_X + x + yy * I_DIM_X + 6];
+        register float imap7  = imap[y * I_DIM_X + x + yy * I_DIM_X + 7];
+        register float imap8  = imap[y * I_DIM_X + x + yy * I_DIM_X + 8];
+        register float imap9  = imap[y * I_DIM_X + x + yy * I_DIM_X + 9];
         asm volatile("": : :"memory");
 
 #ifdef HB_EMUL
@@ -443,14 +444,14 @@ inline void conv2d_3x3_16(float* imap, float* filter, float* omap) {
         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum7) : "f"(imap9), "f"(filter2));
 #endif
       }
-      omap[y * BLOCK_DIM_X + x + 0] = psum0;
-      omap[y * BLOCK_DIM_X + x + 1] = psum1;
-      omap[y * BLOCK_DIM_X + x + 2] = psum2;
-      omap[y * BLOCK_DIM_X + x + 3] = psum3;
-      omap[y * BLOCK_DIM_X + x + 4] = psum4;
-      omap[y * BLOCK_DIM_X + x + 5] = psum5;
-      omap[y * BLOCK_DIM_X + x + 6] = psum6;
-      omap[y * BLOCK_DIM_X + x + 7] = psum7;
+      omap[y * B_DIM_X + x + 0] = psum0;
+      omap[y * B_DIM_X + x + 1] = psum1;
+      omap[y * B_DIM_X + x + 2] = psum2;
+      omap[y * B_DIM_X + x + 3] = psum3;
+      omap[y * B_DIM_X + x + 4] = psum4;
+      omap[y * B_DIM_X + x + 5] = psum5;
+      omap[y * B_DIM_X + x + 6] = psum6;
+      omap[y * B_DIM_X + x + 7] = psum7;
     }
   }
 }
