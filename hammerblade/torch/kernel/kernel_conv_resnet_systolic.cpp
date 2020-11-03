@@ -11,12 +11,14 @@
 #define FILTER_DIM     3
 #define PADDING        1
 #define STRIDE         1
+#define BUFFERS        1
 
 #define IMAP_DIM_X (BLOCK_DIM_X + FILTER_DIM - 1)
 #define IMAP_DIM_Y (BLOCK_DIM_Y + FILTER_DIM - 1)
 
 #include <kernel_common.hpp>
 #include <kernel_conv_baseline.hpp>
+#include <kernel_circular_buffer.hpp>
 
 inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
 
@@ -169,8 +171,46 @@ extern "C" {
     // allocate buffers
     float filter_buf[FILTER_DIM * FILTER_DIM];
     float omap_buf[BLOCK_DIM_X * BLOCK_DIM_Y];
-    float imap_buf[IMAP_DIM_X * IMAP_DIM_Y];
+    float* imap_buf;
 
+    // Buffer
+    CircularBuffer::FIFO<float, IMAP_DIM_X * IMAP_DIM_Y, BUFFERS> fifo(bsg_y, bsg_x-1, bsg_y, bsg_x+1);
+
+
+    // Config
+    // 0 -- idle
+    // 1 -- imap DMA
+    // 2 -- compute
+    // 3 -- polyA stoppper
+
+    // the array is divided into 3 32 (8x4) blocks
+    // if (x+1) % 5 == 0 -- do not write to the right
+    // 8 rows handle one image collectively
+    // 4 columns each on 1 filter
+    char systolic_resnet[8][16] = {
+      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
+      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
+      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
+      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
+      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
+      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
+      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
+      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
+    };
+    // char systolic_resnet[8][16] = {
+    //   {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
+    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    // };
+
+
+    char tile_config = systolic_resnet[bsg_y][bsg_x];
+    bool should_pass = (bsg_x + 1) % 5 == 0 ? false : true;
 
     auto filterDMA = [&](size_t filter_id, size_t channel_id) {
       float* filter_src_base = (float*)filter.data_ptr();
@@ -190,46 +230,90 @@ extern "C" {
       drain_omap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf, omap_src_base, y_step);
     };
 
+    auto imapDMA_job = [&](size_t block_x, size_t block_y) {
+      imap_buf = fifo.get_buffer(); // reuse
+      size_t filter_offset = bsg_x / 5 * 4;
+
+      for (size_t image_id = 0; image_id < N; image_id++) {
+        // 4 filter per block, 3 blocks
+        for (size_t filter_id = filter_offset; filter_id < Cout; filter_id += 12) {
+          if (filter_id < Cout) {
+            for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
+              imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
+              bsg_print_hexadecimal(0xFACEB00C);
+              float* imap_buf_remote = fifo.obtain_wr_ptr();
+              spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
+              fifo.finish_wr_ptr();
+              bsg_print_hexadecimal(0xFACEB00D);
+            }
+          }
+        }
+      }
+    };
+
+    auto compute_job = [&](size_t block_x, size_t block_y) {
+      size_t filter_offset = bsg_x - (bsg_x / 5) - 1;
+
+      for (size_t image_id = 0; image_id < N; image_id++) {
+        // 4 filter per block, 3 blocks
+        for (size_t filter_id = filter_offset; filter_id < Cout; filter_id += 12) {
+          if (filter_id < Cout) {
+            // reset output buffer
+            reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
+            for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
+
+              bsg_print_hexadecimal(0xF00DF00D);
+              imap_buf = fifo.obtain_rd_ptr();
+              bsg_print_hexadecimal(0xF00DF00F);
+              if (should_pass) {
+                bsg_print_hexadecimal(0xBEEFBEEF);
+                float* imap_buf_remote = fifo.obtain_wr_ptr();
+                spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
+                fifo.finish_wr_ptr();
+                bsg_print_hexadecimal(0xBEEF0000);
+              }
+
+              // read in the filter
+              filterDMA(filter_id, channel_id);
+
+              // do conv
+              conv2d_3x3_16<BLOCK_DIM_X, BLOCK_DIM_Y, IMAP_DIM_X, IMAP_DIM_Y, FILTER_DIM>(imap_buf, filter_buf, omap_buf);
+
+              fifo.finish_rd_ptr();
+            } // channel
+
+            // write omap back
+            omapDMA(image_id, filter_id, block_x, block_y);
+
+          } // main loop
+        }
+      }
+    };
+
+    // Job dispatch
+
+    size_t block_y = bsg_y / 2;
+    size_t block_x = bsg_y % 2;
+
     bsg_cuda_print_stat_kernel_start();
 
-    // main loop
-    for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
-      if (idx < num_blocks) {
-
-        // figure out what we are producing
-        size_t tmp = idx;
-        size_t image_id = tmp / (Cout * blocks_per_out_channel);
-        tmp = tmp % (Cout * blocks_per_out_channel);
-        size_t filter_id = tmp / blocks_per_out_channel;
-        tmp = tmp % blocks_per_out_channel;
-        size_t block_y = tmp / w_blocks_per_out_channel;
-        size_t block_x = tmp % w_blocks_per_out_channel;
-
-        // reset output buffer
-        reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
-
-        for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
-
-          // read in the image
-          //imapDMA(image_id, channel_id, block_x, block_y);
-          imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
-
-          // read in the filter
-          filterDMA(filter_id, channel_id);
-
-          // do conv
-          conv2d_3x3_16<BLOCK_DIM_X, BLOCK_DIM_Y, IMAP_DIM_X, IMAP_DIM_Y, FILTER_DIM>(imap_buf, filter_buf, omap_buf);
-        } // channel
-
-        // write omap back
-        omapDMA(image_id, filter_id, block_x, block_y);
-
-      } // if (idx < num_blocks)
-    } // main loop
+    switch (tile_config) {
+      case 0:
+        // nothing
+        break;
+      case 1:
+        imapDMA_job(block_x, block_y);
+        break;
+      case 2:
+        compute_job(block_x, block_y);
+        break;
+      default:
+        hb_assert_msg(false, "invalid tile task config");
+    }
 
     bsg_cuda_print_stat_kernel_end();
-
     g_barrier.sync();
+
     return 0;
   }
 
