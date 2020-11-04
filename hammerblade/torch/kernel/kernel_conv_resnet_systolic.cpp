@@ -258,11 +258,11 @@ extern "C" {
           if (filter_id < Cout) {
             for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
               imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
-              bsg_print_hexadecimal(0xFACEB00C);
+              //bsg_print_hexadecimal(0xFACEB00C);
               float* imap_buf_remote = fifo.obtain_wr_ptr();
               spcpy_imap(imap_buf_remote, imap_buf);
               fifo.finish_wr_ptr();
-              bsg_print_hexadecimal(0xFACEB00D);
+              //bsg_print_hexadecimal(0xFACEB00D);
             }
           }
         }
@@ -280,15 +280,15 @@ extern "C" {
             reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
             for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
 
-              bsg_print_hexadecimal(0xF00DF00D);
+              //bsg_print_hexadecimal(0xF00DF00D);
               imap_buf = fifo.obtain_rd_ptr();
-              bsg_print_hexadecimal(0xF00DF00F);
+              //bsg_print_hexadecimal(0xF00DF00F);
               if (should_pass && filter_id+1 < Cout) {
-                bsg_print_hexadecimal(0xBEEFBEEF);
+                //bsg_print_hexadecimal(0xBEEFBEEF);
                 float* imap_buf_remote = fifo.obtain_wr_ptr();
                 spcpy_imap(imap_buf_remote, imap_buf);
                 fifo.finish_wr_ptr();
-                bsg_print_hexadecimal(0xBEEF0000);
+                //bsg_print_hexadecimal(0xBEEF0000);
               }
 
               // read in the filter
@@ -313,7 +313,7 @@ extern "C" {
     size_t block_y = bsg_y / 2;
     size_t block_x = bsg_y % 2;
 
-    bsg_cuda_print_stat_kernel_start();
+    bsg_cuda_print_stat_start(7);
 
     switch (tile_config) {
       case 0:
@@ -329,7 +329,7 @@ extern "C" {
         hb_assert_msg(false, "invalid tile task config");
     }
 
-    bsg_cuda_print_stat_kernel_end();
+    bsg_cuda_print_stat_end(7);
     g_barrier.sync();
 
     return 0;
@@ -478,7 +478,7 @@ extern "C" {
           if (channel_id < Cout) {
             reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
             for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
-              bsg_print_hexadecimal(0xF00DF00D);
+              //bsg_print_hexadecimal(0xF00DF00D);
               imap_buf = fifo.obtain_rd_ptr();
               if (should_pass && channel_id+1 < Cout) {
                 float* imap_buf_remote = fifo.obtain_wr_ptr();
@@ -488,7 +488,7 @@ extern "C" {
               filterDMA_rotate(filter_id, channel_id);
               conv2d_3x3_16<BLOCK_DIM_X, BLOCK_DIM_Y, IMAP_DIM_X, IMAP_DIM_Y, FILTER_DIM>(imap_buf, filter_buf, omap_buf);
               fifo.finish_rd_ptr();
-              bsg_print_hexadecimal(0xF00D0000);
+              //bsg_print_hexadecimal(0xF00D0000);
             }
             omapDMA(image_id, channel_id, block_x, block_y);
           }
@@ -496,12 +496,10 @@ extern "C" {
       }
     };
 
-    bsg_cuda_print_stat_kernel_start();
-
     size_t block_y = bsg_y / 2;
     size_t block_x = bsg_y % 2;
 
-    bsg_cuda_print_stat_kernel_start();
+    bsg_cuda_print_stat_start(8);
 
     switch (tile_config) {
       case 0:
@@ -517,7 +515,7 @@ extern "C" {
         hb_assert_msg(false, "invalid tile task config");
     }
 
-    bsg_cuda_print_stat_kernel_end();
+    bsg_cuda_print_stat_end(8);
 
     g_barrier.sync();
     return 0;
@@ -630,17 +628,19 @@ extern "C" {
       imap_buf = imap_fifo.get_buffer();
       size_t channel_offset = bsg_y - 1;
 
-      for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 7) {
-        if (channel_id < Cout) {
-          for (size_t image_id = 0; image_id < N_imap; image_id++) {
-            for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
-              for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
-                imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
-                bsg_print_hexadecimal(0xAA);
-                float* imap_buf_remote = imap_fifo.obtain_wr_ptr();
-                spcpy_imap(imap_buf_remote, imap_buf);
-                imap_fifo.finish_wr_ptr();
-                bsg_print_hexadecimal(0xBB);
+      for (size_t filter_id = 0; filter_id < N; filter_id += 15) {
+        for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 7) {
+          if (channel_id < Cout) {
+            for (size_t image_id = 0; image_id < N_imap; image_id++) {
+              for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
+                for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
+                  imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
+                  //bsg_print_hexadecimal(0xAA);
+                  float* imap_buf_remote = imap_fifo.obtain_wr_ptr();
+                  spcpy_imap(imap_buf_remote, imap_buf);
+                  imap_fifo.finish_wr_ptr();
+                  //bsg_print_hexadecimal(0xBB);
+                }
               }
             }
           }
@@ -653,16 +653,18 @@ extern "C" {
       size_t filter_offset = bsg_x - 1;
 
       for (size_t filter_id = filter_offset; filter_id < N; filter_id += 15) {
-        if (filter_id < N) {
-          for (size_t image_id = 0; image_id < N_imap; image_id++) {
-            for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
-              for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
-                gradDMA(image_id, filter_id, block_x, block_y);
-                bsg_print_hexadecimal(0xCC);
-                float* grad_buf_remote = grad_fifo.obtain_wr_ptr();
-                spcpy_grad(grad_buf_remote, grad_buf);
-                grad_fifo.finish_wr_ptr();
-                bsg_print_hexadecimal(0xDD);
+        for (size_t channel_id = 0; channel_id < Cout; channel_id += 7) {
+          if (filter_id < N) {
+            for (size_t image_id = 0; image_id < N_imap; image_id++) {
+              for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
+                for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
+                  gradDMA(image_id, filter_id, block_x, block_y);
+                  //bsg_print_hexadecimal(0xCC);
+                  float* grad_buf_remote = grad_fifo.obtain_wr_ptr();
+                  spcpy_grad(grad_buf_remote, grad_buf);
+                  grad_fifo.finish_wr_ptr();
+                  //bsg_print_hexadecimal(0xDD);
+                }
               }
             }
           }
@@ -675,152 +677,149 @@ extern "C" {
       size_t channel_offset = bsg_y - 1;
       size_t filter_offset = bsg_x - 1;
 
-      size_t channel_id = channel_offset;
-      size_t filter_id = filter_offset;
+      for (size_t filter_id = filter_offset; filter_id < N; filter_id += 15) {
+        for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 7) {
+          if (channel_id < Cout && filter_id < N) {
+            reset_buffer<FILTER_DIM, FILTER_DIM>(filter_buf);
+            for (size_t image_id = 0; image_id < N_imap; image_id++) {
+              for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
+                for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
+                  //bsg_print_hexadecimal(0xEE);
+                  grad_buf = grad_fifo.obtain_rd_ptr();
+                  if (should_pass_grad && channel_id+1 < Cout) {
+                    //bsg_print_hexadecimal(0xFF);
+                    float* grad_buf_remote = grad_fifo.obtain_wr_ptr();
+                    spcpy_grad(grad_buf_remote, grad_buf);
+                    grad_fifo.finish_wr_ptr();
+                    //bsg_print_hexadecimal(0x10101);
+                  }
+                  //bsg_print_hexadecimal(0x111000);
+                  imap_buf = imap_fifo.obtain_rd_ptr();
+                  if (should_pass_imap && filter_id+1 < N) {
+                    //bsg_print_hexadecimal(0x22200);
+                    float* imap_buf_remote = imap_fifo.obtain_wr_ptr();
+                    spcpy_imap(imap_buf_remote, imap_buf);
+                    imap_fifo.finish_wr_ptr();
+                    //bsg_print_hexadecimal(0x33300);
+                  }
+                  for (size_t f_y = 0; f_y < FILTER_DIM; f_y++) {
+                    register float psum0 = 0;
+                    register float psum1 = 0;
+                    register float psum2 = 0;
+                    float* imap_ptr = imap_buf + f_y * IMAP_DIM_X;
+                    float* grad_ptr = grad_buf;
+                    float* output = filter_buf + f_y * FILTER_DIM;
+                    for (size_t y = 0; y < BLOCK_DIM_Y; y++) {
+                      float *imap_row = imap_ptr;
+                      float *grad_row = grad_ptr;
+                      for (size_t x = 0; x < BLOCK_DIM_X; x += 8) {
+                        register float grad0 = grad_row[x+0];
+                        register float grad1 = grad_row[x+1];
+                        register float grad2 = grad_row[x+2];
+                        register float grad3 = grad_row[x+3];
+                        register float grad4 = grad_row[x+4];
+                        register float grad5 = grad_row[x+5];
+                        register float grad6 = grad_row[x+6];
+                        register float grad7 = grad_row[x+7];
 
-      while (channel_id < Cout && filter_id < N) {
-        if (channel_id < Cout && filter_id < N) {
-          reset_buffer<FILTER_DIM, FILTER_DIM>(filter_buf);
-          for (size_t image_id = 0; image_id < N_imap; image_id++) {
-            for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
-              for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
-                bsg_print_hexadecimal(0xEE);
-                grad_buf = grad_fifo.obtain_rd_ptr();
-                if (should_pass_grad && channel_id+1 < Cout) {
-                  bsg_print_hexadecimal(0xFF);
-                  float* grad_buf_remote = grad_fifo.obtain_wr_ptr();
-                  spcpy_grad(grad_buf_remote, grad_buf);
-                  grad_fifo.finish_wr_ptr();
-                  bsg_print_hexadecimal(0x10101);
-                }
-                bsg_print_hexadecimal(0x111000);
-                imap_buf = imap_fifo.obtain_rd_ptr();
-                if (should_pass_imap && filter_id+1 < N) {
-                  bsg_print_hexadecimal(0x22200);
-                  float* imap_buf_remote = imap_fifo.obtain_wr_ptr();
-                  spcpy_imap(imap_buf_remote, imap_buf);
-                  imap_fifo.finish_wr_ptr();
-                  bsg_print_hexadecimal(0x33300);
-                }
-                for (size_t f_y = 0; f_y < FILTER_DIM; f_y++) {
-                  register float psum0 = 0;
-                  register float psum1 = 0;
-                  register float psum2 = 0;
-                  float* imap_ptr = imap_buf + f_y * IMAP_DIM_X;
-                  float* grad_ptr = grad_buf;
-                  float* output = filter_buf + f_y * FILTER_DIM;
-                  for (size_t y = 0; y < BLOCK_DIM_Y; y++) {
-                    float *imap_row = imap_ptr;
-                    float *grad_row = grad_ptr;
-                    for (size_t x = 0; x < BLOCK_DIM_X; x += 8) {
-                      register float grad0 = grad_row[x+0];
-                      register float grad1 = grad_row[x+1];
-                      register float grad2 = grad_row[x+2];
-                      register float grad3 = grad_row[x+3];
-                      register float grad4 = grad_row[x+4];
-                      register float grad5 = grad_row[x+5];
-                      register float grad6 = grad_row[x+6];
-                      register float grad7 = grad_row[x+7];
-
-                      register float imap0 = imap_row[x+0];
-                      register float imap1 = imap_row[x+1];
-                      register float imap2 = imap_row[x+2];
-                      register float imap3 = imap_row[x+3];
-                      register float imap4 = imap_row[x+4];
-                      register float imap5 = imap_row[x+5];
-                      register float imap6 = imap_row[x+6];
-                      register float imap7 = imap_row[x+7];
-                      register float imap8 = imap_row[x+8];
-                      register float imap9 = imap_row[x+9];
+                        register float imap0 = imap_row[x+0];
+                        register float imap1 = imap_row[x+1];
+                        register float imap2 = imap_row[x+2];
+                        register float imap3 = imap_row[x+3];
+                        register float imap4 = imap_row[x+4];
+                        register float imap5 = imap_row[x+5];
+                        register float imap6 = imap_row[x+6];
+                        register float imap7 = imap_row[x+7];
+                        register float imap8 = imap_row[x+8];
+                        register float imap9 = imap_row[x+9];
 
 #ifdef HB_EMUL
-                      psum0 += imap0 * grad0;
-                      psum1 += imap1 * grad0;
-                      psum2 += imap2 * grad0;
+                        psum0 += imap0 * grad0;
+                        psum1 += imap1 * grad0;
+                        psum2 += imap2 * grad0;
 
-                      psum0 += imap1 * grad1;
-                      psum1 += imap2 * grad1;
-                      psum2 += imap3 * grad1;
+                        psum0 += imap1 * grad1;
+                        psum1 += imap2 * grad1;
+                        psum2 += imap3 * grad1;
 
-                      psum0 += imap2 * grad2;
-                      psum1 += imap3 * grad2;
-                      psum2 += imap4 * grad2;
+                        psum0 += imap2 * grad2;
+                        psum1 += imap3 * grad2;
+                        psum2 += imap4 * grad2;
 
-                      psum0 += imap3 * grad3;
-                      psum1 += imap4 * grad3;
-                      psum2 += imap5 * grad3;
+                        psum0 += imap3 * grad3;
+                        psum1 += imap4 * grad3;
+                        psum2 += imap5 * grad3;
 
-                      psum0 += imap4 * grad4;
-                      psum1 += imap5 * grad4;
-                      psum2 += imap6 * grad4;
+                        psum0 += imap4 * grad4;
+                        psum1 += imap5 * grad4;
+                        psum2 += imap6 * grad4;
 
-                      psum0 += imap5 * grad5;
-                      psum1 += imap6 * grad5;
-                      psum2 += imap7 * grad5;
+                        psum0 += imap5 * grad5;
+                        psum1 += imap6 * grad5;
+                        psum2 += imap7 * grad5;
 
-                      psum0 += imap6 * grad6;
-                      psum1 += imap7 * grad6;
-                      psum2 += imap8 * grad6;
+                        psum0 += imap6 * grad6;
+                        psum1 += imap7 * grad6;
+                        psum2 += imap8 * grad6;
 
-                      psum0 += imap7 * grad7;
-                      psum1 += imap8 * grad7;
-                      psum2 += imap9 * grad7;
+                        psum0 += imap7 * grad7;
+                        psum1 += imap8 * grad7;
+                        psum2 += imap9 * grad7;
 #else
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap0), "f"(grad0));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap1), "f"(grad0));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap2), "f"(grad0));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap0), "f"(grad0));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap1), "f"(grad0));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap2), "f"(grad0));
 
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap1), "f"(grad1));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap2), "f"(grad1));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap3), "f"(grad1));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap1), "f"(grad1));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap2), "f"(grad1));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap3), "f"(grad1));
 
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap2), "f"(grad2));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap3), "f"(grad2));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap4), "f"(grad2));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap2), "f"(grad2));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap3), "f"(grad2));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap4), "f"(grad2));
 
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap3), "f"(grad3));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap4), "f"(grad3));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap5), "f"(grad3));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap3), "f"(grad3));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap4), "f"(grad3));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap5), "f"(grad3));
 
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap4), "f"(grad4));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap5), "f"(grad4));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap6), "f"(grad4));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap4), "f"(grad4));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap5), "f"(grad4));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap6), "f"(grad4));
 
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap5), "f"(grad5));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap6), "f"(grad5));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap7), "f"(grad5));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap5), "f"(grad5));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap6), "f"(grad5));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap7), "f"(grad5));
 
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap6), "f"(grad6));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap7), "f"(grad6));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap8), "f"(grad6));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap6), "f"(grad6));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap7), "f"(grad6));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap8), "f"(grad6));
 
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap7), "f"(grad7));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap8), "f"(grad7));
-                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap9), "f"(grad7));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap7), "f"(grad7));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap8), "f"(grad7));
+                        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap9), "f"(grad7));
 #endif
 
+                      }
+                      imap_ptr += IMAP_DIM_X;
+                      grad_ptr += BLOCK_DIM_X;
                     }
-                    imap_ptr += IMAP_DIM_X;
-                    grad_ptr += BLOCK_DIM_X;
+                    output[0] += psum0;
+                    output[1] += psum1;
+                    output[2] += psum2;
                   }
-                  output[0] += psum0;
-                  output[1] += psum1;
-                  output[2] += psum2;
+                  imap_fifo.finish_rd_ptr();
+                  grad_fifo.finish_rd_ptr();
                 }
-                imap_fifo.finish_rd_ptr();
-                grad_fifo.finish_rd_ptr();
               }
             }
+            filterDMA_wb(filter_id, channel_id);
           }
-          filterDMA_wb(filter_id, channel_id);
         }
-        channel_id += 7;
-        filter_id += 15;
       }
     };
 
 
-    bsg_cuda_print_stat_kernel_start();
+    bsg_cuda_print_stat_start(9);
 
     switch (tile_config) {
       case 0:
@@ -840,7 +839,7 @@ extern "C" {
     }
 
 
-    bsg_cuda_print_stat_kernel_end();
+    bsg_cuda_print_stat_end(9);
 
     g_barrier.sync();
     return 0;
