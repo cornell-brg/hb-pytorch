@@ -18,6 +18,18 @@
 #include <kernel_conv_baseline.hpp>
 #include <kernel_circular_buffer.hpp>
 
+namespace{
+
+inline void spcpy_base_imap(bsg_attr_remote float* dest, float* src) {
+  bsg_unroll(IMAP_DIM_Y)
+  for (int i = 0; i < IMAP_DIM_X * IMAP_DIM_Y; i++) {
+    dest[i] = src[i];
+  }
+}
+
+}
+
+
 extern "C" {
   __attribute__ ((noinline))  int tensorlib_conv_systolic(
     hb_tensor_t* output,
@@ -178,7 +190,7 @@ extern "C" {
         // pass imap
         float* imap_buf_remote = fifo.obtain_wr_ptr();
         // copy
-        spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
+        spcpy_base_imap(imap_buf_remote, imap_buf);
 
         fifo.finish_wr_ptr();
 
@@ -205,7 +217,7 @@ extern "C" {
         // pass imap
         float* imap_buf_remote = fifo.obtain_wr_ptr();
         // copy
-        spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
+        spcpy_base_imap(imap_buf_remote, imap_buf);
         fifo.finish_wr_ptr();
       }
     };

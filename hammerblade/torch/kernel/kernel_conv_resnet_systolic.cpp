@@ -20,6 +20,22 @@
 #include <kernel_conv_baseline.hpp>
 #include <kernel_circular_buffer.hpp>
 
+namespace{
+inline void spcpy_imap(bsg_attr_remote float* dest, float* src) {
+  bsg_unroll(IMAP_DIM_Y)
+  for (int i = 0; i < IMAP_DIM_X * IMAP_DIM_Y; i++) {
+    dest[i] = src[i];
+  }
+}
+
+inline void spcpy_grad(bsg_attr_remote float* dest, float* src) {
+  bsg_unroll(BLOCK_DIM_Y)
+  for (int i = 0; i < BLOCK_DIM_X * BLOCK_DIM_Y; i++) {
+    dest[i] = src[i];
+  }
+}
+}
+
 inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
 
   // add 1 col of zeros
@@ -187,6 +203,8 @@ extern "C" {
     // if (x+1) % 5 == 0 -- do not write to the right
     // 8 rows handle one image collectively
     // 4 columns each on 1 filter
+    // one row is one sub block
+    // one col is one filter
     char systolic_resnet[8][16] = {
       {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
       {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
@@ -242,7 +260,7 @@ extern "C" {
               imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
               bsg_print_hexadecimal(0xFACEB00C);
               float* imap_buf_remote = fifo.obtain_wr_ptr();
-              spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
+              spcpy_imap(imap_buf_remote, imap_buf);
               fifo.finish_wr_ptr();
               bsg_print_hexadecimal(0xFACEB00D);
             }
@@ -265,10 +283,10 @@ extern "C" {
               bsg_print_hexadecimal(0xF00DF00D);
               imap_buf = fifo.obtain_rd_ptr();
               bsg_print_hexadecimal(0xF00DF00F);
-              if (should_pass) {
+              if (should_pass && filter_id+1 < Cout) {
                 bsg_print_hexadecimal(0xBEEFBEEF);
                 float* imap_buf_remote = fifo.obtain_wr_ptr();
-                spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
+                spcpy_imap(imap_buf_remote, imap_buf);
                 fifo.finish_wr_ptr();
                 bsg_print_hexadecimal(0xBEEF0000);
               }
@@ -386,6 +404,8 @@ extern "C" {
     // if (x+1) % 5 == 0 -- do not write to the right
     // 8 rows handle one image collectively
     // 4 columns each on 1 filter
+    // image sub blocks are unrolled vertically -- each row is one sub block
+    // image channels are unrolled horizentally -- each col is one channel
     char systolic_resnet[8][16] = {
       {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
       {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
@@ -442,7 +462,7 @@ extern "C" {
             for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
               imapDMA_padding_systolic(imap, imap_buf, image_id, filter_id, block_x, block_y);
               float* imap_buf_remote = fifo.obtain_wr_ptr();
-              spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
+              spcpy_imap(imap_buf_remote, imap_buf);
               fifo.finish_wr_ptr();
             }
           }
@@ -460,9 +480,9 @@ extern "C" {
             for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
               bsg_print_hexadecimal(0xF00DF00D);
               imap_buf = fifo.obtain_rd_ptr();
-              if (should_pass) {
+              if (should_pass && channel_id+1 < Cout) {
                 float* imap_buf_remote = fifo.obtain_wr_ptr();
-                spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
+                spcpy_imap(imap_buf_remote, imap_buf);
                 fifo.finish_wr_ptr();
               }
               filterDMA_rotate(filter_id, channel_id);
@@ -618,7 +638,7 @@ extern "C" {
                 imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
                 bsg_print_hexadecimal(0xAA);
                 float* imap_buf_remote = imap_fifo.obtain_wr_ptr();
-                spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
+                spcpy_imap(imap_buf_remote, imap_buf);
                 imap_fifo.finish_wr_ptr();
                 bsg_print_hexadecimal(0xBB);
               }
@@ -640,7 +660,7 @@ extern "C" {
                 gradDMA(image_id, filter_id, block_x, block_y);
                 bsg_print_hexadecimal(0xCC);
                 float* grad_buf_remote = grad_fifo.obtain_wr_ptr();
-                spcpy<BLOCK_DIM_X,BLOCK_DIM_Y>(grad_buf_remote, grad_buf);
+                spcpy_grad(grad_buf_remote, grad_buf);
                 grad_fifo.finish_wr_ptr();
                 bsg_print_hexadecimal(0xDD);
               }
@@ -669,7 +689,7 @@ extern "C" {
                 if (should_pass_grad && channel_id+1 < Cout) {
                   bsg_print_hexadecimal(0xFF);
                   float* grad_buf_remote = grad_fifo.obtain_wr_ptr();
-                  spcpy<BLOCK_DIM_X,BLOCK_DIM_Y>(grad_buf_remote, grad_buf);
+                  spcpy_grad(grad_buf_remote, grad_buf);
                   grad_fifo.finish_wr_ptr();
                   bsg_print_hexadecimal(0x10101);
                 }
@@ -678,7 +698,7 @@ extern "C" {
                 if (should_pass_imap && filter_id+1 < N) {
                   bsg_print_hexadecimal(0x22200);
                   float* imap_buf_remote = imap_fifo.obtain_wr_ptr();
-                  spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
+                  spcpy_imap(imap_buf_remote, imap_buf);
                   imap_fifo.finish_wr_ptr();
                   bsg_print_hexadecimal(0x33300);
                 }
@@ -713,6 +733,7 @@ extern "C" {
                       register float imap8 = imap_row[x+8];
                       register float imap9 = imap_row[x+9];
 
+#ifdef HB_EMUL
                       psum0 += imap0 * grad0;
                       psum1 += imap1 * grad0;
                       psum2 += imap2 * grad0;
@@ -744,6 +765,39 @@ extern "C" {
                       psum0 += imap7 * grad7;
                       psum1 += imap8 * grad7;
                       psum2 += imap9 * grad7;
+#else
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap0), "f"(grad0));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap1), "f"(grad0));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap2), "f"(grad0));
+
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap1), "f"(grad1));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap2), "f"(grad1));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap3), "f"(grad1));
+
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap2), "f"(grad2));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap3), "f"(grad2));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap4), "f"(grad2));
+
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap3), "f"(grad3));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap4), "f"(grad3));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap5), "f"(grad3));
+
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap4), "f"(grad4));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap5), "f"(grad4));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap6), "f"(grad4));
+
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap5), "f"(grad5));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap6), "f"(grad5));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap7), "f"(grad5));
+
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap6), "f"(grad6));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap7), "f"(grad6));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap8), "f"(grad6));
+
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap7), "f"(grad7));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap8), "f"(grad7));
+                      asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap9), "f"(grad7));
+#endif
 
                     }
                     imap_ptr += IMAP_DIM_X;
