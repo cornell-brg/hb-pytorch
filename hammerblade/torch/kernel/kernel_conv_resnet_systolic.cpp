@@ -552,8 +552,37 @@ extern "C" {
     size_t num_blocks = N * Cout; // parallel over filter x channel
 
     float filter_buf[FILTER_DIM * FILTER_DIM];      //   5x5 * 4 = 100B
-    float imap_buf[IMAP_DIM_X * IMAP_DIM_Y];        // 18x18 * 4 = 1296B
-    float grad_buf[BLOCK_DIM_X * BLOCK_DIM_Y];      // 14x14 * 4 = 784B
+    float* imap_buf;
+    float* grad_buf;
+
+    CircularBuffer::FIFO<float, IMAP_DIM_X * IMAP_DIM_Y, BUFFERS> imap_fifo(bsg_y, bsg_x-1, bsg_y, bsg_x+1);
+    CircularBuffer::FIFO<float, BLOCK_DIM_X * BLOCK_DIM_Y, BUFFERS> grad_fifo(bsg_y-1, bsg_x, bsg_y+1, bsg_x);
+
+    // Config
+    // 0 -- idle
+    // 1 -- imap DMA
+    // 2 -- compute
+    // 3 -- grad DMA
+
+    // unroll filters channels vertically
+    // unroll filters horizentally (a row)
+    // grad needs to be distributed to all channels in a filter
+    // input images need to be distributed to all filters
+    char systolic_resnet[8][16] = {
+      {0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+    };
+
+    char tile_config = systolic_resnet[bsg_y][bsg_x];
+    bool should_pass_imap = bsg_x == (BSG_TILE_GROUP_X_DIM - 1) ? false : true;
+    bool should_pass_grad = bsg_y == (BSG_TILE_GROUP_Y_DIM - 1) ? false : true;
+
 
 
     auto gradDMA = [&](size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
@@ -577,112 +606,185 @@ extern "C" {
       }
     };
 
+    auto imapDMA_job = [&]() {
+      imap_buf = imap_fifo.get_buffer();
+      size_t channel_offset = bsg_y - 1;
+
+      for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 7) {
+        if (channel_id < Cout) {
+          for (size_t image_id = 0; image_id < N_imap; image_id++) {
+            for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
+              for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
+                imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
+                bsg_print_hexadecimal(0xAA);
+                float* imap_buf_remote = imap_fifo.obtain_wr_ptr();
+                spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
+                imap_fifo.finish_wr_ptr();
+                bsg_print_hexadecimal(0xBB);
+              }
+            }
+          }
+        }
+      }
+    };
+
+    auto gradDMA_job = [&]() {
+      grad_buf = grad_fifo.get_buffer();
+      size_t filter_offset = bsg_x - 1;
+
+      for (size_t filter_id = filter_offset; filter_id < N; filter_id += 15) {
+        if (filter_id < N) {
+          for (size_t image_id = 0; image_id < N_imap; image_id++) {
+            for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
+              for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
+                gradDMA(image_id, filter_id, block_x, block_y);
+                bsg_print_hexadecimal(0xCC);
+                float* grad_buf_remote = grad_fifo.obtain_wr_ptr();
+                spcpy<BLOCK_DIM_X,BLOCK_DIM_Y>(grad_buf_remote, grad_buf);
+                grad_fifo.finish_wr_ptr();
+                bsg_print_hexadecimal(0xDD);
+              }
+            }
+          }
+        }
+      }
+    };
+
+
+    auto compute_job = [&]() {
+      size_t channel_offset = bsg_y - 1;
+      size_t filter_offset = bsg_x - 1;
+
+      size_t channel_id = channel_offset;
+      size_t filter_id = filter_offset;
+
+      while (channel_id < Cout && filter_id < N) {
+        if (channel_id < Cout && filter_id < N) {
+          reset_buffer<FILTER_DIM, FILTER_DIM>(filter_buf);
+          for (size_t image_id = 0; image_id < N_imap; image_id++) {
+            for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
+              for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
+                bsg_print_hexadecimal(0xEE);
+                grad_buf = grad_fifo.obtain_rd_ptr();
+                if (should_pass_grad && channel_id+1 < Cout) {
+                  bsg_print_hexadecimal(0xFF);
+                  float* grad_buf_remote = grad_fifo.obtain_wr_ptr();
+                  spcpy<BLOCK_DIM_X,BLOCK_DIM_Y>(grad_buf_remote, grad_buf);
+                  grad_fifo.finish_wr_ptr();
+                  bsg_print_hexadecimal(0x10101);
+                }
+                bsg_print_hexadecimal(0x111000);
+                imap_buf = imap_fifo.obtain_rd_ptr();
+                if (should_pass_imap && filter_id+1 < N) {
+                  bsg_print_hexadecimal(0x22200);
+                  float* imap_buf_remote = imap_fifo.obtain_wr_ptr();
+                  spcpy<IMAP_DIM_X,IMAP_DIM_Y>(imap_buf_remote, imap_buf);
+                  imap_fifo.finish_wr_ptr();
+                  bsg_print_hexadecimal(0x33300);
+                }
+                for (size_t f_y = 0; f_y < FILTER_DIM; f_y++) {
+                  register float psum0 = 0;
+                  register float psum1 = 0;
+                  register float psum2 = 0;
+                  float* imap_ptr = imap_buf + f_y * IMAP_DIM_X;
+                  float* grad_ptr = grad_buf;
+                  float* output = filter_buf + f_y * FILTER_DIM;
+                  for (size_t y = 0; y < BLOCK_DIM_Y; y++) {
+                    float *imap_row = imap_ptr;
+                    float *grad_row = grad_ptr;
+                    for (size_t x = 0; x < BLOCK_DIM_X; x += 8) {
+                      register float grad0 = grad_row[x+0];
+                      register float grad1 = grad_row[x+1];
+                      register float grad2 = grad_row[x+2];
+                      register float grad3 = grad_row[x+3];
+                      register float grad4 = grad_row[x+4];
+                      register float grad5 = grad_row[x+5];
+                      register float grad6 = grad_row[x+6];
+                      register float grad7 = grad_row[x+7];
+
+                      register float imap0 = imap_row[x+0];
+                      register float imap1 = imap_row[x+1];
+                      register float imap2 = imap_row[x+2];
+                      register float imap3 = imap_row[x+3];
+                      register float imap4 = imap_row[x+4];
+                      register float imap5 = imap_row[x+5];
+                      register float imap6 = imap_row[x+6];
+                      register float imap7 = imap_row[x+7];
+                      register float imap8 = imap_row[x+8];
+                      register float imap9 = imap_row[x+9];
+
+                      psum0 += imap0 * grad0;
+                      psum1 += imap1 * grad0;
+                      psum2 += imap2 * grad0;
+
+                      psum0 += imap1 * grad1;
+                      psum1 += imap2 * grad1;
+                      psum2 += imap3 * grad1;
+
+                      psum0 += imap2 * grad2;
+                      psum1 += imap3 * grad2;
+                      psum2 += imap4 * grad2;
+
+                      psum0 += imap3 * grad3;
+                      psum1 += imap4 * grad3;
+                      psum2 += imap5 * grad3;
+
+                      psum0 += imap4 * grad4;
+                      psum1 += imap5 * grad4;
+                      psum2 += imap6 * grad4;
+
+                      psum0 += imap5 * grad5;
+                      psum1 += imap6 * grad5;
+                      psum2 += imap7 * grad5;
+
+                      psum0 += imap6 * grad6;
+                      psum1 += imap7 * grad6;
+                      psum2 += imap8 * grad6;
+
+                      psum0 += imap7 * grad7;
+                      psum1 += imap8 * grad7;
+                      psum2 += imap9 * grad7;
+
+                    }
+                    imap_ptr += IMAP_DIM_X;
+                    grad_ptr += BLOCK_DIM_X;
+                  }
+                  output[0] += psum0;
+                  output[1] += psum1;
+                  output[2] += psum2;
+                }
+                imap_fifo.finish_rd_ptr();
+                grad_fifo.finish_rd_ptr();
+              }
+            }
+          }
+          filterDMA_wb(filter_id, channel_id);
+        }
+        channel_id += 7;
+        filter_id += 15;
+      }
+    };
+
 
     bsg_cuda_print_stat_kernel_start();
 
-    // main loop
-    for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
-      if (idx < num_blocks) {
+    switch (tile_config) {
+      case 0:
+        // nothing
+        break;
+      case 1:
+        imapDMA_job();
+        break;
+      case 2:
+        compute_job();
+        break;
+      case 3:
+        gradDMA_job();
+        break;
+      default:
+        hb_assert_msg(false, "invalid tile task config");
+    }
 
-        // figure out what we are producing
-        size_t filter_id = idx / Cout;
-        size_t channel_id = idx % Cout;
-
-        // reset output buffer
-        reset_buffer<FILTER_DIM, FILTER_DIM>(filter_buf);
-
-        for (size_t image_id = 0; image_id < N_imap; image_id++) {
-          for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
-            for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
-
-              // read in the image
-              imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
-
-              // read in the grad
-              gradDMA(image_id, filter_id, block_x, block_y);
-
-              // do conv
-              // 5x5 is too large to unroll in both x and y directions
-              for (size_t f_y = 0; f_y < FILTER_DIM; f_y++) {
-                register float psum0 = 0;
-                register float psum1 = 0;
-                register float psum2 = 0;
-                float* imap_ptr = imap_buf + f_y * IMAP_DIM_X;
-                float* grad_ptr = grad_buf;
-                float* output = filter_buf + f_y * FILTER_DIM;
-                for (size_t y = 0; y < BLOCK_DIM_Y; y++) {
-                  float *imap_row = imap_ptr;
-                  float *grad_row = grad_ptr;
-                  for (size_t x = 0; x < BLOCK_DIM_X; x += 8) {
-                    register float grad0 = grad_row[x+0];
-                    register float grad1 = grad_row[x+1];
-                    register float grad2 = grad_row[x+2];
-                    register float grad3 = grad_row[x+3];
-                    register float grad4 = grad_row[x+4];
-                    register float grad5 = grad_row[x+5];
-                    register float grad6 = grad_row[x+6];
-                    register float grad7 = grad_row[x+7];
-
-                    register float imap0 = imap_row[x+0];
-                    register float imap1 = imap_row[x+1];
-                    register float imap2 = imap_row[x+2];
-                    register float imap3 = imap_row[x+3];
-                    register float imap4 = imap_row[x+4];
-                    register float imap5 = imap_row[x+5];
-                    register float imap6 = imap_row[x+6];
-                    register float imap7 = imap_row[x+7];
-                    register float imap8 = imap_row[x+8];
-                    register float imap9 = imap_row[x+9];
-
-                    psum0 += imap0 * grad0;
-                    psum1 += imap1 * grad0;
-                    psum2 += imap2 * grad0;
-
-                    psum0 += imap1 * grad1;
-                    psum1 += imap2 * grad1;
-                    psum2 += imap3 * grad1;
-
-                    psum0 += imap2 * grad2;
-                    psum1 += imap3 * grad2;
-                    psum2 += imap4 * grad2;
-
-                    psum0 += imap3 * grad3;
-                    psum1 += imap4 * grad3;
-                    psum2 += imap5 * grad3;
-
-                    psum0 += imap4 * grad4;
-                    psum1 += imap5 * grad4;
-                    psum2 += imap6 * grad4;
-
-                    psum0 += imap5 * grad5;
-                    psum1 += imap6 * grad5;
-                    psum2 += imap7 * grad5;
-
-                    psum0 += imap6 * grad6;
-                    psum1 += imap7 * grad6;
-                    psum2 += imap8 * grad6;
-
-                    psum0 += imap7 * grad7;
-                    psum1 += imap8 * grad7;
-                    psum2 += imap9 * grad7;
-
-                  }
-                  imap_ptr += IMAP_DIM_X;
-                  grad_ptr += BLOCK_DIM_X;
-                }
-                output[0] += psum0;
-                output[1] += psum1;
-                output[2] += psum2;
-              }
-            } // block
-          }
-        } // image
-
-        // write omap back
-        filterDMA_wb(filter_id, channel_id);
-
-      } // if (idx < num_blocks)
-    } // main loop
 
     bsg_cuda_print_stat_kernel_end();
 
