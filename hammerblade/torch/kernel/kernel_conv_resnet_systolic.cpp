@@ -22,19 +22,64 @@
 
 namespace{
 inline void spcpy_imap(bsg_attr_remote float* dest, float* src) {
-  bsg_unroll(IMAP_DIM_Y)
-  for (int i = 0; i < IMAP_DIM_X * IMAP_DIM_Y; i++) {
-    dest[i] = src[i];
+  // bsg_unroll(IMAP_DIM_Y)
+  // for (int i = 0; i < IMAP_DIM_X * IMAP_DIM_Y; i++) {
+  //   dest[i] = src[i];
+  // }
+  for (int i = 0; i < IMAP_DIM_X * IMAP_DIM_Y; i += 9) {
+    register float tmp0 = *(src + 0);
+    register float tmp1 = *(src + 1);
+    register float tmp2 = *(src + 2);
+    register float tmp3 = *(src + 3);
+    register float tmp4 = *(src + 4);
+    register float tmp5 = *(src + 5);
+    register float tmp6 = *(src + 6);
+    register float tmp7 = *(src + 7);
+    register float tmp8 = *(src + 8);
+    asm volatile("": : :"memory");
+    *(dest + 0) = tmp0;
+    *(dest + 1) = tmp1;
+    *(dest + 2) = tmp2;
+    *(dest + 3) = tmp3;
+    *(dest + 4) = tmp4;
+    *(dest + 5) = tmp5;
+    *(dest + 6) = tmp6;
+    *(dest + 7) = tmp7;
+    *(dest + 8) = tmp8;
+    src += 9;
+    dest += 9;
   }
 }
 
 inline void spcpy_grad(bsg_attr_remote float* dest, float* src) {
-  bsg_unroll(BLOCK_DIM_Y)
-  for (int i = 0; i < BLOCK_DIM_X * BLOCK_DIM_Y; i++) {
-    dest[i] = src[i];
+  // bsg_unroll(BLOCK_DIM_Y)
+  // for (int i = 0; i < BLOCK_DIM_X * BLOCK_DIM_Y; i++) {
+  //   dest[i] = src[i];
+  // }
+  for (int i = 0; i < BLOCK_DIM_X * BLOCK_DIM_Y; i += 8) {
+    register float tmp0 = *(src + 0);
+    register float tmp1 = *(src + 1);
+    register float tmp2 = *(src + 2);
+    register float tmp3 = *(src + 3);
+    register float tmp4 = *(src + 4);
+    register float tmp5 = *(src + 5);
+    register float tmp6 = *(src + 6);
+    register float tmp7 = *(src + 7);
+    asm volatile("": : :"memory");
+    *(dest + 0) = tmp0;
+    *(dest + 1) = tmp1;
+    *(dest + 2) = tmp2;
+    *(dest + 3) = tmp3;
+    *(dest + 4) = tmp4;
+    *(dest + 5) = tmp5;
+    *(dest + 6) = tmp6;
+    *(dest + 7) = tmp7;
+    src += 8;
+    dest += 8;
   }
 }
-}
+
+} // namespace
 
 inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
 
@@ -440,21 +485,19 @@ extern "C" {
     // 2 -- compute
     // 3 -- polyA stoppper
 
-    // the array is divided into 3 32 (8x4) blocks
-    // if (x+1) % 5 == 0 -- do not write to the right
     // 8 rows handle one image collectively
     // 4 columns each on 1 filter
     // image sub blocks are unrolled vertically -- each row is one sub block
     // image channels are unrolled horizentally -- each col is one channel
     char systolic_resnet[8][16] = {
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
     };
     // char systolic_resnet[8][16] = {
     //   {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
@@ -469,7 +512,7 @@ extern "C" {
 
 
     char tile_config = systolic_resnet[bsg_y][bsg_x];
-    bool should_pass = (bsg_x + 1) % 5 == 0 ? false : true;
+    bool should_pass = bsg_x == 15 ? false : true;
 
 
     // this one reads the filter in forward order
@@ -494,10 +537,9 @@ extern "C" {
 
     auto imapDMA_job = [&](size_t block_x, size_t block_y) {
       imap_buf = fifo.get_buffer(); // reuse
-      size_t channel_offset = bsg_x / 5 * 4;
 
       for (size_t image_id = 0; image_id < N; image_id++) {
-        for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 12) {
+        for (size_t channel_id = 0; channel_id < Cout; channel_id += 15) {
           if (channel_id < Cout) {
             for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
               imapDMA_padding_systolic(imap, imap_buf, image_id, filter_id, block_x, block_y);
@@ -511,10 +553,10 @@ extern "C" {
     };
 
     auto compute_job = [&](size_t block_x, size_t block_y) {
-      size_t channel_offset = bsg_x - (bsg_x / 5) - 1;
+      size_t channel_offset = bsg_x - 1;
 
       for (size_t image_id = 0; image_id < N; image_id++) {
-        for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 12) {
+        for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 15) {
           if (channel_id < Cout) {
             reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
             for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
