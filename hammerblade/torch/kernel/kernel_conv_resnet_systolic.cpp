@@ -11,7 +11,7 @@
 #define FILTER_DIM     3
 #define PADDING        1
 #define STRIDE         1
-#define BUFFERS        1
+#define BUFFERS        2
 
 #define IMAP_DIM_X (BLOCK_DIM_X + FILTER_DIM - 1)
 #define IMAP_DIM_Y (BLOCK_DIM_Y + FILTER_DIM - 1)
@@ -104,22 +104,63 @@ inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, 
   }
   addPaddingH_1(H_pad); // top / bot padding
 
-  bsg_attr_remote float* imap_src_base = (float*)imap.data_ptr();
+  float* imap_src_base = (float*)imap.data_ptr();
   const uint32_t* imap_src_strides = imap.get_strides();
   imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
   imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
   size_t y_step = imap_src_strides[2];
+
+  size_t buf_offset = logical_start;
   for (size_t r = 0; r < read_y; r++) {
-    size_t row_offset = logical_start;
-    bsg_attr_remote float* row_src = imap_src_base;
+    float* row_src = imap_src_base;
+    /*
     bsg_unroll(IMAP_DIM_X-PADDING)
     for (size_t c = 0; c < read_x; c++) {
       imap_buf[row_offset] = *row_src;
       row_src++;
       row_offset++;
     }
+    */
+
+    // unroll by IMAP_DIM_X-PADDING == 17
+    register float tmp00 = *(imap_src_base + 0);
+    register float tmp01 = *(imap_src_base + 1);
+    register float tmp02 = *(imap_src_base + 2);
+    register float tmp03 = *(imap_src_base + 3);
+    register float tmp04 = *(imap_src_base + 4);
+    register float tmp05 = *(imap_src_base + 5);
+    register float tmp06 = *(imap_src_base + 6);
+    register float tmp07 = *(imap_src_base + 7);
+    register float tmp08 = *(imap_src_base + 8);
+    register float tmp09 = *(imap_src_base + 9);
+    register float tmp10 = *(imap_src_base + 10);
+    register float tmp11 = *(imap_src_base + 11);
+    register float tmp12 = *(imap_src_base + 12);
+    register float tmp13 = *(imap_src_base + 13);
+    register float tmp14 = *(imap_src_base + 14);
+    register float tmp15 = *(imap_src_base + 15);
+    register float tmp16 = *(imap_src_base + 16);
+    asm volatile("": : :"memory");
+    imap_buf[buf_offset + 0]  = tmp00;
+    imap_buf[buf_offset + 1]  = tmp01;
+    imap_buf[buf_offset + 2]  = tmp02;
+    imap_buf[buf_offset + 3]  = tmp03;
+    imap_buf[buf_offset + 4]  = tmp04;
+    imap_buf[buf_offset + 5]  = tmp05;
+    imap_buf[buf_offset + 6]  = tmp06;
+    imap_buf[buf_offset + 7]  = tmp07;
+    imap_buf[buf_offset + 8]  = tmp08;
+    imap_buf[buf_offset + 9]  = tmp09;
+    imap_buf[buf_offset + 10] = tmp10;
+    imap_buf[buf_offset + 11] = tmp11;
+    imap_buf[buf_offset + 12] = tmp12;
+    imap_buf[buf_offset + 13] = tmp13;
+    imap_buf[buf_offset + 14] = tmp14;
+    imap_buf[buf_offset + 15] = tmp15;
+    imap_buf[buf_offset + 16] = tmp16;
+
+    buf_offset += IMAP_DIM_X;
     imap_src_base += y_step;
-    logical_start += IMAP_DIM_X;
   }
   // debug
   /*
@@ -206,14 +247,14 @@ extern "C" {
     // one row is one sub block
     // one col is one filter
     char systolic_resnet[8][16] = {
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-      {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
     };
     // char systolic_resnet[8][16] = {
     //   {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
@@ -228,7 +269,7 @@ extern "C" {
 
 
     char tile_config = systolic_resnet[bsg_y][bsg_x];
-    bool should_pass = (bsg_x + 1) % 5 == 0 ? false : true;
+    bool should_pass = bsg_x  == 15 ? false : true;
 
     auto filterDMA = [&](size_t filter_id, size_t channel_id) {
       float* filter_src_base = (float*)filter.data_ptr();
@@ -250,11 +291,10 @@ extern "C" {
 
     auto imapDMA_job = [&](size_t block_x, size_t block_y) {
       imap_buf = fifo.get_buffer(); // reuse
-      size_t filter_offset = bsg_x / 5 * 4;
 
       for (size_t image_id = 0; image_id < N; image_id++) {
         // 4 filter per block, 3 blocks
-        for (size_t filter_id = filter_offset; filter_id < Cout; filter_id += 12) {
+        for (size_t filter_id = 0; filter_id < Cout; filter_id += 15) {
           if (filter_id < Cout) {
             for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
               imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
@@ -270,11 +310,11 @@ extern "C" {
     };
 
     auto compute_job = [&](size_t block_x, size_t block_y) {
-      size_t filter_offset = bsg_x - (bsg_x / 5) - 1;
+      size_t filter_offset = bsg_x - 1;
 
       for (size_t image_id = 0; image_id < N; image_id++) {
         // 4 filter per block, 3 blocks
-        for (size_t filter_id = filter_offset; filter_id < Cout; filter_id += 12) {
+        for (size_t filter_id = filter_offset; filter_id < Cout; filter_id += 15) {
           if (filter_id < Cout) {
             // reset output buffer
             reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
