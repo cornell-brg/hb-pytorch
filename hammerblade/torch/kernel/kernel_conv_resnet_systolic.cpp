@@ -157,8 +157,8 @@ inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, 
 
   size_t buf_offset = logical_start;
   for (size_t r = 0; r < read_y; r++) {
-    float* row_src = imap_src_base;
     /*
+    float* row_src = imap_src_base;
     bsg_unroll(IMAP_DIM_X-PADDING)
     for (size_t c = 0; c < read_x; c++) {
       imap_buf[row_offset] = *row_src;
@@ -693,7 +693,47 @@ extern "C" {
       grad_src_base += image_id * grad_src_strides[0] + channel_id * grad_src_strides[1];
       grad_src_base += grad_y * grad_src_strides[2] + grad_x * grad_src_strides[3];
       size_t y_step = grad_src_strides[2];
-      fill_imap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(grad_src_base, grad_buf, y_step);
+      // fill_imap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(grad_src_base, grad_buf, y_step);
+      size_t buf_offset = 0;
+      for (size_t row = 0; row < BLOCK_DIM_Y; row++) {
+        // unroll by BLOCK_DIM_X == 16
+        register float tmp00 = *(grad_src_base + 0);
+        register float tmp01 = *(grad_src_base + 1);
+        register float tmp02 = *(grad_src_base + 2);
+        register float tmp03 = *(grad_src_base + 3);
+        register float tmp04 = *(grad_src_base + 4);
+        register float tmp05 = *(grad_src_base + 5);
+        register float tmp06 = *(grad_src_base + 6);
+        register float tmp07 = *(grad_src_base + 7);
+        register float tmp08 = *(grad_src_base + 8);
+        register float tmp09 = *(grad_src_base + 9);
+        register float tmp10 = *(grad_src_base + 10);
+        register float tmp11 = *(grad_src_base + 11);
+        register float tmp12 = *(grad_src_base + 12);
+        register float tmp13 = *(grad_src_base + 13);
+        register float tmp14 = *(grad_src_base + 14);
+        register float tmp15 = *(grad_src_base + 15);
+        asm volatile("": : :"memory");
+        grad_buf[buf_offset + 0]  = tmp00;
+        grad_buf[buf_offset + 1]  = tmp01;
+        grad_buf[buf_offset + 2]  = tmp02;
+        grad_buf[buf_offset + 3]  = tmp03;
+        grad_buf[buf_offset + 4]  = tmp04;
+        grad_buf[buf_offset + 5]  = tmp05;
+        grad_buf[buf_offset + 6]  = tmp06;
+        grad_buf[buf_offset + 7]  = tmp07;
+        grad_buf[buf_offset + 8]  = tmp08;
+        grad_buf[buf_offset + 9]  = tmp09;
+        grad_buf[buf_offset + 10] = tmp10;
+        grad_buf[buf_offset + 11] = tmp11;
+        grad_buf[buf_offset + 12] = tmp12;
+        grad_buf[buf_offset + 13] = tmp13;
+        grad_buf[buf_offset + 14] = tmp14;
+        grad_buf[buf_offset + 15] = tmp15;
+
+        buf_offset += BLOCK_DIM_X;
+        grad_src_base += y_step;
+      }
     };
 
     auto filterDMA_wb = [&](size_t filter_id, size_t channel_id) {
