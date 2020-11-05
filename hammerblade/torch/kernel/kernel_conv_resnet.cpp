@@ -74,22 +74,63 @@ inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t im
   }
   addPaddingW_1(W_pad); // top / bot padding
 
-  bsg_attr_remote float* imap_src_base = (float*)imap.data_ptr();
+  float* imap_src_base = (float*)imap.data_ptr();
   const uint32_t* imap_src_strides = imap.get_strides();
   imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
   imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
   size_t y_step = imap_src_strides[2];
+
+  size_t buf_offset = logical_start;
   for (size_t r = 0; r < read_y; r++) {
-    size_t row_offset = logical_start;
-    bsg_attr_remote float* row_src = imap_src_base;
+    /*
+    float* row_src = imap_src_base;
     bsg_unroll(IMAP_DIM_X-PADDING)
     for (size_t c = 0; c < read_x; c++) {
       imap_buf[row_offset] = *row_src;
       row_src++;
       row_offset++;
     }
+    */
+
+    // unroll by IMAP_DIM_X-PADDING == 17
+    register float tmp00 = *(imap_src_base + 0);
+    register float tmp01 = *(imap_src_base + 1);
+    register float tmp02 = *(imap_src_base + 2);
+    register float tmp03 = *(imap_src_base + 3);
+    register float tmp04 = *(imap_src_base + 4);
+    register float tmp05 = *(imap_src_base + 5);
+    register float tmp06 = *(imap_src_base + 6);
+    register float tmp07 = *(imap_src_base + 7);
+    register float tmp08 = *(imap_src_base + 8);
+    register float tmp09 = *(imap_src_base + 9);
+    register float tmp10 = *(imap_src_base + 10);
+    register float tmp11 = *(imap_src_base + 11);
+    register float tmp12 = *(imap_src_base + 12);
+    register float tmp13 = *(imap_src_base + 13);
+    register float tmp14 = *(imap_src_base + 14);
+    register float tmp15 = *(imap_src_base + 15);
+    register float tmp16 = *(imap_src_base + 16);
+    asm volatile("": : :"memory");
+    imap_buf[buf_offset + 0]  = tmp00;
+    imap_buf[buf_offset + 1]  = tmp01;
+    imap_buf[buf_offset + 2]  = tmp02;
+    imap_buf[buf_offset + 3]  = tmp03;
+    imap_buf[buf_offset + 4]  = tmp04;
+    imap_buf[buf_offset + 5]  = tmp05;
+    imap_buf[buf_offset + 6]  = tmp06;
+    imap_buf[buf_offset + 7]  = tmp07;
+    imap_buf[buf_offset + 8]  = tmp08;
+    imap_buf[buf_offset + 9]  = tmp09;
+    imap_buf[buf_offset + 10] = tmp10;
+    imap_buf[buf_offset + 11] = tmp11;
+    imap_buf[buf_offset + 12] = tmp12;
+    imap_buf[buf_offset + 13] = tmp13;
+    imap_buf[buf_offset + 14] = tmp14;
+    imap_buf[buf_offset + 15] = tmp15;
+    imap_buf[buf_offset + 16] = tmp16;
+
+    buf_offset += IMAP_DIM_X;
     imap_src_base += y_step;
-    logical_start += IMAP_DIM_X;
   }
   /*
   // debug
@@ -462,7 +503,47 @@ extern "C" {
       grad_src_base += image_id * grad_src_strides[0] + channel_id * grad_src_strides[1];
       grad_src_base += grad_y * grad_src_strides[2] + grad_x * grad_src_strides[3];
       size_t y_step = grad_src_strides[2];
-      fill_imap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(grad_src_base, grad_buf, y_step);
+      // fill_imap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(grad_src_base, grad_buf, y_step);
+      size_t buf_offset = 0;
+      for (size_t row = 0; row < BLOCK_DIM_Y; row++) {
+        // unroll by BLOCK_DIM_X == 16
+        register float tmp00 = *(grad_src_base + 0);
+        register float tmp01 = *(grad_src_base + 1);
+        register float tmp02 = *(grad_src_base + 2);
+        register float tmp03 = *(grad_src_base + 3);
+        register float tmp04 = *(grad_src_base + 4);
+        register float tmp05 = *(grad_src_base + 5);
+        register float tmp06 = *(grad_src_base + 6);
+        register float tmp07 = *(grad_src_base + 7);
+        register float tmp08 = *(grad_src_base + 8);
+        register float tmp09 = *(grad_src_base + 9);
+        register float tmp10 = *(grad_src_base + 10);
+        register float tmp11 = *(grad_src_base + 11);
+        register float tmp12 = *(grad_src_base + 12);
+        register float tmp13 = *(grad_src_base + 13);
+        register float tmp14 = *(grad_src_base + 14);
+        register float tmp15 = *(grad_src_base + 15);
+        asm volatile("": : :"memory");
+        grad_buf[buf_offset + 0]  = tmp00;
+        grad_buf[buf_offset + 1]  = tmp01;
+        grad_buf[buf_offset + 2]  = tmp02;
+        grad_buf[buf_offset + 3]  = tmp03;
+        grad_buf[buf_offset + 4]  = tmp04;
+        grad_buf[buf_offset + 5]  = tmp05;
+        grad_buf[buf_offset + 6]  = tmp06;
+        grad_buf[buf_offset + 7]  = tmp07;
+        grad_buf[buf_offset + 8]  = tmp08;
+        grad_buf[buf_offset + 9]  = tmp09;
+        grad_buf[buf_offset + 10] = tmp10;
+        grad_buf[buf_offset + 11] = tmp11;
+        grad_buf[buf_offset + 12] = tmp12;
+        grad_buf[buf_offset + 13] = tmp13;
+        grad_buf[buf_offset + 14] = tmp14;
+        grad_buf[buf_offset + 15] = tmp15;
+
+        buf_offset += BLOCK_DIM_X;
+        grad_src_base += y_step;
+      }
     };
 
     auto filterDMA_wb = [&](size_t filter_id, size_t channel_id) {
@@ -532,6 +613,7 @@ extern "C" {
                     register float imap8 = imap_row[x+8];
                     register float imap9 = imap_row[x+9];
 
+#ifdef HB_EMUL
                     psum0 += imap0 * grad0;
                     psum1 += imap1 * grad0;
                     psum2 += imap2 * grad0;
@@ -563,7 +645,39 @@ extern "C" {
                     psum0 += imap7 * grad7;
                     psum1 += imap8 * grad7;
                     psum2 += imap9 * grad7;
+#else
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap0), "f"(grad0));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap1), "f"(grad0));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap2), "f"(grad0));
 
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap1), "f"(grad1));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap2), "f"(grad1));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap3), "f"(grad1));
+
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap2), "f"(grad2));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap3), "f"(grad2));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap4), "f"(grad2));
+
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap3), "f"(grad3));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap4), "f"(grad3));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap5), "f"(grad3));
+
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap4), "f"(grad4));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap5), "f"(grad4));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap6), "f"(grad4));
+
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap5), "f"(grad5));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap6), "f"(grad5));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap7), "f"(grad5));
+
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap6), "f"(grad6));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap7), "f"(grad6));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap8), "f"(grad6));
+
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap7), "f"(grad7));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap8), "f"(grad7));
+                    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap9), "f"(grad7));
+#endif
                   }
                   imap_ptr += IMAP_DIM_X;
                   grad_ptr += BLOCK_DIM_X;
