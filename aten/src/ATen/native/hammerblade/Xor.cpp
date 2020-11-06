@@ -9,7 +9,7 @@ namespace at { namespace native {
 namespace {
 
 void xor_kernel_hb(TensorIterator& iter) {
-  AT_DISPATCH_INTS_ONLY(iter.dtype(), "xor_hb", [&]() {
+  AT_DISPATCH_INTS_AND_BOOL(iter.dtype(), "xor_hb", [&]() {
       offload_op_binary(iter, "tensorlib_xor");
       });
 }
