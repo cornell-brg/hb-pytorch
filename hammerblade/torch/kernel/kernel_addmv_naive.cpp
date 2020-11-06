@@ -114,8 +114,9 @@ extern "C" {
         float* res_p  = (float*) result.data_ptr();
         float* acc_p  = (float*) acc.data_ptr();
 
-        // Local accumulate array
-        // float* acc_l  = new float[num_rows];
+        // Start profiling
+        bsg_cuda_print_stat_kernel_start();
+
 
         // Find the size of the vector
         int vec_size = vec.dim(0);
@@ -134,6 +135,9 @@ extern "C" {
         // Column in the accumulator tensor
         int col_acc   = (__bsg_id % bsg_tiles_Y);
 
+        // Local accumulate array
+        // float* acc_l  = (float*) malloc( sizeof(float) * num_rows );
+
         // Matrix x vector product of sub-matrix in acc matrix
         int c = col_start;
         for ( ; c+2 <= col_end; c += 2 ) {
@@ -147,6 +151,11 @@ extern "C" {
                 float mat_r1 = mat_p[(r+1) * vec_size + c];
                 float mat_r2 = mat_p[(r+2) * vec_size + c];
                 float mat_r3 = mat_p[(r+3) * vec_size + c];
+
+                // acc_l[r] += mat_r0 * vec_c0;
+                // acc_l[(r+1)] += mat_r1 * vec_c0;
+                // acc_l[(r+2)] += mat_r2 * vec_c0;
+                // acc_l[(r+3)] += mat_r3 * vec_c0;                
                 
                 acc_p[r * bsg_tiles_Y + col_acc] += mat_r0 * vec_c0;
                 acc_p[(r+1) * bsg_tiles_Y + col_acc] += mat_r1 * vec_c0;
@@ -158,6 +167,7 @@ extern "C" {
             }
             for (; r < row_end; r++ ) {
                 float mat_r = mat_p[r * vec_size + c];
+                // acc_l[r] += mat_r * vec_c0;
                 acc_p[r * bsg_tiles_Y + col_acc] += mat_r * vec_c0;
             } 
 
@@ -167,6 +177,11 @@ extern "C" {
                 float mat_r1 = mat_p[(r+1) * vec_size + (c+1)];
                 float mat_r2 = mat_p[(r+2) * vec_size + (c+1)];
                 float mat_r3 = mat_p[(r+3) * vec_size + (c+1)];
+
+                // acc_l[r] += mat_r0 * vec_c1;
+                // acc_l[(r+1)] += mat_r1 * vec_c1;
+                // acc_l[(r+2)] += mat_r2 * vec_c1;
+                // acc_l[(r+3)] += mat_r3 * vec_c1; 
                 
                 acc_p[r * bsg_tiles_Y + col_acc] += mat_r0 * vec_c1;
                 acc_p[(r+1) * bsg_tiles_Y + col_acc] += mat_r1 * vec_c1;
@@ -178,6 +193,7 @@ extern "C" {
             }
             for (; r < row_end; r++ ) {
                 float mat_r = mat_p[r * vec_size + (c+1)];
+                //acc_l[r] += mat_r * vec_c1;
                 acc_p[r * bsg_tiles_Y + col_acc] += mat_r * vec_c1;
             }
             
@@ -191,6 +207,11 @@ extern "C" {
                 float mat_r1 = mat_p[(r+1) * vec_size + c];
                 float mat_r2 = mat_p[(r+2) * vec_size + c];
                 float mat_r3 = mat_p[(r+3) * vec_size + c];
+
+                // acc_l[r] += mat_r0 * vec_c;
+                // acc_l[(r+1)] += mat_r1 * vec_c;
+                // acc_l[(r+2)] += mat_r2 * vec_c;
+                // acc_l[(r+3)] += mat_r3 * vec_c; 
                 
                 acc_p[r * bsg_tiles_Y + col_acc] += mat_r0 * vec_c;
                 acc_p[(r+1) * bsg_tiles_Y + col_acc] += mat_r1 * vec_c;
@@ -202,10 +223,16 @@ extern "C" {
             }
             for (; r < row_end; r++ ) {
                 float mat_r = mat_p[r * vec_size + c];
+                // acc_l[r] += mat_r * vec_c;
                 acc_p[r * bsg_tiles_Y + col_acc] += mat_r * vec_c;
             } 
 
         }
+
+        // Local accumulate to global accumulate
+        //for ( int r = row_start; r < row_end; r++ ) {
+        //    acc_p[r * bsg_tiles_Y + col_acc] = acc_l[r - row_start];
+        //} 
 
         // Wait for all the tiles
         g_barrier.sync();
