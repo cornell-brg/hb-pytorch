@@ -220,7 +220,7 @@ extern "C" {
       drain_omap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf, omap_src_base, y_step);
     };
 
-    bsg_cuda_print_stat_kernel_start();
+    bsg_cuda_print_stat_start(4);
 
     // main loop
     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
@@ -258,7 +258,7 @@ extern "C" {
       } // if (idx < num_blocks)
     } // main loop
 
-    bsg_cuda_print_stat_kernel_end();
+    bsg_cuda_print_stat_end(4);
 
     g_barrier.sync();
     return 0;
@@ -370,7 +370,7 @@ extern "C" {
       drain_omap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf, omap_src_base, y_step);
     };
 
-    bsg_cuda_print_stat_kernel_start();
+    bsg_cuda_print_stat_start(5);
 
     // main loop
     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
@@ -407,7 +407,7 @@ extern "C" {
       } // if (idx < num_blocks)
     } // main loop
 
-    bsg_cuda_print_stat_kernel_end();
+    bsg_cuda_print_stat_end(5);
 
     g_barrier.sync();
     return 0;
@@ -557,7 +557,7 @@ extern "C" {
     };
 
 
-    bsg_cuda_print_stat_kernel_start();
+    bsg_cuda_print_stat_start(6);
 
     // main loop
     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
@@ -696,7 +696,7 @@ extern "C" {
       } // if (idx < num_blocks)
     } // main loop
 
-    bsg_cuda_print_stat_kernel_end();
+    bsg_cuda_print_stat_end(6);
 
     g_barrier.sync();
     return 0;
