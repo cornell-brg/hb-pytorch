@@ -320,6 +320,7 @@
   dispatch:
     CPU: legacy::cpu::_th_addmv
     CUDA: legacy::cuda::_th_addmv
+    HammerBlade: addmv_hb
   supports_named_tensor: True
 
 - func: addmv_(Tensor(a!) self, Tensor mat, Tensor vec, *, Scalar beta=1, Scalar alpha=1) -> Tensor(a!)
