@@ -127,68 +127,69 @@ inline void max_pool2d_core(size_t num_blocks, size_t Hout, size_t Wout, size_t 
           index_offset += STRIDE_X;
         }
       }
-      else if (KERNEL_DIM == 3) {
-        bsg_unroll(3)
-        for (size_t xx = 0; xx < Wout; xx++) {
-          // fully unroll as we know kernel is 2x2 -- 3x3
-          float max = std::numeric_limits<float>::lowest();
-          int index;
-          register float tmp0 = *(input_ptr + 0);
-          register float tmp1 = *(input_ptr + 1);
-          register float tmp2 = *(input_ptr + 2);
-          register float tmp3 = *(input_ptr + input_strides[2] + 0);
-          register float tmp4 = *(input_ptr + input_strides[2] + 1);
-          register float tmp5 = *(input_ptr + input_strides[2] + 2);
-          register float tmp6 = *(input_ptr + 2 * input_strides[2] + 0);
-          register float tmp7 = *(input_ptr + 2 * input_strides[2] + 1);
-          register float tmp8 = *(input_ptr + 2 * input_strides[2] + 2);
+      // else if (KERNEL_DIM == 3) {
+      //   bsg_unroll(3)
+      //   for (size_t xx = 0; xx < Wout; xx++) {
+      //     // fully unroll as we know kernel is 2x2 -- 3x3
+      //     float max = std::numeric_limits<float>::lowest();
+      //     int index;
+      //     register float tmp0 = *(input_ptr + 0);
+      //     register float tmp1 = *(input_ptr + 1);
+      //     register float tmp2 = *(input_ptr + 2);
+      //     register float tmp3 = *(input_ptr + input_strides[2] + 0);
+      //     register float tmp4 = *(input_ptr + input_strides[2] + 1);
+      //     register float tmp5 = *(input_ptr + input_strides[2] + 2);
+      //     register float tmp6 = *(input_ptr + 2 * input_strides[2] + 0);
+      //     register float tmp7 = *(input_ptr + 2 * input_strides[2] + 1);
+      //     register float tmp8 = *(input_ptr + 2 * input_strides[2] + 2);
 
-          if (tmp0 > max) {
-            max = tmp0;
-            index = index_offset;
-          }
-          if (tmp1 > max) {
-            max = tmp1;
-            index = index_offset + 1;
-          }
-          if (tmp2 > max) {
-            max = tmp2;
-            index = index_offset + 2;
-          }
-          if (tmp3 > max) {
-            max = tmp3;
-            index = index_offset + input_strides[2] + 0;
-          }
-          if (tmp4 > max) {
-            max = tmp4;
-            index = index_offset + input_strides[2] + 1;
-          }
-          if (tmp5 > max) {
-            max = tmp5;
-            index = index_offset + input_strides[2] + 2;
-          }
-          if (tmp6 > max) {
-            max = tmp6;
-            index = index_offset + 2 * input_strides[2] + 0;
-          }
-          if (tmp7 > max) {
-            max = tmp7;
-            index = index_offset + 2 * input_strides[2] + 1;
-          }
-          if (tmp8 > max) {
-            max = tmp8;
-            index = index_offset + 2 * input_strides[2] + 2;
-          }
+      //     if (tmp0 > max) {
+      //       max = tmp0;
+      //       index = index_offset;
+      //     }
+      //     if (tmp1 > max) {
+      //       max = tmp1;
+      //       index = index_offset + 1;
+      //     }
+      //     if (tmp2 > max) {
+      //       max = tmp2;
+      //       index = index_offset + 2;
+      //     }
+      //     if (tmp3 > max) {
+      //       max = tmp3;
+      //       index = index_offset + input_strides[2] + 0;
+      //     }
+      //     if (tmp4 > max) {
+      //       max = tmp4;
+      //       index = index_offset + input_strides[2] + 1;
+      //     }
+      //     if (tmp5 > max) {
+      //       max = tmp5;
+      //       index = index_offset + input_strides[2] + 2;
+      //     }
+      //     if (tmp6 > max) {
+      //       max = tmp6;
+      //       index = index_offset + 2 * input_strides[2] + 0;
+      //     }
+      //     if (tmp7 > max) {
+      //       max = tmp7;
+      //       index = index_offset + 2 * input_strides[2] + 1;
+      //     }
+      //     if (tmp8 > max) {
+      //       max = tmp8;
+      //       index = index_offset + 2 * input_strides[2] + 2;
+      //     }
 
-          *output_ptr = max;
-          *ind_ptr = index;
+      //     *output_ptr = max;
+      //     *ind_ptr = index;
 
-          ind_ptr++;
-          output_ptr++;
-          input_ptr += STRIDE_X;
-          index_offset += STRIDE_X;
-        }
-      } else if (KERNEL_DIM == 2) {
+      //     ind_ptr++;
+      //     output_ptr++;
+      //     input_ptr += STRIDE_X;
+      //     index_offset += STRIDE_X;
+      //   }
+      // }
+      else if (KERNEL_DIM == 2) {
         bsg_unroll(6)
         for (size_t xx = 0; xx < Wout; xx++) {
           // fully unroll as we know kernel is 2x2 -- 3x3
@@ -289,60 +290,62 @@ inline void max_pool2d_backward_core(size_t num_blocks, size_t Hout, size_t Wout
           result_ptr += STRIDE_X;
           index_offset += STRIDE_X;
         }
-      } else if (KERNEL_DIM == 3) {
-        bsg_unroll(3)
-        for (size_t xx = 0; xx < Wout; xx++) {
+      }
+      // else if (KERNEL_DIM == 3) {
+      //   bsg_unroll(3)
+      //   for (size_t xx = 0; xx < Wout; xx++) {
 
-          int index = *ind_ptr;
-          float grad = *grad_ptr;
+      //     int index = *ind_ptr;
+      //     float grad = *grad_ptr;
 
-          // fully unroll as we know kernel is 2x2 -- 3x3
-          register float tmp0 = 0;
-          register float tmp1 = 0;
-          register float tmp2 = 0;
-          register float tmp3 = 0;
-          register float tmp4 = 0;
-          register float tmp5 = 0;
-          register float tmp6 = 0;
-          register float tmp7 = 0;
-          register float tmp8 = 0;
+      //     // fully unroll as we know kernel is 2x2 -- 3x3
+      //     register float tmp0 = 0;
+      //     register float tmp1 = 0;
+      //     register float tmp2 = 0;
+      //     register float tmp3 = 0;
+      //     register float tmp4 = 0;
+      //     register float tmp5 = 0;
+      //     register float tmp6 = 0;
+      //     register float tmp7 = 0;
+      //     register float tmp8 = 0;
 
-          if (index == index_offset) {
-            tmp0 = grad;
-          } else if (index == index_offset + 1) {
-            tmp1 = grad;
-          } else if (index == index_offset + 2) {
-            tmp2 = grad;
-          } else if (index == index_offset + result_strides[2] + 0) {
-            tmp3 = grad;
-          } else if (index == index_offset + result_strides[2] + 1) {
-            tmp4 = grad;
-          } else if (index == index_offset + result_strides[2] + 2) {
-            tmp5 = grad;
-          } else if (index == index_offset + 2 * result_strides[2] + 0) {
-            tmp6 = grad;
-          } else if (index == index_offset + 2 * result_strides[2] + 1) {
-            tmp7 = grad;
-          } else {
-            tmp8 = grad;
-          }
+      //     if (index == index_offset) {
+      //       tmp0 = grad;
+      //     } else if (index == index_offset + 1) {
+      //       tmp1 = grad;
+      //     } else if (index == index_offset + 2) {
+      //       tmp2 = grad;
+      //     } else if (index == index_offset + result_strides[2] + 0) {
+      //       tmp3 = grad;
+      //     } else if (index == index_offset + result_strides[2] + 1) {
+      //       tmp4 = grad;
+      //     } else if (index == index_offset + result_strides[2] + 2) {
+      //       tmp5 = grad;
+      //     } else if (index == index_offset + 2 * result_strides[2] + 0) {
+      //       tmp6 = grad;
+      //     } else if (index == index_offset + 2 * result_strides[2] + 1) {
+      //       tmp7 = grad;
+      //     } else {
+      //       tmp8 = grad;
+      //     }
 
-          *(result_ptr + 0) = tmp0;
-          *(result_ptr + 1) = tmp1;
-          *(result_ptr + 2) = tmp2;
-          *(result_ptr + result_strides[2] + 0) = tmp3;
-          *(result_ptr + result_strides[2] + 1) = tmp4;
-          *(result_ptr + result_strides[2] + 2) = tmp5;
-          *(result_ptr + 2 * result_strides[2] + 0) = tmp6;
-          *(result_ptr + 2 * result_strides[2] + 1) = tmp7;
-          *(result_ptr + 2 * result_strides[2] + 2) = tmp8;
+      //     *(result_ptr + 0) = tmp0;
+      //     *(result_ptr + 1) = tmp1;
+      //     *(result_ptr + 2) = tmp2;
+      //     *(result_ptr + result_strides[2] + 0) = tmp3;
+      //     *(result_ptr + result_strides[2] + 1) = tmp4;
+      //     *(result_ptr + result_strides[2] + 2) = tmp5;
+      //     *(result_ptr + 2 * result_strides[2] + 0) = tmp6;
+      //     *(result_ptr + 2 * result_strides[2] + 1) = tmp7;
+      //     *(result_ptr + 2 * result_strides[2] + 2) = tmp8;
 
-          ind_ptr++;
-          grad_ptr++;
-          result_ptr += STRIDE_X;
-          index_offset += STRIDE_X;
-        }
-      } else if (KERNEL_DIM == 4) {
+      //     ind_ptr++;
+      //     grad_ptr++;
+      //     result_ptr += STRIDE_X;
+      //     index_offset += STRIDE_X;
+      //   }
+      // }
+      else if (KERNEL_DIM == 4) {
         for (size_t xx = 0; xx < Wout; xx++) {
 
           int index = *ind_ptr;
@@ -481,9 +484,9 @@ extern "C" {
     if (Kh == 4) {
       max_pool2d_core<4,4,4>(num_blocks, Hout, Wout, C, input_strides, output_strides,
                             input_base, output_base, ind_base);
-    } else if (Kh == 3) {
-      max_pool2d_core<3,3,3>(num_blocks, Hout, Wout, C, input_strides, output_strides,
-                            input_base, output_base, ind_base);
+    // } else if (Kh == 3) {
+    //   max_pool2d_core<3,3,3>(num_blocks, Hout, Wout, C, input_strides, output_strides,
+    //                         input_base, output_base, ind_base);
     } else if (Kh == 2) {
       max_pool2d_core<2,2,2>(num_blocks, Hout, Wout, C, input_strides, output_strides,
                             input_base, output_base, ind_base);
@@ -549,9 +552,9 @@ extern "C" {
     if (Kh == 4) {
       max_pool2d_backward_core<4,4,4>(num_blocks, Hout, Wout, C, result_strides, grad_strides,
                             result_base, grad_base, ind_base);
-    } else if (Kh == 3) {
-      max_pool2d_backward_core<3,3,3>(num_blocks, Hout, Wout, C, result_strides, grad_strides,
-                            result_base, grad_base, ind_base);
+    // } else if (Kh == 3) {
+    //   max_pool2d_backward_core<3,3,3>(num_blocks, Hout, Wout, C, result_strides, grad_strides,
+    //                         result_base, grad_base, ind_base);
     } else if (Kh == 2) {
       max_pool2d_backward_core<2,2,2>(num_blocks, Hout, Wout, C, result_strides, grad_strides,
                             result_base, grad_base, ind_base);
