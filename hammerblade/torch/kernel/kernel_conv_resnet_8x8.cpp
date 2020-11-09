@@ -18,6 +18,8 @@
 #include <kernel_common.hpp>
 #include <kernel_conv_baseline.hpp>
 
+namespace {
+
 inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
 
   // add 1 col of zeros
@@ -151,10 +153,11 @@ inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t im
   std::cout << std::endl;
 }
 
+} // namespace
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3(
+  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_8x8(
     hb_tensor_t* output,
     hb_tensor_t* input,
     hb_tensor_t* weight,
@@ -271,7 +274,7 @@ extern "C" {
 
 
 
-  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_back_input(
+  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_8x8_back_input(
     hb_tensor_t* output,
     hb_tensor_t* input,
     hb_tensor_t* weight,
@@ -420,7 +423,7 @@ extern "C" {
 
 
 
-  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_back_weight(
+  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_8x8_back_weight(
     hb_tensor_t* output,
     hb_tensor_t* input,
     hb_tensor_t* weight,
@@ -707,13 +710,13 @@ extern "C" {
   }
 
 
-  HB_EMUL_REG_KERNEL(tensorlib_conv_resnet_32_3x3, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+  HB_EMUL_REG_KERNEL(tensorlib_conv_resnet_32_3x3_8x8, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
                      hb_vector_t*, hb_vector_t*)
 
-  HB_EMUL_REG_KERNEL(tensorlib_conv_resnet_32_3x3_back_input, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+  HB_EMUL_REG_KERNEL(tensorlib_conv_resnet_32_3x3_8x8_back_input, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
                      hb_vector_t*, hb_vector_t*)
 
-  HB_EMUL_REG_KERNEL(tensorlib_conv_resnet_32_3x3_back_weight, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+  HB_EMUL_REG_KERNEL(tensorlib_conv_resnet_32_3x3_8x8_back_weight, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
                      hb_vector_t*, hb_vector_t*)
 
 }

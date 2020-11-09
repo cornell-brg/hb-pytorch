@@ -143,7 +143,7 @@ static void convolution_shape_check(
 Tensor hb_convolution_forward(
     CheckedFrom c,
     const TensorArg& input, const TensorArg& weight,
-    IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation, 
+    IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation,
     int64_t groups) {
   checkAllSameType(c, {input, weight});
   checkAllSameHB(c, {input, weight});
@@ -159,7 +159,7 @@ Tensor hb_convolution_forward(
 
   // Avoid ambiguity of "output" when this is being used as backwards
   TensorArg output{ output_t, "result", 0 };
-  convolution_shape_check(c, input, weight, output, padding, stride, 
+  convolution_shape_check(c, input, weight, output, padding, stride,
       dilation, groups);
 
   Tensor weight_contig = weight->contiguous();
@@ -174,15 +174,38 @@ Tensor hb_convolution_forward(
   device_args.push_back(create_device_vector(padding, true, device_ptrs));
   device_args.push_back(create_device_vector(stride, true, device_ptrs));
 
+  TORCH_CHECK((*input).size(3) == (*input).size(2), "we only support square imap\n");
+  TORCH_CHECK((*weight).size(3) == 3, "we only support 3x3 filter\n");
+  TORCH_CHECK((*weight).size(3) == (*weight).size(2), "we only support square filter\n");
+
+  string kernel_name;
+  switch((*input).size(3)) {
+    case 32:
+      kernel_name = "tensorlib_conv_resnet_32_3x3_32x32";
+      break;
+    case 16:
+      kernel_name = "tensorlib_conv_resnet_32_3x3_16x16";
+      break;
+    case 8:
+      kernel_name = "tensorlib_conv_resnet_32_3x3_8x8";
+      break;
+    case 4:
+      kernel_name = "tensorlib_conv_resnet_32_3x3_4x4";
+      break;
+    default:
+      TORCH_CHECK(false, "we only support 32x32, 16x16, 8x8, and 4x4 imap\n");
+      break;
+  }
+
   c10::hammerblade::offload_kernel(
-      "tensorlib_conv_resnet_32_3x3_systolic", device_args);
+      kernel_name.c_str(), device_args);
   cleanup_device(device_args, device_ptrs);
 
   return *output;
 }
 
 // In-place!
-void hb_convolution_add_bias_(CheckedFrom c, const TensorArg& output, 
+void hb_convolution_add_bias_(CheckedFrom c, const TensorArg& output,
                               const TensorArg& bias) {
   checkAllSameType(c, {output, bias});
   checkAllSameHB(c, {output, bias});
@@ -222,8 +245,26 @@ Tensor hb_convolution_backward_input(
   device_args.push_back(create_device_vector(padding, true, device_ptrs));
   device_args.push_back(create_device_vector(stride, true, device_ptrs));
 
+  string kernel_name;
+  switch((*grad_output).size(3)) {
+    case 32:
+      kernel_name = "tensorlib_conv_resnet_32_3x3_32x32_back_input";
+      break;
+    case 16:
+      kernel_name = "tensorlib_conv_resnet_32_3x3_16x16_back_input";
+      break;
+    case 8:
+      kernel_name = "tensorlib_conv_resnet_32_3x3_8x8_back_input";
+      break;
+    case 4:
+      kernel_name = "tensorlib_conv_resnet_32_3x3_4x4_back_input";
+      break;
+    default:
+      TORCH_CHECK(false, "we only support 32x32, 16x16, 8x8, and 4x4 imap\n");
+      break;
+  }
   c10::hammerblade::offload_kernel(
-      "tensorlib_conv_resnet_32_3x3_back_input_systolic", device_args);
+      kernel_name.c_str(), device_args);
   cleanup_device(device_args, device_ptrs);
 
   return *grad_input;
@@ -254,8 +295,26 @@ Tensor hb_convolution_backward_weight(
   device_args.push_back(create_device_vector(padding, true, device_ptrs));
   device_args.push_back(create_device_vector(stride, true, device_ptrs));
 
+  string kernel_name;
+  switch((*input).size(3)) {
+    case 32:
+      kernel_name = "tensorlib_conv_resnet_32_3x3_32x32_back_weight";
+      break;
+    case 16:
+      kernel_name = "tensorlib_conv_resnet_32_3x3_16x16_back_weight";
+      break;
+    case 8:
+      kernel_name = "tensorlib_conv_resnet_32_3x3_8x8_back_weight";
+      break;
+    case 4:
+      kernel_name = "tensorlib_conv_resnet_32_3x3_4x4_back_weight";
+      break;
+    default:
+      TORCH_CHECK(false, "we only support 32x32, 16x16, 8x8, and 4x4 imap\n");
+      break;
+  }
   c10::hammerblade::offload_kernel(
-      "tensorlib_conv_resnet_32_3x3_back_weight_systolic", device_args);
+      kernel_name.c_str(), device_args);
   cleanup_device(device_args, device_ptrs);
 
   return grad_weight_t;
