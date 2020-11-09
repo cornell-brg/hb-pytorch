@@ -71,7 +71,6 @@ inline void spcpy_grad(bsg_attr_remote float* dest, float* src) {
   }
 }
 
-} // namespace
 
 inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
 
@@ -168,6 +167,7 @@ inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, 
   }
 }
 
+} // namespace
 
 extern "C" {
 
