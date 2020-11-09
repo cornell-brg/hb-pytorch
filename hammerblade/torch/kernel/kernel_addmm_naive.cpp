@@ -41,10 +41,8 @@ extern "C" {
     float sp_mat2[BLOCK_DIM * BLOCK_DIM];
     float sp_result[BLOCK_DIM * BLOCK_DIM];
 
-    for (int i = 0; i < m1_num_blk_per_col; i += BSG_TILE_GROUP_Y_DIM) {
-      for (int j = 0; j < m2_num_blk_per_row; j += BSG_TILE_GROUP_X_DIM) {
-        int rr = i + __bsg_y;
-        int rc = j + __bsg_x;
+    for (int rr = __bsg_y; rr < m1_num_blk_per_col; rr += BSG_TILE_GROUP_Y_DIM) {
+      for (int rc = __bsg_x; rc < m2_num_blk_per_row; rc += BSG_TILE_GROUP_X_DIM) {
 
         // initialize scratchpad result (init to 0's)
         reset_sp(sp_result);
@@ -52,14 +50,14 @@ extern "C" {
         // process mat1 and mat2 for this result block
         // only care about blocks of mat1 in row rr
         // and blocks of mat2 in col rc
-        for (int mat1x = 0, mat2y = 0; mat1x < m1_num_blk_per_row && mat2y < m2_num_blk_per_col; mat1x++, mat2y++) {
-          dram_to_sp_simple(sp_mat1, mat1, rr, mat1x);
-          dram_to_sp_simple(sp_mat2, mat2, mat2y, rc);
+        for (int mid = 0; mid < m2_num_blk_per_col; mid++) {
+          dram_to_sp_simple_generic(sp_mat1, mat1, rr, mid);
+          dram_to_sp_simple_generic(sp_mat2, mat2, mid, rc);
           compute_simple(sp_result, sp_mat1, sp_mat2);
         }
 
         // reuse self to hold *input* matrix
-        dram_to_sp_simple(sp_mat1, self, rr, rc);
+        dram_to_sp_simple_generic(sp_mat1, self, rr, rc);
         // copy this block back into DRAM
         addmm_and_sp_to_dram_naive(result, sp_result, sp_mat1, rr, rc);
       }
