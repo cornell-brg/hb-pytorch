@@ -94,7 +94,7 @@ inline void dram_to_sp_simple(
           int r_idx,
           int c_idx) {
     float* src_ptr = (float*)src.data_ptr();
-    uint32_t* src_strides = src.get_strides();
+    const uint32_t* src_strides = src.get_strides();
     float* src_base = src_ptr + (r_idx * BLOCK_DIM * src_strides[0])
                       + (c_idx * BLOCK_DIM * src_strides[1]);
     int row_offset = 0;
@@ -161,7 +161,7 @@ inline void dram_to_sp_simple_generic(
           int r_idx,
           int c_idx) {
     float* src_ptr = (float*)src.data_ptr();
-    uint32_t* src_strides = src.get_strides();
+    const uint32_t* src_strides = src.get_strides();
     float* src_base = src_ptr + (r_idx * BLOCK_DIM * src_strides[0])
                       + (c_idx * BLOCK_DIM * src_strides[1]);
     int row_offset = 0;
@@ -228,7 +228,7 @@ inline void sp_to_dram(
           int r_idx,
           int c_idx) {
     float* dest_ptr = (float*)dest.data_ptr();
-    uint32_t* dest_strides = dest.get_strides();
+    const uint32_t* dest_strides = dest.get_strides();
     float* dest_base = dest_ptr + (r_idx * BLOCK_DIM * dest_strides[0])
                        + (c_idx * BLOCK_DIM * dest_strides[1]);
     int row_offset = 0;
@@ -298,7 +298,7 @@ inline void addmm_and_sp_to_dram(
           int r_idx,
           int c_idx) {
     float* dest_ptr = (float*)dest.data_ptr();
-    uint32_t* dest_strides = dest.get_strides();
+    const uint32_t* dest_strides = dest.get_strides();
     float* dest_base = dest_ptr + (r_idx * BLOCK_DIM * dest_strides[0])
                        + (c_idx * BLOCK_DIM * dest_strides[1]);
     int row_offset = 0;
@@ -386,7 +386,7 @@ inline void addmm_and_sp_to_dram_naive(
           int r_idx,
           int c_idx) {
     float* dest_ptr = (float*)dest.data_ptr();
-    uint32_t* dest_strides = dest.get_strides();
+    const uint32_t* dest_strides = dest.get_strides();
     float* dest_base = dest_ptr + (r_idx * BLOCK_DIM * dest_strides[0])
                        + (c_idx * BLOCK_DIM * dest_strides[1]);
     int row_offset = 0;
