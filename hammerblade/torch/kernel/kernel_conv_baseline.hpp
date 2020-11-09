@@ -20,19 +20,19 @@ inline void Unroll<N, T>::reset_buffer(T* buf) {
 
 template<int N, typename T>
 inline void Unroll<N, T>::fill_buffer(T* src, T* buf) {
-  buf[N] = ((bsg_attr_noalias bsg_attr_remote T*) src)[N];
+  buf[N] = ((bsg_attr_remote T*) src)[N];
   Unroll<N-1, T>::fill_buffer(src, buf);
 }
 
 template<int N, typename T>
 inline void Unroll<N, T>::fill_buffer_rotate(T* src, T* buf) {
-  *buf = ((bsg_attr_noalias bsg_attr_remote T*) src)[N];
+  *buf = ((bsg_attr_remote T*) src)[N];
   Unroll<N-1, T>::fill_buffer_rotate(src, buf+1);
 }
 
 template<int N, typename T>
 inline void Unroll<N, T>::drain_buffer(T* buf, T* dest) {
-  ((bsg_attr_noalias bsg_attr_remote T*) dest)[N] = buf[N];
+  ((bsg_attr_remote T*) dest)[N] = buf[N];
   Unroll<N-1, T>::drain_buffer(buf, dest);
 }
 
@@ -51,16 +51,16 @@ inline void Unroll<0, T>::reset_buffer(T* buf) {
 
 template<typename T>
 inline void Unroll<0, T>::fill_buffer(T* src, T* buf) {
-  buf[0] = ((bsg_attr_noalias bsg_attr_remote T*) src)[0];
+  buf[0] = ((bsg_attr_remote T*) src)[0];
 }
 
 template<typename T>
 inline void Unroll<0, T>::fill_buffer_rotate(T* src, T* buf) {
-  *buf = ((bsg_attr_noalias bsg_attr_remote T*) src)[0];
+  *buf = ((bsg_attr_remote T*) src)[0];
 }
 template<typename T>
 inline void Unroll<0, T>::drain_buffer(T* buf, T* dest) {
-  ((bsg_attr_noalias bsg_attr_remote T*) dest)[0] = buf[0];
+  ((bsg_attr_remote T*) dest)[0] = buf[0];
 }
 
 // conv related helpers
