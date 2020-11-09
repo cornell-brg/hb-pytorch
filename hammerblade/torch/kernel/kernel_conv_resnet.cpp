@@ -15,12 +15,6 @@
 #define IMAP_DIM_X (BLOCK_DIM_X + FILTER_DIM - 1)
 #define IMAP_DIM_Y (BLOCK_DIM_Y + FILTER_DIM - 1)
 
-// this only works for padding==1 case
-#define TOP_PAD_IDX                0
-#define BOT_PAD_IDX     (RAW_DIM + 1)
-#define LEFT_PAD_IDX               0
-#define RIGHT_PAD_IDX   (RAW_DIM + 1)
-
 #include <kernel_common.hpp>
 #include <kernel_conv_baseline.hpp>
 
@@ -50,48 +44,39 @@ inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t im
   // this is used to correct the padding output offset
   imap_x = imap_x == 0 ? 0 : imap_x - PADDING;
   imap_y = imap_y == 0 ? 0 : imap_y - PADDING;
-
-  // figure out which padding we are covered
-  bool pad_left  = imap_x == LEFT_PAD_IDX ? true : false;
-  bool pad_top   = imap_y == TOP_PAD_IDX  ? true : false;
-  bool pad_right = imap_x + IMAP_DIM_X == RIGHT_PAD_IDX ? true : false;
-  bool pad_bot   = imap_y + IMAP_DIM_Y == BOT_PAD_IDX   ? true : false;
-
   size_t logical_start = 0; // starting offset of imap buffer writting
-  size_t read_x = IMAP_DIM_X;
-  size_t read_y = IMAP_DIM_Y;
+  size_t read_x = IMAP_DIM_X-PADDING;
+  size_t read_y = IMAP_DIM_Y-PADDING;
   size_t block_id = block_y * 2 + block_x;
   size_t W_pad = -1;
+  // see if we need to add padding
+  switch (block_id) {
+    case 0:
+      W_pad = 0;
+      addPaddingH_1(0);
+      logical_start = PADDING*IMAP_DIM_X+PADDING;
+      break;
+    case 1:
+      W_pad = 0;
+      addPaddingH_1(IMAP_DIM_X-PADDING);
+      logical_start = PADDING*IMAP_DIM_X;
+      break;
+    case 2:
+      W_pad = (IMAP_DIM_Y-PADDING)*IMAP_DIM_X;
+      addPaddingH_1(0);
+      logical_start = PADDING;
+      break;
+    case 3:
+      W_pad = (IMAP_DIM_Y-PADDING)*IMAP_DIM_X;
+      addPaddingH_1(IMAP_DIM_X-PADDING);
+      logical_start = 0;
+      break;
+    default:
+      hb_assert(false);
+  }
+  addPaddingW_1(W_pad); // top / bot padding
 
-  /*
-  std::cout << "block_id = " << block_id << " start left = " << imap_x << " end = " << imap_x + IMAP_DIM_X;
-  std::cout << " start top = " << imap_y << " end = " << imap_y + IMAP_DIM_Y << std::endl;
-  std::cout << "  padding left ? " << pad_left << std::endl;
-  std::cout << "  padding right ? " << pad_right << std::endl;
-  std::cout << "  padding top ? " << pad_top << std::endl;
-  std::cout << "  padding bottom ? " << pad_bot << std::endl;
-  */
-
-  if (pad_left) {
-    addPaddingH_1(0);
-    logical_start += PADDING;
-    read_x -= PADDING;
-  }
-  if (pad_right) {
-    addPaddingH_1(IMAP_DIM_X-PADDING);
-    read_x -= PADDING;
-  }
-  if (pad_top) {
-    addPaddingW_1(0);
-    logical_start += PADDING*IMAP_DIM_X;
-    read_y -= PADDING;
-  }
-  if (pad_bot) {
-    addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
-    read_y -= PADDING;
-  }
-
-  float* bsg_attr_noalias bsg_attr_remote imap_src_base = (float* bsg_attr_noalias bsg_attr_remote)imap.data_ptr();
+  float* imap_src_base = (float*)imap.data_ptr();
   const uint32_t* imap_src_strides = imap.get_strides();
   imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
   imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
