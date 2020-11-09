@@ -255,7 +255,8 @@ extern "C" {
           hb_tensor_t* input,
           hb_tensor_t* weight,
           hb_vector_t* padding,
-          hb_vector_t* strides) {
+          hb_vector_t* strides,
+          uint32_t* groups) {
     #define CONV_FORWARD_TEMPLATED(                                        \
         N, Cout, Hout, Wout, Cin, Hin, Win, Kh, Kw, Sh, Sw, Ph, Pw)        \
       if(!convolution_forward_template<                                    \
@@ -271,6 +272,8 @@ extern "C" {
     CONV_FORWARD_TEMPLATED(N,  64, 16, 16, 32, 16, 16, 1, 1, 1, 1, 0, 0);
     CONV_FORWARD_TEMPLATED(N, 128,  8,  8, 64,  8,  8, 3, 3, 1, 1, 1, 1);
     CONV_FORWARD_TEMPLATED(N, 128,  8,  8, 64,  8,  8, 1, 1, 1, 1, 0, 0);
+
+    bsg_printf("groups: %d\n", *groups);
 
     return convolution_forward(output, input, weight, padding, strides);
   };
@@ -393,7 +396,7 @@ extern "C" {
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_forward,
      hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
-     hb_vector_t*, hb_vector_t*);
+     hb_vector_t*, hb_vector_t*, uint32_t*);
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_add_bias,
      hb_tensor_t*, hb_tensor_t*);

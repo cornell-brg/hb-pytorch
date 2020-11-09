@@ -25,11 +25,6 @@ void hb_convolution_arg_check(
         "dilation = ", dilation,
         " is not supported by HB yet.",
         " Make sure dilation is all ones.");
-
-  // Groups check
-  TORCH_CHECK(groups == 1,
-      "Grouped convolution not supported by HB yet."
-      " Make sure groups = 1.");
 }
 
 constexpr int input_batch_size_dim = 0;  // also grad_input
@@ -173,6 +168,8 @@ Tensor hb_convolution_forward(
   device_args.push_back(create_device_tensor(*weight, device_ptrs));
   device_args.push_back(create_device_vector(padding, true, device_ptrs));
   device_args.push_back(create_device_vector(stride, true, device_ptrs));
+  device_args.push_back(create_device_scalar(
+                        safe_downcast<uint32_t, uint64_t>(groups)));
 
   c10::hammerblade::offload_kernel(
       "tensorlib_convolution_forward", device_args);
