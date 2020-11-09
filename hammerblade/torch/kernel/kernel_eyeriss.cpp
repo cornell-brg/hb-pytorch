@@ -630,6 +630,8 @@ extern "C" {
               register float psum_21 = psum_buf[psum_offset + window + 57];
               asm volatile("": : :"memory");
 
+#ifdef HB_EMUL
+#else
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_00) : "f"(imap_0), "f"(filter_w_0_0));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_10) : "f"(imap_0), "f"(filter_w_1_0));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_20) : "f"(imap_0), "f"(filter_w_2_0));
@@ -645,7 +647,7 @@ extern "C" {
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_00) : "f"(imap_4), "f"(filter_w_0_4));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_10) : "f"(imap_4), "f"(filter_w_1_4));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_20) : "f"(imap_4), "f"(filter_w_2_4));
-
+#endif
               // write back
               psum_buf_remote[psum_offset + window +  0] = psum_00;
               psum_buf_remote[psum_offset + window + 28] = psum_10;
@@ -656,6 +658,8 @@ extern "C" {
               register float psum_22 = psum_buf[psum_offset + window + 58];
               asm volatile("": : :"memory");
 
+#ifdef HB_EMUL
+#else
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_01) : "f"(imap_1), "f"(filter_w_0_0));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_11) : "f"(imap_1), "f"(filter_w_1_0));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_21) : "f"(imap_1), "f"(filter_w_2_0));
@@ -671,7 +675,7 @@ extern "C" {
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_01) : "f"(imap_5), "f"(filter_w_0_4));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_11) : "f"(imap_5), "f"(filter_w_1_4));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_21) : "f"(imap_5), "f"(filter_w_2_4));
-
+#endif
               // write back
               psum_buf_remote[psum_offset + window +  1] = psum_01;
               psum_buf_remote[psum_offset + window + 29] = psum_11;
@@ -682,6 +686,8 @@ extern "C" {
               register float psum_23 = psum_buf[psum_offset + window + 59];
               asm volatile("": : :"memory");
 
+#ifdef HB_EMUL
+#else
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_02) : "f"(imap_2), "f"(filter_w_0_0));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_12) : "f"(imap_2), "f"(filter_w_1_0));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_22) : "f"(imap_2), "f"(filter_w_2_0));
@@ -697,12 +703,14 @@ extern "C" {
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_02) : "f"(imap_6), "f"(filter_w_0_4));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_12) : "f"(imap_6), "f"(filter_w_1_4));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_22) : "f"(imap_6), "f"(filter_w_2_4));
-
+#endif
               // write back
               psum_buf_remote[psum_offset + window +  2] = psum_02;
               psum_buf_remote[psum_offset + window + 30] = psum_12;
               psum_buf_remote[psum_offset + window + 58] = psum_22;
 
+#ifdef HB_EMUL
+#else
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_03) : "f"(imap_3), "f"(filter_w_0_0));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_13) : "f"(imap_3), "f"(filter_w_1_0));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_23) : "f"(imap_3), "f"(filter_w_2_0));
@@ -718,7 +726,7 @@ extern "C" {
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_03) : "f"(imap_7), "f"(filter_w_0_4));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_13) : "f"(imap_7), "f"(filter_w_1_4));
               asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum_23) : "f"(imap_7), "f"(filter_w_2_4));
-
+#endif
               // write back
               psum_buf_remote[psum_offset + window +  3] = psum_03;
               psum_buf_remote[psum_offset + window + 31] = psum_13;
