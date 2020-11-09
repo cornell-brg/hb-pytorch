@@ -99,6 +99,7 @@ inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t im
   imap_buf[buf_offset + 3] = tmp15;
 
   // debug
+  /*
   size_t debug_offset = 0;
   for (size_t r = 0; r < IMAP_DIM_Y; r++) {
     for (size_t c = 0; c < IMAP_DIM_X; c++) {
@@ -109,6 +110,7 @@ inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t im
   }
   std::cout << std::endl;
   std::cout << std::endl;
+  */
 }
 
 } // namespace
