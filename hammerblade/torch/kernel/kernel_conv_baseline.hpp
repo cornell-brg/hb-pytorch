@@ -456,3 +456,63 @@ inline void conv2d_3x3_16(float* imap, float* filter, float* omap) {
   }
 }
 
+template<int B_DIM_X, int B_DIM_Y, int I_DIM_X, int I_DIM_Y, int F_DIM>
+inline void conv2d_3x3_4(float* imap, float* filter, float* omap) {
+  for (size_t y = 0; y < B_DIM_Y; y++) {
+    for (size_t x = 0; x < B_DIM_X; x += 4) {
+      register float psum0 = omap[y * B_DIM_X + x + 0];
+      register float psum1 = omap[y * B_DIM_X + x + 1];
+      register float psum2 = omap[y * B_DIM_X + x + 2];
+      register float psum3 = omap[y * B_DIM_X + x + 3];
+      for (size_t yy = 0; yy < F_DIM; yy++) {
+        register float filter0 = filter[yy * F_DIM + 0];
+        register float filter1 = filter[yy * F_DIM + 1];
+        register float filter2 = filter[yy * F_DIM + 2];
+        register float imap0  = imap[y * I_DIM_X + x + yy * I_DIM_X + 0];
+        register float imap1  = imap[y * I_DIM_X + x + yy * I_DIM_X + 1];
+        register float imap2  = imap[y * I_DIM_X + x + yy * I_DIM_X + 2];
+        register float imap3  = imap[y * I_DIM_X + x + yy * I_DIM_X + 3];
+        register float imap4  = imap[y * I_DIM_X + x + yy * I_DIM_X + 4];
+        register float imap5  = imap[y * I_DIM_X + x + yy * I_DIM_X + 5];
+        asm volatile("": : :"memory");
+
+#ifdef HB_EMUL
+        psum0 += imap0 * filter0;
+        psum1 += imap1 * filter0;
+        psum2 += imap2 * filter0;
+        psum3 += imap3 * filter0;
+
+        psum0 += imap1 * filter1;
+        psum1 += imap2 * filter1;
+        psum2 += imap3 * filter1;
+        psum3 += imap4 * filter1;
+
+        psum0 += imap2 * filter2;
+        psum1 += imap3 * filter2;
+        psum2 += imap4 * filter2;
+        psum3 += imap5 * filter2;
+#else
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap0), "f"(filter0));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap1), "f"(filter0));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap2), "f"(filter0));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3) : "f"(imap3), "f"(filter0));
+
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap1), "f"(filter1));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap2), "f"(filter1));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap3), "f"(filter1));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3) : "f"(imap4), "f"(filter1));
+
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap2), "f"(filter2));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap3), "f"(filter2));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap4), "f"(filter2));
+        asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3) : "f"(imap5), "f"(filter2));
+#endif
+      }
+      omap[y * B_DIM_X + x + 0] = psum0;
+      omap[y * B_DIM_X + x + 1] = psum1;
+      omap[y * B_DIM_X + x + 2] = psum2;
+      omap[y * B_DIM_X + x + 3] = psum3;
+    }
+  }
+}
+
