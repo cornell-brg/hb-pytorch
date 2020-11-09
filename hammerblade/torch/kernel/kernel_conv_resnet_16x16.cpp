@@ -39,42 +39,12 @@ inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t im
     }
   };
 
-  size_t imap_x = 0; // block_x * BLOCK_DIM_X;
-  size_t imap_y = 0; // block_y * BLOCK_DIM_Y;
-  // this is used to correct the padding output offset
-  // imap_x = imap_x == 0 ? 0 : imap_x - PADDING;
-  // imap_y = imap_y == 0 ? 0 : imap_y - PADDING;
+  size_t imap_x = 0;
+  size_t imap_y = 0;
   size_t logical_start = 0; // starting offset of imap buffer writting
-  size_t read_x = IMAP_DIM_X-2*PADDING; // IMAP_DIM_X-PADDING;
-  size_t read_y = IMAP_DIM_Y-2*PADDING; // IMAP_DIM_Y-PADDING;
+  size_t read_x = IMAP_DIM_X-2*PADDING;
+  size_t read_y = IMAP_DIM_Y-2*PADDING;
   size_t block_id = block_y * 2 + block_x;
-  // size_t W_pad = -1;
-  // // see if we need to add padding
-  // switch (block_id) {
-  //   case 0:
-  //     W_pad = 0;
-  //     addPaddingH_1(0);
-  //     logical_start = PADDING*IMAP_DIM_X+PADDING;
-  //     break;
-  //   case 1:
-  //     W_pad = 0;
-  //     addPaddingH_1(IMAP_DIM_X-PADDING);
-  //     logical_start = PADDING*IMAP_DIM_X;
-  //     break;
-  //   case 2:
-  //     W_pad = (IMAP_DIM_Y-PADDING)*IMAP_DIM_X;
-  //     addPaddingH_1(0);
-  //     logical_start = PADDING;
-  //     break;
-  //   case 3:
-  //     W_pad = (IMAP_DIM_Y-PADDING)*IMAP_DIM_X;
-  //     addPaddingH_1(IMAP_DIM_X-PADDING);
-  //     logical_start = 0;
-  //     break;
-  //   default:
-  //     hb_assert(false);
-  // }
-  // addPaddingW_1(W_pad); // top / bot padding
 
   addPaddingW_1(0);
   addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
@@ -90,17 +60,8 @@ inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t im
 
   size_t buf_offset = logical_start;
   for (size_t r = 0; r < read_y; r++) {
-    /*
-    float* row_src = imap_src_base;
-    bsg_unroll(IMAP_DIM_X-PADDING)
-    for (size_t c = 0; c < read_x; c++) {
-      imap_buf[row_offset] = *row_src;
-      row_src++;
-      row_offset++;
-    }
-    */
 
-    // unroll by IMAP_DIM_X-PADDING == 17
+    // unroll by IMAP_DIM_X-2*PADDING == 16
     register float tmp00 = *(imap_src_base + 0);
     register float tmp01 = *(imap_src_base + 1);
     register float tmp02 = *(imap_src_base + 2);
@@ -117,7 +78,6 @@ inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t im
     register float tmp13 = *(imap_src_base + 13);
     register float tmp14 = *(imap_src_base + 14);
     register float tmp15 = *(imap_src_base + 15);
-    // register float tmp16 = *(imap_src_base + 16);
     asm volatile("": : :"memory");
     imap_buf[buf_offset + 0]  = tmp00;
     imap_buf[buf_offset + 1]  = tmp01;
@@ -135,7 +95,6 @@ inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t im
     imap_buf[buf_offset + 13] = tmp13;
     imap_buf[buf_offset + 14] = tmp14;
     imap_buf[buf_offset + 15] = tmp15;
-    // imap_buf[buf_offset + 16] = tmp16;
 
     buf_offset += IMAP_DIM_X;
     imap_src_base += y_step;

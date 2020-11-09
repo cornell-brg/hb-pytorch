@@ -84,15 +84,6 @@ inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t im
 
   size_t buf_offset = logical_start;
   for (size_t r = 0; r < read_y; r++) {
-    /*
-    float* row_src = imap_src_base;
-    bsg_unroll(IMAP_DIM_X-PADDING)
-    for (size_t c = 0; c < read_x; c++) {
-      imap_buf[row_offset] = *row_src;
-      row_src++;
-      row_offset++;
-    }
-    */
 
     // unroll by IMAP_DIM_X-PADDING == 17
     register float tmp00 = *(imap_src_base + 0);
@@ -504,7 +495,6 @@ extern "C" {
       grad_src_base += image_id * grad_src_strides[0] + channel_id * grad_src_strides[1];
       grad_src_base += grad_y * grad_src_strides[2] + grad_x * grad_src_strides[3];
       size_t y_step = grad_src_strides[2];
-      // fill_imap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(grad_src_base, grad_buf, y_step);
       size_t buf_offset = 0;
       for (size_t row = 0; row < BLOCK_DIM_Y; row++) {
         // unroll by BLOCK_DIM_X == 16
