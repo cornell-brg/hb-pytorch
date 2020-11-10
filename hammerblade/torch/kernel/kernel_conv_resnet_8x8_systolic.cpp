@@ -326,6 +326,9 @@ extern "C" {
 
     // Job dispatch
 
+    // put a sync after init ... otherwise we can deadlock
+    g_barrier.sync();
+
     bsg_cuda_print_stat_start(7);
 
     switch (tile_config) {
@@ -513,6 +516,9 @@ extern "C" {
         }
       }
     };
+
+    // put a sync after init ... otherwise we can deadlock
+    g_barrier.sync();
 
     bsg_cuda_print_stat_start(8);
 
@@ -857,6 +863,9 @@ extern "C" {
       }
     };
 
+
+    // put a sync after init ... otherwise we can deadlock
+    g_barrier.sync();
 
     bsg_cuda_print_stat_start(9);
 
