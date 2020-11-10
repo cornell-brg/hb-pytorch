@@ -2,6 +2,8 @@
 #include <ATen/native/hammerblade/HammerBladeTensor.h>
 #include <ATen/native/hammerblade/Offload.h>
 
+#define ENABLE_SYSTOLIC 1
+
 namespace at {
 namespace native {
 
@@ -197,6 +199,10 @@ Tensor hb_convolution_forward(
       break;
   }
 
+  if (ENABLE_SYSTOLIC) {
+    kernel_name += "_systolic";
+  }
+
   c10::hammerblade::offload_kernel(
       kernel_name.c_str(), device_args);
   cleanup_device(device_args, device_ptrs);
@@ -263,6 +269,11 @@ Tensor hb_convolution_backward_input(
       TORCH_CHECK(false, "we only support 32x32, 16x16, 8x8, and 4x4 imap\n");
       break;
   }
+
+  if (ENABLE_SYSTOLIC) {
+    kernel_name += "_systolic";
+  }
+
   c10::hammerblade::offload_kernel(
       kernel_name.c_str(), device_args);
   cleanup_device(device_args, device_ptrs);
@@ -313,6 +324,11 @@ Tensor hb_convolution_backward_weight(
       TORCH_CHECK(false, "we only support 32x32, 16x16, 8x8, and 4x4 imap\n");
       break;
   }
+
+  if (ENABLE_SYSTOLIC) {
+    kernel_name += "_systolic";
+  }
+
   c10::hammerblade::offload_kernel(
       kernel_name.c_str(), device_args);
   cleanup_device(device_args, device_ptrs);

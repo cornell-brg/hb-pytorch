@@ -225,7 +225,7 @@ inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, 
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_systolic(
+  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_32x32_systolic(
     hb_tensor_t* output,
     hb_tensor_t* input,
     hb_tensor_t* weight,
@@ -423,7 +423,7 @@ extern "C" {
 
 
 
-  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_back_input_systolic(
+  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_32x32_back_input_systolic(
     hb_tensor_t* output,
     hb_tensor_t* input,
     hb_tensor_t* weight,
@@ -605,7 +605,7 @@ extern "C" {
 
 
 
-  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_back_weight_systolic(
+  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_32x32_back_weight_systolic(
     hb_tensor_t* output,
     hb_tensor_t* input,
     hb_tensor_t* weight,
@@ -968,13 +968,13 @@ extern "C" {
   }
 
 
-  HB_EMUL_REG_KERNEL(tensorlib_conv_resnet_32_3x3_systolic, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+  HB_EMUL_REG_KERNEL(tensorlib_conv_resnet_32_3x3_32x32_systolic, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
                      hb_vector_t*, hb_vector_t*)
 
-  HB_EMUL_REG_KERNEL(tensorlib_conv_resnet_32_3x3_back_input_systolic, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+  HB_EMUL_REG_KERNEL(tensorlib_conv_resnet_32_3x3_32x32_back_input_systolic, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
                      hb_vector_t*, hb_vector_t*)
 
-  HB_EMUL_REG_KERNEL(tensorlib_conv_resnet_32_3x3_back_weight_systolic, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+  HB_EMUL_REG_KERNEL(tensorlib_conv_resnet_32_3x3_32x32_back_weight_systolic, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
                      hb_vector_t*, hb_vector_t*)
 
 }
