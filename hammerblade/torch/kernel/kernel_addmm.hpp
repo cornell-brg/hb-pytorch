@@ -390,80 +390,104 @@ inline void addmm_and_sp_to_dram_naive(
     float* dest_base = dest_ptr + (r_idx * BLOCK_DIM * dest_strides[0])
                        + (c_idx * BLOCK_DIM * dest_strides[1]);
     int row_offset = 0;
-    for (int i = 0; i < BLOCK_DIM; i++) {
+    if (BLOCK_DIM == 12) {
+      register float input0 = input[0];
+      register float input1 = input[1];
+      register float input2 = input[2];
+      register float input3 = input[3];
+      register float input4 = input[4];
+      register float input5 = input[5];
+      register float input6 = input[6];
+      register float input7 = input[7];
+      register float input8 = input[8];
+      register float input9 = input[9];
+      register float input10 = input[10];
+      register float input11 = input[11];
+      for (int i = 0; i < BLOCK_DIM; i++) {
         float* dest_offset = dest_base;
-        if (BLOCK_DIM == 12) {
-            register float tmp0 = src[row_offset + 0];
-            register float tmp1 = src[row_offset + 1];
-            register float tmp2 = src[row_offset + 2];
-            register float tmp3 = src[row_offset + 3];
-            register float tmp4 = src[row_offset + 4];
-            register float tmp5 = src[row_offset + 5];
-            register float tmp6 = src[row_offset + 6];
-            register float tmp7 = src[row_offset + 7];
-            register float tmp8 = src[row_offset + 8];
-            register float tmp9 = src[row_offset + 9];
-            register float tmp10 = src[row_offset + 10];
-            register float tmp11 = src[row_offset + 11];
-            register float input0 = input[0];
-            register float input1 = input[1];
-            register float input2 = input[2];
-            register float input3 = input[3];
-            register float input4 = input[4];
-            register float input5 = input[5];
-            register float input6 = input[6];
-            register float input7 = input[7];
-            register float input8 = input[8];
-            register float input9 = input[9];
-            register float input10 = input[10];
-            register float input11 = input[11];
-            asm volatile("": : :"memory");
-            *(dest_offset + 0) = tmp0 + input0;
-            *(dest_offset + 1) = tmp1 + input1;
-            *(dest_offset + 2) = tmp2 + input2;
-            *(dest_offset + 3) = tmp3 + input3;
-            *(dest_offset + 4) = tmp4 + input4;
-            *(dest_offset + 5) = tmp5 + input5;
-            *(dest_offset + 6) = tmp6 + input6;
-            *(dest_offset + 7) = tmp7 + input7;
-            *(dest_offset + 8) = tmp8 + input8;
-            *(dest_offset + 9) = tmp9 + input9;
-            *(dest_offset + 10) = tmp10 + input10;
-            *(dest_offset + 11) = tmp11 + input11;
-            row_offset += 12;
-        }
-        else {
-            for (int j = 0; j < BLOCK_DIM; j += 8) {
-                register float tmp0 = src[row_offset + 0];
-                register float tmp1 = src[row_offset + 1];
-                register float tmp2 = src[row_offset + 2];
-                register float tmp3 = src[row_offset + 3];
-                register float tmp4 = src[row_offset + 4];
-                register float tmp5 = src[row_offset + 5];
-                register float tmp6 = src[row_offset + 6];
-                register float tmp7 = src[row_offset + 7];
-                register float input0 = input[j + 0];
-                register float input1 = input[j + 1];
-                register float input2 = input[j + 2];
-                register float input3 = input[j + 3];
-                register float input4 = input[j + 4];
-                register float input5 = input[j + 5];
-                register float input6 = input[j + 6];
-                register float input7 = input[j + 7];
-                asm volatile("": : :"memory");
-                *(dest_offset + 0) = tmp0 + input0;
-                *(dest_offset + 1) = tmp1 + input1;
-                *(dest_offset + 2) = tmp2 + input2;
-                *(dest_offset + 3) = tmp3 + input3;
-                *(dest_offset + 4) = tmp4 + input4;
-                *(dest_offset + 5) = tmp5 + input5;
-                *(dest_offset + 6) = tmp6 + input6;
-                *(dest_offset + 7) = tmp7 + input7;
-                dest_offset += 8;
-                row_offset += 8;
-            }
-        }
+        register float tmp0 = src[row_offset + 0];
+        register float tmp1 = src[row_offset + 1];
+        register float tmp2 = src[row_offset + 2];
+        register float tmp3 = src[row_offset + 3];
+        register float tmp4 = src[row_offset + 4];
+        register float tmp5 = src[row_offset + 5];
+        register float tmp6 = src[row_offset + 6];
+        register float tmp7 = src[row_offset + 7];
+        register float tmp8 = src[row_offset + 8];
+        register float tmp9 = src[row_offset + 9];
+        register float tmp10 = src[row_offset + 10];
+        register float tmp11 = src[row_offset + 11];
+        asm volatile("": : :"memory");
+        *(dest_offset + 0) = tmp0 + input0;
+        *(dest_offset + 1) = tmp1 + input1;
+        *(dest_offset + 2) = tmp2 + input2;
+        *(dest_offset + 3) = tmp3 + input3;
+        *(dest_offset + 4) = tmp4 + input4;
+        *(dest_offset + 5) = tmp5 + input5;
+        *(dest_offset + 6) = tmp6 + input6;
+        *(dest_offset + 7) = tmp7 + input7;
+        *(dest_offset + 8) = tmp8 + input8;
+        *(dest_offset + 9) = tmp9 + input9;
+        *(dest_offset + 10) = tmp10 + input10;
+        *(dest_offset + 11) = tmp11 + input11;
+        row_offset += 12;
         dest_base += dest_strides[0];
+      }
+    } else {
+      register float input0 = input[0];
+      register float input1 = input[1];
+      register float input2 = input[2];
+      register float input3 = input[3];
+      register float input4 = input[4];
+      register float input5 = input[5];
+      register float input6 = input[6];
+      register float input7 = input[7];
+      register float input8 = input[8];
+      register float input9 = input[9];
+      register float input10 = input[10];
+      register float input11 = input[11];
+      register float input12 = input[12];
+      register float input13 = input[13];
+      register float input14 = input[14];
+      register float input15 = input[15];
+      for (int i = 0; i < BLOCK_DIM; i++) {
+        float* dest_offset = dest_base;
+        register float tmp0 = src[row_offset + 0];
+        register float tmp1 = src[row_offset + 1];
+        register float tmp2 = src[row_offset + 2];
+        register float tmp3 = src[row_offset + 3];
+        register float tmp4 = src[row_offset + 4];
+        register float tmp5 = src[row_offset + 5];
+        register float tmp6 = src[row_offset + 6];
+        register float tmp7 = src[row_offset + 7];
+        register float tmp8 = src[row_offset + 8];
+        register float tmp9 = src[row_offset + 9];
+        register float tmp10 = src[row_offset + 10];
+        register float tmp11 = src[row_offset + 11];
+        register float tmp12 = src[row_offset + 12];
+        register float tmp13 = src[row_offset + 13];
+        register float tmp14 = src[row_offset + 14];
+        register float tmp15 = src[row_offset + 15];
+        asm volatile("": : :"memory");
+        *(dest_offset + 0) = tmp0 + input0;
+        *(dest_offset + 1) = tmp1 + input1;
+        *(dest_offset + 2) = tmp2 + input2;
+        *(dest_offset + 3) = tmp3 + input3;
+        *(dest_offset + 4) = tmp4 + input4;
+        *(dest_offset + 5) = tmp5 + input5;
+        *(dest_offset + 6) = tmp6 + input6;
+        *(dest_offset + 7) = tmp7 + input7;
+        *(dest_offset + 8) = tmp8 + input8;
+        *(dest_offset + 9) = tmp9 + input9;
+        *(dest_offset + 10) = tmp10 + input10;
+        *(dest_offset + 11) = tmp11 + input11;
+        *(dest_offset + 12) = tmp12 + input12;
+        *(dest_offset + 13) = tmp13 + input13;
+        *(dest_offset + 14) = tmp14 + input14;
+        *(dest_offset + 15) = tmp15 + input15;
+        row_offset += 16;
+        dest_base += dest_strides[0];
+      }
     }
 }
 
