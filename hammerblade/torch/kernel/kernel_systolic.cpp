@@ -4,11 +4,13 @@
 //====================================================================
 
 #define BLOCK_DIM 12 // sqrt(4KB/4 byte/4 data matrix) = 15 max
-#define SYSTOLIC_X_DIM 14
-#define SYSTOLIC_Y_DIM 6
+#define SYSTOLIC_X_DIM 15
+#define SYSTOLIC_Y_DIM 7
 #include <kernel_common.hpp>
 #include <kernel_addmm.hpp>
 #include <kernel_circular_buffer.hpp>
+
+namespace {
 
 inline void spcpy(float* dest, float* src) {
   for (int i = 0; i < BLOCK_DIM * BLOCK_DIM; i += 8) {
@@ -33,6 +35,8 @@ inline void spcpy(float* dest, float* src) {
         dest += 8;
   }
 }
+
+} // namespace
 
 extern "C" {
 
@@ -65,14 +69,14 @@ extern "C" {
     // 5 -- polyA - row
 
     char systolic_6x14_gemm[8][16] = {
-      {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0},
-      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
-      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
-      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
-      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
-      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
-      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5},
-      {0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0},
+      {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+      {1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
     };
 
     // Activate config
@@ -89,13 +93,13 @@ extern "C" {
     CircularBuffer::FIFO<float, BLOCK_DIM * BLOCK_DIM, 2> mat1_fifo(bsg_y, bsg_x-1, bsg_y, bsg_x+1);
     CircularBuffer::FIFO<float, BLOCK_DIM * BLOCK_DIM, 2> mat2_fifo(bsg_y-1, bsg_x, bsg_y+1, bsg_x);
 
+    bool should_pass_right = bsg_x == SYSTOLIC_X_DIM ? false : true;
+    bool should_pass_down  = bsg_y == SYSTOLIC_Y_DIM ? false : true;
+
     auto compute_task = [&] () {
 
-      for (int i = 0; i < m1_num_blk_per_col; i += SYSTOLIC_Y_DIM) {
-        for (int j = 0; j < m2_num_blk_per_row; j += SYSTOLIC_X_DIM) {
-
-          int rr = i + __bsg_y - 1;
-          int rc = j + __bsg_x - 1;
+      for (int rr = bsg_y-1; rr < m1_num_blk_per_col; rr += SYSTOLIC_Y_DIM) {
+        for (int rc = bsg_x-1; rc < m2_num_blk_per_row; rc += SYSTOLIC_X_DIM) {
 
           reset_sp(sp_result);
 
@@ -103,18 +107,22 @@ extern "C" {
             // wait until buffer is loaded
             sp_mat2 = mat2_fifo.obtain_rd_ptr();
 
-            sp_mat2_remote = mat2_fifo.obtain_wr_ptr();
-            // copy mat2 to S
-            spcpy(sp_mat2_remote, sp_mat2);
-            mat2_fifo.finish_wr_ptr();
+            if (should_pass_down && rr+1 < m1_num_blk_per_col) {
+              sp_mat2_remote = mat2_fifo.obtain_wr_ptr();
+              // copy mat2 to S
+              spcpy(sp_mat2_remote, sp_mat2);
+              mat2_fifo.finish_wr_ptr();
+            }
 
             // wait until buffer is loaded
             sp_mat1 = mat1_fifo.obtain_rd_ptr();
 
-            sp_mat1_remote = mat1_fifo.obtain_wr_ptr();
-            // copy mat2 to S
-            spcpy(sp_mat1_remote, sp_mat1);
-            mat1_fifo.finish_wr_ptr();
+            if (should_pass_right && rc+1 < m2_num_blk_per_row) {
+              sp_mat1_remote = mat1_fifo.obtain_wr_ptr();
+              // copy mat2 to S
+              spcpy(sp_mat1_remote, sp_mat1);
+              mat1_fifo.finish_wr_ptr();
+            }
 
 
             // do compute
@@ -133,13 +141,11 @@ extern "C" {
 
     auto col_dma_task = [&] () {
       for (int i = 0; i < m1_num_blk_per_col; i += SYSTOLIC_Y_DIM) {
-        for (int j = 0; j < m2_num_blk_per_row; j += SYSTOLIC_X_DIM) {
-
-          int rc = j + __bsg_x - 1;
+        for (int rc = bsg_x-1; rc < m2_num_blk_per_row; rc += SYSTOLIC_X_DIM) {
 
           for (int mat1x = 0; mat1x < m1_num_blk_per_row; mat1x++) {
             sp_mat2_remote = mat2_fifo.obtain_wr_ptr();
-            dram_to_sp_simple(sp_mat2_remote, mat2, mat1x, rc);
+            dram_to_sp_simple_generic(sp_mat2_remote, mat2, mat1x, rc);
             mat2_fifo.finish_wr_ptr();
           }
 
@@ -148,14 +154,12 @@ extern "C" {
     };
 
     auto row_dma_task = [&] () {
-      for (int i = 0; i < m1_num_blk_per_col; i += SYSTOLIC_Y_DIM) {
+      for (int rr = bsg_y-1; rr < m1_num_blk_per_col; rr += SYSTOLIC_Y_DIM) {
         for (int j = 0; j < m2_num_blk_per_row; j += SYSTOLIC_X_DIM) {
-
-          int rr = i + __bsg_y - 1;
 
           for (int mat1x = 0; mat1x < m1_num_blk_per_row; mat1x++) {
             sp_mat1_remote = mat1_fifo.obtain_wr_ptr();
-            dram_to_sp_simple(sp_mat1_remote, mat1, rr, mat1x);
+            dram_to_sp_simple_generic(sp_mat1_remote, mat1, rr, mat1x);
             mat1_fifo.finish_wr_ptr();
           }
 
