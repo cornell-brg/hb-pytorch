@@ -41,8 +41,8 @@ extern "C" {
     float sp_mat2[BLOCK_DIM * BLOCK_DIM];
     float sp_result[BLOCK_DIM * BLOCK_DIM];
 
-    for (int rr = __bsg_y; rr < m1_num_blk_per_col; rr += BSG_TILE_GROUP_Y_DIM) {
-      for (int rc = __bsg_x; rc < m2_num_blk_per_row; rc += BSG_TILE_GROUP_X_DIM) {
+    for (int rr = bsg_y; rr < m1_num_blk_per_col; rr += BSG_TILE_GROUP_Y_DIM) {
+      for (int rc = bsg_x; rc < m2_num_blk_per_row; rc += BSG_TILE_GROUP_X_DIM) {
 
         // initialize scratchpad result (init to 0's)
         reset_sp(sp_result);
@@ -57,7 +57,7 @@ extern "C" {
         }
 
         // reuse self to hold *input* matrix
-        dram_to_sp_simple_generic(sp_mat1, self, rr, rc);
+        load_bias(sp_mat1, self, rr, rc);
         // copy this block back into DRAM
         addmm_and_sp_to_dram_naive(result, sp_result, sp_mat1, rr, rc);
       }
