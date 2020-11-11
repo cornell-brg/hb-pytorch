@@ -6,6 +6,10 @@
 #define NUM_OF_SLOTS 32
 #define CACHE_LINE 32
 
+//Parameters of HB with SpMV Xcel
+#define NUM_PE 16
+#define CACHELINE_BYTE 128
+
 inline int convert_idx(int index, int num_row, int row) {
   int idx = 0;
   int div = index / CACHE_LINE; 

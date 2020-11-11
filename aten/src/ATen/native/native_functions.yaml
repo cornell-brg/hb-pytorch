@@ -6681,3 +6681,15 @@
   dispatch:
     SparseCPU: _sampled_reciprocal__cpu
     SparseHammerBlade: _sampled_reciprocal__hb
+
+- func: toc2sr(Tensor self) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: toc2sr_cpu
+
+- func: spmv(Tensor self, Tensor dense_vector) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    HammerBlade: xcelspmv_hb 

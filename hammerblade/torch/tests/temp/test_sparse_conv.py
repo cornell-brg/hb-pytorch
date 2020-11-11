@@ -41,7 +41,7 @@ def test_lenet5_sparse01_conv2():
     out2 = hb_out.cpu()
     print(out2)
 
-    assert torch.allclose(out1, out2, atol=1e-6)
+    assert torch.allclose(out1, out2, atol=1e-5)
 
 def test_special_sparse01_conv():
 

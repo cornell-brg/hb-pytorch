@@ -95,6 +95,7 @@ static void sparse_convolution_shape_check(
 
 Tensor reshape_sparse_weight(const Tensor& weight_indices, uint32_t dim_2, uint32_t dim_3, uint64_t nnz) {
 
+  std::cout << "Enter the weight reshape method" << std::endl;
   TORCH_CHECK(weight_indices.size(0) == 4, "Indices should be a 4 x nnz matrix");
   IntTensor new_indices = at::zeros({nnz}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
   uint32_t nnz_uint = (uint32_t)(nnz);
@@ -153,7 +154,7 @@ Tensor hb_sparse_convolution_forward(
   device_args.push_back(create_device_vector(stride, true, device_ptrs));
   device_args.push_back(create_device_vector(input_sizes, true, device_ptrs));
   device_args.push_back(create_device_vector(weight_sizes, true, device_ptrs));
-  
+  std::cout << "Entering the sparse conv kernel" << std::endl;
   c10::hammerblade::offload_kernel(
       "tensorlib_sparse_convolution_forward", device_args);
   cleanup_device(device_args, device_ptrs);

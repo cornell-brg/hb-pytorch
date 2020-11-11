@@ -50,7 +50,7 @@ void _to_c2sr(const IntTensor& rowIndices,
 }  
 
 Tensor _sparse_mm_hb(const SparseTensor& sparse, const Tensor& dense) {
-
+  std::cout << "Already enter the _sparse_mm_hb function" << std::endl;
   TORCH_CHECK(sparse.is_hammerblade(), "SpMM: expected 'mat1' to be a HammerBlade tensor");
   TORCH_CHECK(dense.is_hammerblade(), "SpMM: expected 'mat2' to be a HammerBlade tensor");
 
@@ -80,7 +80,7 @@ Tensor _sparse_mm_hb(const SparseTensor& sparse, const Tensor& dense) {
   Tensor values = sparse._values();
 
   Tensor result = at::zeros({sparse.size(0), dense.size(1)}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
-
+  std::cout << "Entering the spmm kernel" << std::endl; 
   hb_offload_kernel(result, csr_hb, colIndices, values, dense, "tensorlib_spmm");
   return result;
 }

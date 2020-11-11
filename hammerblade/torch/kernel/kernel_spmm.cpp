@@ -24,11 +24,11 @@ extern "C" {
     uint32_t k = dense.dim(0);
     uint32_t n = dense.dim(1);
     uint32_t v = values.numel();
-
+ 
     size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
     size_t start = __bsg_id;
     size_t end = m;
-    
+    printf("Enter the SpMM kernel\n");   
     bsg_cuda_print_stat_kernel_start();
 
     float temp[1];
