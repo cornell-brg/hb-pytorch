@@ -544,6 +544,7 @@
   dispatch:
     CPU: bitwise_not_out
     CUDA: bitwise_not_out
+    HammerBlade: bitwise_not_out
 
 - func: logical_not(Tensor self) -> Tensor
   supports_named_tensor: True
