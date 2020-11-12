@@ -22,7 +22,7 @@ def _test_not(x):
     y_c = ~x
     y_h = ~h
     assert y_h.device == torch.device("hammerblade")
-    assert torch.allclose(y_c, y_h.cpu())
+    assert torch.equal(y_c, y_h.cpu())
 
 # ------------------------------------------------------------------------
 # tests of not kernel with integer elements
@@ -42,6 +42,14 @@ def test_not_3():
 
 def test_not_4():
     x = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32)).to(torch.int32)
+    _test_not(x)
+
+def test_not_bool1():
+    x = torch.randint(0, 2, (16, 32)).to(torch.bool)
+    _test_not(x)
+
+def test_not_bool2():
+    x = torch.randint(0, 2, (1, 128)).to(torch.bool)
     _test_not(x)
 
 @settings(deadline=None)

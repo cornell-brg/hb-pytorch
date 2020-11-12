@@ -9,7 +9,7 @@ namespace at { namespace native {
 namespace {
 
 void not_kernel_hb(TensorIterator& iter) {
-  AT_DISPATCH_INTS_ONLY(iter.dtype(), "not_hb", [&]() {
+  AT_DISPATCH_INTS_AND_BOOL(iter.dtype(), "not_hb", [&]() {
     offload_op_unary(iter, "tensorlib_not");
   });
 }

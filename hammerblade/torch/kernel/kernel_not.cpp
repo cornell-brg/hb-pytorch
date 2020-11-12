@@ -31,4 +31,24 @@ extern "C" {
 
   HB_EMUL_REG_KERNEL(tensorlib_not_Int, hb_tensor_t*, hb_tensor_t*)
 
+  __attribute__ ((noinline))  bool tensorlib_not_Bool(
+          hb_tensor_t* t0_p,
+          hb_tensor_t* t1_p) {
+    auto res = HBTensor<bool>(t0_p);
+    auto input = HBTensor<bool>(t1_p);
+    bsg_cuda_print_stat_kernel_start();
+
+    hb_tiled_foreach(
+      [](bool a) {
+        return !a;
+      },
+      res, input);
+
+    bsg_cuda_print_stat_kernel_end();
+
+    g_barrier.sync();
+    return 0;
+  }
+
+  HB_EMUL_REG_KERNEL(tensorlib_not_Bool, hb_tensor_t*, hb_tensor_t*)
 }
