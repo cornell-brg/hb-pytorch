@@ -24,12 +24,12 @@ def _test_torch_cholesky(A, atol=1e-8):
     # calculate L * L^T
     LLT = torch.mm(L, LT)
 
-#    print('A')
-#    print(A)
-#    print('L')
-#    print(L)
-#    print('LLT')
-#    print(LLT)
+    print('A')
+    print(A)
+    print('L')
+    print(L)
+    print('LLT')
+    print(LLT)
     assert torch.allclose(A, LLT, atol=atol)
 
 
@@ -46,18 +46,34 @@ def test_torch_cholesky_basic3():
     _test_torch_cholesky(x)
 
 def test_torch_cholesky_basic4():
-    x = torch.tensor([[2.,0.,0.,0.],[0.,2.,0.,0.],[0.,0.,2.,0.],[0.,0.,0.,2.]])
+    x = torch.tensor([[2.,0.,0.],[0.,3.,0.],[0.,0.,4.]])
     _test_torch_cholesky(x)
 
 def test_torch_cholesky_basic5():
-    x = torch.tensor([[2.,-1.,0.],[-1.,2.,-1.],[0.,-1.,2.]])
+    x = torch.tensor([[3.,0.,0.,0.],[0.,3.,0.,0.],[0.,0.,3.,0.],[0.,0.,0.,3.]])
     _test_torch_cholesky(x)
 
 def test_torch_cholesky_basic6():
-    x = torch.tensor([[25.,15.,-5.],[15.,18.,0.],[-5.,0.,11.]])
+    x = torch.tensor([[2.,0.,0.,0.],[0.,3.,0.,0.],[0.,0.,4.,0.],[0.,0.,0.,5.]])
     _test_torch_cholesky(x)
 
 def test_torch_cholesky_basic7():
+    x = torch.tensor([[2.,0.,0.,0.,0.],[0.,2.,0.,0.,0.],[0.,0.,2.,0.,0.],[0.,0.,0.,2.,0.],[0.,0.,0.,0.,2.]])
+    _test_torch_cholesky(x)
+
+def test_torch_cholesky_basic8():
+    x = torch.tensor([[2.,0.,0.,0.,0.],[0.,3.,0.,0.,0.],[0.,0.,4.,0.,0.],[0.,0.,0.,5.,0.],[0.,0.,0.,0.,6.]])
+    _test_torch_cholesky(x)
+
+def test_torch_cholesky_basic9():
+    x = torch.tensor([[2.,-1.,0.],[-1.,3.,-1.],[0.,-1.,4.]])
+    _test_torch_cholesky(x)
+
+def test_torch_cholesky_basic10():
+    x = torch.tensor([[25.,15.,-5.],[15.,18.,0.],[-5.,0.,11.]])
+    _test_torch_cholesky(x)
+
+def test_torch_cholesky_basic11():
     x = torch.tensor([[18.,22.,54.,42.],[22.,70.,86.,62.],[54.,86.,174.,134.],[42.,62.,134.,106.]])
     _test_torch_cholesky(x)
 
@@ -97,16 +113,20 @@ def test_torch_cholesky_hypothesis(inputs):
 '''
 
 def main():
-    test_torch_cholesky_basic1()
-    test_torch_cholesky_basic2()
-    test_torch_cholesky_basic3()
-    test_torch_cholesky_basic4()
-    test_torch_cholesky_basic5()
-    test_torch_cholesky_basic6()
-    test_torch_cholesky_basic7()
-    test_torch_cholesky_random1()
-    test_torch_cholesky_random2()
-    test_torch_cholesky_random_neg()
+    #test_torch_cholesky_basic1()
+    #test_torch_cholesky_basic2()
+    #test_torch_cholesky_basic3()
+    #test_torch_cholesky_basic4()
+    #test_torch_cholesky_basic5()
+    #test_torch_cholesky_basic6()
+    #test_torch_cholesky_basic7()
+    #test_torch_cholesky_basic8()
+    #test_torch_cholesky_basic9()
+    #test_torch_cholesky_basic10()
+    test_torch_cholesky_basic11()
+    #test_torch_cholesky_random1()
+    #test_torch_cholesky_random2()
+    #test_torch_cholesky_random_neg()
 
 if __name__ == "__main__":
     main()
