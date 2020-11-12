@@ -24,7 +24,7 @@ def _test_or(x1, x2):
     y_c = x1 | x2
     y_h = h1 | h2
     assert y_h.device == torch.device("hammerblade")
-    assert torch.allclose(y_c, y_h.cpu())
+    assert torch.equal(y_c, y_h.cpu())
 
 # ------------------------------------------------------------------------
 # tests of or kernel with integer elements
@@ -47,6 +47,16 @@ def test_or_3():
 def test_or_4():
     x = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32)).to(torch.int32)
     y = torch.randint(-2 ** 30, 2 ** 30 - 1, (16, 32)).to(torch.int32)
+    _test_or(x, y)
+
+def test_or_bool1():
+    x = torch.randint(0, 2, (16, 32)).to(torch.bool)
+    y = torch.randint(0, 2, (16, 32)).to(torch.bool)
+    _test_or(x, y)
+
+def test_or_bool2():
+    x = torch.randint(0, 2, (1, 128)).to(torch.bool)
+    y = torch.randint(0, 2, (1, 128)).to(torch.bool)
     _test_or(x, y)
 
 @settings(deadline=None)
