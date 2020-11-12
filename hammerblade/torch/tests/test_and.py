@@ -24,7 +24,7 @@ def _test_and(x1, x2):
     y_c = x1 & x2
     y_h = h1 & h2
     assert y_h.device == torch.device("hammerblade")
-    assert torch.allclose(y_c, y_h.cpu())
+    assert torch.equal(y_c, y_h.cpu())
 
 # ------------------------------------------------------------------------
 # tests of and kernel with integer elements
