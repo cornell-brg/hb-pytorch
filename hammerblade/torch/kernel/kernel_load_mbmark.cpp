@@ -3,8 +3,8 @@
 // 08/13/2020 Lin Cheng
 //====================================================================
 
-#define TILE_LOAD_RANGE 1024 // 1024 * 128 * 4 = 128 * 8 * 16 * 32
-#define LOAD_ITER 2
+#define TILE_LOAD_RANGE 512 // 1024 * 128 * 4 = 128 * 8 * 16 * 32
+#define LOAD_ITER 3
 
 #include <kernel_common.hpp>
 
@@ -61,6 +61,14 @@ extern "C" {
     for (size_t iter = 1; iter < LOAD_ITER+1; iter++) {
       g_barrier.sync();
       bsg_cuda_print_stat_start(iter);
+
+      // iter 1 -- cold icache cold data
+      // iter 2 -- warm icache warm data
+      // iter 3 -- warm icache cold data
+      if (iter == 3) {
+        src_base += src_strides[0];
+      }
+
       float* src_offset = src_base;
       float* buf_offset = buffer;
 
