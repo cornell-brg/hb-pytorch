@@ -77,13 +77,34 @@ def test_torch_cholesky_basic11():
     x = torch.tensor([[18.,22.,54.,42.],[22.,70.,86.,62.],[54.,86.,174.,134.],[42.,62.,134.,106.]])
     _test_torch_cholesky(x)
 
+def test_torch_cholesky_basic12():
+    x = torch.tensor([[0.9744,1.1998,0.4542,0.6176,0.4425],
+                      [1.1998,2.3837,1.1871,1.5825,1.8001],
+                      [0.4542,1.1871,0.8640,0.6495,1.3102],
+                      [0.6176,1.5825,0.6495,1.5022,1.3349],
+                      [0.4425,1.8001,1.3102,1.3349,2.3573]])
+    _test_torch_cholesky(x)
+
+# Test random small matrices of random size between 1x1 and 100x100
+def test_torch_cholesky_random_small():
+    for _ in range(0,100):
+        N = random.randint(2,10)
+#        print('N', N)
+        x = torch.rand((N,N))
+        x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
+        x.add_(torch.eye(N))   # make positive definite
+        _test_torch_cholesky(x, atol=1e-8)
+
 # Test random matrices of random size between 1x1 and 100x100
 def test_torch_cholesky_random1():
     for _ in range(0,50):
         N = random.randint(1,100)
-#        print('N', N)
+        N = 22
+        print('N', N)
         x = torch.rand((N,N))
-        x = torch.mm(x, x.t()) # make symmetric positive-definite
+        x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
+        x.add_(torch.eye(N))   # make positive definite
+        print(x)
         _test_torch_cholesky(x, atol=1e-8)
 
 # Test random matrices of all sizes from 1x1 to 100x100
@@ -91,7 +112,8 @@ def test_torch_cholesky_random2():
     for N in range(1,100):
 #        print('N', N)
         x = torch.rand((N,N))
-        x = torch.mm(x, x.t()) # make symmetric positive-definite
+        x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
+        x.add_(torch.eye(N))   # make positive definite
         _test_torch_cholesky(x, atol=1e-8)
 
 def test_torch_cholesky_random_neg():
@@ -99,7 +121,8 @@ def test_torch_cholesky_random_neg():
         N = random.randint(1,100)
 #        print('N', N)
         x = torch.rand((N,N)) - 0.5 # make half the numbers negative
-        x = torch.mm(x, x.t()) # make symmetric positive-definite
+        x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
+        x.add_(torch.eye(N))   # make positive definite
         _test_torch_cholesky(x, atol=1e-6)
 
 '''
@@ -123,10 +146,12 @@ def main():
     #test_torch_cholesky_basic8()
     #test_torch_cholesky_basic9()
     #test_torch_cholesky_basic10()
-    test_torch_cholesky_basic11()
-    #test_torch_cholesky_random1()
-    #test_torch_cholesky_random2()
-    #test_torch_cholesky_random_neg()
+    #test_torch_cholesky_basic11()
+    #test_torch_cholesky_basic12()
+    #test_torch_cholesky_random_small()
+    test_torch_cholesky_random1()
+    test_torch_cholesky_random2()
+    test_torch_cholesky_random_neg()
 
 if __name__ == "__main__":
     main()
