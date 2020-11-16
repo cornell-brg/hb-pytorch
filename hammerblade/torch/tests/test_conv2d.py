@@ -25,7 +25,7 @@ def _test_conv2d(inputs, kernel, padding=1, stride=1,
                            bias=bias, groups=groups)
 
     # test forward
-    assert torch.allclose(conv_result, conv_result_hb.cpu())
+    assert torch.allclose(conv_result, conv_result_hb.cpu(), rtol=1e-5)
 
     # test backward
     if inputs.requires_grad:
@@ -164,6 +164,15 @@ def test_conv2d_bias_4():
     bias = torch.rand(3, requires_grad=True)
 
     _test_conv2d(inputs, kernel, padding, stride, bias)
+
+def test_conv2d_groups_1():
+    """
+    Multi-batch, multi-channel
+    """
+    kernel = torch.rand(3, 1, 3, 3)
+    inputs = torch.rand(1, 3, 5, 5)
+
+    _test_conv2d(inputs, kernel, groups=3)
 
 @pytest.mark.skipif(torch.hb_cosim_on, reason="Prohibitively slow on cosim")
 def test_conv2d_batch_input_output():
