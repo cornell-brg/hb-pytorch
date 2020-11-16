@@ -56,11 +56,9 @@ static int convolution_forward(
       hb_blocked_for(bsg_tiles_X * bsg_tiles_Y, cout_per_group,
                     [&](size_t co_, size_t tg_size_co) {
         size_t co = co_ + cout_per_group * group;
-        bsg_printf("tile: %d ci: %d co: %d\n",
-                   __bsg_id, ci, co);
 
         // Load the filter w(co, ci, :, :) to dmem
-        uint32_t w_offset = w.offset(co, ci, 0, 0);
+        uint32_t w_offset = w.offset(co, ci / groups, 0, 0);
         auto w_ptr = (bsg_attr_remote float*) w.data_ptr();
         load_weights(W_local, w_ptr, w_offset, Kh, Kw);
 
