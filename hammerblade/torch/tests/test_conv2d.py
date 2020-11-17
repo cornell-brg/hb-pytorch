@@ -167,12 +167,39 @@ def test_conv2d_bias_4():
 
 def test_conv2d_groups_1():
     """
-    Multi-batch, multi-channel
+    Depthwise convolution
     """
     kernel = torch.rand(3, 1, 3, 3)
     inputs = torch.rand(1, 3, 5, 5)
 
     _test_conv2d(inputs, kernel, groups=3)
+
+def test_conv2d_groups_2():
+    """
+    Multi-batch, depthwise convolution
+    """
+    kernel = torch.rand(3, 1, 3, 3)
+    inputs = torch.rand(2, 3, 5, 5)
+
+    _test_conv2d(inputs, kernel, groups=3)
+
+def test_conv2d_groups_3():
+    """
+    Output groups
+    """
+    kernel = torch.rand(6, 1, 3, 3)
+    inputs = torch.rand(1, 2, 5, 5)
+
+    _test_conv2d(inputs, kernel, groups=2)
+
+def test_conv2d_groups_4():
+    """
+    Output groups
+    """
+    kernel = torch.rand(6, 2, 3, 3)
+    inputs = torch.rand(1, 4, 5, 5)
+
+    _test_conv2d(inputs, kernel, groups=2)
 
 @pytest.mark.skipif(torch.hb_cosim_on, reason="Prohibitively slow on cosim")
 def test_conv2d_batch_input_output():
