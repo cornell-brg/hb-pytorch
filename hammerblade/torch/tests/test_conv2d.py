@@ -194,12 +194,25 @@ def test_conv2d_groups_3():
 
 def test_conv2d_groups_4():
     """
-    Output groups
+    Input & Output groups
     """
     kernel = torch.rand(6, 2, 3, 3)
     inputs = torch.rand(1, 4, 5, 5)
 
     _test_conv2d(inputs, kernel, groups=2)
+
+def test_conv2d_groups_5():
+    """
+    Grouped convolution with asymmetric padding and strides
+    """
+    kernel = torch.rand(4, 1, 3, 3)
+    inputs = torch.rand(1, 2, 5, 5)
+    padding = (2, 3)
+    stride = (1, 2)
+    bias = torch.rand(4, requires_grad=True)
+
+    _test_conv2d(inputs, kernel, padding, stride,
+                 bias, groups=2)
 
 @pytest.mark.skipif(torch.hb_cosim_on, reason="Prohibitively slow on cosim")
 def test_conv2d_batch_input_output():
