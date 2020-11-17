@@ -35,6 +35,7 @@ static int convolution_forward(
   auto Ph = p[0];
   auto Pw = p[1];
 
+  auto cin_per_group = Cin / groups;
   auto cout_per_group = Cout / groups;
 
   // Weights buffer
@@ -52,7 +53,7 @@ static int convolution_forward(
 
   for(uint32_t n = 0; n < N; ++n) {
     for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
-      size_t group = ci / (Cin / groups);
+      size_t group = ci / cin_per_group;
       hb_blocked_for(bsg_tiles_X * bsg_tiles_Y, cout_per_group,
                     [&](size_t co_, size_t tg_size_co) {
         size_t co = co_ + cout_per_group * group;
@@ -114,7 +115,7 @@ static int convolution_forward(
               uint32_t kw_local = w_off;
 
               for(uint32_t kw = 0; kw < Kw; ++kw) {
-                if((ci + kh + kw) == 0) {
+                if((ci % cin_per_group + kh + kw) == 0) {
                   y(n, co, yh, yw) = 0.0;
                 }
 
