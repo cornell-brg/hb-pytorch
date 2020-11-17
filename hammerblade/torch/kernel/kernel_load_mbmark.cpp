@@ -68,7 +68,11 @@ extern "C" {
       }
 
       g_barrier.sync();
+
       bsg_cuda_print_stat_start(iter);
+      asm volatile("nop" : : :);
+      asm volatile("nop" : : :);
+      bsg_fence();
 
       float* src_offset = src_base;
       float* buf_offset = buffer;
@@ -575,6 +579,17 @@ extern "C" {
       }
 
       bsg_cuda_print_stat_end(iter);
+      asm volatile("nop" : : :);
+      //asm volatile("nop" : : :);
+      //asm volatile("nop" : : :);
+      //asm volatile("nop" : : :);
+      //asm volatile("nop" : : :);
+      //asm volatile("nop" : : :);
+      //asm volatile("nop" : : :);
+      //asm volatile("nop" : : :);
+      //asm volatile("nop" : : :);
+      //asm volatile("nop" : : :);
+      bsg_fence();
 
       float sum = 0;
       for (size_t idx = 0; idx < TILE_LOAD_RANGE; idx++) {
