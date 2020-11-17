@@ -59,7 +59,7 @@ static int convolution_forward(
         size_t co = co_ + cout_per_group * group;
 
         // Load the filter w(co, ci, :, :) to dmem
-        uint32_t w_offset = w.offset(co, ci / groups, 0, 0);
+        uint32_t w_offset = w.offset(co, ci % cin_per_group, 0, 0);
         auto w_ptr = (bsg_attr_remote float*) w.data_ptr();
         load_weights(W_local, w_ptr, w_offset, Kh, Kw);
 
