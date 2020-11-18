@@ -6,11 +6,11 @@ Unit tests for torch.cholesky kernel
 import torch
 import random
 import pytest
-#from hypothesis import given, settings
-#from .hypothesis_test_util import HypothesisUtil as hu
+from hypothesis import given, settings
+from .hypothesis_test_util import HypothesisUtil as hu
 
-torch.manual_seed(42)
-random.seed(42)
+#torch.manual_seed(42)
+#random.seed(42)
 
 def _test_torch_cholesky(A, atol=1e-8):
     h = A.hammerblade()
@@ -24,12 +24,12 @@ def _test_torch_cholesky(A, atol=1e-8):
     # calculate L * L^T
     LLT = torch.mm(L, LT)
 
-    print('A')
-    print(A)
-    print('L')
-    print(L)
-    print('LLT')
-    print(LLT)
+#    print('A')
+#    print(A)
+#    print('L')
+#    print(L)
+#    print('LLT')
+#    print(LLT)
     assert torch.allclose(A, LLT, atol=atol)
 
 
@@ -85,39 +85,47 @@ def test_torch_cholesky_basic12():
                       [0.4425,1.8001,1.3102,1.3349,2.3573]])
     _test_torch_cholesky(x)
 
-# Test random small matrices of random size between 1x1 and 100x100
+# Test random small matrices of random size between 1x1 and 10x10
 def test_torch_cholesky_random_small():
     for _ in range(0,100):
-        N = random.randint(2,10)
+        N = random.randint(1,10)
 #        print('N', N)
         x = torch.rand((N,N))
         x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
         x.add_(torch.eye(N))   # make positive definite
-        _test_torch_cholesky(x, atol=1e-8)
+        _test_torch_cholesky(x)
+
+# Test random big matrices of random size between 100x100 and 1000x1000
+def test_torch_cholesky_random_big():
+    for _ in range(0,20):
+        N = random.randint(100,1001)
+#        print('N', N)
+        x = torch.rand((N,N))
+        x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
+        x.add_(torch.eye(N))   # make positive definite
+        _test_torch_cholesky(x)
 
 # Test random matrices of random size between 1x1 and 100x100
 def test_torch_cholesky_random1():
-    for _ in range(0,50):
+    for _ in range(0,100):
         N = random.randint(1,100)
-        N = 22
-        print('N', N)
-        x = torch.rand((N,N))
-        x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
-        x.add_(torch.eye(N))   # make positive definite
-        print(x)
-        _test_torch_cholesky(x, atol=1e-8)
-
-# Test random matrices of all sizes from 1x1 to 100x100
-def test_torch_cholesky_random2():
-    for N in range(1,100):
 #        print('N', N)
         x = torch.rand((N,N))
         x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
         x.add_(torch.eye(N))   # make positive definite
-        _test_torch_cholesky(x, atol=1e-8)
+        _test_torch_cholesky(x)
+
+# Test random matrices of all sizes from 1x1 to 100x100
+def test_torch_cholesky_random2():
+    for N in range(1,101):
+#        print('N', N)
+        x = torch.rand((N,N))
+        x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
+        x.add_(torch.eye(N))   # make positive definite
+        _test_torch_cholesky(x)
 
 def test_torch_cholesky_random_neg():
-    for _ in range(0,50):
+    for _ in range(0,100):
         N = random.randint(1,100)
 #        print('N', N)
         x = torch.rand((N,N)) - 0.5 # make half the numbers negative
@@ -125,30 +133,29 @@ def test_torch_cholesky_random_neg():
         x.add_(torch.eye(N))   # make positive definite
         _test_torch_cholesky(x, atol=1e-6)
 
-'''
 @settings(deadline=None)
 @given(inputs=hu.tensors2dsquare(min_shape=1, max_shape=5))
 def test_torch_cholesky_hypothesis(inputs):
     x = torch.tensor(inputs)
-    x = torch.mm(x, x.t())
-    assert x.dim() == 2
-    _test_torch_cholesky(x, atol=1e-8)
-'''
+    x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
+    x.add_(torch.eye(inputs.shape[0])) # make positive definite
+    _test_torch_cholesky(x)
 
 def main():
-    #test_torch_cholesky_basic1()
-    #test_torch_cholesky_basic2()
-    #test_torch_cholesky_basic3()
-    #test_torch_cholesky_basic4()
-    #test_torch_cholesky_basic5()
-    #test_torch_cholesky_basic6()
-    #test_torch_cholesky_basic7()
-    #test_torch_cholesky_basic8()
-    #test_torch_cholesky_basic9()
-    #test_torch_cholesky_basic10()
-    #test_torch_cholesky_basic11()
-    #test_torch_cholesky_basic12()
-    #test_torch_cholesky_random_small()
+    test_torch_cholesky_basic1()
+    test_torch_cholesky_basic2()
+    test_torch_cholesky_basic3()
+    test_torch_cholesky_basic4()
+    test_torch_cholesky_basic5()
+    test_torch_cholesky_basic6()
+    test_torch_cholesky_basic7()
+    test_torch_cholesky_basic8()
+    test_torch_cholesky_basic9()
+    test_torch_cholesky_basic10()
+    test_torch_cholesky_basic11()
+    test_torch_cholesky_basic12()
+    test_torch_cholesky_random_small()
+    test_torch_cholesky_random_big()
     test_torch_cholesky_random1()
     test_torch_cholesky_random2()
     test_torch_cholesky_random_neg()

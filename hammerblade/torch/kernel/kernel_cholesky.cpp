@@ -1,9 +1,10 @@
 //====================================================================
-// Vector - vector add kernel
-// 06/02/2020 Lin Cheng (lc873@cornell.edu)
+// Cholesky kernel
+// 11/18/2020 Kexin Zheng (kz73@cornell.edu)
 //====================================================================
 
 #include <kernel_common.hpp>
+#define BLOCK_DIM 8
 
 extern "C" {
 
@@ -81,7 +82,6 @@ extern "C" {
     // Block is at upper-left elm (y,x) and of size nrow X ncol
     // Row-major storage
     void copy_block_to_sp(float* dst, HBTensor<float>* src, int y, int x, int nrow, int ncol) {
-        printf("copy_to_sp ID %d y %d x %d nrow %d ncol %d\n", __bsg_id, y, x, nrow, ncol);
         int idx = 0;
         for (int i = y; i < y + nrow; i++) {
             for (int j = x; j < x + ncol; j++) {
@@ -89,14 +89,12 @@ extern "C" {
                 idx++;
             }
         }
-//        print_array(dst, nrow, ncol);
     }
 
     // Copies block from scratch pad to DRAM
     // Block is at upper-left elm (y,x) and of size nrow X ncol
     // Row-major storage
     void copy_block_to_dram(HBTensor<float>* dst, float* src, int y, int x, int nrow, int ncol) {
-        printf("copy_to_dram ID %d y %d x %d nrow %d ncol %d\n", __bsg_id, y, x, nrow, ncol);
         int idx = 0;
         for (int i = y; i < y + nrow; i++) {
             for (int j = x; j < x + ncol; j++) {
@@ -104,25 +102,21 @@ extern "C" {
                 idx++;
             }
         }
-//        print_tensor(dst);
     }
 
     // Set the block at (y,x) with size nrow X ncol in dst to zero
     // Used for the upper triangular portion of L (all zeros)
     void set_block_to_zero(HBTensor<float>* dst, int y, int x, int nrow, int ncol) {
-        printf("set_zero ID %d y %d x %d nrow %d ncol %d\n", __bsg_id, y, x, nrow, ncol);
         for (int i = y; i < y + nrow; i++) {
             for (int j = x; j < x + ncol; j++) {
                 (*dst)(i, j) = 0.0;
             }
         }
-//        print_tensor(dst);
     }
 
     // Copies the transpose of the block from DRAM to scratch pad to the 1D array
     // Block is at upper-left elm (y,x) and of size nrow X ncol
     void copy_block_transpose_to_sp(float* dst, HBTensor<float>* src, int y, int x, int nrow, int ncol) {
-        printf("copy_trans_to_sp ID %d y %d x %d nrow %d ncol %d\n", __bsg_id, y, x, nrow, ncol);
         int idx = 0;
         for (int i = x; i < x + ncol; i++) {
             for (int j = y; j < y + nrow; j++) {
@@ -130,55 +124,42 @@ extern "C" {
                 idx++;
             }
         }
-//        print_array(dst, ncol, nrow);
     }
 
   __attribute__ ((noinline))  int tensorlib_cholesky(
           hb_tensor_t* A_p) {
 
     // Convert all low level pointers to Tensor objects
-    HBTensor<float> A(A_p); // LL^T (N by N matrix)
-    //HBTensor<int> pivots(pivots_p); // P: m by 1 vector (N by 1 for now)
+    HBTensor<float> A(A_p);
 
-//    printf("bsg_tiles_X %d bsg_tiles_Y %d __bsg_id %d\n", bsg_tiles_X, bsg_tiles_Y, __bsg_id);
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
     const int N = A.dim(0); // A is N by N
-    const int ntiles = bsg_tiles_X * bsg_tiles_Y; // total number of tiles
-    const int BLOCK_DIM = 4; // dimension of each diagonal block
-    const int LAST_BLOCK_DIM = N % BLOCK_DIM == 0 ? BLOCK_DIM : N % BLOCK_DIM; // dimension of the last diagonal block
-    const int nblocks = N / BLOCK_DIM + (N % BLOCK_DIM != 0); // number of blocks per side
+    const int ntiles = bsg_tiles_X * bsg_tiles_Y;
+    const int LAST_BLOCK_DIM = N % BLOCK_DIM == 0 ? BLOCK_DIM : N % BLOCK_DIM; // Dimension of the last diagonal block
+    const int nblocks = N / BLOCK_DIM + (N % BLOCK_DIM != 0); // Number of blocks per side
 
-//    printf("ID %d N %d ntiles %d BLOCK_DIM %d LAST_BLOCK_DIM %d nblocks %d\n", 
-//            __bsg_id, N,   ntiles,   BLOCK_DIM,   LAST_BLOCK_DIM,   nblocks);
-
-    for (int i = 0; i < nblocks; i++) { // diagonal index of block
-        const int di = i * BLOCK_DIM; // actual index of upper-left corner of block
-        // how many elements are below this diagonal block, also the size of the trailing submatrix
-        // if ne is zero or negative, this is the last block
+    for (int i = 0; i < nblocks; i++) { // Diagonal index of block
+        const int di = i * BLOCK_DIM; // Actual index of upper-left corner of block
+        // ne is how many elements are below this diagonal block, also the size of the trailing submatrix
+        // If ne is zero or negative, this is the last block
         const int ne = N - di - BLOCK_DIM;
         int curr_blk_dim = (ne > 0) ? BLOCK_DIM : LAST_BLOCK_DIM;
-        printf("===BLK_CHOL ID %d diag i %d di %d ne %d curr_blk_dim %d\n", __bsg_id, i, di, ne, curr_blk_dim);
+
         // Serial Cholesky of diagonal block
         float diag_data[curr_blk_dim * curr_blk_dim];
         float diag_result[curr_blk_dim * curr_blk_dim] = {0};
         copy_block_to_sp(diag_data, &A, di, di, curr_blk_dim, curr_blk_dim);
         g_barrier.sync(); // Make sure everyone got the correct data
-
         block_cholesky(diag_data, diag_result, curr_blk_dim);
 
-//        printf("diag_data %d\n", __bsg_id);
-//        print_array(diag_data, curr_blk_dim, curr_blk_dim);
-//        printf("diag_result %d\n", __bsg_id);
-//        print_array(diag_result, curr_blk_dim, curr_blk_dim);
         // Only copy diag block back if I am tile 0
         if (__bsg_id == 0) {
             copy_block_to_dram(&A, diag_result, di, di, curr_blk_dim, curr_blk_dim);
         }
 
-//        print_tensor(&A);
-        if (ne <= 0) break; // this is the last diag block, no need for more calculations
+        if (ne <= 0) break; // This is the last diag block, no need for more calculations
 
         // Parallel triangular solve for all blocks under this diagonal block
         // Each tile is in charge of some 1 X BLOCK_DIM strips of elms
@@ -188,45 +169,33 @@ extern "C" {
         // Each tile processes its elms in blocks
         const int cutoff = ntiles - ne % ntiles;
         const int normal_nstrips = ne / ntiles;
-        const int nstrips = (normal_nstrips < 1) ? ((__bsg_id < ne) ? 1 : 0) : // each relevant tile gets one strip
+        const int nstrips = (normal_nstrips < 1) ? (__bsg_id < ne) : // Each relevant tile gets one strip
                             (ne % ntiles != 0 && __bsg_id >= cutoff) ? normal_nstrips + 1 :
                              normal_nstrips;
         const int normal_nblocks_per_tile = nstrips / BLOCK_DIM;
-        const int nblocks_per_tile = (normal_nblocks_per_tile < 1) ? nstrips : 
+        const int nblocks_per_tile = (normal_nblocks_per_tile < 1) ? (nstrips > 0) : 
                                      (nstrips % BLOCK_DIM != 0) ? normal_nblocks_per_tile + 1 :
                                       normal_nblocks_per_tile;
 
-        printf("===TRI_SOL ID %d cutoff %d normal_nstrips %d nstrips %d normal_nblocks_per_tile %d nblocks_per_tile %d\n",
-                       __bsg_id, cutoff,   normal_nstrips,   nstrips,   normal_nblocks_per_tile,   nblocks_per_tile);
-
-        int x = di; // since we are computing L, x will always be the same
+        int x = di; // Since we are computing L, x will always be the same
         int y = 0;
-        for (int j = 0; j < nblocks_per_tile; j++) { // compute L for each block handled by this tile
+        for (int j = 0; j < nblocks_per_tile; j++) { // Compute L for each block handled by this tile
             // y dimension of this block, x dim is always BLOCK_DIM
             int y_dim = (j == (nblocks_per_tile - 1) && (nstrips % BLOCK_DIM) != 0) ? (nstrips % BLOCK_DIM) : BLOCK_DIM;
             // y index is "diag blocks above me" + "normal chunks before me" + "big chunks before me" + my block offset
-            y = (N-ne) + j* BLOCK_DIM + ((normal_nstrips < 1) ? __bsg_id :          // not enough work for tiles
+            y = (N-ne) + j* BLOCK_DIM + ((normal_nstrips < 1) ? __bsg_id :          // Not enough work for tiles
                                          (__bsg_id < cutoff) ? nstrips * __bsg_id : // I handle normal chunks
                                          (nstrips-1) * cutoff + nstrips * (__bsg_id-cutoff)); // I handle big chunks
 
-//            printf("--ID %d j %d y_dim %d y %d x %d\n", __bsg_id, j, y_dim, y, x);
             // Triangular solve
-            float block_result[y_dim * BLOCK_DIM] = {0}; // block to be computed is y_dim X BLOCK_DIM
+            float block_result[y_dim * BLOCK_DIM];
             copy_block_to_sp(block_result, &A, y, x, y_dim, BLOCK_DIM);
             block_triangular_solve(block_result, diag_result, y_dim, BLOCK_DIM);
-//            printf("block_result %d\n", __bsg_id);
-//            print_array(block_result, y_dim, BLOCK_DIM);
 
             // Write back to DRAM
             copy_block_to_dram(&A, block_result, y, x, y_dim, BLOCK_DIM);
             set_block_to_zero(&A, x, y, BLOCK_DIM, y_dim);
-            //copy_block_to_dram(&A, block_result, x, y, BLOCK_DIM, y_dim);
-
-//            printf("A after copy back %d\n", __bsg_id);
-//            print_tensor(&A);
         }
-
-//        print_tensor(&A);
 
         // Make sure all tiles have finished triangular solve before moving on
         g_barrier.sync();
@@ -235,21 +204,17 @@ extern "C" {
         // Evenly divide the work as before
         // Each tile is in charge of some 1 X ne strips of elms
         // Each tile processes its elms in blocks
-        //printf("===UPDATE bsg_id %d\n", __bsg_id);
         const int nblocks_per_row = ne / BLOCK_DIM + (ne % BLOCK_DIM != 0);
         for (int j = 0; j < nblocks_per_tile; j++) {
             int y_dim = (j == (nblocks_per_tile - 1) && (nstrips % BLOCK_DIM) != 0) ? (nstrips % BLOCK_DIM) : BLOCK_DIM;
             // y index is "diag blocks above me" + "normal chunks before me" + "big chunks before me" + my block offset
-            y = (N-ne) + j* BLOCK_DIM + ((normal_nstrips < 1) ? __bsg_id :          // not enough work for tiles
+            y = (N-ne) + j* BLOCK_DIM + ((normal_nstrips < 1) ? __bsg_id :          // Not enough work for tiles
                                          (__bsg_id < cutoff) ? nstrips * __bsg_id : // I handle normal chunks
                                          (nstrips-1) * cutoff + nstrips * (__bsg_id-cutoff)); // I handle big chunks
 
-            // for each block in this row
             for (int k = 0; k < nblocks_per_row; k++) {
-                int x_dim = (k == (nblocks_per_row - 1) && (ne % BLOCK_DIM) != 0) ? ne % BLOCK_DIM : BLOCK_DIM; // ncols of result block
-                x = di + BLOCK_DIM + k * BLOCK_DIM; // trailing submatrix starts at di + BLOCK_DIM
-                printf("==UPDATE ID %d j %d k %d nblocks_per_row %d y_dim %d x_dim %d y %d x %d\n", 
-                             __bsg_id, j,   k,   nblocks_per_row,   y_dim,   x_dim,   y,   x);
+                int x_dim = (k == (nblocks_per_row - 1) && (ne % BLOCK_DIM) != 0) ? ne % BLOCK_DIM : BLOCK_DIM;
+                x = di + BLOCK_DIM + k * BLOCK_DIM; // Trailing submatrix starts at di + BLOCK_DIM
 
                 // Copy value of L (row matrix) into scratchpad
                 float L_data[y_dim * BLOCK_DIM]; // y_dim X BLOCK_DIM
@@ -257,31 +222,20 @@ extern "C" {
 
                 // Copy value of LT (column matrix) into scratchpad
                 float LT_data[BLOCK_DIM * x_dim]; // BLOCK_DIM X x_dim
-                //copy_block_transpose_to_sp(LT_data, &A, di, x, BLOCK_DIM, x_dim);
                 copy_block_transpose_to_sp(LT_data, &A, x, di, x_dim, BLOCK_DIM);
 
                 // Copy value of A into scratchpad
                 float A_data[y_dim * x_dim];
                 copy_block_to_sp(A_data, &A, y, x, y_dim, x_dim);
 
-//                printf("L_data %d\n", __bsg_id);
-//                print_array(L_data, y_dim, BLOCK_DIM);
-//                printf("LT_data %d\n", __bsg_id);
-//                print_array(LT_data, BLOCK_DIM, x_dim);
-//                printf("A_data %d\n", __bsg_id);
-//                print_array(A_data, y_dim, x_dim);
-
                 // A = A - L*L^T (subtract L*L^T from trailing submatrix)
                 block_matmul_sub(A_data, L_data, LT_data, y_dim, x_dim, BLOCK_DIM);
 
-//                printf("result A_data %d\n", __bsg_id);
-//                print_array(A_data, y_dim, x_dim);
                 // Copy back updated value to DRAM
                 copy_block_to_dram(&A, A_data, y, x, y_dim, x_dim);
             }
         }
 
-//        print_tensor(&A);
         // Make sure all tiles have finished updating trailing submatrix before moving on
         g_barrier.sync();
     }
@@ -309,14 +263,6 @@ extern "C" {
 
         }
 */
-
-
-//        for (size_t i = 0; i < N; i++) {
-//            for (size_t j = 0; j < N; j++) {
-//                printf("%f ", L(i,j));
-//            }
-//            printf("\n");
-//        }
 
     }
 
