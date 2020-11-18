@@ -8,6 +8,7 @@
 
 extern "C" {
 
+/*
     void print_tensor(HBTensor<float>* t) {
         printf("[bsg_id %d\n", __bsg_id);
         int N = (*t).dim(0);
@@ -30,6 +31,7 @@ extern "C" {
         }
         printf("]\n");
     }
+*/
 
     // Compute the Cholesky for the given block A and store it in L
     // N is the size of the block (block is square)
@@ -240,8 +242,9 @@ extern "C" {
         g_barrier.sync();
     }
 
+
     // Use a single tile only
-    if (__bsg_id == 0) {
+//    if (__bsg_id == 0) {
 
 /*
         float data[N * N] = {0};
@@ -264,7 +267,8 @@ extern "C" {
         }
 */
 
-    }
+//    }
+
 
     //   End profiling
     bsg_cuda_print_stat_kernel_end();
