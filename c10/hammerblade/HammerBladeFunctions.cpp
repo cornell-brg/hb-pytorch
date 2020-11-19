@@ -21,11 +21,11 @@ const uint64_t cycle_time = 10000;
 namespace {
 static std::once_flag init_flag;
 static void initHammerBladeDevice() {
-  C10_HB_CHECK(hb_mc_device_init(&_hb_device, "HB_PYTORCH_PORT", 0));
+  C10_HB_CHECK(hb_mc_device_init_custom_dimensions(&_hb_device, "HB_PYTORCH_PORT", 0, _hb_tg_dim));
   C10_HB_CHECK(hb_mc_device_program_init(&_hb_device, _bin_path, "default_allocator", 0));
   // config PyTorch tile group size based on device->mesh->dim, which is populated with
   // device size when calling hb_mc_device_init
-  _hb_tg_dim = _hb_device.mesh->dim;
+  // _hb_tg_dim = _hb_device.mesh->dim;
   std::cerr << "PyTorch configed with " << _hb_tg_dim.x << " * " << _hb_tg_dim.y << " HB device" << std::endl;
   // config shared reduction buffer on device
   // and reset barrier for now -- global constructors are not called
