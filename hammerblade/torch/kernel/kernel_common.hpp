@@ -17,6 +17,8 @@
 #else
 #define BSG_TILE_GROUP_X_DIM bsg_global_X
 #define BSG_TILE_GROUP_Y_DIM (bsg_global_Y - 1)
+#define bsg_tiles_X BSG_TILE_GROUP_X_DIM
+#define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
 #endif // HB_EMUL
 // imaginary __bsg_pod_id and BSG_POD_DIM
 #define __bsg_pod_id 0
