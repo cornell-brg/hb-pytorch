@@ -8,11 +8,6 @@
 
 extern "C" {
 
-//====================================================================
-// tensorlib_hardtanh
-//====================================================================
-// This is the tanh kernel for tensors with float elements.
-
 __attribute__ ((noinline))
 int tensorlib_hardtanh(hb_tensor_t* t0_p, hb_tensor_t* t1_p,
                        float* min_, float* max_)
