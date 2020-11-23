@@ -5,9 +5,10 @@
 
 namespace at {
 namespace native {
-  Tensor hardtanh_hb(Tensor const& self, Scalar min, Scalar max) {
-    auto out = at::empty(self.sizes(), self.options());
 
+namespace {
+  void _hardtanh_hb(Tensor& out, Tensor const& self,
+                   Scalar min, Scalar max) {
     std::vector<eva_t> device_args;
     std::vector<eva_t> device_ptrs;
     device_args.push_back(create_device_tensor(out, device_ptrs));
@@ -17,7 +18,17 @@ namespace native {
     c10::hammerblade::offload_kernel(
         "tensorlib_hardtanh", device_args);
     cleanup_device(device_args, device_ptrs);
-
-    return out;
   }
+}
+
+Tensor hardtanh_hb(Tensor const& self, Scalar min, Scalar max) {
+  auto out = at::empty(self.sizes(), self.options());
+  _hardtanh_hb(out, self, min, max);
+  return out;
+}
+
+Tensor hardtanh_hb_(Tensor const& self, Scalar min, Scalar max) {
+  _hardtanh_hb(self, self, min, max);
+  return self;
+}
 }} // at::native
