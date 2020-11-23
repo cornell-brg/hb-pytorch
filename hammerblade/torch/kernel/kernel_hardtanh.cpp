@@ -34,8 +34,6 @@ int tensorlib_hardtanh(hb_tensor_t* t0_p, hb_tensor_t* t1_p,
   },
   res, input);
 
-  bsg_printf("%f\n", res(0,0));
-
   bsg_cuda_print_stat_kernel_end();
   return 0;
 }

@@ -8,13 +8,16 @@ namespace native {
   Tensor hardtanh_hb(Tensor const& self, Scalar min, Scalar max) {
     auto out = at::empty(self.sizes(), self.options());
 
-    std::vector<Tensor> args;
-    args.push_back(out);
-    args.push_back(self);
-    std::vector<eva_t> scalars;
-    scalars.push_back(create_device_scalar(min));
-    scalars.push_back(create_device_scalar(max));
-    offload_tensor_scalar_impl(args, scalars, "tensorlib_hardtanh");
+    std::vector<eva_t> device_args;
+    std::vector<eva_t> device_ptrs;
+    device_args.push_back(create_device_tensor(out, device_ptrs));
+    device_args.push_back(create_device_tensor(self, device_ptrs));
+    device_args.push_back(create_device_scalar(min.to<float>()));
+    device_args.push_back(create_device_scalar(max.to<float>()));
+    c10::hammerblade::offload_kernel(
+        "tensorlib_hardtanh", device_args);
+    cleanup_device(device_args, device_ptrs);
+
     return out;
   }
 }} // at::native
