@@ -6,7 +6,7 @@
 namespace at {
 namespace native {
   Tensor hardtanh_hb(Tensor const& self, Scalar min, Scalar max) {
-    auto out = at::empty({0}, self.options());
+    auto out = at::empty(self.sizes(), self.options());
 
     std::vector<Tensor> args;
     args.push_back(out);
@@ -15,6 +15,6 @@ namespace native {
     scalars.push_back(create_device_scalar(min));
     scalars.push_back(create_device_scalar(max));
     offload_tensor_scalar_impl(args, scalars, "tensorlib_hardtanh");
-    return self;
+    return out;
   }
 }} // at::native
