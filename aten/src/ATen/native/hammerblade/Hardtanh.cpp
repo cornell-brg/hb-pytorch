@@ -27,7 +27,7 @@ Tensor hardtanh_hb(Tensor const& self, Scalar min, Scalar max) {
   return out;
 }
 
-Tensor hardtanh_hb_(Tensor& self, Scalar min, Scalar max) {
+Tensor& hardtanh_hb_(Tensor& self, Scalar min, Scalar max) {
   _hardtanh_hb(self, self, min, max);
   return self;
 }
