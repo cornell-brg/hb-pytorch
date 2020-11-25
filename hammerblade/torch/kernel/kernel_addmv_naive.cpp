@@ -117,13 +117,12 @@ extern "C" {
         // Start profiling
         bsg_cuda_print_stat_kernel_start();
 
-
         // Find the size of the vector
         int vec_size = vec.dim(0);
         
         // Find the range of rows and columns this tile operates on
         int num_rows  = ((int) mat.dim(0)) / bsg_tiles_X;
-        int num_cols  = ((int) mat.dim(0)) / bsg_tiles_Y;
+        int num_cols  = ((int) mat.dim(1)) / bsg_tiles_Y;
 
         int row_start = (__bsg_id / bsg_tiles_Y) * num_rows;
         int row_end   = row_start + num_rows;
@@ -140,6 +139,7 @@ extern "C" {
 
         // Matrix x vector product of sub-matrix in acc matrix
         int c = col_start;
+        /*
         for ( ; c+2 <= col_end; c += 2 ) {
             float vec_c0 = vec_p[c];
             float vec_c1 = vec_p[c+1];
@@ -198,15 +198,20 @@ extern "C" {
             }
             
         }
+        */
         for (; c < col_end; c++ ){
             float vec_c = vec_p[c];
             
             int r = row_start;
-            for ( ; r + 4 <= row_end; r += 4 ) {
+            for ( ; r + 8 <= row_end; r += 8 ) {
                 float mat_r0 = mat_p[r * vec_size + c];
                 float mat_r1 = mat_p[(r+1) * vec_size + c];
                 float mat_r2 = mat_p[(r+2) * vec_size + c];
                 float mat_r3 = mat_p[(r+3) * vec_size + c];
+                float mat_r4 = mat_p[(r+4) * vec_size + c];
+                float mat_r5 = mat_p[(r+5) * vec_size + c];
+                float mat_r6 = mat_p[(r+6) * vec_size + c];
+                float mat_r7 = mat_p[(r+7) * vec_size + c];
 
                 // acc_l[r] += mat_r0 * vec_c;
                 // acc_l[(r+1)] += mat_r1 * vec_c;
@@ -217,6 +222,10 @@ extern "C" {
                 acc_p[(r+1) * bsg_tiles_Y + col_acc] += mat_r1 * vec_c;
                 acc_p[(r+2) * bsg_tiles_Y + col_acc] += mat_r2 * vec_c;
                 acc_p[(r+3) * bsg_tiles_Y + col_acc] += mat_r3 * vec_c;
+                acc_p[(r+4) * bsg_tiles_Y + col_acc] += mat_r4 * vec_c;
+                acc_p[(r+5) * bsg_tiles_Y + col_acc] += mat_r5 * vec_c;
+                acc_p[(r+6) * bsg_tiles_Y + col_acc] += mat_r6 * vec_c;
+                acc_p[(r+7) * bsg_tiles_Y + col_acc] += mat_r7 * vec_c;
                 
                 // acc_p[r * bsg_tiles_Y + col_acc] += mat_p[r * vec_size + c] * vec_c;
                 // acc(r, col_acc) += mat(r, c) * vec(c);

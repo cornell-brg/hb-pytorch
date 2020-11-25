@@ -4,7 +4,53 @@
 //====================================================================
 
 #define BLOCK_SIZE 4 
+#define VEC_BLOCK_SIZE 16
 #include <kernel_common.hpp>
+
+inline void spcpy(float* dest, float* src) {
+  for (int i = 0; i < VEC_BLOCK_SIZE; i += 8) {
+        register float tmp0 = *(src + 0);
+        register float tmp1 = *(src + 1);
+        register float tmp2 = *(src + 2);
+        register float tmp3 = *(src + 3);
+        register float tmp4 = *(src + 4);
+        register float tmp5 = *(src + 5);
+        register float tmp6 = *(src + 6);
+        register float tmp7 = *(src + 7);
+        asm volatile("": : :"memory");
+        *(dest + 0) = tmp0;
+        *(dest + 1) = tmp1;
+        *(dest + 2) = tmp2;
+        *(dest + 3) = tmp3;
+        *(dest + 4) = tmp4;
+        *(dest + 5) = tmp5;
+        *(dest + 6) = tmp6;
+        *(dest + 7) = tmp7;
+        src += 8;
+        dest += 8;
+  }
+}
+
+template<int N, typename Func>
+struct Unroll {
+  inline static void compute( Func lambda );
+};
+
+template<int N, typename Func>
+inline void Unroll<N, Func>::compute(Func lambda){
+  lambda(N);
+  Unroll<N-1, Func>::compute( lambda );
+}
+
+template<typename Func>
+struct Unroll<0, Func> {
+  inline static void compute( Func lambda );
+};
+
+template<typename Func>
+inline void Unroll<0, Func>::compute( Func lambda ){
+  lambda(0);
+}
 
 extern "C" {
 
@@ -23,19 +69,61 @@ extern "C" {
         float beta  = *_beta;
         float alpha = *_alpha;
 
+        // get data pointers
+        float* self_p = (float*) self.data_ptr();
+        float* mat_p  = (float*) mat.data_ptr();
+        float* vec_p  = (float*) vec.data_ptr();
+        float* res_p  = (float*) result.data_ptr();
+
         // Find out the number of blocks of vec
         int vec_size = vec.dim(0);
         int num_blk = ((int) vec_size / BLOCK_SIZE) + 1;
         
         // Find the range of rows this tile operates on
-        int num_rows = ((int) mat.dim(0) / (bsg_tiles_X * bsg_tiles_Y)) + 1;
+        int num_rows = ((int) mat.dim(0) / (bsg_tiles_X * bsg_tiles_Y));
         int row_st = __bsg_id * num_rows;
         int row_en = row_st + num_rows;
         row_en = row_en > mat.dim(0) ? mat.dim(0) : row_en;
 
         // Resultant vector block for this tile
-        float res[BLOCK_SIZE];
+        float res_block[BLOCK_SIZE];
 
+        g_barrier.sync();
+
+        //   Start profiling
+        bsg_cuda_print_stat_kernel_start();
+
+        // Outer loop for VEC_BLOCK_SIZE increments over vector
+        for ( size_t v = 0; v + VEC_BLOCK_SIZE <= vec_size; v += VEC_BLOCK_SIZE ){
+            float vec_block[VEC_BLOCK_SIZE];
+            
+            // Copy over vec block
+            spcpy( vec_block, vec_p );
+
+            // Inner loop for BLOCK_SIZE increments over matrix rows
+            for ( size_t row = row_st; row < row_en; row++ ) {
+                // Initialize result block
+                float res = 0.0;
+                
+                // Block for matrix elements
+                float mat_block[VEC_BLOCK_SIZE];
+                spcpy( mat_block, mat_p + ( row * vec_size ) + v );
+
+                float msum = 0.0;
+                auto mul_lambda = [&]( size_t i ) {
+                    msum += mat_block[i] * vec_block[i];
+                };
+                Unroll<VEC_BLOCK_SIZE-1, decltype(mul_lambda)>::compute( mul_lambda );
+
+                res_p[row] += beta * msum;
+            }
+        }
+
+        for ( size_t row = row_st; row < row_en; row++ ) {
+            res_p[row] = alpha * self_p[row] + res_p[row];
+        }
+
+        /*
         // Outer loop for BLOCK_SIZE increments from row_st
         for ( ; row_st + BLOCK_SIZE < row_en; row_st += BLOCK_SIZE ) {
             // Initialize Resultant block
@@ -121,6 +209,7 @@ extern "C" {
                 //result(row_st) = res[i];
             }
         }
+        */
         
         //   End profiling
         bsg_cuda_print_stat_kernel_end();

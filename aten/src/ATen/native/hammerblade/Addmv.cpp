@@ -52,8 +52,17 @@ Tensor addmv_hb(
   */
 
   // Data parallel version of addmv for size of matrix > size of machine
-  hb_offload_kernel(result, b_self, mat, vec, acc, beta.to<scalar_t>(),
-    alpha.to<scalar_t>(), "tensorlib_addmv_naive");
+  // hb_offload_kernel(result, b_self, mat, vec, acc, beta.to<scalar_t>(),
+  //   alpha.to<scalar_t>(), "tensorlib_addmv_naive");
+
+  // Data parallel version of addmv for size of matrix > size of machine
+  // hb_offload_kernel(result, b_self, mat, vec, beta.to<scalar_t>(),
+  //  alpha.to<scalar_t>(), "tensorlib_addmv_pipelined");
+
+  // Data parallel version of addmv for size of matrix > size of machine with blocking
+  hb_offload_kernel(result, b_self, mat, vec, beta.to<scalar_t>(),
+    alpha.to<scalar_t>(), "tensorlib_addmv");
+
 
   return result;
 }
