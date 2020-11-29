@@ -5572,6 +5572,7 @@
   dispatch:
     CPU: legacy::cpu::_thnn_hardtanh_forward
     CUDA: legacy::cuda::_thnn_hardtanh_forward
+    HammerBlade: hardtanh_hb
 
 - func: hardtanh_backward.grad_input(Tensor grad_output, Tensor self, Scalar min_val, Scalar max_val, *, Tensor(a!) grad_input) -> Tensor(a!)
   python_module: nn
@@ -5591,6 +5592,7 @@
   dispatch:
     CPU: legacy::cpu::_thnn_hardtanh_forward_
     CUDA: legacy::cuda::_thnn_hardtanh_forward_
+    HammerBlade: hardtanh_hb_
 
 - func: leaky_relu.out(Tensor self, Scalar negative_slope=0.01, *, Tensor(a!) out) -> Tensor(a!)
   python_module: nn

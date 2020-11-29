@@ -11,18 +11,21 @@ import hbutils
 torch.manual_seed(42)
 random.seed(42)
 
-def _test_conv2d(inputs, kernel, padding=1, stride=1, bias=None):
+def _test_conv2d(inputs, kernel, padding=1, stride=1,
+                 bias=None, groups=1):
     inputs_hb = hbutils.init_hb_tensor(inputs)
     kernel_hb = hbutils.init_hb_tensor(kernel)
     bias_hb = None if bias is None else hbutils.init_hb_tensor(bias)
 
     conv_result_hb = F.conv2d(inputs_hb, kernel_hb,
-                              padding=padding, stride=stride, bias=bias_hb)
+                              padding=padding, stride=stride,
+                              bias=bias_hb, groups=groups)
     conv_result = F.conv2d(inputs, kernel,
-                           padding=padding, stride=stride, bias=bias)
+                           padding=padding, stride=stride,
+                           bias=bias, groups=groups)
 
     # test forward
-    assert torch.allclose(conv_result, conv_result_hb.cpu())
+    assert torch.allclose(conv_result, conv_result_hb.cpu(), rtol=1e-5)
 
     # test backward
     if inputs.requires_grad:
@@ -161,6 +164,55 @@ def test_conv2d_bias_4():
     bias = torch.rand(3, requires_grad=True)
 
     _test_conv2d(inputs, kernel, padding, stride, bias)
+
+def test_conv2d_groups_1():
+    """
+    Depthwise convolution
+    """
+    kernel = torch.rand(3, 1, 3, 3)
+    inputs = torch.rand(1, 3, 5, 5)
+
+    _test_conv2d(inputs, kernel, groups=3)
+
+def test_conv2d_groups_2():
+    """
+    Multi-batch, depthwise convolution
+    """
+    kernel = torch.rand(3, 1, 3, 3)
+    inputs = torch.rand(2, 3, 5, 5)
+
+    _test_conv2d(inputs, kernel, groups=3)
+
+def test_conv2d_groups_3():
+    """
+    Output groups
+    """
+    kernel = torch.rand(6, 1, 3, 3)
+    inputs = torch.rand(1, 2, 5, 5)
+
+    _test_conv2d(inputs, kernel, groups=2)
+
+def test_conv2d_groups_4():
+    """
+    Input & Output groups
+    """
+    kernel = torch.rand(6, 2, 3, 3)
+    inputs = torch.rand(1, 4, 5, 5)
+
+    _test_conv2d(inputs, kernel, groups=2)
+
+def test_conv2d_groups_5():
+    """
+    Grouped convolution with asymmetric padding and strides
+    """
+    kernel = torch.rand(4, 1, 3, 3)
+    inputs = torch.rand(1, 2, 5, 5)
+    padding = (2, 3)
+    stride = (1, 2)
+    bias = torch.rand(4, requires_grad=True)
+
+    _test_conv2d(inputs, kernel, padding, stride,
+                 bias, groups=2)
 
 @pytest.mark.skipif(torch.hb_cosim_on, reason="Prohibitively slow on cosim")
 def test_conv2d_batch_input_output():

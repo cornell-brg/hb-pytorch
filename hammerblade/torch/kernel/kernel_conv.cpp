@@ -11,12 +11,14 @@ static int convolution_forward(
     hb_tensor_t* input,
     hb_tensor_t* weight,
     hb_vector_t* padding,
-    hb_vector_t* strides) {
+    hb_vector_t* strides,
+    uint32_t* groups_) {
   auto y = HBTensor<float, 4>(output);
   auto x = HBTensor<float, 4>(input);
   auto w = HBTensor<float, 4>(weight);
   auto p = HBVector<uint32_t>(padding);
   auto s = HBVector<uint32_t>(strides);
+  auto groups = *groups_;
 
   // Conv2d parameters
   auto N = y.dim(0); // number of minibatches
@@ -33,6 +35,9 @@ static int convolution_forward(
   auto Ph = p[0];
   auto Pw = p[1];
 
+  auto cin_per_group = Cin / groups;
+  auto cout_per_group = Cout / groups;
+
   // Weights buffer
   register float W_local[KhBufSize][KwBufSize];
 
@@ -48,14 +53,18 @@ static int convolution_forward(
 
   for(uint32_t n = 0; n < N; ++n) {
     for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
-      hb_blocked_for(bsg_tiles_X * bsg_tiles_Y, Cout,
-                    [&](size_t co, size_t tg_size_co) {
+      size_t group = ci / cin_per_group;
+      hb_blocked_for(bsg_tiles_X * bsg_tiles_Y, cout_per_group,
+                    [&](size_t co_, size_t tg_size_co) {
+        size_t co = co_ + cout_per_group * group;
+
         // Load the filter w(co, ci, :, :) to dmem
-        uint32_t w_offset = w.offset(co, ci, 0, 0);
+        uint32_t w_offset = w.offset(co, ci % cin_per_group, 0, 0);
         auto w_ptr = (bsg_attr_remote float*) w.data_ptr();
         load_weights(W_local, w_ptr, w_offset, Kh, Kw);
 
-        hb_blocked_for(tg_size_co, Hout, [&](size_t yh, size_t tg_size_yh) {
+        hb_blocked_for(tg_size_co, Hout,
+                       [&](size_t yh, size_t tg_size_yh) {
           hb_range yw_range;
           calc_range(&yw_range, Wout, tg_size_yh);
           size_t yw_start = yw_range.start;
@@ -106,7 +115,7 @@ static int convolution_forward(
               uint32_t kw_local = w_off;
 
               for(uint32_t kw = 0; kw < Kw; ++kw) {
-                if((ci + kh + kw) == 0) {
+                if((ci % cin_per_group + kh + kw) == 0) {
                   y(n, co, yh, yw) = 0.0;
                 }
 
@@ -255,7 +264,8 @@ extern "C" {
           hb_tensor_t* input,
           hb_tensor_t* weight,
           hb_vector_t* padding,
-          hb_vector_t* strides) {
+          hb_vector_t* strides,
+          uint32_t* groups) {
     #define CONV_FORWARD_TEMPLATED(                                        \
         N, Cout, Hout, Wout, Cin, Hin, Win, Kh, Kw, Sh, Sw, Ph, Pw)        \
       if(!convolution_forward_template<                                    \
@@ -272,7 +282,8 @@ extern "C" {
     CONV_FORWARD_TEMPLATED(N, 128,  8,  8, 64,  8,  8, 3, 3, 1, 1, 1, 1);
     CONV_FORWARD_TEMPLATED(N, 128,  8,  8, 64,  8,  8, 1, 1, 1, 1, 0, 0);
 
-    return convolution_forward(output, input, weight, padding, strides);
+    return convolution_forward(output, input, weight, padding, strides,
+                               groups);
   };
 
   __attribute__ ((noinline))  int tensorlib_convolution_add_bias(
@@ -393,7 +404,7 @@ extern "C" {
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_forward,
      hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
-     hb_vector_t*, hb_vector_t*);
+     hb_vector_t*, hb_vector_t*, uint32_t*);
 
   HB_EMUL_REG_KERNEL(tensorlib_convolution_add_bias,
      hb_tensor_t*, hb_tensor_t*);
