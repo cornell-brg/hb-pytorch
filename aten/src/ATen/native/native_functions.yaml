@@ -6385,6 +6385,13 @@
 # these are the same thing, but we give them different prefixes to
 # make the operational distinction clear.
 
+# sample sort
+- func: sample_sort(Tensor self, int nproc=1, int sr=1) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    HammerBlade: sample_sort_hb
+
 - func: slow_conv_transpose2d.out(Tensor self, Tensor weight, int[2] kernel_size, Tensor? bias=None, int[2] stride=1, int[2] padding=0, int[2] output_padding=0, int[2] dilation=1, *, Tensor(a!) out) -> Tensor(a!)
   python_module: nn
   dispatch:
