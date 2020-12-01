@@ -7,6 +7,11 @@
 //
 // The naming convention used here matches the naming convention of torch.cuda
 
+#if !defined(SMU_TOPLEVEL_XCEL)
+// PP: make sure we are using custom toplevel
+#define SMU_TOPLEVEL_XCEL
+#endif
+
 // #include <c10/macros/Macros.h>
 #include <c10/hammerblade/HammerBladeMacros.h>
 #include <c10/hammerblade/HammerBladeDevice.h>

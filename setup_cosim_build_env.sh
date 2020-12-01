@@ -4,6 +4,8 @@ echo "  Make sure you enabled devtoolset-8!"
 echo "  Make sure correct Python environemnt is set!"
 echo ""
 
+export BRG_BSG_BLADERUNNER_DIR="/work/global/pp482/hammerblade/bsg_bladerunner"
+
 # setup pytorch building options
 export REL_WITH_DEB_INFO=1
 export BUILD_TEST=0
@@ -48,16 +50,17 @@ export USE_HB_COSIM=1
 # Build COSIM runtime library and simulation executable if not using one of the
 # BRG servers -- on BRG servers we have global installed COSIM so SW side ppl
 # dont have to worry about COSIM installation
-if [[ "x${SETUP_BRG_HAMMERBLADE}" != "xyes" ]]; then
-  export BSG_MACHINE=4x4_fast_n_fake
-  export BSG_MACHINE_PATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/machines/$BSG_MACHINE
-  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python test_python.log
-fi
+export BSG_MACHINE=timing_toplevel_smu_xcel_16_8
+export BSG_MACHINE_PATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/machines/$BSG_MACHINE
+make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python test_python.log
 
 export HB_KERNEL_DIR=$DIR/hammerblade/torch
 
+echo "  \$BRG_BSG_BLADERUNNER_DIR is set to $BRG_BSG_BLADERUNNER_DIR"
 echo "  \$BSG_MANYCORE_INCLUDE is set to $BSG_MANYCORE_INCLUDE"
 echo "  \$BSG_MANYCORE_LDPATH is set to $BSG_MANYCORE_LDPATH"
+echo "  \$BSG_MACHINE is set to $BSG_MACHINE"
+echo "  \$BSG_MACHINE_PATH is set to $BSG_MACHINE_PATH"
 echo "  \$HB_KERNEL_DIR is set to $HB_KERNEL_DIR"
 echo ""
 echo "  Done!"

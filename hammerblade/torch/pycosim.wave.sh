@@ -1,6 +1,6 @@
 #!/usr/bin/bash -x
 
-COSIM_PYTHON_EXE=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python/test_loader.debug
+COSIM_PYTHON_EXE=/work/global/pp482/hammerblade/bsg_bladerunner/bsg_replicant/examples/python/test_loader.debug
 
 if [[ ! -f $COSIM_PYTHON_EXE ]]
 then

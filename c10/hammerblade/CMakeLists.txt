@@ -34,6 +34,9 @@ endforeach()
 add_library(c10_hammerblade ${C10_HAMMERBLADE_SRCS} ${C10_HAMMERBLADE_HEADERS})
 
 
+# PP: tell bsg_manycore_lib we are using SMU custom toplevel
+target_compile_options(c10_hammerblade PRIVATE "-DSMU_TOPLEVEL_XCEL")
+
 # If building shared library, set dllimport/dllexport proper.
 target_compile_options(c10_hammerblade PRIVATE "-DC10_HAMMERBLADE_BUILD_MAIN_LIB")
 # Enable hidden visibility if compiler supports it.

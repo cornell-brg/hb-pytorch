@@ -70,8 +70,9 @@ endif
 
 bsg_global_X := $(BSG_MACHINE_GLOBAL_X)
 bsg_global_Y := $(BSG_MACHINE_GLOBAL_Y)
-bsg_tiles_X  := $(bsg_global_X)
-bsg_tiles_Y  := $(shell expr $(bsg_global_Y) - 1 )
+# PP: SMU toplevel has two extra cols and three extra rows
+bsg_tiles_X  := $(shell expr $(bsg_global_X) - 2)
+bsg_tiles_Y  := $(shell expr $(bsg_global_Y) - 3)
 
 include $(BSG_MANYCORE_DIR)/software/mk/Makefile.master
 

@@ -98,6 +98,7 @@ void device_free(eva_t data_p) {
 
 void* memcpy_host_to_device(void *dst, const void *src, uint32_t nbytes) {
   c10::probe::LogATenKernelWithName("@BSG_API_CALL@__memcpy");
+  std::cerr << "HB memcpy_host_to_device called at " << elapsed_cycles() << std::endl;
   // assume 0 time
   c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
   std::chrono::microseconds simulated(0);
@@ -111,6 +112,7 @@ void* memcpy_host_to_device(void *dst, const void *src, uint32_t nbytes) {
 
 void* memcpy_device_to_host(void *dst, const void *src, uint32_t nbytes) {
   c10::probe::LogATenKernelWithName("@BSG_API_CALL@__memcpy");
+  std::cerr << "HB memcpy_device_to_host called at " << elapsed_cycles() << std::endl;
   // assume 0 time
   c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
   std::chrono::microseconds simulated(0);
@@ -127,6 +129,7 @@ void* DMA_host_to_device(void *dst, const void *src, uint32_t nbytes) {
   return memcpy_host_to_device(dst, src, nbytes);
 #else
   c10::probe::LogATenKernelWithName("@BSG_API_CALL@__dma");
+  std::cerr << "HB DMA_host_to_device called at " << elapsed_cycles() << std::endl;
   // assume 0 time
   c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
   std::chrono::microseconds simulated(0);
@@ -145,6 +148,9 @@ void* DMA_device_to_host(void *dst, const void *src, uint32_t nbytes) {
   return memcpy_device_to_host(dst, src, nbytes);
 #else
   c10::probe::LogATenKernelWithName("@BSG_API_CALL@__dma");
+  std::cerr << "HB DMA_device_to_host( src=" << (eva_t)((intptr_t)src)
+            << ", dst=" << dst << ", nbytes=" << nbytes
+            << " ) called at " << elapsed_cycles() << std::endl;
   // assume 0 time
   c10::probe::HBProfilerTrimLog* trim_log = new c10::probe::HBProfilerTrimLog();
   std::chrono::microseconds simulated(0);
@@ -160,6 +166,7 @@ void* DMA_device_to_host(void *dst, const void *src, uint32_t nbytes) {
 
 void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   std::string kernel_str = "@OFFLOAD_KERNEL@__";
+  std::cerr << "HB offload_kernel " << kernel << " called at " << elapsed_cycles() << std::endl;
 
   int idle = IDLE;
   TORCH_CHECK(hb_device_status.compare_exchange_strong(idle, IN_USE),
