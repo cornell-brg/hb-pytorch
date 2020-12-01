@@ -19,6 +19,18 @@ def test_torch_ss_4():
     x = torch.randn(100)
     _test_torch_ss_check(x,10,3)
 
+def test_torch_ss_5():
+    x = torch.randn(1000)
+    _test_torch_ss_check(x,10,3)
+
+def test_torch_ss_6():
+    x = torch.randn(10000)
+    _test_torch_ss_check(x,15,3)
+
+def test_torch_ss_7():
+    x = torch.randn(100000)
+    _test_torch_ss_check(x,16,5)
+
 def _test_torch_ss_check(tensor_self,nproc=1,sr=1):
     tensor_self_hb = torch.tensor(tensor_self).hammerblade()
     result_hb = torch.sample_sort(tensor_self_hb,nproc,sr)
