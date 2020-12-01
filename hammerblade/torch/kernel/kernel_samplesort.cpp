@@ -9,7 +9,7 @@ extern "C" {
           hb_tensor_t* sample_keys,
           hb_tensor_t* sorted_keys,
           hb_tensor_t* splitters,
-          hb_tensor_t* thread_buckets,
+          hb_tensor_t* buck_sizes,
           int32_t* nproc,
           int32_t* sr
           ) {
@@ -19,7 +19,7 @@ extern "C" {
     auto hb_sample_keys = HBTensor<float>(sample_keys);
     auto hb_sorted_keys = HBTensor<float>(sorted_keys);
     auto hb_splitters = HBTensor<float>(splitters);
-    auto hb_thread_buckets = HBTensor<float>(thread_buckets);
+    auto hb_buck_sizes = HBTensor<float>(buck_sizes);
     int32_t hb_nproc = *nproc;
     int32_t hb_sr = *sr; //sampling rate
 
@@ -82,7 +82,7 @@ extern "C" {
 
       //get (nproc-1) splitters from the keys
       if(__bsg_id<n_sampler){
-        hb_splitters(__bsg_id) = hb_sorted_keys(offset);
+        hb_splitters(__bsg_id) = hb_sorted_keys(offset+(hb_sr/2));
       }
       g_barrier.sync();
 
@@ -98,11 +98,20 @@ extern "C" {
             buck_size++;
           }
         }
-        hb_thread_buckets(__bsg_id)=buck_size;
+        hb_buck_sizes(__bsg_id)=buck_size;
         printf("Bucket size %d, id %d\n",buck_size,__bsg_id);
       }
+      g_barrier.sync();
 
-      float bucket[buck_size];
+      //find offsets
+      int my_offset=0;
+      if(__bsg_id<hb_nproc){
+        for(int j=0; j<__bsg_id; j++) {
+          my_offset+=hb_buck_sizes(j);
+        }
+      }
+
+      bsg_attr_remote float* bucket = res_ptr + my_offset;
       int iter=0;
       //sort bucket
       if(__bsg_id<hb_nproc){
@@ -115,22 +124,9 @@ extern "C" {
             iter++;
           }
         }
+        //sort bucket
         std::sort(bucket,bucket+buck_size,std::less<float>());
       }
-      g_barrier.sync();
-
-      //write output
-      if(__bsg_id<hb_nproc){
-        offset=0;
-        for(int j=0; j<__bsg_id; j++) {
-          offset+=hb_thread_buckets(j);
-        }
-        for(int j=0; j<buck_size; j++) {
-          hb_res(offset+j)=bucket[j];
-        }
-      }
-
-
     }
 
     //   End profiling
