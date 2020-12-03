@@ -196,7 +196,24 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   }
 #endif
 
+  // get current cycle before exec
+  uint64_t start_cycle = -1;
+  C10_HB_CHECK(hb_mc_manycore_get_cycle((&_hb_device)->mc, &start_cycle));
+
+  // EXECUTE!
   C10_HB_CHECK(hb_mc_device_tile_groups_execute(&_hb_device));
+
+  // get current cycle after exec
+  uint64_t end_cycle = 0;
+  C10_HB_CHECK(hb_mc_manycore_get_cycle((&_hb_device)->mc, &end_cycle));
+
+  // cycle count for execution
+  // 63330 is a measured magic number to make the abs_cycle here matches the one in
+  // manycore_stats.log
+  uint64_t abs_cycle = end_cycle - start_cycle - 63330;
+
+  // debug
+  std::cerr << kernel << " finished -- abs cycle = " << abs_cycle << std::endl;
 
 #ifndef HB_SILICON_V0
   if (hb_mc_should_trace) {
@@ -210,8 +227,8 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
 #endif
 
   // write the SIMULATED time to ExecutionTime log
-  // set to 0 for now since bsg_time is ... wired
-  std::chrono::microseconds simulated(0);
+  // assuming 1GHz --> cycle / 1000 = microsecond
+  std::chrono::microseconds simulated(abs_cycle / 1000);
   trim_log->trim_manual_log_exec_time(simulated);
   // delete trim log
   delete trim_log;
