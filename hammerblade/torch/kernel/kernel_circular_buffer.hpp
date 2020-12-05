@@ -58,6 +58,17 @@ namespace CircularBuffer{
       }
 
       __attribute__((always_inline))
+      int SMU_finish_wb(){
+        // SMU has finished streaming data into this buffer
+        // We perform an operation similar to finish_wr_ptr but on *this
+        // NOTE: this only works for double-buffering
+        volatile unsigned int *o = &(occupancy[occ_idx]);
+        *o = 1;
+        // bsg_print_hexadecimal(0xBEEFBEED);
+        return 0;
+      }
+
+      __attribute__((always_inline))
       T *obtain_rd_ptr(){
         // bsg_print_hexadecimal(0xFACE);
         volatile unsigned int *o = &(occupancy[occ_idx]);
@@ -79,8 +90,22 @@ namespace CircularBuffer{
       }
 
       __attribute__((always_inline))
+      int SMU_finish_rd(){
+        volatile unsigned int *o = &(occupancy[occ_idx]);
+        *o = 0;
+        occ_idx = (occ_idx + 1) % DEPTH;
+        // bsg_print_hexadecimal(0xBEFE);
+        return 0;
+      }
+
+      __attribute__((always_inline))
       T* get_buffer(){
         return buffer;
+      }
+
+      __attribute__((always_inline))
+      T* get_next_buffer(){
+        return buffer+((occ_idx+1)%DEPTH)*N;
       }
   };
 
