@@ -6601,7 +6601,7 @@
 
 - func: cholesky_hammerblade(Tensor self) -> Tensor
   use_c10_dispatcher: full
-  variants: function
+  variants: function, method
   dispatch:
     HammerBlade: cholesky_hb
 
