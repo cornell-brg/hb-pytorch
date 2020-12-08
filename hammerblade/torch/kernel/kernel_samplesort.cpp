@@ -1,6 +1,9 @@
 #include <kernel_common.hpp>
 #include <algorithm>
 
+// #define LOCAL_BUCKETING
+#define GLOBAL_BUCKETING
+
 extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_samplesort(
@@ -10,6 +13,7 @@ extern "C" {
           hb_tensor_t* sorted_keys,
           hb_tensor_t* splitters,
           hb_tensor_t* buck_sizes,
+          hb_tensor_t* bucket_id,
           int32_t* nproc,
           int32_t* sr
           ) {
@@ -20,6 +24,7 @@ extern "C" {
     auto hb_sorted_keys = HBTensor<float>(sorted_keys);
     auto hb_splitters = HBTensor<float>(splitters);
     auto hb_buck_sizes = HBTensor<float>(buck_sizes);
+    auto hb_bucket_id = HBTensor<float>(bucket_id);
     int32_t hb_nproc = *nproc;
     int32_t hb_sr = *sr; //sampling rate
 
@@ -86,6 +91,62 @@ extern "C" {
       }
       g_barrier.sync();
 
+
+      #ifdef GLOBAL_BUCKETING
+
+      //PASS 1: assign elements their bucket id
+      if(__bsg_id<hb_nproc){
+        int start = (__bsg_id*list_size)/hb_nproc;
+        int end = ((__bsg_id+1)*list_size)/hb_nproc;
+        for(int i=start; i<end; i++){
+          //bucketing each element
+          float e = hb_inp(i);
+          int found=0;
+          for(int j=0; j<n_sampler; j++){
+            if(e<hb_splitters(j)){
+              found=1;
+              hb_bucket_id(i)=j;
+              break;
+            }
+          }
+          if (found==0) hb_bucket_id(i)=n_sampler;
+        }
+      }
+      g_barrier.sync();
+
+      //find bucket sizes
+      if(__bsg_id==0){
+        for (int j = 0; j < list_size; j++) {
+          hb_buck_sizes(hb_bucket_id(j))++;
+        }
+      }
+      g_barrier.sync();
+
+      //find offsets
+      int my_offset=0;
+      if(__bsg_id<hb_nproc){
+        for(int j=0; j<__bsg_id; j++) {
+          my_offset+=hb_buck_sizes(j);
+        }
+      }
+
+      bsg_attr_remote float* bucket = res_ptr + my_offset;
+      int iter=0;
+      //sort bucket
+      if(__bsg_id<hb_nproc){
+        for (int j = 0; j < list_size; j++) {
+          if(hb_bucket_id(j)==__bsg_id){
+            bucket[iter] = hb_inp(j);
+            iter++;
+          }
+        }
+        int buck_size = iter;
+        //sort bucket
+        std::sort(bucket,bucket+buck_size,std::less<float>());
+      }
+
+      #elif defined (LOCAL_BUCKETING)
+
       //find bucket size
       int buck_size=0;
       int c1,c2;
@@ -102,6 +163,7 @@ extern "C" {
         printf("Bucket size %d, id %d\n",buck_size,__bsg_id);
       }
       g_barrier.sync();
+
 
       //find offsets
       int my_offset=0;
@@ -127,6 +189,7 @@ extern "C" {
         //sort bucket
         std::sort(bucket,bucket+buck_size,std::less<float>());
       }
+      #endif
     }
 
     //   End profiling
@@ -136,6 +199,7 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_samplesort, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, int32_t*, int32_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_samplesort, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, 
+                    hb_tensor_t*, hb_tensor_t*, int32_t*, int32_t*)
 
 }
