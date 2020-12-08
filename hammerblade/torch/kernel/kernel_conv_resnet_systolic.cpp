@@ -19,6 +19,10 @@
 #include <kernel_common.hpp>
 #include <kernel_conv_baseline.hpp>
 #include <kernel_circular_buffer.hpp>
+#include <hb_smu.hpp>
+
+typedef CircularBuffer::FIFO<float, IMAP_DIM_X*IMAP_DIM_Y, BUFFERS> DoubleBuffer;
+typedef HBTensor<float, 4> ConvTensor;
 
 namespace{
 inline void spcpy_imap(bsg_attr_remote float* dest, float* src) {
@@ -79,7 +83,74 @@ inline void spcpy_grad(bsg_attr_remote float* dest, float* src) {
   }
 }
 
+inline void
+loop_inc(int image_id, int filter_id, int channel_id,
+         int& image_id_nxt, int& filter_id_nxt, int& channel_id_nxt,
+         int N, int Cout, int Cin) {
+  image_id_nxt = image_id;
+  filter_id_nxt = filter_id;
+  channel_id_nxt = channel_id+1;
+  if ( channel_id >= Cin ) {
+    channel_id_nxt = 0;
+    filter_id_nxt = filter_id+15;
+    if ( filter_id_nxt >= Cout) {
+      filter_id_nxt = 0;
+      image_id_nxt = image_id+1;
+      if ( image_id_nxt >= N ) {
+        image_id_nxt = 0;
+      }
+    }
+  }
+}
+
 } // namespace
+
+inline void
+load_conv_imap( ConvTensor& src, size_t block_x, size_t block_y,
+                size_t image_id, size_t filter_id, size_t channel_id,
+                int N, int Cout, int Cin,
+                int* ack,
+                DoubleBuffer& fifo ) {
+
+  int image_id_nxt, filter_id_nxt, channel_id_nxt;
+
+  loop_inc( image_id, filter_id, channel_id,
+            image_id_nxt, filter_id_nxt, channel_id_nxt,
+            N, Cout, Cin );
+
+  if ( (image_id == 0) && (filter_id == 0) && (channel_id == 0) ) {
+    // First time loading imap
+    launch_smu_conv( block_x, block_y,
+                     image_id, filter_id, channel_id,
+                     src,
+                     fifo.get_buffer(), ack,
+                     BLOCK_DIM_X, BLOCK_DIM_Y,
+                     FILTER_DIM, PADDING );
+    wait_smu( ack );
+    // Load second block. Wait for ACK in the next call
+    launch_smu_conv( block_x, block_y,
+                     image_id_nxt, filter_id_nxt, channel_id_nxt,
+                     src,
+                     fifo.get_next_buffer(), ack,
+                     BLOCK_DIM_X, BLOCK_DIM_Y,
+                     FILTER_DIM, PADDING );
+  } else {
+    // If not first call, wait till SMU acks
+    wait_smu( ack );
+    // Loading one extra block doesn't impact obserable kernel cycle count
+    // One FIFO has not been loaded; call SMU to load data
+    launch_smu_conv( block_x, block_y,
+                     image_id_nxt, filter_id_nxt, channel_id_nxt,
+                     src,
+                     fifo.get_next_buffer(), ack,
+                     BLOCK_DIM_X, BLOCK_DIM_Y,
+                     FILTER_DIM, PADDING );
+  }
+
+  // Tell the buffer that the SMU has finished a pull-based write
+  fifo.SMU_finish_wb();
+
+} // load_conv_imap
 
 inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
 
@@ -208,22 +279,190 @@ inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, 
     imap_src_base += y_step;
   }
   // debug
-  /*
-  size_t debug_offset = 0;
-  for (size_t r = 0; r < IMAP_DIM_Y; r++) {
-    for (size_t c = 0; c < IMAP_DIM_X; c++) {
-      std::cout << imap_buf[debug_offset] << " ";
-      debug_offset++;
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
-  std::cout << std::endl;
-  */
+  /* size_t debug_offset = 0; */
+  /* for (size_t r = 0; r < IMAP_DIM_Y; r++) { */
+  /*   for (size_t c = 0; c < IMAP_DIM_X; c++) { */
+  /*     std::cout << imap_buf[debug_offset] << " "; */
+  /*     debug_offset++; */
+  /*   } */
+  /*   std::cout << std::endl; */
+  /* } */
+  /* std::cout << std::endl; */
+  /* std::cout << std::endl; */
 }
 
 
 extern "C" {
+
+  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_32x32_smu(
+    hb_tensor_t* output,
+    hb_tensor_t* input,
+    hb_tensor_t* weight,
+    hb_vector_t* padding,
+    hb_vector_t* strides) {
+
+    HBTensor<float, 4> omap(output);
+    HBTensor<float, 4> imap(input);
+    HBTensor<float, 4> filter(weight);
+    HBVector<uint32_t> p(padding);
+    HBVector<uint32_t> s(strides);
+
+    // Conv2d parameters
+    auto N    = omap.dim(0); // number of images in batch
+    auto Cout = omap.dim(1); // number of output channels
+    auto Hout = omap.dim(2);
+    auto Wout = omap.dim(3);
+    auto Cin  = imap.dim(1); // number of input channels
+    auto Hin  = imap.dim(2);
+    auto Win  = imap.dim(3);
+    auto Hk   = filter.dim(2);
+    auto Wk   = filter.dim(3);
+
+    // cross check
+    hb_assert(FILTER_DIM == Hk);
+    hb_assert(FILTER_DIM == Wk);
+    hb_assert(RAW_DIM == Hin);  // assume we are doing 32x32 -> 32x32
+    hb_assert(RAW_DIM == Win);
+    hb_assert(RAW_DIM == Hout);
+    hb_assert(RAW_DIM == Wout);
+    hb_assert(PADDING == p[0]); // assume padding == 1
+    hb_assert(PADDING == p[1]);
+    hb_assert(PADDING == s[0]); // assume stride == 1
+    hb_assert(PADDING == s[1]);
+
+    hb_assert(Hout % BLOCK_DIM_Y == 0); // we dont have partial blocks
+    hb_assert(Wout % BLOCK_DIM_X == 0);
+
+    size_t h_blocks_per_out_channel = Hout / BLOCK_DIM_Y;
+    size_t w_blocks_per_out_channel = Wout / BLOCK_DIM_X;
+
+    size_t blocks_per_out_channel = h_blocks_per_out_channel * w_blocks_per_out_channel;
+    size_t num_blocks = N * Cout * blocks_per_out_channel;
+
+    // allocate buffers
+    float filter_buf[FILTER_DIM * FILTER_DIM];
+    float omap_buf[BLOCK_DIM_X * BLOCK_DIM_Y];
+    float* imap_buf;
+
+    // Buffer
+    CircularBuffer::FIFO<float, IMAP_DIM_X * IMAP_DIM_Y, BUFFERS> fifo(bsg_y, bsg_x-1, bsg_y, bsg_x+1);
+
+    // ACK variable
+    int ack = 0;
+
+    // Config
+    // 0 -- idle
+    // 1 -- imap DMA
+    // 2 -- compute
+
+    // the array is divided into 3 32 (8x4) blocks
+    // if (x+1) % 5 == 0 -- do not write to the right
+    // 8 rows handle one image collectively
+    // 4 columns each on 1 filter
+    // one row is one sub block
+    // one col is one filter
+    /* char systolic_resnet[8][16] = { */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /* }; */
+
+    /* char tile_config = systolic_resnet[bsg_y][bsg_x]; */
+
+    bool should_pass = bsg_x == 15 ? false : true;
+
+    // Job dispatch
+
+    // Since the given imap is of 32x32 and the manycore has 16x8 array,
+    // allocate 16 columns for column 0 and 16 for column 1. Similarly
+    // allocate 2 rows for row 0, row 1, row 2, and row 3, respectively.
+    size_t block_y = bsg_y / 2;
+    size_t block_x = bsg_y % 2;
+
+    auto filterDMA = [&](size_t filter_id, size_t channel_id) {
+      float* filter_src_base = (float*)filter.data_ptr();
+      uint32_t* filter_src_strides = filter.get_strides();
+      filter_src_base += filter_id * filter_src_strides[0] + channel_id * filter_src_strides[1];
+      fill_filter_buffer<FILTER_DIM>(filter_src_base, filter_buf);
+    };
+
+    auto omapDMA = [&](size_t image_id, size_t filter_id, size_t block_x, size_t block_y) {
+      size_t omap_x = block_x * BLOCK_DIM_X;
+      size_t omap_y = block_y * BLOCK_DIM_Y;
+      float* omap_src_base = (float*)omap.data_ptr();
+      uint32_t* omap_src_strides = omap.get_strides();
+      omap_src_base += image_id * omap_src_strides[0] + filter_id * omap_src_strides[1];
+      omap_src_base += omap_y * omap_src_strides[2] + omap_x * omap_src_strides[3];
+      size_t y_step = omap_src_strides[2];
+      drain_omap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf, omap_src_base, y_step);
+    };
+
+    bool is_first_col = bsg_x == 0;
+
+    auto compute_job = [&](size_t block_x, size_t block_y) {
+      size_t filter_offset = bsg_x;
+
+      for (size_t image_id = 0; image_id < N; image_id++) {
+        // 4 filter per block, 3 blocks
+        for (size_t filter_id = filter_offset; filter_id < Cout; filter_id += 16) {
+          if (filter_id < Cout) {
+            // reset output buffer
+            reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
+            for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
+
+              if ( is_first_col ) {
+                load_conv_imap( imap, block_x, block_y,
+                                image_id, filter_id, channel_id,
+                                N, Cout, Cin,
+                                &ack,
+                                fifo );
+              }
+
+              //bsg_print_hexadecimal(0xF00DF00D);
+              imap_buf = fifo.obtain_rd_ptr();
+
+              //bsg_print_hexadecimal(0xF00DF00F);
+              if (should_pass && filter_id+1 < Cout) {
+                //bsg_print_hexadecimal(0xBEEFBEEF);
+                float* imap_buf_remote = fifo.obtain_wr_ptr();
+                spcpy_imap(imap_buf_remote, imap_buf);
+                fifo.finish_wr_ptr();
+                //bsg_print_hexadecimal(0xBEEF0000);
+              }
+
+              // read in the filter
+              filterDMA(filter_id, channel_id);
+
+              // do conv
+              conv2d_3x3_16<BLOCK_DIM_X, BLOCK_DIM_Y, IMAP_DIM_X, IMAP_DIM_Y, FILTER_DIM>(imap_buf, filter_buf, omap_buf);
+
+              fifo.finish_rd_ptr();
+            } // channel
+
+            // write omap back
+            omapDMA(image_id, filter_id, block_x, block_y);
+
+          } // main loop
+        }
+      }
+    };
+
+    // put a sync after init ... otherwise we can deadlock
+    g_barrier.sync();
+    bsg_cuda_print_stat_start(7);
+
+    compute_job( block_x, block_y );
+
+    bsg_cuda_print_stat_end(7);
+    g_barrier.sync();
+
+    return 0;
+  }
 
   __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_32x32_systolic(
     hb_tensor_t* output,
@@ -316,6 +555,11 @@ extern "C" {
     char tile_config = systolic_resnet[bsg_y][bsg_x];
     bool should_pass = bsg_x  == 15 ? false : true;
 
+    // Job dispatch
+
+    size_t block_y = bsg_y / 2;
+    size_t block_x = bsg_y % 2;
+
     auto filterDMA = [&](size_t filter_id, size_t channel_id) {
       float* filter_src_base = (float*)filter.data_ptr();
       uint32_t* filter_src_strides = filter.get_strides();
@@ -392,11 +636,6 @@ extern "C" {
         }
       }
     };
-
-    // Job dispatch
-
-    size_t block_y = bsg_y / 2;
-    size_t block_x = bsg_y % 2;
 
     // put a sync after init ... otherwise we can deadlock
     g_barrier.sync();

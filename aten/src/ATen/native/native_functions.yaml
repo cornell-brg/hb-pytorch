@@ -1857,6 +1857,11 @@
   dispatch:
     HammerBlade: hb_convolution_backward_weight
 
+# PP: add SMU version
+- func: hb_convolution_smu(Tensor self, Tensor weight, Tensor? bias, int[] padding, int[] stride, int[] dilation, int groups) -> Tensor
+  dispatch:
+    HammerBlade: hb_convolution_smu
+
 - func: miopen_rnn(Tensor input, Tensor[] weight, int weight_stride0, Tensor hx, Tensor? cx, int mode, int hidden_size, int num_layers, bool batch_first, float dropout, bool train, bool bidirectional, int[] batch_sizes, Tensor? dropout_state) -> (Tensor, Tensor, Tensor, Tensor, Tensor)
   dispatch:
     CUDA: miopen_rnn

@@ -2,6 +2,8 @@
 #include <ATen/native/hammerblade/HammerBladeTensor.h>
 #include <ATen/native/hammerblade/Offload.h>
 
+// PP: ENABLE_SMU takes priority over ENABLE_SYSTOLIC
+#define ENABLE_SMU      1
 #define ENABLE_SYSTOLIC 1
 
 namespace at {
@@ -199,7 +201,9 @@ Tensor hb_convolution_forward(
       break;
   }
 
-  if (ENABLE_SYSTOLIC) {
+  if (ENABLE_SMU) {
+    kernel_name += "_smu";
+  } else if (ENABLE_SYSTOLIC) {
     kernel_name += "_systolic";
   }
 

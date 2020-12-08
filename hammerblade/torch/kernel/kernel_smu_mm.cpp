@@ -79,22 +79,33 @@ load_block(bool is_col, DoubleBuffer& buf, MMTensor& src, int* ack,
   int r_idx_nxt = is_col ? rr_nxt : k_nxt;
   int c_idx_nxt = is_col ? k_nxt : rc_nxt;
 
-  bool is_last_block = k == (m1_num_blk_per_row);
+  /* bool is_last_block = k == (m1_num_blk_per_row); */
 
   if ( !((rr == bsg_y) && (rc == bsg_x) && (k == 0)) ) {
     // If not first call, wait till SMU acks
     wait_smu( ack );
-    if ( ! is_last_block )
-      // One FIFO has not been loaded; call SMU to load data
-      launch_smu_mm( is_col, src, r_idx_nxt, c_idx_nxt, buf.get_next_buffer(), ack );
+
+    /* if ( ! is_last_block ) */
+    // Launching one more round doesn't impact observed kernel cycle count
+    // One FIFO has not been loaded; call SMU to load data
+    launch_smu_mm( is_col, src,
+                   r_idx_nxt, c_idx_nxt,
+                   buf.get_next_buffer(), ack,
+                   BLOCK_DIM, BLOCK_DIM );
   } else {
     // No FIFO was set to load data -- only possible at the first call
     // In this case we load two blocks and wait til the first block
     // comes back.
-    launch_smu_mm( is_col, src, r_idx, c_idx, buf.get_buffer(), ack );
+    launch_smu_mm( is_col, src,
+                   r_idx, c_idx,
+                   buf.get_buffer(), ack,
+                   BLOCK_DIM, BLOCK_DIM );
     wait_smu( ack );
     // Load second block. Wait for ACK in the next call
-    launch_smu_mm( is_col, src, r_idx_nxt, c_idx_nxt, buf.get_next_buffer(), ack );
+    launch_smu_mm( is_col, src,
+                   r_idx_nxt, c_idx_nxt,
+                   buf.get_next_buffer(), ack,
+                   BLOCK_DIM, BLOCK_DIM );
   }
 
   // Tell the buffer that the SMU has finished a pull-based write
