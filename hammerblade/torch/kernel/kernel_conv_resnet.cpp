@@ -7,7 +7,7 @@
 
 #define RAW_DIM       32
 #define BLOCK_DIM_X   16
-#define BLOCK_DIM_Y    8
+#define BLOCK_DIM_Y   16
 #define FILTER_DIM     3
 #define PADDING        1
 #define STRIDE         1
@@ -20,8 +20,7 @@
 
 namespace {
 
-
-inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
+inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf, size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
 
   // add 1 col of zeros
   auto addPaddingH_1 = [&](size_t start) {
@@ -49,45 +48,33 @@ inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, 
   size_t read_x = IMAP_DIM_X-PADDING;
   size_t read_y = IMAP_DIM_Y-PADDING;
   size_t block_id = block_y * 2 + block_x;
-  size_t H_pad = -1;
+  size_t W_pad = -1;
   // see if we need to add padding
   switch (block_id) {
     case 0:
-      addPaddingW_1(0);
-      H_pad = 0;
+      W_pad = 0;
+      addPaddingH_1(0);
       logical_start = PADDING*IMAP_DIM_X+PADDING;
       break;
     case 1:
-      addPaddingW_1(0);
-      H_pad = IMAP_DIM_X-PADDING;
+      W_pad = 0;
+      addPaddingH_1(IMAP_DIM_X-PADDING);
       logical_start = PADDING*IMAP_DIM_X;
       break;
     case 2:
-    case 4:
-      H_pad = 0; // left only
+      W_pad = (IMAP_DIM_Y-PADDING)*IMAP_DIM_X;
+      addPaddingH_1(0);
       logical_start = PADDING;
-      read_y = IMAP_DIM_Y;
       break;
     case 3:
-    case 5:
-      H_pad = IMAP_DIM_X-PADDING; // right only
-      logical_start = 0;
-      read_y = IMAP_DIM_Y;
-      break;
-    case 6:
-      addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
-      H_pad = 0;
-      logical_start = PADDING;
-      break;
-    case 7:
-      addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
-      H_pad = IMAP_DIM_X-PADDING;
+      W_pad = (IMAP_DIM_Y-PADDING)*IMAP_DIM_X;
+      addPaddingH_1(IMAP_DIM_X-PADDING);
       logical_start = 0;
       break;
     default:
       hb_assert(false);
   }
-  addPaddingH_1(H_pad); // top / bot padding
+  addPaddingW_1(W_pad); // top / bot padding
 
   float* imap_src_base = (float*)imap.data_ptr();
   const uint32_t* imap_src_strides = imap.get_strides();
@@ -97,15 +84,6 @@ inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, 
 
   size_t buf_offset = logical_start;
   for (size_t r = 0; r < read_y; r++) {
-    /*
-    float* row_src = imap_src_base;
-    bsg_unroll(IMAP_DIM_X-PADDING)
-    for (size_t c = 0; c < read_x; c++) {
-      imap_buf[row_offset] = *row_src;
-      row_src++;
-      row_offset++;
-    }
-    */
 
     // unroll by IMAP_DIM_X-PADDING == 17
     register float tmp00 = *(imap_src_base + 0);
@@ -258,7 +236,7 @@ extern "C" {
 
           // read in the image
           //imapDMA(image_id, channel_id, block_x, block_y);
-          imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
+          imapDMA_padding(imap, imap_buf, image_id, channel_id, block_x, block_y);
 
           // read in the filter
           filterDMA(filter_id, channel_id);
@@ -407,7 +385,7 @@ extern "C" {
         for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
 
           // read in the image
-          imapDMA_padding_systolic(imap, imap_buf, image_id, filter_id, block_x, block_y);
+          imapDMA_padding(imap, imap_buf, image_id, filter_id, block_x, block_y);
 
           // read in the filter
           filterDMA_rotate(filter_id, channel_id);
@@ -590,7 +568,7 @@ extern "C" {
             for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
 
               // read in the image
-              imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
+              imapDMA_padding(imap, imap_buf, image_id, channel_id, block_x, block_y);
 
               // read in the grad
               gradDMA(image_id, filter_id, block_x, block_y);
