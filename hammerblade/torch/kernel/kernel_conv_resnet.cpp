@@ -217,8 +217,8 @@ extern "C" {
     bsg_cuda_print_stat_start(4);
 
     // main loop
-    for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
-      if (idx < num_blocks) {
+    for (size_t idx = bsg_id / 2; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)/2) {
+      if (bsg_id % 2 == 0 && idx < num_blocks) {
 
         // figure out what we are producing
         size_t tmp = idx;
@@ -367,8 +367,8 @@ extern "C" {
     bsg_cuda_print_stat_start(5);
 
     // main loop
-    for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
-      if (idx < num_blocks) {
+    for (size_t idx = bsg_id / 2; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)/2) {
+      if (bsg_id % 2 == 0 && idx < num_blocks) {
 
         // figure out what we are producing
         size_t tmp = idx;
@@ -553,8 +553,8 @@ extern "C" {
     bsg_cuda_print_stat_start(6);
 
     // main loop
-    for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
-      if (idx < num_blocks) {
+    for (size_t idx = bsg_id / 2; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)/2) {
+      if (bsg_id % 2 == 0 && idx < num_blocks) {
 
         // figure out what we are producing
         size_t filter_id = idx / Cout;
