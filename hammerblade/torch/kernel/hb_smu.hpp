@@ -86,12 +86,13 @@ launch_smu_mm( bool is_col, HBTensor<float, 2>& src, int r_idx, int c_idx,
 }
 
 inline void
-launch_smu_conv( size_t block_x, size_t block_y,
-                 size_t image_id, size_t filter_id, size_t channel_id,
-                 HBTensor<float, 4>& src,
-                 float* dst_base, int* ack,
-                 size_t block_dim_x, size_t block_dim_y,
-                 size_t filter_dim, size_t padding ) {
+launch_smu_conv_imap(
+    size_t block_x, size_t block_y,
+    size_t image_id, size_t filter_id, size_t channel_id,
+    HBTensor<float, 4>& src,
+    float* dst_base, int* ack,
+    size_t block_dim_x, size_t block_dim_y,
+    size_t filter_dim, size_t padding ) {
 
   // TODO: this needs to be fixed if filter_dim is not 3?
   const size_t imap_dim_x = block_dim_x + filter_dim - 1;
@@ -167,6 +168,50 @@ launch_smu_conv( size_t block_x, size_t block_y,
               imap_dim_x,                      // src_x_count
               src_strides[2] * 4,              // src_y_stride
               imap_dim_y,                      // src_y_count
+              reinterpret_cast<int>(dst_base), // dst_base_addr
+              reinterpret_cast<int>(ack),      // dst_ack_addr
+              ((bsg_y+3) << 16) | (bsg_x+1)    // dst_cord
+            );
+
+}
+
+inline void
+launch_smu_conv_grad(
+    size_t block_x, size_t block_y,
+    size_t image_id, size_t filter_id, size_t channel_id,
+    HBTensor<float, 4>& src,
+    float* dst_base, int* ack,
+    size_t block_dim_x, size_t block_dim_y,
+    size_t filter_dim, size_t padding ) {
+
+  size_t grad_x = block_x * block_dim_x;
+  size_t grad_y = block_y * block_dim_y;
+
+  const uint32_t* src_strides = src.get_strides();
+  float* src_addr = (float*)src.data_ptr()
+                  + (image_id * src_strides[0])
+                  + (channel_id * src_strides[1])
+                  + (grad_y * src_strides[2])
+                  + (grad_x * src_strides[3]);
+  *ack = 0;
+  /* bsg_printf("[INFO] Launching SMU with dst (%d, %d), r_idx = %d, c_idx = %d, " */
+  /*            "stride0 = %d, stride1 = %d, " */
+  /*            "src_base 0x%x, src_addr 0x%x, dst_base 0x%x, ack 0x%x (cleared), y_stride %u\n", */
+  /*            bsg_y+3, bsg_x+1, r_idx, c_idx, */
+  /*            src_strides[0], src_strides[1], */
+  /*            reinterpret_cast<int>(src.data_ptr()), */
+  /*            reinterpret_cast<int>(src_addr), */
+  /*            reinterpret_cast<int>(dst_base), */
+  /*            reinterpret_cast<int>(ack), */
+  /*            src.get_strides()[0]*4); */
+  launch_smu( bsg_x+1,                         // x
+              2,                               // y
+              0,                               // padding
+              reinterpret_cast<int>(src_addr), // src_base_addr
+              4,                               // src_x_stride
+              block_dim_x,                     // src_x_count
+              src_strides[2] * 4,              // src_y_stride
+              block_dim_y,                     // src_y_count
               reinterpret_cast<int>(dst_base), // dst_base_addr
               reinterpret_cast<int>(ack),      // dst_ack_addr
               ((bsg_y+3) << 16) | (bsg_x+1)    // dst_cord

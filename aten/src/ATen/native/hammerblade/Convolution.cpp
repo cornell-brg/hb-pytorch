@@ -274,7 +274,9 @@ Tensor hb_convolution_backward_input(
       break;
   }
 
-  if (ENABLE_SYSTOLIC) {
+  if (ENABLE_SMU) {
+    kernel_name += "_smu";
+  } else if (ENABLE_SYSTOLIC) {
     kernel_name += "_systolic";
   }
 
@@ -329,7 +331,9 @@ Tensor hb_convolution_backward_weight(
       break;
   }
 
-  if (ENABLE_SYSTOLIC) {
+  if (ENABLE_SMU) {
+    kernel_name += "_smu";
+  } else if (ENABLE_SYSTOLIC) {
     kernel_name += "_systolic";
   }
 

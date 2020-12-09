@@ -1,8 +1,8 @@
 //====================================================================
-// SPMD 2D Convolution
+// SPMD 2D Convolution using SMU
 // Idea is that each tile will receive a piece of output image that
 // does not overlap with any other tile to work on
-// 10/02/2020 Lin Cheng
+// 12/08/2020 Lin Cheng, Peitian Pan
 //====================================================================
 
 #define RAW_DIM       32
@@ -19,8 +19,10 @@
 #include <kernel_common.hpp>
 #include <kernel_conv_baseline.hpp>
 #include <kernel_circular_buffer.hpp>
+#include <hb_smu.hpp>
 
 typedef CircularBuffer::FIFO<float, IMAP_DIM_X*IMAP_DIM_Y, BUFFERS> DoubleBuffer;
+typedef CircularBuffer::FIFO<float, BLOCK_DIM_X*BLOCK_DIM_Y, BUFFERS> GradDoubleBuffer;
 typedef HBTensor<float, 4> ConvTensor;
 
 namespace{
@@ -82,151 +84,229 @@ inline void spcpy_grad(bsg_attr_remote float* dest, float* src) {
   }
 }
 
-} // namespace
-
-inline void imapDMA_padding_systolic(HBTensor<float, 4>& imap, float* imap_buf, size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
-
-  // add 1 col of zeros
-  auto addPaddingH_1 = [&](size_t start) {
-    bsg_unroll(IMAP_DIM_Y)
-    for (size_t r = 0; r < IMAP_DIM_Y; r++) {
-      imap_buf[start] = 0;
-      start += IMAP_DIM_X;
+inline void
+loop_inc(size_t image_id, size_t filter_id, size_t channel_id,
+         size_t& image_id_nxt, size_t& filter_id_nxt, size_t& channel_id_nxt,
+         int N, int Cout, int Cin) {
+  image_id_nxt = image_id;
+  filter_id_nxt = filter_id;
+  channel_id_nxt = channel_id+1;
+  if ( channel_id_nxt >= Cin ) {
+    channel_id_nxt = 0;
+    filter_id_nxt = filter_id+16;
+    if ( filter_id_nxt >= Cout) {
+      filter_id_nxt = 0;
+      image_id_nxt = image_id+1;
+      if ( image_id_nxt >= N ) {
+        image_id_nxt = 0;
+      }
     }
-  };
-
-  // add 1 row of zeros
-  auto addPaddingW_1 = [&](size_t start) {
-    bsg_unroll(IMAP_DIM_X)
-    for (size_t c = 0; c < IMAP_DIM_X; c++) {
-      imap_buf[start + c] = 0;
-    }
-  };
-
-  size_t imap_x = block_x * BLOCK_DIM_X;
-  size_t imap_y = block_y * BLOCK_DIM_Y;
-  // this is used to correct the padding output offset
-  imap_x = imap_x == 0 ? 0 : imap_x - PADDING;
-  imap_y = imap_y == 0 ? 0 : imap_y - PADDING;
-  size_t logical_start = 0; // starting offset of imap buffer writting
-  size_t read_x = IMAP_DIM_X-PADDING;
-  size_t read_y = IMAP_DIM_Y-PADDING;
-  size_t block_id = block_y * 2 + block_x;
-  size_t H_pad = -1;
-  // see if we need to add padding
-  switch (block_id) {
-    case 0:
-      addPaddingW_1(0);
-      H_pad = 0;
-      logical_start = PADDING*IMAP_DIM_X+PADDING;
-      break;
-    case 1:
-      addPaddingW_1(0);
-      H_pad = IMAP_DIM_X-PADDING;
-      logical_start = PADDING*IMAP_DIM_X;
-      break;
-    case 2:
-    case 4:
-      H_pad = 0; // left only
-      logical_start = PADDING;
-      read_y = IMAP_DIM_Y;
-      break;
-    case 3:
-    case 5:
-      H_pad = IMAP_DIM_X-PADDING; // right only
-      logical_start = 0;
-      read_y = IMAP_DIM_Y;
-      break;
-    case 6:
-      addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
-      H_pad = 0;
-      logical_start = PADDING;
-      break;
-    case 7:
-      addPaddingW_1((IMAP_DIM_Y-PADDING)*IMAP_DIM_X);
-      H_pad = IMAP_DIM_X-PADDING;
-      logical_start = 0;
-      break;
-    default:
-      hb_assert(false);
   }
-  addPaddingH_1(H_pad); // top / bot padding
-
-  float* imap_src_base = (float*)imap.data_ptr();
-  const uint32_t* imap_src_strides = imap.get_strides();
-  imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
-  imap_src_base += imap_y * imap_src_strides[2] + imap_x * imap_src_strides[3];
-  size_t y_step = imap_src_strides[2];
-
-  size_t buf_offset = logical_start;
-  for (size_t r = 0; r < read_y; r++) {
-    /*
-    float* row_src = imap_src_base;
-    bsg_unroll(IMAP_DIM_X-PADDING)
-    for (size_t c = 0; c < read_x; c++) {
-      imap_buf[row_offset] = *row_src;
-      row_src++;
-      row_offset++;
-    }
-    */
-
-    // unroll by IMAP_DIM_X-PADDING == 17
-    register float tmp00 = *(imap_src_base + 0);
-    register float tmp01 = *(imap_src_base + 1);
-    register float tmp02 = *(imap_src_base + 2);
-    register float tmp03 = *(imap_src_base + 3);
-    register float tmp04 = *(imap_src_base + 4);
-    register float tmp05 = *(imap_src_base + 5);
-    register float tmp06 = *(imap_src_base + 6);
-    register float tmp07 = *(imap_src_base + 7);
-    register float tmp08 = *(imap_src_base + 8);
-    register float tmp09 = *(imap_src_base + 9);
-    register float tmp10 = *(imap_src_base + 10);
-    register float tmp11 = *(imap_src_base + 11);
-    register float tmp12 = *(imap_src_base + 12);
-    register float tmp13 = *(imap_src_base + 13);
-    register float tmp14 = *(imap_src_base + 14);
-    register float tmp15 = *(imap_src_base + 15);
-    register float tmp16 = *(imap_src_base + 16);
-    asm volatile("": : :"memory");
-    imap_buf[buf_offset + 0]  = tmp00;
-    imap_buf[buf_offset + 1]  = tmp01;
-    imap_buf[buf_offset + 2]  = tmp02;
-    imap_buf[buf_offset + 3]  = tmp03;
-    imap_buf[buf_offset + 4]  = tmp04;
-    imap_buf[buf_offset + 5]  = tmp05;
-    imap_buf[buf_offset + 6]  = tmp06;
-    imap_buf[buf_offset + 7]  = tmp07;
-    imap_buf[buf_offset + 8]  = tmp08;
-    imap_buf[buf_offset + 9]  = tmp09;
-    imap_buf[buf_offset + 10] = tmp10;
-    imap_buf[buf_offset + 11] = tmp11;
-    imap_buf[buf_offset + 12] = tmp12;
-    imap_buf[buf_offset + 13] = tmp13;
-    imap_buf[buf_offset + 14] = tmp14;
-    imap_buf[buf_offset + 15] = tmp15;
-    imap_buf[buf_offset + 16] = tmp16;
-
-    buf_offset += IMAP_DIM_X;
-    imap_src_base += y_step;
-  }
-  // debug
-  /* size_t debug_offset = 0; */
-  /* for (size_t r = 0; r < IMAP_DIM_Y; r++) { */
-  /*   for (size_t c = 0; c < IMAP_DIM_X; c++) { */
-  /*     std::cout << imap_buf[debug_offset] << " "; */
-  /*     debug_offset++; */
-  /*   } */
-  /*   std::cout << std::endl; */
-  /* } */
-  /* std::cout << std::endl; */
-  /* std::cout << std::endl; */
 }
 
+inline void
+loop_inc_back_weight(
+    size_t filter_id, size_t channel_id, size_t image_id,
+    size_t block_y, size_t block_x,
+    size_t& filter_id_nxt, size_t& channel_id_nxt, size_t& image_id_nxt,
+    size_t& block_y_nxt, size_t& block_x_nxt,
+    int N, int Cout, int N_imap,
+    int h_blocks_per_out_channel, int w_blocks_per_out_channel) {
+  filter_id_nxt = filter_id;
+  channel_id_nxt = channel_id;
+  image_id_nxt = image_id;
+  block_y_nxt = block_y;
+  block_x_nxt = block_x+1;
+  if ( block_x_nxt >= w_blocks_per_out_channel ) {
+    block_x_nxt = 0;
+    block_y_nxt = block_y+1;
+    if ( block_y_nxt >= h_blocks_per_out_channel ) {
+      block_y_nxt = 0;
+      image_id_nxt = image_id+1;
+      if ( image_id_nxt >= N_imap ) {
+        image_id_nxt = 0;
+        channel_id_nxt = channel_id+8;
+        if ( channel_id_nxt >= Cout ) {
+          channel_id_nxt = bsg_y;
+          filter_id_nxt = filter_id+16;
+          if ( filter_id_nxt >= N ) {
+            filter_id_nxt = bsg_x;
+          }
+        }
+      }
+    }
+  }
+}
+
+} // namespace
+
+inline void
+load_conv_imap_back_weight(
+    ConvTensor& src,
+    size_t filter_id, size_t channel_id, size_t image_id,
+    size_t block_y, size_t block_x,
+    int N, int Cout, int N_imap,
+    int h_blocks_per_out_channel, int w_blocks_per_out_channel,
+    int* ack, DoubleBuffer& fifo ) {
+
+  size_t filter_id_nxt, channel_id_nxt, image_id_nxt;
+  size_t block_y_nxt, block_x_nxt;
+
+  loop_inc_back_weight(
+      filter_id, channel_id, image_id, block_y, block_x,
+      filter_id_nxt, channel_id_nxt, image_id_nxt, block_y_nxt, block_x_nxt,
+      N, Cout, N_imap, h_blocks_per_out_channel, w_blocks_per_out_channel );
+
+  bool is_first_call = (filter_id == bsg_x) && (channel_id == bsg_y)
+                    && (image_id == 0) && (block_y == 0) && (block_x == 0);
+
+  if ( is_first_call ) {
+    // First time loading imap
+    launch_smu_conv_imap(
+        block_x, block_y,
+        image_id, filter_id, channel_id,
+        src,
+        fifo.get_buffer(), ack,
+        BLOCK_DIM_X, BLOCK_DIM_Y,
+        FILTER_DIM, PADDING );
+    wait_smu( ack );
+    // Load second block. Wait for ACK in the next call
+    launch_smu_conv_imap(
+        block_x, block_y,
+        image_id_nxt, filter_id_nxt, channel_id_nxt,
+        src,
+        fifo.get_next_buffer(), ack,
+        BLOCK_DIM_X, BLOCK_DIM_Y,
+        FILTER_DIM, PADDING );
+  } else {
+    // If not first call, wait till SMU acks
+    wait_smu( ack );
+    // Loading one extra block doesn't impact obserable kernel cycle count
+    // One FIFO has not been loaded; call SMU to load data
+    launch_smu_conv_imap(
+        block_x, block_y,
+        image_id_nxt, filter_id_nxt, channel_id_nxt,
+        src,
+        fifo.get_next_buffer(), ack,
+        BLOCK_DIM_X, BLOCK_DIM_Y,
+        FILTER_DIM, PADDING );
+  }
+
+  // Tell the buffer that the SMU has finished a pull-based write
+  fifo.SMU_finish_wb();
+
+} // load_conv_imap_back_weight
+
+inline void
+load_conv_grad_back_weight(
+    ConvTensor& src,
+    size_t filter_id, size_t channel_id, size_t image_id,
+    size_t block_y, size_t block_x,
+    int N, int Cout, int N_imap,
+    int h_blocks_per_out_channel, int w_blocks_per_out_channel,
+    int* ack, GradDoubleBuffer& fifo ) {
+
+  size_t filter_id_nxt, channel_id_nxt, image_id_nxt;
+  size_t block_y_nxt, block_x_nxt;
+
+  loop_inc_back_weight(
+      filter_id, channel_id, image_id, block_y, block_x,
+      filter_id_nxt, channel_id_nxt, image_id_nxt, block_y_nxt, block_x_nxt,
+      N, Cout, N_imap, h_blocks_per_out_channel, w_blocks_per_out_channel );
+
+  bool is_first_call = (filter_id == bsg_x) && (channel_id == bsg_y)
+                    && (image_id == 0) && (block_y == 0) && (block_x == 0);
+
+  if ( is_first_call ) {
+    // First time loading imap
+    launch_smu_conv_grad(
+        block_x, block_y,
+        image_id, filter_id, channel_id,
+        src,
+        fifo.get_buffer(), ack,
+        BLOCK_DIM_X, BLOCK_DIM_Y,
+        FILTER_DIM, PADDING );
+    wait_smu( ack );
+    // Load second block. Wait for ACK in the next call
+    launch_smu_conv_grad(
+        block_x, block_y,
+        image_id_nxt, filter_id_nxt, channel_id_nxt,
+        src,
+        fifo.get_next_buffer(), ack,
+        BLOCK_DIM_X, BLOCK_DIM_Y,
+        FILTER_DIM, PADDING );
+  } else {
+    // If not first call, wait till SMU acks
+    wait_smu( ack );
+    // Loading one extra block doesn't impact obserable kernel cycle count
+    // One FIFO has not been loaded; call SMU to load data
+    launch_smu_conv_grad(
+        block_x, block_y,
+        image_id_nxt, filter_id_nxt, channel_id_nxt,
+        src,
+        fifo.get_next_buffer(), ack,
+        BLOCK_DIM_X, BLOCK_DIM_Y,
+        FILTER_DIM, PADDING );
+  }
+
+  // Tell the buffer that the SMU has finished a pull-based write
+  fifo.SMU_finish_wb();
+
+} // load_conv_grad_back_weight
+
+inline void
+load_conv_imap( ConvTensor& src, size_t block_x, size_t block_y,
+                size_t image_id, size_t filter_id, size_t channel_id,
+                int N, int Cout, int Cin,
+                int* ack,
+                DoubleBuffer& fifo ) {
+
+  size_t image_id_nxt, filter_id_nxt, channel_id_nxt;
+
+  loop_inc( image_id, filter_id, channel_id,
+            image_id_nxt, filter_id_nxt, channel_id_nxt,
+            N, Cout, Cin );
+
+  if ( (image_id == 0) && (filter_id == 0) && (channel_id == 0) ) {
+    // First time loading imap
+    launch_smu_conv_imap(
+        block_x, block_y,
+        image_id, filter_id, channel_id,
+        src,
+        fifo.get_buffer(), ack,
+        BLOCK_DIM_X, BLOCK_DIM_Y,
+        FILTER_DIM, PADDING );
+    wait_smu( ack );
+    // Load second block. Wait for ACK in the next call
+    launch_smu_conv_imap(
+        block_x, block_y,
+        image_id_nxt, filter_id_nxt, channel_id_nxt,
+        src,
+        fifo.get_next_buffer(), ack,
+        BLOCK_DIM_X, BLOCK_DIM_Y,
+        FILTER_DIM, PADDING );
+  } else {
+    // If not first call, wait till SMU acks
+    wait_smu( ack );
+    // Loading one extra block doesn't impact obserable kernel cycle count
+    // One FIFO has not been loaded; call SMU to load data
+    launch_smu_conv_imap(
+        block_x, block_y,
+        image_id_nxt, filter_id_nxt, channel_id_nxt,
+        src,
+        fifo.get_next_buffer(), ack,
+        BLOCK_DIM_X, BLOCK_DIM_Y,
+        FILTER_DIM, PADDING );
+  }
+
+  // Tell the buffer that the SMU has finished a pull-based write
+  fifo.SMU_finish_wb();
+
+} // load_conv_imap
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_32x32_systolic(
+  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_32x32_smu(
     hb_tensor_t* output,
     hb_tensor_t* input,
     hb_tensor_t* weight,
@@ -279,12 +359,13 @@ extern "C" {
     // Buffer
     CircularBuffer::FIFO<float, IMAP_DIM_X * IMAP_DIM_Y, BUFFERS> fifo(bsg_y, bsg_x-1, bsg_y, bsg_x+1);
 
+    // ACK variable
+    int ack = 0;
 
     // Config
     // 0 -- idle
     // 1 -- imap DMA
     // 2 -- compute
-    // 3 -- polyA stoppper
 
     // the array is divided into 3 32 (8x4) blocks
     // if (x+1) % 5 == 0 -- do not write to the right
@@ -292,33 +373,26 @@ extern "C" {
     // 4 columns each on 1 filter
     // one row is one sub block
     // one col is one filter
-    char systolic_resnet[8][16] = {
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-    };
-    // char systolic_resnet[8][16] = {
-    //   {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    // };
+    /* char systolic_resnet[8][16] = { */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /* }; */
 
+    /* char tile_config = systolic_resnet[bsg_y][bsg_x]; */
 
-    char tile_config = systolic_resnet[bsg_y][bsg_x];
-    bool should_pass = bsg_x  == 15 ? false : true;
+    bool should_pass = bsg_x == 15 ? false : true;
 
     // Job dispatch
 
+    // Since the given imap is of 32x32 and the manycore has 16x8 array,
+    // allocate 16 columns for column 0 and 16 for column 1. Similarly
+    // allocate 2 rows for row 0, row 1, row 2, and row 3, respectively.
     size_t block_y = bsg_y / 2;
     size_t block_x = bsg_y % 2;
 
@@ -340,46 +414,33 @@ extern "C" {
       drain_omap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf, omap_src_base, y_step);
     };
 
-    auto imapDMA_job = [&](size_t block_x, size_t block_y) {
-      imap_buf = fifo.get_buffer(); // reuse
-
-      for (size_t image_id = 0; image_id < N; image_id++) {
-        // 4 filter per block, 3 blocks
-        for (size_t filter_id = 0; filter_id < Cout; filter_id += 15) {
-          if (filter_id < Cout) {
-            for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
-              imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
-              //bsg_print_hexadecimal(0xFACEB00C);
-              float* imap_buf_remote = fifo.obtain_wr_ptr();
-              spcpy_imap(imap_buf_remote, imap_buf);
-              fifo.finish_wr_ptr();
-              //bsg_print_hexadecimal(0xFACEB00D);
-            }
-          }
-        }
-      }
-    };
+    bool is_first_col = bsg_x == 0;
 
     auto compute_job = [&](size_t block_x, size_t block_y) {
-      size_t filter_offset = bsg_x - 1;
+      size_t filter_offset = bsg_x;
 
       for (size_t image_id = 0; image_id < N; image_id++) {
         // 4 filter per block, 3 blocks
-        for (size_t filter_id = filter_offset; filter_id < Cout; filter_id += 15) {
+        for (size_t filter_id = filter_offset; filter_id < Cout; filter_id += 16) {
           if (filter_id < Cout) {
             // reset output buffer
             reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
             for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
 
-              //bsg_print_hexadecimal(0xF00DF00D);
+              if ( is_first_col ) {
+                load_conv_imap( imap, block_x, block_y,
+                                image_id, filter_id, channel_id,
+                                N, Cout, Cin,
+                                &ack,
+                                fifo );
+              }
+
               imap_buf = fifo.obtain_rd_ptr();
-              //bsg_print_hexadecimal(0xF00DF00F);
+
               if (should_pass && filter_id+1 < Cout) {
-                //bsg_print_hexadecimal(0xBEEFBEEF);
                 float* imap_buf_remote = fifo.obtain_wr_ptr();
                 spcpy_imap(imap_buf_remote, imap_buf);
                 fifo.finish_wr_ptr();
-                //bsg_print_hexadecimal(0xBEEF0000);
               }
 
               // read in the filter
@@ -401,22 +462,9 @@ extern "C" {
 
     // put a sync after init ... otherwise we can deadlock
     g_barrier.sync();
-
     bsg_cuda_print_stat_start(7);
 
-    switch (tile_config) {
-      case 0:
-        // nothing
-        break;
-      case 1:
-        imapDMA_job(block_x, block_y);
-        break;
-      case 2:
-        compute_job(block_x, block_y);
-        break;
-      default:
-        hb_assert_msg(false, "invalid tile task config");
-    }
+    compute_job( block_x, block_y );
 
     bsg_cuda_print_stat_end(7);
     g_barrier.sync();
@@ -427,7 +475,7 @@ extern "C" {
 
 
 
-  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_32x32_back_input_systolic(
+  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_32x32_back_input_smu(
     hb_tensor_t* output,
     hb_tensor_t* input,
     hb_tensor_t* weight,
@@ -483,6 +531,9 @@ extern "C" {
     // Buffer
     CircularBuffer::FIFO<float, IMAP_DIM_X * IMAP_DIM_Y, BUFFERS> fifo(bsg_y, bsg_x-1, bsg_y, bsg_x+1);
 
+    // ACK variable
+    int ack = 0;
+
     // Config
     // 0 -- idle
     // 1 -- imap DMA
@@ -493,31 +544,24 @@ extern "C" {
     // 4 columns each on 1 filter
     // image sub blocks are unrolled vertically -- each row is one sub block
     // image channels are unrolled horizentally -- each col is one channel
-    char systolic_resnet[8][16] = {
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-    };
-    // char systolic_resnet[8][16] = {
-    //   {1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    // };
+    /* char systolic_resnet[8][16] = { */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /* }; */
 
+    /* char tile_config = systolic_resnet[bsg_y][bsg_x]; */
 
-    char tile_config = systolic_resnet[bsg_y][bsg_x];
     bool should_pass = bsg_x == 15 ? false : true;
 
+    // Job dispatch
+    size_t block_y = bsg_y / 2;
+    size_t block_x = bsg_y % 2;
 
     // this one reads the filter in forward order
     // then write it into SPM is rotated order
@@ -539,70 +583,59 @@ extern "C" {
       drain_omap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf, omap_src_base, y_step);
     };
 
-    auto imapDMA_job = [&](size_t block_x, size_t block_y) {
-      imap_buf = fifo.get_buffer(); // reuse
-
-      for (size_t image_id = 0; image_id < N; image_id++) {
-        for (size_t channel_id = 0; channel_id < Cout; channel_id += 15) {
-          if (channel_id < Cout) {
-            for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
-              imapDMA_padding_systolic(imap, imap_buf, image_id, filter_id, block_x, block_y);
-              float* imap_buf_remote = fifo.obtain_wr_ptr();
-              spcpy_imap(imap_buf_remote, imap_buf);
-              fifo.finish_wr_ptr();
-            }
-          }
-        }
-      }
-    };
+    bool is_first_col = bsg_x == 0;
 
     auto compute_job = [&](size_t block_x, size_t block_y) {
-      size_t channel_offset = bsg_x - 1;
+      size_t channel_offset = bsg_x;
 
       for (size_t image_id = 0; image_id < N; image_id++) {
-        for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 15) {
+        for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 16) {
           if (channel_id < Cout) {
+
+            // Reset output buffer
             reset_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(omap_buf);
+
             for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
-              //bsg_print_hexadecimal(0xF00DF00D);
+
+              if ( is_first_col ) {
+                load_conv_imap( imap, block_x, block_y,
+                                image_id, channel_id, filter_id,
+                                N, Cout, Cin,
+                                &ack,
+                                fifo );
+              }
+
               imap_buf = fifo.obtain_rd_ptr();
+
               if (should_pass && channel_id+1 < Cout) {
                 float* imap_buf_remote = fifo.obtain_wr_ptr();
                 spcpy_imap(imap_buf_remote, imap_buf);
                 fifo.finish_wr_ptr();
               }
-              filterDMA_rotate(filter_id, channel_id);
-              conv2d_3x3_16<BLOCK_DIM_X, BLOCK_DIM_Y, IMAP_DIM_X, IMAP_DIM_Y, FILTER_DIM>(imap_buf, filter_buf, omap_buf);
-              fifo.finish_rd_ptr();
-              //bsg_print_hexadecimal(0xF00D0000);
-            }
-            omapDMA(image_id, channel_id, block_x, block_y);
-          }
-        }
-      }
-    };
 
-    size_t block_y = bsg_y / 2;
-    size_t block_x = bsg_y % 2;
+              // Load filter
+              filterDMA_rotate(filter_id, channel_id);
+
+              // do conv
+              conv2d_3x3_16<BLOCK_DIM_X, BLOCK_DIM_Y, IMAP_DIM_X, IMAP_DIM_Y, FILTER_DIM>(imap_buf, filter_buf, omap_buf);
+
+              fifo.finish_rd_ptr();
+            }
+
+            // write omap back
+            omapDMA(image_id, channel_id, block_x, block_y);
+
+          } // filter_id
+        } // channel_id
+      } // image_id
+    }; // compute_job
 
     // put a sync after init ... otherwise we can deadlock
     g_barrier.sync();
 
     bsg_cuda_print_stat_start(8);
 
-    switch (tile_config) {
-      case 0:
-        // nothing
-        break;
-      case 1:
-        imapDMA_job(block_x, block_y);
-        break;
-      case 2:
-        compute_job(block_x, block_y);
-        break;
-      default:
-        hb_assert_msg(false, "invalid tile task config");
-    }
+    compute_job(block_x, block_y);
 
     bsg_cuda_print_stat_end(8);
 
@@ -612,7 +645,7 @@ extern "C" {
 
 
 
-  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_32x32_back_weight_systolic(
+  __attribute__ ((noinline))  int tensorlib_conv_resnet_32_3x3_32x32_back_weight_smu(
     hb_tensor_t* output,
     hb_tensor_t* input,
     hb_tensor_t* weight,
@@ -675,73 +708,22 @@ extern "C" {
     // unroll filters horizentally (a row)
     // grad needs to be distributed to all channels in a filter
     // input images need to be distributed to all filters
-    char systolic_resnet[8][16] = {
-      {0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-      {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-    };
+    /* char systolic_resnet[8][16] = { */
+    /*   {0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /*   {1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}, */
+    /* }; */
 
-    char tile_config = systolic_resnet[bsg_y][bsg_x];
+    /* char tile_config = systolic_resnet[bsg_y][bsg_x]; */
+
     bool should_pass_imap = bsg_x == (BSG_TILE_GROUP_X_DIM - 1) ? false : true;
     bool should_pass_grad = bsg_y == (BSG_TILE_GROUP_Y_DIM - 1) ? false : true;
 
-
-
-    auto gradDMA = [&](size_t image_id, size_t channel_id, size_t block_x, size_t block_y) {
-      size_t grad_x = block_x * BLOCK_DIM_X;
-      size_t grad_y = block_y * BLOCK_DIM_Y;
-      float* grad_src_base = (float*)grad.data_ptr();
-      uint32_t* grad_src_strides = grad.get_strides();
-      grad_src_base += image_id * grad_src_strides[0] + channel_id * grad_src_strides[1];
-      grad_src_base += grad_y * grad_src_strides[2] + grad_x * grad_src_strides[3];
-      size_t y_step = grad_src_strides[2];
-      // fill_imap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(grad_src_base, grad_buf, y_step);
-      size_t buf_offset = 0;
-      for (size_t row = 0; row < BLOCK_DIM_Y; row++) {
-        // unroll by BLOCK_DIM_X == 16
-        register float tmp00 = *(grad_src_base + 0);
-        register float tmp01 = *(grad_src_base + 1);
-        register float tmp02 = *(grad_src_base + 2);
-        register float tmp03 = *(grad_src_base + 3);
-        register float tmp04 = *(grad_src_base + 4);
-        register float tmp05 = *(grad_src_base + 5);
-        register float tmp06 = *(grad_src_base + 6);
-        register float tmp07 = *(grad_src_base + 7);
-        register float tmp08 = *(grad_src_base + 8);
-        register float tmp09 = *(grad_src_base + 9);
-        register float tmp10 = *(grad_src_base + 10);
-        register float tmp11 = *(grad_src_base + 11);
-        register float tmp12 = *(grad_src_base + 12);
-        register float tmp13 = *(grad_src_base + 13);
-        register float tmp14 = *(grad_src_base + 14);
-        register float tmp15 = *(grad_src_base + 15);
-        asm volatile("": : :"memory");
-        grad_buf[buf_offset + 0]  = tmp00;
-        grad_buf[buf_offset + 1]  = tmp01;
-        grad_buf[buf_offset + 2]  = tmp02;
-        grad_buf[buf_offset + 3]  = tmp03;
-        grad_buf[buf_offset + 4]  = tmp04;
-        grad_buf[buf_offset + 5]  = tmp05;
-        grad_buf[buf_offset + 6]  = tmp06;
-        grad_buf[buf_offset + 7]  = tmp07;
-        grad_buf[buf_offset + 8]  = tmp08;
-        grad_buf[buf_offset + 9]  = tmp09;
-        grad_buf[buf_offset + 10] = tmp10;
-        grad_buf[buf_offset + 11] = tmp11;
-        grad_buf[buf_offset + 12] = tmp12;
-        grad_buf[buf_offset + 13] = tmp13;
-        grad_buf[buf_offset + 14] = tmp14;
-        grad_buf[buf_offset + 15] = tmp15;
-
-        buf_offset += BLOCK_DIM_X;
-        grad_src_base += y_step;
-      }
-    };
 
     auto filterDMA_wb = [&](size_t filter_id, size_t channel_id) {
       bsg_attr_remote float* filter_dst_base = (float*)filter.data_ptr();
@@ -753,84 +735,143 @@ extern "C" {
       }
     };
 
-    auto imapDMA_job = [&]() {
-      imap_buf = imap_fifo.get_buffer();
-      size_t channel_offset = bsg_y - 1;
+    /* auto gradDMA = [&](size_t image_id, size_t channel_id, size_t block_x, size_t block_y) { */
+    /*   size_t grad_x = block_x * BLOCK_DIM_X; */
+    /*   size_t grad_y = block_y * BLOCK_DIM_Y; */
+    /*   float* grad_src_base = (float*)grad.data_ptr(); */
+    /*   uint32_t* grad_src_strides = grad.get_strides(); */
+    /*   grad_src_base += image_id * grad_src_strides[0] + channel_id * grad_src_strides[1]; */
+    /*   grad_src_base += grad_y * grad_src_strides[2] + grad_x * grad_src_strides[3]; */
+    /*   size_t y_step = grad_src_strides[2]; */
+    /*   // fill_imap_buffer<BLOCK_DIM_X, BLOCK_DIM_Y>(grad_src_base, grad_buf, y_step); */
+    /*   size_t buf_offset = 0; */
+    /*   for (size_t row = 0; row < BLOCK_DIM_Y; row++) { */
+    /*     // unroll by BLOCK_DIM_X == 16 */
+    /*     register float tmp00 = *(grad_src_base + 0); */
+    /*     register float tmp01 = *(grad_src_base + 1); */
+    /*     register float tmp02 = *(grad_src_base + 2); */
+    /*     register float tmp03 = *(grad_src_base + 3); */
+    /*     register float tmp04 = *(grad_src_base + 4); */
+    /*     register float tmp05 = *(grad_src_base + 5); */
+    /*     register float tmp06 = *(grad_src_base + 6); */
+    /*     register float tmp07 = *(grad_src_base + 7); */
+    /*     register float tmp08 = *(grad_src_base + 8); */
+    /*     register float tmp09 = *(grad_src_base + 9); */
+    /*     register float tmp10 = *(grad_src_base + 10); */
+    /*     register float tmp11 = *(grad_src_base + 11); */
+    /*     register float tmp12 = *(grad_src_base + 12); */
+    /*     register float tmp13 = *(grad_src_base + 13); */
+    /*     register float tmp14 = *(grad_src_base + 14); */
+    /*     register float tmp15 = *(grad_src_base + 15); */
+    /*     asm volatile("": : :"memory"); */
+    /*     grad_buf[buf_offset + 0]  = tmp00; */
+    /*     grad_buf[buf_offset + 1]  = tmp01; */
+    /*     grad_buf[buf_offset + 2]  = tmp02; */
+    /*     grad_buf[buf_offset + 3]  = tmp03; */
+    /*     grad_buf[buf_offset + 4]  = tmp04; */
+    /*     grad_buf[buf_offset + 5]  = tmp05; */
+    /*     grad_buf[buf_offset + 6]  = tmp06; */
+    /*     grad_buf[buf_offset + 7]  = tmp07; */
+    /*     grad_buf[buf_offset + 8]  = tmp08; */
+    /*     grad_buf[buf_offset + 9]  = tmp09; */
+    /*     grad_buf[buf_offset + 10] = tmp10; */
+    /*     grad_buf[buf_offset + 11] = tmp11; */
+    /*     grad_buf[buf_offset + 12] = tmp12; */
+    /*     grad_buf[buf_offset + 13] = tmp13; */
+    /*     grad_buf[buf_offset + 14] = tmp14; */
+    /*     grad_buf[buf_offset + 15] = tmp15; */
 
-      for (size_t filter_id = 0; filter_id < N; filter_id += 15) {
-        for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 7) {
-          if (channel_id < Cout) {
-            for (size_t image_id = 0; image_id < N_imap; image_id++) {
-              for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
-                for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
-                  imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y);
-                  //bsg_print_hexadecimal(0xAA);
-                  float* imap_buf_remote = imap_fifo.obtain_wr_ptr();
-                  spcpy_imap(imap_buf_remote, imap_buf);
-                  imap_fifo.finish_wr_ptr();
-                  //bsg_print_hexadecimal(0xBB);
-                }
-              }
-            }
-          }
-        }
-      }
-    };
+    /*     buf_offset += BLOCK_DIM_X; */
+    /*     grad_src_base += y_step; */
+    /*   } */
+    /* }; */
 
-    auto gradDMA_job = [&]() {
-      grad_buf = grad_fifo.get_buffer();
-      size_t filter_offset = bsg_x - 1;
+    /* auto gradDMA_job = [&]() { */
+    /*   grad_buf = grad_fifo.get_buffer(); */
+    /*   size_t filter_offset = bsg_x; */
 
-      for (size_t filter_id = filter_offset; filter_id < N; filter_id += 15) {
-        for (size_t channel_id = 0; channel_id < Cout; channel_id += 7) {
-          if (filter_id < N) {
-            for (size_t image_id = 0; image_id < N_imap; image_id++) {
-              for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
-                for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
-                  gradDMA(image_id, filter_id, block_x, block_y);
-                  //bsg_print_hexadecimal(0xCC);
-                  float* grad_buf_remote = grad_fifo.obtain_wr_ptr();
-                  spcpy_grad(grad_buf_remote, grad_buf);
-                  grad_fifo.finish_wr_ptr();
-                  //bsg_print_hexadecimal(0xDD);
-                }
-              }
-            }
-          }
-        }
-      }
-    };
+    /*   for (size_t filter_id = filter_offset; filter_id < N; filter_id += 16) { */
+    /*     for (size_t channel_id = 0; channel_id < Cout; channel_id += 8) { */
+    /*       if (filter_id < N) { */
+    /*         for (size_t image_id = 0; image_id < N_imap; image_id++) { */
+    /*           for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) { */
+    /*             for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) { */
+    /*               gradDMA(image_id, filter_id, block_x, block_y); */
+    /*               //bsg_print_hexadecimal(0xCC); */
+    /*               float* grad_buf_remote = grad_fifo.obtain_wr_ptr(); */
+    /*               spcpy_grad(grad_buf_remote, grad_buf); */
+    /*               grad_fifo.finish_wr_ptr(); */
+    /*               //bsg_print_hexadecimal(0xDD); */
+    /*             } */
+    /*           } */
+    /*         } */
+    /*       } */
+    /*     } */
+    /*   } */
+    /* }; */
 
+    bool is_first_row = bsg_y == 0 ? true : false;
+    bool is_first_col = bsg_x == 0 ? true : false;
+
+    int ack_col = 0;
+    int ack_row = 0;
 
     auto compute_job = [&]() {
-      size_t channel_offset = bsg_y - 1;
-      size_t filter_offset = bsg_x - 1;
+      size_t channel_offset = bsg_y;
+      size_t filter_offset = bsg_x;
 
-      for (size_t filter_id = filter_offset; filter_id < N; filter_id += 15) {
-        for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 7) {
+      for (size_t filter_id = filter_offset; filter_id < N; filter_id += 16) {
+        for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 8) {
           if (channel_id < Cout && filter_id < N) {
             reset_buffer<FILTER_DIM, FILTER_DIM>(filter_buf);
             for (size_t image_id = 0; image_id < N_imap; image_id++) {
               for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) {
                 for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) {
-                  //bsg_print_hexadecimal(0xEE);
+
+                  // Gradient loaders doing gradDMA_job()
+
+                  if ( is_first_row ) {
+                    load_conv_grad_back_weight(
+                        grad,
+                        filter_id, channel_id, image_id, block_y, block_x,
+                        N, Cout, N_imap, h_blocks_per_out_channel, w_blocks_per_out_channel,
+                        &ack_row, grad_fifo
+                    );
+                  }
+
+                  // Imap loaders doing imapDMA_job()
+
+                  if ( is_first_col ) {
+                    load_conv_imap_back_weight(
+                        imap,
+                        filter_id, channel_id, image_id, block_y, block_x,
+                        N, Cout, N_imap, h_blocks_per_out_channel, w_blocks_per_out_channel,
+                        &ack_col, imap_fifo
+                    );
+                  }
+
+                  // Pass grad vertically
+
                   grad_buf = grad_fifo.obtain_rd_ptr();
+
                   if (should_pass_grad && channel_id+1 < Cout) {
-                    //bsg_print_hexadecimal(0xFF);
                     float* grad_buf_remote = grad_fifo.obtain_wr_ptr();
                     spcpy_grad(grad_buf_remote, grad_buf);
                     grad_fifo.finish_wr_ptr();
-                    //bsg_print_hexadecimal(0x10101);
                   }
-                  //bsg_print_hexadecimal(0x111000);
+
+                  // Pass imap horizontally
+
                   imap_buf = imap_fifo.obtain_rd_ptr();
+
                   if (should_pass_imap && filter_id+1 < N) {
-                    //bsg_print_hexadecimal(0x22200);
                     float* imap_buf_remote = imap_fifo.obtain_wr_ptr();
                     spcpy_imap(imap_buf_remote, imap_buf);
                     imap_fifo.finish_wr_ptr();
-                    //bsg_print_hexadecimal(0x33300);
                   }
+
+                  // Main computation
+
                   for (size_t f_y = 0; f_y < FILTER_DIM; f_y++) {
                     register float psum0 = 0;
                     register float psum1 = 0;
@@ -862,39 +903,38 @@ extern "C" {
                         register float imap8 = imap_row[x+8];
                         register float imap9 = imap_row[x+9];
 
-#ifdef HB_EMUL
-                        psum0 += imap0 * grad0;
-                        psum1 += imap1 * grad0;
-                        psum2 += imap2 * grad0;
+                        /* psum0 += imap0 * grad0; */
+                        /* psum1 += imap1 * grad0; */
+                        /* psum2 += imap2 * grad0; */
 
-                        psum0 += imap1 * grad1;
-                        psum1 += imap2 * grad1;
-                        psum2 += imap3 * grad1;
+                        /* psum0 += imap1 * grad1; */
+                        /* psum1 += imap2 * grad1; */
+                        /* psum2 += imap3 * grad1; */
 
-                        psum0 += imap2 * grad2;
-                        psum1 += imap3 * grad2;
-                        psum2 += imap4 * grad2;
+                        /* psum0 += imap2 * grad2; */
+                        /* psum1 += imap3 * grad2; */
+                        /* psum2 += imap4 * grad2; */
 
-                        psum0 += imap3 * grad3;
-                        psum1 += imap4 * grad3;
-                        psum2 += imap5 * grad3;
+                        /* psum0 += imap3 * grad3; */
+                        /* psum1 += imap4 * grad3; */
+                        /* psum2 += imap5 * grad3; */
 
-                        psum0 += imap4 * grad4;
-                        psum1 += imap5 * grad4;
-                        psum2 += imap6 * grad4;
+                        /* psum0 += imap4 * grad4; */
+                        /* psum1 += imap5 * grad4; */
+                        /* psum2 += imap6 * grad4; */
 
-                        psum0 += imap5 * grad5;
-                        psum1 += imap6 * grad5;
-                        psum2 += imap7 * grad5;
+                        /* psum0 += imap5 * grad5; */
+                        /* psum1 += imap6 * grad5; */
+                        /* psum2 += imap7 * grad5; */
 
-                        psum0 += imap6 * grad6;
-                        psum1 += imap7 * grad6;
-                        psum2 += imap8 * grad6;
+                        /* psum0 += imap6 * grad6; */
+                        /* psum1 += imap7 * grad6; */
+                        /* psum2 += imap8 * grad6; */
 
-                        psum0 += imap7 * grad7;
-                        psum1 += imap8 * grad7;
-                        psum2 += imap9 * grad7;
-#else
+                        /* psum0 += imap7 * grad7; */
+                        /* psum1 += imap8 * grad7; */
+                        /* psum2 += imap9 * grad7; */
+
                         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap0), "f"(grad0));
                         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap1), "f"(grad0));
                         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap2), "f"(grad0));
@@ -926,49 +966,32 @@ extern "C" {
                         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0) : "f"(imap7), "f"(grad7));
                         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1) : "f"(imap8), "f"(grad7));
                         asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2) : "f"(imap9), "f"(grad7));
-#endif
 
-                      }
+                      } // x
                       imap_ptr += IMAP_DIM_X;
                       grad_ptr += BLOCK_DIM_X;
-                    }
+                    } // y
                     output[0] += psum0;
                     output[1] += psum1;
                     output[2] += psum2;
-                  }
+                  } // f_y
                   imap_fifo.finish_rd_ptr();
                   grad_fifo.finish_rd_ptr();
-                }
-              }
-            }
+                } // block_x
+              } // block_y
+            } // image_id
             filterDMA_wb(filter_id, channel_id);
           }
-        }
-      }
-    };
+        } // channel_id
+      } // filter_id
+    }; // compute_job
 
     // put a sync after init ... otherwise we can deadlock
     g_barrier.sync();
 
     bsg_cuda_print_stat_start(9);
 
-    switch (tile_config) {
-      case 0:
-        // nothing
-        break;
-      case 1:
-        imapDMA_job();
-        break;
-      case 2:
-        compute_job();
-        break;
-      case 3:
-        gradDMA_job();
-        break;
-      default:
-        hb_assert_msg(false, "invalid tile task config");
-    }
-
+    compute_job();
 
     bsg_cuda_print_stat_end(9);
 
