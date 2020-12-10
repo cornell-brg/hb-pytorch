@@ -4,7 +4,7 @@
 //====================================================================
 
 #include <kernel_common.hpp>
-#define BLOCK_DIM 8
+#define BLOCK_DIM 4
 
 extern "C" {
 
@@ -51,7 +51,7 @@ extern "C" {
     // B = X * L^T
     // L^T(k,j) = L(j,k)
     // X(i,j) = ( B(i,j) - sum_from_k=1_to_j-1 (X(i,k) * L(j,k)) ) / L(j,j)
-    // B is the A blocks under the diagonal block, (ncol X ncol)
+    // B is the A blocks under the diagonal block, (nrow X ncol)
     // X is the L blocks under the diagonal block, (nrow X ncol)
     // L is chol(diagonal block),                  (ncol X ncol)
     // This function is destructive, i.e. B is overwritten with X
@@ -153,7 +153,9 @@ extern "C" {
         float diag_data[curr_blk_dim * curr_blk_dim];
         float diag_result[curr_blk_dim * curr_blk_dim] = {0};
         copy_block_to_sp(diag_data, &A, di, di, curr_blk_dim, curr_blk_dim);
+        bsg_cuda_print_stat_kernel_start(1);
         g_barrier.sync(); // Make sure everyone got the correct data
+        bsg_cuda_print_stat_kernel_end(1);
         block_cholesky(diag_data, diag_result, curr_blk_dim);
 
         // Only copy diag block back if I am tile 0
@@ -200,7 +202,9 @@ extern "C" {
         }
 
         // Make sure all tiles have finished triangular solve before moving on
+        bsg_cuda_print_stat_kernel_start(2);
         g_barrier.sync();
+        bsg_cuda_print_stat_kernel_start(2);
 
         // Parallel Schur complement update of trailing submatrix
         // Evenly divide the work as before
@@ -239,7 +243,9 @@ extern "C" {
         }
 
         // Make sure all tiles have finished updating trailing submatrix before moving on
+        bsg_cuda_print_stat_kernel_start(3);
         g_barrier.sync();
+        bsg_cuda_print_stat_kernel_end(3);
     }
 
 
