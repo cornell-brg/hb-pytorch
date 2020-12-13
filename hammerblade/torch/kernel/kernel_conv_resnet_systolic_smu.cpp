@@ -172,7 +172,7 @@ load_conv_imap_back_weight(
     wait_smu( ack );
     // Load second block. Wait for ACK in the next call
     launch_smu_conv_imap(
-        block_x, block_y,
+        block_x_nxt, block_y_nxt,
         image_id_nxt, filter_id_nxt, channel_id_nxt,
         src,
         fifo.get_next_buffer(), ack,
@@ -184,7 +184,7 @@ load_conv_imap_back_weight(
     // Loading one extra block doesn't impact obserable kernel cycle count
     // One FIFO has not been loaded; call SMU to load data
     launch_smu_conv_imap(
-        block_x, block_y,
+        block_x_nxt, block_y_nxt,
         image_id_nxt, filter_id_nxt, channel_id_nxt,
         src,
         fifo.get_next_buffer(), ack,
@@ -229,7 +229,7 @@ load_conv_grad_back_weight(
     wait_smu( ack );
     // Load second block. Wait for ACK in the next call
     launch_smu_conv_grad(
-        block_x, block_y,
+        block_x_nxt, block_y_nxt,
         image_id_nxt, filter_id_nxt, channel_id_nxt,
         src,
         fifo.get_next_buffer(), ack,
@@ -241,7 +241,7 @@ load_conv_grad_back_weight(
     // Loading one extra block doesn't impact obserable kernel cycle count
     // One FIFO has not been loaded; call SMU to load data
     launch_smu_conv_grad(
-        block_x, block_y,
+        block_x_nxt, block_y_nxt,
         image_id_nxt, filter_id_nxt, channel_id_nxt,
         src,
         fifo.get_next_buffer(), ack,
@@ -449,7 +449,10 @@ extern "C" {
               // do conv
               conv2d_3x3_16<BLOCK_DIM_X, BLOCK_DIM_Y, IMAP_DIM_X, IMAP_DIM_Y, FILTER_DIM>(imap_buf, filter_buf, omap_buf);
 
-              fifo.finish_rd_ptr();
+              if ( is_first_col )
+                fifo.SMU_finish_rd();
+              else
+                fifo.finish_rd_ptr();
             } // channel
 
             // write omap back
@@ -619,7 +622,10 @@ extern "C" {
               // do conv
               conv2d_3x3_16<BLOCK_DIM_X, BLOCK_DIM_Y, IMAP_DIM_X, IMAP_DIM_Y, FILTER_DIM>(imap_buf, filter_buf, omap_buf);
 
-              fifo.finish_rd_ptr();
+              if ( is_first_col )
+                fifo.SMU_finish_rd();
+              else
+                fifo.finish_rd_ptr();
             }
 
             // write omap back
@@ -652,22 +658,22 @@ extern "C" {
     hb_vector_t* padding,
     hb_vector_t* strides) {
 
-    HBTensor<float, 4> filter(output);
-    HBTensor<float, 4> imap(input);
-    HBTensor<float, 4> grad(weight);
+    HBTensor<float, 4> filter(output); // 16, 8, 3, 3
+    HBTensor<float, 4> imap(input); // 1, 16, 32, 32
+    HBTensor<float, 4> grad(weight); // 1, 16, 32, 32
     HBVector<uint32_t> p(padding);
     HBVector<uint32_t> s(strides);
 
     // extract parameters
-    auto N      = filter.dim(0); // number of filters to calculate grad for
-    auto Cout   = filter.dim(1); // number of channels in the images
-    auto Hout   = filter.dim(2);
-    auto Wout   = filter.dim(3);   // filter dimensions
-    auto N_imap = imap.dim(0);   // number of images
-    auto Hin    = imap.dim(2);   // image dimensions
-    auto Win    = imap.dim(3);
-    auto Hk     = grad.dim(2);   // grad dimensions
-    auto Wk     = grad.dim(3);
+    auto N      = filter.dim(0); // 16, number of filters to calculate grad for
+    auto Cout   = filter.dim(1); // 8, number of channels in the images
+    auto Hout   = filter.dim(2); // 3
+    auto Wout   = filter.dim(3); // 3, filter dimensions
+    auto N_imap = imap.dim(0);   // 1, number of images
+    auto Hin    = imap.dim(2);   // 32, image dimensions
+    auto Win    = imap.dim(3);   // 32
+    auto Hk     = grad.dim(2);   // 32, grad dimensions
+    auto Wk     = grad.dim(3);   // 32
 
     // cross check
     hb_assert(FILTER_DIM == Hout);
@@ -685,11 +691,11 @@ extern "C" {
     hb_assert(Wk % BLOCK_DIM_X == 0);
 
     // Here we break grad into blocks
-    size_t h_blocks_per_out_channel = Hk / BLOCK_DIM_Y;
-    size_t w_blocks_per_out_channel = Wk / BLOCK_DIM_X;
+    size_t h_blocks_per_out_channel = Hk / BLOCK_DIM_Y; // 4
+    size_t w_blocks_per_out_channel = Wk / BLOCK_DIM_X; // 2
 
-    size_t blocks_per_out_channel = h_blocks_per_out_channel * w_blocks_per_out_channel;
-    size_t num_blocks = N * Cout; // parallel over filter x channel
+    size_t blocks_per_out_channel = h_blocks_per_out_channel * w_blocks_per_out_channel; // 8
+    size_t num_blocks = N * Cout; // 128, parallel over filter x channel
 
     float filter_buf[FILTER_DIM * FILTER_DIM];      //   5x5 * 4 = 100B
     float* imap_buf;
@@ -815,6 +821,30 @@ extern "C" {
 
     int ack_col = 0;
     int ack_row = 0;
+
+    /* auto imapDMA_job = [&]() { */
+    /*   imap_buf = imap_fifo.get_buffer(); */
+    /*   size_t channel_offset = bsg_y; */
+
+    /*   for (size_t filter_id = 0; filter_id < N; filter_id += 16) { */
+    /*     for (size_t channel_id = channel_offset; channel_id < Cout; channel_id += 8) { */
+    /*       if (channel_id < Cout) { */
+    /*         for (size_t image_id = 0; image_id < N_imap; image_id++) { */
+    /*           for (size_t block_y = 0; block_y < h_blocks_per_out_channel; block_y++) { */
+    /*             for (size_t block_x = 0; block_x < w_blocks_per_out_channel; block_x++) { */
+    /*               imapDMA_padding_systolic(imap, imap_buf, image_id, channel_id, block_x, block_y); */
+    /*               //bsg_print_hexadecimal(0xAA); */
+    /*               float* imap_buf_remote = imap_fifo.obtain_wr_ptr(); */
+    /*               spcpy_imap(imap_buf_remote, imap_buf); */
+    /*               imap_fifo.finish_wr_ptr(); */
+    /*               //bsg_print_hexadecimal(0xBB); */
+    /*             } */
+    /*           } */
+    /*         } */
+    /*       } */
+    /*     } */
+    /*   } */
+    /* }; */
 
     auto compute_job = [&]() {
       size_t channel_offset = bsg_y;
@@ -975,8 +1005,14 @@ extern "C" {
                     output[1] += psum1;
                     output[2] += psum2;
                   } // f_y
-                  imap_fifo.finish_rd_ptr();
-                  grad_fifo.finish_rd_ptr();
+                  if ( is_first_row )
+                    grad_fifo.SMU_finish_rd();
+                  else
+                    grad_fifo.finish_rd_ptr();
+                  if ( is_first_col )
+                    imap_fifo.SMU_finish_rd();
+                  else
+                    imap_fifo.finish_rd_ptr();
                 } // block_x
               } // block_y
             } // image_id

@@ -47,7 +47,7 @@ loop_inc(int rr, int rc, int k, int& rr_nxt, int& rc_nxt, int& k_nxt,
   rr_nxt = rr;
   rc_nxt = rc;
   k_nxt = k+1;
-  if ( k_nxt == m1_num_blk_per_row ) {
+  if ( k_nxt >= m1_num_blk_per_row ) {
     k_nxt = 0;
     rc_nxt = rc + SYSTOLIC_X_DIM;
     if ( rc_nxt >= m2_num_blk_per_row) {
@@ -113,6 +113,75 @@ load_block(bool is_col, DoubleBuffer& buf, MMTensor& src, int* ack,
 
 }
 
+inline void
+load_block_row_col(
+      DoubleBuffer& buf1, DoubleBuffer& buf2,
+      MMTensor& src1, MMTensor& src2,
+      int* ack1, int* ack2,
+      int rr, int rc, int k, int m1_num_blk_per_col,
+      int m2_num_blk_per_row, int m1_num_blk_per_row) {
+
+  int rr_nxt, rc_nxt, k_nxt;
+
+  loop_inc( rr, rc, k, rr_nxt, rc_nxt, k_nxt,
+            m1_num_blk_per_col, m2_num_blk_per_row, m1_num_blk_per_row );
+
+  /* int r_idx = is_col ? rr : k; */
+  /* int c_idx = is_col ? k : rc; */
+
+  /* int r_idx_nxt = is_col ? rr_nxt : k_nxt; */
+  /* int c_idx_nxt = is_col ? k_nxt : rc_nxt; */
+
+  /* bool is_last_block = k == (m1_num_blk_per_row); */
+
+  if ( !((rr == bsg_y) && (rc == bsg_x) && (k == 0)) ) {
+    // If not first call, wait till SMU acks
+    wait_smu( ack1 );
+
+    /* if ( ! is_last_block ) */
+    // Launching one more round doesn't impact observed kernel cycle count
+    // One FIFO has not been loaded; call SMU to load data
+    launch_smu_mm( true, src1,
+                   rr_nxt, k_nxt,
+                   buf1.get_next_buffer(), ack1,
+                   BLOCK_DIM, BLOCK_DIM );
+
+    wait_smu( ack2 );
+    launch_smu_mm( false, src2,
+                   k_nxt, rc_nxt,
+                   buf2.get_next_buffer(), ack2,
+                   BLOCK_DIM, BLOCK_DIM );
+  } else {
+    // No FIFO was set to load data -- only possible at the first call
+    // In this case we load two blocks and wait til the first block
+    // comes back.
+    launch_smu_mm( true, src1,
+                   rr, k,
+                   buf1.get_buffer(), ack1,
+                   BLOCK_DIM, BLOCK_DIM );
+    launch_smu_mm( false, src2,
+                   k, rc,
+                   buf2.get_buffer(), ack2,
+                   BLOCK_DIM, BLOCK_DIM );
+    wait_smu( ack1 );
+    wait_smu( ack2 );
+    // Load second block. Wait for ACK in the next call
+    launch_smu_mm( true, src1,
+                   rr_nxt, k_nxt,
+                   buf1.get_next_buffer(), ack1,
+                   BLOCK_DIM, BLOCK_DIM );
+    launch_smu_mm( false, src2,
+                   k_nxt, rc_nxt,
+                   buf2.get_next_buffer(), ack2,
+                   BLOCK_DIM, BLOCK_DIM );
+  }
+
+  // Tell the buffer that the SMU has finished a pull-based write
+  buf1.SMU_finish_wb();
+  buf2.SMU_finish_wb();
+
+}
+
 } // namespace
 
 extern "C" {
@@ -171,17 +240,26 @@ extern "C" {
         for (int mat1x = 0; mat1x < m1_num_blk_per_row; mat1x++) {
           // Begin per-block computation
 
-          if ( is_first_row )
-            // load block at first row
-            load_block( false, mat2_fifo, mat2, &ack_row, rr, rc, mat1x,
-                        m1_num_blk_per_col, m2_num_blk_per_row,
-                        m1_num_blk_per_row );
+          if ( is_first_row & is_first_col ) {
+              load_block_row_col(
+                  mat1_fifo, mat2_fifo, mat1, mat2,
+                  &ack_col, &ack_row,
+                  rr, rc, mat1x,
+                  m1_num_blk_per_col, m2_num_blk_per_row,
+                  m1_num_blk_per_row );
+          } else {
+            if ( is_first_row )
+              // load block at first row
+              load_block( false, mat2_fifo, mat2, &ack_row, rr, rc, mat1x,
+                          m1_num_blk_per_col, m2_num_blk_per_row,
+                          m1_num_blk_per_row );
 
-          if ( is_first_col )
-            // load block at first column
-            load_block( true, mat1_fifo, mat1, &ack_col, rr, rc, mat1x,
-                        m1_num_blk_per_col, m2_num_blk_per_row,
-                        m1_num_blk_per_row );
+            if ( is_first_col )
+              // load block at first column
+              load_block( true, mat1_fifo, mat1, &ack_col, rr, rc, mat1x,
+                          m1_num_blk_per_col, m2_num_blk_per_row,
+                          m1_num_blk_per_row );
+          }
 
           // wait until buffer is loaded
           sp_mat2 = mat2_fifo.obtain_rd_ptr();

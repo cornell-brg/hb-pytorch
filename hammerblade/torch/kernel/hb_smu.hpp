@@ -178,7 +178,7 @@ launch_smu_conv_imap(
 inline void
 launch_smu_conv_grad(
     size_t block_x, size_t block_y,
-    size_t image_id, size_t filter_id, size_t channel_id,
+    size_t image_id, size_t channel_id, size_t filter_id,
     HBTensor<float, 4>& src,
     float* dst_base, int* ack,
     size_t block_dim_x, size_t block_dim_y,
@@ -194,6 +194,7 @@ launch_smu_conv_grad(
                   + (grad_y * src_strides[2])
                   + (grad_x * src_strides[3]);
   *ack = 0;
+
   /* bsg_printf("[INFO] Launching SMU with dst (%d, %d), r_idx = %d, c_idx = %d, " */
   /*            "stride0 = %d, stride1 = %d, " */
   /*            "src_base 0x%x, src_addr 0x%x, dst_base 0x%x, ack 0x%x (cleared), y_stride %u\n", */
