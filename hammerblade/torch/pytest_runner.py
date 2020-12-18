@@ -50,6 +50,4 @@ print(" starting pytest ...")
 print()
 
 # invoke pytest main loop
-#exit(pytest.main(pytest_argv + targets))
-exit(pytest.main(pytest_argv + targets + ["-k cholesky"] + ["-v"]))
-#exit(pytest.main(pytest_argv + targets + ["-k cholesky_hypo"] + ["-sv"]))
+exit(pytest.main(pytest_argv + targets))
