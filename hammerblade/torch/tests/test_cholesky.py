@@ -5,12 +5,14 @@ Unit tests for torch.cholesky kernel
 
 import torch
 import random
-#import pytest
-#from hypothesis import given, settings
-#from .hypothesis_test_util import HypothesisUtil as hu
+import pytest
+from hypothesis import given, settings
+from .hypothesis_test_util import HypothesisUtil as hu
 
-#torch.manual_seed(42)
-#random.seed(42)
+MAXSIZE = 100
+
+torch.manual_seed(42)
+random.seed(42)
 
 def _test_torch_cholesky(A, atol=1e-8):
     h = A.hammerblade()
@@ -26,31 +28,27 @@ def _test_torch_cholesky(A, atol=1e-8):
     assert torch.allclose(A, LLT, atol=atol)
 
 def test_torch_cholesky_identity():
-    s = 1000
-    for n in range(s):
+    for n in range(MAXSIZE):
         x = torch.eye(n)
         _test_torch_cholesky(x)
 
 def test_torch_cholesky_diagonal():
-    s = 1000
-    for n in range(s):
+    for n in range(MAXSIZE):
         x = 2 * torch.eye(n)
         _test_torch_cholesky(x)
 
 def test_torch_cholesky_diagonal_inc():
-    s = 1000
-    for n in range(s):
+    for n in range(MAXSIZE):
         x = torch.eye(n)
-        for i in range(s):
+        for i in range(n):
             x[i,i] = i + 2
         _test_torch_cholesky(x)
 
 def test_torch_cholesky_diagonal_dec():
-    s = 1000
-    for n in range(s):
+    for n in range(MAXSIZE):
         x = torch.eye(n)
-        for i in range(s):
-            x[i,i] = s + 2 - i
+        for i in range(n):
+            x[i,i] = n + 2 - i
         _test_torch_cholesky(x)
 
 def test_torch_cholesky_basic1():
@@ -77,7 +75,6 @@ def test_torch_cholesky_basic4():
 def test_torch_cholesky_random_small():
     for _ in range(0,100):
         N = random.randint(1,10)
-#        print('N', N)
         x = torch.rand((N,N))
         x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
         x.add_(torch.eye(N))   # make positive definite
@@ -87,7 +84,6 @@ def test_torch_cholesky_random_small():
 def test_torch_cholesky_random_big():
     for _ in range(0,20):
         N = random.randint(100,1001)
-#        print('N', N)
         x = torch.rand((N,N))
         x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
         x.add_(torch.eye(N))   # make positive definite
@@ -97,7 +93,6 @@ def test_torch_cholesky_random_big():
 def test_torch_cholesky_random1():
     for _ in range(0,100):
         N = random.randint(1,101)
-#        print('N', N)
         x = torch.rand((N,N))
         x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
         x.add_(torch.eye(N))   # make positive definite
@@ -106,7 +101,6 @@ def test_torch_cholesky_random1():
 # Test random matrices of all sizes from 1x1 to 100x100
 def test_torch_cholesky_random2():
     for N in range(1,101):
-#        print('N', N)
         x = torch.rand((N,N))
         x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
         x.add_(torch.eye(N))   # make positive definite
@@ -115,13 +109,11 @@ def test_torch_cholesky_random2():
 def test_torch_cholesky_random_neg():
     for _ in range(0,100):
         N = random.randint(1,100)
-#        print('N', N)
         x = torch.rand((N,N)) - 0.5 # make half the numbers negative
         x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
         x.add_(torch.eye(N))   # make positive definite
         _test_torch_cholesky(x, atol=1e-6)
 
-'''
 @settings(deadline=None)
 @given(inputs=hu.tensors2dsquare(min_shape=1, max_shape=5))
 def test_torch_cholesky_hypothesis(inputs):
@@ -129,22 +121,4 @@ def test_torch_cholesky_hypothesis(inputs):
     x = torch.mm(x, x.t()) # make symmetric positive-semidefinite
     x.add_(10 * torch.eye(inputs.shape[0])) # make positive definite
     _test_torch_cholesky(x)
-'''
 
-def main():
-    test_torch_cholesky_identity()
-    test_torch_cholesky_diagonal()
-    test_torch_cholesky_diagonal_inc()
-    test_torch_cholesky_diagonal_dec()
-    #test_torch_cholesky_basic1()
-    #test_torch_cholesky_basic2()
-    #test_torch_cholesky_basic3()
-    #test_torch_cholesky_basic4()
-    #test_torch_cholesky_random_small()
-    #test_torch_cholesky_random_big()
-    #test_torch_cholesky_random1()
-    #test_torch_cholesky_random2()
-    #test_torch_cholesky_random_neg()
-
-if __name__ == "__main__":
-    main()

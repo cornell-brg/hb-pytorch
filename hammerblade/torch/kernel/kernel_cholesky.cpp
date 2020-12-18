@@ -8,31 +8,6 @@
 
 extern "C" {
 
-/*
-    void print_tensor(HBTensor<float>* t) {
-        printf("[bsg_id %d\n", __bsg_id);
-        int N = (*t).dim(0);
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                printf("%f ", (*t)(i, j));
-            }
-            printf("\n");
-        }
-        printf("]\n");
-    }
-
-    void print_array(float* b, int nrow, int ncol) {
-        printf("[bsg_id %d\n", __bsg_id);
-        for (int x = 0; x < nrow; x++) {
-            for (int y = 0; y < ncol; y++) {
-                printf("%f ", b[x*ncol + y]);
-            }
-            printf("\n");
-        }
-        printf("]\n");
-    }
-*/
-
     // Compute the Cholesky for the given block A and store it in L
     // N is the size of the block (block is square)
     void block_cholesky(float* A, float* L, int N) {
@@ -153,9 +128,7 @@ extern "C" {
         float diag_data[curr_blk_dim * curr_blk_dim];
         float diag_result[curr_blk_dim * curr_blk_dim] = {0};
         copy_block_to_sp(diag_data, &A, di, di, curr_blk_dim, curr_blk_dim);
-        bsg_cuda_print_stat_kernel_start(1);
         g_barrier.sync(); // Make sure everyone got the correct data
-        bsg_cuda_print_stat_kernel_end(1);
         block_cholesky(diag_data, diag_result, curr_blk_dim);
 
         // Only copy diag block back if I am tile 0
@@ -202,9 +175,7 @@ extern "C" {
         }
 
         // Make sure all tiles have finished triangular solve before moving on
-        bsg_cuda_print_stat_kernel_start(2);
         g_barrier.sync();
-        bsg_cuda_print_stat_kernel_start(2);
 
         // Parallel Schur complement update of trailing submatrix
         // Evenly divide the work as before
@@ -243,37 +214,8 @@ extern "C" {
         }
 
         // Make sure all tiles have finished updating trailing submatrix before moving on
-        bsg_cuda_print_stat_kernel_start(3);
         g_barrier.sync();
-        bsg_cuda_print_stat_kernel_end(3);
     }
-
-
-    // Use a single tile only
-//    if (__bsg_id == 0) {
-
-/*
-        float data[N * N] = {0};
-        float result[N * N] = {0};
-        copy_block_to_sp(data, &A, 0, 0, N);
-        block_cholesky(data, result, N);
-        copy_block_to_dram(&L, result, 0, 0, N);
-*/
-
-/*
-        for (size_t i = 0; i < N; i++) { // for diagonal index
-            for (size_t j = 0; j < i+1; j++) { // for each elm in the row this diag belongs to
-                float sum = 0.0;
-                for (size_t k = 0; k < j; k++) { // for each elm e to the left of (i,j)
-                    sum += L(i, k) * L(j, k); // sum e times elm in jth row directly above e
-                }
-                L(i, j) = (i == j) ? sqrt(A(i, i) - sum) : ((A(i, j) - sum) / L(j, j));
-            }
-
-        }
-*/
-
-//    }
 
 
     //   End profiling

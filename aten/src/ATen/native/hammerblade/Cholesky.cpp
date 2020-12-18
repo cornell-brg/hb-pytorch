@@ -11,7 +11,7 @@ Tensor cholesky_hb(const Tensor& self) {
   TORCH_CHECK(self.dim() == 2, "2D matrices expected, got ", self.dim(), " tensor");
   TORCH_CHECK(self.size(0) == self.size(1), "Square matrices expected, got ", self.size(0), " by ", self.size(1), " tensor");
 
-  Tensor factorization = at::clone(self); // mXn matrix, same as self
+  Tensor factorization = at::clone(self);
 
   hb_offload_kernel(factorization, "tensorlib_cholesky");
 
