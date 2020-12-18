@@ -9,6 +9,7 @@ import hypothesis.extra.numpy
 import hypothesis.strategies as st
 import numpy as np
 import os
+import random
 
 def is_travis():
     return 'TRAVIS' in os.environ
@@ -20,7 +21,6 @@ def is_travis():
 
 def dims(min_value=1, max_value=5):
     return st.integers(min_value=min_value, max_value=max_value)
-
 
 def elements_of_type(dtype=np.float32, filter_=None):
     elems = None
@@ -101,6 +101,15 @@ class HypothesisUtil():
             return dims_.flatmap(
                 lambda dims: st.lists(arrays(dims, dtype, elements), min_size=n, max_size=n))
 
+    @staticmethod
+    @st.composite
+    def tensors2dsquare(draw, min_shape=1, max_shape=10, dtype=np.float32):
+        # create 2d square matrices
+        s = st.integers(min_shape, max_shape)
+        a = st.shared(s, key="hi")
+        b = st.shared(s, key="hi")
+        shapes = st.tuples(a,b)
+        return draw(arrays(shapes, dtype=dtype))
 
     @staticmethod
     def tensors1d(n, min_len=1, max_len=64, dtype=np.float32, elements=None, nonzero=False):
