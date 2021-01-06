@@ -41,7 +41,8 @@ int tensorlib_upsample_nearest1d(
 
   // special case: just copy
   if (input_width == output_width) {
-    for (int32_t w2 = 0; w2 < output_width; ++w2) {
+    //for (int32_t w2 = 0; w2 < output_width; ++w2) {
+    hb_tiled_for(output_width, [&](size_t w2) {
       const int32_t w1 = w2;
       const float* pos1 = &idata[w1];
       float* pos2 = &odata[w2];
@@ -51,11 +52,12 @@ int tensorlib_upsample_nearest1d(
         pos1 += input_width;
         pos2 += output_width;
       }
-    }
+    });
     return 0;
   }
 
-  for (int64_t w2 = 0; w2 < output_width; ++w2) {
+  //for (int64_t w2 = 0; w2 < output_width; ++w2) {
+  hb_tiled_for(output_width, [&](size_t w2) {
     const int32_t w1 =
         nearest_neighbor_compute_source_index(scale, w2, input_width);
     const float* pos1 = &idata[w1];
@@ -66,7 +68,7 @@ int tensorlib_upsample_nearest1d(
       pos1 += input_width;
       pos2 += output_width;
     }
-  }
+  });
 
   return 0;
 
@@ -99,7 +101,8 @@ int tensorlib_upsample_nearest1d_back(
 
   // special case: same-size matching grids
   if (input_width == output_width) {
-    for (int32_t w2 = 0; w2 < output_width; ++w2) {
+    //for (int32_t w2 = 0; w2 < output_width; ++w2) {
+    hb_tiled_for(output_width, [&](size_t w2) {
       const int32_t w1 = w2;
       float* pos1 = &idata[w1];
       const float* pos2 = &odata[w2];
@@ -109,23 +112,26 @@ int tensorlib_upsample_nearest1d_back(
         pos1 += input_width;
         pos2 += output_width;
       }
-    }
+    });
     return 0;
   }
 
-  for (int32_t w2 = 0; w2 < output_width; ++w2) {
-    const int32_t w1 =
-        nearest_neighbor_compute_source_index(scale, w2, input_width);
+  //for (int32_t w1 = 0; w1 < input_width; ++w1) {
+  hb_tiled_for(input_width, [&](size_t w1) {
+    int32_t start_idx = w1 / scale;
+    int32_t end_idx = start_idx + (1 / scale);
+    end_idx = end_idx > output_width ? output_width : end_idx;
 
-    float* pos1 = &idata[w1];
-    const float* pos2 = &odata[w2];
-
-    for (int32_t c = 0; c < channels; ++c) {
-      pos1[0] += pos2[0];
-      pos1 += input_width;
-      pos2 += output_width;
+    for (int32_t w2 = start_idx; w2 < end_idx; ++w2) {
+      float* pos1 = &idata[w1];
+      const float* pos2 = &odata[w2];
+      for (int32_t c = 0; c < channels; ++c) {
+        pos1[0] += pos2[0];
+        pos1 += input_width;
+        pos2 += output_width;
+      }
     }
-  }
+  });
 
   return 0;
 }
