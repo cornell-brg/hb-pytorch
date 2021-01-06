@@ -6282,6 +6282,7 @@
   dispatch:
     CPU: upsample_nearest1d_cpu
     CUDA: upsample_nearest1d_cuda
+    HammerBlade: upsample_nearest1d_hb
 
 - func: upsample_nearest1d_backward.grad_input(Tensor grad_output, int[1] output_size, int[3] input_size, *, Tensor(a!) grad_input) -> Tensor(a!)
   python_module: nn
@@ -6294,6 +6295,7 @@
   dispatch:
     CPU: upsample_nearest1d_backward_cpu
     CUDA: upsample_nearest1d_backward_cuda
+    HammerBlade: upsample_nearest1d_backward_hb
 
 - func: upsample_nearest2d.out(Tensor self, int[2] output_size, *, Tensor(a!) out) -> Tensor(a!)
   python_module: nn
