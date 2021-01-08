@@ -31,7 +31,7 @@ def _test_torch_nn_NLLLoss2d(x, y):
   print(loss)
   loss_hb = m_hb(x_hb, y_hb)
 
-  assert torch.equal(loss, loss_hb.cpu())
+  assert torch.allclose(loss, loss_hb.cpu())
 
   loss.backward()
   loss_hb.backward()

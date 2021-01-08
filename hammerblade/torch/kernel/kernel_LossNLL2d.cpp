@@ -44,32 +44,45 @@ int tensorlib_nll_loss2d_forward(
   float total_weight_val = 0;
   float output_val = 0;
 
+  // parallel reduction buffer
+  float* buffer = (float*)g_reduction_buffer;
+
+  // here we assume weight is always 1
+  total_weight_val = static_cast<float>(batch_size * map_size);
+
   for (size_t b = 0; b < batch_size; b++) {
-    for (size_t elem = 0; elem < map_size; elem++) {
+    hb_tiled_for(map_size, [&](size_t elem) {
       const uint32_t cur_target = static_cast<uint32_t>(target_data[b * map_size + elem]);
 
-      if (cur_target == ignore_index) {
-        continue;
+      if (cur_target != ignore_index) {
+        hb_assert(cur_target >= 0 && cur_target < n_classes);
+        // for parallel reduction, we change -= to +=
+        output_val += input_data[b * sample_size + cur_target * map_size + elem];
       }
+    });
+  }
 
-      hb_assert(cur_target >= 0 && cur_target < n_classes);
+  buffer[__bsg_id] = output_val;
+  g_barrier.sync();
 
-      const float weight_val = 1.0f;
-      total_weight_val += weight_val;
-      output_val -= input_data[b * sample_size + cur_target * map_size + elem] *
-          weight_val;
+  if(__bsg_id == 0) {
+
+    output_val = 0;
+    for(size_t idx = 0; idx < bsg_tiles_X * bsg_tiles_Y; idx++) {
+      output_val -= buffer[idx];
     }
+
+    if (reduction == Reduction::Mean &&
+        (total_weight_val != 0 || input.numel() == 0)) {
+      // allow NaN result for total_weight_val == 0 case, see #15870
+      output_val /= total_weight_val;
+    }
+
+    output(0) = output_val;
+    total_weight(0) = total_weight_val;
   }
 
-  if (reduction == Reduction::Mean &&
-      (total_weight_val != 0 || input.numel() == 0)) {
-    // allow NaN result for total_weight_val == 0 case, see #15870
-    output_val /= total_weight_val;
-  }
-
-  output(0) = output_val;
-  total_weight(0) = total_weight_val;
-
+  g_barrier.sync();
   return 0;
 }
 
