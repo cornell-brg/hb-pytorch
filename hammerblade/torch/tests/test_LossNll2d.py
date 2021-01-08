@@ -28,7 +28,6 @@ def _test_torch_nn_NLLLoss2d(x, y):
   assert m is not m_hb
 
   loss    = m(x, y)
-  print(loss)
   loss_hb = m_hb(x_hb, y_hb)
 
   assert torch.allclose(loss, loss_hb.cpu())

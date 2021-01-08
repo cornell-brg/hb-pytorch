@@ -121,74 +121,6 @@ void nll_loss2d_forward_out_hb_template(
       });
 }
 
-static void nll_loss2d_backward_out_frame(
-    Tensor& grad_input,
-    const Tensor& grad_output,
-    const Tensor& input,
-    const Tensor& target,
-    const Tensor& weight,
-    int64_t reduction,
-    int64_t ignore_index,
-    const Tensor& total_weight) {
-  auto weight_contiguous = optional_contiguous(weight);
-  const float* weight_data = optional_data<float>(weight_contiguous);
-
-  if (reduction == at::Reduction::None) {
-    // XXX: unimplemented
-    TORCH_CHECK(false,"Reduction::None unimplemented");
-    return;
-  }
-
-  const float total_weight_value = *total_weight.data_ptr<float>();
-  if (total_weight_value <= 0) {
-    return;
-  }
-
-  TORCH_CHECK(
-      grad_output.dim() <= 1 && grad_output.numel() == 1,
-      "Expected a single element grad_output tensor, but got: ",
-      grad_output.sizes());
-
-  const float grad_output_value = *grad_output.data_ptr<float>();
-
-  const auto target_contiguous = target.contiguous();
-  const int64_t* target_data = target_contiguous.data_ptr<int64_t>();
-
-  float* grad_input_data = grad_input.data_ptr<float>();
-
-  const int64_t batch_size = input.size(0);
-  const int64_t n_classes = input.size(1);
-  const int64_t map_size = input.size(2) * input.size(3);
-  const int64_t sample_size = map_size * n_classes;
-
-  float normalize = (reduction == at::Reduction::Mean)
-      ? total_weight_value
-      : static_cast<float>(1);
-
-  at::parallel_for(0, batch_size, 0, [&](int64_t start, int64_t end) {
-    for (int64_t b = start; b < end; b++) {
-      for (int64_t elem = 0; elem < map_size; elem++) {
-        const int64_t cur_target = target_data[b * map_size + elem];
-
-        if (cur_target == ignore_index) {
-          continue;
-        }
-
-        TORCH_CHECK_INDEX(
-            cur_target >= 0 && cur_target < n_classes,
-            "Target ",
-            cur_target,
-            " is out of bounds.");
-
-        const int64_t index = b * sample_size + cur_target * map_size + elem;
-        const float w = weight_data != nullptr ? weight_data[cur_target]
-                                                  : static_cast<float>(1);
-        grad_input_data[index] = -w / normalize * grad_output_value;
-      }
-    }
-  });
-}
-
 void nll_loss2d_backward_out_hb_template(
     Tensor& grad_input,
     const Tensor& grad_output,
@@ -210,19 +142,26 @@ void nll_loss2d_backward_out_hb_template(
       total_weight.numel(),
       " elements)");
 
+  const auto target_contiguous = target.contiguous();
+
+  TORCH_CHECK(
+      grad_output.dim() <= 1 && grad_output.numel() == 1,
+      "Expected a single element grad_output tensor, but got: ",
+      grad_output.sizes());
+
   AT_DISPATCH_FLOAT_TYPE_ONLY(
       input.scalar_type(),
       "nll_loss2d_backward_out_frame",
       [&] {
-        nll_loss2d_backward_out_frame(
+        hb_offload_kernel(
             grad_input,
             grad_output,
             input,
-            target,
-            weight,
+            target_contiguous,
+            total_weight,
             reduction,
             ignore_index,
-            total_weight);
+            "tensorlib_nll_loss2d_backward");
       });
 }
 
