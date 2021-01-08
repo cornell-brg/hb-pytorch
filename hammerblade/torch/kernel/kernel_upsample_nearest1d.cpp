@@ -53,6 +53,8 @@ int tensorlib_upsample_nearest1d(
         pos2 += output_width;
       }
     });
+
+    g_barrier.sync();
     return 0;
   }
 
@@ -70,6 +72,7 @@ int tensorlib_upsample_nearest1d(
     }
   });
 
+  g_barrier.sync();
   return 0;
 
 }
@@ -113,6 +116,8 @@ int tensorlib_upsample_nearest1d_back(
         pos2 += output_width;
       }
     });
+
+    g_barrier.sync();
     return 0;
   }
 
@@ -133,6 +138,7 @@ int tensorlib_upsample_nearest1d_back(
     }
   });
 
+  g_barrier.sync();
   return 0;
 }
 
