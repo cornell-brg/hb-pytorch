@@ -6276,6 +6276,7 @@
   dispatch:
     CPU: upsample_nearest1d_out_cpu
     CUDA: upsample_nearest1d_out_cuda
+    HammerBlade: upsample_nearest1d_out_hb
 
 - func: upsample_nearest1d(Tensor self, int[1] output_size) -> Tensor
   python_module: nn
@@ -6289,6 +6290,7 @@
   dispatch:
     CPU: upsample_nearest1d_backward_out_cpu
     CUDA: upsample_nearest1d_backward_out_cuda
+    HammerBlade: upsample_nearest1d_backward_out_hb
 
 - func: upsample_nearest1d_backward(Tensor grad_output, int[1] output_size, int[3] input_size) -> Tensor
   python_module: nn
