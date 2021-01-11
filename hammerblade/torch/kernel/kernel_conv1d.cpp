@@ -19,8 +19,6 @@ namespace {
 inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf,
                             size_t image_id, size_t channel_id,
                             size_t block_id, size_t num_blocks) {
-  std::cout << "imapDMA - image id = " << image_id << " channel_id = " << channel_id
-            << " block_id = " << block_id << " num_blocks = " << num_blocks << std::endl;
   // helper functions
   auto load2 = [&](float* start_ptr, float* dest_ptr) {
     register float tmp0 = *(start_ptr + 0);
@@ -74,7 +72,6 @@ inline void imapDMA_padding(HBTensor<float, 4>& imap, float* imap_buf,
   const uint32_t* imap_src_strides = imap.get_strides();
   imap_src_base += image_id * imap_src_strides[0] + channel_id * imap_src_strides[1];
   // technically there is a x axis ... but it has to have a stride of 0 in the 1d case
-  std::cout << "imap base = " << imap_src_base << " = " << *imap_src_base << std::endl;
 
   if (block_id == 0) {
     pad2(imap_buf);
@@ -181,6 +178,184 @@ inline void omapReset(float* omap_buf) {
   return;
 }
 
+inline void kernel1d(float* imap, float* filter, float* omap) {
+  // unroll by 11
+  // 11 to hold output
+  //  5 to hold filter
+  // 15 to hold input
+  // 11 + 5 + 15 = 31 < 32
+  for (size_t idx = 0; idx < BLOCK_DIM; idx+=11) {
+    register float psum0  = omap[idx +  0];
+    register float psum1  = omap[idx +  1];
+    register float psum2  = omap[idx +  2];
+    register float psum3  = omap[idx +  3];
+    register float psum4  = omap[idx +  4];
+    register float psum5  = omap[idx +  5];
+    register float psum6  = omap[idx +  6];
+    register float psum7  = omap[idx +  7];
+    register float psum8  = omap[idx +  8];
+    register float psum9  = omap[idx +  9];
+    register float psum10 = omap[idx + 10];
+
+    register float filter0 = filter[0];
+    register float filter1 = filter[1];
+    register float filter2 = filter[2];
+    register float filter3 = filter[3];
+    register float filter4 = filter[4];
+
+    register float imap0  = imap[idx +  0];
+    register float imap1  = imap[idx +  1];
+    register float imap2  = imap[idx +  2];
+    register float imap3  = imap[idx +  3];
+    register float imap4  = imap[idx +  4];
+    register float imap5  = imap[idx +  5];
+    register float imap6  = imap[idx +  6];
+    register float imap7  = imap[idx +  7];
+    register float imap8  = imap[idx +  8];
+    register float imap9  = imap[idx +  9];
+    register float imap10 = imap[idx + 10];
+    register float imap11 = imap[idx + 11];
+    register float imap12 = imap[idx + 12];
+    register float imap13 = imap[idx + 13];
+    register float imap14 = imap[idx + 14];
+    asm volatile("": : :"memory");
+
+#ifdef HB_EMUL
+    psum0  += imap0  * filter0;
+    psum1  += imap1  * filter0;
+    psum2  += imap2  * filter0;
+    psum3  += imap3  * filter0;
+    psum4  += imap4  * filter0;
+    psum5  += imap5  * filter0;
+    psum6  += imap6  * filter0;
+    psum7  += imap7  * filter0;
+    psum8  += imap8  * filter0;
+    psum9  += imap9  * filter0;
+    psum10 += imap10 * filter0;
+
+    psum0  += imap1  * filter1;
+    psum1  += imap2  * filter1;
+    psum2  += imap3  * filter1;
+    psum3  += imap4  * filter1;
+    psum4  += imap5  * filter1;
+    psum5  += imap6  * filter1;
+    psum6  += imap7  * filter1;
+    psum7  += imap8  * filter1;
+    psum8  += imap9  * filter1;
+    psum9  += imap10 * filter1;
+    psum10 += imap11 * filter1;
+
+    psum0  += imap2  * filter2;
+    psum1  += imap3  * filter2;
+    psum2  += imap4  * filter2;
+    psum3  += imap5  * filter2;
+    psum4  += imap6  * filter2;
+    psum5  += imap7  * filter2;
+    psum6  += imap8  * filter2;
+    psum7  += imap9  * filter2;
+    psum8  += imap10 * filter2;
+    psum9  += imap11 * filter2;
+    psum10 += imap12 * filter2;
+
+    psum0  += imap3  * filter3;
+    psum1  += imap4  * filter3;
+    psum2  += imap5  * filter3;
+    psum3  += imap6  * filter3;
+    psum4  += imap7  * filter3;
+    psum5  += imap8  * filter3;
+    psum6  += imap9  * filter3;
+    psum7  += imap10 * filter3;
+    psum8  += imap11 * filter3;
+    psum9  += imap12 * filter3;
+    psum10 += imap13 * filter3;
+
+    psum0  += imap4  * filter4;
+    psum1  += imap5  * filter4;
+    psum2  += imap6  * filter4;
+    psum3  += imap7  * filter4;
+    psum4  += imap8  * filter4;
+    psum5  += imap9  * filter4;
+    psum6  += imap10 * filter4;
+    psum7  += imap11 * filter4;
+    psum8  += imap12 * filter4;
+    psum9  += imap13 * filter4;
+    psum10 += imap14 * filter4;
+#else
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0)  : "f"(imap0),  "f"(filter0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1)  : "f"(imap1),  "f"(filter0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2)  : "f"(imap2),  "f"(filter0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3)  : "f"(imap3),  "f"(filter0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4)  : "f"(imap4),  "f"(filter0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5)  : "f"(imap5),  "f"(filter0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6)  : "f"(imap6),  "f"(filter0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum7)  : "f"(imap7),  "f"(filter0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum8)  : "f"(imap8),  "f"(filter0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum9)  : "f"(imap9),  "f"(filter0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum10) : "f"(imap10), "f"(filter0));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0)  : "f"(imap1),  "f"(filter1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1)  : "f"(imap2),  "f"(filter1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2)  : "f"(imap3),  "f"(filter1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3)  : "f"(imap4),  "f"(filter1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4)  : "f"(imap5),  "f"(filter1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5)  : "f"(imap6),  "f"(filter1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6)  : "f"(imap7),  "f"(filter1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum7)  : "f"(imap8),  "f"(filter1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum8)  : "f"(imap9),  "f"(filter1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum9)  : "f"(imap10), "f"(filter1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum10) : "f"(imap11), "f"(filter1));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0)  : "f"(imap2),  "f"(filter2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1)  : "f"(imap3),  "f"(filter2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2)  : "f"(imap4),  "f"(filter2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3)  : "f"(imap5),  "f"(filter2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4)  : "f"(imap6),  "f"(filter2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5)  : "f"(imap7),  "f"(filter2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6)  : "f"(imap8),  "f"(filter2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum7)  : "f"(imap9),  "f"(filter2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum8)  : "f"(imap10), "f"(filter2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum9)  : "f"(imap11), "f"(filter2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum10) : "f"(imap12), "f"(filter2));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0)  : "f"(imap3),  "f"(filter3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1)  : "f"(imap4),  "f"(filter3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2)  : "f"(imap5),  "f"(filter3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3)  : "f"(imap6),  "f"(filter3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4)  : "f"(imap7),  "f"(filter3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5)  : "f"(imap8),  "f"(filter3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6)  : "f"(imap9),  "f"(filter3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum7)  : "f"(imap10), "f"(filter3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum8)  : "f"(imap11), "f"(filter3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum9)  : "f"(imap12), "f"(filter3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum10) : "f"(imap13), "f"(filter3));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum0)  : "f"(imap4),  "f"(filter4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum1)  : "f"(imap5),  "f"(filter4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum2)  : "f"(imap6),  "f"(filter4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum3)  : "f"(imap7),  "f"(filter4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum4)  : "f"(imap8),  "f"(filter4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum5)  : "f"(imap9),  "f"(filter4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum6)  : "f"(imap10), "f"(filter4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum7)  : "f"(imap11), "f"(filter4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum8)  : "f"(imap12), "f"(filter4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum9)  : "f"(imap13), "f"(filter4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(psum10) : "f"(imap14), "f"(filter4));
+#endif
+    omap[idx +  0] = psum0;
+    omap[idx +  1] = psum1;
+    omap[idx +  2] = psum2;
+    omap[idx +  3] = psum3;
+    omap[idx +  4] = psum4;
+    omap[idx +  5] = psum5;
+    omap[idx +  6] = psum6;
+    omap[idx +  7] = psum7;
+    omap[idx +  8] = psum8;
+    omap[idx +  9] = psum9;
+    omap[idx + 10] = psum10;
+  }
+
+  return;
+}
 
 } // namespace
 
@@ -226,36 +401,32 @@ extern "C" {
     float omap_buf[BLOCK_DIM];
     float imap_buf[IMAP_DIM];
 
-     bsg_cuda_print_stat_start(4);
+    bsg_cuda_print_stat_start(4);
 
-     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
-       size_t tmp = idx;
-       size_t image_id = tmp / (Cout * blocks_per_out_channel);
-       tmp = tmp % (Cout * blocks_per_out_channel);
-       size_t filter_id = tmp / blocks_per_out_channel;
-       tmp = tmp % blocks_per_out_channel;
-       size_t block_id = tmp % blocks_per_out_channel;
+    for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
+      size_t tmp = idx;
+      size_t image_id = tmp / (Cout * blocks_per_out_channel);
+      tmp = tmp % (Cout * blocks_per_out_channel);
+      size_t filter_id = tmp / blocks_per_out_channel;
+      tmp = tmp % blocks_per_out_channel;
+      size_t block_id = tmp % blocks_per_out_channel;
 
-       omapReset(omap_buf);
+      omapReset(omap_buf);
 
-       for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
-         imapDMA_padding(imap, imap_buf, image_id, channel_id, block_id, num_blocks);
-         filterDMA(filter, filter_buf, filter_id, channel_id);
-         // debug print
-         for (size_t i = 0; i < IMAP_DIM; i++) {
-           std::cout << imap_buf[i] << ",";
-         }
-         std::cout << std::endl;
-         // do conv
-       } //channel
-       omapDMA(omap, omap_buf, image_id, filter_id, block_id);
-     }
+      for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
+        imapDMA_padding(imap, imap_buf, image_id, channel_id, block_id, blocks_per_out_channel);
+        filterDMA(filter, filter_buf, filter_id, channel_id);
+        // do conv
+        kernel1d(imap_buf, filter_buf, omap_buf);
+      } //channel
+      omapDMA(omap, omap_buf, image_id, filter_id, block_id);
+    }
 
-     bsg_cuda_print_stat_end(4);
+    bsg_cuda_print_stat_end(4);
 
     g_barrier.sync();
     return 0;
-   }
+  }
 
    HB_EMUL_REG_KERNEL(tensorlib_conv1d_forward, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
                       hb_vector_t*, hb_vector_t*)
