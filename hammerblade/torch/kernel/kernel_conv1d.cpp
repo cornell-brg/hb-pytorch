@@ -357,6 +357,161 @@ inline void kernel1d(float* imap, float* filter, float* omap) {
   return;
 }
 
+inline void gradDMA(HBTensor<float, 4>& grad, float* grad_buf,
+                    size_t image_id, size_t filter_id,
+                    size_t block_id) {
+
+  float* grad_src_base = (float*)grad.data_ptr();
+  uint32_t* grad_src_strides = grad.get_strides();
+  grad_src_base += image_id * grad_src_strides[0] + filter_id * grad_src_strides[1];
+  grad_src_base += block_id * BLOCK_DIM;
+  // unroll by 11
+  for (size_t idx = 0; idx < BLOCK_DIM; idx+=11) {
+    register float tmp0  = *(grad_src_base + 0);
+    register float tmp1  = *(grad_src_base + 1);
+    register float tmp2  = *(grad_src_base + 2);
+    register float tmp3  = *(grad_src_base + 3);
+    register float tmp4  = *(grad_src_base + 4);
+    register float tmp5  = *(grad_src_base + 5);
+    register float tmp6  = *(grad_src_base + 6);
+    register float tmp7  = *(grad_src_base + 7);
+    register float tmp8  = *(grad_src_base + 8);
+    register float tmp9  = *(grad_src_base + 9);
+    register float tmp10 = *(grad_src_base + 10);
+    asm volatile("": : :"memory");
+    *(grad_buf + 0)  = tmp0;
+    *(grad_buf + 1)  = tmp1;
+    *(grad_buf + 2)  = tmp2;
+    *(grad_buf + 3)  = tmp3;
+    *(grad_buf + 4)  = tmp4;
+    *(grad_buf + 5)  = tmp5;
+    *(grad_buf + 6)  = tmp6;
+    *(grad_buf + 7)  = tmp7;
+    *(grad_buf + 8)  = tmp8;
+    *(grad_buf + 9)  = tmp9;
+    *(grad_buf + 10) = tmp10;
+    // advance pointers
+    grad_src_base += 11;
+    grad_buf      += 11;
+  }
+  return;
+}
+
+
+inline void kernel1d_back_weight(float* imap, float* filter, float* grad) {
+  // load partial filter
+  register float filter0 = filter[0];
+  register float filter1 = filter[1];
+  register float filter2 = filter[2];
+  register float filter3 = filter[3];
+  register float filter4 = filter[4];
+
+  for (size_t idx = 0; idx < BLOCK_DIM; idx+=11) {
+    register float imap0  = imap[idx +  0];
+    register float imap1  = imap[idx +  1];
+    register float imap2  = imap[idx +  2];
+    register float imap3  = imap[idx +  3];
+    register float imap4  = imap[idx +  4];
+    register float imap5  = imap[idx +  5];
+    register float imap6  = imap[idx +  6];
+    register float imap7  = imap[idx +  7];
+    register float imap8  = imap[idx +  8];
+    register float imap9  = imap[idx +  9];
+    register float imap10 = imap[idx + 10];
+    register float imap11 = imap[idx + 11];
+    register float imap12 = imap[idx + 12];
+    register float imap13 = imap[idx + 13];
+    register float imap14 = imap[idx + 14];
+
+    register float grad0  = grad[idx +  0];
+    register float grad1  = grad[idx +  1];
+    register float grad2  = grad[idx +  2];
+    register float grad3  = grad[idx +  3];
+    register float grad4  = grad[idx +  4];
+    register float grad5  = grad[idx +  5];
+    register float grad6  = grad[idx +  6];
+    register float grad7  = grad[idx +  7];
+    register float grad8  = grad[idx +  8];
+    register float grad9  = grad[idx +  9];
+    register float grad10 = grad[idx + 10];
+    asm volatile("": : :"memory");
+
+#ifdef HB_EMUL
+    filter0 += imap0  * grad0;
+    filter1 += imap1  * grad0;
+    filter2 += imap2  * grad0;
+    filter3 += imap3  * grad0;
+    filter4 += imap4  * grad0;
+
+    filter0 += imap1  * grad1;
+    filter1 += imap2  * grad1;
+    filter2 += imap3  * grad1;
+    filter3 += imap4  * grad1;
+    filter4 += imap5  * grad1;
+
+    filter0 += imap2  * grad2;
+    filter1 += imap3  * grad2;
+    filter2 += imap4  * grad2;
+    filter3 += imap5  * grad2;
+    filter4 += imap6  * grad2;
+
+    filter0 += imap3  * grad3;
+    filter1 += imap4  * grad3;
+    filter2 += imap5  * grad3;
+    filter3 += imap6  * grad3;
+    filter4 += imap7  * grad3;
+
+    filter0 += imap4  * grad4;
+    filter1 += imap5  * grad4;
+    filter2 += imap6  * grad4;
+    filter3 += imap7  * grad4;
+    filter4 += imap8  * grad4;
+
+    filter0 += imap5  * grad5;
+    filter1 += imap6  * grad5;
+    filter2 += imap7  * grad5;
+    filter3 += imap8  * grad5;
+    filter4 += imap9  * grad5;
+
+    filter0 += imap6  * grad6;
+    filter1 += imap7  * grad6;
+    filter2 += imap8  * grad6;
+    filter3 += imap9  * grad6;
+    filter4 += imap10 * grad6;
+
+    filter0 += imap7  * grad7;
+    filter1 += imap8  * grad7;
+    filter2 += imap9  * grad7;
+    filter3 += imap10 * grad7;
+    filter4 += imap11 * grad7;
+
+    filter0 += imap8  * grad8;
+    filter1 += imap9  * grad8;
+    filter2 += imap10 * grad8;
+    filter3 += imap11 * grad8;
+    filter4 += imap12 * grad8;
+
+    filter0 += imap9  * grad9;
+    filter1 += imap10 * grad9;
+    filter2 += imap11 * grad9;
+    filter3 += imap12 * grad9;
+    filter4 += imap13 * grad9;
+
+    filter0 += imap10 * grad10;
+    filter1 += imap11 * grad10;
+    filter2 += imap12 * grad10;
+    filter3 += imap13 * grad10;
+    filter4 += imap14 * grad10;
+#else
+#endif
+  }
+    filter[0] = filter0;
+    filter[1] = filter1;
+    filter[2] = filter2;
+    filter[3] = filter3;
+    filter[4] = filter4;
+}
+
 } // namespace
 
 extern "C" {
@@ -391,6 +546,8 @@ extern "C" {
     hb_assert(p[1] == PADDING);
     hb_assert(s[0] == 1);
     hb_assert(s[1] == 1);
+    hb_assert(Hin == 1);
+    hb_assert(Hout == 1);
     hb_assert(Wout % BLOCK_DIM == 0);
 
     size_t blocks_per_out_channel = Wout / BLOCK_DIM;
@@ -462,6 +619,8 @@ extern "C" {
     hb_assert(p[1] == PADDING);
     hb_assert(s[0] == 1);
     hb_assert(s[1] == 1);
+    hb_assert(Hin == 1);
+    hb_assert(Hout == 1);
     hb_assert(Wout % BLOCK_DIM == 0);
 
     size_t blocks_per_out_channel = Wout / BLOCK_DIM;
@@ -499,5 +658,90 @@ extern "C" {
   }
 
   HB_EMUL_REG_KERNEL(tensorlib_conv1d_backward_input, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
-                      hb_vector_t*, hb_vector_t*)
+                     hb_vector_t*, hb_vector_t*)
+
+  __attribute__ ((noinline)) int tensorlib_conv1d_backward_weight(
+      hb_tensor_t* output,
+      hb_tensor_t* grad_p,
+      hb_tensor_t* imap_p,
+      hb_vector_t* padding,
+      hb_vector_t* strides) {
+
+    HBTensor<float, 4> filter(output);
+    HBTensor<float, 4> grad(grad_p);
+    HBTensor<float, 4> imap(imap_p);
+    HBVector<uint32_t> p(padding);
+    HBVector<uint32_t> s(strides);
+
+    // conv parameters
+    auto N      = filter.dim(0); // number of filters to calculate grad for
+    auto Cout   = filter.dim(1); // number of channels in the images
+    auto Hout   = filter.dim(2);
+    auto Wout   = filter.dim(3); // filter dimensions
+    auto N_imap = imap.dim(0);   // number of images
+    auto Hin    = imap.dim(2);   // image dimensions
+    auto Win    = imap.dim(3);
+    auto Hk     = grad.dim(2);   // grad dimensions
+    auto Wk     = grad.dim(3);
+
+    hb_assert(Hout == 1);
+    hb_assert(Wout == FILTER_DIM);
+    hb_assert(p[0] == 0);
+    hb_assert(p[1] == PADDING);
+    hb_assert(s[0] == 1);
+    hb_assert(s[1] == 1);
+    hb_assert(Hin == 1);
+    hb_assert(Hout == 1);
+    hb_assert(Hk == 1);
+    hb_assert(Win % BLOCK_DIM == 0);
+    hb_assert(Wk % BLOCK_DIM == 0);
+
+    size_t blocks_per_out_channel = Wk / BLOCK_DIM;
+    size_t num_blocks = N * Cout; // parallel over filter x channel
+
+    float filter_buf[FILTER_DIM];
+    float imap_buf[IMAP_DIM];
+    float grad_buf[BLOCK_DIM];
+
+    bsg_cuda_print_stat_start(6);
+
+    for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
+      size_t filter_id = idx / Cout;
+      size_t channel_id = idx % Cout;
+
+      // reset filter buf
+      filter_buf[0] = 0;
+      filter_buf[1] = 0;
+      filter_buf[2] = 0;
+      filter_buf[3] = 0;
+      filter_buf[4] = 0;
+
+      for (size_t image_id = 0; image_id < N_imap; image_id++) {
+        for (size_t block_id = 0; block_id < blocks_per_out_channel; block_id++) {
+
+          imapDMA_padding(imap, imap_buf, image_id, channel_id, block_id, blocks_per_out_channel);
+          gradDMA(grad, grad_buf, image_id, filter_id, block_id);
+          // do large conv
+          kernel1d_back_weight(imap_buf, filter_buf, grad_buf);
+        }
+      }
+      // filter WB
+      bsg_attr_remote float* filter_dst_base = (float*)filter.data_ptr();
+      uint32_t* filter_dst_strides = filter.get_strides();
+      filter_dst_base += filter_id * filter_dst_strides[0] + channel_id * filter_dst_strides[1];
+      *(filter_dst_base + 0) = filter_buf[0];
+      *(filter_dst_base + 1) = filter_buf[1];
+      *(filter_dst_base + 2) = filter_buf[2];
+      *(filter_dst_base + 3) = filter_buf[3];
+      *(filter_dst_base + 4) = filter_buf[4];
+    }
+
+    bsg_cuda_print_stat_end(6);
+
+    g_barrier.sync();
+    return 0;
+  }
+
+  HB_EMUL_REG_KERNEL(tensorlib_conv1d_backward_weight, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+                     hb_vector_t*, hb_vector_t*)
 }
