@@ -428,6 +428,76 @@ extern "C" {
     return 0;
   }
 
-   HB_EMUL_REG_KERNEL(tensorlib_conv1d_forward, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+  HB_EMUL_REG_KERNEL(tensorlib_conv1d_forward, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+                      hb_vector_t*, hb_vector_t*)
+
+
+  __attribute__ ((noinline)) int tensorlib_conv1d_backward_input(
+      hb_tensor_t* output,
+      hb_tensor_t* input,
+      hb_tensor_t* weight,
+      hb_vector_t* padding,
+      hb_vector_t* strides) {
+
+    HBTensor<float, 4> omap(output);
+    HBTensor<float, 4> imap(input);
+    HBTensor<float, 4> filter(weight);
+    HBVector<uint32_t> p(padding);
+    HBVector<uint32_t> s(strides);
+
+    // conv parameters
+    auto N    = omap.dim(0); // number of images in batch
+    auto Cout = omap.dim(1); // number of output channels
+    auto Hout = omap.dim(2);
+    auto Wout = omap.dim(3);
+    auto Cin  = imap.dim(1); // number of input channels
+    auto Hin  = imap.dim(2);
+    auto Win  = imap.dim(3);
+    auto Hk   = filter.dim(2);
+    auto Wk   = filter.dim(3);
+
+    hb_assert(Hk == 1);
+    hb_assert(Wk == FILTER_DIM);
+    hb_assert(p[0] == 0);
+    hb_assert(p[1] == PADDING);
+    hb_assert(s[0] == 1);
+    hb_assert(s[1] == 1);
+    hb_assert(Wout % BLOCK_DIM == 0);
+
+    size_t blocks_per_out_channel = Wout / BLOCK_DIM;
+    size_t num_blocks = N * Cout * blocks_per_out_channel;
+
+    // allocate buffers
+    float filter_buf[FILTER_DIM];
+    float omap_buf[BLOCK_DIM];
+    float imap_buf[IMAP_DIM];
+
+    bsg_cuda_print_stat_start(5);
+
+    for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
+      size_t tmp = idx;
+      size_t image_id = tmp / (Cout * blocks_per_out_channel);
+      tmp = tmp % (Cout * blocks_per_out_channel);
+      size_t channel_id = tmp / blocks_per_out_channel;
+      tmp = tmp % blocks_per_out_channel;
+      size_t block_id = tmp % blocks_per_out_channel;
+
+      omapReset(omap_buf);
+
+      for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
+        imapDMA_padding(imap, imap_buf, image_id, filter_id, block_id, blocks_per_out_channel);
+        filterDMA_rotate(filter, filter_buf, filter_id, channel_id);
+        kernel1d(imap_buf, filter_buf, omap_buf);
+      }
+      omapDMA(omap, omap_buf, image_id, channel_id, block_id);
+    }
+
+    bsg_cuda_print_stat_end(5);
+
+    g_barrier.sync();
+    return 0;
+  }
+
+  HB_EMUL_REG_KERNEL(tensorlib_conv1d_backward_input, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
                       hb_vector_t*, hb_vector_t*)
 }

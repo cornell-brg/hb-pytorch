@@ -223,7 +223,7 @@ Tensor hb_convolution_backward_input(
   device_args.push_back(create_device_vector(stride, true, device_ptrs));
 
   c10::hammerblade::offload_kernel(
-      "tensorlib_convolution_backward_input", device_args);
+      "tensorlib_conv1d_backward_input", device_args);
   cleanup_device(device_args, device_ptrs);
 
   return *grad_input;
