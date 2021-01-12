@@ -503,6 +503,71 @@ inline void kernel1d_back_weight(float* imap, float* filter, float* grad) {
     filter3 += imap13 * grad10;
     filter4 += imap14 * grad10;
 #else
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter0)  : "f"(imap0),  "f"(grad0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter1)  : "f"(imap1),  "f"(grad0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter2)  : "f"(imap2),  "f"(grad0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter3)  : "f"(imap3),  "f"(grad0));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter4)  : "f"(imap4),  "f"(grad0));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter0)  : "f"(imap1),  "f"(grad1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter1)  : "f"(imap2),  "f"(grad1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter2)  : "f"(imap3),  "f"(grad1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter3)  : "f"(imap4),  "f"(grad1));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter4)  : "f"(imap5),  "f"(grad1));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter0)  : "f"(imap2),  "f"(grad2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter1)  : "f"(imap3),  "f"(grad2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter2)  : "f"(imap4),  "f"(grad2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter3)  : "f"(imap5),  "f"(grad2));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter4)  : "f"(imap6),  "f"(grad2));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter0)  : "f"(imap3),  "f"(grad3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter1)  : "f"(imap4),  "f"(grad3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter2)  : "f"(imap5),  "f"(grad3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter3)  : "f"(imap6),  "f"(grad3));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter4)  : "f"(imap7),  "f"(grad3));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter0)  : "f"(imap4),  "f"(grad4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter1)  : "f"(imap5),  "f"(grad4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter2)  : "f"(imap6),  "f"(grad4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter3)  : "f"(imap7),  "f"(grad4));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter4)  : "f"(imap8),  "f"(grad4));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter0)  : "f"(imap5),  "f"(grad5));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter1)  : "f"(imap6),  "f"(grad5));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter2)  : "f"(imap7),  "f"(grad5));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter3)  : "f"(imap8),  "f"(grad5));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter4)  : "f"(imap9),  "f"(grad5));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter0)  : "f"(imap6),  "f"(grad6));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter1)  : "f"(imap7),  "f"(grad6));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter2)  : "f"(imap8),  "f"(grad6));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter3)  : "f"(imap9),  "f"(grad6));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter4)  : "f"(imap10), "f"(grad6));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter0)  : "f"(imap7),  "f"(grad7));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter1)  : "f"(imap8),  "f"(grad7));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter2)  : "f"(imap9),  "f"(grad7));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter3)  : "f"(imap10), "f"(grad7));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter4)  : "f"(imap11), "f"(grad7));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter0)  : "f"(imap8),  "f"(grad8));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter1)  : "f"(imap9),  "f"(grad8));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter2)  : "f"(imap10), "f"(grad8));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter3)  : "f"(imap11), "f"(grad8));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter4)  : "f"(imap12), "f"(grad8));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter0)  : "f"(imap9),  "f"(grad9));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter1)  : "f"(imap10), "f"(grad9));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter2)  : "f"(imap11), "f"(grad9));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter3)  : "f"(imap12), "f"(grad9));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter4)  : "f"(imap13), "f"(grad9));
+
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter0)  : "f"(imap10), "f"(grad10));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter1)  : "f"(imap11), "f"(grad10));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter2)  : "f"(imap12), "f"(grad10));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter3)  : "f"(imap13), "f"(grad10));
+    asm volatile("fmadd.s %0, %1, %2, %0" : "+f"(filter4)  : "f"(imap14), "f"(grad10));
 #endif
   }
     filter[0] = filter0;
