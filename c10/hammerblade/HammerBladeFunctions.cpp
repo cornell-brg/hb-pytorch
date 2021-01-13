@@ -215,7 +215,11 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   uint64_t abs_cycle = end_cycle - start_cycle - 63330;
 
   // debug
+#ifdef HB_EMUL
+  std::cerr << kernel << " finished" << std::endl;
+#else
   std::cerr << kernel << " finished -- abs cycle = " << abs_cycle << std::endl;
+#endif
 
 #ifndef HB_SILICON_V0
   if (hb_mc_should_trace) {
@@ -230,7 +234,11 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
 
   // write the SIMULATED time to ExecutionTime log
   // assuming 1GHz --> cycle / 1000 = microsecond
+#ifdef HB_EMUL
+  std::chrono::microseconds simulated(0);
+#else
   std::chrono::microseconds simulated(abs_cycle / 1000);
+#endif
   trim_log->trim_manual_log_exec_time(simulated);
   // delete trim log
   delete trim_log;
