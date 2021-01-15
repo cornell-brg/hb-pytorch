@@ -44,21 +44,21 @@ def test_upsample1d_nearest1():
   _test_upsample1d_nearest(x, scale_factor)
 
 def test_upsample1d_nearest2():
-  x = torch.ones(1,1,10)
+  x = torch.ones(1,1,128)
   scale_factor = 2
   _test_upsample1d_nearest(x, scale_factor)
 
 def test_upsample1d_nearest3():
-  x = torch.rand(1,1,10)
+  x = torch.rand(1,1,128)
   scale_factor = 3
   _test_upsample1d_nearest(x, scale_factor)
 
 def test_upsample1d_nearest4():
-  x = torch.rand(2,3,10)
+  x = torch.rand(2,3,128)
   scale_factor = 2
   _test_upsample1d_nearest(x, scale_factor)
 
 def test_upsample1d_nearest5():
-  x = torch.rand(2,3,10)
+  x = torch.rand(2,3,128)
   scale_factor = 3
   _test_upsample1d_nearest(x, scale_factor)
