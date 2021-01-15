@@ -41,6 +41,7 @@ int tensorlib_upsample_nearest1d(
 
   // special case: just copy
   if (input_width == output_width) {
+    bsg_cuda_print_stat_start(2);
     //for (int32_t w2 = 0; w2 < output_width; ++w2) {
     hb_tiled_for(output_width, [&](size_t w2) {
       const int32_t w1 = w2;
@@ -54,11 +55,13 @@ int tensorlib_upsample_nearest1d(
       }
     });
 
+    bsg_cuda_print_stat_end(2);
     g_barrier.sync();
     return 0;
   }
 
   //for (int64_t w2 = 0; w2 < output_width; ++w2) {
+  bsg_cuda_print_stat_start(2);
   hb_tiled_for(output_width, [&](size_t w2) {
     const int32_t w1 =
         nearest_neighbor_compute_source_index(scale, w2, input_width);
@@ -72,6 +75,7 @@ int tensorlib_upsample_nearest1d(
     }
   });
 
+  bsg_cuda_print_stat_end(2);
   g_barrier.sync();
   return 0;
 
@@ -105,6 +109,7 @@ int tensorlib_upsample_nearest1d_back(
   // special case: same-size matching grids
   if (input_width == output_width) {
     //for (int32_t w2 = 0; w2 < output_width; ++w2) {
+    bsg_cuda_print_stat_start(3);
     hb_tiled_for(output_width, [&](size_t w2) {
       const int32_t w1 = w2;
       float* pos1 = &idata[w1];
@@ -117,11 +122,13 @@ int tensorlib_upsample_nearest1d_back(
       }
     });
 
+   bsg_cuda_print_stat_end(3);
     g_barrier.sync();
     return 0;
   }
 
   //for (int32_t w1 = 0; w1 < input_width; ++w1) {
+  bsg_cuda_print_stat_start(3);
   hb_tiled_for(input_width, [&](size_t w1) {
     int32_t start_idx = w1 / scale;
     int32_t end_idx = start_idx + (1 / scale);
@@ -138,6 +145,7 @@ int tensorlib_upsample_nearest1d_back(
     }
   });
 
+  bsg_cuda_print_stat_end(3);
   g_barrier.sync();
   return 0;
 }
