@@ -15,8 +15,8 @@
 #define bsg_tiles_X BSG_TILE_GROUP_X_DIM
 #define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
 #else
-#define BSG_TILE_GROUP_X_DIM 1 // bsg_global_X
-#define BSG_TILE_GROUP_Y_DIM 1 // (bsg_global_Y - 1)
+#define BSG_TILE_GROUP_X_DIM 8
+#define BSG_TILE_GROUP_Y_DIM 8
 #define bsg_tiles_X BSG_TILE_GROUP_X_DIM
 #define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
 #endif // HB_EMUL
@@ -26,6 +26,7 @@
 #include "bsg_manycore.h"
 #include "bsg_set_tile_x_y.h"
 #include "bsg_tile_group_barrier.hpp"
+#include "bsg_manycore_atomic.h"
 #include "hb_tensor.hpp"
 #include <hb_assert.hpp>
 #include <hb_tiled_for.hpp>
