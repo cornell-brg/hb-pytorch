@@ -619,11 +619,21 @@ extern "C" {
     size_t num_blocks = N * Cout * blocks_per_out_channel;
 
     // allocate buffers
-    float filter_buf[FILTER_DIM];
+    float filter_base[FILTER_DIM * 128];
+    float* filter_buf = filter_base;
     float omap_buf[BLOCK_DIM];
     float imap_buf[IMAP_DIM];
 
     bsg_cuda_print_stat_start(4);
+
+    // preload filters
+    filter_buf = filter_base;
+    for(size_t f = 0; f < Cout; f++) {
+      for(size_t c = 0; c < Cin; c++) {
+        filterDMA(filter, filter_buf, f, c);
+        filter_buf += 5;
+      }
+    }
 
     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
       size_t tmp = idx;
@@ -637,7 +647,8 @@ extern "C" {
 
       for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
         imapDMA_padding(imap, imap_buf, image_id, channel_id, block_id, blocks_per_out_channel);
-        filterDMA(filter, filter_buf, filter_id, channel_id);
+        //filterDMA(filter, filter_buf, filter_id, channel_id);
+        filter_buf = filter_base + (filter_id * Cin * 5) + (channel_id * 5);
         // do conv
         kernel1d(imap_buf, filter_buf, omap_buf);
       } //channel
@@ -692,11 +703,21 @@ extern "C" {
     size_t num_blocks = N * Cout * blocks_per_out_channel;
 
     // allocate buffers
-    float filter_buf[FILTER_DIM];
+    float filter_base[FILTER_DIM * 128];
+    float* filter_buf = filter_base;
     float omap_buf[BLOCK_DIM];
     float imap_buf[IMAP_DIM];
 
     bsg_cuda_print_stat_start(5);
+
+    // preload filters
+    filter_buf = filter_base;
+    for(size_t f = 0; f < Cin; f++) {
+      for(size_t c = 0; c < Cout; c++) {
+        filterDMA_rotate(filter, filter_buf, f, c);
+        filter_buf += 5;
+      }
+    }
 
     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
       size_t tmp = idx;
@@ -710,7 +731,8 @@ extern "C" {
 
       for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
         imapDMA_padding(imap, imap_buf, image_id, filter_id, block_id, blocks_per_out_channel);
-        filterDMA_rotate(filter, filter_buf, filter_id, channel_id);
+        //filterDMA_rotate(filter, filter_buf, filter_id, channel_id);
+        filter_buf = filter_base + (filter_id * Cout * 5) + (channel_id * 5);
         kernel1d(imap_buf, filter_buf, omap_buf);
       }
       omapDMA(omap, omap_buf, image_id, channel_id, block_id);
