@@ -15,8 +15,8 @@
 #define bsg_tiles_X BSG_TILE_GROUP_X_DIM
 #define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
 #else
-#define BSG_TILE_GROUP_X_DIM 4
-#define BSG_TILE_GROUP_Y_DIM 4
+#define BSG_TILE_GROUP_X_DIM 2
+#define BSG_TILE_GROUP_Y_DIM 2
 #define bsg_tiles_X BSG_TILE_GROUP_X_DIM
 #define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
 #endif // HB_EMUL
