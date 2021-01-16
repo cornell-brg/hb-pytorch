@@ -115,34 +115,51 @@ extern "C" {
     auto Ph = *padH;
     auto Pw = *padW;
 
+    hb_assert(Kh == 1);
+    hb_assert(Kw == 2);
+    hb_assert(Kh == Sh);
+    hb_assert(Kw == Sw);
+    hb_assert(Ph == 0);
+    hb_assert(Pw == 0);
+    hb_assert(Hout == 1);
 
+    bsg_attr_remote float* result_base = (float*)x.data_ptr();
+    bsg_attr_remote float* grad_base = (float*)y.data_ptr();
+    bsg_attr_remote int* ind_base = (int*)ind.data_ptr();
+    const uint32_t* result_strides = x.get_strides();
+    const uint32_t* grad_strides = y.get_strides();
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_foreach([]() {return 0.0;}, x);
-    g_barrier.sync();
+    for(size_t image_id = 0; image_id < N; image_id++) {
+      for(size_t channel_id = 0; channel_id < C; channel_id++) {
+        size_t grad_offset   = image_id * grad_strides[0] + channel_id * grad_strides[1];
+        size_t result_offset = image_id * result_strides[0] + channel_id * result_strides[1];
+        hb_tiled_for(Wout, [&](size_t yy) {
+          size_t grad_offset2   = grad_offset + yy * grad_strides[3];
+          size_t result_offset2 = result_offset + yy * 2 * result_strides[3];
+          bsg_attr_remote float*   grad_ptr = grad_base + grad_offset2;
+          bsg_attr_remote float* result_ptr = result_base + result_offset2;
+          bsg_attr_remote int*      ind_ptr = ind_base + grad_offset2;
 
-    hb_tiled_for(bsg_tiles_X * bsg_tiles_Y,
-                 [&](size_t n, size_t c, size_t xh, size_t xw) {
-      for(uint32_t kh = 0; kh < Kh; ++kh)
-        for(uint32_t kw = 0; kw < Kw; ++kw) {
-          uint32_t rel_h = xh - kh + Ph;
-          uint32_t rel_w = xw - kw + Pw;
+          int index = *ind_ptr;
+          float grad = *grad_ptr;
 
-          if((rel_h % Sh != 0) || (rel_w % Sw != 0))
-            continue;
+          float tmp0 = 0;
+          float tmp1 = 0;
 
-          uint32_t yh = rel_h / Sh;
-          uint32_t yw = rel_w / Sw;
+          if (index == 0) {
+            tmp0 = grad;
+          } else {
+            tmp1 = grad;
+          }
 
-          if(yh >= 0 && yh < Hout && yw >= 0 && yw < Wout
-             && xh == ind(n, c, yh, yw) / Win
-             && xw == ind(n, c, yh, yw) % Win) {
-            x(n, c, xh, xw) += y(n, c, yh, yw);
-          } // else 0
-        }
-    }, N, C, Hin, Win);
+          *(result_ptr + 0) = tmp0;
+          *(result_ptr + 1) = tmp1;
+        });
+      }
+    }
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
