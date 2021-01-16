@@ -37,26 +37,50 @@ extern "C" {
     auto Ph = *padH;
     auto Pw = *padW;
 
+    hb_assert(Kh == 1);
+    hb_assert(Kw == 2);
+    hb_assert(Kh == Sh);
+    hb_assert(Kw == Sw);
+    hb_assert(Ph == 0);
+    hb_assert(Pw == 0);
+    hb_assert(Hout == 1);
+
+    bsg_attr_remote float* input_base = (float*)x.data_ptr();
+    bsg_attr_remote float* output_base = (float*)y.data_ptr();
+    bsg_attr_remote int* ind_base = (int*)ind.data_ptr();
+    const uint32_t* input_strides = x.get_strides();
+    const uint32_t* output_strides = y.get_strides();
+
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
 
-    hb_tiled_for(bsg_tiles_X * bsg_tiles_Y,
-                 [&](size_t n, size_t c, size_t yh, size_t yw) {
-      y(n, c, yh, yw) = std::numeric_limits<float>::lowest();
+    for(size_t image_id = 0; image_id < N; image_id++) {
+      for(size_t channel_id = 0; channel_id < C; channel_id++) {
+        size_t output_offset = image_id * output_strides[0] + channel_id * output_strides[1];
+        size_t input_offset  = image_id * input_strides[0] + channel_id * input_strides[1];
+        hb_tiled_for(Wout, [&](size_t yy) {
+          size_t output_offset2 = output_offset + yy * output_strides[3];
+          size_t input_offset2  = input_offset  + yy * 2 * input_strides[3];
+          bsg_attr_remote float* input_ptr  = input_base + input_offset2;
+          bsg_attr_remote float* output_ptr = output_base + output_offset2;
+          bsg_attr_remote int*   ind_ptr    = ind_base + output_offset2;
 
-      for(uint32_t kh = 0; kh < Kh; ++kh)
-        for(uint32_t kw = 0; kw < Kw; ++kw) {
-          int32_t xh = Sh * yh - Ph + kh;
-          int32_t xw = Sw * yw - Pw + kw;
-
-          if(xh >= 0 && xh < Hin && xw >= 0 && xw < Win) {
-            if(x(n, c, xh, xw) > y(n, c, yh, yw)) {
-              y(n, c, yh, yw) = x(n, c, xh, xw);
-              ind(n, c, yh, yw) = xh * Win + xw;
-            }
+          float max;
+          int index;
+          register float tmp0 = *(input_ptr + 0);
+          register float tmp1 = *(input_ptr + 1);
+          if (tmp0 > tmp1) {
+            max = tmp0;
+            index = 0;
+          } else {
+            max = tmp1;
+            index = 1;
           }
-        }
-    }, N, C, Hout, Wout);
+          *output_ptr = max;
+          *ind_ptr = index;
+        });
+      }
+    }
 
     // End profiling
     bsg_cuda_print_stat_kernel_end();
@@ -90,6 +114,8 @@ extern "C" {
     auto Sw = *sW;
     auto Ph = *padH;
     auto Pw = *padW;
+
+
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
