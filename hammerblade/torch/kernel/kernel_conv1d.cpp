@@ -645,7 +645,7 @@ extern "C" {
       omapDMA(omap, omap_buf, image_id, filter_id, block_id);
       // early quit
       counter++;
-      if (counter == 40)
+      if (counter == 20)
         break;
     }
 
@@ -722,7 +722,7 @@ extern "C" {
       omapDMA(omap, omap_buf, image_id, channel_id, block_id);
       // early quit
       counter++;
-      if (counter == 40)
+      if (counter == 20)
         break;
     }
 
