@@ -625,6 +625,7 @@ extern "C" {
 
     bsg_cuda_print_stat_start(4);
 
+    size_t counter = 0;
     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
       size_t tmp = idx;
       size_t image_id = tmp / (Cout * blocks_per_out_channel);
@@ -642,6 +643,10 @@ extern "C" {
         kernel1d(imap_buf, filter_buf, omap_buf);
       } //channel
       omapDMA(omap, omap_buf, image_id, filter_id, block_id);
+      // early quit
+      counter++;
+      if (counter == 40)
+        break;
     }
 
     bsg_cuda_print_stat_end(4);
@@ -698,6 +703,7 @@ extern "C" {
 
     bsg_cuda_print_stat_start(5);
 
+    size_t counter = 0;
     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
       size_t tmp = idx;
       size_t image_id = tmp / (Cout * blocks_per_out_channel);
@@ -714,6 +720,10 @@ extern "C" {
         kernel1d(imap_buf, filter_buf, omap_buf);
       }
       omapDMA(omap, omap_buf, image_id, channel_id, block_id);
+      // early quit
+      counter++;
+      if (counter == 40)
+        break;
     }
 
     bsg_cuda_print_stat_end(5);
@@ -799,6 +809,7 @@ extern "C" {
       *(filter_dst_base + 2) = filter_buf[2];
       *(filter_dst_base + 3) = filter_buf[3];
       *(filter_dst_base + 4) = filter_buf[4];
+      break;
     }
 
     bsg_cuda_print_stat_end(6);
