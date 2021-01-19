@@ -616,37 +616,48 @@ extern "C" {
     hb_assert(Wout % BLOCK_DIM == 0);
 
     size_t blocks_per_out_channel = Wout / BLOCK_DIM;
-    size_t num_blocks = N * Cout * blocks_per_out_channel;
+    size_t num_blocks = N * blocks_per_out_channel;
 
     // allocate buffers
     float filter_buf[FILTER_DIM];
     float omap_buf[BLOCK_DIM];
-    float imap_buf[IMAP_DIM];
+    float imap_buf[IMAP_DIM*8];
+
+    // SM Hack
+    size_t tiles_to_hold_full_input = (Cin + 15) / 16;
+    size_t filters_per_tile = (Cout + tiles_to_hold_full_input - 1) / tiles_to_hold_full_input;
+    size_t tile_offset = bsg_id % tiles_to_hold_full_input;
 
     bsg_cuda_print_stat_start(4);
 
-    size_t counter = 0;
     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
       size_t tmp = idx;
-      size_t image_id = tmp / (Cout * blocks_per_out_channel);
-      tmp = tmp % (Cout * blocks_per_out_channel);
-      size_t filter_id = tmp / blocks_per_out_channel;
-      tmp = tmp % blocks_per_out_channel;
+      size_t image_id = tmp / blocks_per_out_channel;
       size_t block_id = tmp % blocks_per_out_channel;
 
-      omapReset(omap_buf);
+      // load input
+      size_t start = tile_offset;
+      size_t end = (start + 16) > Cin ? Cin :  (start + 16);
+      for (size_t c = start; c < end; c++) {
+        imapDMA_padding(imap, imap_buf+c, image_id, c, block_id, blocks_per_out_channel);
+      }
 
-      for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
-        imapDMA_padding(imap, imap_buf, image_id, channel_id, block_id, blocks_per_out_channel);
-        filterDMA(filter, filter_buf, filter_id, channel_id);
-        // do conv
-        kernel1d(imap_buf, filter_buf, omap_buf);
-      } //channel
-      omapDMA(omap, omap_buf, image_id, filter_id, block_id);
+      // re-use on all filters
+      start = tile_offset;
+      end = (tile_offset + filters_per_tile) > Cout ? Cout : (tile_offset + filters_per_tile);
+      for (size_t filter_id = start; filter_id < end; filter_id++) {
+        omapReset(omap_buf);
+
+        for (size_t channel_id = 0; channel_id < Cin; channel_id++) {
+          filterDMA(filter, filter_buf, filter_id, channel_id);
+          // do conv
+          kernel1d(imap_buf, filter_buf, omap_buf);
+        } //channel
+        omapDMA(omap, omap_buf, image_id, filter_id, block_id);
+      }
+
       // early quit
-      counter++;
-      if (counter == 20)
-        break;
+      break;
     }
 
     bsg_cuda_print_stat_end(4);
@@ -694,36 +705,46 @@ extern "C" {
     hb_assert(Wout % BLOCK_DIM == 0);
 
     size_t blocks_per_out_channel = Wout / BLOCK_DIM;
-    size_t num_blocks = N * Cout * blocks_per_out_channel;
+    size_t num_blocks = N * blocks_per_out_channel;
 
     // allocate buffers
     float filter_buf[FILTER_DIM];
     float omap_buf[BLOCK_DIM];
-    float imap_buf[IMAP_DIM];
+    float imap_buf[IMAP_DIM*8];
+
+    // SM Hack
+    size_t tiles_to_hold_full_input = (Cin + 15) / 16;
+    size_t channels_per_tile = (Cout + tiles_to_hold_full_input - 1) / tiles_to_hold_full_input;
+    size_t tile_offset = bsg_id % tiles_to_hold_full_input;
 
     bsg_cuda_print_stat_start(5);
 
-    size_t counter = 0;
     for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
       size_t tmp = idx;
-      size_t image_id = tmp / (Cout * blocks_per_out_channel);
-      tmp = tmp % (Cout * blocks_per_out_channel);
-      size_t channel_id = tmp / blocks_per_out_channel;
-      tmp = tmp % blocks_per_out_channel;
+      size_t image_id = tmp / blocks_per_out_channel;
       size_t block_id = tmp % blocks_per_out_channel;
 
-      omapReset(omap_buf);
-
-      for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
-        imapDMA_padding(imap, imap_buf, image_id, filter_id, block_id, blocks_per_out_channel);
-        filterDMA_rotate(filter, filter_buf, filter_id, channel_id);
-        kernel1d(imap_buf, filter_buf, omap_buf);
+      // load input
+      size_t start = tile_offset;
+      size_t end = (start + 16) > Cin ? Cin :  (start + 16);
+      for (size_t f = start; f < end; f++) {
+        imapDMA_padding(imap, imap_buf+f, image_id, f, block_id, blocks_per_out_channel);
       }
-      omapDMA(omap, omap_buf, image_id, channel_id, block_id);
+
+      // reuse input
+      start = tile_offset;
+      end = (tile_offset + channels_per_tile) > Cout ? Cout : (tile_offset + channels_per_tile);
+      for (size_t channel_id = start; channel_id < end; channel_id++) {
+        omapReset(omap_buf);
+
+        for (size_t filter_id = 0; filter_id < Cin; filter_id++) {
+          filterDMA_rotate(filter, filter_buf, filter_id, channel_id);
+          kernel1d(imap_buf, filter_buf, omap_buf);
+        }
+        omapDMA(omap, omap_buf, image_id, channel_id, block_id);
+      }
       // early quit
-      counter++;
-      if (counter == 20)
-        break;
+      break;
     }
 
     bsg_cuda_print_stat_end(5);
