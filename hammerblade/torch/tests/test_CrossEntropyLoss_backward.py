@@ -6,13 +6,13 @@ Tests on torch.nn.CrossEntropyLoss backward
 import torch
 import torch.nn as nn
 import random
-import hbutils
+from .hbutils import init_hb_tensor
 
 torch.manual_seed(42)
 random.seed(42)
 
 def _test_torch_nn_CrossEntropyLoss_back(loss, input, target):
-    input_h = hbutils.init_hb_tensor(input)
+    input_h = init_hb_tensor(input)
     assert input_h is not input
     output = loss(input, target)
     output_h = loss(input_h, target.hammerblade())
@@ -42,7 +42,7 @@ def test_torch_nn_CrossEntropyLoss_none_back():
     input = torch.randn(3, 5, requires_grad=True)
     target = torch.tensor([1, 0, 4])
     grad = torch.tensor([1., 2., 3.])
-    input_h = hbutils.init_hb_tensor(input)
+    input_h = init_hb_tensor(input)
     assert input_h is not input
     output = loss(input, target)
     output_h = loss(input_h, target.hammerblade())
