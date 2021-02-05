@@ -7,8 +7,8 @@ import copy
 import torch
 import torch.nn as nn
 import random
-import hbutils
 import pytest
+from .hbutils import init_hb_tensor
 
 torch.manual_seed(42)
 random.seed(42)
@@ -53,7 +53,7 @@ def test_mlp_inference():
 
     # random 28 * 28 image
     image = torch.randn(28, 28, requires_grad=True)
-    image_hb = hbutils.init_hb_tensor(image)
+    image_hb = init_hb_tensor(image)
 
     # inference on CPU
     output_cpu = model_cpu(image.view(-1, 28 * 28))
@@ -84,7 +84,7 @@ def test_mlp_backprop():
 
     # random 28 * 28 image
     image = torch.randn(28, 28, requires_grad=True)
-    image_hb = hbutils.init_hb_tensor(image)
+    image_hb = init_hb_tensor(image)
 
     # inference on CPU
     output_cpu = model_cpu(image.view(-1, 28 * 28))

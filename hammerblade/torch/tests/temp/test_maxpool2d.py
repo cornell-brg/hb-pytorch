@@ -6,13 +6,13 @@ Unit tests for maxpool2d operator
 import torch
 import torch.nn.functional as F
 import random
-import hbutils
+from .hbutils import init_hb_tensor
 
 torch.manual_seed(42)
 random.seed(42)
 
 def _test_max_pool2d(x, kernel_size, stride=None, padding=1):
-    x_hb = hbutils.init_hb_tensor(x)
+    x_hb = init_hb_tensor(x)
 
     y, r = F.max_pool2d(x, kernel_size, stride, padding, return_indices=True)
     y_hb, r_hb = F.max_pool2d(x_hb, kernel_size, stride, padding,

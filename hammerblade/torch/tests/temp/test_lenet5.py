@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import random
 import pytest
-import hbutils
+from .hbutils import init_hb_tensor
 
 torch.manual_seed(42)
 random.seed(42)
@@ -117,7 +117,7 @@ def test_lenet5_backprop_1():
     image = torch.rand(1, 1, 32, 32, requires_grad=True)
 
     # Create a copy of above image on HB
-    image_hb = hbutils.init_hb_tensor(image)
+    image_hb = init_hb_tensor(image)
 
     # Inference on CPU
     output = net.forward(image)
