@@ -5,18 +5,18 @@ Unit tests for batch_norm operator
 import torch
 import torch.nn.functional as F
 import random
-import hbutils
+from .hbutils import init_hb_tensor
 
 torch.manual_seed(42)
 random.seed(42)
 
 def _test_batch_norm(inputs, running_mean, running_var,
                      weights=None, bias=None, training=False):
-    inputs_hb = hbutils.init_hb_tensor(inputs)
-    running_mean_hb = hbutils.init_hb_tensor(running_mean)
-    running_var_hb = hbutils.init_hb_tensor(running_var)
-    weights_hb = hbutils.init_hb_tensor(weights)
-    bias_hb = hbutils.init_hb_tensor(bias)
+    inputs_hb = init_hb_tensor(inputs)
+    running_mean_hb = init_hb_tensor(running_mean)
+    running_var_hb = init_hb_tensor(running_var)
+    weights_hb = init_hb_tensor(weights)
+    bias_hb = init_hb_tensor(bias)
 
     out = F.batch_norm(inputs, running_mean, running_var,
                        weights, bias, training)
@@ -81,7 +81,7 @@ def test_batch_norm2d_train_2():
                      training=True)
 
 def _test_BatchNorm2d(n, inputs, affine=True):
-    inputs_hb = hbutils.init_hb_tensor(inputs)
+    inputs_hb = init_hb_tensor(inputs)
 
     bn = torch.nn.BatchNorm2d(n, affine=affine)
     bn_hb = torch.nn.BatchNorm2d(n, affine=affine).hammerblade()
