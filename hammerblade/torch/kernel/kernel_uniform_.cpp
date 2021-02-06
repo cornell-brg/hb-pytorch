@@ -39,6 +39,7 @@ int tensorlib_uniform_(hb_tensor_t* _self, hb_tensor_t* _seed,
   });
 
   bsg_cuda_print_stat_kernel_end();
+  g_barrier.sync();
   return 0;
 }
 
