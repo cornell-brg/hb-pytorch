@@ -804,6 +804,7 @@ void TensorIterator::compute_shape() {
       shape_ = DimVector(infer_size(shape_, shape));
     }
   }
+
   // Outputs cannot be broadcasted. Check that the shape of the outputs matches
   // the inferred shape. There's an exception for write-only tensors to support
   // our legacy behavior that functions with `out=` arguments resize their
@@ -1080,7 +1081,7 @@ void DimCounter::increment(const std::array<int64_t, 2>& step) {
 }
 
 std::array<int64_t, 2> DimCounter::max_2d_step() const {
-  int64_t step0 = std::min(shape[0] - values[0], range.end - offset);
+  int64_t step0 = std::min(shape[0] - values[0], range.end - offset); 
   int64_t step1 = 1;
   if (step0 == shape[0] && shape.size() >= 1) {
     step1 = std::min(shape[1] - values[1], (range.end - offset) / shape[0]);

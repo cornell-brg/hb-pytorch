@@ -3,7 +3,7 @@
 #include <ATen/Parallel.h>
 #include <ATen/NativeFunctions.h>
 #include <ATen/native/sparse/SparseTensorMath.h>
-#include <ATen/native/sparse/hammerblade/SparseCommon.hpp>
+#include <ATen/native/hammerblade/SparseCommon.hpp>
 #include <ATen/native/hammerblade/Offload.h>
 #include <cmath>
 
@@ -30,7 +30,6 @@ IntTensor to_csr(const int32_t* indices, int32_t dim, int32_t nnz) {
 
 Tensor toc2sr_cpu(const Tensor& self) {
   TORCH_CHECK(self.dim() == 2, "2D matrix expected, got ", self.dim(), " tensor");
-  std::cout<<"enter sptensorblocking function" << std::endl;
   auto indices = self._indices();
   auto values  = self.values();
   auto int_indices = indices.to(kInt);
@@ -52,7 +51,7 @@ Tensor toc2sr_cpu(const Tensor& self) {
   int32_t num_tile_y = std::ceil((float)row / (float)TILE_Y_SIZE);
   int32_t last_tile_x = (col % TILE_X_SIZE == 0) ? TILE_X_SIZE : (col % TILE_X_SIZE);
   int32_t last_tile_y = (row % TILE_Y_SIZE == 0) ? TILE_Y_SIZE : (row % TILE_Y_SIZE);
-  std::cout << "last_tile_x is " << last_tile_x << std::endl;
+//  std::cout << "last_tile_x is " << last_tile_x << std::endl;
   
   int32_t s_ptr_record_len = num_tile_x * num_tile_y;
   int32_t record_sparse_len[s_ptr_record_len];
@@ -82,7 +81,7 @@ Tensor toc2sr_cpu(const Tensor& self) {
   int32_t* other_ptr = other.data_ptr<int32_t>();
   memcpy(other_ptr, other_info, 12 * sizeof(int32_t));
 */
-  std::cout << "Start tiling !" << std::endl;
+//  std::cout << "Start tiling !" << std::endl;
 
   //loop to rebuild independent matrices for each tile
   for(uint32_t tile_y_idx = 0; tile_y_idx < num_tile_y; tile_y_idx++) {
@@ -130,7 +129,7 @@ Tensor toc2sr_cpu(const Tensor& self) {
       }
       uint32_t length_total_a = max_region_a * CACHELINE_BYTE * NUM_PE;
 
-      std::cout << "Enter the loop, create dram_a" << std::endl;
+//      std::cout << "Enter the loop, create dram_a" << std::endl;
       //allocate memory space on the host for sparse matrix
       int32_t* dram_a = (int32_t*)malloc(length_total_a);
       uint32_t a_base = 0;
@@ -190,14 +189,15 @@ Tensor toc2sr_cpu(const Tensor& self) {
       }
 
       record_sparse_len[tile_y_idx * num_tile_x + tile_x_idx] = length_total_a;
-      std::cout << "record_sparse_len[" << tile_y_idx * num_tile_x + tile_x_idx << "] is " << length_total_a << std::endl;
+//      std::cout << "record_sparse_len[" << tile_y_idx * num_tile_x + tile_x_idx << "] is " << length_total_a << std::endl;
       len_sparse += length_total_a;
       tile_ptr[tile_y_idx * num_tile_x + tile_x_idx] = dram_a;
     }
   }
 
-  std::cout << "Exist the tiling loop, merge fragments" << std::endl;
-  Tensor c2sr_merge = at::empty({len_sparse + s_ptr_record_len + 12}, {at::requires_grad().dtype(at::kInt)});
+//  std::cout << "Exist the tiling loop, merge fragments" << std::endl;
+//  std::cout << "c2sr length is " << len_sparse / sizeof(int32_t) << " record length is " << s_ptr_record_len << " other info length is 12" << std::endl; 
+  Tensor c2sr_merge = at::empty({len_sparse/sizeof(int32_t) + s_ptr_record_len + 12}, {at::device(at::kCPU).dtype(at::kInt)});
   
   int32_t* src = c2sr_merge.data_ptr<int32_t>();
   for(uint32_t i = 0; i < s_ptr_record_len; i++){
@@ -206,7 +206,7 @@ Tensor toc2sr_cpu(const Tensor& self) {
     src += record_sparse_len[i] / 4;
   }
 
-  int32_t *record_ptr = src + len_sparse;
+  int32_t *record_ptr = c2sr_merge.data_ptr<int32_t>() + len_sparse/sizeof(int32_t);
   memcpy(record_ptr, record_sparse_len, s_ptr_record_len * sizeof(int32_t));
   int32_t *other_ptr = record_ptr + s_ptr_record_len;
   memcpy(other_ptr, other_info, 12 * sizeof(int32_t));

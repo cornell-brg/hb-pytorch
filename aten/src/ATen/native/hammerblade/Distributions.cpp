@@ -46,4 +46,14 @@ Tensor& bernoulli_scalar_hb_(Tensor& self, double p, Generator* gen) {
   return self;
 }
 
+Tensor& random_hb_(Tensor& self, Generator* gen) {
+  AT_DISPATCH_INT_TYPE_ONLY(self.scalar_type(), "random_hb_", [&]() {
+    HammerBladeGenerator* generator = get_generator_or_default<HammerBladeGenerator>(gen,
+                                      hammerblade::detail::getDefaultHammerBladeGenerator());
+    auto seed_tensor = hammerblade_common_seed_to_tensor(generator->random());
+
+    hb_offload_kernel(self, seed_tensor, "tensorlib_random_Int_");
+  });
+}
+
 }} // namespace at::native

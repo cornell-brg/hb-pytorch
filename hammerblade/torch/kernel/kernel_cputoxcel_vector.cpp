@@ -22,7 +22,8 @@ extern "C" {
       
     //Now we use the first row to copy the data now, NUM_PE must equal to 16
     uint32_t b_index = __bsg_id * cacheline_word;
-    if(__bsg_id <= 16) {
+    bsg_cuda_print_stat_kernel_start();
+    if(__bsg_id < 16) {
       for(uint32_t i=0; i<max_region_b; i++) {
         for(uint32_t k=0; k < cacheline_word; k++){
           uint32_t address_b = i * cacheline_word * NUM_PE + k * NUM_PE + __bsg_id;
@@ -35,6 +36,8 @@ extern "C" {
         b_index = b_index + NUM_PE * cacheline_word - cacheline_word;
       } 
     }
+    g_barrier.sync();
+    bsg_cuda_print_stat_kernel_end();
     return 0;
   }
   HB_EMUL_REG_KERNEL(tensorlib_cputoxcel_vector, hb_tensor_t*, hb_tensor_t*)

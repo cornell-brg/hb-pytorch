@@ -64,14 +64,14 @@ endif
 ifdef HB_SILICON_V0
 include $(BSG_F1_DIR)/Makefile.machine.include
 else
-BSG_MACHINE ?= timing_v0_16_8
+BSG_MACHINE ?= 4x4_fast_n_fake
 include  $(BSG_F1_DIR)/machines/$(BSG_MACHINE)/Makefile.machine.include
 endif
 
 bsg_global_X := $(BSG_MACHINE_GLOBAL_X)
 bsg_global_Y := $(BSG_MACHINE_GLOBAL_Y)
 bsg_tiles_X  := $(bsg_global_X)
-bsg_tiles_Y  := $(shell expr $(bsg_global_Y) - 1 )
+bsg_tiles_Y  := $(shell expr $(bsg_global_Y) - 2 )
 
 include $(BSG_MANYCORE_DIR)/software/mk/Makefile.master
 

@@ -7,7 +7,7 @@
 
 namespace at { namespace native {
 
-Tensor& hb_max_out(Tensor& result, const Tensor& self, const Tensor& other) {
+Tensor& max_out_hb(Tensor& result, const Tensor& self, const Tensor& other) {
   TORCH_CHECK(result.sizes() == self.sizes() && result.sizes() == other.sizes(), "Tensor size should be equal");
   auto iter = TensorIterator::binary_op(result, self, other,
     /*check_mem_overlap=*/true);
@@ -17,9 +17,9 @@ Tensor& hb_max_out(Tensor& result, const Tensor& self, const Tensor& other) {
   return result;
 }
 
-Tensor hb_max(const Tensor& self, const Tensor& other) {
+Tensor max_hb(const Tensor& self, const Tensor& other) {
   Tensor result = at::empty(self.sizes(), self.options());
-  return hb_max_out(result, self, other);
+  return max_out_hb(result, self, other);
 }
 
 }}
