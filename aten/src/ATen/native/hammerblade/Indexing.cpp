@@ -30,7 +30,7 @@ void index_kernel_hb(TensorIterator& iter, IntArrayRef index_size, IntArrayRef i
   for(int i = 0; i < iter.ntensors(); i++) { 
     Tensor& t = iter.tensor(i);
     if(i > iter.noutputs() && t.dtype() == at::kLong) {
-      std::cout << "Convert data type" << std::endl;
+//      std::cout << "Convert data type" << std::endl;
       t.to(at::kInt);
     }
     device_args.push_back(create_device_tensor(t, device_ptrs));

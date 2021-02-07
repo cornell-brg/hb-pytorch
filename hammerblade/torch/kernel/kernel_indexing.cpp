@@ -8,20 +8,20 @@
 
 static int get(int idx, int num_indexers, int** indexer_ptr,  int* indexer_strides, int* original_sizes, int* original_strides) {
   int offset = 0;
-  printf("In get function: ");
+//  printf("In get function: ");
   for(int j = 0; j < num_indexers; j++) {
-    printf("  original_strides[%d] is: %d\n", idx, original_strides[j]);
-    printf("  original_sizes[%d] is: %d\n", idx, original_sizes[j]);
-    printf("  indexer_strides[%d] is: %d\n", idx, indexer_strides[j]);
+//    printf("  original_strides[%d] is: %d\n", idx, original_strides[j]);
+//    printf("  original_sizes[%d] is: %d\n", idx, original_sizes[j]);
+//    printf("  indexer_strides[%d] is: %d\n", idx, indexer_strides[j]);
     int value = indexer_ptr[j][idx * indexer_strides[j]];
-    printf("  value %d is: %d\n", j, value);
+//    printf("  value %d is: %d\n", j, value);
     int size = original_sizes[j];
     if(value < 0) {
       value += size;
     }
     offset += value * original_strides[j] / sizeof(int);
   }
-  printf("  offset if idx %d is: %d\n", idx, offset);
+//  printf("  offset if idx %d is: %d\n", idx, offset);
   return offset;
 }
 

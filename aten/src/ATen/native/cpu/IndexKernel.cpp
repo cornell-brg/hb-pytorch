@@ -31,14 +31,14 @@ struct Indexer {
   const int64_t* original_sizes;
 
   int64_t get(int64_t idx) {
-    std::cout << "In get function: " << std::endl;
+//    std::cout << "In get function: " << std::endl;
     int64_t offset = 0;
     for (int j = 0; j < num_indexers; j++) {
-      std::cout << "  original_strides[" << j << "] is " << original_strides[j] << std::endl;
-      std::cout << "  original_sizes[" << j << "] is " << original_sizes[j] << std::endl;
-      std::cout << "  indexer_strides[" << j << "] is " << indexer_strides[j] << std::endl;
+//      std::cout << "  original_strides[" << j << "] is " << original_strides[j] << std::endl;
+//      std::cout << "  original_sizes[" << j << "] is " << original_sizes[j] << std::endl;
+//      std::cout << "  indexer_strides[" << j << "] is " << indexer_strides[j] << std::endl;
       int64_t value = *(int64_t*)&indexers[j][idx * indexer_strides[j]];
-      std::cout << "  value " << j << " is " << value << std::endl;
+//      std::cout << "  value " << j << " is " << value << std::endl;
       int64_t size = original_sizes[j];
       if (value < -size || value >= size) {
         AT_INDEX_ERROR("index ", value, " is out of bounds for dimension ", j, " with size ", size);
@@ -48,7 +48,7 @@ struct Indexer {
       }
       offset += value * original_strides[j];
     }
-    std::cout << "  offset of idx " << idx << " is " << offset << std::endl;
+//    std::cout << "  offset of idx " << idx << " is " << offset << std::endl;
     return offset;
   }
 };
