@@ -6,9 +6,7 @@ echo ""
 # setup pytorch building options
 export BUILD_TEST=0
 export USE_HB=0
-export BLAS=OpenBLAS
-export OpenBLAS_HOME=<YOUR_OpenBLAS_HOME_PATH>
-export USE_MKL=0
+export USE_MKL=1
 export USE_MKLDNN=0
 export USE_CUDA=0
 export USE_CUDNN=0
