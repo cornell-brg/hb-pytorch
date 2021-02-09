@@ -2315,6 +2315,7 @@
   dispatch:
     CPU: relu_
     CUDA: relu_
+    HammerBlade: relu_
     MkldnnCPU: mkldnn_relu_
     QuantizedCPU: quantized_relu_
 

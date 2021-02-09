@@ -209,8 +209,8 @@ static AdvancedIndex make_info(Tensor self, TensorList orig) {
   }
 //  std::cout << "In make_info function, indices.size() before existing function is: " << indices.size() << std::endl;
   //Since this operator is developped for GraphSAGE workload, currrently, we only support int. 
-  if(self.type().device_type() == kHAMMERBLADE && self.dtype() == at::kLong) {
-    self = self.to(at::kInt);
+  if(self.type().device_type() == kHAMMERBLADE && self.scalar_type() != kLong) {
+    self.to(at::kInt);
   }
   return AdvancedIndex(self, indices);
 }
