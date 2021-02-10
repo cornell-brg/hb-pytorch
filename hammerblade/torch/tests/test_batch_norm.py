@@ -158,7 +158,7 @@ def test_batch_norm1d_train_2():
                      training=True)
 
 def _test_BatchNorm1d(n, inputs, affine=True):
-    inputs_hb = hbutils.init_hb_tensor(inputs)
+    inputs_hb = init_hb_tensor(inputs)
 
     bn = torch.nn.BatchNorm1d(n, affine=affine)
     bn_hb = torch.nn.BatchNorm1d(n, affine=affine).hammerblade()
