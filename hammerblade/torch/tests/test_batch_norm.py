@@ -34,7 +34,7 @@ def _test_batch_norm(inputs, running_mean, running_var,
         out.backward(grad)
         out_hb.backward(grad_hb)
 
-        assert torch.allclose(inputs.grad, inputs_hb.grad.cpu(), atol=1e-5)
+        assert torch.allclose(inputs.grad, inputs_hb.grad.cpu(), atol=1e-4)
 
         if weights is not None:
             assert torch.allclose(weights.grad, weights_hb.grad.cpu(),
@@ -117,4 +117,81 @@ def test_BatchNorm2d_3():
 
 def test_BatchNorm2d_4():
     _test_BatchNorm2d(4, torch.rand(2, 4, 3, 3, requires_grad=True),
+                      affine=False)
+
+def test_batch_norm1d_eval_1():
+    inputs = torch.rand(3, 3,  requires_grad=True)
+    weights = torch.rand(3, requires_grad=True)
+    bias = torch.rand(3, requires_grad=True)
+    running_mean = torch.rand(3)
+    running_var = torch.rand(3)
+
+    _test_batch_norm(inputs, running_mean, running_var, weights, bias)
+
+def test_batch_norm1d_train_1():
+    inputs = torch.rand(3, 3, requires_grad=True)
+    weights = torch.rand(3, requires_grad=True)
+    bias = torch.rand(3, requires_grad=True)
+    running_mean = torch.rand(3)
+    running_var = torch.rand(3)
+
+    _test_batch_norm(inputs, running_mean, running_var, weights, bias,
+                     training=True)
+
+def test_batch_norm1d_eval_2():
+    inputs = torch.rand(3, 3, requires_grad=True)
+    weights = torch.rand(3, requires_grad=True)
+    bias = torch.rand(3, requires_grad=True)
+    running_mean = torch.rand(3)
+    running_var = torch.rand(3)
+
+    _test_batch_norm(inputs, running_mean, running_var, weights, bias)
+
+def test_batch_norm1d_train_2():
+    inputs = torch.rand(3, 3, requires_grad=True)
+    weights = torch.rand(3, requires_grad=True)
+    bias = torch.rand(3, requires_grad=True)
+    running_mean = torch.rand(3)
+    running_var = torch.rand(3)
+
+    _test_batch_norm(inputs, running_mean, running_var, weights, bias,
+                     training=True)
+
+def _test_BatchNorm1d(n, inputs, affine=True):
+    inputs_hb = hbutils.init_hb_tensor(inputs)
+
+    bn = torch.nn.BatchNorm1d(n, affine=affine)
+    bn_hb = torch.nn.BatchNorm1d(n, affine=affine).hammerblade()
+
+    # num_batches_tracked is BatchNorm2d's metadata and its data type
+    # is int64. HB doesn't support operations on this and since this
+    # metadata is independent to the core computation of BatchNorm2d,
+    # we move this to CPU.
+    bn_hb.move_buffers_to_cpu(torch.nn.BatchNorm1d, ['num_batches_tracked'])
+
+    out = bn(inputs)
+    out_hb = bn_hb(inputs_hb)
+
+    torch.allclose(out, out_hb.cpu(), atol=1e-4)
+
+    if inputs.requires_grad:
+        grad = torch.rand(out.shape)
+        grad_hb = grad.hammerblade()
+
+        out.backward(grad)
+        out_hb.backward(grad_hb)
+
+        assert torch.allclose(inputs.grad, inputs_hb.grad.cpu(), atol=1e-3)
+
+def test_BatchNorm1d_1():
+    _test_BatchNorm1d(800, torch.ones(2, 800, requires_grad=True))
+
+def test_BatchNorm1d_2():
+    _test_BatchNorm1d(4, torch.rand(2, 4, requires_grad=True))
+
+def test_BatchNorm1d_3():
+    _test_BatchNorm1d(4, torch.zeros(2, 4, requires_grad=True))
+
+def test_BatchNorm1d_4():
+    _test_BatchNorm1d(4, torch.rand(2, 4, requires_grad=True),
                       affine=False)
