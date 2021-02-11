@@ -8,10 +8,10 @@ from time import time
 
 # Kernel parameters.
 TOTAL_DOCS = 4096
-QUERY_IDX = 5  # Was 100; lowered to allow even smaller runs.
+QUERY_IDX = 100  # Was 100; lowered to allow even smaller runs.
 HB_DATA_FRAC = 16 # fraction of data to use on hb, i.e. 1/(this value)
 LAMBDA = 1
-N_ITERS = 1 #max_iter is set to 15: https://github.com/cornell-brg/darpa-sdh-prog-eval/blob/master/sinkhorn_wmd/main-redacted.py
+N_ITERS = 5 #max_iter is set to 15: https://github.com/cornell-brg/darpa-sdh-prog-eval/blob/master/sinkhorn_wmd/main-redacted.py
 SAVE_FILE = '' #'scores.out'
 
 # Data files. (Ask Adrian for these.)
@@ -134,6 +134,7 @@ def sinkhorn_test():
         # instead of on the CPU.
         with open(ROUTE_JSON) as f:
             route_data = json.load(f)
+        
         for i, kernel in enumerate(route_data):
             # Mark kernel for offload.
             if kernel_idx is None or kernel_idx == i:
@@ -143,7 +144,8 @@ def sinkhorn_test():
             # Set up a "chart" "beacon" (?).
             torch.hammerblade.profiler.chart.add(kernel['signature'])
 
-        torch.hammerblade.profiler.route.set_route_from_json(route_data)
+        new_data = route_data[:3]*N_ITERS+[route_data[-1]]
+        torch.hammerblade.profiler.route.set_route_from_json(new_data)
 
     # Set the size of the run. Use TOTAL_DOCS/data_fraction of the data.
 
