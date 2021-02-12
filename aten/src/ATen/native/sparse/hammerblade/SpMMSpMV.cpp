@@ -21,6 +21,7 @@ IntTensor _to_csr_int(const IntTensor& rowIndices, int64_t dim, int64_t nnz) {
   uint32_t dim_uint = (uint32_t)(dim);
   uint32_t nnz_uint = (uint32_t)(nnz);
   hb_offload_kernel(csr, rowIndices, dim_uint, nnz_uint, "tensorlib_coo_to_csr");
+  return csr;
 }
 
 void _to_c2sr(const IntTensor& rowIndices, 

@@ -4,14 +4,14 @@ echo "  Make sure you enabled devtoolset-8!"
 echo ""
 
 # setup pytorch building options
-export DEBUG=1
+export DEBUG=0
 export BUILD_TEST=0
-export USE_MKL=0
-export USE_MKLDNN=0
+export USE_MKL=1
+export USE_MKLDNN=1
 export USE_CUDA=0
 export USE_CUDNN=0
 export USE_FBGEMM=0
-export USE_NNPACK=0
+export USE_NNPACK=1
 export USE_QNNPACK=0
 export USE_DISTRIBUTED=0
 

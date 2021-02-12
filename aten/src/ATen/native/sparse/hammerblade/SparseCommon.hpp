@@ -1,4 +1,0 @@
-#define NUM_PE 16
-#define CACHELINE_BYTE 128
-#define TILE_X_SIZE 1600
-#define TILE_Y_SIZE 6400

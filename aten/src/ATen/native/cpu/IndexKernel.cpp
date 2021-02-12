@@ -31,9 +31,14 @@ struct Indexer {
   const int64_t* original_sizes;
 
   int64_t get(int64_t idx) {
+//    std::cout << "In get function: " << std::endl;
     int64_t offset = 0;
     for (int j = 0; j < num_indexers; j++) {
+//      std::cout << "  original_strides[" << j << "] is " << original_strides[j] << std::endl;
+//      std::cout << "  original_sizes[" << j << "] is " << original_sizes[j] << std::endl;
+//      std::cout << "  indexer_strides[" << j << "] is " << indexer_strides[j] << std::endl;
       int64_t value = *(int64_t*)&indexers[j][idx * indexer_strides[j]];
+//      std::cout << "  value " << j << " is " << value << std::endl;
       int64_t size = original_sizes[j];
       if (value < -size || value >= size) {
         AT_INDEX_ERROR("index ", value, " is out of bounds for dimension ", j, " with size ", size);
@@ -43,6 +48,7 @@ struct Indexer {
       }
       offset += value * original_strides[j];
     }
+//    std::cout << "  offset of idx " << idx << " is " << offset << std::endl;
     return offset;
   }
 };
@@ -50,6 +56,7 @@ struct Indexer {
 static bool is_constant_index(int ntensor, const int64_t* strides) {
   AT_ASSERT(ntensor >= 3);
   for (int arg = 2; arg < ntensor; arg++) {
+//    std::cout << "In is_constant_index function, strides[" << arg << "] is " << strides[arg] << std::endl;
     if (strides[arg] != 0) {
       return false;
     }
@@ -63,10 +70,12 @@ void cpu_index_kernel(TensorIterator& iter, IntArrayRef index_size, IntArrayRef 
 {
   int ntensor = iter.ntensors();
   auto loop = [&](char** data, const int64_t* strides, int64_t n) {
-    auto indexer = Indexer(ntensor - 2, &data[2], &strides[2], index_size, index_stride);
+//   std::cout << "In loop function of cpu_index_kernel, n is " << n << std::endl;
+   auto indexer = Indexer(ntensor - 2, &data[2], &strides[2], index_size, index_stride);
     char* dst = data[0];
     char* src = data[1];
     if (is_constant_index(ntensor, strides)) {
+//      std::cout << "In loop function of cpu_index_kernel, enter the true branch" << std::endl;
       // specialization for when every element uses the same index
       int64_t offset = indexer.get(0);
       if (strides[0] == sizeof(scalar_t) && strides[1] == sizeof(scalar_t)) {
@@ -79,6 +88,7 @@ void cpu_index_kernel(TensorIterator& iter, IntArrayRef index_size, IntArrayRef 
         }
       }
     } else {
+//      std::cout << "In loop function of cpu_index_kernel, enter the false branch" << std::endl;
       for (int64_t i = 0; i < n; i++) {
         int64_t offset = indexer.get(i);
         f(dst + strides[0] * i, src + strides[1] * i, offset);

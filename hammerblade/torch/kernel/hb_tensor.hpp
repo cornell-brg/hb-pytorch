@@ -278,6 +278,10 @@ class HBVector {
     T& operator[](uint32_t i) {
       return data[i];
     }
+
+    char* data_ptr() {
+      return (char*)data;
+    }
 };
 
 #endif // _HB_TENSOR_HPP
