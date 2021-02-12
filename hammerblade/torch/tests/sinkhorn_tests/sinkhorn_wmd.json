@@ -9,7 +9,7 @@
     },
     {
         "offload": false,
-        "signature": "at::Tensor at::SparseCPUType::{anonymous}::dstmmt(const at::Tensor&, const at::Tensor&)"
+        "signature": "at::Tensor at::SparseCPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)"
     },
     {
         "offload": false,

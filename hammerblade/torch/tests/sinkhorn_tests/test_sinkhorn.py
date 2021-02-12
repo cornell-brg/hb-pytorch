@@ -58,6 +58,7 @@ def swmd_torch(r, cT, vecs, niters):
     K = torch.exp(- M * LAMBDA)
     K_div_r = K / r
     K_T = K.T
+    K_div_r_T = K_div_r.T
 
     for it in range(niters):
         print('starting iteration {}'.format(it))
@@ -74,7 +75,8 @@ def swmd_torch(r, cT, vecs, niters):
         # custom dstmm.t():
         # x = _dsmp(K_div_r, v)
         # x = torch.dstmm(K_div_r, vT)
-        xT = torch.dstmmt(K_div_r, vT)
+        # xT = torch.dstmmt(K_div_r, vT)
+        xT = torch.sparse.mm(vT,K_div_r_T) #using the transposed version to allow Sparse-dense MM (SDMM) instead of (DSMM)
 
     #Note: M is huge compared to uT, so use the sum(axis=0) instead of sum(axis=1) line
     # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
