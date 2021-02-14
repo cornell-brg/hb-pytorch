@@ -39,8 +39,15 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
   int offset = 0;
   
   bsg_cuda_print_stat_kernel_start();
+  int offset_strides = 0;
+  for(int j = 0; j < length; j++) {
+    HBTensor<float> input(tensors_p[j]);
+    int local_inner = inner * input.dim(dim);
+    offset_strides += local_inner;
+  }
 
   for(int o = __bsg_id; o < outer; o = o + num_threads) {
+    offset = o * offset_strides;
     for(int j = 0; j < length; j++) {
       HBTensor<float> input(tensors_p[j]);
       float *input_data = (float*)input.data_ptr();
