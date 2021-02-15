@@ -76,7 +76,7 @@ def swmd_torch(r, cT, vecs, niters):
         # x = _dsmp(K_div_r, v)
         # x = torch.dstmm(K_div_r, vT)
         # xT = torch.dstmmt(K_div_r, vT)
-        xT = torch.sparse.mm(vT,K_div_r_T) #using the transposed version to allow Sparse-dense MM (SDMM) instead of (DSMM)
+        xT = torch.mm(vT,K_div_r_T) #using the transposed version to allow Sparse-dense MM (SDMM) instead of (DSMM)
 
     #Note: M is huge compared to uT, so use the sum(axis=0) instead of sum(axis=1) line
     # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
