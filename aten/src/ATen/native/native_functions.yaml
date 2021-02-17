@@ -2073,10 +2073,6 @@
 - func: cdist(Tensor x1, Tensor x2, float p=2, int? compute_mode=None) -> Tensor
   use_c10_dispatcher: full
   supports_named_tensor: True
-  dispatch:
-    CPU: cdist
-    CUDA: cdist
-    HammerBlade: cdist_hb
 
 - func: _cdist_backward(Tensor grad, Tensor x1, Tensor x2, float p, Tensor cdist) -> Tensor
   use_c10_dispatcher: full
@@ -2224,6 +2220,7 @@
   dispatch:
     CPU: _reciprocal__cpu
     CUDA: _reciprocal__cuda
+    HammerBlade: _reciprocal__hb
 
 - func: reciprocal.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
@@ -2318,6 +2315,7 @@
   dispatch:
     CPU: relu_
     CUDA: relu_
+    HammerBlade: relu_
     MkldnnCPU: mkldnn_relu_
     QuantizedCPU: quantized_relu_
 
@@ -2706,12 +2704,14 @@
   dispatch:
     CPU: _tanh__cpu
     CUDA: _tanh__cuda
+    HammerBlade: _tanh__hb
 
 - func: tanh.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
   dispatch:
     CPU: _tanh_out_cpu
     CUDA: _tanh_out_cuda
+    HammerBlade: _tanh_out_hb
 
 - func: tensordot(Tensor self, Tensor other, int[] dims_self, int[] dims_other) -> Tensor
   variants: function
@@ -4264,6 +4264,7 @@
   dispatch:
     CPU: legacy::cpu::_th_random_
     CUDA: random_cuda_
+    HammerBlade: random_hb_
   supports_named_tensor: True
 
 - func: uniform_(Tensor(a!) self, float from=0, float to=1, *, Generator? generator=None) -> Tensor(a!)
@@ -4271,6 +4272,7 @@
   dispatch:
     CPU: legacy::cpu::_th_uniform_
     CUDA: uniform_cuda_
+    HammerBlade: uniform_
   supports_named_tensor: True
 
 - func: normal_(Tensor(a!) self, float mean=0, float std=1, *, Generator? generator=None) -> Tensor(a!)
@@ -4909,6 +4911,7 @@
   dispatch:
     CPU: sign_out
     CUDA: sign_out
+    HammerBlade: sign_out
 
 - func: dist(Tensor self, Tensor other, Scalar p=2) -> Tensor
   use_c10_dispatcher: full
@@ -5001,6 +5004,7 @@
   dispatch:
     CPU: legacy::cpu::_th_remainder_out
     CUDA: legacy::cuda::_th_remainder_out
+    HammerBlade: remainder_out_hb
 
 - func: remainder.Tensor(Tensor self, Tensor other) -> Tensor
   use_c10_dispatcher: full
@@ -5008,6 +5012,7 @@
   dispatch:
     CPU: legacy::cpu::_th_remainder
     CUDA: legacy::cuda::_th_remainder
+    HammerBlade: remainder_hb
 
 - func: min.out(Tensor self, Tensor other, *, Tensor(a!) out) -> Tensor(a!)
   dispatch:
@@ -5034,7 +5039,7 @@
   dispatch:
     CPU: legacy::cpu::_th_max_out
     CUDA: legacy::cuda::_th_max_out
-    HammerBlade: hb_max_out
+    HammerBlade: max_out_hb
 
 - func: max.other(Tensor self, Tensor other) -> Tensor
   use_c10_dispatcher: full
@@ -5042,7 +5047,7 @@
   dispatch:
     CPU: legacy::cpu::_th_max
     CUDA: legacy::cuda::_th_max
-    HammerBlade: hb_max
+    HammerBlade: max_hb
 
 - func: max(Tensor self) -> Tensor
   use_c10_dispatcher: full
@@ -5262,6 +5267,7 @@
   dispatch:
     CPU: legacy::cpu::_th_cat
     CUDA: legacy::cuda::_th_cat
+    HammerBlade: _cat_hb
 
 - func: _cat.out(Tensor[] tensors, int dim=0, *, Tensor(a!) out) -> Tensor(a!)
   dispatch:
@@ -5356,6 +5362,7 @@
   dispatch:
     CPU: l1_loss_backward_out
     CUDA: l1_loss_backward_out
+    HammerBlade: l1_loss_backward_out
 
 - func: l1_loss_backward(Tensor grad_output, Tensor self, Tensor target, int reduction) -> Tensor
   use_c10_dispatcher: full
@@ -6637,9 +6644,60 @@
 #   variants: function
 #   dispatch:
 
-- func: sddmm(Tensor self, Tensor mat1, Tensor mat2) -> Tensor
+  # sampled dense-[dense transpose] matrix product (self = sparse)
+  # returns a sparse tensor
+- func: sddtmm(Tensor self, Tensor mat1, Tensor mat2t) -> Tensor
   use_c10_dispatcher: full
   variants: function, method
   dispatch:
-    # SparseCPU: sddmm_cpu
-    SparseHammerBlade: sddmm_hb
+    SparseCPU: sddtmm_cpu
+    SparseHammerBlade: sddtmm_hb
+
+  # sampled dense-[dense transpose] matrix product (self = sparse)
+  # returns a dense tensor
+- func: sddtmmd(Tensor self, Tensor mat1, Tensor mat2t) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: sddtmmd_cpu
+    SparseHammerBlade: sddtmmd_hb
+    
+  # dense-[sparse transpose] matrix product
+  # returns a dense tensor
+- func: dstmm(Tensor self, Tensor mat2t) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: dstmm_cpu
+    SparseHammerBlade: dstmm_hb
+
+  # dense-[sparse transpose] matrix product [transposed]
+  # returns a dense tensor
+- func: dstmmt(Tensor self, Tensor mat2t) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: dstmmt_cpu
+    SparseHammerBlade: dstmmt_hb
+
+  # sampled reciprocal - reciprocal_, but ignoring entries that are 0
+  # returns a sparse tensor
+- func: sreciprocal_(Tensor(a!) self) -> Tensor(a!)
+  supports_named_tensor: True
+  variants: function, method
+  dispatch:
+    SparseCPU: _sampled_reciprocal__cpu
+    SparseHammerBlade: _sampled_reciprocal__hb
+
+- func: convert_format(Tensor self) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: toc2sr_cpu
+
+- func: mv_xcel(Tensor self, Tensor dense_vector) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    HammerBlade: xcelspmv_hb
+    CPU: xcelspmv_cpu
