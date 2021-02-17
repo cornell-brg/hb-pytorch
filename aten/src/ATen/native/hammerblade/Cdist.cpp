@@ -2,9 +2,12 @@
 #include <ATen/hammerblade/HammerBladeContext.h>
 #include <ATen/native/TensorIterator.h>
 #include <ATen/native/hammerblade/Offload.h>
+#include <ATen/native/Distance.h>
 
 namespace at { namespace native {
-void cdist_kernel_hb(Tensor& result, const Tensor& x1, const Tensor& x2, double p) {
+namespace{
+
+static void cdist_kernel_hb(Tensor& result, const Tensor& x1, const Tensor& x2, const double p) {
 
     //only meant for Euclidean distance
     TORCH_CHECK(x1.is_hammerblade(), "cdist hb: expected 'x1' to be a HammerBlade tensor");
@@ -19,6 +22,7 @@ void cdist_kernel_hb(Tensor& result, const Tensor& x1, const Tensor& x2, double 
     // return result;
 }
 
+}
 REGISTER_HAMMERBLADE_DISPATCH(cdist_stub, &cdist_kernel_hb);
 
 }} // namespace at::native
