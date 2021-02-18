@@ -7,7 +7,7 @@ import json
 from time import time
 
 # Kernel parameters.
-TOTAL_DOCS = 4096
+TOTAL_DOCS = 5000
 QUERY_IDX = 100  # Was 100; lowered to allow even smaller runs.
 HB_DATA_FRAC = 16 # fraction of data to use on hb, i.e. 1/(this value)
 LAMBDA = 1
@@ -72,6 +72,14 @@ def swmd_torch(r, cT, vecs, niters):
         # vT = cT * 1.0 / torch.sddtmm(cT, uT, K_T)
         vT = cT * torch.sreciprocal_(torch.sddtmm(cT, uT, K_T))
         
+        # #dump sparse tensor for Zichao
+        # vT_dense = vT.to_dense().numpy()
+        # vT_csr = scipy.sparse.csr_matrix(vT_dense)
+        # scipy.sparse.save_npz('sparsemat_csr_scipy.npz',vT_csr)
+        # csr = scipy.sparse.load_npz('sparsemat_csr_scipy.npz')
+        # print(csr)
+        # break
+
         # custom dstmm.t():
         # x = _dsmp(K_div_r, v)
         # x = torch.dstmm(K_div_r, vT)
