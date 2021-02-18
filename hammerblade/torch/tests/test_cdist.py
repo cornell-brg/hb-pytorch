@@ -15,8 +15,8 @@ def _test_torch_cdist_check(x1,x2):
     assert torch.allclose(cdist_h.cpu(), cdist_x)
 
 def test_torch_cdist_1():
-    x1 = torch.randn(20,100)
-    x2 = torch.randn(30,100)
+    x1 = torch.randn(5,100)
+    x2 = torch.randn(6,100)
     _test_torch_cdist_check(x1,x2)
 
 def test_torch_cdist_2():
@@ -25,6 +25,7 @@ def test_torch_cdist_2():
     _test_torch_cdist_check(x1,x2)
 
 def test_torch_cdist_3():
-    x1 = torch.randn(20,10)
-    x2 = torch.randn(30,100)
+    #size of matrices for sinkhorn
+    x1 = torch.randn(19,300)
+    x2 = torch.randn(100000,300)
     _test_torch_cdist_check(x1,x2)
