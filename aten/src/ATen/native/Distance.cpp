@@ -88,7 +88,7 @@ static Tensor cdist_impl(const Tensor& x1, const Tensor& x2, const double p, c10
     result = at::zeros(output_shape, x1.options());
   } else if (device1 == kHAMMERBLADE || device2 == kHAMMERBLADE){
     result = at::empty(output_shape, x1.options());
-    cdist_stub(device1, result, tensor1_expanded, tensor2_expanded, p);
+    cdist_stub(device1, result, x1, x2, p);
   }
   else if (p == 2 && (mode == 1 || (mode == 0 && (r1 > 25 || r2 > 25)))) {
     Tensor dist = (expand_batch_product == 1) ? euclidean_dist_out(x1, x2) :
