@@ -59,14 +59,14 @@ void offload_tensorlist_scalar_impl(TensorList list, std::vector<Tensor> tensors
   // Create a buffer on device to hold these list member eva's
   eva_t* host_list   = (eva_t*) malloc(list.size() * sizeof(eva_t));
   eva_t  device_list =  c10::hammerblade::device_malloc(list.size() * sizeof(eva_t));
-  std::cout << "device_list at eva " << device_list << std::endl;
+//  std::cout << "device_list at eva " << device_list << std::endl;
 
   // Handle the TensorList
   for(int i=0; i<list.size(); i++) {
     auto arg = list[i];
     TORCH_INTERNAL_ASSERT(arg.device().is_hammerblade())
     eva_t list_arg = create_device_tensor(arg, device_ptrs);
-    std::cout << " created tensor at eva " << list_arg << std::endl;
+//    std::cout << " created tensor at eva " << list_arg << std::endl;
     host_list[i] = list_arg;
   }
 
