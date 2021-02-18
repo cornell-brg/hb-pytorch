@@ -9,7 +9,7 @@ namespace at { namespace native {
 
 void cdist_kernel_hb(Tensor& result, const Tensor& x1, const Tensor& x2, const double p) {
 
-    //only meant for Euclidean distance
+    //only Euclidean distance supported
     TORCH_CHECK(x1.is_hammerblade(), "cdist hb: expected 'x1' to be a HammerBlade tensor");
     TORCH_CHECK(x2.is_hammerblade(), "cdist hb: expected 'x2' to be a HammerBlade tensor");
 
