@@ -1,6 +1,6 @@
 """
-Tests on torch.nn.relu (threshold kernel)
-03/09/2020 Lin Cheng (lc873@cornell.edu)
+Tests on torch.remainder (threshold kernel)
+30/01/2021 Zhongyuan Zhao (zz546@cornell.edu)
 """
 import torch
 import torch.nn as nn

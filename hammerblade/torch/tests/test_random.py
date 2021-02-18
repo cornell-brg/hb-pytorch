@@ -1,3 +1,7 @@
+"""
+Tests on torch.random_
+24/01/2021 Zhongyuan Zhao (zz546@cornell.edu)
+"""
 import torch
 
 def test_random_1():

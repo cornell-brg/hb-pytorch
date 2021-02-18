@@ -5362,6 +5362,7 @@
   dispatch:
     CPU: l1_loss_backward_out
     CUDA: l1_loss_backward_out
+    HammerBlade: l1_loss_backward_out
 
 - func: l1_loss_backward(Tensor grad_output, Tensor self, Tensor target, int reduction) -> Tensor
   use_c10_dispatcher: full
