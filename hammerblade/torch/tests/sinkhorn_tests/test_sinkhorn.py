@@ -11,7 +11,7 @@ TOTAL_DOCS = 5000
 QUERY_IDX = 100  # Was 100; lowered to allow even smaller runs.
 HB_DATA_FRAC = 16 # fraction of data to use on hb, i.e. 1/(this value)
 LAMBDA = 1
-N_ITERS = 5 #max_iter is set to 15: https://github.com/cornell-brg/darpa-sdh-prog-eval/blob/master/sinkhorn_wmd/main-redacted.py
+N_ITERS = 15 #max_iter is set to 15: https://github.com/cornell-brg/darpa-sdh-prog-eval/blob/master/sinkhorn_wmd/main-redacted.py
 SAVE_FILE = '' #'scores.out'
 
 # Data files. (Ask Adrian for these.)
@@ -71,14 +71,6 @@ def swmd_torch(r, cT, vecs, niters):
         # v = c * (1.0 / torch.sddtmm(c, K_T, uT)
         # vT = cT * 1.0 / torch.sddtmm(cT, uT, K_T)
         vT = cT * torch.sreciprocal_(torch.sddtmm(cT, uT, K_T))
-        
-        # #dump sparse tensor for Zichao
-        # vT_dense = vT.to_dense().numpy()
-        # vT_csr = scipy.sparse.csr_matrix(vT_dense)
-        # scipy.sparse.save_npz('sparsemat_csr_scipy.npz',vT_csr)
-        # csr = scipy.sparse.load_npz('sparsemat_csr_scipy.npz')
-        # print(csr)
-        # break
 
         # custom dstmm.t():
         # x = _dsmp(K_div_r, v)
