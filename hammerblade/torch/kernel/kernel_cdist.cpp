@@ -25,11 +25,9 @@ extern "C" {
     auto mb = res.dim(1);
     auto sample_size = x1.dim(1);
 
-    // for each row of a, do the multiplication
-    //(since this is a very even way to distribute the work)
     float sum;
-    hb_tiled_for(ma, [&](int row) {
-      hb_tiled_for(mb, [&](int col) {
+    hb_tiled_for(mb, [&](int col) {
+      for (int row=0; row<ma; row++){
         sum = 0;
         for (int el = 0; el < sample_size; el++){
             float temp = x1(row,el) - x2(col,el);
@@ -37,7 +35,7 @@ extern "C" {
             sum+=temp;
         }
         res(row, col) = sqrt(sum);
-      });
+      }
     });
 
     bsg_cuda_print_stat_kernel_end();
