@@ -14,11 +14,9 @@ def test_customized_sparse_dense_tensor_mm():
     xs = x.coalesce()
     xd = torch.ones(4, 1)
     xr = torch.mm(xs, xd)
-   
     hb_xs = xs.hammerblade()
     hb_xd = xd.hammerblade()
-    hb_xr = torch.mm(hb_xs, hb_xd)
-    
+    hb_xr = torch.mm(hb_xs, hb_xd)  
     cpu_r = hb_xr.cpu()
     assert hb_xr.device == torch.device("hammerblade")
     assert torch.allclose(cpu_r, xr)
@@ -34,7 +32,7 @@ def test_customized_sparse_dense_sparse_mm():
 
     hb_xs = xs.hammerblade()
     hb_xd = xd.hammerblade()
-    hb_xr = torch.sparse.mm(hb_xs, hb_xd)
+    hb_xr = torch.sparse.mm(hb_xs, hb_xd)    
 
     cpu_r = hb_xr.cpu()
     assert hb_xr.device == torch.device("hammerblade")

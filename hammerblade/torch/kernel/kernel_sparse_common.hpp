@@ -10,6 +10,8 @@
 #define NUM_PE 16
 #define CACHELINE_BYTE 128
 
+#define OUTPUT_BUF_SIZE 256
+
 inline int convert_idx(int index, int num_row, int row) {
   int idx = 0;
   int div = index / CACHE_LINE; 
