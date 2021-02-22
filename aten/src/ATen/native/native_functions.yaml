@@ -3324,6 +3324,7 @@
   dispatch:
     SparseCPU: new_with_dims_and_tensor_sparse
     SparseCUDA: new_with_dims_and_tensor_sparse
+    SparseHammerBlade: new_with_dims_and_tensor_sparse
   requires_tensor: True
 
 - func: sparse_resize_(Tensor(a!) self, int[] size, int sparse_dim, int dense_dim) -> Tensor(a!)
@@ -6689,15 +6690,28 @@
     SparseCPU: _sampled_reciprocal__cpu
     SparseHammerBlade: _sampled_reciprocal__hb
 
-- func: convert_format(Tensor self) -> Tensor
+- func: to_spmvxf(Tensor self) -> Tensor
   use_c10_dispatcher: full
   variants: function, method
   dispatch:
-    SparseCPU: toc2sr_cpu
+    SparseCPU: to_spmvxcel_format_cpu
 
-- func: mv_xcel(Tensor self, Tensor dense_vector) -> Tensor
+- func: to_spmmxf(Tensor self) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: to_spmmxcel_format_cpu
+
+- func: spmvx(Tensor self, Tensor dense_vector) -> Tensor
   use_c10_dispatcher: full
   variants: function, method
   dispatch:
     HammerBlade: xcelspmv_hb
     CPU: xcelspmv_cpu
+
+- func: spmmx(Tensor self, Tensor dense_vector) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    HammerBlade: xcelspmm_hb
+    CPU: xcelspmm_cpu

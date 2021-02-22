@@ -56,47 +56,6 @@ Tensor xcelspmv_hb(const Tensor &self, const Tensor &dense_vector) {
   Tensor c2sr_hb = tensors1[0];
   Tensor record_hb = tensors1[1];
 
-  //Create a tensor that stores the other relative informations needed by the SpMV accelerators
-/*  
-  for (uint32_t tile_y_idx = 0; tile_y_idx < num_tile_y; tile_y_idx++) {
-    int tile_y_dim = (tile_y_idx == num_tile_y - 1) ? last_tile_y : TILE_Y_SIZE;
-    for (uint32_t tile_x_idx = 0; tile_x_idx < num_tile_x; tile_x_idx++) {
-      int sparse_length[tile_y_dim];
-      for(uint32_t i = tile_y_idx * TILE_Y_SIZE; i < tile_y_idx * TILE_Y_SIZE + tile_y_dim; i++) {
-        uint32_t row_len = 0;
-        int upper_bound = (tile_x_idx + 1) *TILE_X_SIZE;
-        for(uint32_t j = tile_x_bound[i % TILE_Y_SIZE]; j < csr_ptr[i + 1]; j++) {
-          if(csr_idx[j] < upper_bound) {
-            row_len++;
-            tile_x_bound[i % TILE_Y_SIZE]++;
-          } else {
-            break;
-          }
-        }
-        sparse_length[i % TILE_Y_SIZE] = row_len;
-      }
-      uint32_t len_per_pe_a[NUM_PE];
-      for(int i = 0; i < NUM_PE; i++) {
-        len_per_pe_a[i] = 0;
-      }
-      for(int i = 0; i < tile_y_dim; i++) {
-        len_per_pe_a[i % NUM_PE] += 2 + sparse_length[i] * 2;
-      }
-      uint32_t alloc_per_pe_a;
-      uint32_t max_region_a = 0;
-      for(int i=0; i<NUM_PE; i++){
-        alloc_per_pe_a = ((len_per_pe_a[i] * 4) % (CACHELINE_BYTE) == 0) ?
-                           ((len_per_pe_a[i] * 4) / CACHELINE_BYTE) : (((len_per_pe_a[i] * 4)/CACHELINE_BYTE) + 1);
-        if (alloc_per_pe_a > max_region_a){
-          max_region_a = alloc_per_pe_a;
-        }
-      }
-      uint32_t length_total_a = max_region_a * CACHELINE_BYTE * NUM_PE;
-      record_sparse_len[tile_y_idx * num_tile_x + tile_x_idx] = length_total_a;
-      std::cout << "record_sparse_len[" << tile_y_idx * num_tile_x + tile_x_idx << "] is " << length_total_a << std::endl;
-    }
-  }
-*/
   uint32_t cacheline_word = CACHELINE_BYTE / 4;
   uint32_t max_region_b = (((col + NUM_PE - 1) / NUM_PE) + cacheline_word - 1) / cacheline_word;
   uint32_t length_total_b = max_region_b * CACHELINE_BYTE * NUM_PE;

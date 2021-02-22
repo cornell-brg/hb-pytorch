@@ -28,7 +28,7 @@ IntTensor to_csr(const int32_t* indices, int32_t dim, int32_t nnz) {
   return csr;
 }
 
-Tensor toc2sr_cpu(const Tensor& self) {
+Tensor to_spmvxcel_format_cpu(const Tensor& self) {
   TORCH_CHECK(self.dim() == 2, "2D matrix expected, got ", self.dim(), " tensor");
   auto indices = self._indices();
   auto values  = self.values();
@@ -165,7 +165,7 @@ Tensor toc2sr_cpu(const Tensor& self) {
         for(int i=0; i<NUM_PE; i++){
           for(int j=0; j<(CACHELINE_BYTE/(sizeof(int))); j++){
             if(len_per_pe_a[i]>0){
-              dram_a[index_a] = *(a_content[i] + j+ num_loop* (CACHELINE_BYTE / (sizeof(int))));
+              dram_a[index_a] = *(a_content[i] + j + num_loop* (CACHELINE_BYTE / (sizeof(int))));
               len_per_pe_a[i]--;
               index_a++;
             } else{
@@ -210,39 +210,124 @@ Tensor toc2sr_cpu(const Tensor& self) {
   memcpy(record_ptr, record_sparse_len, s_ptr_record_len * sizeof(int32_t));
   int32_t *other_ptr = record_ptr + s_ptr_record_len;
   memcpy(other_ptr, other_info, 12 * sizeof(int32_t));
-/*
-  std::cout << "Finish generating C2SR, start generating densvector" << std::endl;
-
-  uint32_t max_region_b = (((col + NUM_PE - 1) / NUM_PE) + cacheline_word - 1) / cacheline_word;
-  uint32_t length_total_b = max_region_b * CACHELINE_BYTE * NUM_PE;
-  int32_t* dram_b =(int32_t*) malloc(length_total_b);
-  uint32_t b_index = 0;
-  for(uint32_t i=0; i<max_region_b; i++){
-    for(uint32_t j=0; j<NUM_PE; j++){
-      for(uint32_t k=0; k < cacheline_word; k++){
-        uint32_t address_b = i * cacheline_word * NUM_PE + j + k * NUM_PE;
-        if(address_b < col)
-          dram_b[b_index] = dv_ptr[address_b];
-        else
-          dram_b[b_index] = 0;
-        b_index ++; 
-      }
-    }
-  }
-
-  Tensor vector = at::empty({length_total_b / 4}, {at::requires_grad().dtype(at::kInt)});
-  int32_t* vec_ptr = vector.data_ptr<int32_t>();
-  memcpy(vec_ptr, dram_b, length_total_b);
-
-  uint32_t max_region_c = (((row + NUM_PE - 1) / NUM_PE) + cacheline_word - 1) / cacheline_word;
-  uint32_t length_total_c = max_region_c * CACHELINE_BYTE * NUM_PE;
-  int32_t load_result[length_total_c / 4];
-  Tensor output = at::empty({length_total_c / 4}, {at::requires_grad().dtype(at::kInt)});
-
-  memcpy(record_ptr, record_sparse_len, s_ptr_record_len);
-*/
   return c2sr_merge;
 }
 
+Tensor to_spmmxcel_format_cpu(const Tensor& self) {
+  TORCH_CHECK(self.dim() == 2, "2D matrix expected, got ", self.dim(), " tensor");
+  auto indices = self._indices();
+  auto values  = self.values();
+  auto int_indices = indices.to(kInt);
+  auto int_values = values.to(kInt);
+
+  int32_t row = (int32_t)self.size(0);
+  int32_t col = (int32_t)self.size(1);
+  int32_t nnz = (int32_t)self._nnz();  
+  IntTensor csr = to_csr(int_indices.data_ptr<int32_t>(), row, nnz);
+  int32_t* csr_ptr = csr.data_ptr<int32_t>();
+  int32_t* csr_idx = int_indices.data_ptr<int32_t>();
+  int32_t* csr_val = int_values.data_ptr<int32_t>();
+  int32_t cacheline_word = CACHELINE_BYTE / 4;
+  const uint32_t cacheline_log  = std::log(CACHELINE_BYTE) / std::log(2);
+  const uint32_t num_pe_log = std::log(NUM_PE) / std::log(2);
+
+  int32_t other_info[5];
+
+  other_info[0] = row;
+  other_info[1] = NUM_PE;
+  other_info[2] = CACHELINE_BYTE;
+  other_info[3] = cacheline_log;
+  other_info[4] = num_pe_log;
+
+//  std::cout << "m is " << row << "!" << std::endl;
+
+  uint32_t len_per_pe_a[NUM_PE];
+  for(int i = 0; i < NUM_PE; i++) {
+    len_per_pe_a[i] = 0;
+  }
+  for(int i = 0; i < row; i++) {
+    len_per_pe_a[i % NUM_PE] += 2 + (csr_ptr[i+1] - csr_ptr[i]) * 2;
+  }
+
+  uint32_t alloc_per_pe_a;
+  uint32_t max_region_a = 0;
+  for(int i=0; i<NUM_PE; i++){
+    alloc_per_pe_a = (len_per_pe_a[i] + cacheline_word - 1) / cacheline_word;
+    if (alloc_per_pe_a > max_region_a){
+      max_region_a = alloc_per_pe_a;
+    }
+  }
+ 
+//  std::cout << "Start to create dram_a" << std::endl;
+  uint32_t length_total_a = max_region_a * CACHELINE_BYTE * NUM_PE;
+  int32_t* dram_a = (int32_t*)malloc(length_total_a);
+  uint32_t a_base = 0;
+  int32_t* a_content[NUM_PE]; 
+
+  for(uint32_t i = 0; i < NUM_PE; i++) {
+    a_content[i] = (int *) malloc(len_per_pe_a[i] * 4);
+  }
+  int32_t* dest[NUM_PE];
+  for(int32_t i=0; i<NUM_PE; i++){
+    dest[i] = a_content[i];
+  }
+  
+  for(uint32_t i=0; i<row; i++){
+    *(dest[i%NUM_PE]) = csr_ptr[i+1] - csr_ptr[i];
+    dest[i%NUM_PE]++;
+    *(dest[i%NUM_PE]) = a_base; //Loader will not actually use the ptr information in the sparse matrix, thus this is not the correct address
+    dest[i%NUM_PE] ++;
+  }  
+
+  for(uint32_t i=0; i<row; i++) {
+    for(uint32_t j = csr_ptr[i]; j < csr_ptr[i+1]; j++) {
+      *(dest[i%NUM_PE]) = csr_val[j];
+      dest[i%NUM_PE] ++;
+      *(dest[i%NUM_PE]) = csr_idx[j];
+      dest[i%NUM_PE] ++;     
+    }
+  }
+  
+  int index_a = 0;
+  int num_loop = 0;
+  int remain = 0; 
+
+  while(1){
+    for(int i=0; i<NUM_PE; i++){
+      for(int j=0; j<(CACHELINE_BYTE/(sizeof(int))); j++){
+        if(len_per_pe_a[i]>0){
+          dram_a[index_a] = *(a_content[i] + j + num_loop* (CACHELINE_BYTE / (sizeof(int))));
+          len_per_pe_a[i]--;
+          index_a++;
+        } else{
+          dram_a[index_a] = 0;
+          index_a++;
+        }
+      }
+    }
+    num_loop ++;
+    for(int n=0; n<NUM_PE; n++){
+      remain += len_per_pe_a[n];
+    }
+    if(remain == 0)
+      break;
+    else
+      remain = 0;
+  }
+  
+  std::cout << "Finish write dram_a" << std::endl;
+  for(uint32_t i = 0; i < NUM_PE; i++){
+    free(a_content[i]);
+  }
+  
+  std::cout << "Finish free " << std::endl;
+  Tensor c2sr_merge = at::empty({length_total_a/sizeof(int32_t) + 5}, {at::device(at::kCPU).dtype(at::kInt)});
+  int32_t* src = c2sr_merge.data_ptr<int32_t>();
+  memcpy(src, dram_a, length_total_a);
+  std::cout << "Finish copying c2sr" << std::endl;
+  int32_t* other_ptr = src + length_total_a / sizeof(int32_t);
+  memcpy(other_ptr, other_info, 5 * sizeof(int32_t));
+  return c2sr_merge;
+}
 
 }} // namespace at::native   
