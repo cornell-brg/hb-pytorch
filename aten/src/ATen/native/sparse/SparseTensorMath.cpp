@@ -1274,26 +1274,96 @@ void sddtmm_kernel_cpu(
     int row = a_indices[0][k]; //0
     int col = a_indices[1][k];  //1
 
-    float dot_total = 0;
-    for (int i = 0; i < dot_len; i++)
+    float dot_total = 0; 
+    for (int i = 0; i < dot_len; i++){
       dot_total += b_dense[row][i] * c_dense[col][i];
-
+    }
+    
     // update indices & vals
     res_indices[0][k] = row;
     res_indices[1][k] = col;
     res_vals[k] = dot_total;
   }
 }
+
+// --------------------------------------------------------------------
+// sddtmm(Csr Tensor, Tensor, Tensor) -> SparseTensor
+//
+// sddtmm(a, b, c) returns (b@c.T) at locations were a is nonzero
+// optimized version from above since it uses the CSR format for the sparse matrix and allows more reuse!
+// --------------------------------------------------------------------
+template <typename scalar_t>
+void sddtmm_kernel_cpu_opt(
+  const LongTensor& a_csr_tensor,
+  const LongTensor& a_cols_tensor,
+  const Tensor& b_dense_tensor,
+  const Tensor& c_dense_tensor,
+  Tensor& out_indices,
+  Tensor& out_vals){
+    
+  if ( b_dense_tensor.scalar_type() != ScalarType::Float
+    || c_dense_tensor.scalar_type() != ScalarType::Float ) {
+    AT_ERROR("SddTmm is implemented for Float type only for matrices b and c"); 
+  }
+
+  TORCH_CHECK(b_dense_tensor.dim() == 2 && c_dense_tensor.dim() == 2, "Expected 2D matrixes for 'a' and 'b', but got ", b_dense_tensor.dim(), " and ", c_dense_tensor.dim(), " tensors");
+  TORCH_CHECK(b_dense_tensor.size(1) == c_dense_tensor.size(1), "Matrix multiply dimension mismatch: 'b' dim 1 = ", b_dense_tensor.size(1), ", 'c'.T dim 0 = ", c_dense_tensor.size(1));
+
+  auto a_csr = a_csr_tensor.accessor<int64_t, 1>();
+  auto a_cols = a_cols_tensor.accessor<int64_t, 1>();
+
+  auto b_dense = b_dense_tensor.accessor<scalar_t, 2>();
+  auto c_dense = c_dense_tensor.accessor<scalar_t, 2>();
+  auto res_indices = out_indices.accessor<int64_t, 2>();
+  auto res_vals = out_vals.accessor<scalar_t, 1>();
+
+  int dot_len = b_dense.size(1);
+
+  int out_row = b_dense.size(0);
+  int out_cols = c_dense.size(0);
+
+  int nnz_idx=0;
+  for (int a_row = 0; a_row < out_row; a_row++) {
+    for (int a_col_idx = a_csr[a_row]; a_col_idx < a_csr[a_row+1]; a_col_idx++){
+      int a_col = a_cols[a_col_idx];
+      ++nnz_idx;
+
+      float dot_total = 0; 
+      // auto res_dot = b_dense_tensor.select(0,a_row).dot(c_dense_tensor.select(0,a_col));
+      // dot_total = *res_dot.data_ptr<scalar_t>();
+      for (int i = 0; i < dot_len; i++){
+        dot_total += b_dense[a_row][i] * c_dense[a_col][i];
+      }
+      // update indices & vals
+      res_indices[0][nnz_idx] = a_row;
+      res_indices[1][nnz_idx] = a_col;
+      res_vals[nnz_idx] = dot_total;
+    }
+  }
+}
+
+
 SparseTensor sddtmm_cpu(
   const SparseTensor& a_sparse_tensor,
   const Tensor& b_dense_tensor,
   const Tensor& c_dense_tensor) {
   
-  Tensor result_indices = at::zeros({2, a_sparse_tensor._nnz()}, {at::requires_grad().device(at::kCPU).dtype(at::kLong)});
-  Tensor result_vals = at::zeros(a_sparse_tensor._nnz(), {at::requires_grad().device(at::kCPU).dtype(at::kFloat)});
+  Tensor result_indices = at::empty({2, a_sparse_tensor._nnz()}, {at::requires_grad().device(at::kCPU).dtype(at::kLong)});
+  Tensor result_vals = at::empty(a_sparse_tensor._nnz(), {at::requires_grad().device(at::kCPU).dtype(at::kFloat)});
 
+  LongTensor indices = a_sparse_tensor._indices();
+  LongTensor a_colIndices = indices.select(0, 1);
+  int64_t* a_rowIndices = indices.select(0, 0).data_ptr<int64_t>();
+  int64_t a_nnz = a_sparse_tensor._nnz();
+  int64_t a_dim = a_sparse_tensor.size(0);
+  LongTensor a_csr = _to_csr(a_rowIndices, a_dim, a_nnz);
+
+  // AT_DISPATCH_ALL_TYPES(b_dense_tensor.scalar_type(), "sddtmm_cpu", [&]{
+  //   sddtmm_kernel_cpu<scalar_t>(a_sparse_tensor, b_dense_tensor, c_dense_tensor, result_indices, result_vals);
+  // });
+  
   AT_DISPATCH_ALL_TYPES(b_dense_tensor.scalar_type(), "sddtmm_cpu", [&]{
-    sddtmm_kernel_cpu<scalar_t>(a_sparse_tensor, b_dense_tensor, c_dense_tensor, result_indices, result_vals);
+    sddtmm_kernel_cpu_opt<scalar_t>(a_csr, a_colIndices, b_dense_tensor, c_dense_tensor, result_indices, result_vals);
   });
 
   //Create CPU sparse tensor (from SparseLLCopy):
