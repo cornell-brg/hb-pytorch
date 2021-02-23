@@ -1323,23 +1323,26 @@ void sddtmm_kernel_cpu_opt(
   int out_cols = c_dense.size(0);
 
   int nnz_idx=0;
+  // int flops = 0;
   for (int a_row = 0; a_row < out_row; a_row++) {
     for (int a_col_idx = a_csr[a_row]; a_col_idx < a_csr[a_row+1]; a_col_idx++){
       int a_col = a_cols[a_col_idx];
-      ++nnz_idx;
 
       float dot_total = 0; 
       // auto res_dot = b_dense_tensor.select(0,a_row).dot(c_dense_tensor.select(0,a_col));
       // dot_total = *res_dot.data_ptr<scalar_t>();
       for (int i = 0; i < dot_len; i++){
         dot_total += b_dense[a_row][i] * c_dense[a_col][i];
+        // flops+=2;
       }
       // update indices & vals
       res_indices[0][nnz_idx] = a_row;
       res_indices[1][nnz_idx] = a_col;
       res_vals[nnz_idx] = dot_total;
+      ++nnz_idx;
     }
   }
+  // printf("FLOPS for sddtmm %d\n",flops);
 }
 
 
