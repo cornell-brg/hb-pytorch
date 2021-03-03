@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <sstream>
+#include <assert.h>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -49,6 +50,8 @@ void HBProfiler::profiling_end() {
   std::chrono::microseconds delta(g_execution_time_profiler.diff_microsecond(global_clk, tv));
   g_execution_time_profiler.log(g_curr_call_stack, delta);
   g_curr_call_stack.pop_back();
+  // we should have just popped ROI
+  assert(g_curr_call_stack.size() == 0);
 #endif
 #ifdef HB_REDISPATCH
   g_execution_charter.print();
