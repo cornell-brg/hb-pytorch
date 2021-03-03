@@ -113,7 +113,9 @@ def exec_time_print_tree(root, lvl=0, output=None):
 def exec_time_tree(trimming=False):
     data = torch._C._hb_profiler_exec_time_raw_stack()
     print(data)
-    root = exec_time_construct_tree_impl(data)
+    data, roi = exec_time_preprocess(data)
+    root = exec_time_Node(roi[0], roi[1])
+    exec_time_construct_tree_impl(data, root, fancy_func)
     if trimming:
       adjust_trimming(root)
     else:

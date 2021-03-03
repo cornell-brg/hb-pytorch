@@ -50,8 +50,6 @@ void HBProfiler::profiling_end() {
   std::chrono::microseconds delta(g_execution_time_profiler.diff_microsecond(global_clk, tv));
   g_execution_time_profiler.log(g_curr_call_stack, delta);
   g_curr_call_stack.pop_back();
-  // we should have just popped ROI
-  assert(g_curr_call_stack.size() == 0);
 #endif
 #ifdef HB_REDISPATCH
   g_execution_charter.print();
@@ -103,12 +101,10 @@ bool hb_profiler_is_top_level() {
 // Entering a function
 HBProfilerLog::HBProfilerLog(const std::string& func_name) {
   if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
-    g_curr_call_stack.push_back(func_name);
-    execution_time_log = new ExecutionTimeLog(g_curr_call_stack);
+    execution_time_log = new ExecutionTimeLog(g_curr_call_stack, func_name);
 #ifdef HB_REDISPATCH
     if (hb_profiler_is_top_level()) {
       g_execution_charter.log(func_name);
-      g_per_op_execution_time_profiler.reset();
     }
 #endif
   }
