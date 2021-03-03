@@ -25,12 +25,11 @@ void HBProfiler::profiling_start() {
   // reset profiler pluggins
   g_unimpl_kernel_profiler.reset();
   g_execution_time_profiler.reset();
-  g_per_op_execution_time_profiler.reset();
   g_execution_charter.reset();
   // mark current time
-  std::vector<std::string> fake_roi_stack;
-  fake_roi_stack.push_back("time_in_roi");
-  time_in_roi = new ExecutionTimeLog(fake_roi_stack);
+  g_curr_call_stack.push_back("ROI");
+  // start the clock
+  clock_gettime(CLOCK_MONOTONIC, &global_clk);
 #else
   std::cerr << "Warning: ATen profiler is invoked "
             << "but PyTorch is not built with profiling capability "
@@ -44,7 +43,14 @@ void HBProfiler::profiling_start() {
 void HBProfiler::profiling_end() {
   in_roi = false;
 #ifdef PROFILE_ATEN
-  delete time_in_roi;
+  // stop the clock
+  timespec tv;
+  clock_gettime(CLOCK_MONOTONIC, &tv);
+  std::chrono::microseconds delta(g_execution_time_profiler.diff_microsecond(global_clk, tv));
+  g_execution_time_profiler.log(g_curr_call_stack, delta);
+  g_curr_call_stack.pop_back();
+#endif
+#ifdef HB_REDISPATCH
   g_execution_charter.print();
 #endif
   return;
@@ -86,7 +92,7 @@ bool hb_profiler_is_in_roi() {
 }
 
 bool hb_profiler_is_top_level() {
-  return (g_curr_call_stack.size() == 1);
+  return (g_curr_call_stack.size() == 2);
 }
 
 // =============== HBProfilerLog Members =======================
@@ -94,12 +100,10 @@ bool hb_profiler_is_top_level() {
 // Entering a function
 HBProfilerLog::HBProfilerLog(const std::string& func_name) {
   if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
-    g_curr_call_stack.push_back(func_name);
-    execution_time_log = new ExecutionTimeLog(g_curr_call_stack);
+    execution_time_log = new ExecutionTimeLog(g_curr_call_stack, func_name);
 #ifdef HB_REDISPATCH
     if (hb_profiler_is_top_level()) {
       g_execution_charter.log(func_name);
-      g_per_op_execution_time_profiler.reset();
     }
 #endif
   }
@@ -110,17 +114,6 @@ HBProfilerLog::~HBProfilerLog()
 {
   if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
     delete execution_time_log;
-#ifdef HB_REDISPATCH
-    if (hb_profiler_is_top_level()) {
-      std::string per_op_log = g_per_op_execution_time_profiler.str_dump();
-      if (per_op_log.find("@CPU_LOG@") != std::string::npos) {
-        std::cerr << "#TOP_LEVEL_FUNC#__" << g_curr_call_stack.back() << std::endl;
-        std::cerr << per_op_log << std::endl;
-        std::cerr << "#TOP_LEVEL_FUNC_END#__" << g_curr_call_stack.back() << std::endl;
-      }
-    }
-#endif
-    g_curr_call_stack.pop_back();
   }
 }
 
@@ -144,9 +137,6 @@ HBProfilerTrimLog::~HBProfilerTrimLog()
 void HBProfilerTrimLog::trim_manual_log_exec_time(std::chrono::microseconds simulated) {
   if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
     g_execution_time_profiler.log(g_curr_call_stack, simulated);
-#ifdef HB_REDISPATCH
-    g_per_op_execution_time_profiler.log(g_curr_call_stack, simulated);
-#endif
   }
 }
 
