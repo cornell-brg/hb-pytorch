@@ -4,10 +4,17 @@ echo "  Make sure you enabled devtoolset-8!"
 echo "  Make sure correct Python environemnt is set!"
 echo ""
 
+# setup path to MKL
+export MKL_ROOT=/work/global/lc873/work/sdh/venv_baseline/
+export MKL_INCLUDE=$MKL_ROOT/include
+export MKL_LIBRARY=$MKL_ROOT/lib
+export CMAKE_INCLUDE_PATH=$MKL_INCLUDE:$CMAKE_INCLUDE_PATH
+export CMAKE_LIBRARY_PATH=$MKL_LIBRARY:$CMAKE_LIBRARY_PATH
+
 # setup pytorch building options
 export REL_WITH_DEB_INFO=1
 export BUILD_TEST=0
-export USE_MKL=0
+export USE_MKL=1
 export USE_MKLDNN=0
 export USE_CUDA=0
 export USE_CUDNN=0

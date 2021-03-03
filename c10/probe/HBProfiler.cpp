@@ -96,12 +96,12 @@ HBProfilerLog::HBProfilerLog(const std::string& func_name) {
   if (hb_profiler_is_in_roi() && hb_profiler_thread_safe()) {
     g_curr_call_stack.push_back(func_name);
     execution_time_log = new ExecutionTimeLog(g_curr_call_stack);
+#ifdef HB_REDISPATCH
     if (hb_profiler_is_top_level()) {
       g_execution_charter.log(func_name);
-#ifdef HB_REDISPATCH
       g_per_op_execution_time_profiler.reset();
-#endif
     }
+#endif
   }
 }
 
