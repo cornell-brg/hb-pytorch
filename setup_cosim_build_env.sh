@@ -4,10 +4,16 @@ echo "  Make sure you enabled devtoolset-8!"
 echo "  Make sure correct Python environemnt is set!"
 echo ""
 
+export MKL_ROOT=/work/global/lc873/work/sdh/venv_baseline/
+export MKL_INCLUDE=$MKL_ROOT/include
+export MKL_LIBRARY=$MKL_ROOT/lib
+export CMAKE_INCLUDE_PATH=$MKL_INCLUDE:$CMAKE_INCLUDE_PATH
+export CMAKE_LIBRARY_PATH=$MKL_LIBRARY:$CMAKE_LIBRARY_PATH
+
 # setup pytorch building options
 export REL_WITH_DEB_INFO=1
 export BUILD_TEST=0
-export USE_MKL=0
+export USE_MKL=1
 export USE_MKLDNN=0
 export USE_CUDA=0
 export USE_CUDNN=0
@@ -40,7 +46,7 @@ then
   export BSG_MANYCORE_LDPATH="<path-to-your-cudalite-cosim-runtime-lib>"
 else
   export BSG_MANYCORE_INCLUDE=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries
-  export BSG_MANYCORE_LDPATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries/platforms/bigblade-vcs
+  export BSG_MANYCORE_LDPATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries/platforms/dpi-vcs
 fi
 
 export USE_HB_COSIM=1

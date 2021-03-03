@@ -56,7 +56,7 @@ extern "C" {
           while(bsg_amoswap_aq(lock_addr, 1)!=0);
           //bsg_print_hexadecimal(0xbeef0000);
           bsg_unroll(16)
-          for (size_t i = 0; i < numel; i++) {
+          for (size_t i = 0; i < numel/16; i++) {
             *dst += *src;
             dst++;
             src += grad_s2;

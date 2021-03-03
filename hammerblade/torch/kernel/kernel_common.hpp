@@ -20,7 +20,7 @@
 #endif // HB_EMUL
 // imaginary __bsg_pod_id and BSG_POD_DIM
 #define __bsg_pod_id 0
-#define BSG_POD_DIM 1
+#define BSG_POD_DIM 16
 #include "bsg_manycore.h"
 #include "bsg_set_tile_x_y.h"
 #include "bsg_tile_group_barrier.hpp"

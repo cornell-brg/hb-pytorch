@@ -211,7 +211,7 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   // 63330 is a measured magic number to make the abs_cycle here matches the one in
   // manycore_stats.log
 #ifdef COSIM
-  uint64_t abs_cycle = end_cycle - start_cycle - 55000;
+  uint64_t abs_cycle = end_cycle - start_cycle - 63330;
 #else
   uint64_t abs_cycle = 0;
 #endif

@@ -41,7 +41,7 @@ extern "C" {
       if (idx < batch_size) {
         // reset buffer
         bsg_unroll(16)
-        for (size_t i = 0; i < numel; i++) {
+        for (size_t i = 0; i < numel/16; i++) {
           acc[i] = 0;
         }
         for (size_t emb = 0; emb < embeddings_per_batch; emb++) {
@@ -49,7 +49,7 @@ extern "C" {
           if (offset != padding_idx) {
             bsg_attr_remote float* src = weight_ptr + offset * weight_s0;
             bsg_unroll(16)
-            for (size_t i = 0; i < numel; i++) {
+            for (size_t i = 0; i < numel/16; i++) {
               acc[i] += *src;
               src++;
             }
@@ -58,7 +58,7 @@ extern "C" {
         // write back
         bsg_attr_remote float* dst = sum_ptr + idx * sum_s0;
         bsg_unroll(16)
-        for (size_t i = 0; i < numel; i++) {
+        for (size_t i = 0; i < numel/16; i++) {
           dst[i] = acc[i];
         }
       }
