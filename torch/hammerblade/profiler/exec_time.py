@@ -2,17 +2,11 @@ import torch
 
 class exec_time_Node:
 
-    def __init__(self, func, time, fancy_func=False):
+    def __init__(self, func, time):
         self.func = func
         self.time = float(time)
         self.children = []
         self.percentage = -1
-        if fancy_func:
-            func = self.func
-            func = func.split("(")[0]
-            func = func.split("::")[-1]
-            func = "aten::" + func
-            self.func = func
 
     def add_child(self, child):
         assert isinstance(child, exec_time_Node)
@@ -22,58 +16,47 @@ class exec_time_Node:
         return "Node(" + self.func + " : " + str(self.time) + ")"
 
 
-def exec_time_preprocess(data):
-    processed = []
-    data = data.splitlines()
-    roi = ()
-    for d in data:
-        stack, time = d.split(";")
-        if stack == "time_in_roi":
-            roi = (stack, time)
-        else:
-            stack = stack.split("<|>")
-            processed.append((stack, time))
-    return processed, roi
+def exec_time_construct_tree_impl(data):
+  data = data.splitlines()
+  ROI_data = data[0].split(";")
+  assert ROI_data[0] == "ROI"
+  ROI = exec_time_Node("ROI",ROI_data[1])
 
-# recursively construct a stack tree
-# the idea is to find len(1) stacks, and construct a node
-# anything between two len(1) stacks, or the end, should be
-# recursively handled and added as len(1) stack's children
-def exec_time_construct_tree_impl(data, parent, fancy_func=False):
-    global_idx = 0
-    while global_idx < len(data):
-        stack, time = data[global_idx]
-        assert len(stack) == 1
-        node = exec_time_Node(stack[0], time, fancy_func)
-        parent.add_child(node)
-        lower_level = []
-        global_idx += 1
-        while global_idx < len(data):
-            stack, time = data[global_idx]
-            if len(stack) == 1:
-                break
-            # stack pop front
-            lower_level.append((stack[1:], time))
-            global_idx += 1
-        exec_time_construct_tree_impl(lower_level, node)
+  # helper
+  def node_adder(path, parent, time):
+    # base
+    if len(path) == 1:
+      # the node we want to add shouldn't already there
+      for kid in parent.children:
+        assert kid.func != path[0]
+      parent.add_child(exec_time_Node(path[0],time))
+      return
+    # find the kid in parent's children list
+    for kid in parent.children:
+      if kid.func == path[0]:
+        node_adder(path[1:], kid, time)
+        return
+    # not found ...
+    assert False
 
-# "Trim" the exec_time tree -> replace offload_kernel time
-# with simulated time
-def exec_time_apply_trim(root):
-    trim_amount = 0.0
-    # this is a func that runs on HB, which needs trimming
-    if root.func.startswith("@OFFLOAD_KERNEL@__") or root.func.startswith("@BSG_API_CALL@__"):
-        assert len(root.children) == 1
-        simulated = root.children[0]
-        assert simulated.func == "@TRIM@"
-        trim_amount = simulated.time - root.time
-        root.time += trim_amount
-        return trim_amount
+  # process each entry
+  for d in data[1:]:
+    d = d.split(";")
+    path = d[0]
+    time = d[1]
+    path = path.split("<|>")
+    node_adder(path[1:], ROI, time)
 
-    for kid in root.children:
-        trim_amount += exec_time_apply_trim(kid)
-    root.time += trim_amount
-    return trim_amount
+  return ROI
+
+# build total time from ground up
+# a simple postorder traversla will do
+def accumulate_time(root):
+  children_time = 0
+  for kid in root.children:
+    children_time += accumulate_time(kid)
+  root.time += children_time
+  return root.time
 
 # find other time in ROI
 def exec_time_add_other(root):
@@ -105,15 +88,11 @@ def exec_time_print_tree(root, lvl=0, output=None):
     return "\n".join(output)
 
 # wrap everything, return a tree
-def exec_time_tree(fancy_func=False, trimming=False):
+def exec_time_tree(trimming=False):
     data = torch._C._hb_profiler_exec_time_raw_stack()
     print(data)
-    data, roi = exec_time_preprocess(data)
-    root = exec_time_Node(roi[0], roi[1])
-    exec_time_construct_tree_impl(data, root, fancy_func)
-    if trimming:
-        # simulation time trimming
-        exec_time_apply_trim(root)
+    root = exec_time_construct_tree_impl(data)
+    accumulate_time(root)
     exec_time_add_other(root)
     exec_time_calc_percentage(root)
     return root
@@ -122,7 +101,7 @@ def exec_time_tree(fancy_func=False, trimming=False):
 
 def fancy_print(trimming=False):
     try:
-        root = exec_time_tree(fancy_func=True, trimming=trimming)
+        root = exec_time_tree(trimming=trimming)
         buffer = ""
         for e in (root.children + [root]):
             func = e.func
@@ -136,7 +115,7 @@ def fancy_print(trimming=False):
 
 def latex_table(trimming=False):
     try:
-        root = exec_time_tree(fancy_func=True, trimming=trimming)
+        root = exec_time_tree(trimming=trimming)
         buffer = ""
         header = "\\begin{table}[t]\n" \
                  "\\begin{tabular}{lrr}\n" \
