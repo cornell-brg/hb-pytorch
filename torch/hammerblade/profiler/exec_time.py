@@ -65,6 +65,28 @@ def exec_time_add_other(root):
         agg_total += kid.time
     root.children.append(exec_time_Node("other", root.time - agg_total))
 
+# deal with TRIM nodes
+# if trimming we adjust the parent
+# if not we set trim value to 0
+def adjust_trimming(root):
+  for kid in root.children:
+    if kid.func == "@TRIM@":
+      assert len(root.children) == 1 # the only kid should be trim, if there is a trim
+      root.time = kid.time # adjust time to simulated time
+      kid.time = 0 # disgrad this time to prevent double counting
+    else:
+      adjust_trimming(kid)
+
+def disgrad_trimming(root):
+  # base
+  if root.func == "@TRIM@":
+    root.time = 0 # we disgrad this info
+    assert len(root.children) == 0
+    return
+  # recursion
+  for kid in root.children:
+    disgrad_trimming(kid)
+
 # append percentage of ROI to each node
 def exec_time_calc_percentage(root, roi_time=None):
     if roi_time is None:
@@ -92,6 +114,10 @@ def exec_time_tree(trimming=False):
     data = torch._C._hb_profiler_exec_time_raw_stack()
     print(data)
     root = exec_time_construct_tree_impl(data)
+    if trimming:
+      adjust_trimming(root)
+    else:
+      disgrad_trimming(root)
     accumulate_time(root)
     exec_time_add_other(root)
     exec_time_calc_percentage(root)
