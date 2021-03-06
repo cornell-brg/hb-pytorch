@@ -14,15 +14,13 @@ LAMBDA = 1
 N_ITERS = 1 #max_iter is set to 15: https://github.com/cornell-brg/darpa-sdh-prog-eval/blob/master/sinkhorn_wmd/main-redacted.py
 SAVE_FILE = '' #'scores.out'
 
-cwd = os.getcwd()
-# cwd = os.path.dirname(__file__)
 # Data files. (Ask Adrian for these.)
-DATA_DIR = os.path.join(cwd, 'sinkhorn_wmd-data')
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'sinkhorn_wmd-data')
 DATA_MAT = os.path.join(DATA_DIR, 'cache-mat.npz')
 DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 
 # Kernel "routing" file.
-ROUTE_JSON = os.path.join(cwd, 'sinkhorn_wmd.json')
+ROUTE_JSON = os.path.join(os.path.dirname(__file__), 'sinkhorn_wmd.json')
 
 
 def begin_profile(on_hb):
@@ -81,13 +79,13 @@ def swmd_torch(r, cT, vecs, niters):
     """
     # I=(r > 0)
     sel = r > 0
-
     # r=r(I)
     r = r[sel].reshape(-1, 1)
 
     # M=M(I,:)
     M = torch.cdist(vecs[sel], vecs)
-    cdist_flops = vecs[sel].size()[0]*vecs.size()[0]*vecs.size()[1]*3
+    # print(vecs[sel].size(), vecs.size())
+    # cdist_flops = vecs[sel].size()[0]*vecs.size()[0]*vecs.size()[1]*3
 
     # x=ones(length(r), size(c,2)) / length(r)
     a_dim = r.shape[0]
@@ -113,21 +111,21 @@ def swmd_torch(r, cT, vecs, niters):
         vT = cT * torch.sreciprocal_(torch.sddtmm(cT, uT, K_T))
         # vT = cT * torch.sreciprocal_(_sddmm(cT, uT, K))
         # vT = _sddmm_special(cT,uT,K,lambda x:1.0/x)
-        sddtmm_flops = 2*uT.size()[1]*len(cT.values())
+        # sddtmm_flops = 2*uT.size()[1]*len(cT.values())
 
         # custom dstmm.t():
         # x = _dsmp(K_div_r, v)
         # x = torch.dstmm(K_div_r, vT)
-        xT = torch.dstmmt(K_div_r, vT)
-        # xT = torch.mm(vT,K_div_r_T) #using the transposed version to allow Sparse-dense MM (SDMM) instead of (DSMM)
+        # xT = torch.dstmmt(K_div_r, vT)
+        xT = torch.mm(vT,K_div_r_T) #using the transposed version to allow Sparse-dense MM (SDMM) instead of (DSMM)
 
     #Note: M is huge compared to uT, so use the sum(axis=0) instead of sum(axis=1) line
     # out = (uT * (vT @ (K_T * M.t())).sum(axis=1) 
     out = (uT.t() * torch.dstmm(K * M, vT)).sum(axis=0)
 
-    print("SDDTMM flops = "+str(sddtmm_flops))
-    print("Cdist flops = "+str(cdist_flops))
-    print("cdist has "+str(cdist_flops/sddtmm_flops)+"x more flops")
+    # print("SDDTMM flops = "+str(sddtmm_flops))
+    # print("Cdist flops = "+str(cdist_flops))
+    # print("cdist has "+str(cdist_flops/sddtmm_flops)+"x more flops")
     return out
 
 
