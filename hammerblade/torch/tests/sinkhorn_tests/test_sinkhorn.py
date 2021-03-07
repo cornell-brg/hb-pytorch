@@ -11,7 +11,7 @@ TOTAL_DOCS = 5000
 QUERY_IDX = 100  # Was 100; lowered to allow even smaller runs.
 HB_DATA_FRAC = 16 # fraction of data to use on hb, i.e. 1/(this value)
 LAMBDA = 1
-N_ITERS = 1 #max_iter is set to 15: https://github.com/cornell-brg/darpa-sdh-prog-eval/blob/master/sinkhorn_wmd/main-redacted.py
+N_ITERS = 5 #max_iter is set to 15: https://github.com/cornell-brg/darpa-sdh-prog-eval/blob/master/sinkhorn_wmd/main-redacted.py
 SAVE_FILE = '' #'scores.out'
 
 # Data files. (Ask Adrian for these.)
