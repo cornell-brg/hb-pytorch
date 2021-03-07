@@ -20,3 +20,9 @@ run_%/manycore_stats.log: run_%/vanilla_stats.csv
 cpu_run/log.txt: $(APP_SCRIPT)
 	mkdir -p cpu_run
 	cd cpu_run ; PYTHONPATH=$(PYTORCH_DIR) python ../$(APP_SCRIPT) > log.txt
+
+cdist: test_cdist.py
+	mkdir -p run_4
+	cd run_4 ; PYTHONPATH=$(PYTORCH_DIR) pycosim ../test_cdist.py > log.txt
+	cd run_4 ; PYTHONPATH=$(MCPY_DIR) python -m vanilla_parser
+	cd run_4 ; mv stats/manycore_stats.log .
