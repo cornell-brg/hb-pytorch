@@ -17,6 +17,7 @@ HB_DATA_FRAC = 16  # Used this fraction of the CPU's data.
 CPU_TDP = 165  # Xeon power (watts).
 
 
+#use -s for summary and -cdist to include cdist HB results
 
 def cycles_from_stats(stats):
     """Given the text contents of a `manycore_stats.log` file, extract the
@@ -141,6 +142,11 @@ def hb_cycles_to_time(cycles):
 def collect(summary):
     with open(ROUTE_JSON) as f:
         kernels = json.load(f)
+    
+    if '-cdist' in sys.argv:
+        cdist = {}
+        cdist["signature"] = "at::Tensor at::TypeDefault::cdist(const at::Tensor&, const at::Tensor&, double, c10::optional<long int>)"
+        kernels.append(cdist)
 
     # Load results from every HB run (one per kernel).
     hb_cycles = {}
@@ -158,7 +164,11 @@ def collect(summary):
         log_fn = HB_LOG.format(i)
         with open(log_fn) as f:
             log_txt = f.read()
-        trimmed_times = dict(trimmed_times_from_tree(log_txt))
+        
+        if 'cdist' in kname:
+            trimmed_times = dict(trimmed_times_from_tree(log_txt,marker = "at::native::cdist_stub::cdist_stub()"))
+        else:
+            trimmed_times = dict(trimmed_times_from_tree(log_txt))
         hb_host_times[kname] = trimmed_times[kname]
 
         # Run energy model, convert to joules.
