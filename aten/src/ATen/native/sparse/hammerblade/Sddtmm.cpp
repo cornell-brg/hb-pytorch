@@ -29,7 +29,7 @@ SparseTensor sddtmm_hb(const SparseTensor& sample, const Tensor& b, const Tensor
   TORCH_CHECK(b.size(0) == sample.size(0) && c.size(0) == sample.size(1),"SddTmm sample dimension mismatch: sample was shape ",sample.size(0)," by ",sample.size(1),", but (b@c.T) is shape ",b.size(0)," by ",c.size(0));
 
   Tensor result_indices = at::empty({2, sample._nnz()}, {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kInt)});
-  Tensor result_vals = at::zeros(sample._nnz(), {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
+  Tensor result_vals = at::empty(sample._nnz(), {at::requires_grad().device(at::kHAMMERBLADE).dtype(at::kFloat)});
 
   hb_offload_kernel(result_indices, result_vals, indices, b, c, "tensorlib_sddtmm");
 
