@@ -30,7 +30,6 @@ static void initHammerBladeDevice() {
   std::vector<eva_t> hb_startup_argv;
   eva_t shared_reduction_buffer = device_malloc(_hb_tg_dim.x * _hb_tg_dim.y * 2 * sizeof(uint32_t));
   hb_startup_argv.push_back(shared_reduction_buffer);
-#ifdef COSIM
   // to avoid race condition -- we do 16x8 1x1 tile groups for startup kernel
   uint64_t tg_x = _hb_tg_dim.x;
   uint64_t tg_y = _hb_tg_dim.y;
@@ -38,17 +37,13 @@ static void initHammerBladeDevice() {
   _hb_grid_dim.y = tg_y;
   _hb_tg_dim.x = 1;
   _hb_tg_dim.y = 1;
-  std::cerr << "Using 16x8 1x1 tile groups to call tensorlib_hb_startup" << std::endl;
-#endif
   offload_kernel("tensorlib_hb_startup", hb_startup_argv);
   std::cerr << "HB startup config kernel applied" << std::endl;
   // restore tile group dim
-#ifdef COSIM
   _hb_grid_dim.x = 1;
   _hb_grid_dim.y = 1;
   _hb_tg_dim.x = tg_x;
   _hb_tg_dim.y = tg_y;
-#endif
   return;
 }
 
