@@ -58,7 +58,8 @@ export USE_HB_COSIM=1
 if [[ "x${SETUP_BRG_HAMMERBLADE}" != "xyes" ]]; then
   export BSG_MACHINE=timing_v0_16_8
   export BSG_MACHINE_PATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/machines/$BSG_MACHINE
-  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python test_python.log
+  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python/test_loader main.exec
+  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python/test_loader main.profile
 fi
 
 export HB_KERNEL_DIR=$DIR/hammerblade/torch
