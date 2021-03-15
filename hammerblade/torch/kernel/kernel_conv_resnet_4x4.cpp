@@ -160,7 +160,7 @@ extern "C" {
     size_t w_blocks_per_out_channel = Wout / BLOCK_DIM_X;
 
     size_t blocks_per_out_channel = h_blocks_per_out_channel * w_blocks_per_out_channel;
-    size_t num_blocks = N * Cout * blocks_per_out_channel;
+    size_t num_blocks = N * Cout * blocks_per_out_channel / 16;
 
     // allocate buffers
     float filter_buf[FILTER_DIM * FILTER_DIM];
@@ -280,7 +280,7 @@ extern "C" {
     size_t w_blocks_per_out_channel = Wout / BLOCK_DIM_X;
 
     size_t blocks_per_out_channel = h_blocks_per_out_channel * w_blocks_per_out_channel;
-    size_t num_blocks = N * Cout * blocks_per_out_channel;
+    size_t num_blocks = N * Cout * blocks_per_out_channel / 16;
 
     // allocate buffers
     float filter_buf[FILTER_DIM * FILTER_DIM];
@@ -522,12 +522,15 @@ extern "C" {
     bsg_cuda_print_stat_start(6);
 
     // main loop
-    for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
-      if (idx < num_blocks) {
+    // for (size_t idx = bsg_id; idx < num_blocks; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
+    //   if (idx < num_blocks) {
 
-        // figure out what we are producing
-        size_t filter_id = idx / Cout;
-        size_t channel_id = idx % Cout;
+    //     // figure out what we are producing
+    //     size_t filter_id = idx / Cout;
+    //     size_t channel_id = idx % Cout;
+
+    for (size_t filter_id = bsg_x; filter_id < N / 4; filter_id += BSG_TILE_GROUP_X_DIM) {
+      for (size_t channel_id = bsg_y; channel_id < Cout / 4; channel_id += BSG_TILE_GROUP_Y_DIM) {
 
         // reset output buffer
         reset_buffer<FILTER_DIM, FILTER_DIM>(filter_buf);

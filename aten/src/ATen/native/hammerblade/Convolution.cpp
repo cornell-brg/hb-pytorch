@@ -2,7 +2,7 @@
 #include <ATen/native/hammerblade/HammerBladeTensor.h>
 #include <ATen/native/hammerblade/Offload.h>
 
-#define ENABLE_SYSTOLIC 1
+#define ENABLE_SYSTOLIC 0
 
 namespace at {
 namespace native {
