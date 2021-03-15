@@ -14,11 +14,17 @@
 #define BSG_TILE_GROUP_Y_DIM emul_hb_mesh_dim.y
 #define bsg_tiles_X BSG_TILE_GROUP_X_DIM
 #define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
+//Macros for triggering saif generation
+#define bsg_saif_start()
+#define bsg_saif_end()
 #else
 #define BSG_TILE_GROUP_X_DIM bsg_global_X
 #define BSG_TILE_GROUP_Y_DIM bsg_global_Y
 #define bsg_tiles_X BSG_TILE_GROUP_X_DIM
 #define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
+//Macros for triggering saif generation
+#define bsg_saif_start() asm volatile ("addi zero,zero,1")
+#define bsg_saif_end() asm volatile ("addi zero,zero,2")
 #endif // HB_EMUL
 // imaginary __bsg_pod_id and BSG_POD_DIM
 #define __bsg_pod_id 0
