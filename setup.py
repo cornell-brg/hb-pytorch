@@ -757,6 +757,7 @@ def configure_extension_build():
         scripts = [
             'torch/bin/pycosim',
             'torch/bin/pycosim.profile',
+            'torch/bin/pycosim.saif',
             'torch/bin/pycosim.trace',
             'torch/bin/pycosim.wave',
         ]

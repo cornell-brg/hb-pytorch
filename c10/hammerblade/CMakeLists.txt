@@ -132,6 +132,8 @@ if(NOT USE_HB_EMUL)
           DESTINATION bin RENAME pycosim)
   install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.profile.sh
           DESTINATION bin RENAME pycosim.profile)
+  install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.saif.sh
+          DESTINATION bin RENAME pycosim.saif)
   install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.trace.sh
           DESTINATION bin RENAME pycosim.trace)
   install(PROGRAMS $ENV{HB_KERNEL_DIR}/pycosim.wave.sh
