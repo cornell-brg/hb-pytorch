@@ -8,7 +8,7 @@ namespace c10 {
 namespace probe {
 
 ExecutionTimeProfiler g_execution_time_profiler;
-ExecutionTimeProfiler g_per_op_execution_time_profiler;
+timespec global_clk;
 
 // ============ ExecutionTimeProfiler Members ============
 
@@ -24,8 +24,6 @@ void ExecutionTimeProfiler::log(const std::vector<std::string>& stack,
     execution_time_dict[stack] = time;
   }
 }
-
-// ============ ExecutionTimeLog Member ============
 
 const std::string ExecutionTimeProfiler::str_dump() {
   using std::chrono::microseconds;
@@ -50,6 +48,12 @@ const std::string ExecutionTimeProfiler::str_dump() {
   return data;
 }
 
+long ExecutionTimeProfiler::diff_microsecond(timespec& start, timespec& end) {
+  long end_microsecond   =   end.tv_sec * 1000000 +   end.tv_nsec / 1000;
+  long start_microsecond = start.tv_sec * 1000000 + start.tv_nsec / 1000;
+  return (end_microsecond - start_microsecond);
+}
+
 // ============ ExecutionTimeProfiler C10_API ============
 
 const std::string exec_time_raw_stack() {
@@ -58,17 +62,29 @@ const std::string exec_time_raw_stack() {
 
 // ============ ExecutionTimeLog Member ============
 
-ExecutionTimeLog::ExecutionTimeLog(const std::vector<std::string>& stack)
-  : start(std::chrono::high_resolution_clock::now()),
-    stack(stack) {}
+ExecutionTimeLog::ExecutionTimeLog(std::vector<std::string>& stack,
+                                   const std::string& func_name) : stack(stack) {
+  // stop the previous clock
+  clock_gettime(CLOCK_MONOTONIC, &tv);
+  // time belongs to the upper level
+  std::chrono::microseconds delta(g_execution_time_profiler.diff_microsecond(global_clk, tv));
+  g_execution_time_profiler.log(stack, delta);
+  // extend stack with funcName
+  stack.push_back(func_name);
+  // start the clock
+  clock_gettime(CLOCK_MONOTONIC, &global_clk);
+}
 
 ExecutionTimeLog::~ExecutionTimeLog() {
-  auto delta = std::chrono::duration_cast<std::chrono::microseconds>
-    (std::chrono::high_resolution_clock::now() - start);
+  // stop the clock
+  clock_gettime(CLOCK_MONOTONIC, &tv);
+  // time belongs to current level
+  std::chrono::microseconds delta(g_execution_time_profiler.diff_microsecond(global_clk, tv));
   g_execution_time_profiler.log(stack, delta);
-#ifdef HB_REDISPATCH
-  g_per_op_execution_time_profiler.log(stack, delta);
-#endif
+  // remote self from stack
+  stack.pop_back();
+  // start the clock
+  clock_gettime(CLOCK_MONOTONIC, &global_clk);
 }
 
 }} // namespace c10::probe

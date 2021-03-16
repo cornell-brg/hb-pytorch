@@ -14,7 +14,6 @@ KernelLogger kernel_call_logger(false);
 #endif
 
 void enqueue_kernel(const std::string &kernel, uint32_t argc, uint64_t* argv) {
-  std::cout << kernel << std::endl;
   assert (kernelMap.find(kernel) != kernelMap.end());
   enqueued_argc.push_back(argc);
   enqueued_argv.push_back(argv);
