@@ -40,10 +40,10 @@ Tensor euclidean_dist_out(const Tensor& x1, const Tensor& x2) {
 static Tensor cdist_impl(const Tensor& x1, const Tensor& x2, const double p, c10::optional<int64_t> compute_mode) {
   TORCH_CHECK(at::isFloatingType(x1.scalar_type()), "cdist only supports floating-point dtypes, X1 got: ", x1.scalar_type());
   auto device1 = x1.type().device_type();
-  TORCH_CHECK(device1 == kCPU || device1 == kCUDA, "cdist only supports CPU and CUDA devices, X1 got: ", device1);
+  TORCH_CHECK(device1 == kCPU || device1 == kCUDA || device1 == kHAMMERBLADE, "cdist only supports CPU, CUDA and HammerBlade devices, X1 got: ", device1);
   TORCH_CHECK(at::isFloatingType(x1.scalar_type()), "cdist only supports floating-point dtypes, X2 got: ", x2.scalar_type());
   auto device2 = x2.type().device_type();
-  TORCH_CHECK(device2 == kCPU || device2 == kCUDA, "cdist only supports CPU and CUDA devices, X2 got: ", device2);
+  TORCH_CHECK(device2 == kCPU || device2 == kCUDA || device2 == kHAMMERBLADE, "cdist only supports CPU, CUDA and HammerBlade devices, X2 got: ", device2);
   TORCH_CHECK(p >= 0, "cdist only supports non-negative p values");
   TORCH_CHECK(device1 == device2, "X1 and X2 must have the same device type. X1: ", device1, " X2: ", device2);
   TORCH_CHECK(!x1.is_cuda() || x1.get_device() == x2.get_device(), "device of X1 (", x1.get_device(), ") must match device of X2 (", x2.get_device(), ")");
@@ -86,7 +86,11 @@ static Tensor cdist_impl(const Tensor& x1, const Tensor& x2, const double p, c10
     result = at::empty(output_shape, x1.options());
   } else if (c1 == 0) {
     result = at::zeros(output_shape, x1.options());
-  } else if (p == 2 && (mode == 1 || (mode == 0 && (r1 > 25 || r2 > 25)))) {
+  } else if (device1 == kHAMMERBLADE || device2 == kHAMMERBLADE){
+    result = at::empty(output_shape, x1.options());
+    cdist_stub(device1, result, x1, x2, p);
+  }
+  else if (p == 2 && (mode == 1 || (mode == 0 && (r1 > 25 || r2 > 25)))) {
     Tensor dist = (expand_batch_product == 1) ? euclidean_dist_out(x1, x2) :
                   euclidean_dist_out(tensor1_expanded, tensor2_expanded);
     result = dist.view(output_shape);

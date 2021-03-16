@@ -1,0 +1,18 @@
+[
+    {
+        "offload": false,
+        "signature": "at::Tensor at::SparseCPUType::{anonymous}::sddtmm(const at::Tensor&, const at::Tensor&, const at::Tensor&)"
+    },
+    {
+        "offload": false,
+        "signature": "at::Tensor& at::SparseCPUType::{anonymous}::sreciprocal_(at::Tensor&)"
+    },
+    {
+        "offload": false,
+        "signature": "at::Tensor at::SparseCPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)"
+    },
+    {
+        "offload": false,
+        "signature": "at::Tensor at::SparseCPUType::{anonymous}::dstmm(const at::Tensor&, const at::Tensor&)"
+    }
+]
