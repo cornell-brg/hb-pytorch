@@ -15,7 +15,7 @@ extern "C" {
     int m = other_info[0];
     int n = *(_n);
     int k = *(_k);
-    printf("Size of SpMM is %d x %d x %d\n", m, n, k);
+    // printf("Size of SpMM is %d x %d x %d\n", m, n, k);
 
 
     return 0;
