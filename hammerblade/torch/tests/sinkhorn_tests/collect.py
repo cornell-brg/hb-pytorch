@@ -65,8 +65,8 @@ def parse_tree(log):
         if line.strip().startswith('|- Node'):
             indent, rest = line.split('|-', 1)
             level = len(indent) // 2
-            match = re.search(r'Node\((.*) : (\d+\.\d+)\)', line)
-            sig, tm = match.groups()
+            match = re.search(r'Node\((.*) : (\d+(\.\d+)?)\)', line) #the third group is for the case when decimal is "optionally" present but captured inside the second group
+            sig, tm = match.groups()[0],match.groups()[1]
 
             micros = int(tm.split('.')[0])  # Data reported in microseconds.
 
