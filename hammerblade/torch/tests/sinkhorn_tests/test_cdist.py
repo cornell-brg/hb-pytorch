@@ -15,8 +15,9 @@ DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 TOTAL_DOCS = 5000
 HB_DATA_FRAC = 16
 QUERY_IDX = 100
+COSIM_SCALE = 5 #reduces kernel compute by this factor. Need to scale timings later for 1 pod
 
-n_docs = TOTAL_DOCS // HB_DATA_FRAC
+n_docs = TOTAL_DOCS
 # Load data and run the kernel.
 print('loading data for {} docs'.format(n_docs))
 r, cT, vecs = load_data(n_docs)
@@ -29,12 +30,10 @@ vecs_row, _ = vecs.shape
 
 torch.hammerblade.profiler.enable()
 # #sinkhorn matrix values, x2.size(0) is 16x lesser than orig for weak pod scaling
-# x1 = torch.randn(19,300).hammerblade()
-# x2 = torch.randn((100000//16),300).hammerblade()
 
 x1 = vecs[sel].hammerblade()
-x2 = vecs[:vecs_row//16,:].hammerblade()  #hammerblade weak scaling
-
+x2 = vecs[:(vecs_row//HB_DATA_FRAC)//COSIM_SCALE,:].hammerblade()  #hammerblade weak scaling
+# print(x1.size(),x2.size())
 cdist_h = torch.cdist(x1,x2)
 
 # assert cdist_h.device == torch.device("hammerblade") #might be bad for profiling data!
