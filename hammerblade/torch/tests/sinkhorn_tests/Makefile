@@ -11,7 +11,7 @@ results.csv: $(ALL_LOGS) collect.py
 
 run_%/vanilla_stats.csv: $(APP_SCRIPT)
 	mkdir -p run_$*
-	cd run_$* ; PYTHONPATH=$(PYTORCH_DIR) pycosim ../$(APP_SCRIPT) --hb $* > log.txt
+	cd run_$* ; PYTHONPATH=$(PYTORCH_DIR) pycosim.profile ../$(APP_SCRIPT) --hb $* > log.txt
 
 run_%/manycore_stats.log: run_%/vanilla_stats.csv
 	cd run_$* ; PYTHONPATH=$(MCPY_DIR) python -m vanilla_parser
@@ -23,6 +23,6 @@ cpu_run/log.txt: $(APP_SCRIPT)
 
 cdist: test_cdist.py
 	mkdir -p run_4
-	cd run_4 ; PYTHONPATH=$(PYTORCH_DIR) pycosim ../test_cdist.py > log.txt
+	cd run_4 ; PYTHONPATH=$(PYTORCH_DIR) pycosim.profile ../test_cdist.py > log.txt
 	cd run_4 ; PYTHONPATH=$(MCPY_DIR) python -m vanilla_parser
 	cd run_4 ; mv stats/manycore_stats.log .
