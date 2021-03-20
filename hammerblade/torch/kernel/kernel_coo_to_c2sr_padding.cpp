@@ -66,7 +66,7 @@ extern "C" {
     end = dim;
     // Generate the pointer to the first nnz element of each row in corresponding slot, store into c2sr(0) ~ c2sr(dim - 1)
     for (size_t k = start; k < end; k = k + thread_num) {
-      printf("offset, start and end are %d, %d and %d\n", offset, start, end);
+//      printf("offset, start and end are %d, %d and %d\n", offset, start, end);
       int sum = 0;
       if(k < NUM_OF_SLOTS) {
         sum = 0;
