@@ -105,8 +105,12 @@ Tensor mv_hb_sparse(const SparseTensor& sparse, const Tensor& dense) {
   
   int64_t nnz = sparse._nnz();
   int64_t dim = sparse.size(0);
-  int64_t dim1 = sparse.size(1); 
+  int64_t dim1 = sparse.size(1);
+  //When number of rows less than vcache number...
+  dim1 = dim1 < 32 ? 32 : dim1;
   int64_t estimate = dim * dim1;
+  //Consider the padding. There must be at least 1024 paddings...
+  estimate = estimate + 1024;
  
 
   IntTensor indices = sparse._indices();

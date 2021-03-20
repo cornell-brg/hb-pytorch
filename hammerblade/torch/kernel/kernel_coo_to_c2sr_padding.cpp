@@ -1,5 +1,5 @@
 //=======================================================================
-// Convert COO format sparse matrix to C2SR (Compressed Cyclic Sparse Row) format
+// Convert COO format sparse matrix to CBSR (Cyclic Bank Sparse Row) format
 // 08/12/2020 Zhongyuan Zhao (zz546@cornell.edu)
 //=======================================================================
 
@@ -26,6 +26,12 @@ extern "C" {
     auto c2sr_values = HBTensor<float>(_c2sr_values);
     uint32_t dim = *_dim;
     uint32_t nnz = *_nnz;
+    int *tmp_indices = (int*)c2sr_colindices.data_ptr();
+    float *tmp_values = (float*)c2sr_values.data_ptr();
+    int indices_vcache = ((uintptr_t)tmp_indices / 128) % 32;
+    int values_vcache = ((uintptr_t)tmp_values / 128) % 32;
+    int indices_padding = (NUM_OF_SLOTS - indices_vcache) * CACHE_LINE;
+    int values_padding = (NUM_OF_SLOTS - values_vcache) * CACHE_LINE;
     
     uint32_t num_element = c2sr_values.numel();
     size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
@@ -60,6 +66,7 @@ extern "C" {
     end = dim;
     // Generate the pointer to the first nnz element of each row in corresponding slot, store into c2sr(0) ~ c2sr(dim - 1)
     for (size_t k = start; k < end; k = k + thread_num) {
+      printf("offset, start and end are %d, %d and %d\n", offset, start, end);
       int sum = 0;
       if(k < NUM_OF_SLOTS) {
         sum = 0;
@@ -87,10 +94,12 @@ extern "C" {
       int32_t csr_last = c2sr(l + 1);
       for(int32_t m = c2sr_first, n = csr_first; m < c2sr_last && n < csr_last; m++, n++) {
         int idx = convert_idx(m, dim, l);
-//        printf("Got m is %d, l is %d and idx is %d\n", m, l, idx);
-        c2sr_colindices(idx) = colindices(n);
+        int idx_indices = idx + indices_padding;
+        int idx_values = idx + values_padding;
+//        printf("Got m is %d, n is %d and idx is %d\n", m, n, idx);
+        c2sr_colindices(idx_indices) = colindices(n);
 //        printf("c2sr_colindices(%d) is %d\n", idx, c2sr_colindices(idx));
-        c2sr_values(idx) = values(n);
+        c2sr_values(idx_values) = values(n);
       }
     }  
     
