@@ -30,6 +30,7 @@ extern "C" {
     uint32_t C = input.get_sizes()[1];
 
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     for(size_t c = 0; c < C; ++c) {
 
@@ -53,8 +54,9 @@ extern "C" {
       });
     }
 
-    g_barrier.sync();
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
+    g_barrier.sync();
     return 0;
   }
 
@@ -76,6 +78,7 @@ extern "C" {
 
 
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     for(size_t c = 0; c < C; ++c) {
       float* reduction_buffer = (float*) g_reduction_buffer;
@@ -84,7 +87,7 @@ extern "C" {
       // reduction buffer
       float partial_sum = 0.0;
       hb_tiled_for(N, [&](size_t i) {
-    
+
           size_t n = i % N;
 
           partial_sum += input(n, c);
@@ -137,7 +140,10 @@ extern "C" {
       }
       g_barrier.sync();
     }
+
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
+    g_barrier.sync();
     return 0;
   }
 
@@ -165,6 +171,7 @@ extern "C" {
     uint32_t numel = input.numel() / C;
 
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     for(size_t c = 0; c < C; ++c) {
       float mean, invstd;
@@ -208,7 +215,7 @@ extern "C" {
       // reduction buffer
       partial_sum = 0.0;
       hb_tiled_for(N, [&](size_t i) {
-         
+
           size_t n = (i) % N;
 
           partial_sum += (input(n, c) - mean) * grad_out(n, c);
@@ -276,7 +283,10 @@ extern "C" {
         }
       }
     }
+
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
+    g_barrier.sync();
     return 0;
   }
 
