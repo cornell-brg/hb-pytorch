@@ -22,6 +22,7 @@ extern "C" {
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
 
     // v2: single tile, use blocking
@@ -100,6 +101,7 @@ extern "C" {
         }
     });
     //   End profiling
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();

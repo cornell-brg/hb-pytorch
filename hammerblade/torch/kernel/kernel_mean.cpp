@@ -22,6 +22,7 @@ extern "C" {
     auto ndim = in.ndim();
 
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     uint32_t elements_to_collect =
       calc_elements_per_output(out, in, num_reduction_dim);
@@ -37,6 +38,7 @@ extern "C" {
     binary_reduction(out, in, ndim, num_reduction_dim,
           elements_to_collect, reduce, project);
 
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
