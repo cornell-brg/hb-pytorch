@@ -18,11 +18,16 @@ This work aims to port PyTorch to HammerBlade.
 
  - Create python virtual environment:
 
-       python3.6 -m venv ./venv_pytorch`
+       python3.6 -m venv ./venv_pytorch
 
  - Install dependencies:
+    
+       pip install --upgrade pip
+       pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis thop pillow
 
-       pip install numpy pyyaml mkl mkl-include setuptools cmake cffi typing sklearn tqdm pytest ninja hypothesis thop
+ - Remove automatically installed PyTorch:
+       
+       pip uninstall torch
 
  - Init pytorch third party dependencies:
 
