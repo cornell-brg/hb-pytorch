@@ -102,8 +102,8 @@ This work aims to port PyTorch to HammerBlade.
 
 - Setup emulated HB device size
 
-      export HBEMUL_TILE_X_DIM=2
-      export HBEMUL_TILE_Y_DIM=2
+      export HBEMUL_TILE_X_DIM=16
+      export HBEMUL_TILE_Y_DIM=8
 
 [venv]: https://docs.python.org/3/tutorial/venv.html
 
