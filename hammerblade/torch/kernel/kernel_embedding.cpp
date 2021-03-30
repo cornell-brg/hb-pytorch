@@ -36,6 +36,7 @@ extern "C" {
     const uint32_t  weight_s0 =  weight.get_strides()[0];
 
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     for (size_t idx = bsg_id; idx < batch_size; idx += (BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM)) {
       if (idx < batch_size) {
@@ -64,6 +65,7 @@ extern "C" {
       }
     }
 
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
     g_barrier.sync();
     return 0;
