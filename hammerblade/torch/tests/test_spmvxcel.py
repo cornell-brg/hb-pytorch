@@ -22,7 +22,7 @@ def test_spmv_1():
     coo_sp = read_sparse_matrix(csr_sp)
     coo_sp = coo_sp.coalesce()
     t = time()
-    cpu_c2sr = coo_sp.convert_format()
+    cpu_c2sr = coo_sp.to_spmvxf()
     torch.set_printoptions(profile='full')
     print(cpu_c2sr)
     convert_time = time() - t
@@ -43,7 +43,7 @@ def test_spmv_1():
     hb_v = cpu_v.hammerblade()
 #    torch.hb_trace_enable()
 #    torch.hammerblade.profiler.enable()
-    hb_out = torch.mv_xcel(hb_c2sr, hb_v)
+    hb_out = torch.spmvx(hb_c2sr, hb_v)
 #    torch.hammerblade.profiler.disable()
 #    torch.hb_trace_disable()
     cpu_out1 = hb_out.to("cpu")
