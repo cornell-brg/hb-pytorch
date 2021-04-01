@@ -15,7 +15,7 @@ DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 TOTAL_DOCS = 5000
 HB_DATA_FRAC = 16
 QUERY_IDX = 100
-COSIM_SCALE = 5 #reduces kernel compute by this factor. Need to scale timings later for 1 pod
+COSIM_SCALE = 1 #reduces kernel compute by this factor. Need to scale timings later for 1 pod
 
 n_docs = TOTAL_DOCS
 # Load data and run the kernel.
