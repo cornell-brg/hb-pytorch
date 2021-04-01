@@ -29,6 +29,11 @@ void index_kernel_hb(TensorIterator& iter, IntArrayRef index_size, IntArrayRef i
   std::vector<eva_t> device_ptrs;
   for(int i = 0; i < iter.ntensors(); i++) { 
     Tensor& t = iter.tensor(i);
+    if(i < iter.noutputs() && t.dtype() == at::kInt) {
+      std::cout << "The data type of the output tensor is int" << std::endl;
+    } else if(i < iter.noutputs() && t.dtype() == at::kLong) {
+      std::cout << "The data type of the output tensor is long" << std::endl;
+    }
     if(i > iter.noutputs() && t.dtype() == at::kLong) {
 //      std::cout << "Convert data type" << std::endl;
       t.to(at::kInt);
