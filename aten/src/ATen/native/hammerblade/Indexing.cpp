@@ -27,7 +27,8 @@ void index_kernel_hb(TensorIterator& iter, IntArrayRef index_size, IntArrayRef i
   IntArrayRef shapes = iter.shape();
   std::vector<eva_t> device_args;
   std::vector<eva_t> device_ptrs;
-  for(int i = 0; i < iter.ntensors(); i++) { 
+//  std::cout << "Number of tensors is " << iter.ntensors();
+  for(int i = 0; i < iter.ntensors(); i++) {
     Tensor& t = iter.tensor(i);
     if(i > iter.noutputs() && t.dtype() == at::kLong) {
 //      std::cout << "Convert data type" << std::endl;
