@@ -46,11 +46,15 @@ static void checkIndexTensorTypes(TensorList indices) {
       auto scalarType = tensor.scalar_type();
       auto device = tensor.type().device_type();
       if (device != kHAMMERBLADE && scalarType != kLong && scalarType != kByte && scalarType != kBool) {
+        if(scalarType == kInt) {
+          tensor.to(at::kLong);
+        } else{
           AT_INDEX_ERROR("tensors used as indices must be long, byte or bool tensors");
+        }
       }
-      else if(device == kHAMMERBLADE && scalarType != kInt) {
-        tensor.to(at::kInt);
-      }
+//      else if(device == kHAMMERBLADE && scalarType != kInt) {
+//        tensor.to(at::kInt);
+//      }
     }
   }
 }
