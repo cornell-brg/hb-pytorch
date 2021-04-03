@@ -42,8 +42,6 @@ extern "C" {
 //    uint32_t tag2 = 2;
     int32_t offset = dim + 1;
 
-    bsg_cuda_print_stat_kernel_start();
-    bsg_cuda_print_stat_start(tag0);
     if(__bsg_id == 0) {
       c2sr(0) = 0;
     }
@@ -59,9 +57,7 @@ extern "C" {
     }
     
     g_barrier.sync();
-//    bsg_cuda_print_stat_end(tag0);
 
-//    bsg_cuda_print_stat_start(tag1); 
     //Generate nnz of each row, store into c2sr(dim + 1) ~ c2sr(2 * dim)
     end = dim;
     // Generate the pointer to the first nnz element of each row in corresponding slot, store into c2sr(0) ~ c2sr(dim - 1)
@@ -103,9 +99,7 @@ extern "C" {
       }
     }  
     
-//    printf("successful finish coo_to_c2sr");
-    bsg_cuda_print_stat_end(tag0);
-    bsg_cuda_print_stat_kernel_end();   
+//    printf("successful finish coo_to_c2sr"); 
     g_barrier.sync();
     return 0;
   }

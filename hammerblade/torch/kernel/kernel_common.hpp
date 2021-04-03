@@ -19,7 +19,7 @@
 #define bsg_saif_end()
 #else
 #define BSG_TILE_GROUP_X_DIM bsg_global_X
-#define BSG_TILE_GROUP_Y_DIM bsg_global_Y
+#define BSG_TILE_GROUP_Y_DIM bsg_global_Y 
 #define bsg_tiles_X BSG_TILE_GROUP_X_DIM
 #define bsg_tiles_Y BSG_TILE_GROUP_Y_DIM
 //Macros for triggering saif generation

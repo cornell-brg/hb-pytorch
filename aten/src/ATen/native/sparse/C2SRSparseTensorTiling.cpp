@@ -32,7 +32,8 @@ Tensor to_spmvxcel_format_cpu(const Tensor& self) {
   TORCH_CHECK(self.dim() == 2, "2D matrix expected, got ", self.dim(), " tensor");
   auto indices = self._indices();
   auto values  = self.values();
-  auto int_indices = indices.to(kInt);
+  auto row_indices = indices.select(0, 0).to(kInt);
+  auto col_indices = indices.select(0, 1).to(kInt);
   auto int_values = values.to(kInt);
   
   const uint32_t cacheline_word = CACHELINE_BYTE / 4;
@@ -42,9 +43,9 @@ Tensor to_spmvxcel_format_cpu(const Tensor& self) {
   int32_t row = (int32_t)self.size(0);
   int32_t col = (int32_t)self.size(1);
   int32_t nnz = (int32_t)self._nnz();
-  IntTensor csr = to_csr(int_indices.data_ptr<int32_t>(), row, nnz);
+  IntTensor csr = to_csr(row_indices.data_ptr<int32_t>(), row, nnz);
   int32_t* csr_ptr = csr.data_ptr<int32_t>();
-  int32_t* csr_idx = int_indices.data_ptr<int32_t>();
+  int32_t* csr_idx = col_indices.data_ptr<int32_t>();
   int32_t* csr_val = int_values.data_ptr<int32_t>();
 
   int32_t num_tile_x = std::ceil((float)col / (float)TILE_X_SIZE);
@@ -217,15 +218,16 @@ Tensor to_spmmxcel_format_cpu(const Tensor& self) {
   TORCH_CHECK(self.dim() == 2, "2D matrix expected, got ", self.dim(), " tensor");
   auto indices = self._indices();
   auto values  = self.values();
-  auto int_indices = indices.to(kInt);
+  auto row_indices = indices.select(0, 0).to(kInt);
+  auto col_indices = indices.select(0, 1).to(kInt);
   auto int_values = values.to(kInt);
 
   int32_t row = (int32_t)self.size(0);
   int32_t col = (int32_t)self.size(1);
   int32_t nnz = (int32_t)self._nnz();  
-  IntTensor csr = to_csr(int_indices.data_ptr<int32_t>(), row, nnz);
+  IntTensor csr = to_csr(row_indices.data_ptr<int32_t>(), row, nnz);
   int32_t* csr_ptr = csr.data_ptr<int32_t>();
-  int32_t* csr_idx = int_indices.data_ptr<int32_t>();
+  int32_t* csr_idx = col_indices.data_ptr<int32_t>();
   int32_t* csr_val = int_values.data_ptr<int32_t>();
   int32_t cacheline_word = CACHELINE_BYTE / 4;
   const uint32_t cacheline_log  = std::log(CACHELINE_BYTE) / std::log(2);

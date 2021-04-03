@@ -30,7 +30,6 @@ extern "C" {
 //    bsg_printf("Thread number is %d\n", thread_num);
     size_t start = __bsg_id;
     size_t end = m;
-    uint32_t tag = 1;
 
     int indices_vcache = ((uintptr_t)tmp_indices / 128) % 32;
     int values_vcache = ((uintptr_t)tmp_values / 128) % 32;
@@ -41,7 +40,6 @@ extern "C" {
 //    }   
  
     bsg_cuda_print_stat_kernel_start();
-    bsg_cuda_print_stat_start(tag);
 //    bsg_printf("Tile %d is working\n", __bsg_id);
 //    if(__bsg_id == 0) {
     for (uint32_t i = start; i < end; i = i + thread_num) {
@@ -110,7 +108,6 @@ extern "C" {
     }
 //    }
 //    bsg_printf("Row %d finish computing !\n", i);
-    bsg_cuda_print_stat_end(tag);
     bsg_cuda_print_stat_kernel_end();
     g_barrier.sync();
     return 0;

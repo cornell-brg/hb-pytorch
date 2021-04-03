@@ -21,6 +21,8 @@ def test_customized_spmv():
     hb_xr = torch.mv(hb_xs, hb_xv)
     
     cpu_r = hb_xr.cpu()
+    print(xr)
+    print(cpu_r)
     assert hb_xr.device == torch.device("hammerblade")
     assert torch.allclose(cpu_r, xr)
 
