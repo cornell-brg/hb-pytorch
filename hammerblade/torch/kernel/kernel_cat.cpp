@@ -1,10 +1,10 @@
 //====================================================================
 // _cat kernel
 //====================================================================
-// simple _cat kernel only works with 0 dim
+// _cat kernel support cat on any dim
 //
-// Authors : Lin Cheng, Janice Wei
-// Date    : 07/29/2020, 08/04/2020
+// Authors : Zhongyuan Zhao
+// Date    : 03/01/2021
 
 #include <kernel_common.hpp>
 
@@ -39,6 +39,7 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
   int offset = 0;
   
   bsg_cuda_print_stat_kernel_start();
+
   int offset_strides = 0;
   for(int j = 0; j < length; j++) {
     HBTensor<float> input(tensors_p[j]);
