@@ -6,6 +6,7 @@
 // Authors : Zhongyuan Zhao
 // Date    : 03/01/2021
 
+#define BUF_SIZE 16
 #include <kernel_common.hpp>
 
 extern "C" {
@@ -20,24 +21,16 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
                     uint32_t* length_p, int32_t* dim_p)
 {
   HBTensor<float> result(result_p);
-  float* result_data = (float*)result.data_ptr();
   uint32_t length = *length_p;
+  hb_assert(length <= BUF_SIZE);
   int32_t dim = *dim_p;
-  
-  int outer = 1;
-  int inner = 1;
+  int32_t arr[BUF_SIZE];
 
-  for(int i = 0; i < dim; i++) {
-    outer *= result.dim(i);
+  // collect tensors' size
+  for(size_t i = 0; i < length; i++) {
+    HBTensor<float> tensor(tensors_p[i]);
+    arr[i] = tensor.numel();
   }
-
-  for(int i = dim + 1; i < result.ndim(); i++) {
-    inner *= result.dim(i);
-  }
-
-  size_t num_threads = bsg_tiles_X * bsg_tiles_Y;
-  int offset = 0;
-  
   bsg_cuda_print_stat_kernel_start();
 
   int offset_strides = 0;
@@ -47,31 +40,21 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
     offset_strides += local_inner;
   }
 
-  for(int o = __bsg_id; o < outer; o = o + num_threads) {
-    offset = o * offset_strides;
-    for(int j = 0; j < length; j++) {
-      HBTensor<float> input(tensors_p[j]);
-      float *input_data = (float*)input.data_ptr();
-      int local_inner = inner * input.dim(dim);
-      float *result_ptr = result_data + offset;
-      float *input_ptr = input_data + o * local_inner;
-      int idx = 0;
-      for(; idx <= local_inner - 8; idx++) {
-        *(result_ptr + idx) = *(input_ptr + idx);
-        *(result_ptr + idx + 1) = *(input_ptr + idx + 1);
-        *(result_ptr + idx + 2) = *(input_ptr + idx + 2);
-        *(result_ptr + idx + 3) = *(input_ptr + idx + 3);
-        *(result_ptr + idx + 4) = *(input_ptr + idx + 4);
-        *(result_ptr + idx + 5) = *(input_ptr + idx + 5);
-        *(result_ptr + idx + 6) = *(input_ptr + idx + 6);
-        *(result_ptr + idx + 7) = *(input_ptr + idx + 7);
-      }
-      for(; idx < local_inner; idx++) {
-        *(result_ptr + idx) = *(input_ptr + idx);
-      }
-      offset += local_inner;
+  hb_tiled_for(result.numel(), [&] (int32_t i) {
+    int32_t j = 0;
+    int32_t index = 0;
+    int32_t size = arr[0];
+    while (i >= size) {
+      index = i - size;
+      j++;
+      size += arr[j];
     }
-  }
+    if (j == 0) {
+      index = i;
+    }
+    HBTensor<float> t(tensors_p[j]);
+    result(i) = t(index);
+  });
 
   bsg_cuda_print_stat_kernel_end();
   g_barrier.sync();
