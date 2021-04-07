@@ -7,6 +7,11 @@ import json
 
 from test_sinkhorn import load_data
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--cosim_scale",type=int,default=1,help="reduces kernel compute by this factor. Need to scale timings later for 1 pod")
+args = parser.parse_args()
+
 # Data files. (Ask Adrian for these.)
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'sinkhorn_wmd-data')
 DATA_MAT = os.path.join(DATA_DIR, 'cache-mat.npz')
@@ -15,7 +20,7 @@ DATA_VECS = os.path.join(DATA_DIR, 'cache-vecs.npy')
 TOTAL_DOCS = 5000
 HB_DATA_FRAC = 16
 QUERY_IDX = 100
-COSIM_SCALE = 1 #reduces kernel compute by this factor. Need to scale timings later for 1 pod
+COSIM_SCALE = args.cosim_scale #10
 
 n_docs = TOTAL_DOCS
 # Load data and run the kernel.
