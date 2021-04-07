@@ -23,6 +23,7 @@ extern "C" {
           ) { 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     auto row_indices = HBTensor<int>(row_inds_p);
     auto col_indices = HBTensor<int>(col_inds_p);
@@ -47,6 +48,7 @@ extern "C" {
     });
 
     //   End profiling
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();

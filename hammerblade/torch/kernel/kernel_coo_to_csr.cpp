@@ -24,6 +24,7 @@ extern "C" {
     uint32_t tag = 0;
 
     bsg_cuda_print_stat_start(tag);
+    bsg_saif_start();
     if(__bsg_id == 0) {
       csr(0) = 0;
     }
@@ -37,6 +38,7 @@ extern "C" {
       }
     }
 
+    bsg_saif_end();
     bsg_cuda_print_stat_end(tag);   
     g_barrier.sync();
     return 0;
