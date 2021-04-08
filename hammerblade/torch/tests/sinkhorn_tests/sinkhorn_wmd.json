@@ -9,6 +9,10 @@
     },
     {
         "offload": false,
+        "signature": "at::Tensor at::SparseCPUType::{anonymous}::mul(const at::Tensor&, const at::Tensor&)"
+    },
+    {
+        "offload": false,
         "signature": "at::Tensor at::SparseCPUType::{anonymous}::mm(const at::Tensor&, const at::Tensor&)"
     },
     {

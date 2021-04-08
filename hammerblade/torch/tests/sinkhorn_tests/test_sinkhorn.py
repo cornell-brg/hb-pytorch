@@ -191,7 +191,8 @@ def sinkhorn_test():
             # Set up a "chart" "beacon" (?).
             torch.hammerblade.profiler.chart.add(kernel['signature'])
 
-        new_data = route_data[:3]*N_ITERS+[route_data[-1]]
+        new_data = route_data[:4]*N_ITERS+[route_data[-1]]
+        print(new_data)
         torch.hammerblade.profiler.route.set_route_from_json(new_data)
 
     # Set the size of the run. Use TOTAL_DOCS/data_fraction of the data.
