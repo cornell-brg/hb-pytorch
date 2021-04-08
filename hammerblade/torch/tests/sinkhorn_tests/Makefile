@@ -10,12 +10,12 @@ ALL_SAIF := $(KERNELS:%=saif_%/run.saif.gz)
 results.csv: $(ALL_LOGS) collect.py $(ALL_SAIF)
 	python collect.py > $@
 
-# run_4/vanilla_stats.csv: APP_SCRIPT=test_cdist
+# run_5/vanilla_stats.csv: APP_SCRIPT=test_cdist
 run_%/vanilla_stats.csv: $(APP_SCRIPT)
 	mkdir -p run_$*
 	cd run_$* ; PYTHONPATH=$(PYTORCH_DIR) pycosim.profile ../$(APP_SCRIPT) --hb $* > log.txt
 
-# saif_4/run.saif: APP_SCRIPT=test_cdist
+# saif_5/run.saif: APP_SCRIPT=test_cdist
 saif_%/run.saif: $(APP_SCRIPT)
 	mkdir -p saif_$*
 	cd saif_$* ; PYTHONPATH=$(PYTORCH_DIR) pycosim.saif ../$(APP_SCRIPT) --hb $* > log.txt
@@ -31,15 +31,15 @@ cpu_run/log.txt: $(APP_SCRIPT)
 	mkdir -p cpu_run
 	cd cpu_run ; PYTHONPATH=$(PYTORCH_DIR) python ../$(APP_SCRIPT) > log.txt
 
-cdist: run_4/manycore_stats.log saif_4/run.saif
-	cd saif_4 ; gzip run.saif
+cdist: run_5/manycore_stats.log saif_5/run.saif
 	
 run_5/manycore_stats.log: test_cdist.py
-	mkdir -p run_4
-	cd run_4 ; PYTHONPATH=$(PYTORCH_DIR) pycosim.profile ../test_cdist.py > log.txt
-	cd run_4 ; PYTHONPATH=$(MCPY_DIR) python -m vanilla_parser
-	cd run_4 ; mv stats/manycore_stats.log .
+	mkdir -p run_5
+	cd run_5 ; PYTHONPATH=$(PYTORCH_DIR) pycosim.profile ../test_cdist.py > log.txt
+	cd run_5 ; PYTHONPATH=$(MCPY_DIR) python -m vanilla_parser
+	cd run_5 ; mv stats/manycore_stats.log .
 
 saif_5/run.saif: test_cdist.py
-	mkdir -p saif_4
-	cd saif_4 ; PYTHONPATH=$(PYTORCH_DIR) pycosim.saif ../test_cdist.py --cosim_scale 10 > log.txt
+	mkdir -p saif_5
+	cd saif_5 ; PYTHONPATH=$(PYTORCH_DIR) pycosim.saif ../test_cdist.py --cosim_scale 10 > log.txt
+	cd saif_5 ; gzip run.saif
