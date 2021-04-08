@@ -23,6 +23,7 @@ extern "C" {
     float value = *value_p;
 
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     hb_tiled_foreach(
       [value](float input_val, float tensor1_val, float tensor2_val) {
@@ -30,6 +31,7 @@ extern "C" {
       },
       res, input, tensor1, tensor2);
 
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();

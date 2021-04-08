@@ -72,7 +72,7 @@ extern "C" {
         bsg_printf("First pe_id is %d\n", pe_id);
         for(int pe_index = 0; pe_index < num_pe; pe_index++) {
           bsg_printf("The xcel with pe_id %d is working\n", pe_id);
-          bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(24 + (pe_id % (num_pe/8)), 8 + (pe_id / (num_pe/8)), 0);
+          bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(30 + (pe_id % (num_pe/8)), 8 + (pe_id / (num_pe/8)), 0);
           pe_id = (pe_id + 1) % num_pe;
           int out_ptr = (unsigned)result + pe_index * cacheline_byte + ((i * tile_y_size / num_pe * 4) / cacheline_byte) 
                       * cacheline_byte * num_pe + ((i * tile_y_size / num_pe * 4) % cacheline_byte);
@@ -93,7 +93,7 @@ extern "C" {
         for(int j = 0; j < num_tile_x; j++) {
           pe_id = init_index;
           for(int pe_index = 0; pe_index < num_pe; pe_index++) {
-            bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(pe_id % num_pe, 9 + pe_id / num_pe, 0);
+            bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(30 + (pe_id % (num_pe/8)), 8 + (pe_id / (num_pe/8)), 0);
             pe_id = (pe_id + 1) % num_pe;
             xcel_csr_base_ptr[CSR_PTR_A] = (unsigned)c2sr_m + record_accumulate; 
             xcel_csr_base_ptr[CSR_GO] = 1;
@@ -104,7 +104,7 @@ extern "C" {
       
       pe_id = init_index;
       for(int pe_index = 0; pe_index < num_pe; pe_index++) {
-        bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(pe_id % num_pe, 9 + pe_id / num_pe, 0);
+        bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(30 + (pe_id % (num_pe/8)), 8 + (pe_id / (num_pe/8)), 0);
         pe_id = (pe_id + 1) % num_pe;
       }
     }

@@ -14,7 +14,12 @@ namespace at { namespace native {
 
 Tensor xcelspmm_hb(const Tensor &self, const Tensor &dense_matrix) {
   TORCH_CHECK(self.dim() == 1, "1D matrix expected, got dim ", self.dim(), " tensor");
-  Tensor int_matrix = dense_matrix.to(at::kInt);
+  Tensor int_matrix;
+  if(!(dense_matrix.dtype() == at::kInt)) {
+    int_matrix = dense_matrix.to(at::kInt);
+  } else {
+    int_matrix = dense_matrix;
+  }
   TORCH_CHECK(int_matrix.dtype() == at::kInt, "Dense vector should be int !");
   int64_t tensor_size = self.size(0);
   std::vector<int64_t> split_sizes(2);

@@ -148,7 +148,10 @@ __attribute__ ((noinline)) int tensorlib_indexing_1d(
   int* ptrs[3] = {out, src, index1};
   int values[ndim];
   calculate_values(values, ndim, out_sizes);
+
   bsg_cuda_print_stat_kernel_start();
+  bsg_saif_start();
+
   if(ndim <= 1) {
     get_data_ptrs(ptrs, values, kernel_strides, ndim, 3);
     compute_core(ptrs, kernel_strides, index_sizes, index_strides, 3, out_numel, 1);
@@ -161,6 +164,8 @@ __attribute__ ((noinline)) int tensorlib_indexing_1d(
       increment(step, offset, shapes, ndim, values);
     }
   }
+
+  bsg_saif_end();
   bsg_cuda_print_stat_kernel_end();
   g_barrier.sync();
   return 0;

@@ -36,6 +36,8 @@ extern "C" {
     uint32_t out_ptr[NUM_PE];
    
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
+
     if(tile_id < 128) {
       for(int i = tile_id; i < m; i = i + thread_num) {
         for(int j = 0; j < k; j++) {
@@ -49,6 +51,8 @@ extern "C" {
         }
       }
     }
+
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
     g_barrier.sync();
 

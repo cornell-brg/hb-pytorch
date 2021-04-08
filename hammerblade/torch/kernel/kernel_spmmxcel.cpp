@@ -51,7 +51,7 @@ extern "C" {
       bsg_printf("init_index is %d\n", init_index);
       pe_id = init_index;
       for(unsigned pe_index = 0; pe_index < num_pe_test; pe_index++) {
-        bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(14 + (pe_id%(NUM_PE/8)), (2 + (pe_id/ (NUM_PE/8))), 0);
+        bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(30 + (pe_id%(NUM_PE/8)), (8 + (pe_id/ (NUM_PE/8))), 0);
 //        bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(14, 2, 0);
         pe_id = (pe_id + 1) % NUM_PE;
         int out_ptr = (int)result + pe_index * CACHELINE_BYTE;
@@ -75,7 +75,7 @@ extern "C" {
       pe_id = init_index;
 
       for(int pe_index = 0; pe_index < num_pe_test; pe_index++) {
-        bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(14 + (pe_id%(NUM_PE/8)), (2 + (pe_id/(NUM_PE/8))), 0);
+        bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(30 + (pe_id%(NUM_PE/8)), (8 + (pe_id/(NUM_PE/8))), 0);
 //        bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(14, 2, 0);
         int temp = xcel_csr_base_ptr[CSR_RETURN];
         pe_id = (pe_id + 1) % NUM_PE;

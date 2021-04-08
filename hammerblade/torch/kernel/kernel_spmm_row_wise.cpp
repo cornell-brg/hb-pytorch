@@ -30,7 +30,10 @@ extern "C" {
     size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
     size_t start = __bsg_id;
     size_t end = m;
+
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
+
     float tmp_out[OUTPUT_BUF_SIZE];
 //    int num_iter = std::ceil((float)OUTPUT_BUF_SIZE / (float)n);   
     for (int32_t i = start; i < end; i = i + thread_num) {
@@ -86,6 +89,7 @@ extern "C" {
       }        
     }  
 
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
     g_barrier.sync();
     return 0;

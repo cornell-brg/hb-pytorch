@@ -40,6 +40,7 @@ extern "C" {
 //    }   
  
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 //    bsg_printf("Tile %d is working\n", __bsg_id);
 //    if(__bsg_id == 0) {
     for (uint32_t i = start; i < end; i = i + thread_num) {
@@ -108,6 +109,8 @@ extern "C" {
     }
 //    }
 //    bsg_printf("Row %d finish computing !\n", i);
+
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
     g_barrier.sync();
     return 0;

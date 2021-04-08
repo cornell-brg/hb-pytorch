@@ -17,6 +17,7 @@ extern "C" {
     auto b = HBTensor<float>(other);
 
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     hb_tiled_foreach(
       [&](float a, float b) {
@@ -24,6 +25,7 @@ extern "C" {
     }, 
     c, a, b);
 
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();

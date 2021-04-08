@@ -16,11 +16,14 @@ extern "C" {
     auto self = HBTensor<int32_t>(_self);
     std::default_random_engine generator;
     generator.seed(seed + __bsg_id);
+
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
     hb_tiled_for(self.numel(), [&](size_t i) {
       self(i) = (int32_t)(generator() % (INT32_MAX + 1UL));
     });
 
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
     g_barrier.sync();
     return 0;

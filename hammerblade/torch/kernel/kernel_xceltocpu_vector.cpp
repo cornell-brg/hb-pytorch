@@ -19,14 +19,17 @@ extern "C" {
     uint32_t n = result.numel();
     uint32_t cacheline_word = CACHELINE_BYTE / 4;
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
     for(uint32_t i = __bsg_id; i < n; i = i + thread_num) {
       uint32_t index = i % NUM_PE;
       uint32_t offset = i / NUM_PE;
       uint32_t addr = index * cacheline_word + (offset / cacheline_word) * cacheline_word * NUM_PE + (offset % cacheline_word);
       r[i] = xcel[addr];
     }
-    g_barrier.sync();
+
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
+    g_barrier.sync();
     return 0;
   }
   HB_EMUL_REG_KERNEL(tensorlib_xceltocpu_vector, hb_tensor_t*, hb_tensor_t*)

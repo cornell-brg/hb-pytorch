@@ -14,7 +14,12 @@ namespace at { namespace native {
 
 Tensor xcelspmv_hb(const Tensor &self, const Tensor &dense_vector) {
   TORCH_CHECK(self.dim() == 1, "1D matrix expected, got dim ", self.dim(), " tensor");
-  Tensor int_vector = dense_vector.to(at::kInt);
+  Tensor int_vector;
+  if (!(dense_vector.dtype() == at::kInt)) {
+    int_vector = dense_vector.to(at::kInt);
+  } else {
+    int_vector = dense_vector;
+  }
   TORCH_CHECK(int_vector.dtype() == at::kInt, "Dense vector should be int !");
   TORCH_CHECK(self.dtype() == at::kInt, "C2SR should be int !");
   int64_t tensor_size = self.size(0);

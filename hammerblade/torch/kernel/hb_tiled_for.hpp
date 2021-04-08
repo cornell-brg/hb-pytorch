@@ -44,7 +44,12 @@ typedef struct hb_range {
 inline void calc_range(hb_range* range, size_t numel,
                        size_t tg_size = bsg_tiles_X * bsg_tiles_Y) {
   // per pod chunk
-  size_t len_per_pod  = numel / BSG_POD_DIM + 1;
+  size_t len_per_pod  = 0;
+  if (numel % BSG_POD_DIM == 0) {
+    len_per_pod  = numel / BSG_POD_DIM;
+  } else {
+    len_per_pod  = numel / BSG_POD_DIM + 1;
+  }
   // chunk range
   size_t pod_start    = len_per_pod * __bsg_pod_id;
   size_t pod_end      = pod_start + len_per_pod;
@@ -58,7 +63,12 @@ inline void calc_range(hb_range* range, size_t numel,
 
   // per tile range within a pod
   size_t tile_id = __bsg_id % tg_size;
-  size_t len_per_tile = pod_size / tg_size + 1;
+  size_t len_per_tile = 0;
+  if (pod_size % tg_size == 0) {
+    len_per_tile = pod_size / tg_size;
+  } else {
+    len_per_tile = pod_size / tg_size + 1;
+  }
   size_t start        = len_per_tile * tile_id;
   size_t end          = start + len_per_tile;
   end = (end > pod_size) ? pod_size : end;

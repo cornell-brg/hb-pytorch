@@ -45,6 +45,8 @@ extern "C" {
     }
 
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
+
 //      bsg_printf("(%d, %d) is working and max_region_b is %d\n", bsg_y, bsg_x, max_region_b);
 //      bsg_printf("n and k are %d, %d\n", row, col);
     if(tile_id < 128) {
@@ -62,6 +64,7 @@ extern "C" {
       }
     } 
 
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
     g_barrier.sync();
 

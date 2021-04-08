@@ -18,7 +18,7 @@ def read_sparse_matrix(csr_sp):
     return t
 
 def test_spmmxcel():
-    csr_sp = sparse.load_npz('sinkhorn_csr_float32.npz')
+    csr_sp = sparse.load_npz('cora_csr_float32.npz')
     coo_sp = read_sparse_matrix(csr_sp)
     coo_sp = coo_sp.coalesce()
     t = time()
@@ -35,7 +35,7 @@ def test_spmmxcel():
 #    v2 = torch.rand(col)
 #    cpu_v = (v1 + v2) * v2
 #    cpu_int = cpu_v.int()
-    cpu_float = torch.randn(100000, 19) * 10
+    cpu_float = torch.randn(2708, 19) * 10
     cpu_int = cpu_float.int()
 #    cpu_out = torch.mm(coo_sp, cpu_int)
 #    print(cpu_out)

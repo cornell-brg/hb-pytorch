@@ -97,7 +97,8 @@ def swmd_torch(r, cT, vecs, niters):
     K_div_r = K / r
     K_T = K.T
     K_div_r_T = K_div_r.T
-
+    
+    
     for it in range(niters):
         print('starting iteration {}'.format(it))
 
@@ -109,6 +110,8 @@ def swmd_torch(r, cT, vecs, niters):
         # v = c * (1.0 / torch.sddtmm(c, K_T, uT)
         # vT = cT * 1.0 / torch.sddtmm(cT, uT, K_T)
         vT = cT * torch.sreciprocal_(torch.sddtmm(cT, uT, K_T))
+        xcel_vT = vT.cpu().to_spmvxf()
+        xcel_vT 
         # vT = cT * torch.sreciprocal_(_sddmm(cT, uT, K))
         # vT = _sddmm_special(cT,uT,K,lambda x:1.0/x)
         # sddtmm_flops = 2*uT.size()[1]*len(cT.values())
