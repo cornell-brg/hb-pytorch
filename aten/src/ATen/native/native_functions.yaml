@@ -1924,6 +1924,7 @@
     SparseCPU: mul_sparse
     SparseCUDA: mul_sparse
     MkldnnCPU: mkldnn_mul
+    SparseHammerBlade: mul_sparse_hb
   supports_named_tensor: True
 
 - func: mul_.Tensor(Tensor(a!) self, Tensor other) -> Tensor(a!)
