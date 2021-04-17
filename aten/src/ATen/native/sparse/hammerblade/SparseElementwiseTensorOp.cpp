@@ -41,12 +41,70 @@ Tensor& add_out_dense_sparse_hb(Tensor& r, const Tensor& dense, const SparseTens
   return r;
 }
 
+SparseTensor& add_out_sparse_sparse_hb(SparseTensor& r, const SparseTensor& t, const SparseTensor& src, Scalar value){
+  AT_ASSERT(t.is_sparse());
+  AT_ASSERT(src.is_sparse());
+  TORCH_CHECK(t.is_hammerblade(), "add: expected 't' to be a HAMMERBLADE tensor, but got a CPU tensor");
+  TORCH_CHECK(src.is_hammerblade(), "add: expected 'src' to be a HAMMERBLADE tensor, but got a CPU tensor");
+  TORCH_CHECK(r.is_hammerblade(), "add: expected 'out' to be a HAMMERBLADE tensor, but got a CPU tensor");
+  TORCH_CHECK(t.sparse_dim() == t.dim(), "add: expected 't' to be a full dimension sparse tensor");
+  TORCH_CHECK(t.sparse_dim() == src.dim(), "add: expected 'src' to be a full dimension sparse tensor");
+  TORCH_CHECK(t.sizes().equals(src.sizes()), "add: expected sizes of 't' and 'src' to match, but ", t.sizes(), " != ", src.sizes());
+  int64_t t_nnz = t._nnz(), s_nnz = src._nnz(), max_nnz = t_nnz + s_nnz;
+  bool t_coalesced = t.is_coalesced(), s_coalesced = src.is_coalesced();
+  LongTensor t_indices = t._indices();
+  Tensor t_values = t._values();
+  LongTensor src_indices = src._indices();
+  Tensor src_values = src._values();
+  r.resize_as_(src);
+  LongTensor r_indices = at::empty({t.dim(), max_nnz}, t_indices.options());
+  Tensor r_values = new_values_with_size_of(src_values, max_nnz).zero_();
+  Tensor hb_resultNnz = at::empty({1}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
+  get_sparse_impl(r)->set_indices_and_values_unsafe(r_indices, r_values);
+  using scalar_t = float;
+  hb_offload_kernel(r_indices, r_values,  t_indices, t_values, src_indices, src_values, hb_resultNnz, value.to<scalar_t>(), "tensorlib_sparse_add_out_dense");
+  IntTensor cpu_intresultNnz = at::empty({1}, CPU(kInt));
+  cpu_intresultNnz.copy_(hb_resultNnz);
+  LongTensor cpu_resultNnz = cpu_intresultNnz.to(kLong);
+  get_sparse_impl(r) ->set_nnz_and_narrow(cpu_resultNnz.accessor<int64_t, 1>()[0]); 
+  return r._coalesced_(t_coalesced && s_coalesced);
+}
+
+SparseTensor& mul_out_sparse_hb(SparseTensor& r, const SparseTensor& t, const SparseTensor& src){
+  AT_ASSERT(t.is_sparse());
+  AT_ASSERT(src.is_sparse());
+  TORCH_CHECK(t.is_hammerblade(), "mul: expected 't' to be a HAMMERBLADE tensor, but got a CPU tensor");
+  TORCH_CHECK(src.is_hammerblade(), "mul: expected 'src' to be a HAMMERBLADE tensor, but got a CPU tensor");
+  TORCH_CHECK(r.is_hammerblade(), "mul: expected 'out' to be a HAMMERBLADE tensor, but got a CPU tensor");
+  TORCH_CHECK(t.sparse_dim() == t.dim(), "mul: expected 't' to be a full dimension sparse tensor");
+  TORCH_CHECK(t.sparse_dim() == src.dim(), "mul: expected 'src' to be a full dimension sparse tensor");
+  TORCH_CHECK(t.sizes().equals(src.sizes()), "mul: expected sizes of 't' and 'src' to match, but ", t.sizes(), " != ", src.sizes());
+  int64_t t_nnz = t._nnz(), s_nnz = src._nnz();
+  int64_t max_nnz = std::min(t_nnz, s_nnz);
+  bool t_coalesced = t.is_coalesced(), s_coalesced = src.is_coalesced();
+  LongTensor t_indices = t._indices();
+  Tensor t_values = t._values();
+  LongTensor src_indices = src._indices();
+  Tensor src_values = src._values();
+  r.resize_as_(src);
+  LongTensor r_indices = at::empty({t.dim(), max_nnz}, t_indices.options());
+  Tensor r_values = new_values_with_size_of(src_values, max_nnz).zero_();
+  get_sparse_impl(r)->set_indices_and_values_unsafe(r_indices, r_values);
+  Tensor hb_resultNnz = at::empty({1}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
+  hb_offload_kernel(r_indices, r_values,  t_indices, t_values, src_indices, src_values, hb_resultNnz, "tensorlib_sparse_mul");
+  IntTensor cpu_intresultNnz = at::empty({1}, CPU(kInt));
+  cpu_intresultNnz.copy_(hb_resultNnz);
+  LongTensor cpu_resultNnz = cpu_intresultNnz.to(kLong);
+  get_sparse_impl(r) ->set_nnz_and_narrow(cpu_resultNnz.accessor<int64_t, 1>()[0]);
+  return r._coalesced_(t_coalesced && s_coalesced);
+}
+
 SparseTensor& add_out_sparse_hb(SparseTensor& r, const SparseTensor& t, const SparseTensor& src, Scalar value) {
   if (!t.is_sparse()) {
     return add_out_dense_sparse_hb(r, t, src, value);
   }
   else {
-    AT_ERROR("Currently, only dense tensor add sparse tensor is supported on HammerBlade !");
+    add_out_sparse_sparse_hb(r, t, src, value);
   }
 }
 /*
@@ -56,7 +114,6 @@ SparseTensor& add_out_sparse_hb(SparseTensor& r, const SparseTensor& t, const Sp
   TORCH_CHECK(src_.is_hammerblade(), "add: expected 'other' to be HammerBlade, but got CPU");
   TORCH_CHECK(t.sizes().equals(src.sizes()), "add: expected sizes of 'self' and 'other' to match, but ", t.sizes(), " != ", src.sizes());  
 
-  if(src._nnz() == 0) {
     AT_ERROR(" 'other' should not have zero nnz values because on device memcpy is currently not allowed for HammerBlade");
   }
   if(t._nnz() == 0) {
