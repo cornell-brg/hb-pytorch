@@ -62,7 +62,7 @@ SparseTensor& add_out_sparse_sparse_hb(SparseTensor& r, const SparseTensor& t, c
   Tensor hb_resultNnz = at::empty({1}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
   get_sparse_impl(r)->set_indices_and_values_unsafe(r_indices, r_values);
   using scalar_t = float;
-  hb_offload_kernel(r_indices, r_values,  t_indices, t_values, src_indices, src_values, hb_resultNnz, value.to<scalar_t>(), "tensorlib_sparse_add_out_dense");
+  hb_offload_kernel(r_indices, r_values,  t_indices, t_values, src_indices, src_values, hb_resultNnz, n_dim, value.to<scalar_t>(), "tensorlib_sparse_add_out_dense");
   IntTensor cpu_intresultNnz = at::empty({1}, CPU(kInt));
   cpu_intresultNnz.copy_(hb_resultNnz);
   LongTensor cpu_resultNnz = cpu_intresultNnz.to(kLong);

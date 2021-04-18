@@ -216,5 +216,3 @@ extern "C" {
 
   HB_EMUL_REG_KERNEL(tensorlib_sparse_add_out_sparse, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, float*)
 }
-
-
