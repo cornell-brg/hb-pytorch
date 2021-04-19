@@ -117,3 +117,16 @@ def test_customized_dense_sparse_tensor_sub():
     cpu_r = hb_xr.cpu()
     assert hb_xr.device == torch.device("hammerblade")
     assert torch.allclose(cpu_r, xr)
+
+def test_sparse_sparse_elementwise_add_1():
+    xd = torch.rand(16, 32).to_sparse()
+    xs = torch.rand(16, 32).to_sparse()
+    xr = torch.add(xd, xs)
+
+    hb_xd = xd.hammerblade()
+    hb_xs = xs.hammerblade()
+    hb_xr = torch.add(hb_xd, hb_xs)
+
+    cpu_r = hb_xr.to("cpu")
+    assert hb_xr.device == torch.device("hammerblade")
+    assert torch.allclose(cpu_r, xr)

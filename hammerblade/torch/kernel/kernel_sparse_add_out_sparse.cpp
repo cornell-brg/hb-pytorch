@@ -116,8 +116,9 @@ extern "C" {
       }
     }
 
-    bsg_tile_group_barrier(&r_barrier, &c_barrier);  // all tiles should finish their computations before proceeding
-
+    // all tiles should finish their computations before proceeding
+    g_barrier.sync();
+    
     // add all the nnz to return in result_nnz
     for (int i = 0; i < thread_num; i++) {
       int x_coord = tile%BSG_TILE_GROUP_X_DIM;      // get tile coordinates
