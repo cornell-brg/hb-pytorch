@@ -64,7 +64,7 @@ endif
 ifdef HB_SILICON_V0
 include $(BSG_F1_DIR)/Makefile.machine.include
 else
-BSG_MACHINE ?= 4x4_fast_n_fake
+BSG_MACHINE ?= pod_X1Y1_ruche_X16Y8_hbm
 include  $(BSG_F1_DIR)/machines/$(BSG_MACHINE)/Makefile.machine.include
 endif
 
