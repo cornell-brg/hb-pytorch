@@ -56,3 +56,13 @@ def test_torch_mm_large():
     out_h = torch.mm(mat1_h, mat2_h)
     assert out_h.device == torch.device("hammerblade")
     assert torch.allclose(out_h.cpu(), out, rtol=1e-02)
+
+def test_torch_mm_recsys_30():
+    mat1 = torch.randn(256, 400)
+    mat2 = torch.randn(400, 800)
+    mat1_h = mat1.hammerblade()
+    mat2_h = mat2.hammerblade()
+    out = torch.mm(mat1, mat2)
+    out_h = torch.mm(mat1_h, mat2_h)
+    assert out_h.device == torch.device("hammerblade")
+    assert torch.allclose(out_h.cpu(), out, rtol=1e-01)

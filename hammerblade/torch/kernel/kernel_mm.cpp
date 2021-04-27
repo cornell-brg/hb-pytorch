@@ -48,9 +48,11 @@ extern "C" {
       int m2_last_blk_dim_x = c2 % CGRA_MM_BLOCK_SIZE == 0 ? CGRA_MM_BLOCK_SIZE : c2 % CGRA_MM_BLOCK_SIZE;
       int m2_last_blk_dim_y = r2 % CGRA_MM_BLOCK_SIZE == 0 ? CGRA_MM_BLOCK_SIZE : r2 % CGRA_MM_BLOCK_SIZE;
 
-      // Only perform 1/16 of the overall workload.
+      // Only do 1/16 of the overall workload.
       /* int rr_inc = 16; */
-      int rr_inc = 1; // make it do the entire workload
+
+      // Do the entire workload
+      int rr_inc = 1;
 
       // Stage configuration
       stage_cfg(cgra_mm_cfg, cgra_mm_cfg_size);
