@@ -14,7 +14,7 @@ extern "C" {
 //====================================================================
 // tensorlib__cat
 //====================================================================
-// This is a simple _cat kernel only works with 0 dim
+// This is a simple _cat kernel only works with 0 and 1 dim
 
 __attribute__ ((noinline))
 int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
@@ -25,26 +25,47 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
   hb_assert(length <= BUF_SIZE);
   int32_t dim = *dim_p;
   int32_t arr[BUF_SIZE];
-
+ 
   // collect tensors' size
   for(size_t i = 0; i < length; i++) {
     HBTensor<float> tensor(tensors_p[i]);
     arr[i] = tensor.numel();
   }
-  bsg_cuda_print_stat_kernel_start();
-
+  bsg_cuda_print_stat_kernel_start(); 
+  
+  int32_t orig_size = arr[0];
   hb_tiled_for(result.numel(), [&] (int32_t i) {
     int32_t j = 0;
     int32_t index = 0;
-    int32_t size = arr[0];
+    int32_t size = arr[0];  
+
     while (i >= size) {
       index = i - size;
       j++;
-      size += arr[j];
-    }
+      size += arr[j];    }
     if (j == 0) {
       index = i;
     }
+    
+    if (i>length && dim==1){
+      
+        if (index>length){
+          if (i<=orig_size){
+            j=1;
+            index = index-length-1;   
+          }
+          else{
+            j=1;
+           } 
+        }
+        else{
+          if (i<=size+length+1){
+            j=0;
+            index = index+length+1;
+          }
+        }
+    } 
+    
     HBTensor<float> t(tensors_p[j]);
     result(i) = t(index);
   });
