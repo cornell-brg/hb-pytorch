@@ -4,7 +4,9 @@
 inline int bsg_amoswap (int* p, int val)
 {
   int result;
+  __sync_synchronize();
   result = __sync_lock_test_and_set(p, val);
+  __sync_synchronize();
   return result;
 }
 

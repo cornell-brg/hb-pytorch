@@ -16,6 +16,10 @@ Tensor embedding(const Tensor & weight, const Tensor & indices,
   auto indices_arg = TensorArg(indices, "indices", 1);
   checkScalarType("embedding", indices_arg, kLong);
 
+  if (weight.is_hammerblade() && weight.sizes()[0] == 10678) {
+    return at::embedding_recsys(weight, indices, padding_idx, scale_grad_by_freq, sparse);
+  }
+
   // TODO: use tensor.index() after improving perf
   if (indices.dim() == 1) {
     return weight.index_select(0, indices);
@@ -31,6 +35,10 @@ Tensor embedding(const Tensor & weight, const Tensor & indices,
 Tensor embedding_backward(
     const Tensor & grad, const Tensor & indices, int64_t num_weights,
     int64_t padding_idx, bool scale_grad_by_freq, bool sparse) {
+  if (indices.is_hammerblade() && num_weights == 10678) {
+    return at::embedding_dense_backward_recsys(
+        grad, indices, num_weights, padding_idx, scale_grad_by_freq);
+  }
   if (sparse) {
     return at::embedding_sparse_backward(
         grad, indices, num_weights, padding_idx, scale_grad_by_freq);
@@ -38,13 +46,6 @@ Tensor embedding_backward(
     return at::embedding_dense_backward(
         grad, indices, num_weights, padding_idx, scale_grad_by_freq);
   }
-}
-
-Tensor embedding_backward_recsys(
-    const Tensor & grad, const Tensor & indices, int64_t num_weights,
-    int64_t padding_idx, bool scale_grad_by_freq, bool sparse) {
-  return at::embedding_dense_backward_recsys(
-      grad, indices, num_weights, padding_idx, scale_grad_by_freq);
 }
 
 Tensor embedding_sparse_backward(

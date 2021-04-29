@@ -6608,9 +6608,6 @@
   dispatch:
     HammerBlade: embedding_hb
 
-- func: embedding_backward_recsys(Tensor grad, Tensor indices, int num_weights, int padding_idx, bool scale_grad_by_freq, bool sparse) -> Tensor
-  use_c10_dispatcher: full
-
 - func: embedding_dense_backward_recsys(Tensor grad_output, Tensor indices, int num_weights, int padding_idx, bool scale_grad_by_freq) -> Tensor
   use_c10_dispatcher: full
   dispatch:

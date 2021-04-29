@@ -35,7 +35,7 @@ extern "C" {
     const bsg_attr_remote int64_t* index_data = (bsg_attr_remote int64_t*)index.data_ptr();
     const uint32_t grad_weight_s0 = grad_weight.get_strides()[0];
     const uint32_t grad_s0 = grad.get_strides()[0];
-    const uint32_t grad_s1 = grad.get_strides()[1];
+    // const uint32_t grad_s1 = grad.get_strides()[1]; we don't actually use it ... since we know we will multiple 0 with it
     const uint32_t grad_s2 = grad.get_strides()[2];
     const uint32_t batch_size = index.dim(0);
     const uint32_t embeddings_per_batch = indices_numel / batch_size;
@@ -48,9 +48,9 @@ extern "C" {
         const int32_t offset = (int32_t)*(index_data + idx);
         if (offset != padding_idx) {
           const int32_t batch_id = idx / embeddings_per_batch;
-          const int32_t embedding_id = idx % embeddings_per_batch;
+          // const int32_t embedding_id = idx % embeddings_per_batch;
           bsg_attr_remote float* dst = grad_weight_data + offset * grad_weight_s0;
-          bsg_attr_remote float* src = grad_data + batch_id * grad_s0 + embedding_id * grad_s1;
+          bsg_attr_remote float* src = grad_data + batch_id * grad_s0;
           //bsg_print_hexadecimal(0xbeefbeef);
           int* lock_addr = locks_data + offset;
           // acquire the lock
