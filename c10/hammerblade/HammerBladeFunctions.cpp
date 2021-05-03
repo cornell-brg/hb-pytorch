@@ -23,17 +23,36 @@ static std::once_flag init_flag;
 static void initHammerBladeDevice() {
   C10_HB_CHECK(hb_mc_device_init(&_hb_device, "HB_PYTORCH_PORT", 0));
   C10_HB_CHECK(hb_mc_device_program_init(&_hb_device, _bin_path, "default_allocator", 0));
+#ifndef COSIM
   // config PyTorch tile group size based on device->mesh->dim, which is populated with
-  // device size when calling hb_mc_device_init
+  // device size when calling hb_mc_device_init IF WE ARE EMULATING
   _hb_tg_dim = _hb_device.mesh->dim;
+#endif
   std::cerr << "PyTorch configed with " << _hb_tg_dim.x << " * " << _hb_tg_dim.y << " HB device" << std::endl;
   // config shared reduction buffer on device
   // and reset barrier for now -- global constructors are not called
   std::vector<eva_t> hb_startup_argv;
   eva_t shared_reduction_buffer = device_malloc(_hb_tg_dim.x * _hb_tg_dim.y * 2 * sizeof(uint32_t));
   hb_startup_argv.push_back(shared_reduction_buffer);
+#ifdef COSIM
+  // to avoid race condition -- we do 16x8 1x1 tile groups for startup kernel
+  uint64_t tg_x = _hb_tg_dim.x;
+  uint64_t tg_y = _hb_tg_dim.y;
+  _hb_grid_dim.x = tg_x;
+  _hb_grid_dim.y = tg_y;
+  _hb_tg_dim.x = 1;
+  _hb_tg_dim.y = 1;
+  std::cerr << "Using 16x8 1x1 tile groups to call tensorlib_hb_startup" << std::endl;
+#endif
   offload_kernel("tensorlib_hb_startup", hb_startup_argv);
   std::cerr << "HB startup config kernel applied" << std::endl;
+  // restore tile group dim
+#ifdef COSIM
+  _hb_grid_dim.x = 1;
+  _hb_grid_dim.y = 1;
+  _hb_tg_dim.x = tg_x;
+  _hb_tg_dim.y = tg_y;
+#endif
   return;
 }
 
@@ -198,7 +217,28 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
   }
 #endif
 
+  // get current cycle before exec
+  uint64_t start_cycle = -1;
+  C10_HB_CHECK(hb_mc_manycore_get_cycle((&_hb_device)->mc, &start_cycle));
+
+  // EXECUTE!
   C10_HB_CHECK(hb_mc_device_tile_groups_execute(&_hb_device));
+
+  // get current cycle after exec
+  uint64_t end_cycle = 0;
+  C10_HB_CHECK(hb_mc_manycore_get_cycle((&_hb_device)->mc, &end_cycle));
+
+  // cycle count for execution
+  // 63330 is a measured magic number to make the abs_cycle here matches the one in
+  // manycore_stats.log
+#ifdef COSIM
+  uint64_t abs_cycle = end_cycle - start_cycle - 55000;
+#else
+  uint64_t abs_cycle = 0;
+#endif
+
+  // debug
+  std::cerr << kernel << " finished -- abs cycle = " << abs_cycle << std::endl;
 
 #ifndef HB_SILICON_V0
   if (hb_mc_should_trace) {
@@ -212,8 +252,12 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
 #endif
 
   // write the SIMULATED time to ExecutionTime log
-  // set to 0 for now since bsg_time is ... wired
+  // assuming 1GHz --> cycle / 1000 = microsecond
+#ifdef COSIM
+  std::chrono::microseconds simulated(abs_cycle / 1000);
+#else
   std::chrono::microseconds simulated(0);
+#endif
   trim_log->trim_manual_log_exec_time(simulated);
   // delete trim log
   delete trim_log;

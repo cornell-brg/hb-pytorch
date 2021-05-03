@@ -6,17 +6,17 @@ Tests on torch.nn.LogSoftMax backward
 import torch
 import torch.nn.functional as F
 import random
-import hbutils
 import pytest
 from hypothesis import given, settings
 from .hypothesis_test_util import HypothesisUtil as hu
+from .hbutils import init_hb_tensor
 
 torch.manual_seed(42)
 random.seed(42)
 
 def _test_log_softmax_back(x, dim):
     x = x.clone().detach().requires_grad_(True)
-    x_hb = hbutils.init_hb_tensor(x)
+    x_hb = init_hb_tensor(x)
     assert x is not x_hb
 
     y = F.log_softmax(x, dim)

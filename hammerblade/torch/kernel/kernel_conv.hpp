@@ -118,6 +118,7 @@ int convolution_forward_template(
 
   // Start profiling
   bsg_cuda_print_stat_kernel_start();
+  bsg_saif_start();
 
   for(uint32_t n = 0; n < N; ++n) {
     for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
@@ -195,6 +196,7 @@ int convolution_forward_template(
   };
 
   // End profiling
+  bsg_saif_end();
   bsg_cuda_print_stat_kernel_end();
 
   g_barrier.sync();
@@ -224,6 +226,7 @@ int convolution_backward_input_template(
 
   // Start profiling
   bsg_cuda_print_stat_kernel_start();
+  bsg_saif_start();
 
   // init input grads
   x.init(0.0);
@@ -251,6 +254,7 @@ int convolution_backward_input_template(
     }, Cin, Hin, Win);
 
   // End profiling
+  bsg_saif_end();
   bsg_cuda_print_stat_kernel_end();
 
   g_barrier.sync();
@@ -280,6 +284,7 @@ int convolution_backward_weight_template(
 
   // Start profiling
   bsg_cuda_print_stat_kernel_start();
+  bsg_saif_start();
 
   // init weight grads
   w.init(0.0);
@@ -300,6 +305,7 @@ int convolution_backward_weight_template(
     }, Cout, Cin, Kh, Kw);
 
   // End profiling
+  bsg_saif_end();
   bsg_cuda_print_stat_kernel_end();
 
   g_barrier.sync();

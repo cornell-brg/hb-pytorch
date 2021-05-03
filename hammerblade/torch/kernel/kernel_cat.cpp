@@ -32,6 +32,7 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
     arr[i] = tensor.numel();
   }
   bsg_cuda_print_stat_kernel_start();
+  bsg_saif_start();
 
   hb_tiled_for(result.numel(), [&] (int32_t i) {
     int32_t j = 0;
@@ -49,6 +50,7 @@ int tensorlib__cat( hb_tensor_t** tensors_p, hb_tensor_t* result_p,
     result(i) = t(index);
   });
 
+  bsg_saif_end();
   bsg_cuda_print_stat_kernel_end();
   g_barrier.sync();
   return 0;
