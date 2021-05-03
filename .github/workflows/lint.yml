@@ -17,12 +17,6 @@ jobs:
           architecture: x64
       - name: Checkout PyTorch
         uses: actions/checkout@v1
-      - name: Ensure consistent CircleCI YAML config
-        run: |
-          pip install -r requirements.txt
-          cd .circleci && ./ensure-consistency.py
-      - name: Ensure Docker version is correctly deployed
-        run: .circleci/validate-docker-version.py
       - name: Shellcheck Jenkins scripts
         run: |
           sudo apt-get install -y shellcheck
@@ -37,10 +31,6 @@ jobs:
         run: |
           pip install mypy mypy-extensions
           mypy @mypy-files.txt
-      - name: C++ docs check
-        run: |
-          sudo apt-get install -y doxygen && pip install -r requirements.txt
-          cd docs/cpp/source && ./check-doxygen.sh
 
   flake8-py3:
     runs-on: ubuntu-latest
