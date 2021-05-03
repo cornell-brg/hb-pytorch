@@ -6599,6 +6599,12 @@
   dispatch:
     HammerBlade: vincr_hb
 
+- func: add_amc(Tensor self, Tensor other) -> Tensor
+  use_c10_dispatcher: full
+  variants: function
+  dispatch:
+    CPU: add_amc_cpu
+
 # Tutorial TODO:
 # Create an ATen operator vvadd, which takes 2 input arguments
 # self, and other, and produce a Tensor
