@@ -1,12 +1,11 @@
 import glob
 import os
-import sys
 import subprocess
 
 qsub_template = '(cd {path}; qsub -N {job_name} -l walltime=72:00:00 -l nodes=1:ppn=3 -l mem="10gb" -d {path} -o {path}/qsub.out -e {path}/qsub.err -V run.sh)\n'
 
 def get_test_files(path):
-    files = glob.glob( path+"/*.py" )
+    files = glob.glob(path + "/*.py")
     src_files = []
     for f in files:
         if f.split("/")[-1].startswith("test_"):
@@ -15,7 +14,7 @@ def get_test_files(path):
 
 def run_test_file_on_cluster(test_file):
     name = "bigblade_" + test_file.split("/")[-1].split(".")[0]
-    print( name )
+    print(name)
     sh_cmd = "mkdir -p " + name
     os.system(sh_cmd)
 
@@ -41,4 +40,4 @@ def run_test_file_on_cluster(test_file):
 files = get_test_files("/work/global/lc873/work/sdh/brg-hb-pytorch/hammerblade/torch/tests/")
 
 for f in files:
-    run_test_file_on_cluster( f )
+    run_test_file_on_cluster(f)

@@ -20,7 +20,7 @@ def exec_time_construct_tree_impl(data):
     data = data.splitlines()
     ROI_data = data[0].split(";")
     assert ROI_data[0] == "ROI"
-    ROI = exec_time_Node("ROI",ROI_data[1])
+    ROI = exec_time_Node("ROI", ROI_data[1])
 
     # helper
     def node_adder(path, parent, time):
@@ -29,7 +29,7 @@ def exec_time_construct_tree_impl(data):
             # the node we want to add shouldn't already there
             for kid in parent.children:
                 assert kid.func != path[0]
-            parent.add_child(exec_time_Node(path[0],time))
+            parent.add_child(exec_time_Node(path[0], time))
             return
         # find the kid in parent's children list
         for kid in parent.children:
@@ -71,16 +71,16 @@ def exec_time_add_other(root):
 def adjust_trimming(root):
     for kid in root.children:
         if kid.func == "@TRIM@":
-            assert len(root.children) == 1 # the only kid should be trim, if there is a trim
-            root.time = kid.time # adjust time to simulated time
-            kid.time = 0 # disgrad this time to prevent double counting
+            assert len(root.children) == 1  # the only kid should be trim, if there is a trim
+            root.time = kid.time  # adjust time to simulated time
+            kid.time = 0  # disgrad this time to prevent double counting
         else:
             adjust_trimming(kid)
 
 def disgrad_trimming(root):
     # base
     if root.func == "@TRIM@":
-        root.time = 0 # we disgrad this info
+        root.time = 0  # we disgrad this info
         assert len(root.children) == 0
         return
     # recursion
