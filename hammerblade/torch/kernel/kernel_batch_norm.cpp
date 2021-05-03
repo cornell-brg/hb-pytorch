@@ -257,7 +257,7 @@ extern "C" {
               size_t n = i % N;
 
               float scaled_var = (input(n, c) - mean) * k;
-              grad_input(n, c) = (grad_out(n, c) - grad_mean 
+              grad_input(n, c) = (grad_out(n, c) - grad_mean
                                           - scaled_var) * invstd * gamma;
           });
         } else {
@@ -553,7 +553,7 @@ extern "C" {
               size_t n = (i / (W * H)) % N;
 
               float scaled_var = (input(n, c, h, w) - mean) * k;
-              grad_input(n, c, h, w) = (grad_out(n, c, h, w) - grad_mean 
+              grad_input(n, c, h, w) = (grad_out(n, c, h, w) - grad_mean
                                           - scaled_var) * invstd * gamma;
           });
         } else {

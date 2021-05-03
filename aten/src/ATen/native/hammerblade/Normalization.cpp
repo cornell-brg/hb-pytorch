@@ -12,10 +12,10 @@ std::tuple<Tensor,Tensor,Tensor> batch_norm_hb_transform_input(
     const Tensor& running_mean /* optional */,
     const Tensor& running_var /* optional */,
     bool train, double eps) {
-  
+
   TORCH_CHECK(input.dim() == 4 || input.dim() == 2,
               "Only 2D BatchNorm and 1D for 2 dimensions is implemented for HB backend.");
-  
+
   Tensor output = at::empty(input.sizes(), input.options());
 
   std::vector<eva_t> device_args;
@@ -30,7 +30,7 @@ std::tuple<Tensor,Tensor,Tensor> batch_norm_hb_transform_input(
   device_args.push_back(create_device_tensor(running_var, device_ptrs));
   device_args.push_back(create_device_scalar((int) train));
   device_args.push_back(create_device_scalar((float) eps));
- 
+
   if(input.dim() == 4){
     c10::hammerblade::offload_kernel("tensorlib_batch_norm2d_transform_input",
                                      device_args);
@@ -71,7 +71,7 @@ std::tuple<Tensor,Tensor> batch_norm_hb_update_stats(
   if(input.dim() == 4){
     c10::hammerblade::offload_kernel("tensorlib_batch_norm2d_update_stats",
                                    device_args);
-  } 
+  }
   else{
     c10::hammerblade::offload_kernel("tensorlib_batch_norm1d_update_stats",
                                    device_args);
@@ -109,7 +109,7 @@ std::tuple<Tensor, Tensor, Tensor> batch_norm_backward_hb(
     const Tensor& running_mean, const Tensor& running_var,
     const Tensor& save_mean, const Tensor& save_invstd,
     bool train, double eps, std::array<bool,3> grad_input_mask) {
- 
+
   TORCH_CHECK(self.dim() == 4 || self.dim() == 2,
               "Only 2D BatchNorm and 1D for 2 dimensions is implemented for HB backend.");
 
@@ -149,7 +149,7 @@ std::tuple<Tensor, Tensor, Tensor> batch_norm_backward_hb(
       }
       else{
         c10::hammerblade::offload_kernel("tensorlib_batch_norm1d_backward",
-                                       device_args); 
+                                       device_args);
       }
       cleanup_device(device_args, device_ptrs);
 
