@@ -17,46 +17,46 @@ class exec_time_Node:
 
 
 def exec_time_construct_tree_impl(data):
-  data = data.splitlines()
-  ROI_data = data[0].split(";")
-  assert ROI_data[0] == "ROI"
-  ROI = exec_time_Node("ROI",ROI_data[1])
+    data = data.splitlines()
+    ROI_data = data[0].split(";")
+    assert ROI_data[0] == "ROI"
+    ROI = exec_time_Node("ROI",ROI_data[1])
 
-  # helper
-  def node_adder(path, parent, time):
-    # base
-    if len(path) == 1:
-      # the node we want to add shouldn't already there
-      for kid in parent.children:
-        assert kid.func != path[0]
-      parent.add_child(exec_time_Node(path[0],time))
-      return
-    # find the kid in parent's children list
-    for kid in parent.children:
-      if kid.func == path[0]:
-        node_adder(path[1:], kid, time)
-        return
-    # not found ...
-    assert False
+    # helper
+    def node_adder(path, parent, time):
+        # base
+        if len(path) == 1:
+            # the node we want to add shouldn't already there
+            for kid in parent.children:
+                assert kid.func != path[0]
+            parent.add_child(exec_time_Node(path[0],time))
+            return
+        # find the kid in parent's children list
+        for kid in parent.children:
+            if kid.func == path[0]:
+                node_adder(path[1:], kid, time)
+                return
+        # not found ...
+        assert False
 
-  # process each entry
-  for d in data[1:]:
-    d = d.split(";")
-    path = d[0]
-    time = d[1]
-    path = path.split("<|>")
-    node_adder(path[1:], ROI, time)
+    # process each entry
+    for d in data[1:]:
+        d = d.split(";")
+        path = d[0]
+        time = d[1]
+        path = path.split("<|>")
+        node_adder(path[1:], ROI, time)
 
-  return ROI
+    return ROI
 
 # build total time from ground up
 # a simple postorder traversla will do
 def accumulate_time(root):
-  children_time = 0
-  for kid in root.children:
-    children_time += accumulate_time(kid)
-  root.time += children_time
-  return root.time
+    children_time = 0
+    for kid in root.children:
+        children_time += accumulate_time(kid)
+    root.time += children_time
+    return root.time
 
 # find other time in ROI
 def exec_time_add_other(root):
@@ -69,23 +69,23 @@ def exec_time_add_other(root):
 # if trimming we adjust the parent
 # if not we set trim value to 0
 def adjust_trimming(root):
-  for kid in root.children:
-    if kid.func == "@TRIM@":
-      assert len(root.children) == 1 # the only kid should be trim, if there is a trim
-      root.time = kid.time # adjust time to simulated time
-      kid.time = 0 # disgrad this time to prevent double counting
-    else:
-      adjust_trimming(kid)
+    for kid in root.children:
+        if kid.func == "@TRIM@":
+            assert len(root.children) == 1 # the only kid should be trim, if there is a trim
+            root.time = kid.time # adjust time to simulated time
+            kid.time = 0 # disgrad this time to prevent double counting
+        else:
+            adjust_trimming(kid)
 
 def disgrad_trimming(root):
-  # base
-  if root.func == "@TRIM@":
-    root.time = 0 # we disgrad this info
-    assert len(root.children) == 0
-    return
-  # recursion
-  for kid in root.children:
-    disgrad_trimming(kid)
+    # base
+    if root.func == "@TRIM@":
+        root.time = 0 # we disgrad this info
+        assert len(root.children) == 0
+        return
+    # recursion
+    for kid in root.children:
+        disgrad_trimming(kid)
 
 # append percentage of ROI to each node
 def exec_time_calc_percentage(root, roi_time=None):
@@ -115,9 +115,9 @@ def exec_time_tree(trimming=False):
     print(data)
     root = exec_time_construct_tree_impl(data)
     if trimming:
-      adjust_trimming(root)
+        adjust_trimming(root)
     else:
-      disgrad_trimming(root)
+        disgrad_trimming(root)
     accumulate_time(root)
     exec_time_add_other(root)
     exec_time_calc_percentage(root)
@@ -134,7 +134,7 @@ def fancy_print(trimming=False):
             func = func.split("(")[0]
             func = func.split("::")[-1]
             func = "aten::" + func
-            time = e.time / 1000.0 #ms
+            time = e.time / 1000.0  # ms
             percentage = e.percentage
             buffer += ('{func:30}     {time:.2f} {percentage:.1f}%\n'.format(
                 func=func, time=time, percentage=percentage))
@@ -159,7 +159,7 @@ def latex_table(trimming=False):
             func = func.split("::")[-1]
             func = "aten::" + func
             func = func.replace("_", "\\_")
-            time = e.time / 1000.0 #ms
+            time = e.time / 1000.0  # ms
             percentage = e.percentage
             buffer += ('\\textbf{{{func:30}}} &  {time:.2f} & {percentage:.1f}\\% \\\\\n'.format(
                 func=func, time=time, percentage=percentage))
