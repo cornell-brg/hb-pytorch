@@ -15,6 +15,7 @@ extern "C" {
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     auto res = HBTensor<float>(t0_p);
     auto x1 = HBTensor<float>(t1_p);
@@ -38,6 +39,7 @@ extern "C" {
       }
     });
 
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();

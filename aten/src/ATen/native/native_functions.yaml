@@ -1927,6 +1927,7 @@
     HammerBlade: mul
     SparseCPU: mul_sparse
     SparseCUDA: mul_sparse
+    SparseHammerBlade: mul_sparse
     MkldnnCPU: mkldnn_mul
   supports_named_tensor: True
 
@@ -1938,6 +1939,7 @@
     HammerBlade: mul_
     SparseCPU: mul_sparse_
     SparseCUDA: mul_sparse_
+    SparseHammerBlade: mul_sparse_
     MkldnnCPU: mkldnn_mul_
   supports_named_tensor: True
 
