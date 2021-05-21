@@ -72,12 +72,11 @@ def test_cat1d_3_dif_sizes():
 
 
 @settings(deadline=None)
-@given(inputs=hu.tensors(n=3, min_dim=1, max_dim=3))
-def test_cat_hypothesis(inputs):
+@given(inputs=hu.tensors(n=3, min_dim=2, max_dim=3))
+def test_cat1d_hypothesis(inputs):
     x1 = torch.tensor(inputs[0])
     x2 = torch.tensor(inputs[1])
     x3 = torch.tensor(inputs[2])
-    _test_torch_cat(x1, x2, x3)
     _test_torch_cat1d(x1, x2, x3)
 
 def test_cat_error_1():
@@ -96,6 +95,17 @@ def test_cat_error_4():
     y = torch.randn(3, 4).hammerblade()
     with pytest.raises(RuntimeError):
         torch.cat([x, y], 0)
+
+def test_cat_error_4():
+    x = torch.ones(2,3).hammerblade()
+    y = torch.randn(3,4,5).hammerblade()
     with pytest.raises(RuntimeError):
         torch.cat([x, y], 1)
 
+@settings(deadline=None)
+@given(inputs=hu.tensors(n=3, min_dim=1, max_dim=3))
+def test_cat_hypothesis(inputs):
+    x1 = torch.tensor(inputs[0])
+    x2 = torch.tensor(inputs[1])
+    x3 = torch.tensor(inputs[2])
+    _test_torch_cat(x1, x2, x3)
