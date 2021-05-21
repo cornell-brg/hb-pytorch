@@ -1,7 +1,7 @@
 .DEFAULT = help
 
-BSG_MANYCORE_DIR := $(BRG_BSG_BLADERUNNER_DIR)/bsg_manycore
-BSG_F1_DIR       := $(BRG_BSG_BLADERUNNER_DIR)/bsg_replicant
+BSG_MANYCORE_DIR := /work/global/lc873/work/sdh/playground/standalone-bigblade/bsg_manycore
+BSG_F1_DIR       := /work/global/lc873/work/sdh/playground/hb_bigbladerunner/bigblade_toplevel/bsg_replicant
 COSIM_PYTHON_DIR := $(BRG_BSG_BLADERUNNER_DIR)/bsg_replicant/testbenches/python
 KERNEL_DIR       := $(shell git rev-parse --show-toplevel)/hammerblade/torch/kernel
 SCRIPT_DIR       := $(shell git rev-parse --show-toplevel)/hammerblade/torch/
@@ -64,8 +64,7 @@ endif
 ifdef HB_SILICON_V0
 include $(BSG_F1_DIR)/Makefile.machine.include
 else
-BSG_MACHINE ?= 4x4_fast_n_fake
-include  $(BSG_F1_DIR)/machines/$(BSG_MACHINE)/Makefile.machine.include
+include  /work/global/lc873/work/sdh/playground/hb_bigbladerunner/bigblade_toplevel/testing/rtl/out/Makefile.machine.include
 endif
 
 bsg_global_X := $(BSG_MACHINE_GLOBAL_X)

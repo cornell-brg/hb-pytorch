@@ -43,8 +43,8 @@ echo "  hb-pytorch lives in $DIR"
 # setup cudalite runtime and pytorch kernel binary paths
 if [ -z "$BRG_BSG_BLADERUNNER_DIR" ]
 then
-  export BSG_MANYCORE_INCLUDE="<path-to-your-cudalite-cosim-runtime-source>"
-  export BSG_MANYCORE_LDPATH="<path-to-your-cudalite-cosim-runtime-lib>"
+  export BSG_MANYCORE_INCLUDE=/work/global/lc873/work/sdh/playground/hb_bigbladerunner/bigblade_toplevel/bsg_replicant/libraries
+  export BSG_MANYCORE_LDPATH=/work/global/lc873/work/sdh/playground/hb_bigbladerunner/bigblade_toplevel/bsg_replicant/libraries/platforms/tapeout-vcs
 else
   export BSG_MANYCORE_INCLUDE=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries
   export BSG_MANYCORE_LDPATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/libraries/platforms/bigblade-vcs
@@ -55,13 +55,6 @@ export USE_HB_COSIM=1
 # Build COSIM runtime library and simulation executable if not using one of the
 # BRG servers -- on BRG servers we have global installed COSIM so SW side ppl
 # dont have to worry about COSIM installation
-if [[ "x${SETUP_BRG_HAMMERBLADE}" != "xyes" ]]; then
-  export BSG_MACHINE=4x4_fast_n_fake
-  export BSG_MACHINE_PATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/machines/$BSG_MACHINE
-  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python/test_loader main.exec
-  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python/test_loader main.profile
-  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python/test_loader main.saif
-fi
 
 export HB_KERNEL_DIR=$DIR/hammerblade/torch
 
