@@ -6366,6 +6366,7 @@
   dispatch:
     CPU: legacy::cpu::_thnn_tanh_backward
     CUDA: legacy::cuda::_thnn_tanh_backward
+    HammerBlade: tanh_backward_hb
 
 # What's a thnn_conv_ versus a slow_conv_?
 #
