@@ -30,46 +30,7 @@ extern "C" {
 
     bsg_cuda_print_stat_kernel_start();
 /*
-    int nnz = 0;
-    for (int t_val = start; t_val < end; t_val = t_val + thread_num) { // check nonzero val in t
-      int row = t_indices(0, t_val);                           // get val's indices
-      int col = t_indices(1, t_val);
-      for (int s_val = 0; s_val < s_values.numel(); s_val++) { // search through values in s
-        if (s_indices(0, s_val) == row && s_indices(1, s_val) == col) { // if indices match
-          nnz++;                                                    // multiplication yields nnz
-          break;
-        }
-      }
-    }
-    g_barrier.sync();
-
-    if (nnz > 0) {
-      int output_index = 0;                                    // initialize index variable
-      for (int tile = 0; tile < __bsg_id; tile++) { 
-        int x_coord = tile%bsg_tiles_X;
-        int y_coord = static_cast<int>(tile / bsg_tiles_X);
-        int *tile_nnz = reinterpret_cast<int*>(bsg_tile_group_remote_pointer(x_coord, y_coord, &nnz));
-        output_index = output_index + *(tile_nnz);
-      }
-      if (__bsg_id == ((bsg_tiles_X*bsg_tiles_Y)-1)) {
-        result_nnz(0) = output_index + nnz;
-      }
-      for (int t_val = start; t_val < end; t_val = t_val + thread_num) { // check nonzero val in t
-        int row = t_indices(0, t_val);                           // get val's indices
-        int col = t_indices(1, t_val);
-        for (int s_val = 0; s_val < s_values.numel(); s_val++) { // search through values in s
-          if (s_indices(0, s_val) == row && s_indices(1, s_val) == col) { // if indices match
-            float elem_t = t_values(t_val);
-            float elem_s = s_values(s_val);
-            r_values(output_index) = elem_t * elem_s;
-            r_indices(0, output_index) = row;
-            r_indices(1, output_index) = col;
-            output_index++;
-            break;
-          }
-        }
-      }
-    }
+   TODO: Add the implementation here.
 */ 
     bsg_cuda_print_stat_kernel_end(); 
     g_barrier.sync();  

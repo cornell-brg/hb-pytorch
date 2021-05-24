@@ -1,7 +1,7 @@
 """
 BRG tests on PyTorch => tests of real offloading kernels
-Feb 09, 2020
-Lin Cheng
+May 10, 2021
+Zhongyuan Zhao
 """
 
 import torch

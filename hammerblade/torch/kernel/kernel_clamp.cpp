@@ -18,6 +18,7 @@ extern "C" {
     float max = *max_p;
 
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     hb_tiled_foreach(
       [&](float a) {
@@ -25,6 +26,7 @@ extern "C" {
       },
       res, input);
 
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
@@ -40,6 +42,7 @@ extern "C" {
     float min = *min_p;
 
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     hb_tiled_foreach(
       [min](float a) {
@@ -47,6 +50,7 @@ extern "C" {
       },
       res, input);
 
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
@@ -62,6 +66,7 @@ extern "C" {
     float max = *max_p;
 
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     hb_tiled_foreach(
       [max](float a) {
@@ -69,6 +74,7 @@ extern "C" {
       },
       res, input);
 
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();

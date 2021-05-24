@@ -6,14 +6,14 @@ Unit tests for torch.nn.F.binary_cross_entropy_with_logits
 import torch
 import torch.nn.functional as F
 import random
-import hbutils
+from .hbutils import init_hb_tensor
 
 torch.manual_seed(42)
 random.seed(42)
 
 def test_torch_nn_F_BinaryCrossEntropyWithLogits_1():
     input = torch.randn(3, requires_grad=True)
-    input_h = hbutils.init_hb_tensor(input)
+    input_h = init_hb_tensor(input)
     assert input_h is not input
     target = torch.empty(3).random_(2)
     output = F.binary_cross_entropy_with_logits(input, target)

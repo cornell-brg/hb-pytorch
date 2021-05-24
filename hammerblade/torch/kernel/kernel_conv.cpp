@@ -45,6 +45,7 @@ static int convolution_forward(
 
   // Start profiling
   bsg_cuda_print_stat_kernel_start();
+  bsg_saif_start();
 
   for(uint32_t n = 0; n < N; ++n) {
     for(uint32_t ci = 0; ci < Cin; ++ci) { // input channel first to maximum data reuse
@@ -122,6 +123,7 @@ static int convolution_forward(
   };
 
   // End profiling
+  bsg_saif_end();
   bsg_cuda_print_stat_kernel_end();
 
   g_barrier.sync();
@@ -157,6 +159,7 @@ static int convolution_backward_input(
 
   // Start profiling
   bsg_cuda_print_stat_kernel_start();
+  bsg_saif_start();
 
   // init input grads
   hb_tiled_foreach([]() {return 0.0;}, x);
@@ -184,6 +187,7 @@ static int convolution_backward_input(
     }, Cin, Hin, Win);
 
   // End profiling
+  bsg_saif_end();
   bsg_cuda_print_stat_kernel_end();
 
   g_barrier.sync();
@@ -219,6 +223,7 @@ static int convolution_backward_weight(
 
   // Start profiling
   bsg_cuda_print_stat_kernel_start();
+  bsg_saif_start();
 
   // init weight grads
   hb_tiled_foreach([]() {return 0.0;}, w);
@@ -239,6 +244,7 @@ static int convolution_backward_weight(
     }, Cout, Cin, Kh, Kw);
 
   // End profiling
+  bsg_saif_end();
   bsg_cuda_print_stat_kernel_end();
 
   g_barrier.sync();
@@ -294,6 +300,7 @@ extern "C" {
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     for(int i = start; i < end; ++i) {
       float bias = b[(i / out_ch_stride) % nb];
@@ -301,6 +308,7 @@ extern "C" {
     }
 
     // End profiling
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
@@ -372,6 +380,7 @@ extern "C" {
 
     // Start profiling
     bsg_cuda_print_stat_kernel_start();
+    bsg_saif_start();
 
     hb_tiled_for(Cout, [&](size_t co) {
       for(uint32_t n = 0; n < N; ++n)
@@ -385,6 +394,7 @@ extern "C" {
     });
 
     // End profiling
+    bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
