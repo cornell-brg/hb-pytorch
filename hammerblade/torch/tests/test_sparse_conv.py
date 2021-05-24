@@ -19,12 +19,6 @@ def convert_dense_input(x, r, s):
     x = torch.flatten(x, start_dim = 0, end_dim = 2).t().contiguous()
     return x
 
-def load_conv2_sparse_weight():
-    model = torch.load("LeNet_5.prune.conv.fc.pth.tar", map_location='cpu')
-    weights = model.get('state_dict')
-    conv2_weight = weights.get('conv2.weight').cpu()
-    return conv2_weight
-
 def test_lenet5_sparse01_conv2():
 
     di = torch.rand(1, 20, 12, 12)
