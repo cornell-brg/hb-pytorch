@@ -8,13 +8,18 @@ This work aims to port PyTorch to HammerBlade.
 ### How to build PyTorch to use COSIM
   This assumes that you have a working HB Cosimulation installed through `bsg_bladerunner`. Then:
  - Enable `devtoolset-8` or any toolchain that supports C++14.
+
+   On CentOS, this is usually done with:
+
+       scl enable devtoolset-8 bash
+
  - Set following variable to point to `bsg_bladerunner` clone:
 
        export BRG_BSG_BLADERUNNER_DIR=<path to bsg_bladerunner that has be setup>
 
  - Clone hb-pytorch repo:
 
-       git clone -b hb-device git@github.com:cornell-brg/hb-pytorch.git
+       git clone git@github.com:cornell-brg/hb-pytorch.git
 
  - Create python virtual environment:
 
