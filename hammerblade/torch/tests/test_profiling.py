@@ -63,14 +63,14 @@ def test_execution_time_3():
     assert stack.find("at::Tensor& at::native::legacy::cpu::_th_normal_(at::Tensor&, double, double, at::Generator*)") != -1
     assert stack.find("at::native::add_stub::add_stub()") != -1
 
-def test_unimpl_1():
-    x = torch.ones(100000)
-    torch.hammerblade.profiler.enable()
-    x = torch.randn(100000)
-    y = x + x
-    torch.hammerblade.profiler.disable()
-    unimpl = torch.hammerblade.profiler.unimpl.fancy_print()
-    assert unimpl.find("aten::normal_") != -1
+#def test_unimpl_1():
+#    x = torch.ones(100000)
+#    torch.hammerblade.profiler.enable()
+#    x = torch.randn(100000)
+#    y = x + x
+#    torch.hammerblade.profiler.disable()
+#    unimpl = torch.hammerblade.profiler.unimpl.fancy_print()
+#    assert unimpl.find("aten::normal_") != -1
 
 def test_unimpl_2():
     x = torch.ones(100000)
