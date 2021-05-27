@@ -804,7 +804,6 @@ void TensorIterator::compute_shape() {
       shape_ = DimVector(infer_size(shape_, shape));
     }
   }
-
   // Outputs cannot be broadcasted. Check that the shape of the outputs matches
   // the inferred shape. There's an exception for write-only tensors to support
   // our legacy behavior that functions with `out=` arguments resize their

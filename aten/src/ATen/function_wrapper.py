@@ -2153,7 +2153,6 @@ for(size_t i = 0; i < res_cpu.size(); i++) {
 
         # get alternative dispatching dst
         dispatch = option['type_method_definition_dispatch']
-        print(dispatch)
         assert isinstance(dispatch, dict)
         alter_method_dispatch = dispatch.get("HammerBlade")
         assert alter_method_dispatch
@@ -2433,7 +2432,6 @@ return res_hb;
                     else:
                         option['log_unimpl'] = ''
                     if backend == 'CPU' and 'HammerBlade' in option['backend_types']:
-                        print("Enter CPU backend")
                         process_redispatch_cpu_to_hb(option)
                         type_object_definitions.append(
                             NATIVE_DISPATCH_DEFINITION_BACKEND_REDISPATCH.substitute(env))

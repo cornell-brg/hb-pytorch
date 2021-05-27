@@ -31,7 +31,6 @@ extern "C" {
         } else {
           return other;
         }
-        printf("self and other are : \n", self, other);
        },
        c, a, b);
 

@@ -96,9 +96,9 @@ eva_t create_device_tensor(const Tensor& tensor_arg,
     tensor = tensor_arg;
   }
 
-//  if(!tensor.is_contiguous()) {
-//    AT_WARN("Offloading non contiguous plain tensor. Make sure you are expecting this!");
-//  }
+  if(!tensor.is_contiguous()) {
+    AT_WARN("Offloading non contiguous plain tensor. Make sure you are expecting this!");
+  }
 
   uint32_t N = (uint32_t) tensor.numel();
   uint32_t dims = (uint32_t) tensor.dim();
