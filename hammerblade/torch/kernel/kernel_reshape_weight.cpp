@@ -1,5 +1,5 @@
 //=======================================================================
-// Dense tensor add sparse tensor kernel
+// Reshape the 4-D sparse weight to 2D sparse matrix
 // 05/08/2020 Zhongyuan Zhao (zz546@cornell.edu)
 //=======================================================================
 

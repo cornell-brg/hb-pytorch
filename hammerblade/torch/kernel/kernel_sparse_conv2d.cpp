@@ -1,5 +1,5 @@
 //====================================================================
-// The direct pparse convolution kernel
+// The direct sparse convolution kernel
 // 05/08/2020 Zhongyuan Zhao (zz546@cornell.edu)
 //====================================================================
 

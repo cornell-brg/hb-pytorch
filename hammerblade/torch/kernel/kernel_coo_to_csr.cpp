@@ -1,5 +1,5 @@
 //=======================================================================
-// Dense tensor add sparse tensor kernel
+// Convert COO format sparse tensor to CSR format
 // 03/22/2020 Zhongyuan Zhao (zz546@cornell.edu)
 //=======================================================================
 

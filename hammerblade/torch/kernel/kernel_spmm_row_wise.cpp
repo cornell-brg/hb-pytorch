@@ -1,7 +1,7 @@
 //============================================================================
 // Sparse matrix multiply dense matrix (SpMM) kernel using row-wise product
 // and CSR compression format for sparse matrix
-// 17/02/2020 Zhongyuan Zhao, Yuxiang Long (zz546@cornell.edu, yl)
+// 17/02/2021 Zhongyuan Zhao, Yuxiang Long (zz546@cornell.edu)
 //============================================================================
 
 #include <kernel_common.hpp>
