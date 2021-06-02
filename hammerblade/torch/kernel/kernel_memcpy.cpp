@@ -12,7 +12,6 @@ extern "C" {
       const void* src,
       uint32_t* n) {
     // Start profiling
-    bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
     // Perform memcpy if __bsg_id is 0
     if(__bsg_id == 0) {
@@ -20,7 +19,6 @@ extern "C" {
     }
     //   End profiling
     bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;

@@ -16,7 +16,6 @@ extern "C" {
     auto b = HBTensor<float>(_b);
     float sum = 0.0f;
     // Start profiling
-    bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
     // Partial dot product sum
     hb_tiled_for(a.numel(), [&](size_t i) {
@@ -36,7 +35,6 @@ extern "C" {
 
     //   End profiling
     bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;

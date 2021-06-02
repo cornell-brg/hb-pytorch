@@ -25,7 +25,6 @@ extern "C" {
     bsg_attr_remote float* grad_data = (bsg_attr_remote float*)grad.data_ptr();
     bsg_attr_remote int32_t* index_data = (bsg_attr_remote int32_t*)index.data_ptr();
 
-    bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
     uint32_t indices_numel = index.numel();
@@ -78,7 +77,6 @@ extern "C" {
     }
 
     bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;

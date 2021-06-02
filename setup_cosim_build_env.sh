@@ -5,7 +5,7 @@ echo "  Make sure correct Python environemnt is set!"
 echo ""
 
 # setup path to MKL
-export MKL_ROOT=/work/global/lc873/work/sdh/venv_baseline/
+export MKL_ROOT=/work/global/lc873/work/sdh/venv_cosim/
 export MKL_INCLUDE=$MKL_ROOT/include
 export MKL_LIBRARY=$MKL_ROOT/lib
 export CMAKE_INCLUDE_PATH=$MKL_INCLUDE:$CMAKE_INCLUDE_PATH

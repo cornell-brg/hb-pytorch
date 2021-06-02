@@ -15,7 +15,6 @@ extern "C" {
     auto res = HBTensor<float>(t1_p);
 
     // Start profiling
-    bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
     hb_tiled_foreach(
@@ -26,7 +25,6 @@ extern "C" {
 
     //   End profiling
     bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;

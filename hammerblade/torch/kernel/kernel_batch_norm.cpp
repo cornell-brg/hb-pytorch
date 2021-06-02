@@ -29,9 +29,6 @@ extern "C" {
     uint32_t N = input.get_sizes()[0];
     uint32_t C = input.get_sizes()[1];
 
-    bsg_cuda_print_stat_kernel_start();
-    bsg_saif_start();
-
     for(size_t c = 0; c < C; ++c) {
 
       float mean, invstd;
@@ -54,8 +51,6 @@ extern "C" {
       });
     }
 
-    bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
     g_barrier.sync();
     return 0;
   }
@@ -76,9 +71,6 @@ extern "C" {
     uint32_t C = input.get_sizes()[1];
     uint32_t numel = input.numel() / C;
 
-
-    bsg_cuda_print_stat_kernel_start();
-    bsg_saif_start();
 
     for(size_t c = 0; c < C; ++c) {
       float* reduction_buffer = (float*) g_reduction_buffer;
@@ -141,8 +133,6 @@ extern "C" {
       g_barrier.sync();
     }
 
-    bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
     g_barrier.sync();
     return 0;
   }
@@ -169,9 +159,6 @@ extern "C" {
     uint32_t N = input.get_sizes()[0];
     uint32_t C = input.get_sizes()[1];
     uint32_t numel = input.numel() / C;
-
-    bsg_cuda_print_stat_kernel_start();
-    bsg_saif_start();
 
     for(size_t c = 0; c < C; ++c) {
       float mean, invstd;
@@ -284,8 +271,6 @@ extern "C" {
       }
     }
 
-    bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
     g_barrier.sync();
     return 0;
   }
@@ -305,9 +290,6 @@ extern "C" {
     HBTensor<float, 1> running_var(running_var_);
     int train = *train_;
     float eps = *eps_;
-
-    bsg_cuda_print_stat_kernel_start();
-    bsg_saif_start();
 
     uint32_t N = input.get_sizes()[0];
     uint32_t C = input.get_sizes()[1];
@@ -337,8 +319,6 @@ extern "C" {
       });
     }
 
-    bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;
@@ -356,8 +336,6 @@ extern "C" {
     float momentum = *momentum_;
     float eps = *eps_;
 
-    bsg_cuda_print_stat_kernel_start();
-    bsg_saif_start();
 
     uint32_t N = input.get_sizes()[0];
     uint32_t C = input.get_sizes()[1];
@@ -429,8 +407,6 @@ extern "C" {
       g_barrier.sync();
     }
 
-    bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;
@@ -455,8 +431,6 @@ extern "C" {
     int train = *train_;
     float eps = *eps_;
 
-    bsg_cuda_print_stat_kernel_start();
-    bsg_saif_start();
 
     uint32_t N = input.get_sizes()[0];
     uint32_t C = input.get_sizes()[1];
@@ -582,8 +556,6 @@ extern "C" {
       }
     }
 
-    bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;

@@ -2,7 +2,7 @@ import glob
 import os
 import subprocess
 
-qsub_template = '(cd {path}; qsub -N {job_name} -l walltime=72:00:00 -l nodes=1:ppn=3 -l mem="10gb" -d {path} -o {path}/qsub.out -e {path}/qsub.err -V run.sh)\n'
+qsub_template = '(cd {path}; qsub -N {job_name} -l walltime=144:00:00 -l nodes=1:ppn=12 -l mem="50gb" -d {path} -o {path}/qsub.out -e {path}/qsub.err -V run.sh)\n'
 
 def get_test_files(path):
     files = glob.glob(path + "/*.py")
@@ -18,7 +18,7 @@ def run_test_file_on_cluster(test_file):
     sh_cmd = "mkdir -p " + name
     os.system(sh_cmd)
 
-    script = "(source /work/global/lc873/work/sdh/venv_cosim/bin/activate; source /work/global/lc873/work/sdh/playground/bsg_bladerunner/setup.sh; source /work/global/lc873/work/sdh/brg-hb-pytorch/setup_cosim_build_env.sh; pycosim -m pytest -vs -k-hypothesis " + test_file + ")\n"
+    script = "(module load synopsys-2020/synopsys-vcs-R-2020.12; source /work/global/lc873/work/sdh/venv_cosim/bin/activate; source setup-gcc8.sh; pycosim -m pytest -vs -k-hypothesis " + test_file + " > out.std 2>&1)\n"
     with open(name + "/run.sh", 'w') as outfile:
         outfile.write(script)
 

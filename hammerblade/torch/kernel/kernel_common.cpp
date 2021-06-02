@@ -85,10 +85,14 @@ extern "C" {
 
   __attribute__ ((noinline))  int tensorlib_hb_startup(uint32_t* buffer) {
 
-    buffer[2*__bsg_id] = 0;
-    buffer[2*__bsg_id+1] = 0;
+    buffer[2*__bsg_tile_group_id] = 0;
+    buffer[2*__bsg_tile_group_id+1] = 0;
     g_reduction_buffer = (void*)buffer;
     g_barrier.reset();
+
+    // artificial delay
+    volatile int x = 50000;
+    for (size_t y = 0; y < x; y++);
 
     return 0;
   }

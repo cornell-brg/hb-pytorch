@@ -117,7 +117,6 @@ int convolution_forward_template(
                   "Conv2d filter doesn't fit in DMEM allocated array");
 
   // Start profiling
-  bsg_cuda_print_stat_kernel_start();
   bsg_saif_start();
 
   for(uint32_t n = 0; n < N; ++n) {
@@ -197,7 +196,6 @@ int convolution_forward_template(
 
   // End profiling
   bsg_saif_end();
-  bsg_cuda_print_stat_kernel_end();
 
   g_barrier.sync();
   return 0;
@@ -225,7 +223,6 @@ int convolution_backward_input_template(
   auto w = HBTensor4d<float, Cout, Cin, Kh, Kw>(weight);
 
   // Start profiling
-  bsg_cuda_print_stat_kernel_start();
   bsg_saif_start();
 
   // init input grads
@@ -255,7 +252,6 @@ int convolution_backward_input_template(
 
   // End profiling
   bsg_saif_end();
-  bsg_cuda_print_stat_kernel_end();
 
   g_barrier.sync();
   return 0;
@@ -283,7 +279,6 @@ int convolution_backward_weight_template(
   auto w = HBTensor4d<float, Cout, Cin, Kh, Kw>(grad_weight);
 
   // Start profiling
-  bsg_cuda_print_stat_kernel_start();
   bsg_saif_start();
 
   // init weight grads
@@ -306,7 +301,6 @@ int convolution_backward_weight_template(
 
   // End profiling
   bsg_saif_end();
-  bsg_cuda_print_stat_kernel_end();
 
   g_barrier.sync();
   return 0;

@@ -19,7 +19,6 @@ extern "C" {
     bsg_attr_remote float* result_data = (bsg_attr_remote float*)result.data_ptr();
     bsg_attr_remote int32_t* index_data = (bsg_attr_remote int32_t*)index.data_ptr();
 
-    bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
     auto size0 = self.dim(0); // this should really be size(0)
@@ -44,7 +43,6 @@ extern "C" {
     }
 
     bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;

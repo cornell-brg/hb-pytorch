@@ -95,7 +95,6 @@ extern "C" {
           uint32_t*     reduction_p,
           int32_t*      ignore_index_p) {
 
-    bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
     HBTensor<float> weight(weight_p);
@@ -110,7 +109,6 @@ extern "C" {
                            });
 
     bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;
@@ -129,7 +127,6 @@ extern "C" {
           uint32_t*     reduction_p,
           int32_t*      ignore_index_p) {
 
-    bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
     tensorlib_lossnll_impl(output_p,
@@ -143,7 +140,6 @@ extern "C" {
                            });
 
     bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;

@@ -6,6 +6,7 @@ COSIM_PYTHON_DIR := $(BRG_BSG_BLADERUNNER_DIR)/bsg_replicant/testbenches/python
 KERNEL_DIR       := $(shell git rev-parse --show-toplevel)/hammerblade/torch/kernel
 SCRIPT_DIR       := $(shell git rev-parse --show-toplevel)/hammerblade/torch/
 SCRIPT           := pytest_runner
+BSG_MACHINE_PATH := /work/global/lc873/work/sdh/playground/hb_bigbladerunner/bigblade_toplevel/testing/rtl/out/
 
 # bsg_replicant detail: test_loader is fast and lean version of
 # simulation executable. test_loader.debug is waveform enabled version.

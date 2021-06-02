@@ -26,7 +26,6 @@ extern "C" {
     int32_t inner_size = 1;
 
     // Start profiling
-    bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
     for (int32_t i = 0; i < dim; ++i)
@@ -60,7 +59,6 @@ extern "C" {
 
     // End profiling
     bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;

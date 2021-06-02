@@ -47,7 +47,6 @@ extern "C" {
     uint32_t outer_stride = in_sizes[dim] * in_strides[dim];
 
     // Start profiling
-    bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
     hb_tiled_for(num_softmax_axes, [&](size_t n) {
@@ -89,7 +88,6 @@ extern "C" {
 
     // End profiling
     bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;

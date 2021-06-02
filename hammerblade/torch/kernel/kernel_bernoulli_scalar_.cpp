@@ -21,8 +21,6 @@ extern "C" {
     generator.seed(seed + __bsg_id);
     std::uniform_real_distribution<float> distribution(0.0, 1.0);
     // Start profiling
-    bsg_cuda_print_stat_kernel_start();
-    bsg_saif_start();
     // bernoulli
     hb_tiled_for(self.numel(), [&](size_t i) {
         float rand = distribution(generator);
@@ -36,8 +34,6 @@ extern "C" {
         }
     });
     //   End profiling
-    bsg_saif_end();
-    bsg_cuda_print_stat_kernel_end();
 
     g_barrier.sync();
     return 0;
