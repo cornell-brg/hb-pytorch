@@ -313,6 +313,39 @@ Tensor& comparison_op_(Tensor& self, Scalar other, OutImpl& out_impl) {
   return out_impl(self, self, wrapped_scalar_tensor_and_check_convert(other, self));
 }
 
+Tensor xcelspmv_cpu(const Tensor& self, const Tensor& dense_vector) {
+  TORCH_CHECK(self.dim() == 1, "1D matrix expected, got dim ", self.dim(), " tensor");
+  int64_t tensor_size = self.size(0);
+  std::vector<int64_t> split_sizes(2);
+  split_sizes[0] = tensor_size - 12;
+  split_sizes[1] = 12;
+  std::vector<Tensor> tensors = self.split_with_sizes(split_sizes, 0);
+  Tensor other_cpu = tensors[1];
+  int32_t *other_info = other_cpu.data_ptr<int32_t>();
+  int32_t row = other_info[0];
+  int64_t vector_size = dense_vector.size(0);
+  std::cout << "Size of the dense vector is " << vector_size << std::endl; 
+  Tensor result = at::empty({row}, {at::device(at::kCPU).dtype(at::kInt)});
+  return result;
+}
+
+Tensor xcelspmm_cpu(const Tensor& self, const Tensor& dense_mm) {
+  TORCH_CHECK(self.dim() == 1, "1D matrix expected, got dim ", self.dim(), " tensor");
+  int64_t tensor_size = self.size(0);
+  std::vector<int64_t> split_sizes(2);
+  split_sizes[0] = tensor_size - 5;
+  split_sizes[1] = 5;
+  std::vector<Tensor> tensors = self.split_with_sizes(split_sizes, 0);
+  Tensor other_cpu = tensors[1];
+  int32_t *other_info = other_cpu.data_ptr<int32_t>();
+  int32_t m = other_info[0];
+  int64_t n = dense_mm.size(0);
+  int64_t k = dense_mm.size(1);
+  std::cout << "Size of the dense matrix is " << n << " x " << k << std::endl;
+  Tensor result = at::empty({m, k}, {at::device(at::kCPU).dtype(at::kInt)});
+  return result;
+}
+
 // We need explicit cast to OutFunc because each *_out func is overloaded twice. Without An explicit cast, merely
 // referring to *_out function is ambiguious.
 using OutFunc = std::add_const<Tensor&(&)(Tensor&, const Tensor&, const Tensor&)>::type;

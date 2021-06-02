@@ -207,8 +207,14 @@ Tensor add_sparse(const Tensor& self, const Tensor& other, Scalar alpha) {
   // TODO: Why?! Can't we just flip the order here...
   TORCH_CHECK(!(self.is_sparse() && !other.is_sparse()),
               "add(sparse, dense) is not supported. Use add(dense, sparse) instead.");
-  Tensor result = at::empty({0}, self.options());
-  return at::add_out(result, self, other, alpha);  // redispatch!
+  if(self.is_hammerblade()) {
+    Tensor result = at::empty(self.sizes(), self.options());
+    return at::add_out(result, self, other, alpha);  
+  }
+  else {
+    Tensor result = at::empty({0}, self.options());
+    return at::add_out(result, self, other, alpha);  // redispatch!
+  }
 }
 
 Tensor& add_sparse_(Tensor& self, const Tensor& other, Scalar alpha) {
@@ -1174,5 +1180,425 @@ Tensor _sparse_sum_backward_cpu(const Tensor& grad_, const SparseTensor& input_,
     return at::_sparse_coo_tensor_with_dims_and_tensors(input_sparse_dim, input_dense_dim, input_sizes, input_indices.clone(at::MemoryFormat::Contiguous), grad_input_values, grad.options());
   }
 }
+
+constexpr int cpu_dense_input_batch_size_dim = 0;
+constexpr int cpu_dense_input_channels_dim = 1;
+constexpr int cpu_sparse_weight_channels_dim = 0;
+constexpr int cpu_dense_output_channels_dim = 1;
+
+static std::vector<int64_t> cpu_sparse_conv_output_size(
+    IntArrayRef input_size, IntArrayRef weight_size,
+    IntArrayRef padding, IntArrayRef stride, IntArrayRef dilation,
+    int64_t groups) {
+  auto dim = input_size.size();
+  std::vector<int64_t> output_size(dim);
+  output_size[0] = input_size[cpu_dense_input_batch_size_dim];
+  output_size[1] = weight_size[cpu_sparse_weight_channels_dim];
+  for (size_t d = 2; d < dim; ++d) {
+    auto kernel = dilation[d - 2] * (weight_size[d] - 1) + 1;
+    output_size[d] = (input_size[d] + (2 * padding[d - 2])
+                        - kernel) / stride[d - 2] + 1;
+  }
+  return output_size;
+}
+
+Tensor sparse_convolution(const Tensor& input_t, const SparseTensor& weight_t, const Tensor& bias_t,
+    IntArrayRef padding, IntArrayRef stride,
+    IntArrayRef dilation, int64_t groups) {
+
+  auto output_t = at::zeros(
+                    cpu_sparse_conv_output_size(input_t.sizes(), weight_t.sizes(),
+                                     padding, stride, dilation, groups),
+                    input_t.options());
+  /*
+  Sparse Convolution implementation for CPU.
+  */
+  return output_t;
+}
+
+Tensor mv_sparse(const SparseTensor& self, const Tensor& vec)
+{
+  TORCH_CHECK(self.ndimension() == 2 && 
+              vec.ndimension() == 1,
+              "mv: two tensor dim should be 2 and 1, but got ",
+              "SparseTensor Dim: ", self.ndimension(), "Tensor Dim: ", vec.ndimension());
+
+  TORCH_CHECK(vec.size(-1) == self.size(-1),
+              "mv: expected self.size(-1) == vec.size(-1)");
+
+  auto result = self.matmul(vec.unsqueeze(-1));
+
+  return result.squeeze(-1);
+}
+
+// --------------------------------------------------------------------
+// Sinkhorn Functions
+// --------------------------------------------------------------------
+
+// --------------------------------------------------------------------
+// sddtmm(SparseTensor, Tensor, Tensor) -> SparseTensor
+//
+// sddtmm(a, b, c) returns (b@c.T) at locations were a is nonzero
+// --------------------------------------------------------------------
+
+template <typename scalar_t>
+void sddtmm_kernel_cpu(
+  const SparseTensor& a_sparse_tensor,
+  const Tensor& b_dense_tensor,
+  const Tensor& c_dense_tensor,
+  Tensor& out_indices,
+  Tensor& out_vals){
+    
+  if ( b_dense_tensor.scalar_type() != ScalarType::Float
+    || c_dense_tensor.scalar_type() != ScalarType::Float ) {
+    AT_ERROR("SddTmm is implemented for Float type only for matrices b and c"); 
+  }
+
+  TORCH_CHECK(a_sparse_tensor.sparse_dim() == 2, "We do not support hybrid sparse tensor for 'a' in sddtmm!");
+  TORCH_CHECK(b_dense_tensor.dim() == 2 && c_dense_tensor.dim() == 2, "Expected 2D matrixes for 'a' and 'b', but got ", b_dense_tensor.dim(), " and ", c_dense_tensor.dim(), " tensors");
+  TORCH_CHECK(b_dense_tensor.size(1) == c_dense_tensor.size(1), "Matrix multiply dimension mismatch: 'b' dim 1 = ", b_dense_tensor.size(1), ", 'c'.T dim 0 = ", c_dense_tensor.size(1));
+
+  TORCH_CHECK(b_dense_tensor.size(0) == a_sparse_tensor.size(0) && c_dense_tensor.size(0) == a_sparse_tensor.size(1),"SddTmm sample dimension mismatch: sample was shape ",a_sparse_tensor.size(0)," by ",a_sparse_tensor.size(1),", but b@c is shape ",b_dense_tensor.size(0)," by ",c_dense_tensor.size(0));
+
+  auto indices = a_sparse_tensor._indices();
+  TORCH_CHECK(indices.dtype() == at::kLong, "Indices should be long, but got ", indices.dtype());
+
+  auto a_indices = indices.accessor<int64_t, 2>();
+  auto b_dense = b_dense_tensor.accessor<scalar_t, 2>();
+  auto c_dense = c_dense_tensor.accessor<scalar_t, 2>();
+  auto res_indices = out_indices.accessor<int64_t, 2>();
+  auto res_vals = out_vals.accessor<scalar_t, 1>();
+
+  int dot_len = b_dense.size(1);
+  for (int k = 0; k < a_sparse_tensor._nnz(); k++) {
+    int row = a_indices[0][k]; //0
+    int col = a_indices[1][k];  //1
+
+    float dot_total = 0; 
+    for (int i = 0; i < dot_len; i++){
+      dot_total += b_dense[row][i] * c_dense[col][i];
+    }
+    
+    // update indices & vals
+    res_indices[0][k] = row;
+    res_indices[1][k] = col;
+    res_vals[k] = dot_total;
+  }
+}
+
+// --------------------------------------------------------------------
+// sddtmm(Csr Tensor, Tensor, Tensor) -> SparseTensor
+//
+// sddtmm(a, b, c) returns (b@c.T) at locations were a is nonzero
+// optimized version from above since it uses the CSR format for the sparse matrix and allows more reuse!
+// --------------------------------------------------------------------
+template <typename scalar_t>
+void sddtmm_kernel_cpu_opt(
+  const LongTensor& a_csr_tensor,
+  const LongTensor& a_cols_tensor,
+  const Tensor& b_dense_tensor,
+  const Tensor& c_dense_tensor,
+  Tensor& out_indices,
+  Tensor& out_vals){
+    
+  if ( b_dense_tensor.scalar_type() != ScalarType::Float
+    || c_dense_tensor.scalar_type() != ScalarType::Float ) {
+    AT_ERROR("SddTmm is implemented for Float type only for matrices b and c"); 
+  }
+
+  TORCH_CHECK(b_dense_tensor.dim() == 2 && c_dense_tensor.dim() == 2, "Expected 2D matrixes for 'a' and 'b', but got ", b_dense_tensor.dim(), " and ", c_dense_tensor.dim(), " tensors");
+  TORCH_CHECK(b_dense_tensor.size(1) == c_dense_tensor.size(1), "Matrix multiply dimension mismatch: 'b' dim 1 = ", b_dense_tensor.size(1), ", 'c'.T dim 0 = ", c_dense_tensor.size(1));
+
+  auto a_csr = a_csr_tensor.accessor<int64_t, 1>();
+  auto a_cols = a_cols_tensor.accessor<int64_t, 1>();
+
+  auto b_dense = b_dense_tensor.accessor<scalar_t, 2>();
+  auto c_dense = c_dense_tensor.accessor<scalar_t, 2>();
+  auto res_indices = out_indices.accessor<int64_t, 2>();
+  auto res_vals = out_vals.accessor<scalar_t, 1>();
+
+  int dot_len = b_dense.size(1);
+
+  int out_row = b_dense.size(0);
+  int out_cols = c_dense.size(0);
+
+  int nnz_idx=0;
+  // int flops = 0;
+  for (int a_row = 0; a_row < out_row; a_row++) {
+    for (int a_col_idx = a_csr[a_row]; a_col_idx < a_csr[a_row+1]; a_col_idx++){
+      int a_col = a_cols[a_col_idx];
+
+      float dot_total = 0; 
+      // auto res_dot = b_dense_tensor.select(0,a_row).dot(c_dense_tensor.select(0,a_col));
+      // dot_total = *res_dot.data_ptr<scalar_t>();
+      for (int i = 0; i < dot_len; i++){
+        dot_total += b_dense[a_row][i] * c_dense[a_col][i];
+        // flops+=2;
+      }
+      // update indices & vals
+      res_indices[0][nnz_idx] = a_row;
+      res_indices[1][nnz_idx] = a_col;
+      res_vals[nnz_idx] = dot_total;
+      ++nnz_idx;
+    }
+  }
+  // printf("FLOPS for sddtmm %d\n",flops);
+}
+
+
+SparseTensor sddtmm_cpu(
+  const SparseTensor& a_sparse_tensor,
+  const Tensor& b_dense_tensor,
+  const Tensor& c_dense_tensor) {
+  
+  Tensor result_indices = at::empty({2, a_sparse_tensor._nnz()}, {at::requires_grad().device(at::kCPU).dtype(at::kLong)});
+  Tensor result_vals = at::empty(a_sparse_tensor._nnz(), {at::requires_grad().device(at::kCPU).dtype(at::kFloat)});
+
+  LongTensor indices = a_sparse_tensor._indices();
+  LongTensor a_colIndices = indices.select(0, 1);
+  int64_t* a_rowIndices = indices.select(0, 0).data_ptr<int64_t>();
+  int64_t a_nnz = a_sparse_tensor._nnz();
+  int64_t a_dim = a_sparse_tensor.size(0);
+  LongTensor a_csr = _to_csr(a_rowIndices, a_dim, a_nnz);
+
+  // AT_DISPATCH_ALL_TYPES(b_dense_tensor.scalar_type(), "sddtmm_cpu", [&]{
+  //   sddtmm_kernel_cpu<scalar_t>(a_sparse_tensor, b_dense_tensor, c_dense_tensor, result_indices, result_vals);
+  // });
+  
+  AT_DISPATCH_ALL_TYPES(b_dense_tensor.scalar_type(), "sddtmm_cpu", [&]{
+    sddtmm_kernel_cpu_opt<scalar_t>(a_csr, a_colIndices, b_dense_tensor, c_dense_tensor, result_indices, result_vals);
+  });
+
+  //Create CPU sparse tensor (from SparseLLCopy):
+  SparseTensor sparse_tensor = detail::make_tensor<SparseTensorImpl>(TensorTypeSet(TensorTypeId::SparseCPUTensorId), result_vals.options().dtype());
+  get_sparse_impl(sparse_tensor)->resize_(a_sparse_tensor.sparse_dim(), a_sparse_tensor.dense_dim(), a_sparse_tensor.sizes());
+  get_sparse_impl(sparse_tensor)->set_indices_and_values_unsafe(result_indices, result_vals);
+  if(a_sparse_tensor.is_coalesced()) {
+    get_sparse_impl(sparse_tensor)->set_coalesced(true);
+  }
+  return sparse_tensor;
+}
+
+// --------------------------------------------------------------------
+// sddtmmd(SparseTensor, Tensor, Tensor) -> Tensor
+//
+// sddtmmd(a, b, c) returns (b@c.T) at locations were a is nonzero
+// --------------------------------------------------------------------
+
+template <typename scalar_t>
+void sddtmmd_kernel_cpu(
+  const SparseTensor& a_sparse_tensor,
+  const Tensor& b_dense_tensor,
+  const Tensor& c_dense_tensor,
+  Tensor& out_tensor){
+
+  if ( b_dense_tensor.scalar_type() != ScalarType::Float
+    || c_dense_tensor.scalar_type() != ScalarType::Float ) {
+    AT_ERROR("Sddtmmd is implemented for Float type only for matrices b and c"); 
+  }
+
+  TORCH_CHECK(a_sparse_tensor.sparse_dim() == 2, "We do not support hybrid sparse tensor for 'a' in sddtmm!");
+  TORCH_CHECK(b_dense_tensor.dim() == 2 && c_dense_tensor.dim() == 2, "Expected 2D matrixes for 'a' and 'b', but got ", b_dense_tensor.dim(), " and ", c_dense_tensor.dim(), " tensors");
+  TORCH_CHECK(b_dense_tensor.size(1) == c_dense_tensor.size(1), "Matrix multiply dimension mismatch: 'b' dim 1 = ", b_dense_tensor.size(1), ", 'c'.T dim 0 = ", c_dense_tensor.size(1));
+
+  TORCH_CHECK(b_dense_tensor.size(0) == a_sparse_tensor.size(0) && c_dense_tensor.size(0) == a_sparse_tensor.size(1),"SddTmm sample dimension mismatch: sample was shape ",a_sparse_tensor.size(0)," by ",a_sparse_tensor.size(1),", but b@c is shape ",b_dense_tensor.size(0)," by ",c_dense_tensor.size(0));
+
+  auto indices = a_sparse_tensor._indices();
+  TORCH_CHECK(indices.dtype() == at::kLong, "Indices should be long, but got ", indices.dtype());
+
+  auto a_indices = indices.accessor<int64_t, 2>();
+  auto b_dense = b_dense_tensor.accessor<scalar_t, 2>();
+  auto c_dense = c_dense_tensor.accessor<scalar_t, 2>();
+  auto out = out_tensor.accessor<scalar_t, 2>();
+
+  int dot_len = b_dense.size(1);
+  for (int k = 0; k < a_sparse_tensor._nnz(); k++) {
+    int row = a_indices[0][k]; //0
+    int col = a_indices[1][k];  //1
+
+    float dot_total = 0;
+    for (int i = 0; i < dot_len; i++)
+      dot_total += b_dense[row][i] * c_dense[col][i];
+
+    // update out
+    out[row][col] = dot_total;
+  }
+}
+SparseTensor sddtmmd_cpu(
+  const SparseTensor& a_sparse_tensor,
+  const Tensor& b_dense_tensor,
+  const Tensor& c_dense_tensor) {
+  
+  Tensor result = at::zeros(a_sparse_tensor.sizes(), {at::requires_grad().device(at::kCPU).dtype(at::kFloat)});
+
+  AT_DISPATCH_ALL_TYPES(b_dense_tensor.scalar_type(), "sddtmmd_cpu", [&]{
+    sddtmmd_kernel_cpu<scalar_t>(a_sparse_tensor, b_dense_tensor, c_dense_tensor, result);
+  });
+
+  return result;
+}
+
+// --------------------------------------------------------------------
+// dstmm(Tensor, SparseTensor) -> Tensor
+// 
+// dstmm(a, b) returns a@b.T
+// --------------------------------------------------------------------
+
+template <typename scalar_t>
+void dstmm_kernel(
+    const Tensor& a_tensor, //dense
+    const LongTensor& b_csc_tensor,
+    const LongTensor& b_rows_tensor,
+    const Tensor& b_vals_tensor,
+    Tensor& res_tensor //destination
+  ) {
+  auto a = a_tensor.accessor<scalar_t, 2>();
+  auto b_csc = b_csc_tensor.accessor<int64_t, 1>();
+  auto b_rows = b_rows_tensor.accessor<int64_t, 1>();
+  auto b_vals = b_vals_tensor.accessor<scalar_t, 1>();
+  auto res = res_tensor.accessor<scalar_t, 2>();
+
+  auto a_nrows = res.size(0);
+  auto b_ncols = res.size(1);
+  auto nnz = b_vals.size(0);
+
+  float sum;
+  for (int a_row = 0; a_row < a_nrows; a_row++){
+    for (int b_col = 0; b_col < b_ncols; b_col++){
+      sum = 0;
+      for (int b_row_idx = b_csc[b_col]; b_row_idx < b_csc[b_col+1]; b_row_idx++){
+        int b_row = b_rows[b_row_idx];
+        float b_val = b_vals[b_row_idx];
+        sum += b_val * a[a_row][b_row]; 
+      }
+      res[a_row][b_col] = sum;
+    }
+  }
+}
+Tensor dstmm_cpu(
+  const Tensor& a_dense,
+  const SparseTensor& bT_sparse) {
+
+  if ( a_dense.scalar_type() != ScalarType::Float
+    || bT_sparse.scalar_type() != ScalarType::Float ) {
+    AT_ERROR("dstmm is implemented for Float only"); 
+  }
+
+  TORCH_CHECK(bT_sparse.sparse_dim() == 2, "We do not support hybrid sparse tensor for 'b' (sparse) in DenseSparseTMm!");
+  TORCH_CHECK(a_dense.dim() == 2 && bT_sparse.dim() == 2, "Expected 2D matrixes for 'a' and 'b', but got ", a_dense.dim(), " and ", bT_sparse.dim(), " tensors");
+  TORCH_CHECK(a_dense.size(1) == bT_sparse.size(1), "Matrix multiply dimension mismatch: 'a' dim 1 = ", a_dense.size(1), ", 'b' dim 0 = ", bT_sparse.size(1));
+
+  LongTensor indices = bT_sparse._indices();
+  TORCH_CHECK(indices.dtype() == at::kLong, "Indices should be long, but got ", indices.dtype());
+
+  LongTensor b_rowIndices = indices.select(0, 1);
+  int64_t* b_colIndices = indices.select(0, 0).data_ptr<int64_t>();
+  int64_t b_nnz = bT_sparse._nnz();
+  int64_t b_dim = bT_sparse.size(0);
+  LongTensor b_csc = _to_csr(b_colIndices, b_dim, b_nnz);
+  Tensor b_values = bT_sparse._values();
+
+  Tensor out_dense = at::zeros({a_dense.size(0), bT_sparse.size(0)}, {at::requires_grad().device(at::kCPU).dtype(at::kFloat)});
+
+  AT_DISPATCH_ALL_TYPES(a_dense.scalar_type(), "dstmm_cpu", [&]{
+    dstmm_kernel<scalar_t>(a_dense, b_csc, b_rowIndices, b_values, out_dense);
+  });
+
+  return out_dense;
+}
+
+// --------------------------------------------------------------------
+// dstmmt(Tensor, SparseTensor) -> Tensor
+//
+// dstmmt(a, b) returns (a@b.T).T
+// --------------------------------------------------------------------
+
+template <typename scalar_t>
+void dstmmt_kernel(
+    const Tensor& a_tensor, //dense
+    const LongTensor& b_csc_tensor,
+    const LongTensor& b_rows_tensor,
+    const Tensor& b_vals_tensor,
+    Tensor& res_tensor //destination
+  ) {
+  auto a = a_tensor.accessor<scalar_t, 2>();
+  auto b_csc = b_csc_tensor.accessor<int64_t, 1>();
+  auto b_rows = b_rows_tensor.accessor<int64_t, 1>();
+  auto b_vals = b_vals_tensor.accessor<scalar_t, 1>();
+  auto res = res_tensor.accessor<scalar_t, 2>();
+
+  auto a_nrows = res.size(1);
+  auto b_ncols = res.size(0);
+  auto nnz = b_vals.size(0);
+
+  float sum;
+  for (int a_row = 0; a_row < a_nrows; a_row++){
+    for (int b_col = 0; b_col < b_ncols; b_col++){
+      sum = 0;
+      for (int b_row_idx = b_csc[b_col]; b_row_idx < b_csc[b_col+1]; b_row_idx++){
+        int b_row = b_rows[b_row_idx];
+        float b_val = b_vals[b_row_idx];
+        sum += b_val * a[a_row][b_row]; 
+      }
+      res[b_col][a_row] = sum;
+    }
+  }
+}
+Tensor dstmmt_cpu(
+  const Tensor& a_dense,
+  const SparseTensor& bT_sparse) {
+
+  if ( a_dense.scalar_type() != ScalarType::Float
+    || bT_sparse.scalar_type() != ScalarType::Float ) {
+    AT_ERROR("dstmmt is implemented for Float only"); 
+  }
+
+  TORCH_CHECK(bT_sparse.sparse_dim() == 2, "We do not support hybrid sparse tensor for 'b' (sparse) in DenseSparseTMm!");
+  TORCH_CHECK(a_dense.dim() == 2 && bT_sparse.dim() == 2, "Expected 2D matrixes for 'a' and 'b', but got ", a_dense.dim(), " and ", bT_sparse.dim(), " tensors");
+  TORCH_CHECK(a_dense.size(1) == bT_sparse.size(1), "Matrix multiply dimension mismatch: 'a' dim 1 = ", a_dense.size(1), ", 'b' dim 0 = ", bT_sparse.size(1));
+
+  LongTensor indices = bT_sparse._indices();
+  TORCH_CHECK(indices.dtype() == at::kLong, "Indices should be long, but got ", indices.dtype());
+
+  LongTensor b_rowIndices = indices.select(0, 1);
+  int64_t* b_colIndices = indices.select(0, 0).data_ptr<int64_t>();
+  int64_t b_nnz = bT_sparse._nnz();
+  int64_t b_dim = bT_sparse.size(0);
+  LongTensor b_csc = _to_csr(b_colIndices, b_dim, b_nnz);
+  Tensor b_values = bT_sparse._values();
+
+  Tensor out_dense = at::zeros({bT_sparse.size(0), a_dense.size(0)}, {at::requires_grad().device(at::kCPU).dtype(at::kFloat)});
+
+  AT_DISPATCH_ALL_TYPES(a_dense.scalar_type(), "dstmmt_cpu", [&]{
+    dstmmt_kernel<scalar_t>(a_dense, b_csc, b_rowIndices, b_values, out_dense);
+  });
+
+  return out_dense;
+}
+
+
+// --------------------------------------------------------------------
+// sreciprocal_(SparseTensor) -> SparseTensor
+//
+// sreciprocal_(a) returns 1.0 / a, ignoring a's zero entries
+// ** and modifies a **
+// a must be a coalesced tensor
+// --------------------------------------------------------------------
+
+SparseTensor& _sampled_reciprocal__cpu(SparseTensor& self) {
+  TORCH_CHECK(self.is_coalesced(), "_sampled_reciprocal__cpu only supports a coalesced tensor");
+  int64_t nnz = self._nnz(); // = vals.numel()
+  Tensor vals = self._values();
+
+  AT_DISPATCH_ALL_TYPES(self.scalar_type(), "_sampled_reciprocal__cpu", [&]{
+    auto out = vals.accessor<scalar_t, 1>();
+    for (int i = 0; i < nnz; i++){
+      out[i] = 1 / out[i];
+    }
+  });
+
+  return self;
+}
+
 
 }} // namespace at::native

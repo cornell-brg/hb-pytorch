@@ -280,6 +280,7 @@
     HammerBlade: add
     SparseCPU: add_sparse
     SparseCUDA: add_sparse
+    SparseHammerBlade: add_sparse
     MkldnnCPU: mkldnn_add
   supports_named_tensor: True
 
@@ -291,6 +292,7 @@
     HammerBlade: add_
     SparseCPU: add_sparse_
     SparseCUDA: add_sparse_
+    SparseHammerBlade: add_sparse_
     MkldnnCPU: mkldnn_add_
   supports_named_tensor: True
 
@@ -301,6 +303,7 @@
     HammerBlade: add_out
     SparseCPU: add_out_sparse_cpu
     SparseCUDA: add_out_sparse_cuda
+    SparseHammerBlade: add_out_sparse_hb
     MkldnnCPU: mkldnn_add_out
   supports_named_tensor: True
 
@@ -409,6 +412,7 @@
   variants: function, method
   dispatch:
     CPU: llcopy_to_hb
+    SparseCPU: llcopy_sparse_to_hb
 
 - func: as_strided(Tensor(a) self, int[] size, int[] stride, int? storage_offset=None) -> Tensor(a)
   variants: function, method
@@ -972,6 +976,10 @@
 
 - func: embedding(Tensor weight, Tensor indices, int padding_idx=-1, bool scale_grad_by_freq=False, bool sparse=False) -> Tensor
   use_c10_dispatcher: full
+  dispatch:
+    CPU: embedding
+    CUDA: embedding
+    HammerBlade: embedding
 
 - func: embedding_backward(Tensor grad, Tensor indices, int num_weights, int padding_idx, bool scale_grad_by_freq, bool sparse) -> Tensor
   use_c10_dispatcher: full
@@ -1828,6 +1836,10 @@
   dispatch:
     CUDA: miopen_depthwise_convolution_backward_weight
 
+- func: sparse_convolution(Tensor self, Tensor weight, Tensor? bias, int[] padding, int[] stride, int[] dilation, int groups) -> Tensor
+  dispatch:
+    SparseCPU: sparse_convolution
+
 - func: hb_convolution_transpose(Tensor self, Tensor weight, Tensor? bias, int[] padding, int[] output_padding, int[] stride, int[] dilation, int groups) -> Tensor
   dispatch:
     HammerBlade: hb_convolution_transpose
@@ -1835,6 +1847,10 @@
 - func: hb_convolution(Tensor self, Tensor weight, Tensor? bias, int[] padding, int[] stride, int[] dilation, int groups) -> Tensor
   dispatch:
     HammerBlade: hb_convolution
+
+- func: hb_sparse_convolution(Tensor self, Tensor weight, Tensor? bias, int[] padding, int[] stride, int[] dilation, int groups) -> Tensor
+  dispatch:
+    SparseHammerBlade: hb_sparse_convolution
 
 - func: hb_convolution_backward_input(int[] self_size, Tensor grad_output, Tensor weight, int[] padding, int[] stride, int[] dilation, int groups) -> Tensor
   dispatch:
@@ -1870,6 +1886,7 @@
     HammerBlade: mm_hb
     SparseCPU: _sparse_mm
     SparseCUDA: _sparse_mm
+    SparseHammerBlade: _sparse_mm_hb
   supports_named_tensor: True
 
 - func: mm.out(Tensor self, Tensor mat2, *, Tensor(a!) out) -> Tensor(a!)
@@ -1882,6 +1899,10 @@
 
 - func: _sparse_mm(Tensor sparse, Tensor dense) -> Tensor
   use_c10_dispatcher: full
+  dispatch:
+    SparseCPU: _sparse_mm
+    SparseCUDA: _sparse_mm
+    SparseHammerBlade: _sparse_mm_hb
 
 - func: mode(Tensor self, int dim=-1, bool keepdim=False) -> (Tensor values, Tensor indices)
   supports_named_tensor: True
@@ -1906,6 +1927,7 @@
     HammerBlade: mul
     SparseCPU: mul_sparse
     SparseCUDA: mul_sparse
+    SparseHammerBlade: mul_sparse
     MkldnnCPU: mkldnn_mul
   supports_named_tensor: True
 
@@ -1917,6 +1939,7 @@
     HammerBlade: mul_
     SparseCPU: mul_sparse_
     SparseCUDA: mul_sparse_
+    SparseHammerBlade: mul_sparse_
     MkldnnCPU: mkldnn_mul_
   supports_named_tensor: True
 
@@ -1927,6 +1950,7 @@
     HammerBlade: mul_out
     SparseCPU: mul_out_sparse_cpu
     SparseCUDA: mul_out_sparse_cuda
+    SparseHammerBlade: mul_out_sparse_hb
     MkldnnCPU: mkldnn_mul_out
   supports_named_tensor: True
 
@@ -1944,6 +1968,8 @@
   dispatch:
     CPU: legacy::cpu::_th_mv
     CUDA: legacy::cuda::_th_mv
+    SparseCPU: mv_sparse
+    SparseHammerBlade: mv_hb_sparse
   supports_named_tensor: True
 
 - func: mv.out(Tensor self, Tensor vec, *, Tensor(a!) out) -> Tensor(a!)
@@ -2201,6 +2227,7 @@
   dispatch:
     CPU: _reciprocal__cpu
     CUDA: _reciprocal__cuda
+    HammerBlade: _reciprocal__hb
 
 - func: reciprocal.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
   supports_named_tensor: True
@@ -2295,6 +2322,7 @@
   dispatch:
     CPU: relu_
     CUDA: relu_
+    HammerBlade: relu_
     MkldnnCPU: mkldnn_relu_
     QuantizedCPU: quantized_relu_
 
@@ -3083,6 +3111,7 @@
     HammerBlade: sub_out
     SparseCPU: sub_out_sparse
     SparseCUDA: sub_out_sparse
+    SparseHammerBlade: sub_out_sparse
   supports_named_tensor: True
 
 - func: sub.Tensor(Tensor self, Tensor other, *, Scalar alpha=1) -> Tensor
@@ -3094,6 +3123,7 @@
     HammerBlade: sub
     SparseCPU: sub_sparse
     SparseCUDA: sub_sparse
+    SparseHammerBlade: sub_sparse
   supports_named_tensor: True
 
 - func: sub_.Tensor(Tensor(a!) self, Tensor other, *, Scalar alpha=1) -> Tensor(a!)
@@ -3104,6 +3134,7 @@
     HammerBlade: sub_
     SparseCPU: sub_sparse_
     SparseCUDA: sub_sparse_
+    SparseHammerBlade: sub_sparse_
   supports_named_tensor: True
 
 # For C++ only, until we have conversion from C++ numbers to Tensor
@@ -3300,6 +3331,7 @@
   dispatch:
     SparseCPU: new_with_dims_and_tensor_sparse
     SparseCUDA: new_with_dims_and_tensor_sparse
+    SparseHammerBlade: new_with_dims_and_tensor_sparse
   requires_tensor: True
 
 - func: sparse_resize_(Tensor(a!) self, int[] size, int sparse_dim, int dense_dim) -> Tensor(a!)
@@ -4240,6 +4272,7 @@
   dispatch:
     CPU: legacy::cpu::_th_random_
     CUDA: random_cuda_
+    HammerBlade: random_hb_
   supports_named_tensor: True
 
 - func: uniform_(Tensor(a!) self, float from=0, float to=1, *, Generator? generator=None) -> Tensor(a!)
@@ -4886,6 +4919,7 @@
   dispatch:
     CPU: sign_out
     CUDA: sign_out
+    HammerBlade: sign_out
 
 - func: dist(Tensor self, Tensor other, Scalar p=2) -> Tensor
   use_c10_dispatcher: full
@@ -4978,6 +5012,7 @@
   dispatch:
     CPU: legacy::cpu::_th_remainder_out
     CUDA: legacy::cuda::_th_remainder_out
+    HammerBlade: remainder_out_hb
 
 - func: remainder.Tensor(Tensor self, Tensor other) -> Tensor
   use_c10_dispatcher: full
@@ -4985,6 +5020,7 @@
   dispatch:
     CPU: legacy::cpu::_th_remainder
     CUDA: legacy::cuda::_th_remainder
+    HammerBlade: remainder_hb
 
 - func: min.out(Tensor self, Tensor other, *, Tensor(a!) out) -> Tensor(a!)
   dispatch:
@@ -5011,6 +5047,7 @@
   dispatch:
     CPU: legacy::cpu::_th_max_out
     CUDA: legacy::cuda::_th_max_out
+    HammerBlade: max_out_hb
 
 - func: max.other(Tensor self, Tensor other) -> Tensor
   use_c10_dispatcher: full
@@ -5018,6 +5055,7 @@
   dispatch:
     CPU: legacy::cpu::_th_max
     CUDA: legacy::cuda::_th_max
+    HammerBlade: max_hb
 
 - func: max(Tensor self) -> Tensor
   use_c10_dispatcher: full
@@ -5100,6 +5138,7 @@
   dispatch:
     CPU: unfold
     CUDA: unfold
+    HammerBlade: unfold
 
 - func: equal(Tensor self, Tensor other) -> bool
   use_c10_dispatcher: full
@@ -5331,6 +5370,7 @@
   dispatch:
     CPU: l1_loss_backward_out
     CUDA: l1_loss_backward_out
+    HammerBlade: l1_loss_backward_out
 
 - func: l1_loss_backward(Tensor grad_output, Tensor self, Tensor target, int reduction) -> Tensor
   use_c10_dispatcher: full
@@ -6599,6 +6639,19 @@
   dispatch:
     HammerBlade: vincr_hb
 
+- func: embedding_recsys(Tensor weight, Tensor indices, int padding_idx=-1, bool scale_grad_by_freq=False, bool sparse=False) -> Tensor
+  use_c10_dispatcher: full
+  dispatch:
+    HammerBlade: embedding_hb
+
+- func: embedding_backward_recsys(Tensor grad, Tensor indices, int num_weights, int padding_idx, bool scale_grad_by_freq, bool sparse) -> Tensor
+  use_c10_dispatcher: full
+
+- func: embedding_dense_backward_recsys(Tensor grad_output, Tensor indices, int num_weights, int padding_idx, bool scale_grad_by_freq) -> Tensor
+  use_c10_dispatcher: full
+  dispatch:
+    HammerBlade: embedding_dense_backward_hb_recsys
+
 # Tutorial TODO:
 # Create an ATen operator vvadd, which takes 2 input arguments
 # self, and other, and produce a Tensor
@@ -6611,3 +6664,74 @@
 #   use_c10_dispatcher: full
 #   variants: function
 #   dispatch:
+
+  # sampled dense-[dense transpose] matrix product (self = sparse)
+  # returns a sparse tensor
+- func: sddtmm(Tensor self, Tensor mat1, Tensor mat2t) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: sddtmm_cpu
+    SparseHammerBlade: sddtmm_hb
+
+  # sampled dense-[dense transpose] matrix product (self = sparse)
+  # returns a dense tensor
+- func: sddtmmd(Tensor self, Tensor mat1, Tensor mat2t) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: sddtmmd_cpu
+    SparseHammerBlade: sddtmmd_hb
+    
+  # dense-[sparse transpose] matrix product
+  # returns a dense tensor
+- func: dstmm(Tensor self, Tensor mat2t) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: dstmm_cpu
+    SparseHammerBlade: dstmm_hb
+
+  # dense-[sparse transpose] matrix product [transposed]
+  # returns a dense tensor
+- func: dstmmt(Tensor self, Tensor mat2t) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: dstmmt_cpu
+    SparseHammerBlade: dstmmt_hb
+
+  # sampled reciprocal - reciprocal_, but ignoring entries that are 0
+  # returns a sparse tensor
+- func: sreciprocal_(Tensor(a!) self) -> Tensor(a!)
+  supports_named_tensor: True
+  variants: function, method
+  dispatch:
+    SparseCPU: _sampled_reciprocal__cpu
+    SparseHammerBlade: _sampled_reciprocal__hb
+
+- func: to_spmvxf(Tensor self) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: to_spmvxcel_format_cpu
+
+- func: to_spmmxf(Tensor self) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    SparseCPU: to_spmmxcel_format_cpu
+
+- func: spmvx(Tensor self, Tensor dense_vector) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    HammerBlade: xcelspmv_hb
+    CPU: xcelspmv_cpu
+
+- func: spmmx(Tensor self, Tensor dense_vector) -> Tensor
+  use_c10_dispatcher: full
+  variants: function, method
+  dispatch:
+    HammerBlade: xcelspmm_hb
+    CPU: xcelspmm_cpu

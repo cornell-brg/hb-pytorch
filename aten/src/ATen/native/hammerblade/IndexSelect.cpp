@@ -12,8 +12,8 @@ Tensor index_select_hb(const Tensor& self, int64_t dim, const Tensor& index) {
   if (ndim == 0) {
     AT_INDEX_ERROR("index_select() cannot be applied to a 0-dim tensor.");
   }
-  if (!(index.dim() == 1 && index.dtype() == at::kLong)) {
-    AT_INDEX_ERROR("index_select() argument index must be 1-D long-tensor.");
+  if (!(index.dim() == 1 && (index.dtype() == at::kLong || index.dtype() == at::kInt))) {
+    AT_INDEX_ERROR("index_select() argument index must be 1-D long-tensor or int-tensor.");
   }
 
   dim = maybe_wrap_dim(dim, ndim);
@@ -25,7 +25,12 @@ Tensor index_select_hb(const Tensor& self, int64_t dim, const Tensor& index) {
 
   // fast path -- we can simply use memcpy
   if (dim == 0 && self.is_contiguous()) {
-    auto index_int = index.to(at::kInt).contiguous();
+    Tensor index_int;
+    if(index.dtype() == at::kLong) { 
+      index_int = index.to(at::kInt).contiguous();
+    } else {
+      index_int = index;
+    }
 
     hb_offload_kernel(self, result, index_int, "tensorlib_index_select");
   } else {

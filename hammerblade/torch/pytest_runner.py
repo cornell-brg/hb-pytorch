@@ -6,7 +6,7 @@ Lin Cheng
 """
 
 # pytest commandline options
-pytest_argv = ["-v"]
+pytest_argv = ["-vs"]
 
 # This is a work around of the bug in which sys.argv is not set
 # when running as embededd script
@@ -22,7 +22,7 @@ import pytest
 current_path = str(pathlib.Path(__file__).parent.absolute())
 
 # add current and tests paths
-sys.path.append(current_path + "/tests")
+sys.path.append(current_path + "/tests/")
 sys.path.append(current_path)
 
 # construct target list

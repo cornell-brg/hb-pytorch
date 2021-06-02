@@ -162,7 +162,7 @@ class ATen_OP:
         buf = ""
         template = "\n| {func:<22}| {tensor:<14}| {full:<19}| {chunk:<19}|{xeon:>16} |{hb:>20} |{host:>16} |{device:>18} |"
         # this may not always true ... but ...
-        assert len(self.actuals) > 0
+#        assert len(self.actuals) > 0
         op_loc = 0
         loc = 0
         for actual in self.actuals:

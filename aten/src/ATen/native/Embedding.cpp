@@ -40,6 +40,13 @@ Tensor embedding_backward(
   }
 }
 
+Tensor embedding_backward_recsys(
+    const Tensor & grad, const Tensor & indices, int64_t num_weights,
+    int64_t padding_idx, bool scale_grad_by_freq, bool sparse) {
+  return at::embedding_dense_backward_recsys(
+      grad, indices, num_weights, padding_idx, scale_grad_by_freq);
+}
+
 Tensor embedding_sparse_backward(
     const Tensor & grad_, const Tensor & indices_, int64_t num_weights,
     int64_t padding_idx, bool scale_grad_by_freq) {

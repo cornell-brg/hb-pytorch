@@ -120,12 +120,18 @@ static Tensor reshape_indexer(const Tensor& index, int64_t dims_before, int64_t 
   shape.append(dims_before, 1);
   shape.append(orig_shape.begin(), orig_shape.end());
   shape.append(dims_after, 1);
+//  std::cout << "In reshape_indexer function, the shape after reshape is: (";
+//  for(int i =0; i < shape.size(); i++) {
+//    std::cout << shape[i] << " ";
+//  }
+//  std::cout << ")" << std::endl;
   return index.reshape(shape);
 }
 
 AdvancedIndex::AdvancedIndex(const Tensor& src, TensorList indices_list)
 {
   int64_t element_size_bytes = src.element_size();
+//  std::cout << "In AdvancedIndex function, the emelemt_size_bytes is: " << src.element_size() << std::endl;
   int64_t dims_before = 0, dims_after = 0, dims_indexed = 0;
   IntArrayRef replacement_shape;
   for (size_t dim = 0; dim < indices_list.size(); dim++) {
@@ -165,7 +171,7 @@ AdvancedIndex::AdvancedIndex(const Tensor& src, TensorList indices_list)
 
   // For CUDA tensors, force all index tensors to have the same striding to
   // simplify the CUDA kernel.
-  if (indices.size() >= 2 && this->src.type().device_type() == kCUDA) {
+  if (indices.size() >= 2 && ((this->src.type().device_type() == kCUDA) || (this->src.type().device_type() == kHAMMERBLADE))) {
     if (!all_strides_match(indices)) {
       for (size_t i = 0; i < indices.size(); i++) {
         indices[i] = indices[i].contiguous();
@@ -186,6 +192,7 @@ static AdvancedIndex make_info(Tensor self, TensorList orig) {
                    " with shapes ", shapes_as_str(indices));
   }
   // add missing null Tensors so that it matches self.dim()
+//  std::cout << "In make_info function, input tensor dim is " << self.dim() << " indices.size() is: " << indices.size() << std::endl;
   while (indices.size() < (size_t)self.dim()) {
     indices.emplace_back();
   }
@@ -200,6 +207,11 @@ static AdvancedIndex make_info(Tensor self, TensorList orig) {
       indices[i] = indices[i].to(self.device());
     }
   }
+//  std::cout << "In make_info function, indices.size() before existing function is: " << indices.size() << std::endl;
+  //Since this operator is developped for GraphSAGE workload, currrently, we only support int. 
+//  if(self.type().device_type() == kHAMMERBLADE && self.scalar_type() != kLong) {
+//    self.to(at::kInt);
+//  }
   return AdvancedIndex(self, indices);
 }
 
@@ -221,14 +233,17 @@ static TensorIterator make_index_put_iterator(const AdvancedIndex& info, const T
 }
 
 static TensorIterator make_index_iterator(const AdvancedIndex& info) {
+//  std::cout << "Enter make_index_iterator function. " << std::endl;
   auto iter = TensorIterator();
   iter.dont_compute_common_dtype();
   iter.add_output(Tensor(), info.src.device(), info.src.scalar_type());
   iter.add_input(info.src);
+//  std::cout << "  In make_index_terator function, size of indices is: " << info.indices.size() << std::endl;
   for (auto& index : info.indices) {
     iter.add_input(index);
   }
   iter.build();
+//  std::cout << "Exist make_index_iterator function." << std::endl;
   return iter;
 }
 
@@ -236,7 +251,7 @@ Tensor index(const Tensor & self, TensorList indices) {
   if (indices.size() > (size_t)self.dim()) {
     AT_INDEX_ERROR("too many indices for tensor of dimension ", self.dim(), " (got ", indices.size(), ")");
   }
-
+//  std::cout << "Enter the index function " << std::endl;
   auto info = make_info(self, indices);
   auto iter = make_index_iterator(info);
   index_stub(iter.device_type(), iter, info.indexed_sizes, info.indexed_strides);

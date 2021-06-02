@@ -17,6 +17,7 @@ def parse(out_std):
     data = out_std.splitlines()
     idx = 0
     for d in data:
+        print(d)
         if d.startswith("@#ACTUALS#@__"):
             # assuming exactly one redispatching per out.std log
             assert actuals is None

@@ -94,6 +94,10 @@ class HBTensorImpl {
     IT* get_strides() {
       return strides;
     }
+   
+    uint32_t stride(uint32_t d) {
+      return strides[d];
+    }
 
     IT* get_sizes() {
       return sizes;
@@ -273,6 +277,10 @@ class HBVector {
 
     T& operator[](uint32_t i) {
       return data[i];
+    }
+
+    char* data_ptr() {
+      return (char*)data;
     }
 };
 

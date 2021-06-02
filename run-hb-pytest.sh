@@ -10,4 +10,4 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 make -C $DIR/hammerblade/torch -f riscv.mk clean regression
-make -C $DIR/hammerblade/torch -f riscv.mk clean
+#make -C $DIR/hammerblade/torch -f riscv.mk clean

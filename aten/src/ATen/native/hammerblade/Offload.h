@@ -44,7 +44,7 @@ void offload_tensorlist_scalar_impl(TensorList list, std::vector<Tensor> tensors
 //==============================================
 
 //----------------------------------------------
-// 0-5 tensors + 0 scalar
+// 0-7 tensors + 0 scalar
 //----------------------------------------------
 
 inline void hb_offload_kernel(const char* kernel) {
@@ -113,8 +113,38 @@ inline void hb_offload_kernel(Tensor t0, Tensor t1, Tensor t2, Tensor t3,
   offload_tensor_scalar_impl(args, scalars, kernel);
 }
 
+inline void hb_offload_kernel(Tensor t0, Tensor t1, Tensor t2, Tensor t3,
+                              Tensor t4, Tensor t5, Tensor t6, const char* kernel) {
+  std::vector<Tensor> args;
+  args.push_back(t0);
+  args.push_back(t1);
+  args.push_back(t2);
+  args.push_back(t3);
+  args.push_back(t4);
+  args.push_back(t5);
+  args.push_back(t6);
+  std::vector<eva_t> scalars;
+  offload_tensor_scalar_impl(args, scalars, kernel);
+}
+
+inline void hb_offload_kernel(Tensor t0, Tensor t1, Tensor t2, Tensor t3,
+                              Tensor t4, Tensor t5, Tensor t6, Tensor t7, const char* kernel) {
+  std::vector<Tensor> args;
+  args.push_back(t0);
+  args.push_back(t1);
+  args.push_back(t2);
+  args.push_back(t3);
+  args.push_back(t4);
+  args.push_back(t5);
+  args.push_back(t6);
+  args.push_back(t7);
+  std::vector<eva_t> scalars;
+  offload_tensor_scalar_impl(args, scalars, kernel);
+}
+
+
 //----------------------------------------------
-// 0-5 tensors + 1 scalar
+// 0-7 tensors + 1 scalar
 //----------------------------------------------
 
 template <typename ST0>
@@ -193,6 +223,39 @@ inline void hb_offload_kernel(Tensor t0, Tensor t1, Tensor t2, Tensor t3,
   args.push_back(t3);
   args.push_back(t4);
   args.push_back(t5);
+  std::vector<eva_t> scalars;
+  scalars.push_back(create_device_scalar(s0));
+  offload_tensor_scalar_impl(args, scalars, kernel);
+}
+
+template <typename ST0>
+inline void hb_offload_kernel(Tensor t0, Tensor t1, Tensor t2, Tensor t3,
+                              Tensor t4, Tensor t5, Tensor t6, ST0 s0, const char* kernel) {
+  std::vector<Tensor> args;
+  args.push_back(t0);
+  args.push_back(t1);
+  args.push_back(t2);
+  args.push_back(t3);
+  args.push_back(t4);
+  args.push_back(t5);
+  args.push_back(t6);
+  std::vector<eva_t> scalars;
+  scalars.push_back(create_device_scalar(s0));
+  offload_tensor_scalar_impl(args, scalars, kernel);
+}
+
+template <typename ST0>
+inline void hb_offload_kernel(Tensor t0, Tensor t1, Tensor t2, Tensor t3,
+                              Tensor t4, Tensor t5, Tensor t6, Tensor t7, ST0 s0, const char* kernel) {
+  std::vector<Tensor> args;
+  args.push_back(t0);
+  args.push_back(t1);
+  args.push_back(t2);
+  args.push_back(t3);
+  args.push_back(t4);
+  args.push_back(t5);
+  args.push_back(t6);
+  args.push_back(t7);
   std::vector<eva_t> scalars;
   scalars.push_back(create_device_scalar(s0));
   offload_tensor_scalar_impl(args, scalars, kernel);

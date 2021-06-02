@@ -20,6 +20,7 @@ extern "C" {
     float threshold = *_threshold_scalar_p;
     float value    = *_value_scalar_p;
 
+
     bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 

@@ -33,10 +33,31 @@ inline void alias_into_sparse(const SparseTensor& self, const LongTensor& indice
 // Take indices and values and makes a (data) copy of them to put into the sparse
 // indices/values.  This used to be called THSTensor_(_set)
 inline void copy_into_sparse(const SparseTensor& self, const LongTensor& indices, const Tensor& values, bool non_blocking) {
-  alias_into_sparse(
+  if(indices.device().is_cpu() && self.is_hammerblade()) {
+    TORCH_CHECK(indices.dtype() == at::kLong, "Indices on CPU is not LongTensor");
+    IntTensor int_indices = indices.to(kInt);
+    IntTensor int_self = self._indices().to(kInt);
+    alias_into_sparse(
+      self,
+      int_indices.to(int_self.options(), non_blocking, /*copy=*/true),   
+      values.to(self._values().options(), non_blocking, /*copy=*/true));
+  } else if(indices.is_hammerblade() &&  self.device().is_cpu()) {
+    TORCH_CHECK(indices.dtype() == at::kInt, "Indices on HammerBlade is not IntTensor");
+    TORCH_CHECK(self._indices().dtype() == at::kLong, "Self Indices on CPU is not LongTensor");  
+    IntTensor option_self = self._indices().to(kInt);
+    IntTensor temp_self = indices.to(option_self.options(), non_blocking, /*copy=*/true);
+    TORCH_CHECK(temp_self.dtype() == at::kInt && temp_self.device().is_cpu(), "Temp Self Indices should on CPU and IntTensor");
+    LongTensor cpu_indices = temp_self.to(kLong);
+    alias_into_sparse(
+      self,
+      cpu_indices.to(self._indices().options(), non_blocking, /*copy=*/true),
+      values.to(self._values().options(), non_blocking, /*copy=*/true));
+  } else { 
+    alias_into_sparse(
       self,
       indices.to(self._indices().options(), non_blocking, /*copy=*/true),
       values.to(self._values().options(), non_blocking, /*copy=*/true));
+  } 
 }
 
 // TODO: put this into the public API
