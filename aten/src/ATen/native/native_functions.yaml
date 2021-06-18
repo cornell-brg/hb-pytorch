@@ -1944,6 +1944,7 @@
     HammerBlade: mul_out
     SparseCPU: mul_out_sparse_cpu
     SparseCUDA: mul_out_sparse_cuda
+    SparseHammerBlade: mul_out_sparse_hb
     MkldnnCPU: mkldnn_mul_out
   supports_named_tensor: True
 

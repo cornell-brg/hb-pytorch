@@ -74,8 +74,9 @@ extern "C" {
           bsg_printf("The xcel with pe_id %d is working\n", pe_id);
           bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(30 + (pe_id % (num_pe/8)), 8 + (pe_id / (num_pe/8)), 0);
           pe_id = (pe_id + 1) % num_pe;
-          int out_ptr = (unsigned)result + pe_index * cacheline_byte + ((i * tile_y_size / num_pe * 4) / cacheline_byte) 
-                      * cacheline_byte * num_pe + ((i * tile_y_size / num_pe * 4) % cacheline_byte);
+//          int out_ptr = (unsigned)result + pe_index * cacheline_byte + ((i * tile_y_size / num_pe * 4) / cacheline_byte) 
+//                      * cacheline_byte * num_pe + ((i * tile_y_size / num_pe * 4) % cacheline_byte);
+          int out_ptr = (int)result + (i * num_tile_y) * sizeof(int);
           int last_num_row = (last_tile_y % num_pe == 0) ? (last_tile_y / num_pe) : 
                              ((last_tile_y % num_pe > pe_index) ? (last_tile_y / num_pe + 1):(last_tile_y / num_pe));
           int num_row = (i == num_tile_y - 1)? last_num_row : (tile_y_size / num_pe);

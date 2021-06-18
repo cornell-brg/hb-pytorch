@@ -54,7 +54,8 @@ extern "C" {
         bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(30 + (pe_id%(NUM_PE/8)), (8 + (pe_id/ (NUM_PE/8))), 0);
 //        bsg_remote_int_ptr xcel_csr_base_ptr = bsg_global_ptr(14, 2, 0);
         pe_id = (pe_id + 1) % NUM_PE;
-        int out_ptr = (int)result + pe_index * CACHELINE_BYTE;
+//        int out_ptr = (int)result + pe_index * CACHELINE_BYTE;
+        int out_ptr = (int)result;
         bsg_printf("address of result is %u, %d and %u\n", (unsigned)result, (int)result, &(result[0]));   
         int num_row = (pe_index < m % NUM_PE) ? (m + NUM_PE - 1) / NUM_PE : m / NUM_PE;
         xcel_csr_base_ptr[CSR_PTR_B] = (int)matrix;

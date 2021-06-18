@@ -37,17 +37,18 @@ Tensor xcelspmm_hb(const Tensor &self, const Tensor &dense_matrix) {
 
   int32_t m = other_info[0];  
 
-  uint32_t cacheline_word = CACHELINE_BYTE / 4;
-  uint32_t max_region_b = ( ((n + NUM_PE - 1)/NUM_PE) * k + cacheline_word - 1) / cacheline_word;
-  uint32_t length_total_b = max_region_b * CACHELINE_BYTE * NUM_PE;
+//  uint32_t cacheline_word = CACHELINE_BYTE / 4;
+//  uint32_t max_region_b = ( ((n + NUM_PE - 1)/NUM_PE) * k + cacheline_word - 1) / cacheline_word;
+//  uint32_t length_total_b = max_region_b * CACHELINE_BYTE * NUM_PE;
   
-  Tensor matrix_hb = at::empty({length_total_b / 4}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
-  hb_offload_kernel(int_matrix, matrix_hb, "tensorlib_cputoxcel_matrix"); 
-  uint32_t length_total_c = ((((m + NUM_PE - 1)/NUM_PE)* k + cacheline_word - 1) / cacheline_word) * CACHELINE_BYTE * NUM_PE; 
-  Tensor xcel_out = at::empty({length_total_c / 4}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
-  hb_offload_kernel(xcel_out, c2sr_hb, matrix_hb, other_hb, n, k, "tensorlib_spmmxcel");
-  Tensor result = at::empty({m, k}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
-  hb_offload_kernel(result, xcel_out, "tensorlib_xceltocpu_matrix");  
+//  Tensor matrix_hb = at::empty({length_total_b / 4}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
+//  hb_offload_kernel(int_matrix, matrix_hb, "tensorlib_cputoxcel_matrix"); 
+//  uint32_t length_total_c = ((((m + NUM_PE - 1)/NUM_PE)* k + cacheline_word - 1) / cacheline_word) * CACHELINE_BYTE * NUM_PE; 
+//  Tensor xcel_out = at::empty({length_total_c / 4}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
+  Tensor result = at::empty({m, k}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});  
+  hb_offload_kernel(result, c2sr_hb, int_matrix, other_hb, n, k, "tensorlib_spmmxcel");
+//  Tensor result = at::empty({m, k}, {at::device(at::kHAMMERBLADE).dtype(at::kInt)});
+//  hb_offload_kernel(result, xcel_out, "tensorlib_xceltocpu_matrix");  
   return result; 
 }
 

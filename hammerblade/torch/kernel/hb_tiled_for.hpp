@@ -19,6 +19,7 @@
 // =========================================================
 // Linear index to offset
 // =========================================================
+
 template<typename scalar_t>
 inline uint32_t offset_calc(uint32_t idx, HBTensor<scalar_t> tensor) {
   uint32_t* strides = tensor.get_strides();
@@ -28,6 +29,38 @@ inline uint32_t offset_calc(uint32_t idx, HBTensor<scalar_t> tensor) {
     uint32_t dimx = idx % sizes[i];
     idx /= sizes[i];
     offset += dimx * strides[i];
+  }
+  return offset;
+}
+
+template<typename scalar_t>
+inline uint32_t offset_calc(uint32_t idx, HBTensor<scalar_t> tensor, uint32_t* vals) {
+  uint32_t* strides = tensor.get_strides();
+  uint32_t* sizes = tensor.get_sizes();
+  uint32_t offset = 0;
+  for(uint32_t i = 0; i < tensor.ndim(); i++) {
+    uint32_t dimx = idx % sizes[i];
+    vals[i] = dimx;
+    idx /= sizes[i];
+    offset += dimx * strides[i];
+  }
+  return offset;
+}
+
+template<typename scalar_t>
+inline uint32_t offset_calc_incr(HBTensor<scalar_t> tensor, uint32_t* vals) {
+  uint32_t* strides = tensor.get_strides();
+  uint32_t* sizes = tensor.get_sizes();
+  uint32_t offset = 0;
+  for(uint32_t i = 0; i < tensor.ndim(); i++) {
+    vals[i] = vals[i] + 1;
+    if (vals[i] != sizes[i])
+      break;
+    else
+      vals[i] = 0;
+  }
+  for (uint32_t i = 0; i < tensor.ndim(); i++) {
+    offset += vals[i] * strides[i];
   }
   return offset;
 }
@@ -44,12 +77,7 @@ typedef struct hb_range {
 inline void calc_range(hb_range* range, size_t numel,
                        size_t tg_size = bsg_tiles_X * bsg_tiles_Y) {
   // per pod chunk
-  size_t len_per_pod  = 0;
-  if (numel % BSG_POD_DIM == 0) {
-    len_per_pod  = numel / BSG_POD_DIM;
-  } else {
-    len_per_pod  = numel / BSG_POD_DIM + 1;
-  }
+  size_t len_per_pod  = numel / BSG_POD_DIM + 1;
   // chunk range
   size_t pod_start    = len_per_pod * __bsg_pod_id;
   size_t pod_end      = pod_start + len_per_pod;
@@ -63,12 +91,7 @@ inline void calc_range(hb_range* range, size_t numel,
 
   // per tile range within a pod
   size_t tile_id = __bsg_id % tg_size;
-  size_t len_per_tile = 0;
-  if (pod_size % tg_size == 0) {
-    len_per_tile = pod_size / tg_size;
-  } else {
-    len_per_tile = pod_size / tg_size + 1;
-  }
+  size_t len_per_tile = pod_size / tg_size + 1;
   size_t start        = len_per_tile * tile_id;
   size_t end          = start + len_per_tile;
   end = (end > pod_size) ? pod_size : end;
@@ -159,6 +182,11 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
       bsg_attr_remote scalar_t* bsg_attr_noalias res_ptr,
       bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr0,
       bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr1) {
+
+  uint32_t dim = res.ndim();
+  uint32_t res_vals[dim];
+  uint32_t arg0_vals[dim];
+  uint32_t arg1_vals[dim];
   // is_trivial_1d
   if(res.ndim() == 1) {
     bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
@@ -167,10 +195,16 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
                 tensor_data_ptr1[idx * tensor_arg1.get_strides()[0]]);
     }
   } else {
-    bsg_unroll(16) for (size_t idx = start; idx < end; idx++) {
-      res_ptr[offset_calc(idx, res)] =
-        functor(tensor_data_ptr0[offset_calc(idx, tensor_arg0)],
-                tensor_data_ptr1[offset_calc(idx, tensor_arg1)]);
+    size_t idx = start;
+    if(idx < end) {
+      res_ptr[offset_calc(idx, res, res_vals)] =
+        functor(tensor_data_ptr0[offset_calc(idx, tensor_arg0, arg0_vals)],
+                tensor_data_ptr1[offset_calc(idx, tensor_arg1, arg1_vals)]);
+    }
+    bsg_unroll(16) for (idx = start+1; idx < end; idx++) {
+      res_ptr[offset_calc_incr(res, res_vals)] =
+        functor(tensor_data_ptr0[offset_calc_incr(tensor_arg0, arg0_vals)],
+                tensor_data_ptr1[offset_calc_incr(tensor_arg1, arg1_vals)]);
     }
   }
 }
