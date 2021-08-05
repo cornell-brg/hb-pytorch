@@ -6389,6 +6389,7 @@
   dispatch:
     CPU: sigmoid_backward_out
     CUDA: sigmoid_backward_out
+    HammerBlade: sigmoid_backward_out
 
 - func: sigmoid_backward(Tensor grad_output, Tensor output) -> Tensor
   use_c10_dispatcher: full
