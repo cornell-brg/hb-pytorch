@@ -24,7 +24,7 @@ def _test_mse_loss(inp_list, target_list, target_requires_grad=False):
     print("outputh: ")
     print(outputh)
     assert outputh.device == torch.device("hammerblade")
-    assert torch.allclose(output, outputh.cpu())
+    assert torch.allclose(output, outputh.cpu(), equal_nan=True)
 
 
 # target does not require gradient
