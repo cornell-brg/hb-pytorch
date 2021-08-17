@@ -3080,6 +3080,7 @@
   dispatch:
     CPU: pow_out
     CUDA: pow_out
+    HammerBlade: pow_out
     SparseCPU: pow_out_sparse_scalar
     SparseCUDA: pow_out_sparse_scalar
 
@@ -3090,6 +3091,7 @@
   dispatch:
     CPU: pow
     CUDA: pow
+    HammerBlade: pow
     SparseCPU: pow_sparse_scalar
     SparseCUDA: pow_sparse_scalar
 
@@ -4187,6 +4189,7 @@
   dispatch:
     CPU: pow_
     CUDA: pow_
+    HammerBlade: pow_
 
 - func: pow_.Tensor(Tensor(a!) self, Tensor exponent) -> Tensor(a!)
   supports_named_tensor: True
