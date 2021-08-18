@@ -34,8 +34,8 @@ def test_sigmoid_backward_vector():
     _test_sigmoid_backward([0.5, 0.6, 0.7], [0.7, 0.8, 0.9])
 
 def test_sigmoid_backward_random():
-    x_size = randrange(50)
-    y_size = randrange(10)
+    x_size = randrange(1, 50)
+    y_size = randrange(1, 10)
 
     inp = [1.0]
     grad_out = [1.0]
