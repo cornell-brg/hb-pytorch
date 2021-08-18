@@ -24,7 +24,7 @@ def _test_mse_loss(inp_list, target_list, target_requires_grad=False):
     print("outputh: ")
     print(outputh)
     assert outputh.device == torch.device("hammerblade")
-    assert torch.allclose(output, outputh.cpu(), equal_nan=True)
+    assert torch.allclose(output, outputh.cpu())
 
 
 # target does not require gradient
@@ -35,8 +35,8 @@ def test_mse_loss2():
     _test_mse_loss([1.0, 7.0, -3.0], [2.0, 5.0, -1.0], False)
 
 def test_mse_loss3():
-    x_size = randrange(50)
-    y_size = randrange(10)
+    x_size = randrange(1, 50)
+    y_size = randrange(1, 10)
 
     inp = [1.0]
     target = [1.0]
@@ -59,8 +59,8 @@ def test_mse_loss_grad2():
     _test_mse_loss([1.0, 7.0, -3.0], [2.0, 5.0, -1.0], True)
 
 def test_mse_loss_grad3():
-    x_size = randrange(50)
-    y_size = randrange(10)
+    x_size = randrange(1, 50)
+    y_size = randrange(1, 10)
 
     inp = [1.0]
     target = [1.0]
