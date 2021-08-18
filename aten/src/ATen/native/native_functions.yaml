@@ -5353,6 +5353,7 @@
   dispatch:
     CPU: mse_loss_backward_out
     CUDA: mse_loss_backward_out
+    HammerBlade: mse_loss_backward_out
 
 - func: mse_loss_backward(Tensor grad_output, Tensor self, Tensor target, int reduction) -> Tensor
   use_c10_dispatcher: full
@@ -5360,6 +5361,7 @@
   dispatch:
     CPU: mse_loss_backward
     CUDA: mse_loss_backward
+    HammerBlade: mse_loss_backward
 
 - func: l1_loss.out(Tensor self, Tensor target, int reduction=Mean, *, Tensor(a!) out) -> Tensor(a!)
   python_module: nn
