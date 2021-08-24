@@ -28,21 +28,52 @@ def _test_add(x1, x2):
     assert y_h.device == torch.device("hammerblade")
     assert torch.allclose(y_c, y_h.cpu())
     # inplace
-    x1.add_(x2)
-    h1.add_(h2)
-    assert h1.device == torch.device("hammerblade")
-    assert torch.allclose(x1, h1.cpu())
+#    x1.add_(x2)
+#    h1.add_(h2)
+#    assert h1.device == torch.device("hammerblade")
+#    assert torch.allclose(x1, h1.cpu())
 
 # ------------------------------------------------------------------------
 # tests of add kernel with float elements
 # ------------------------------------------------------------------------
 
-def test_add_1():
-    x = torch.ones(10)
-    _test_add(x, x)
+#def test_add_1():
+#    x = torch.rand(64)
+#    _test_add(x, x)
 
-#def test_add_2():
-#    x1 = torch.ones(4, 5)
-#    x2 = torch.ones(4, 5)
+def test_add_2():
+    x1 = torch.rand(256, 32)
+    x2 = torch.rand(256, 32)
+    _test_add(x1, x2)
+
+#def test_add_3():
+#    x1 = torch.rand(32, 2, 32)
+#    x2 = torch.rand(32, 2, 32)
 #    _test_add(x1, x2)
 
+#def test_relu_1():
+#    x = torch.rand(64)
+#    x_h = x.hammerblade()
+#    relu = torch.nn.ReLU()
+#    x_relu = relu(x)
+#    x_h_relu = relu(x_h)
+#    assert x_h_relu.device == torch.device("hammerblade")
+#    assert torch.equal(x_h_relu.cpu(), x_relu)
+
+#def test_relu_2():
+#    x = torch.rand(32, 32)
+#    x_h = x.hammerblade()
+#    relu = torch.nn.ReLU()
+#    x_relu = relu(x)
+#    x_h_relu = relu(x_h)
+#    assert x_h_relu.device == torch.device("hammerblade")
+#    assert torch.equal(x_h_relu.cpu(), x_relu)
+
+#def test_relu_3():
+#    x = torch.rand(32, 12, 64)
+#    x_h = x.hammerblade()
+#    relu = torch.nn.ReLU()
+#    x_relu = relu(x)
+#    x_h_relu = relu(x_h)
+#    assert x_h_relu.device == torch.device("hammerblade")
+#    assert torch.equal(x_h_relu.cpu(), x_relu)

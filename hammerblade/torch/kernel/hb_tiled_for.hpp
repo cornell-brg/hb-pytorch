@@ -10,6 +10,9 @@
 #ifndef _HB_TILED_FOR_HPP
 #define _HB_TILED_FOR_HPP
 
+#define CACHE_LINE 32
+#define NUM_CACHES 32
+
 #include <map>
 #include <math.h>
 #include <initializer_list>
@@ -72,12 +75,52 @@ inline uint32_t offset_calc_incr(HBTensor<scalar_t> tensor, uint32_t* vals) {
 typedef struct hb_range {
   size_t start;
   size_t end;
+  size_t pod_end;
 } hb_range;
+
+inline void calc_range_opt(hb_range* range, size_t numel,
+                       size_t tg_size = bsg_tiles_X * bsg_tiles_Y) {
+  // per pod chunk
+  size_t len_per_pod  = numel / BSG_POD_DIM + 1;
+  // chunk range
+  size_t pod_start    = len_per_pod * __bsg_pod_id;
+  size_t pod_end      = pod_start + len_per_pod;
+  pod_end = (pod_end > numel) ? numel : pod_end;
+  if (pod_start >= pod_end) {
+    range->start = 0;
+    range->end   = 0;
+    return;
+  }
+  range->pod_end    = pod_end;
+
+  // per tile range within a pod
+  size_t tile_id = __bsg_id % tg_size;
+  size_t len_per_tile = CACHE_LINE;
+  size_t start        = CACHE_LINE * tile_id;
+  size_t end          = start + len_per_tile;
+  end = (end > range->pod_end) ? range->pod_end : end;
+  if (start >= end) {
+    range->start = 0;
+    range->end   = 0;
+    return;
+  }
+
+  // range in global idx
+  range->start = pod_start + start;
+  range->end   = pod_start + end;
+
+  return;
+}
 
 inline void calc_range(hb_range* range, size_t numel,
                        size_t tg_size = bsg_tiles_X * bsg_tiles_Y) {
   // per pod chunk
-  size_t len_per_pod  = numel / BSG_POD_DIM + 1;
+  size_t len_per_pod  = 0;
+  if (numel % BSG_POD_DIM == 0) {
+    len_per_pod  = numel / BSG_POD_DIM;
+  } else {
+    len_per_pod  = numel / BSG_POD_DIM + 1;
+  }
   // chunk range
   size_t pod_start    = len_per_pod * __bsg_pod_id;
   size_t pod_end      = pod_start + len_per_pod;
@@ -91,7 +134,12 @@ inline void calc_range(hb_range* range, size_t numel,
 
   // per tile range within a pod
   size_t tile_id = __bsg_id % tg_size;
-  size_t len_per_tile = pod_size / tg_size + 1;
+  size_t len_per_tile = 0;
+  if (pod_size % tg_size == 0) {
+    len_per_tile = pod_size / tg_size;
+  } else {
+    len_per_tile = pod_size / tg_size + 1;
+  }
   size_t start        = len_per_tile * tile_id;
   size_t end          = start + len_per_tile;
   end = (end > pod_size) ? pod_size : end;
@@ -118,13 +166,14 @@ inline void hb_tiled_foreach(F functor,
                              Types... args) {
   // Iterating over all elementes
   hb_range range;
-  calc_range(&range, res.numel());
+  calc_range_opt(&range, res.numel());
   size_t start = range.start;
   size_t end   = range.end;
+  size_t lenth = range.pod_end;
 
   // Static dispatch based on number number of operands
   hb_tiled_foreach_impl(
-      start, end, functor, res,
+      start, end, lenth, functor, res,
       args...,
       (bsg_attr_remote scalar_t*) res.data_ptr(),
       ((bsg_attr_remote scalar_t*) args.data_ptr())...);
@@ -133,19 +182,19 @@ inline void hb_tiled_foreach(F functor,
 // Nullary
 template<typename scalar_t, typename F, typename... P>
 __attribute__((noinline)) void hb_tiled_foreach_impl(
-      size_t start, size_t end, F functor,
+      size_t start, size_t end, size_t length, F functor,
       HBTensor<scalar_t> res,
       bsg_attr_remote scalar_t* bsg_attr_noalias res_ptr) {
   // is_trivial_1d
   if(res.ndim() == 1) {
     bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
       res_ptr[idx * res.get_strides()[0]] =
-        functor();
+      functor();
     }
   } else {
     bsg_unroll(16) for (size_t idx = start; idx < end; idx++) {
       res_ptr[offset_calc(idx, res)] =
-        functor();
+      functor();
     }
   }
 }
@@ -153,21 +202,39 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
 // Unary
 template<typename scalar_t, typename F, typename... P>
 __attribute__((noinline)) void hb_tiled_foreach_impl(
-      size_t start, size_t end, F functor,
+      size_t start, size_t end, size_t length, F functor,
       HBTensor<scalar_t> res,
       HBTensor<scalar_t> tensor_arg0,
       bsg_attr_remote scalar_t* bsg_attr_noalias res_ptr,
       bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr0) {
+  
+  uint32_t dim = res.ndim();
+  uint32_t res_vals[dim];
+  uint32_t arg0_vals[dim];
+  uint32_t cache_total = CACHE_LINE * bsg_tiles_X * bsg_tiles_Y;
   // is_trivial_1d
   if(res.ndim() == 1) {
-    bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
-      res_ptr[idx * res.get_strides()[0]] =
+    for(; start < length; start = start + cache_total) {
+      end = start + CACHE_LINE;
+      end = end > length ? length : end;
+      bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
+        res_ptr[idx * res.get_strides()[0]] =
         functor(tensor_data_ptr0[idx * tensor_arg0.get_strides()[0]]);
+      }
     }
   } else {
-    bsg_unroll(16) for (size_t idx = start; idx < end; idx++) {
-      res_ptr[offset_calc(idx, res)] =
-        functor(tensor_data_ptr0[offset_calc(idx, tensor_arg0)]);
+    for(; start < length; start = start + cache_total) {
+      end = start + CACHE_LINE;
+      end = end > length ? length : end;
+      size_t idx = start;
+      if(idx < end) {
+        res_ptr[offset_calc(idx, res, res_vals)] =
+        functor(tensor_data_ptr0[offset_calc(idx, tensor_arg0, arg0_vals)]);
+      }
+      bsg_unroll(16) for (idx = start+1; idx < end; idx++) {
+        res_ptr[offset_calc_incr(res, res_vals)] =
+        functor(tensor_data_ptr0[offset_calc_incr(tensor_arg0, arg0_vals)]);
+      }
     }
   }
 }
@@ -175,7 +242,7 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
 // Binary
 template<typename scalar_t, typename F, typename... P>
 __attribute__((noinline)) void hb_tiled_foreach_impl(
-      size_t start, size_t end, F functor,
+      size_t start, size_t end, size_t length, F functor,
       HBTensor<scalar_t> res,
       HBTensor<scalar_t> tensor_arg0,
       HBTensor<scalar_t> tensor_arg1,
@@ -187,24 +254,33 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
   uint32_t res_vals[dim];
   uint32_t arg0_vals[dim];
   uint32_t arg1_vals[dim];
+  uint32_t cache_total = CACHE_LINE * bsg_tiles_X * bsg_tiles_Y;
   // is_trivial_1d
   if(res.ndim() == 1) {
-    bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
-      res_ptr[idx * res.get_strides()[0]] =
+    for(; start < length; start = start + cache_total) {
+      end = start + CACHE_LINE;
+      end = end > length ? length : end;     
+      bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
+        res_ptr[idx * res.get_strides()[0]] =
         functor(tensor_data_ptr0[idx * tensor_arg0.get_strides()[0]],
                 tensor_data_ptr1[idx * tensor_arg1.get_strides()[0]]);
+      }
     }
   } else {
-    size_t idx = start;
-    if(idx < end) {
-      res_ptr[offset_calc(idx, res, res_vals)] =
+    for(; start < length; start = start + cache_total) {
+      end = start + CACHE_LINE;
+      end = end > length ? length : end;
+      size_t idx = start;
+      if(idx < end) {
+        res_ptr[offset_calc(idx, res, res_vals)] =
         functor(tensor_data_ptr0[offset_calc(idx, tensor_arg0, arg0_vals)],
                 tensor_data_ptr1[offset_calc(idx, tensor_arg1, arg1_vals)]);
-    }
-    bsg_unroll(16) for (idx = start+1; idx < end; idx++) {
-      res_ptr[offset_calc_incr(res, res_vals)] =
+      }
+      bsg_unroll(16) for (idx = start+1; idx < end; idx++) {
+        res_ptr[offset_calc_incr(res, res_vals)] =
         functor(tensor_data_ptr0[offset_calc_incr(tensor_arg0, arg0_vals)],
                 tensor_data_ptr1[offset_calc_incr(tensor_arg1, arg1_vals)]);
+      }
     }
   }
 }
@@ -212,7 +288,7 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
 // Ternary
 template<typename scalar_t, typename F, typename... P>
 __attribute__((noinline)) void hb_tiled_foreach_impl(
-      size_t start, size_t end, F functor,
+      size_t start, size_t end, size_t length, F functor,
       HBTensor<scalar_t> res,
       HBTensor<scalar_t> tensor_arg0,
       HBTensor<scalar_t> tensor_arg1,
