@@ -20,26 +20,36 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
-    hb_tiled_foreach(
-      [exp](float b) {
-        // similar to aten/src/ATen/native/cpu/PowKernel.cpp
-        if (exp == 0.5) {
-          return (float) std::sqrt(b);
-        } else if (exp == 2.0) {
-          return b*b;
-        } else if (exp == 3.0) {
-          return b*b*b;
-        } else if (exp == -0.5) {
-          return (float) (1.0 / std::sqrt(b));
-        } else if (exp == -1.0) {
-          return (float) (1.0 / b);
-        } else if (exp == -2.0) {
-          return (float) (1.0 / (b*b));
-        } else {
-          return (float) std::pow(b, exp);
-        }
-       },
-       base, result);
+    // similar to aten/src/ATen/native/cpu/PowKernel.cpp
+    if (exp == 0.5) {
+      hb_tiled_foreach([](float b) {
+        return sqrtf(b);
+      }, base, result);
+    } else if (exp == 2.0) {
+      hb_tiled_foreach([](float b) {
+        return b*b;
+      }, base, result);
+    } else if (exp == 3.0) {
+      hb_tiled_foreach([](float b) {
+        return b*b*b;
+      }, base, result);
+    } else if (exp == -0.5) {
+      hb_tiled_foreach([](float b) {
+        return 1.0 / sqrtf(b);
+      }, base, result);
+    } else if (exp == -1.0) {
+      hb_tiled_foreach([](float b) {
+        return 1.0 / b;
+      }, base, result);
+    } else if (exp == -2.0) {
+      hb_tiled_foreach([](float b) {
+        return 1.0 / (b*b);
+      }, base, result);
+    } else {
+      hb_tiled_foreach([exp](float b) {
+        return powf(b, exp);
+      }, base, result);
+    }
 
     bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
