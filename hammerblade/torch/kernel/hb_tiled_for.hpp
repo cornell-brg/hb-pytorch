@@ -104,7 +104,7 @@ inline void hb_tiled_foreach(F functor,
       start, end, functor, res,
       args...,
       (bsg_attr_remote scalar_t*) res.data_ptr(),
-      ((bsg_attr_remote scalar_t*) args.data_ptr())...);
+      ((bsg_attr_remote typename decltype(args)::data_type*) args.data_ptr())...);
 }
 
 // Nullary
