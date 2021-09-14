@@ -87,6 +87,8 @@ class HBTensorImpl {
         HB_FIX_WAW_HAZARD(sizes);
       }
 
+    typedef DT data_type;
+
     bsg_attr_remote char* data_ptr() {
       return (bsg_attr_remote char*)data;
     }
