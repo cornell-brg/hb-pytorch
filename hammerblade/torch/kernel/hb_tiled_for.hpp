@@ -12,6 +12,7 @@
 
 #include <map>
 #include <math.h>
+#include <tuple>
 #include <initializer_list>
 #include <hb_assert.hpp>
 #include <hb_tensor.hpp>
@@ -89,10 +90,10 @@ inline void calc_range(hb_range* range, size_t numel,
 // Tiled Pointwise for
 // =========================================================
 
-template<typename scalar_t, typename F, class... Types>
+template<typename F, class... Types>
 inline void hb_tiled_foreach(F functor,
-                             HBTensor<scalar_t> res,
                              Types... args) {
+  auto res = std::get<0>(std::make_tuple(args...));
   // Iterating over all elementes
   hb_range range;
   calc_range(&range, res.numel());
@@ -101,9 +102,8 @@ inline void hb_tiled_foreach(F functor,
 
   // Static dispatch based on number number of operands
   hb_tiled_foreach_impl(
-      start, end, functor, res,
+      start, end, functor,
       args...,
-      (bsg_attr_remote scalar_t*) res.data_ptr(),
       ((bsg_attr_remote typename decltype(args)::data_type*) args.data_ptr())...);
 }
 
