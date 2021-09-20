@@ -3080,6 +3080,7 @@
   dispatch:
     CPU: pow_out
     CUDA: pow_out
+    HammerBlade: pow_out
     SparseCPU: pow_out_sparse_scalar
     SparseCUDA: pow_out_sparse_scalar
 
@@ -3090,6 +3091,7 @@
   dispatch:
     CPU: pow
     CUDA: pow
+    HammerBlade: pow
     SparseCPU: pow_sparse_scalar
     SparseCUDA: pow_sparse_scalar
 
@@ -4187,6 +4189,7 @@
   dispatch:
     CPU: pow_
     CUDA: pow_
+    HammerBlade: pow_
 
 - func: pow_.Tensor(Tensor(a!) self, Tensor exponent) -> Tensor(a!)
   supports_named_tensor: True
@@ -5350,6 +5353,7 @@
   dispatch:
     CPU: mse_loss_backward_out
     CUDA: mse_loss_backward_out
+    HammerBlade: mse_loss_backward_out
 
 - func: mse_loss_backward(Tensor grad_output, Tensor self, Tensor target, int reduction) -> Tensor
   use_c10_dispatcher: full
@@ -5357,6 +5361,7 @@
   dispatch:
     CPU: mse_loss_backward
     CUDA: mse_loss_backward
+    HammerBlade: mse_loss_backward
 
 - func: l1_loss.out(Tensor self, Tensor target, int reduction=Mean, *, Tensor(a!) out) -> Tensor(a!)
   python_module: nn
@@ -6389,6 +6394,7 @@
   dispatch:
     CPU: sigmoid_backward_out
     CUDA: sigmoid_backward_out
+    HammerBlade: sigmoid_backward_out
 
 - func: sigmoid_backward(Tensor grad_output, Tensor output) -> Tensor
   use_c10_dispatcher: full
