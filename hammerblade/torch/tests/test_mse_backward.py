@@ -19,16 +19,8 @@ def _test_mse_backward(inp_list, target_list, target_requires_grad=False):
     out = loss(inp, target)
     outh = loss(inph, targeth)
 
-    print("out:")
-    print(out)
-    print(outh)
-
     out.backward()
     outh.backward()
-
-    print("gradient:")
-    print(inp.grad)
-    print(inph.grad)
 
     assert outh.device == torch.device("hammerblade")
     assert torch.allclose(inp.grad, inph.grad.cpu())

@@ -13,8 +13,6 @@ def _test_pow_tensor_scalar(inp_list, exp_scalar):
 
     out = inp ** exp_scalar
     outh = inph ** exp_scalar
-    print(out)
-    print(outh)
 
     assert outh.device == torch.device("hammerblade")
     # NaN results when base negative and exp < 1

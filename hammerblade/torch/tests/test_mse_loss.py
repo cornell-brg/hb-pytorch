@@ -18,11 +18,6 @@ def _test_mse_loss(inp_list, target_list, target_requires_grad=False):
 
     output = loss(inp, target)
     outputh = loss(inph, targeth)
-    print()
-    print("output: ")
-    print(output)
-    print("outputh: ")
-    print(outputh)
     assert outputh.device == torch.device("hammerblade")
     assert torch.allclose(output, outputh.cpu())
 
