@@ -18,9 +18,15 @@ Tensor _s_where_hb(const Tensor& condition, const Tensor& self, const Tensor& ot
     iter.dont_compute_common_dtype();
     iter.build();
 
-    AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "where_hb", [&](){
-        offload_op_ternary(iter, "tensorlib_where");
-    });
+    if (condition.scalar_type() == at::ScalarType::Byte) {
+        AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "where_byte_hb", [&](){
+            offload_op_ternary(iter, "tensorlib_where_byte");
+        });
+    } else {
+        AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "where_bool_hb", [&](){
+            offload_op_ternary(iter, "tensorlib_where_bool");
+        });
+    }
 
     return result;
 }
