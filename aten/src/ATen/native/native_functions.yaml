@@ -2919,6 +2919,7 @@
   dispatch:
     CPU: _s_where_cpu
     CUDA: _s_where_cuda
+    HammerBlade: _s_where_hb
 
 - func: norm_except_dim(Tensor v, int pow=2, int dim=0) -> Tensor
   variants: function

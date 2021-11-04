@@ -12,6 +12,7 @@
 
 #include <map>
 #include <math.h>
+#include <tuple>
 #include <initializer_list>
 #include <hb_assert.hpp>
 #include <hb_tensor.hpp>
@@ -89,10 +90,10 @@ inline void calc_range(hb_range* range, size_t numel,
 // Tiled Pointwise for
 // =========================================================
 
-template<typename scalar_t, typename F, class... Types>
+template<typename F, class... Types>
 inline void hb_tiled_foreach(F functor,
-                             HBTensor<scalar_t> res,
                              Types... args) {
+  auto res = std::get<0>(std::make_tuple(args...));
   // Iterating over all elementes
   hb_range range;
   calc_range(&range, res.numel());
@@ -101,10 +102,9 @@ inline void hb_tiled_foreach(F functor,
 
   // Static dispatch based on number number of operands
   hb_tiled_foreach_impl(
-      start, end, functor, res,
+      start, end, functor,
       args...,
-      (bsg_attr_remote scalar_t*) res.data_ptr(),
-      ((bsg_attr_remote scalar_t*) args.data_ptr())...);
+      ((bsg_attr_remote typename decltype(args)::data_type*) args.data_ptr())...);
 }
 
 // Nullary
@@ -128,13 +128,13 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
 }
 
 // Unary
-template<typename scalar_t, typename F, typename... P>
+template<typename scalar1_t, typename scalar2_t, typename F, typename... P>
 __attribute__((noinline)) void hb_tiled_foreach_impl(
       size_t start, size_t end, F functor,
-      HBTensor<scalar_t> res,
-      HBTensor<scalar_t> tensor_arg0,
-      bsg_attr_remote scalar_t* bsg_attr_noalias res_ptr,
-      bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr0) {
+      HBTensor<scalar1_t> res,
+      HBTensor<scalar2_t> tensor_arg0,
+      bsg_attr_remote scalar1_t* bsg_attr_noalias res_ptr,
+      bsg_attr_remote scalar2_t* bsg_attr_noalias tensor_data_ptr0) {
   // is_trivial_1d
   if(res.ndim() == 1) {
     bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
@@ -150,15 +150,16 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
 }
 
 // Binary
-template<typename scalar_t, typename F, typename... P>
+template<typename scalar1_t, typename scalar2_t, typename scalar3_t,
+         typename F, typename... P>
 __attribute__((noinline)) void hb_tiled_foreach_impl(
       size_t start, size_t end, F functor,
-      HBTensor<scalar_t> res,
-      HBTensor<scalar_t> tensor_arg0,
-      HBTensor<scalar_t> tensor_arg1,
-      bsg_attr_remote scalar_t* bsg_attr_noalias res_ptr,
-      bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr0,
-      bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr1) {
+      HBTensor<scalar1_t> res,
+      HBTensor<scalar2_t> tensor_arg0,
+      HBTensor<scalar3_t> tensor_arg1,
+      bsg_attr_remote scalar1_t* bsg_attr_noalias res_ptr,
+      bsg_attr_remote scalar2_t* bsg_attr_noalias tensor_data_ptr0,
+      bsg_attr_remote scalar3_t* bsg_attr_noalias tensor_data_ptr1) {
   // is_trivial_1d
   if(res.ndim() == 1) {
     bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
@@ -176,17 +177,18 @@ __attribute__((noinline)) void hb_tiled_foreach_impl(
 }
 
 // Ternary
-template<typename scalar_t, typename F, typename... P>
+template<typename scalar1_t, typename scalar2_t, typename scalar3_t,
+         typename scalar4_t, typename F, typename... P>
 __attribute__((noinline)) void hb_tiled_foreach_impl(
       size_t start, size_t end, F functor,
-      HBTensor<scalar_t> res,
-      HBTensor<scalar_t> tensor_arg0,
-      HBTensor<scalar_t> tensor_arg1,
-      HBTensor<scalar_t> tensor_arg2,
-      bsg_attr_remote scalar_t* bsg_attr_noalias res_ptr,
-      bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr0,
-      bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr1,
-      bsg_attr_remote scalar_t* bsg_attr_noalias tensor_data_ptr2) {
+      HBTensor<scalar1_t> res,
+      HBTensor<scalar2_t> tensor_arg0,
+      HBTensor<scalar3_t> tensor_arg1,
+      HBTensor<scalar4_t> tensor_arg2,
+      bsg_attr_remote scalar1_t* bsg_attr_noalias res_ptr,
+      bsg_attr_remote scalar2_t* bsg_attr_noalias tensor_data_ptr0,
+      bsg_attr_remote scalar3_t* bsg_attr_noalias tensor_data_ptr1,
+      bsg_attr_remote scalar4_t* bsg_attr_noalias tensor_data_ptr2) {
   // is_trivial_1d
   if(res.ndim() == 1) {
     bsg_unroll(16) for(size_t idx = start; idx < end; idx++) {
