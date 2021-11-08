@@ -134,10 +134,10 @@ Tensor& index_add_hb_(Tensor &self, int64_t dim, const Tensor &index, const Tens
     }
     int64_t nbrIndices = index.numel();
     // TODO: Just last dim?
-    bool indexShouldBeMajor = false;
+    int32_t indexShouldBeMajor = 0;
     for (int i = 0; i < dst_c.dim(); ++i) {
         if (i != dst_add_dim && dst_c.size(i) > 1 && dst_c.stride(i) < dst_c.stride(dst_add_dim))
-            indexShouldBeMajor = true;
+            indexShouldBeMajor = 1;
     }
     if (indexShouldBeMajor)
         std::cout << "indexShouldBeMajor" << std::endl;
@@ -151,13 +151,16 @@ Tensor& index_add_hb_(Tensor &self, int64_t dim, const Tensor &index, const Tens
     device_args.push_back(create_device_tensor(index, device_ptrs));
     device_args.push_back(create_device_scalar((int64_t) dst_add_dim));
     device_args.push_back(create_device_scalar((int64_t) sliceSize));
-    device_args.push_back(create_device_scalar((int64_t) nbrIndices));
-    device_args.push_back(create_device_scalar((bool) indexShouldBeMajor));
 
-    // TODO: numIndices <= 16
-    // TODO: Implement small indices
-
-    c10::hammerblade::offload_kernel("tensorlib_index_add_large_index", device_args);
+    if (nbrIndices <= 16) {
+        // small number of indices
+        c10::hammerblade::offload_kernel("tensorlib_index_add_small_index", device_args);
+    } else {
+        // large number of indices
+        device_args.push_back(create_device_scalar((int64_t) nbrIndices));
+        device_args.push_back(create_device_scalar((int32_t) indexShouldBeMajor));
+        c10::hammerblade::offload_kernel("tensorlib_index_add_large_index", device_args);
+    }
 
     cleanup_device(device_args, device_ptrs);
 
