@@ -3879,6 +3879,7 @@
   dispatch:
     CPU: index_add_cpu_
     CUDA: legacy::cuda::_th_index_add_
+    HammerBlade: index_add_hb_
 
 - func: index_add(Tensor self, int dim, Tensor index, Tensor source) -> Tensor
   use_c10_dispatcher: full
