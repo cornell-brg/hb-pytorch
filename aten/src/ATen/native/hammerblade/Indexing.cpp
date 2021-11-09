@@ -113,8 +113,12 @@ Tensor& index_add_hb_(Tensor &self, int64_t dim, const Tensor &index, const Tens
                 "index_add_(): Indexing dim ", dim, " is out of bounds of tensor");
     TORCH_CHECK(numel == (source.dim() == 0 ? 1 : source.size(dim)),
                 "index_add_(): Number of indices should be equal to self.size(dim)");
-    // TODO: check all dimension sizes besides dim dimension
-    // TODO: check dim equal of self and source
+    TORCH_CHECK(self.dim() == source.dim(), "index_add_(): Expected same number of dimensions for self and source tensors");
+    for (int i = 0; i < self.dim(); ++i) {
+        if (i != dim) {
+            TORCH_CHECK(self.size(i) == source.size(i), "index_add_(): Expected equal size of dimension ", i, " for self and source tensors");
+        }
+    }
 
 
     int64_t dst_add_dim = dim;
