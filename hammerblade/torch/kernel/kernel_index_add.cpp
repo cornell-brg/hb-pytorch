@@ -98,7 +98,7 @@ extern "C" {
           int64_t* dim_p,
           int64_t* sliceSize_p,
           int64_t* numIndices_p,
-          int32_t* indexIsMajor_p) {
+          int32_t* indexMajorMode_p) {
 
     auto dst = HBTensor<float>(t0_p);
     auto src = HBTensor<float>(t1_p);
@@ -106,7 +106,7 @@ extern "C" {
     int64_t dim = *dim_p;
     int64_t sliceSize = *sliceSize_p;
     int64_t numIndices = *numIndices_p;
-    int32_t indexIsMajor = *indexIsMajor_p;
+    int32_t indexMajorMode = *indexMajorMode_p;
 
       // Start profiling
     bsg_cuda_print_stat_kernel_start();
@@ -118,7 +118,7 @@ extern "C" {
 
     for (int linearIndex = bsg_id; linearIndex < src.numel(); linearIndex += BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM) {
         int64_t srcIndex, elementInSlice;
-        if (indexIsMajor == 1) {
+        if (indexMajorMode == 1) {
             srcIndex = linearIndex / sliceSize;
             elementInSlice = linearIndex % sliceSize;
         } else {
@@ -133,10 +133,9 @@ extern "C" {
 
         int64_t dst_lock_idx = dst_element_idx && 0xFF;
         int *dst_lock = &lock[dst_lock_idx];
+
         aquire_lock(dst_lock);
-
         dst(dst_element_idx) += src(src_element_idx);
-
         release_lock(dst_lock);
     }
 

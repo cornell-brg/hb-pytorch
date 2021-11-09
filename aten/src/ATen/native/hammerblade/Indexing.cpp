@@ -96,14 +96,13 @@ Tensor collapseDims(Tensor t, int64_t &addDim) {
 }
 
 Tensor& index_add_hb_(Tensor &self, int64_t dim, const Tensor &index, const Tensor &source) {
-    auto  numel = index.numel();
     TORCH_CHECK_INDEX(index.dim() <= 1, "index_add_(): Index is supposed to be a vector");
     TORCH_CHECK(index.scalar_type() == ScalarType::Long, "index_add_(): Expected dtype int64 for index");
     TORCH_CHECK(self.scalar_type() == source.scalar_type(),
                 "index_add_(): self and source must have the same scalar type");
     TORCH_CHECK(dim == 0 || dim < source.dim(),
                 "index_add_(): Indexing dim ", dim, " is out of bounds of tensor");
-    TORCH_CHECK(numel == (source.dim() == 0 ? 1 : source.size(dim)),
+    TORCH_CHECK(index.numel() == (source.dim() == 0 ? 1 : source.size(dim)),
                 "index_add_(): Number of indices should be equal to self.size(dim)");
     TORCH_CHECK(self.dim() == source.dim(), "index_add_(): Expected same number of dimensions for self and source tensors");
     for (int i = 0; i < self.dim(); ++i) {
@@ -126,16 +125,6 @@ Tensor& index_add_hb_(Tensor &self, int64_t dim, const Tensor &index, const Tens
     }
 
     int64_t nbrIndices = index.numel();
-    // TODO: Just last dim?
-    int32_t indexShouldBeMajor = 0;
-    for (int i = 0; i < dst_c.dim(); ++i) {
-        if (i != dst_add_dim && dst_c.size(i) > 1 && dst_c.stride(i) < dst_c.stride(dst_add_dim))
-            indexShouldBeMajor = 1;
-    }
-    if (indexShouldBeMajor)
-        std::cout << "indexShouldBeMajor" << std::endl;
-    else
-        std::cout << "elementsInSliceMajor" << std::endl;
     int64_t sliceSize = dst_c.numel() / dst_c.size(dst_add_dim);
     TORCH_CHECK(sliceSize > 0, "index_add_(): Expected slice with size greater than 0");
 
@@ -152,8 +141,14 @@ Tensor& index_add_hb_(Tensor &self, int64_t dim, const Tensor &index, const Tens
         c10::hammerblade::offload_kernel("tensorlib_index_add_small_index", device_args);
     } else {
         // large number of indices
+        // indexMajorMode when addDim is not last dim, and not second-last (when last dim has size of 1)
+        int32_t indexMajorMode = 1;
+        if ((dst_add_dim == dst_c.dim()-1) || (dst_c.size(dst_c.dim()-1) == 1 && dst_add_dim == dst_c.dim()-2)) {
+            indexMajorMode = 0;
+        }
+
         device_args.push_back(create_device_scalar((int64_t) nbrIndices));
-        device_args.push_back(create_device_scalar((int32_t) indexShouldBeMajor));
+        device_args.push_back(create_device_scalar((int32_t) indexMajorMode));
         c10::hammerblade::offload_kernel("tensorlib_index_add_large_index", device_args);
     }
 
