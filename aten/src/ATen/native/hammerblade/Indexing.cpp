@@ -116,17 +116,11 @@ Tensor& index_add_hb_(Tensor &self, int64_t dim, const Tensor &index, const Tens
     int64_t src_add_dim = dim;
     Tensor dst_c = collapseDims(self, dst_add_dim);
     Tensor src_c = collapseDims(source, src_add_dim);
-
-
-    // TODO: check sliceSize != 0
-    // TODO: simplify sliceSize calculation?
-    int64_t sliceSize = 1;
     // Check dimensions of tensors after collapse; probably not necessary
     TORCH_CHECK(dst_c.dim() == src_c.dim(), "index_add_(): Expected same number of dimensions for dst_c and src_c tensors");
     TORCH_CHECK(dst_add_dim == src_add_dim, "index_add_(): Expected the generated Add-Index-Dimensions (dst_add_dim and src_add_dim) to be equal");
     for (int i = 0; i < dst_c.dim(); ++i) {
         if (i != dst_add_dim) {
-            sliceSize *= dst_c.size(i);
             TORCH_CHECK(dst_c.size(i) == src_c.size(i), "index_add_(): Expected equal size of dimension ", i, " for dst_c and src_c tensors");
         }
     }
@@ -142,6 +136,8 @@ Tensor& index_add_hb_(Tensor &self, int64_t dim, const Tensor &index, const Tens
         std::cout << "indexShouldBeMajor" << std::endl;
     else
         std::cout << "elementsInSliceMajor" << std::endl;
+    int64_t sliceSize = dst_c.numel() / dst_c.size(dst_add_dim);
+    TORCH_CHECK(sliceSize > 0, "index_add_(): Expected slice with size greater than 0");
 
     std::vector<eva_t>  device_args;
     std::vector<eva_t>  device_ptrs;
