@@ -61,7 +61,9 @@ REGISTER_HAMMERBLADE_DISPATCH(index_stub, &index_kernel_hb);
 }
 
 
-// NOTE: Function updates addDim
+// NOTE: Function updates addDim to new addDim
+// Function does not collapse dimensions of size 1 into addDim
+// => dst and src tensors keep same number of dimensions
 Tensor collapseDims(Tensor t, int64_t &addDim) {
     // collapse dimensions smaller than addDim
     std::vector<int64_t> new_shape;
@@ -89,16 +91,6 @@ Tensor collapseDims(Tensor t, int64_t &addDim) {
 
     if (addDim != 0)
         addDim = 1;
-    std::cout << "addDim: " << addDim << std::endl;
-    std::cout << "new_shape: " << new_shape << std::endl;
-
-    /*
-    std::cout  << "addDim: " << addDim << std::endl;
-    for (int i = 0; i < t_collapsed.dim(); ++i) {
-        std::cout << "size[" << i << "]: " << t_collapsed.size(i) << std::endl;
-        std::cout << "stride[" << i << "]: " << t_collapsed.stride(i) << std::endl;
-    }
-    */
 
     return t_collapsed;
 }
