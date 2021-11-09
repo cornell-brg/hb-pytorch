@@ -5,15 +5,15 @@ def _test_index_add(dim, t1, t2, index):
     t2_h = t2.hammerblade()
     index_h = index.hammerblade()
 
-    out = t1.index_add(dim, index, t2)
     out_h = t1_h.index_add(dim, index_h, t2_h)
+    out = t1.index_add(dim, index, t2)
     print(out)
     print(out_h)
-    abs_diff = torch.abs(out - out_h.cpu())
-    nonzero = torch.nonzero(abs_diff)
-    print(nonzero)
-    print("#nonzero: ", nonzero.size())
-    print("sum abs difference: ", torch.sum(abs_diff))
+    #abs_diff = torch.abs(out - out_h.cpu())
+    #nonzero = torch.nonzero(abs_diff)
+    #print(nonzero)
+    #print("#nonzero: ", nonzero.size())
+    #print("sum abs difference: ", torch.sum(abs_diff))
     assert out_h.device == torch.device("hammerblade")
     assert torch.allclose(out, out_h.cpu())
 
@@ -144,4 +144,18 @@ def test_index_add_13():
     t1 = torch.ones([10, 2])
     t2 = torch.ones([count, 2])
     index = torch.zeros(count, dtype=torch.int64)
+    _test_index_add(dim, t1, t2, index)
+
+def test_index_add_14():
+    dim = 0
+    t1 = torch.zeros(5)
+    t2 = torch.rand(10)
+    index = torch.tensor([0, 0, 3, 3, 3, 0, 4, 4, 4, 4], dtype=torch.int64)
+    _test_index_add(dim, t1, t2, index)
+
+def test_index_add_15():
+    dim = 0
+    t1 = torch.tensor([42.])
+    t2 = torch.rand([5])
+    index = torch.tensor([0, 0, 0, 0, 0], dtype=torch.int64)
     _test_index_add(dim, t1, t2, index)
