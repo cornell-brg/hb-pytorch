@@ -159,3 +159,17 @@ def test_index_add_15():
     t2 = torch.rand([5])
     index = torch.tensor([0, 0, 0, 0, 0], dtype=torch.int64)
     _test_index_add(dim, t1, t2, index)
+
+def test_index_add_16():
+    dim = 2
+    t1 = torch.rand([1, 7, 11, 1])
+    t2 = torch.rand([1, 7, 7, 1])
+    index = torch.tensor([0, 1, 2, 3, 4, 5, 6], dtype=torch.int64)
+    _test_index_add(dim, t1, t2, index)
+
+def test_index_add_17():
+    dim = 1
+    t1 = torch.rand([1, 11, 1])
+    t2 = torch.rand([1, 7, 1])
+    index = torch.tensor([0, 1, 2, 3, 4, 5, 6], dtype=torch.int64)
+    _test_index_add(dim, t1, t2, index)
