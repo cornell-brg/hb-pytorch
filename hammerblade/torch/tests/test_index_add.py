@@ -132,7 +132,7 @@ def test_index_add_11():
 
 def test_index_add_12():
     dim = 1
-    count = 10000000
+    count = 100
     t1 = torch.ones([45, 10])
     t2 = torch.ones([45, count])
     index = torch.zeros(count, dtype=torch.int64)
@@ -140,7 +140,7 @@ def test_index_add_12():
 
 def test_index_add_13():
     dim = 0
-    count = 10000000
+    count = 10000
     t1 = torch.ones([10, 2])
     t2 = torch.ones([count, 2])
     index = torch.zeros(count, dtype=torch.int64)
