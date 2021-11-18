@@ -5,31 +5,15 @@
 
 #include <kernel_common.hpp>
 #include <cmath>
-#include "bsg_manycore_atomic.h"
+#include "bsg_manycore_arch.h"
+#include "bsg_mcs_mutex.h"
 
 // equal to number of tiles
-#define LOCK_SIZE 128
+#define MTX_SIZE 128
 
 
 extern "C" {
-  int lock[LOCK_SIZE] __attribute__ ((section (".dram")));
-
-  void init_locks() {
-    for (int linearIndex = bsg_id; linearIndex < LOCK_SIZE; linearIndex += BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM) {
-        lock[linearIndex] = 0;
-    }
-  }
-
-  void aquire_lock(int *lock) {
-      int lock_ret = 1;
-      do {
-          lock_ret = bsg_amoswap_aq(lock, 1);
-      } while (lock_ret != 0);
-  }
-
-  void release_lock(int *lock) {
-      bsg_amoswap_rl(lock, 0);
-  }
+  bsg_mcs_mutex_t mtx[MTX_SIZE] __attribute__ ((section (".dram")));
 
 
   int get_element_index(HBTensor<float> &ten, int add_dim, int index, int elementInSlice) {
@@ -64,7 +48,7 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
-    init_locks();
+    bsg_mcs_mutex_node_t lcl, *lcl_as_glbl = (bsg_mcs_mutex_node_t*)bsg_tile_group_remote_ptr(int, bsg_x, bsg_y, &lcl);
     g_barrier.sync();
 
     for (int srcIndex = 0; srcIndex < idx.numel(); ++srcIndex) {
@@ -73,12 +57,12 @@ extern "C" {
             int dst_element_idx = get_element_index(dst, dim, dstIndex, linearIndex);
             int src_element_idx = get_element_index(src, dim, srcIndex, linearIndex);
 
-            int dst_lock_idx = dst_element_idx && 0xFF;
-            int *dst_lock = &lock[dst_lock_idx];
+            int dst_mtx_idx = dst_element_idx && 0xFF;
+            int *dst_mtx = &mtx[dst_mtx_idx];
 
-            aquire_lock(dst_lock);
+            bsg_mcs_mutex_acquire(dst_mtx, &lcl, lcl_as_glbl);
             dst(dst_element_idx) += src(src_element_idx);
-            release_lock(dst_lock);
+            bsg_mcs_mutex_release(dst_mtx, &lcl, lcl_as_glbl);
         }
     }
 
@@ -112,7 +96,7 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
-    init_locks();
+    bsg_mcs_mutex_node_t lcl, *lcl_as_glbl = (bsg_mcs_mutex_node_t*)bsg_tile_group_remote_ptr(int, bsg_x, bsg_y, &lcl);
     g_barrier.sync();
 
 
@@ -131,12 +115,12 @@ extern "C" {
         int dst_element_idx = get_element_index(dst, dim, dstIndex, elementInSlice);
         int src_element_idx = get_element_index(src, dim, srcIndex, elementInSlice);
 
-        int dst_lock_idx = dst_element_idx && 0xFF;
-        int *dst_lock = &lock[dst_lock_idx];
+        int dst_mtx_idx = dst_element_idx && 0xFF;
+        int *dst_mtx = &mtx[dst_mtx_idx];
 
-        aquire_lock(dst_lock);
+        bsg_mcs_mutex_acquire(dst_mtx, &lcl, lcl_as_glbl);
         dst(dst_element_idx) += src(src_element_idx);
-        release_lock(dst_lock);
+        bsg_mcs_mutex_release(dst_mtx, &lcl, lcl_as_glbl);
     }
 
 
