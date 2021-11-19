@@ -238,7 +238,7 @@ void offload_kernel(const char* kernel, std::vector<eva_t> args) {
 #endif
 
   // debug
-//  std::cerr << kernel << " finished -- abs cycle = " << abs_cycle << std::endl;
+  std::cerr << kernel << " finished -- abs cycle = " << abs_cycle << std::endl;
 
 #ifndef HB_SILICON_V0
   if (hb_mc_should_trace) {

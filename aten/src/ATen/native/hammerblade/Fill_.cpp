@@ -8,9 +8,15 @@ namespace at { namespace native {
 namespace {
 
 void fill_kernel_hb(TensorIterator& iter, Scalar value_scalar) {
-  AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "fill_hb", [&]() {
+  if(iter.dtype() == kFloat) {
+    AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "fill_hb", [&]() {
       offload_op_nullary(iter, value_scalar.to<scalar_t>(), "tensorlib_fill");
       });
+  } else {
+    AT_DISPATCH_INT_TYPE_ONLY(iter.dtype(), "fill_hb", [&]() {
+      offload_op_nullary(iter, value_scalar.to<scalar_t>(), "tensorlib_fill_int");
+      });
+  }
 }
 
 } // anonymous namespace

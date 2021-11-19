@@ -56,8 +56,45 @@ void index_kernel_hb(TensorIterator& iter, IntArrayRef index_size, IntArrayRef i
   cleanup_device(device_args, device_ptrs);
 }
 
-REGISTER_HAMMERBLADE_DISPATCH(index_stub, &index_kernel_hb);
+void index_put_hb(TensorIterator& iter, IntArrayRef index_size, IntArrayRef index_stride, bool accumulate) {
+  auto strides = iter.get_strides();
+  while (strides.size() < 2 * iter.ntensors()) {
+    strides.push_back(0);
+  }
 
+  for(int i = 0; i < strides.size(); i++) {
+    strides[i] = strides[i] / 4;
+  }
+  IntArrayRef kernel_strides = IntArrayRef(strides);
+  IntArrayRef shapes = iter.shape();
+  std::vector<eva_t> device_args;
+  std::vector<eva_t> device_ptrs;
+  for(int i = 0; i < iter.ntensors(); i++) {
+    Tensor& t = iter.tensor(i);
+    if(i > iter.noutputs() && t.dtype() == at::kLong) {
+      t.to(at::kInt);
+    }
+    device_args.push_back(create_device_tensor(t, device_ptrs));
+  }
+  device_args.push_back(create_device_vector(shapes, true, device_ptrs));
+  device_args.push_back(create_device_vector(kernel_strides, true, device_ptrs));
+  device_args.push_back(create_device_vector(index_size, true, device_ptrs));
+  device_args.push_back(create_device_vector(index_stride, true, device_ptrs));
+  device_args.push_back(create_device_scalar((int) accumulate));  
+  if(iter.ntensors() == 3) {
+    c10::hammerblade::offload_kernel(
+        "tensorlib_index_put_1d", device_args);
+  } else if(iter.ntensors() == 4) {
+    c10::hammerblade::offload_kernel(
+        "tensorlib_index_put_2d", device_args);
+  } else {
+    AT_ERROR("Currently, we only support the indexing of 2D HB Tensor !");
+  }
+  cleanup_device(device_args, device_ptrs); 
+}
+
+REGISTER_HAMMERBLADE_DISPATCH(index_stub, &index_kernel_hb);
+REGISTER_HAMMERBLADE_DISPATCH(index_put_stub, &index_put_hb);
 }
 }}
 

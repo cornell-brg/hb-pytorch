@@ -120,6 +120,59 @@ static void compute_core(int** ptrs, int* strides, int* index_sizes, int* index_
   }
 }
 
+static void index_put_compute_core(int** ptrs, int* strides, int* index_sizes, int* index_strides, int ntensors, int step0, int step1) {
+  size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
+  int* outer_strides = &strides[ntensors];
+  for(int i = 0; i < step1; i++) {
+    if(i > 0) {
+      for(int arg = 0; arg < ntensors; arg++) {
+        ptrs[arg] += outer_strides[arg];
+      }
+    }
+    int* dst = ptrs[0];
+    int* src = ptrs[1];
+    if(is_constant_index(ntensors, strides)) {
+      int offset = get(0, ntensors-2, &ptrs[2], &strides[2], index_sizes, index_strides);
+      for(int id = __bsg_id; id < step0; id = id + thread_num) {
+        *(dst + strides[0] * id + offset) = *(src + strides[1] * id);
+      }
+    } else {
+      for(int id = __bsg_id; id < step0; id = id + thread_num) {
+        int offset = get(id, ntensors-2, &ptrs[2], &strides[2], index_sizes, index_strides);
+        *(dst + strides[0] * id + offset) = *(src + strides[1] * id);
+      }
+    }
+  }
+}
+
+static void index_put_accu_compute_core(int** ptrs, int* strides, int* index_sizes, int* index_strides, int ntensors, int step0, int step1) {
+  size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
+  int* outer_strides = &strides[ntensors];
+  for(int i = 0; i < step1; i++) {
+    if(i > 0) {
+      for(int arg = 0; arg < ntensors; arg++) {
+        ptrs[arg] += outer_strides[arg];
+      }
+    }
+    int* dst = ptrs[0];
+    int* src = ptrs[1];
+    if(is_constant_index(ntensors, strides)) {
+      int offset = get(0, ntensors-2, &ptrs[2], &strides[2], index_sizes, index_strides);
+      for(int id = __bsg_id; id < step0; id = id + thread_num) {
+        *(dst + strides[0] * id + offset) += *(src + strides[1] * id);
+//        printf("Enter the accumulate branch, dst[%d] is %d, and it is added with src[%d], which is %d\n", strides[0] * id + offset, *(dst + strides[0] * id + offset), strides[1] * id, *(src + strides[1] * id));
+      }
+    } else {
+      for(int id = __bsg_id; id < step0; id = id + thread_num) {
+        int offset = get(id, ntensors-2, &ptrs[2], &strides[2], index_sizes, index_strides);
+        *(dst + strides[0] * id + offset) += *(src + strides[1] * id);
+//        printf("Enter the accumulate branch, dst[%d] is %d, and it is added with src[%d], which is %d\n", strides[0] * id + offset, *(dst + strides[0] * id + offset), strides[1] * id, *(src + strides[1] * id));
+      }
+    }
+  }
+}
+
+
 extern "C" {
 
 __attribute__ ((noinline)) int tensorlib_indexing_1d(
@@ -169,6 +222,63 @@ __attribute__ ((noinline)) int tensorlib_indexing_1d(
 HB_EMUL_REG_KERNEL(tensorlib_indexing_1d, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, 
                                           hb_vector_t*, hb_vector_t*, hb_vector_t*, hb_vector_t*)
 
+// the _out in index_input is the value that will be put onto the indexed tensor.
+__attribute__ ((noinline)) int tensorlib_index_put_1d(
+  hb_tensor_t* _out,
+  hb_tensor_t* _src,
+  hb_tensor_t* _index1,
+  hb_vector_t* _shapes,
+  hb_vector_t* _kernel_strides,
+  hb_vector_t* _index_sizes,
+  hb_vector_t* _index_strides,
+  int* _accumulate) {
+
+  auto out_tensor = HBTensor<int>(_out);
+  int* out = (int*)out_tensor.data_ptr();
+  int* out_sizes = (int*)out_tensor.get_sizes();
+  int out_numel = out_tensor.numel();
+  int* src = (int*)HBTensor<int>(_src).data_ptr();
+  int* index1 = (int*)HBTensor<int>(_index1).data_ptr();
+  int* shapes = (int*)HBVector<int>(_shapes).data_ptr();
+  int ndim = HBVector<int>(_shapes).numel();
+  int* index_sizes = (int*)HBVector<int>(_index_sizes).data_ptr();
+  int* index_strides = (int*)HBVector<int>(_index_strides).data_ptr();
+  int* kernel_strides = (int*)HBVector<int>(_kernel_strides).data_ptr();
+  int accumulate = *_accumulate;
+
+  int step[2];
+
+  int* ptrs[3] = {out, src, index1};
+  int values[ndim];
+  calculate_values(values, ndim, out_sizes);
+  bsg_cuda_print_stat_kernel_start();
+  if(ndim <= 1) {
+    get_data_ptrs(ptrs, values, kernel_strides, ndim, 3);
+    if(accumulate) {
+      index_put_accu_compute_core(ptrs, kernel_strides, index_sizes, index_strides, 3, out_numel, 1);
+    } else {
+      index_put_compute_core(ptrs, kernel_strides, index_sizes, index_strides, 3, out_numel, 1);
+    }
+  } else {
+    int offset = 0;
+    while(offset < out_numel) {
+      get_data_ptrs(ptrs, values, kernel_strides, ndim, 3);
+      max_2d_step(step, offset, shapes, ndim, values, out_numel);
+      if(accumulate){
+        index_put_accu_compute_core(ptrs, kernel_strides, index_sizes, index_strides, 3, step[0], step[1]);
+      } else {
+        index_put_compute_core(ptrs, kernel_strides, index_sizes, index_strides, 3, step[0], step[1]);
+      }  
+      increment(step, offset, shapes, ndim, values);
+    }
+  }
+  bsg_cuda_print_stat_kernel_start();
+  g_barrier.sync();
+  return 0;
+}
+
+HB_EMUL_REG_KERNEL(tensorlib_index_put_1d, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+                                          hb_vector_t*, hb_vector_t*, hb_vector_t*, hb_vector_t*, int*)
 
 __attribute__ ((noinline)) int tensorlib_indexing_2d(
   hb_tensor_t* _out,
@@ -219,5 +329,64 @@ __attribute__ ((noinline)) int tensorlib_indexing_2d(
 
 HB_EMUL_REG_KERNEL(tensorlib_indexing_2d, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, 
                                           hb_vector_t*, hb_vector_t*, hb_vector_t*, hb_vector_t*)
-    
+
+__attribute__ ((noinline)) int tensorlib_index_put_2d(
+  hb_tensor_t* _out,
+  hb_tensor_t* _src,
+  hb_tensor_t* _index1,
+  hb_tensor_t* _index2,
+  hb_vector_t* _shapes,
+  hb_vector_t* _kernel_strides,
+  hb_vector_t* _index_sizes,
+  hb_vector_t* _index_strides,
+  int* _accumulate) {
+
+  auto out_tensor = HBTensor<int>(_out);
+  int* out = (int*)out_tensor.data_ptr();
+  int* out_sizes = (int*)out_tensor.get_sizes();
+  int out_numel = out_tensor.numel();
+  int* src = (int*)HBTensor<int>(_src).data_ptr();
+  int* index1 = (int*)HBTensor<int>(_index1).data_ptr();
+  int* index2 = (int*)HBTensor<int>(_index2).data_ptr();
+  int* shapes = (int*)HBVector<int>(_shapes).data_ptr();
+  int ndim = HBVector<int>(_shapes).numel();
+  int* index_sizes = (int*)HBVector<int>(_index_sizes).data_ptr();
+  int* index_strides = (int*)HBVector<int>(_index_strides).data_ptr();
+  int* kernel_strides = (int*)HBVector<int>(_kernel_strides).data_ptr();
+  int accumulate = *_accumulate;
+
+  int step[2];
+
+  int* ptrs[4] = {out, src, index1, index2};
+  int values[ndim];
+  calculate_values(values, ndim, out_sizes);
+
+  bsg_cuda_print_stat_kernel_start();
+  if(ndim <= 1) {
+    get_data_ptrs(ptrs, values, kernel_strides, ndim, 4);
+    if(accumulate) {
+      index_put_accu_compute_core(ptrs, kernel_strides, index_sizes, index_strides, 4, out_numel, 1);
+    } else {
+      index_put_compute_core(ptrs, kernel_strides, index_sizes, index_strides, 4, out_numel, 1);
+    }
+  } else {
+    int offset = 0;
+    while(offset < out_numel) {
+      get_data_ptrs(ptrs, values, kernel_strides, ndim, 4);
+      max_2d_step(step, offset, shapes, ndim, values, out_numel);
+      if(accumulate) {
+        index_put_accu_compute_core(ptrs, kernel_strides, index_sizes, index_strides, 4, step[0], step[1]);
+      } else {
+        index_put_compute_core(ptrs, kernel_strides, index_sizes, index_strides, 4, step[0], step[1]);
+      }
+      increment(step, offset, shapes, ndim, values);
+    }
+  }
+  bsg_cuda_print_stat_kernel_start();
+  g_barrier.sync();
+  return 0;
+}
+
+HB_EMUL_REG_KERNEL(tensorlib_index_put_2d, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*,
+                                          hb_vector_t*, hb_vector_t*, hb_vector_t*, hb_vector_t*, int*)
 }

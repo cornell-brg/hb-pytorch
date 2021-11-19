@@ -5,7 +5,7 @@ Tests on torch.index
 import torch
 
 def test_indexing_1D_array():
-    x = torch.tensor([1, 2, 3, 4, 5, 6, 7, 8, 9]).int()
+    x = torch.tensor([1, 2, 3, 4, 5, 6, 7, 8, 9]).float()
     hb_x = x.hammerblade()
 
     #Index single element:
@@ -40,7 +40,7 @@ def test_indexing_1D_array():
     assert torch.allclose(z5, hb_z5.cpu())
 
 def test_indexing_2D_array():
-    x = torch.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]]).int()
+    x = torch.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]]).float()
     hb_x = x.hammerblade()
      
     #Index single element

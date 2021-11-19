@@ -52,7 +52,16 @@ inline void copy_into_sparse(const SparseTensor& self, const LongTensor& indices
       self,
       cpu_indices.to(self._indices().options(), non_blocking, /*copy=*/true),
       values.to(self._values().options(), non_blocking, /*copy=*/true));
-  } else { 
+  } else if(indices.device().is_hammerblade() && self.is_hammerblade()) {
+//    std::cout << "Copy sparse hb to hb branch" << std::endl;
+    TORCH_CHECK(indices.dtype() == at::kInt, "Indices on HammerBlade is not IntTensor");
+    IntTensor int_self = self._indices().to(kInt);
+    std::cout << "Finish converting self_indices" << std::endl;
+    alias_into_sparse(
+      self,
+      indices.to(int_self.options(), non_blocking, /*copy=*/true),
+      values.to(self._values().options(), non_blocking, /*copy=*/true));
+  } else {
     alias_into_sparse(
       self,
       indices.to(self._indices().options(), non_blocking, /*copy=*/true),
