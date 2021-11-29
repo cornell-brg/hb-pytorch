@@ -6,7 +6,7 @@
 #include <kernel_common.hpp>
 #include <cmath>
 #include "bsg_manycore_arch.h"
-#include "bsg_mcs_mutex.h"
+#include "bsg_mcs_mutex.hpp"
 
 // equal to number of tiles
 #define MTX_SIZE 128
@@ -58,7 +58,7 @@ extern "C" {
             int src_element_idx = get_element_index(src, dim, srcIndex, linearIndex);
 
             int dst_mtx_idx = dst_element_idx && 0xFF;
-            int *dst_mtx = &mtx[dst_mtx_idx];
+            bsg_mcs_mutex_t *dst_mtx = &mtx[dst_mtx_idx];
 
             bsg_mcs_mutex_acquire(dst_mtx, &lcl, lcl_as_glbl);
             dst(dst_element_idx) += src(src_element_idx);
@@ -116,7 +116,7 @@ extern "C" {
         int src_element_idx = get_element_index(src, dim, srcIndex, elementInSlice);
 
         int dst_mtx_idx = dst_element_idx && 0xFF;
-        int *dst_mtx = &mtx[dst_mtx_idx];
+        bsg_mcs_mutex_t *dst_mtx = &mtx[dst_mtx_idx];
 
         bsg_mcs_mutex_acquire(dst_mtx, &lcl, lcl_as_glbl);
         dst(dst_element_idx) += src(src_element_idx);
