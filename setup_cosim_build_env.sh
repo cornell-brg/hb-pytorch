@@ -56,11 +56,10 @@ export USE_HB_COSIM=1
 # BRG servers -- on BRG servers we have global installed COSIM so SW side ppl
 # dont have to worry about COSIM installation
 if [[ "x${SETUP_BRG_HAMMERBLADE}" != "xyes" ]]; then
-  export BSG_MACHINE=pod_X1Y1_ruche_X16Y8_hbm
+  export BSG_MACHINE=pod_X1Y1_ruche_X16Y8_hbm_one_pseudo_channel
   export BSG_MACHINE_PATH=$BRG_BSG_BLADERUNNER_DIR/bsg_replicant/machines/$BSG_MACHINE
-  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python/test_loader main.exec
-  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python/test_loader main.profile
-  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python/test_loader main.saif
+  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python/test_loader exec.log
+  make -C $BRG_BSG_BLADERUNNER_DIR/bsg_replicant/examples/python/test_loader profile.log
 fi
 
 export HB_KERNEL_DIR=$DIR/hammerblade/torch
