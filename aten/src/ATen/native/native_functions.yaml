@@ -2130,6 +2130,7 @@
   use_c10_dispatcher: full
   variants: function
 
+
 - func: scalar_tensor(Scalar s, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor
 
 - func: rand.names(int[] size, *, Dimname[]? names, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor
@@ -2657,6 +2658,10 @@
 - func: prod(Tensor self, *, ScalarType? dtype=None) -> Tensor
   variants: function, method
   supports_named_tensor: True
+  dispatch: 
+    HammerBlade : prod
+    CPU: prod
+    CUDA: prod
 
 - func: prod.dim_int(Tensor self, int dim, bool keepdim=False, *, ScalarType? dtype=None) -> Tensor
   variants: function, method
