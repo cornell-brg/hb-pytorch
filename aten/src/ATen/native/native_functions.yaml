@@ -3073,6 +3073,7 @@
     HammerBlade: clone
     SparseCPU: clone_sparse
     SparseCUDA: clone_sparse
+    SparseHammerBlade: clone_sparse
     MkldnnCPU: mkldnn_clone
     QuantizedCPU: quantized_clone
   supports_named_tensor: True

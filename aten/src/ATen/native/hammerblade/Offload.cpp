@@ -119,7 +119,9 @@ void offload_memcpy(TensorIterator& iter) {
   std::string memcpy_kernel = "tensorlib_copy_";
   memcpy_kernel += c10::toString(iter.dtype(1));
   memcpy_kernel += "_to_";
+//  std::cout << memcpy_kernel << std::endl;
   memcpy_kernel += c10::toString(iter.dtype(0));
+//  std::cout << memcpy_kernel << std::endl;
   offload_op_unary(iter, memcpy_kernel.c_str());
 }
 

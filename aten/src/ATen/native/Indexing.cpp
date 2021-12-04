@@ -225,6 +225,7 @@ static TensorIterator make_index_put_iterator(const AdvancedIndex& info, const T
   iter.dont_resize_outputs();
   iter.add_output(info.src);
   iter.add_input(value, info.src.device(), info.src.scalar_type());
+//  std::cout << "  In make_index_put_terator function, size of indices is: " << info.indices.size() << std::endl;
   for (auto& index : info.indices) {
     iter.add_input(index);
   }
