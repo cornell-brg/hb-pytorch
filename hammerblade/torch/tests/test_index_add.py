@@ -165,3 +165,21 @@ def test_index_add_13():
     index = torch.tensor([0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 0, 1, 2, 3, 4, 0, 1, 2], dtype=torch.int64)
     _test_index_add(dim, t1, t2, index)
     print("*** test_index_add_13 done!")
+
+
+# tests with realistic size
+def _profiling(add_size):
+    dim = 0
+    t1 = torch.rand([3000, 10])
+    t2 = torch.rand([add_size, 10])
+    index = torch.arange(0, add_size, dtype=torch.int64)
+    _test_index_add(dim, t1, t2, index)
+
+# def test_real_10():
+#     _profiling(10)
+# def test_real_100():
+#     _profiling(100)
+# # def test_real_1000():
+#     _profiling(1000)
+# def test_real_2000():
+#     _profiling(2000)
