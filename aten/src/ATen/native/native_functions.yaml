@@ -548,6 +548,7 @@
   dispatch:
     CPU: bitwise_not_out
     CUDA: bitwise_not_out
+    HammerBlade: bitwise_not_out
 
 - func: logical_not(Tensor self) -> Tensor
   supports_named_tensor: True
@@ -3068,7 +3069,6 @@
     HammerBlade: clone
     SparseCPU: clone_sparse
     SparseCUDA: clone_sparse
-    SparseHammerBlade: clone_sparse
     MkldnnCPU: mkldnn_clone
     QuantizedCPU: quantized_clone
   supports_named_tensor: True
@@ -4543,6 +4543,7 @@
   dispatch:
     CPU: lt_out
     CUDA: lt_out
+    HammerBlade: lt_out
     QuantizedCPU: lt_out_quantized_cpu
 
 - func: lt.Scalar(Tensor self, Scalar other) -> Tensor
@@ -4552,6 +4553,7 @@
   dispatch:
     CPU: lt
     CUDA: lt
+    HammerBlade: lt
     QuantizedCPU: lt_quantized_cpu
 
 - func: lt.Tensor_out(Tensor self, Tensor other, *, Tensor(a!) out) -> Tensor(a!)
@@ -4559,6 +4561,7 @@
   dispatch:
     CPU: lt_out
     CUDA: lt_out
+    HammerBlade: lt_out
     QuantizedCPU: lt_out_quantized_cpu
 
 - func: lt.Tensor(Tensor self, Tensor other) -> Tensor
@@ -4568,6 +4571,7 @@
   dispatch:
     CPU: lt
     CUDA: lt
+    HammerBlade: lt
     QuantizedCPU: lt_quantized_cpu
 
 - func: take.out(Tensor self, Tensor index, *, Tensor(a!) out) -> Tensor(a!)
