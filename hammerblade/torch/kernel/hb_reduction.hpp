@@ -66,7 +66,7 @@ inline uint32_t calc_elements_per_output(HBTensor<scalar_t> out,
 template<typename scalar_t, typename F1, typename F2>
 inline void binary_reduction_simple(HBTensor<scalar_t> out,
                                     HBTensor<scalar_t> in,
-                                    F1 reduce, F2 project) {
+                                    F1 reduce, F2 project, uint32_t init_res=0) {
   hb_assert_msg(out.numel() == 1, "reduction_simple only handles trivial case");
 
   bsg_attr_remote scalar_t* data[2];
@@ -77,7 +77,9 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
   //-----------------------------
   // partial_result
   //-----------------------------
-  scalar_t result = 0;
+  // scalar_t result = 0;
+  scalar_t result = init_res;
+  
 
   // is_trivial_1d
   if(in.ndim() == 1) {
@@ -128,9 +130,9 @@ inline void binary_reduction(HBTensor<scalar_t>out,
                              HBTensor<scalar_t>in,
                              uint32_t ndim, uint32_t num_reduction_dim,
                              uint32_t elements_per_output,
-                             F1 reduce, F2 project) {
+                             F1 reduce, F2 project, uint32_t init_res=0) {
   if(out.numel() == 1) {
-    binary_reduction_simple(out, in, reduce, project);
+    binary_reduction_simple(out, in, reduce, project,init_res);
     return;
   }
 
@@ -150,7 +152,8 @@ inline void binary_reduction(HBTensor<scalar_t>out,
         // parallelize over output elements
         hb_tiled_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
-          scalar_t result = 0;
+          // scalar_t result = 0;
+          scalar_t result = init_res;
           size_t d = 0;
           if (elements_per_output > 16) {
             for(; d < elements_per_output - 8; d += 8) {
@@ -188,7 +191,8 @@ inline void binary_reduction(HBTensor<scalar_t>out,
         // parallelize over output elements
         hb_tiled_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
-          scalar_t result = 0;
+          // scalar_t result = 0;
+          scalar_t result = init_res;
           uint32_t dim1 = n % in.dim(1);
           uint32_t dim2 = n / in.dim(1);
           size_t d = 0;
@@ -223,7 +227,8 @@ inline void binary_reduction(HBTensor<scalar_t>out,
         // parallelize over output elements
         hb_tiled_for(out.numel(), [&](size_t n) {
           // reduction result init to 0
-          scalar_t result = 0;
+          // scalar_t result = 0;
+          scalar_t result = init_res;
           for(size_t d = 0; d < elements_per_output; d++) {
             uint32_t dim0 = d % in.dim(0);
             uint32_t dim1 = d / in.dim(0);

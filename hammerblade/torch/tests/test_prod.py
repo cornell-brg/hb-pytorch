@@ -17,19 +17,60 @@ random.seed(42)
 # test of getting product of tensor t along dimension dim
 # ------------------------------------------------------------------------
 
-def _test_torch_prod(t,dim):
+def _test_torch_prod(t, dim, keepdim=False):
     h = t.hammerblade()
-    assert h is not t
-    out = torch.prod(t,dim)
-    out_h = torch.prod(h,dim)
+    out = torch.prod(t,dim, keepdim=keepdim)
+    print("CPU output:")
+    print(out)
+    print("\n")
+    out_h = torch.prod(h,dim, keepdim=keepdim)
+    print("hammerblade output:")
+    print(out_h.cpu())
+    print("\n")
     assert out_h.device == torch.device("hammerblade")
     assert torch.allclose(out_h.cpu(), out)   
 
 
-def test_rand_tensor_x():
-    t = torch.randn(10)
+def test_prod_1():
+    t = torch.ones(10)
     _test_torch_prod(t,0)
 
-def test_rand_tensor_y():
-    t = torch.randn(10)
+def test_prod_rand0():
+    t = torch.randn(4)
+    _test_torch_prod(t,0)
+
+def test_prod_rand2x():
+    t = torch.randn(4,5)
+    _test_torch_prod(t,0, keepdim=True)
+
+def test_prod_rand2x2():
+    t = torch.randn(10,20)
+    _test_torch_prod(t,0)
+
+def test_prod_rand2y():
+    t = torch.randn(10,20)
+    _test_torch_prod(t,1, keepdim=True)
+
+def test_prod_rand2y2():
+    t = torch.randn(4,5)
     _test_torch_prod(t,1)
+
+def test_prod_rand3x():
+    t = torch.randn(4,5, 6)
+    _test_torch_prod(t,0)
+
+def test_prod_rand3x2():
+    t = torch.randn(4,5, 6)
+    _test_torch_prod(t,0, keepdim=True)
+
+def test_prod_rand3y():
+    t = torch.randn(4,5, 6)
+    _test_torch_prod(t,1)
+
+def test_prod_rand3y2():
+    t = torch.randn(4,5, 6)
+    _test_torch_prod(t,1, keepdim=True)
+
+def test_prod_rand3z():
+    t = torch.randn(4,5, 6)
+    _test_torch_prod(t,0, keepdim=True)
