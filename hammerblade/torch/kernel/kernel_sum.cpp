@@ -21,6 +21,7 @@ extern "C" {
     uint32_t num_reduction_dim = *num_reduction_dim_p;
     auto ndim = in.ndim();
 
+    
     bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
