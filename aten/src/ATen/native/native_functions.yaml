@@ -1666,6 +1666,7 @@
 
 - func: max_values(Tensor self, int[1] dim, bool keepdim=False) -> Tensor
   variants: function, method
+  
 
 - func: max.names_dim(Tensor self, Dimname dim, bool keepdim=False) -> (Tensor values, Tensor indices)
   variants: function, method
@@ -1676,6 +1677,7 @@
 
 - func: max_values.names(Tensor self, Dimname[1] dim, bool keepdim=False) -> Tensor
   variants: function, method
+
 
 # Return: (Tensor output, Tensor indices)
 - func: max_pool1d_with_indices(Tensor self, int[1] kernel_size, int[1] stride=[], int[1] padding=0, int[1] dilation=1, bool ceil_mode=False) -> (Tensor, Tensor)
@@ -5070,6 +5072,7 @@
     CPU: legacy::cpu::_th_max
     CUDA: legacy::cuda::_th_max
     QuantizedCPU: max_quant
+    HammerBlade: max_hb_self
   supports_named_tensor: True
 
 - func: median(Tensor self) -> Tensor
