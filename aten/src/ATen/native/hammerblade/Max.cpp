@@ -22,4 +22,13 @@ Tensor max_hb(const Tensor& self, const Tensor& other) {
   return max_out_hb(result, self, other);
 }
 
+Tensor max_hb(const Tensor& self) {
+  Tensor result = at::empty(self.sizes(), self.options());
+  auto iter = TensorIterator::unary_op(result, self);
+  AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "max_val_hb", [&]() {
+    offload_op_unary(iter, "tensorlib_max_values");
+  });
+  return result;
+}
+
 }}

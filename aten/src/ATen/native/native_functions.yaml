@@ -5072,7 +5072,7 @@
     CPU: legacy::cpu::_th_max
     CUDA: legacy::cuda::_th_max
     QuantizedCPU: max_quant
-    HammerBlade: max_hb_self
+    HammerBlade: max_hb
   supports_named_tensor: True
 
 - func: median(Tensor self) -> Tensor
