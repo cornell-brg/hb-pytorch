@@ -63,7 +63,7 @@ extern "C" {
 
     
     binary_reduction(res, input, ndim, dim,
-          elements_to_collect, reduce, project, 1);
+          elements_to_collect, reduce, project, Reduction::Prod, 1);
 
     bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();

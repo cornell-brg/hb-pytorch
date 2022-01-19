@@ -5072,7 +5072,7 @@
     CPU: legacy::cpu::_th_max
     CUDA: legacy::cuda::_th_max
     QuantizedCPU: max_quant
-    HammerBlade: max_hb
+    HammerBlade: maxall_hb
   supports_named_tensor: True
 
 - func: median(Tensor self) -> Tensor
@@ -5305,11 +5305,13 @@
   dispatch:
     CPU: legacy::cpu::_th_max
     CUDA: legacy::cuda::_th_max
+    HammerBlade: max_dim_hb
 
 - func: _max.max(Tensor self, int dim, bool keepdim=False, *, Tensor(a!) max, Tensor(b!) max_indices) -> (Tensor(a!), Tensor(b!))
   dispatch:
     CPU: legacy::cpu::_th_max_out
     CUDA: legacy::cuda::_th_max_out
+    HammerBlade: max_dim_out_hb
 
 - func: _min(Tensor self, int dim, bool keepdim=False) -> (Tensor, Tensor)
   dispatch:

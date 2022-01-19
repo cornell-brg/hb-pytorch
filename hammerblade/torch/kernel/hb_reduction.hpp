@@ -12,6 +12,9 @@ enum Reduction {
   None,             // Do not reduce
   Mean,             // (Possibly weighted) mean of losses
   Sum,              // Sum losses
+  Prod,
+  Max,
+  Min,
   END
 };
 
@@ -66,7 +69,7 @@ inline uint32_t calc_elements_per_output(HBTensor<scalar_t> out,
 template<typename scalar_t, typename F1, typename F2>
 inline void binary_reduction_simple(HBTensor<scalar_t> out,
                                     HBTensor<scalar_t> in,
-                                    F1 reduce, F2 project, uint32_t init_res=0) {
+                                    F1 reduce, F2 project, uint32_t mode, uint32_t init_res=0) {
   hb_assert_msg(out.numel() == 1, "reduction_simple only handles trivial case");
 
   bsg_attr_remote scalar_t* data[2];
@@ -79,6 +82,9 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
   //-----------------------------
   // scalar_t result = 0;
   scalar_t result = init_res;
+  if (mode == Reduction::Max || mode == Reduction::Min) {
+    result = *(data[1]);
+  }
   
 
   // is_trivial_1d
@@ -113,11 +119,25 @@ inline void binary_reduction_simple(HBTensor<scalar_t> out,
   g_barrier.sync();
 
   if(__bsg_id == 0) {
-    result = 0;
-    for(size_t idx = 0; idx < bsg_tiles_X * bsg_tiles_Y; idx++) {
-      result += buffer[idx];
+    if(mode == Reduction::Sum || mode == Reduction::Mean) {
+      result = 0;
+      for(size_t idx = 0; idx < bsg_tiles_X * bsg_tiles_Y; idx++) {
+        result += buffer[idx];
+      }
+    } else if (mode == Reduction::Prod) {
+      result = 1;
+      for(size_t idx = 0; idx < bsg_tiles_X * bsg_tiles_Y; idx++) {
+        result *= buffer[idx];
+      }
+    } else if (mode == Reduction::Max || Reduction::Min) {
+      result = buffer[0];
+      for(size_t idx = 0; idx < bsg_tiles_X * bsg_tiles_Y; idx++) {
+        if(result < buffer[idx]) {
+          result = buffer[idx];
+        }
+      }
     }
-    // produce final result
+    //produce final result
     bsg_attr_remote scalar_t* out_dp = (bsg_attr_remote scalar_t*)(data[0]);
     *out_dp = project(result);
   }
@@ -130,9 +150,9 @@ inline void binary_reduction(HBTensor<scalar_t>out,
                              HBTensor<scalar_t>in,
                              uint32_t ndim, uint32_t num_reduction_dim,
                              uint32_t elements_per_output,
-                             F1 reduce, F2 project, uint32_t init_res=0) {
+                             F1 reduce, F2 project, uint32_t mode, uint32_t init_res=0) {
   if(out.numel() == 1) {
-    binary_reduction_simple(out, in, reduce, project,init_res);
+    binary_reduction_simple(out, in, reduce, project, mode, init_res);
     return;
   }
 
@@ -243,6 +263,109 @@ inline void binary_reduction(HBTensor<scalar_t>out,
     default:
       hb_assert_msg(false, "Invalid number of dims for reduction kernel");
   }
+}
+
+//==================This binary_reduction is the template for max / min kernels which return
+//==================not only value but indices.
+template<typename scalar_t, typename scalar_t1, typename F1, typename F2, typename F3, typename F4>
+inline void hybrid_reduction(HBTensor<scalar_t>out,
+                             HBTensor<scalar_t1>indices,
+                             HBTensor<scalar_t> in,
+                             uint32_t ndim, uint32_t num_reduction_dim,
+                             uint32_t elements_per_output,
+                             F1 reduce, F2 project, F3 reduce1, F4 project_int) {
+  if(out.numel() == 1) {
+    binary_reduction_simple(out, in, reduce, project, Reduction::Max);
+    return;
+  }
+
+  switch(ndim) {
+    case 1:
+      hb_assert_msg(out.numel() == in.numel(),
+                     "This case should be handled by reduction_simple?");
+      hb_tiled_for(out.numel(), [&](size_t n) {
+        out(n) = project(in(n));
+      });
+      break;
+    case 2:
+      if(num_reduction_dim == 1) {
+        hb_tiled_for(out.numel(), [&](size_t n) {
+          scalar_t result = in(0, n);
+          scalar_t1 index = -1;
+          size_t d = 0;
+          if (elements_per_output > 16) {
+            for(; d < elements_per_output - 8; d += 8) {
+              register scalar_t tmp0 = in(d, n);
+              register scalar_t tmp1 = in(d + 1, n);
+              register scalar_t tmp2 = in(d + 2, n);
+              register scalar_t tmp3 = in(d + 3, n);
+              register scalar_t tmp4 = in(d + 4, n);
+              register scalar_t tmp5 = in(d + 5, n);
+              register scalar_t tmp6 = in(d + 6, n);
+              register scalar_t tmp7 = in(d + 7, n);
+              asm volatile("": : :"memory");
+              reduce1(result, index, d, tmp0);
+              reduce1(result, index, d+1, tmp1);
+              reduce1(result, index, d+2, tmp2);
+              reduce1(result, index, d+3, tmp3);
+              reduce1(result, index, d+4, tmp4);
+              reduce1(result, index, d+5, tmp5);
+              reduce1(result, index, d+6, tmp6);
+              reduce1(result, index, d+7, tmp7);
+            }
+          }
+          for(; d < elements_per_output; d++) {
+            reduce1(result, index, d, in(d, n));
+          }
+          out(0, n) = project(result);
+          indices(0, n) = project_int(index);
+        });
+      } else {
+        hb_assert_msg(false, "Invalid number of reduction dims");
+      }
+      break;
+    case3:
+      if(num_reduction_dim == 1) {
+        hb_tiled_for(out.numel(), [&](size_t n) {
+        uint32_t dim1 = n % in.dim(1);
+        uint32_t dim2 = n / in.dim(1);
+        scalar_t result = in(0, dim1, dim2);
+        scalar_t1 index = -1;
+        size_t d = 0;
+        if (elements_per_output > 16) {
+          for(; d < elements_per_output - 8; d += 8) {
+            register scalar_t tmp0 = in(d, dim1, dim2);
+            register scalar_t tmp1 = in(d + 1, dim1, dim2);
+            register scalar_t tmp2 = in(d + 2, dim1, dim2);
+            register scalar_t tmp3 = in(d + 3, dim1, dim2);
+            register scalar_t tmp4 = in(d + 4, dim1, dim2);
+            register scalar_t tmp5 = in(d + 5, dim1, dim2);
+            register scalar_t tmp6 = in(d + 6, dim1, dim2);
+            register scalar_t tmp7 = in(d + 7, dim1, dim2);
+            asm volatile("": : :"memory");
+            reduce1(result, index, d, tmp0);
+            reduce1(result, index, d+1, tmp1);
+            reduce1(result, index, d+2, tmp2);
+            reduce1(result, index, d+3, tmp3);
+            reduce1(result, index, d+4, tmp4);
+            reduce1(result, index, d+5, tmp5);
+            reduce1(result, index, d+6, tmp6);
+            reduce1(result, index, d+7, tmp7);
+          }
+        }
+        for(; d < elements_per_output; d++) {
+          reduce1(result, index, d, in(d, dim1, dim2));
+        }
+          out(0, dim1, dim2) = project(result);
+          indices(0, dim1, dim2) = project(index);
+        });
+    } else {
+      hb_assert_msg(false, "Invalid number of reduction dims");
+    }
+    break;
+    default:
+      hb_assert_msg(false, "Invalid number of dims for reduction kernel");
+  }  
 }
 
 #endif

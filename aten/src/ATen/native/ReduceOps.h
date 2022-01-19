@@ -3,6 +3,7 @@
 #include <ATen/ATen.h>
 #include <ATen/native/DispatchStub.h>
 #include <c10/util/Optional.h>
+#include <ATen/native/TensorIterator.h>
 
 namespace at {
   struct TensorIterator;
@@ -32,5 +33,9 @@ DECLARE_DISPATCH(reduce_norm_fn, norm_kernel);
 
 using reduce_fn_flag = void(*)(TensorIterator &, Scalar);
 DECLARE_DISPATCH(reduce_fn_flag, norm_stub);
+
+at::TensorIterator::DimMask make_dim_mask(IntArrayRef dims, int64_t ndim);
+void allocate_reduction_result(Tensor& result, const Tensor& self, at::TensorIterator::DimMask mask, bool keepdim, ScalarType dtype);
+Tensor review_reduce_result(const Tensor& result, int ndim, at::TensorIterator::DimMask mask, bool keepdim);
 
 }} // namespace at::native

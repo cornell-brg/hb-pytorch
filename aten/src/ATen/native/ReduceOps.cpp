@@ -41,7 +41,7 @@ static inline Tensor integer_upcast(const Tensor& self, optional<ScalarType> dty
 
 using DimMask = TensorIterator::DimMask;
 
-static DimMask make_dim_mask(IntArrayRef dims, int64_t ndim) {
+DimMask make_dim_mask(IntArrayRef dims, int64_t ndim) {
   auto mask = DimMask();
   if (dims.empty()) {
     mask.flip();
@@ -53,7 +53,7 @@ static DimMask make_dim_mask(IntArrayRef dims, int64_t ndim) {
   return mask;
 }
 
-static void allocate_reduction_result(
+void allocate_reduction_result(
     Tensor& result, const Tensor& self, DimMask mask, bool keepdim,
     ScalarType dtype)
 {
@@ -74,7 +74,7 @@ static void allocate_reduction_result(
   }
 }
 
-static Tensor review_reduce_result(const Tensor& result, int ndim, DimMask mask, bool keepdim) {
+Tensor review_reduce_result(const Tensor& result, int ndim, DimMask mask, bool keepdim) {
   if (keepdim) {
     return result;
   }

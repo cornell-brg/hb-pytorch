@@ -36,7 +36,7 @@ extern "C" {
                    };
 
     binary_reduction(out, in, ndim, num_reduction_dim,
-          elements_to_collect, reduce, project);
+          elements_to_collect, reduce, project, Reduction::Sum);
 
     bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
