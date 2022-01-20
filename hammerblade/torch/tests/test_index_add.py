@@ -168,18 +168,30 @@ def test_index_add_13():
 
 
 # tests with realistic size
-def _profiling(add_size):
+def _profiling(add_size, recurrence):
     dim = 0
     t1 = torch.rand([3000, 10])
     t2 = torch.rand([add_size, 10])
-    index = torch.arange(0, add_size, dtype=torch.int64)
+    recurrence_size = add_size // recurrence
+    rest = add_size % recurrence
+    index = torch.arange(0, recurrence_size+rest, dtype=torch.int64)
+    t_partial = torch.arange(0, recurrence_size, dtype=torch.int64)
+    for i in range(1, recurrence):
+        index = torch.cat((t_partial, index))
     _test_index_add(dim, t1, t2, index)
 
 # def test_real_10():
-#     _profiling(10)
+#     _profiling(10, 1)
 # def test_real_100():
-#     _profiling(100)
-# # def test_real_1000():
-#     _profiling(1000)
+#     _profiling(100, 1)
+# def test_real_1000():
+#     _profiling(1000, 1)
 # def test_real_2000():
-#     _profiling(2000)
+#     _profiling(2000, 1)
+
+# def test_rec_3():
+#     _profiling(1000, 3)
+# def test_rec_6():
+#     _profiling(1000, 6)
+# def test_rec_9():
+#     _profiling(1000, 9)
