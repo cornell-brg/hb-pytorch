@@ -178,6 +178,7 @@ def _profiling(add_size, recurrence):
     t_partial = torch.arange(0, recurrence_size, dtype=torch.int64)
     for i in range(1, recurrence):
         index = torch.cat((t_partial, index))
+    index, _ = torch.sort(index)
     _test_index_add(dim, t1, t2, index)
 
 # def test_real_10():
