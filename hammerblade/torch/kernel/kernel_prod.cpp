@@ -22,32 +22,6 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
     float prod;
-
-
-
-
-    // if(dim == 1){ //product of elements in each row
-    //     for(auto i = start; i < input.dim(0); i += thread_num){
-    //         prod = 1;
-    //         for(int32_t j = 0; j<input.dim(1);j++){
-    //           prod *= input(j,i);
-    //         }
-    //         res(0,i) = prod;
-    //     }
-    //     // res(0,0) = 1.0;
-    // }else{ //product of elements in each col
-    //     for(auto i = start; i < input.dim(1); i += thread_num){
-    //         prod = 1;
-    //         for(int32_t j = 0; j<input.dim(0);j++){
-    //           prod *= input(i,j);
-    //         }
-    //         res(0,i) = prod;
-    //     }
-    //     // bsg_printf("no error");
-    //     // res(0,0) = 1.0;
-    // }
-
-
     
     uint32_t elements_to_collect =
       calc_elements_per_output(res, input, dim);

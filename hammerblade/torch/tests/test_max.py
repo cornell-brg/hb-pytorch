@@ -1,7 +1,6 @@
 """
-BRG tests on PyTorch => tests of real offloading kernels
-May 10, 2021
-Zhongyuan Zhao
+Unit test on reduction max kernel
+01/25/2022 Zhongyuan Zhao (zz546@cornell.edu)
 """
 
 import torch
