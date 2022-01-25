@@ -18,7 +18,7 @@ extern "C" {
 
     hb_tiled_foreach(
       [](bool input) {
-        return ~input;
+        return !input;
       },
       out, input);
 

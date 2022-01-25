@@ -8,7 +8,7 @@ namespace at { namespace native {
 namespace {
 
 
-static void bitwise_not_kernel_hb(TensorIterator& iter) {
+void bitwise_not_kernel_hb(TensorIterator& iter) {
   if (iter.dtype() == ScalarType::Bool) {
     AT_DISPATCH_FLOATING_TYPES_AND(ScalarType::Bool, iter.dtype(), "bitwise_not_bool_hb", [&]() {
       offload_op_unary(iter, "tensorlib_bitwise_not_bool");
@@ -18,7 +18,9 @@ static void bitwise_not_kernel_hb(TensorIterator& iter) {
       offload_op_unary(iter, "tensorlib_bitwise_not_int");
     }); 
   }
-} // anonymous namespace
+}
+
+}
 
 REGISTER_HAMMERBLADE_DISPATCH(bitwise_not_stub, &bitwise_not_kernel_hb);
 
