@@ -114,6 +114,14 @@ Tensor& index_add_hb_(Tensor &self, int64_t dim, const Tensor &index_long, const
             TORCH_CHECK(self.size(i) == source.size(i), "index_add_(): Expected equal size of dimension ", i, " for self and source tensors");
         }
     }
+    // check if index tensor elements have valid values
+    // index tensor needs to be duplicated on host-cpu to check elements on host
+    Tensor index_cpu = index.cpu();
+    auto index_elements = index_cpu.accessor<int32_t, 1>();
+    for (int i = 0; i < index.numel(); i++) {
+        int cur_idx = index_elements[i];
+        TORCH_CHECK_INDEX((cur_idx >= 0) && (cur_idx < self.size(dim)), "index out of range in self");
+    }
 
 
     int dst_add_dim = (int) dim;
