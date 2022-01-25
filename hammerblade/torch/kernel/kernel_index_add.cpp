@@ -8,8 +8,8 @@
 #include "bsg_manycore_arch.h"
 #include "bsg_mcs_mutex.hpp"
 
-// equal to number of tiles
-#define MTX_SIZE 128
+
+#define MTX_SIZE 256
 
 
 extern "C" {
