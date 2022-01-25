@@ -4015,6 +4015,7 @@
   dispatch:
     CPU: legacy::cpu::_th_and
     CUDA: legacy::cuda::_th_and
+    HammerBlade: and_kernel_hb
 
 - func: __iand__.Scalar(Tensor(a!) self, Scalar other) -> Tensor(a!)
   variants: method
