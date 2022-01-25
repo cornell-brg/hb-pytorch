@@ -14,40 +14,40 @@ from .hypothesis_test_util import HypothesisUtil as hu
 torch.manual_seed(42)
 random.seed(42)
 
-# test of max two tensors
+# test of min two tensors
 
-def _test_max(x1, x2):
+def _test_min(x1, x2):
     h1 = x1.hammerblade()
     h2 = x2.hammerblade()
     assert h1 is not x1
     assert h2 is not x2
-    y_c = torch.max(x1, x2)
-    y_h = torch.max(h1, h2)
+    y_c = torch.min(x1, x2)
+    y_h = torch.min(h1, h2)
     assert y_h.device == torch.device("hammerblade")
     assert torch.allclose(y_c, y_h.cpu())
 
-def test_max_1():
+def test_min_1():
     x1 = torch.zeros(1, 10)
     x2 = torch.ones(1, 10)
-    _test_max(x1, x2)
+    _test_min(x1, x2)
 
-def test_max_2():
+def test_min_2():
     x1 = torch.rand(1, 128)
     x2 = torch.rand(1, 128)
-    _test_max(x1, x2)
+    _test_min(x1, x2)
 
-def test_max_3():
+def test_min_3():
     x1 = torch.rand(16, 32)
     x2 = torch.rand(16, 32)
-    _test_max(x1, x2)
+    _test_min(x1, x2)
 
-def test_max_4():
+def test_min_4():
     x1 = torch.rand(16, 32)
     x2 = torch.rand(32)
-    _test_max(x1, x2)
+    _test_min(x1, x2)
 
-def test_max_5():
+def test_min_5():
     x1 = torch.rand(32)
     x2 = torch.rand(16, 32)
-    _test_max(x1, x2)
+    _test_min(x1, x2)
 

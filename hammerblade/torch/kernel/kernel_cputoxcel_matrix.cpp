@@ -40,9 +40,9 @@ extern "C" {
     char (&mc_config)[8][16] = tid_map;
     int tile_id = (int)mc_config[bsg_y][bsg_x];
     uint32_t thread_num = bsg_tiles_X  * bsg_tiles_Y;
-    if(__bsg_id == 0) {
-      bsg_printf("bsg_tiles_X, bsg_tiles_Y are %d and %d\n", bsg_tiles_X, bsg_tiles_Y);
-    }
+//    if(__bsg_id == 0) {
+//      bsg_printf("bsg_tiles_X, bsg_tiles_Y are %d and %d\n", bsg_tiles_X, bsg_tiles_Y);
+//    }
 
     bsg_cuda_print_stat_kernel_start();
 //      bsg_printf("(%d, %d) is working and max_region_b is %d\n", bsg_y, bsg_x, max_region_b);

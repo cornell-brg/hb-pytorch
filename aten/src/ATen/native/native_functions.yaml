@@ -2422,6 +2422,7 @@
   dispatch:
     CPU: sigmoid_
     CUDA: sigmoid_
+    HammerBlade: sigmoid_
     MkldnnCPU: mkldnn_sigmoid_
 
 - func: sigmoid.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
@@ -5034,6 +5035,7 @@
   dispatch:
     CPU: legacy::cpu::_th_min_out
     CUDA: legacy::cuda::_th_min_out
+    HammerBlade: min_out_hb
 
 - func: min.other(Tensor self, Tensor other) -> Tensor
   use_c10_dispatcher: full
@@ -5041,6 +5043,7 @@
   dispatch:
     CPU: legacy::cpu::_th_min
     CUDA: legacy::cuda::_th_min
+    HammerBlade: min_hb
 
 - func: min(Tensor self) -> Tensor
   use_c10_dispatcher: full
