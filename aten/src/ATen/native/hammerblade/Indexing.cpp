@@ -97,21 +97,21 @@ Tensor collapseDims(Tensor t, int &addDim) {
 }
 
 Tensor& index_add_hb_(Tensor &self, int64_t dim, const Tensor &index_long, const Tensor &source) {
-    TORCH_CHECK(index_long.scalar_type() == ScalarType::Long, "index_add_(): Expected dtype int64 for index input");
+    TORCH_CHECK(index_long.scalar_type() == ScalarType::Long, "index_add_hb_(): Expected dtype int64 for index input");
 
     Tensor index = index_long.toType(ScalarType::Int);
-    TORCH_CHECK_INDEX(index.dim() <= 1, "index_add_(): Index is supposed to be a vector");
-    TORCH_CHECK(index.scalar_type() == ScalarType::Int, "index_add_(): Index should have been converted to dtype int32");
+    TORCH_CHECK_INDEX(index.dim() <= 1, "index_add_hb_(): Index is supposed to be a vector");
+    TORCH_CHECK(index.scalar_type() == ScalarType::Int, "index_add_hb_(): Index should have been converted to dtype int32");
     TORCH_CHECK(self.scalar_type() == source.scalar_type(),
-                "index_add_(): self and source must have the same scalar type");
+                "index_add_hb_(): self and source must have the same scalar type");
     TORCH_CHECK(dim == 0 || dim < source.dim(),
-                "index_add_(): Indexing dim ", dim, " is out of bounds of tensor");
+                "index_add_hb_(): Indexing dim ", dim, " is out of bounds of tensor");
     TORCH_CHECK(index.numel() == (source.dim() == 0 ? 1 : source.size(dim)),
-                "index_add_(): Number of indices should be equal to self.size(dim)");
-    TORCH_CHECK(self.dim() == source.dim(), "index_add_(): Expected same number of dimensions for self and source tensors");
+                "index_add_hb_(): Number of indices should be equal to self.size(dim)");
+    TORCH_CHECK(self.dim() == source.dim(), "index_add_hb_(): Expected same number of dimensions for self and source tensors");
     for (int i = 0; i < self.dim(); ++i) {
         if (i != dim) {
-            TORCH_CHECK(self.size(i) == source.size(i), "index_add_(): Expected equal size of dimension ", i, " for self and source tensors");
+            TORCH_CHECK(self.size(i) == source.size(i), "index_add_hb_(): Expected equal size of dimension ", i, " for self and source tensors");
         }
     }
     // check if index tensor elements have valid values
@@ -120,7 +120,7 @@ Tensor& index_add_hb_(Tensor &self, int64_t dim, const Tensor &index_long, const
     auto index_elements = index_cpu.accessor<int32_t, 1>();
     for (int i = 0; i < index.numel(); i++) {
         int cur_idx = index_elements[i];
-        TORCH_CHECK_INDEX((cur_idx >= 0) && (cur_idx < self.size(dim)), "index out of range in self");
+        TORCH_CHECK_INDEX((cur_idx >= 0) && (cur_idx < self.size(dim)), "index_add_hb_(): index out of range in self");
     }
 
 
@@ -129,17 +129,17 @@ Tensor& index_add_hb_(Tensor &self, int64_t dim, const Tensor &index_long, const
     Tensor dst_c = collapseDims(self, dst_add_dim);
     Tensor src_c = collapseDims(source, src_add_dim);
     // Check dimensions of tensors after collapse; probably not necessary
-    TORCH_CHECK(dst_c.dim() == src_c.dim(), "index_add_(): Expected same number of dimensions for dst_c and src_c tensors");
-    TORCH_CHECK(dst_add_dim == src_add_dim, "index_add_(): Expected the generated Add-Index-Dimensions (dst_add_dim and src_add_dim) to be equal");
+    TORCH_CHECK(dst_c.dim() == src_c.dim(), "index_add_hb_(): Expected same number of dimensions for dst_c and src_c tensors");
+    TORCH_CHECK(dst_add_dim == src_add_dim, "index_add_hb_(): Expected the generated Add-Index-Dimensions (dst_add_dim and src_add_dim) to be equal");
     for (int i = 0; i < dst_c.dim(); ++i) {
         if (i != dst_add_dim) {
-            TORCH_CHECK(dst_c.size(i) == src_c.size(i), "index_add_(): Expected equal size of dimension ", i, " for dst_c and src_c tensors");
+            TORCH_CHECK(dst_c.size(i) == src_c.size(i), "index_add_hb_(): Expected equal size of dimension ", i, " for dst_c and src_c tensors");
         }
     }
 
     int nbrIndices = index.numel();
     int sliceSize = dst_c.numel() / dst_c.size(dst_add_dim);
-    TORCH_CHECK(sliceSize > 0, "index_add_(): Expected slice with size greater than 0");
+    TORCH_CHECK(sliceSize > 0, "index_add_hb_(): Expected slice with size greater than 0");
 
     std::vector<eva_t>  device_args;
     std::vector<eva_t>  device_ptrs;
