@@ -1,6 +1,7 @@
 //====================================================================
 // Product reduction kernel
 // 11/14/2021 Aditi Agarwal (aa2224@cornell.edu)
+// 01/26/2022 revised Zhongyuan Zhao (zz546@cornell.edu)
 //====================================================================
 
 #include <kernel_common.hpp>

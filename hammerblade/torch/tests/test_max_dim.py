@@ -1,6 +1,7 @@
 """
 Unit tests for torch.max
-03/29/2020 Lin Cheng (lc873@cornell.edu)
+11/14/2021 Aditi Agarwal (aa2224@cornell.edu)
+01/25/2022 Zhongyuan Zhao (zz546@cornell.edu)
 """
 
 import torch

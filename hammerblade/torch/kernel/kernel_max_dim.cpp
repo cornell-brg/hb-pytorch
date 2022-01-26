@@ -1,7 +1,7 @@
 //====================================================================
 // Max reduction kernel
 // 11/14/2021 Aditi Agarwal (aa2224@cornell.edu)
-// 01/11/2022 Zhongyuan Zhao (zz546@cornell.edu)
+// 01/11/2022 Revised Zhongyuan Zhao (zz546@cornell.edu)
 //====================================================================
 
 #include <kernel_common.hpp>
