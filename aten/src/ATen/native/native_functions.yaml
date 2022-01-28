@@ -1667,6 +1667,7 @@
 
 - func: max_values(Tensor self, int[1] dim, bool keepdim=False) -> Tensor
   variants: function, method
+  
 
 - func: max.names_dim(Tensor self, Dimname dim, bool keepdim=False) -> (Tensor values, Tensor indices)
   variants: function, method
@@ -1677,6 +1678,7 @@
 
 - func: max_values.names(Tensor self, Dimname[1] dim, bool keepdim=False) -> Tensor
   variants: function, method
+
 
 # Return: (Tensor output, Tensor indices)
 - func: max_pool1d_with_indices(Tensor self, int[1] kernel_size, int[1] stride=[], int[1] padding=0, int[1] dilation=1, bool ceil_mode=False) -> (Tensor, Tensor)
@@ -2421,6 +2423,7 @@
   dispatch:
     CPU: sigmoid_
     CUDA: sigmoid_
+    HammerBlade: sigmoid_
     MkldnnCPU: mkldnn_sigmoid_
 
 - func: sigmoid.out(Tensor self, *, Tensor(a!) out) -> Tensor(a!)
@@ -5057,6 +5060,7 @@
   dispatch:
     CPU: legacy::cpu::_th_min_out
     CUDA: legacy::cuda::_th_min_out
+    HammerBlade: min_out_hb
 
 - func: min.other(Tensor self, Tensor other) -> Tensor
   use_c10_dispatcher: full
@@ -5064,6 +5068,7 @@
   dispatch:
     CPU: legacy::cpu::_th_min
     CUDA: legacy::cuda::_th_min
+    HammerBlade: min_hb
 
 - func: min(Tensor self) -> Tensor
   use_c10_dispatcher: full
@@ -5095,6 +5100,7 @@
     CPU: legacy::cpu::_th_max
     CUDA: legacy::cuda::_th_max
     QuantizedCPU: max_quant
+    HammerBlade: maxall_hb
   supports_named_tensor: True
 
 - func: median(Tensor self) -> Tensor
@@ -5327,11 +5333,13 @@
   dispatch:
     CPU: legacy::cpu::_th_max
     CUDA: legacy::cuda::_th_max
+    HammerBlade: max_dim_hb
 
 - func: _max.max(Tensor self, int dim, bool keepdim=False, *, Tensor(a!) max, Tensor(b!) max_indices) -> (Tensor(a!), Tensor(b!))
   dispatch:
     CPU: legacy::cpu::_th_max_out
     CUDA: legacy::cuda::_th_max_out
+    HammerBlade: max_dim_out_hb
 
 - func: _min(Tensor self, int dim, bool keepdim=False) -> (Tensor, Tensor)
   dispatch:

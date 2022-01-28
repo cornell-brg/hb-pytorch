@@ -202,8 +202,8 @@ std::tuple<Tensor, Tensor> max(const Tensor& self, int64_t dim, bool keepdim) {
 
 static std::tuple<Tensor &,Tensor &> max_out_impl(Tensor& max, Tensor& max_indices,
                                                   const Tensor& self, int64_t dim, bool keepdim) {
-  TORCH_CHECK(self.type().backend() == Backend::CPU || self.type().backend() == Backend::CUDA,
-           "max only supports CPU AND CUDA backend, got: ", toString(self.type().backend()));
+  TORCH_CHECK(self.type().backend() == Backend::CPU || self.type().backend() == Backend::CUDA || self.type().backend() == Backend::HammerBlade,
+           "max only supports CPU, CUDA and HammerBlade backend, got: ", toString(self.type().backend()));
   dim = maybe_wrap_dim(dim, self.dim());
   if (_dimreduce_return_trivial_no_ident(max, self, dim, keepdim, "max")) {
     AT_ASSERT(max.dim() == 0);
