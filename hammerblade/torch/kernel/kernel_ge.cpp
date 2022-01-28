@@ -7,7 +7,7 @@
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_lt_Float(
+  __attribute__ ((noinline))  int tensorlib_ge_Float(
           hb_tensor_t* t0_p,
           hb_tensor_t* t1_p,
           hb_tensor_t* t2_p) {
@@ -20,7 +20,7 @@ extern "C" {
 
     hb_tiled_foreach(
       [](float input, float other) {
-        return input < other;
+        return input >= other;
       },
       out, input, other);
 
@@ -31,7 +31,7 @@ extern "C" {
     return 0;
   }
 
-  __attribute__ ((noinline))  int tensorlib_lt_Int(
+  __attribute__ ((noinline))  int tensorlib_ge_Int(
           hb_tensor_t* t0_p,
           hb_tensor_t* t1_p,
           hb_tensor_t* t2_p) {
@@ -44,7 +44,7 @@ extern "C" {
 
     hb_tiled_foreach(
       [](int32_t input, int32_t other) {
-        return input < other;
+        return input >= other;
       },
       out, input, other);
 
@@ -55,6 +55,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_lt_Float, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
-  HB_EMUL_REG_KERNEL(tensorlib_lt_Int, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_ge_Float, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
+  HB_EMUL_REG_KERNEL(tensorlib_ge_Int, hb_tensor_t*, hb_tensor_t*, hb_tensor_t*)
 }

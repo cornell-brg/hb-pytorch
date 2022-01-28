@@ -8,20 +8,20 @@ namespace at { namespace native {
 namespace {
 
 
-void lt_kernel_hb(TensorIterator& iter) {
+void eq_kernel_hb(TensorIterator& iter) {
   if(iter.dtype(1) == kFloat) {
-    AT_DISPATCH_FLOATING_TYPES_AND(ScalarType::Bool, iter.dtype(), "lt_hb", [&]() {
-      offload_op_binary(iter, "tensorlib_lt_Float");
+    AT_DISPATCH_FLOATING_TYPES_AND(ScalarType::Bool, iter.dtype(), "eq_hb", [&]() {
+      offload_op_binary(iter, "tensorlib_eq_Float");
     });
   } else if (iter.dtype(1) == kInt) {
-    AT_DISPATCH_FLOATING_TYPES_AND(ScalarType::Bool, iter.dtype(), "lt_hb", [&]() {
-      offload_op_binary(iter, "tensorlib_lt_Int");
+    AT_DISPATCH_FLOATING_TYPES_AND(ScalarType::Bool, iter.dtype(), "eq_hb", [&]() {
+      offload_op_binary(iter, "tensorlib_eq_Int");
     });
   }
 }
 
 } // anonymous namespace
 
-REGISTER_HAMMERBLADE_DISPATCH(lt_stub, &lt_kernel_hb);
+REGISTER_HAMMERBLADE_DISPATCH(eq_stub, &eq_kernel_hb);
 
 }} // namespace at::native
