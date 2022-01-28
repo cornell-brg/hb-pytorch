@@ -5,15 +5,27 @@
 
 #include <kernel_common.hpp>
 #include <cmath>
+
+// use cpp std::mutex in emulation
+#ifdef HB_EMUL
+#include <mutex>
+#else
+// use mcs-mutex of bsg_manycore_lib in cosimulation
 #include "bsg_manycore_arch.h"
 #include "bsg_mcs_mutex.hpp"
+#endif
 
 
 #define MTX_SIZE 256
 
 
+
 extern "C" {
+  #ifdef HB_EMUL
+  std::mutex mtx[MTX_SIZE];
+  #else
   bsg_mcs_mutex_t mtx[MTX_SIZE] __attribute__ ((section (".dram")));
+  #endif
 
 
   int get_element_index(HBTensor<float> &ten, int add_dim, int index, int elementInSlice) {
@@ -48,7 +60,9 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
+    #ifndef HB_EMUL
     bsg_mcs_mutex_node_t lcl, *lcl_as_glbl = (bsg_mcs_mutex_node_t*)bsg_tile_group_remote_ptr(int, bsg_x, bsg_y, &lcl);
+    #endif
     g_barrier.sync();
 
     for (int srcIndex = 0; srcIndex < idx.numel(); ++srcIndex) {
@@ -58,11 +72,24 @@ extern "C" {
             int src_element_idx = get_element_index(src, dim, srcIndex, linearIndex);
 
             int dst_mtx_idx = dst_element_idx && 0xFF;
-            bsg_mcs_mutex_t *dst_mtx = &mtx[dst_mtx_idx];
 
+            // lock
+            #ifdef HB_EMUL
+            std::mutex *dst_mtx = &mtx[dst_mtx_idx];
+            dst_mtx->lock();
+            #else
+            bsg_mcs_mutex_t *dst_mtx = &mtx[dst_mtx_idx];
             bsg_mcs_mutex_acquire(dst_mtx, &lcl, lcl_as_glbl);
+            #endif
+
             dst(dst_element_idx) += src(src_element_idx);
+
+            // unlock
+            #ifdef HB_EMUL
+            dst_mtx->unlock();
+            #else
             bsg_mcs_mutex_release(dst_mtx, &lcl, lcl_as_glbl);
+            #endif
         }
     }
 
@@ -96,7 +123,9 @@ extern "C" {
     bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
+    #ifndef HB_EMUL
     bsg_mcs_mutex_node_t lcl, *lcl_as_glbl = (bsg_mcs_mutex_node_t*)bsg_tile_group_remote_ptr(int, bsg_x, bsg_y, &lcl);
+    #endif
     g_barrier.sync();
 
 
@@ -116,11 +145,24 @@ extern "C" {
         int src_element_idx = get_element_index(src, dim, srcIndex, elementInSlice);
 
         int dst_mtx_idx = dst_element_idx && 0xFF;
-        bsg_mcs_mutex_t *dst_mtx = &mtx[dst_mtx_idx];
 
+        // lock
+        #ifdef HB_EMUL
+        std::mutex *dst_mtx = &mtx[dst_mtx_idx];
+        dst_mtx->lock();
+        #else
+        bsg_mcs_mutex_t *dst_mtx = &mtx[dst_mtx_idx];
         bsg_mcs_mutex_acquire(dst_mtx, &lcl, lcl_as_glbl);
+        #endif
+
         dst(dst_element_idx) += src(src_element_idx);
+
+        // unlock
+        #ifdef HB_EMUL
+        dst_mtx->unlock();
+        #else
         bsg_mcs_mutex_release(dst_mtx, &lcl, lcl_as_glbl);
+        #endif
     }
 
 
