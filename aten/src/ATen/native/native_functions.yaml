@@ -548,6 +548,7 @@
   dispatch:
     CPU: bitwise_not_out
     CUDA: bitwise_not_out
+    HammerBlade: bitwise_not_out
 
 - func: logical_not(Tensor self) -> Tensor
   supports_named_tensor: True
@@ -3069,7 +3070,6 @@
     HammerBlade: clone
     SparseCPU: clone_sparse
     SparseCUDA: clone_sparse
-    SparseHammerBlade: clone_sparse
     MkldnnCPU: mkldnn_clone
     QuantizedCPU: quantized_clone
   supports_named_tensor: True
@@ -4385,6 +4385,7 @@
   dispatch:
     CPU: ne_out
     CUDA: ne_out
+    HammerBlade: ne_out
     QuantizedCPU: ne_out_quantized_cpu
 
 - func: ne.Scalar(Tensor self, Scalar other) -> Tensor
@@ -4394,6 +4395,7 @@
   dispatch:
     CPU: ne
     CUDA: ne
+    HammerBlade: ne
     QuantizedCPU: ne_quantized_cpu
 
 - func: ne.Tensor_out(Tensor self, Tensor other, *, Tensor(a!) out) -> Tensor(a!)
@@ -4401,6 +4403,7 @@
   dispatch:
     CPU: ne_out
     CUDA: ne_out
+    HammerBlade: ne_out
     QuantizedCPU: ne_out_quantized_cpu
 
 - func: ne.Tensor(Tensor self, Tensor other) -> Tensor
@@ -4410,6 +4413,7 @@
   dispatch:
     CPU: ne
     CUDA: ne
+    HammerBlade: ne
     QuantizedCPU: ne_quantized_cpu
 
 - func: eq.Scalar_out(Tensor self, Scalar other, *, Tensor(a!) out) -> Tensor(a!)
@@ -4417,6 +4421,7 @@
   dispatch:
     CPU: eq_out
     CUDA: eq_out
+    HammerBlade: eq_out
     QuantizedCPU: eq_out_quantized_cpu
 
 - func: eq.Scalar(Tensor self, Scalar other) -> Tensor
@@ -4426,6 +4431,7 @@
   dispatch:
     CPU: eq
     CUDA: eq
+    HammerBlade: eq
     QuantizedCPU: eq_quantized_cpu
 
 - func: eq.Tensor_out(Tensor self, Tensor other, *, Tensor(a!) out) -> Tensor(a!)
@@ -4433,6 +4439,7 @@
   dispatch:
     CPU: eq_out
     CUDA: eq_out
+    HammerBlade: eq_out
     QuantizedCPU: eq_out_quantized_cpu
 
 - func: eq.Tensor(Tensor self, Tensor other) -> Tensor
@@ -4442,6 +4449,7 @@
   dispatch:
     CPU: eq
     CUDA: eq
+    HammerBlade: eq
     QuantizedCPU: eq_quantized_cpu
 
 - func: ge.Scalar_out(Tensor self, Scalar other, *, Tensor(a!) out) -> Tensor(a!)
@@ -4449,6 +4457,7 @@
   dispatch:
     CPU: ge_out
     CUDA: ge_out
+    HammerBlade: ge_out
     QuantizedCPU: ge_out_quantized_cpu
 
 - func: ge.Scalar(Tensor self, Scalar other) -> Tensor
@@ -4458,6 +4467,7 @@
   dispatch:
     CPU: ge
     CUDA: ge
+    HammerBlade: ge
     QuantizedCPU: ge_quantized_cpu
 
 - func: ge.Tensor_out(Tensor self, Tensor other, *, Tensor(a!) out) -> Tensor(a!)
@@ -4465,6 +4475,7 @@
   dispatch:
     CPU: ge_out
     CUDA: ge_out
+    HammerBlade: ge_out
     QuantizedCPU: ge_out_quantized_cpu
 
 - func: ge.Tensor(Tensor self, Tensor other) -> Tensor
@@ -4474,6 +4485,7 @@
   dispatch:
     CPU: ge
     CUDA: ge
+    HammerBlade: ge
     QuantizedCPU: ge_quantized_cpu
 
 - func: le.Scalar_out(Tensor self, Scalar other, *, Tensor(a!) out) -> Tensor(a!)
@@ -4481,6 +4493,7 @@
   dispatch:
     CPU: le_out
     CUDA: le_out
+    HammerBlade: le_out
     QuantizedCPU: le_out_quantized_cpu
 
 - func: le.Scalar(Tensor self, Scalar other) -> Tensor
@@ -4490,6 +4503,7 @@
   dispatch:
     CPU: le
     CUDA: le
+    HammerBlade: le
     QuantizedCPU: le_quantized_cpu
 
 - func: le.Tensor_out(Tensor self, Tensor other, *, Tensor(a!) out) -> Tensor(a!)
@@ -4497,6 +4511,7 @@
   dispatch:
     CPU: le_out
     CUDA: le_out
+    HammerBlade: le_out
     QuantizedCPU: le_out_quantized_cpu
 
 - func: le.Tensor(Tensor self, Tensor other) -> Tensor
@@ -4506,6 +4521,7 @@
   dispatch:
     CPU: le
     CUDA: le
+    HammerBlade: le
     QuantizedCPU: le_quantized_cpu
 
 - func: gt.Scalar_out(Tensor self, Scalar other, *, Tensor(a!) out) -> Tensor(a!)
@@ -4513,6 +4529,7 @@
   dispatch:
     CPU: gt_out
     CUDA: gt_out
+    HammerBlade: gt_out
     QuantizedCPU: gt_out_quantized_cpu
 
 - func: gt.Scalar(Tensor self, Scalar other) -> Tensor
@@ -4522,6 +4539,7 @@
   dispatch:
     CPU: gt
     CUDA: gt
+    HammerBlade: gt
     QuantizedCPU: gt_quantized_cpu
 
 - func: gt.Tensor_out(Tensor self, Tensor other, *, Tensor(a!) out) -> Tensor(a!)
@@ -4529,6 +4547,7 @@
   dispatch:
     CPU: gt_out
     CUDA: gt_out
+    HammerBlade: gt_out
     QuantizedCPU: gt_out_quantized_cpu
 
 - func: gt.Tensor(Tensor self, Tensor other) -> Tensor
@@ -4538,6 +4557,7 @@
   dispatch:
     CPU: gt
     CUDA: gt
+    HammerBlade: gt
     QuantizedCPU: gt_quantized_cpu
 
 - func: lt.Scalar_out(Tensor self, Scalar other, *, Tensor(a!) out) -> Tensor(a!)
@@ -4545,6 +4565,7 @@
   dispatch:
     CPU: lt_out
     CUDA: lt_out
+    HammerBlade: lt_out
     QuantizedCPU: lt_out_quantized_cpu
 
 - func: lt.Scalar(Tensor self, Scalar other) -> Tensor
@@ -4554,6 +4575,7 @@
   dispatch:
     CPU: lt
     CUDA: lt
+    HammerBlade: lt
     QuantizedCPU: lt_quantized_cpu
 
 - func: lt.Tensor_out(Tensor self, Tensor other, *, Tensor(a!) out) -> Tensor(a!)
@@ -4561,6 +4583,7 @@
   dispatch:
     CPU: lt_out
     CUDA: lt_out
+    HammerBlade: lt_out
     QuantizedCPU: lt_out_quantized_cpu
 
 - func: lt.Tensor(Tensor self, Tensor other) -> Tensor
@@ -4570,6 +4593,7 @@
   dispatch:
     CPU: lt
     CUDA: lt
+    HammerBlade: lt
     QuantizedCPU: lt_quantized_cpu
 
 - func: take.out(Tensor self, Tensor index, *, Tensor(a!) out) -> Tensor(a!)
