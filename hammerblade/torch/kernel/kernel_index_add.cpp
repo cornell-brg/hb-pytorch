@@ -29,18 +29,18 @@ extern "C" {
 
 
   int get_element_index(HBTensor<float> &ten, int add_dim, int index, int elementInSlice) {
-      int offset = 0;
-      for (int i = ten.ndim()-1; i > 0; --i) {
-          int size = (i == add_dim)? 1 : ten.dim(i);
-          offset += (elementInSlice % size) * ten.stride(i);
-          elementInSlice /= size;
-      }
-      offset += elementInSlice * ten.stride(0) + index * ten.stride(add_dim);
-      if (offset > ten.numel()) {
-          bsg_printf("Warning: index out of range!\n");
-          offset = 0;
-      }
-      return offset;
+    int offset = 0;
+    for (int i = ten.ndim()-1; i > 0; --i) {
+      int size = (i == add_dim)? 1 : ten.dim(i);
+      offset += (elementInSlice % size) * ten.stride(i);
+      elementInSlice /= size;
+    }
+    offset += elementInSlice * ten.stride(0) + index * ten.stride(add_dim);
+    if (offset > ten.numel()) {
+      bsg_printf("Warning: index out of range!\n");
+      offset = 0;
+    }
+    return offset;
   }
 
   __attribute__ ((noinline))  int tensorlib_index_add_small_index(
@@ -66,31 +66,31 @@ extern "C" {
     g_barrier.sync();
 
     for (int srcIndex = 0; srcIndex < idx.numel(); ++srcIndex) {
-        int dstIndex = idx(srcIndex);
-        for (int linearIndex = bsg_id; linearIndex < sliceSize; linearIndex += BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM) {
-            int dst_element_idx = get_element_index(dst, dim, dstIndex, linearIndex);
-            int src_element_idx = get_element_index(src, dim, srcIndex, linearIndex);
+      int dstIndex = idx(srcIndex);
+      for (int linearIndex = bsg_id; linearIndex < sliceSize; linearIndex += BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM) {
+        int dst_element_idx = get_element_index(dst, dim, dstIndex, linearIndex);
+        int src_element_idx = get_element_index(src, dim, srcIndex, linearIndex);
 
-            int dst_mtx_idx = dst_element_idx && 0xFF;
+        int dst_mtx_idx = dst_element_idx && 0xFF;
 
-            // lock
-            #ifdef HB_EMUL
-            std::mutex *dst_mtx = &mtx[dst_mtx_idx];
-            dst_mtx->lock();
-            #else
-            bsg_mcs_mutex_t *dst_mtx = &mtx[dst_mtx_idx];
-            bsg_mcs_mutex_acquire(dst_mtx, &lcl, lcl_as_glbl);
-            #endif
+        // lock
+        #ifdef HB_EMUL
+        std::mutex *dst_mtx = &mtx[dst_mtx_idx];
+        dst_mtx->lock();
+        #else
+        bsg_mcs_mutex_t *dst_mtx = &mtx[dst_mtx_idx];
+        bsg_mcs_mutex_acquire(dst_mtx, &lcl, lcl_as_glbl);
+        #endif
 
-            dst(dst_element_idx) += src(src_element_idx);
+        dst(dst_element_idx) += src(src_element_idx);
 
-            // unlock
-            #ifdef HB_EMUL
-            dst_mtx->unlock();
-            #else
-            bsg_mcs_mutex_release(dst_mtx, &lcl, lcl_as_glbl);
-            #endif
-        }
+        // unlock
+        #ifdef HB_EMUL
+        dst_mtx->unlock();
+        #else
+        bsg_mcs_mutex_release(dst_mtx, &lcl, lcl_as_glbl);
+        #endif
+      }
     }
 
     //   End profiling
@@ -119,7 +119,7 @@ extern "C" {
     int numIndices = *numIndices_p;
     int indexMajorMode = *indexMajorMode_p;
 
-      // Start profiling
+    // Start profiling
     bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
 
@@ -130,39 +130,39 @@ extern "C" {
 
 
     for (int linearIndex = bsg_id; linearIndex < src.numel(); linearIndex += BSG_TILE_GROUP_X_DIM * BSG_TILE_GROUP_Y_DIM) {
-        int srcIndex, elementInSlice;
-        if (indexMajorMode == 1) {
-            srcIndex = linearIndex / sliceSize;
-            elementInSlice = linearIndex % sliceSize;
-        } else {
-            srcIndex = linearIndex % numIndices;
-            elementInSlice = linearIndex / numIndices;
-        }
-        //bsg_printf("tile %d, srcIndex: %d, elementInSlice: %d\n", bsg_id, srcIndex, elementInSlice);
-        int dstIndex = idx(srcIndex);
+      int srcIndex, elementInSlice;
+      if (indexMajorMode == 1) {
+        srcIndex = linearIndex / sliceSize;
+        elementInSlice = linearIndex % sliceSize;
+      } else {
+        srcIndex = linearIndex % numIndices;
+        elementInSlice = linearIndex / numIndices;
+      }
+      //bsg_printf("tile %d, srcIndex: %d, elementInSlice: %d\n", bsg_id, srcIndex, elementInSlice);
+      int dstIndex = idx(srcIndex);
 
-        int dst_element_idx = get_element_index(dst, dim, dstIndex, elementInSlice);
-        int src_element_idx = get_element_index(src, dim, srcIndex, elementInSlice);
+      int dst_element_idx = get_element_index(dst, dim, dstIndex, elementInSlice);
+      int src_element_idx = get_element_index(src, dim, srcIndex, elementInSlice);
 
-        int dst_mtx_idx = dst_element_idx && 0xFF;
+      int dst_mtx_idx = dst_element_idx && 0xFF;
 
-        // lock
-        #ifdef HB_EMUL
-        std::mutex *dst_mtx = &mtx[dst_mtx_idx];
-        dst_mtx->lock();
-        #else
-        bsg_mcs_mutex_t *dst_mtx = &mtx[dst_mtx_idx];
-        bsg_mcs_mutex_acquire(dst_mtx, &lcl, lcl_as_glbl);
-        #endif
+      // lock
+      #ifdef HB_EMUL
+      std::mutex *dst_mtx = &mtx[dst_mtx_idx];
+      dst_mtx->lock();
+      #else
+      bsg_mcs_mutex_t *dst_mtx = &mtx[dst_mtx_idx];
+      bsg_mcs_mutex_acquire(dst_mtx, &lcl, lcl_as_glbl);
+      #endif
 
-        dst(dst_element_idx) += src(src_element_idx);
+      dst(dst_element_idx) += src(src_element_idx);
 
-        // unlock
-        #ifdef HB_EMUL
-        dst_mtx->unlock();
-        #else
-        bsg_mcs_mutex_release(dst_mtx, &lcl, lcl_as_glbl);
-        #endif
+      // unlock
+      #ifdef HB_EMUL
+      dst_mtx->unlock();
+      #else
+      bsg_mcs_mutex_release(dst_mtx, &lcl, lcl_as_glbl);
+      #endif
     }
 
 
