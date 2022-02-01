@@ -7,13 +7,8 @@ def _test_index_add(dim, t1, t2, index):
 
     out_h = t1_h.index_add(dim, index_h, t2_h)
     out = t1.index_add(dim, index, t2)
-    #print(out)
-    #print(out_h)
-    #abs_diff = torch.abs(out - out_h.cpu())
-    #nonzero = torch.nonzero(abs_diff)
-    #print(nonzero)
-    #print("#nonzero: ", nonzero.size())
-    #print("sum abs difference: ", torch.sum(abs_diff))
+    # print(out)
+    # print(out_h)
     assert out_h.device == torch.device("hammerblade")
     assert torch.allclose(out, out_h.cpu())
 
