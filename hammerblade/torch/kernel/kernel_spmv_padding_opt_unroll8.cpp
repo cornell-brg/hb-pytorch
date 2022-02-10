@@ -1,7 +1,7 @@
 //============================================================================
 // Sparse matrix multiply dense vector kernel
 // Optimizations: non-blocking load, padding, C2SR format
-// 04/05/2020 Zhongyuan Zhao, Michael Rivera (zz546@cornell.edu)
+// 04/05/2020 Zhongyuan Zhao (zz546@cornell.edu)
 //============================================================================
 
 #include <kernel_common.hpp>

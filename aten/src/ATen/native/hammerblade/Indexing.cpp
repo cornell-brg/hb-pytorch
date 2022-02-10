@@ -30,7 +30,7 @@ void index_kernel_hb(TensorIterator& iter, IntArrayRef index_size, IntArrayRef i
 //  std::cout << "Number of tensors is " << iter.ntensors();
   for(int i = 0; i < iter.ntensors(); i++) {
     Tensor& t = iter.tensor(i);
-    if(i > iter.noutputs() && t.dtype() == at::kLong) {
+    if(i > iter.noutputs() && (t.dtype() == at::kLong || t.dtype() == at::kBool)) {
 //      std::cout << "Convert data type" << std::endl;
       t.to(at::kInt);
     }

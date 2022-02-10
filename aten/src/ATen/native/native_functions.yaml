@@ -391,6 +391,7 @@
   dispatch:
     CPU: arange_cpu_out
     CUDA: arange_cuda_out
+    HammerBlade: arange_hb_out
 
 # This function is a temporary hack to allow tracing of arange like constructs with dynamic
 # bounds on arange.  Normal arange is not traceable because it does not take any tensor inputs;
@@ -3967,6 +3968,7 @@
   dispatch:
     CPU: legacy::cpu::_th_scatter_add_
     CUDA: legacy::cuda::_th_scatter_add_
+    HammerBlade: scatter_add_hb_
 
 - func: scatter_add(Tensor self, int dim, Tensor index, Tensor src) -> Tensor
   use_c10_dispatcher: full
