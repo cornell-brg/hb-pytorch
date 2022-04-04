@@ -28,8 +28,8 @@ extern "C" {
     uint32_t nnz = *_nnz;
     int *tmp_indices = (int*)c2sr_colindices.data_ptr();
     float *tmp_values = (float*)c2sr_values.data_ptr();
-    int indices_vcache = ((uintptr_t)tmp_indices / 128) % 32;
-    int values_vcache = ((uintptr_t)tmp_values / 128) % 32;
+    int indices_vcache = ((uintptr_t)tmp_indices / (CACHE_LINE*4)) % NUM_OF_SLOTS;
+    int values_vcache = ((uintptr_t)tmp_values / (CACHE_LINE*4)) % NUM_OF_SLOTS;
     int indices_padding = (NUM_OF_SLOTS - indices_vcache) * CACHE_LINE;
     int values_padding = (NUM_OF_SLOTS - values_vcache) * CACHE_LINE;
     
@@ -58,36 +58,28 @@ extern "C" {
       }
     }
     
-    g_barrier.sync();
-//    bsg_cuda_print_stat_end(tag0);
-
-//    bsg_cuda_print_stat_start(tag1); 
+    g_barrier.sync(); 
     //Generate nnz of each row, store into c2sr(dim + 1) ~ c2sr(2 * dim)
     end = dim;
     // Generate the pointer to the first nnz element of each row in corresponding slot, store into c2sr(0) ~ c2sr(dim - 1)
-    for (size_t k = start; k < end; k = k + thread_num) {
-//      printf("offset, start and end are %d, %d and %d\n", offset, start, end);
-      int sum = 0;
-      if(k < NUM_OF_SLOTS) {
-        sum = 0;
-      } else {
-        int t = k;
-        t = t - NUM_OF_SLOTS;
-        for (; t >= 0 ; t = t - NUM_OF_SLOTS) {
-          sum = sum + c2sr(t + 1) - c2sr(t);     
-        }
+    if(__bsg_id == 0) { 
+      int first_end = dim > NUM_OF_SLOTS ? NUM_OF_SLOTS : dim;  
+      for( size_t k = 0; k < first_end; k++) {
+        c2sr(offset + k) = 0;
+      } 
+
+      for (size_t k = NUM_OF_SLOTS; k < end; k++) {
+        int t = k - NUM_OF_SLOTS;
+        c2sr(offset + k) = c2sr(offset + t) + c2sr(t + 1) - c2sr(t);     
       }
-      c2sr(offset + k) = sum;
-//      printf("c2sr(%d) is %d\n", k, c2sr(k)); 
     }
-//    printf("pass generating the pointer of the fist nnz element of each row\n");
     g_barrier.sync();
 //    bsg_cuda_print_stat_end(tag1);
 
 //    bsg_cuda_print_stat_start(tag2);
     //Reorganize the data in colindices and values
     for(size_t l = start; l < end; l = l + thread_num) {
-//      printf("l is %d\n", l);
+//      bsg_printf("l is %d\n", l);
       int32_t c2sr_first = c2sr(offset + l);
       int32_t c2sr_last = c2sr(offset + l) + c2sr(l + 1) - c2sr(l);
       int32_t csr_first = c2sr(l);
