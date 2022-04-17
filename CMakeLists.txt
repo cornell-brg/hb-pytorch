@@ -29,7 +29,7 @@ else()
 endif()
 
 set(CMAKE_INSTALL_MESSAGE NEVER)
-
+set(CPUINFO_SOURCE_DIR "/scratch/users/zz546/temp/hb-pytorch/third_party/cpuinfo")
 set(CMAKE_CXX_STANDARD 11)
 if (NOT MSVC)
   set(CMAKE_C_STANDARD 11)
