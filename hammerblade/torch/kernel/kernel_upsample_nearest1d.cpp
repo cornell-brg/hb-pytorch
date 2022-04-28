@@ -39,6 +39,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_upsample_nearest1d, int32_t)
+  HB_EMUL_REG_KERNEL(tensorlib_upsample_nearest1d, hb_tensor_t*, int32_t)
 
 }

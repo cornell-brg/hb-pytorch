@@ -12,18 +12,18 @@
 
 namespace at { namespace native {
 
-
-namespace {
-
-
-static void upsample_nearest1d_kernel_hb(TensorIterator& iter) {
-  AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "upsample_nearest1d_hb", [&]() {
-      offload_op_unary(iter, "tensorlib_upsample_nearest1d");
-      });
+Tensor& upsample_nearest1d_out_hb(Tensor& output, const Tensor& input, IntArrayRef output_size) {
+  // Add code here
+  return output;
 }
 
-} // anonymous namespace
-
-REGISTER_HAMMERBLADE_DISPATCH(upsample_nearest1d_stub, &upsample_nearest1d_hb);
+Tensor upsample_nearest1d_hb(const Tensor& input, IntArrayRef output_size) {
+//  AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "upsample_nearest1d_hb", [&]() {
+//      offload_op_unary(iter, "tensorlib_upsample_nearest1d");
+//      });
+  auto output = at::empty({0}, input.options());
+  upsample_nearest1d_out_hb(output, input, output_size);
+  return output;
+}
 
 }} // namespace at::native
