@@ -6,32 +6,66 @@
 
 #include <kernel_common.hpp>
 #include <cmath>
+#include <math.h>
 
 extern "C" {
 
-  __attribute__ ((noinline))  int tensorlib_upsample_nearest1d(
-          hb_tensor_t* t0_p,
-          int32_t output_size) {
-    auto input = HBTensor<float>(t0_p);
-    
-    int32_t scale_factor = output_size / input.dim(0); // not sure if this is right
+//taken from aten/src/ATen/native/UpSample.h
+static inline int64_t nearest_neighbor_compute_source_index(
+    const float scale,
+    int64_t dst_index,
+    int64_t input_size) {
+  const int64_t src_index =
+      std::min(static_cast<int64_t>(floorf(dst_index * scale)), input_size - 1);
+  return src_index;
+}
 
-    size_t thread_num = bsg_tiles_X * bsg_tiles_Y;
-    size_t start = __bsg_id;
-    size_t end = output_size;
+  
+  __attribute__ ((noinline)) static int tensorlib_upsample_nearest1d(
+          int64_t* odata,
+          int64_t* idata,
+          int64_t input_width,
+          int64_t output_width,
+          int64_t nbatch,
+          int64_t channels) {
+    
+    // auto input = HBTensor<float>(t0_p);
+    const float scale = (float)input_width / (float)output_width;
+    channels = channels * nbatch;
+
+
+
     bsg_cuda_print_stat_kernel_start();
     bsg_saif_start();
-    float res[output_size];
+    
+      // special case: just copy
+    if (input_width == output_width) {
+      hb_tiled_for(output_width, [&](int64_t w2) {
+        const int64_t w1 = w2;
+        const int64_t* pos1 = &idata[w1];
+        int64_t* pos2 = &odata[w2];
 
-    for (int32_t i = start; i < end; i = i + thread_num) {
-        for (int32_t j = 0; j < scale_factor; j++){
-            res[i*scale_factor + j] = input(i);
+        for (int64_t c = 0; c < channels; ++c) {
+          pos2[0] = pos1[0];
+          pos1 += input_width;
+          pos2 += output_width;
         }
+      });
+      return 0;
     }
+    hb_tiled_for(output_width, [&](int64_t w2) {
+      const int64_t src_x = nearest_neighbor_compute_source_index(scale, w2, input_width);
+      const int64_t w1 = src_x;
+      const int64_t* pos1 = &idata[w1];
+      int64_t* pos2 = &odata[w2];
 
-    for (int32_t i = 0; i < output_size; i++) {
-        input(i) = res[i];
-    }
+      for (int64_t c = 0; c < channels; ++c) {
+        pos2[0] = pos1[0];
+        pos1 += input_width;
+        pos2 += output_width;
+      }
+    });
+
     bsg_saif_end();
     bsg_cuda_print_stat_kernel_end();
 
@@ -39,6 +73,6 @@ extern "C" {
     return 0;
   }
 
-  HB_EMUL_REG_KERNEL(tensorlib_upsample_nearest1d, hb_tensor_t*, int32_t)
+  HB_EMUL_REG_KERNEL(tensorlib_upsample_nearest1d, int64_t*, int64_t*, int64_t, int64_t, int64_t, int64_t)
 
 }
