@@ -24,7 +24,6 @@ def test_torch_upsample_1():
     T_data = [[[1., 2.], [3., 4.]],
           [[5., 6.], [7., 8.]]]
     T = torch.tensor(T_data)
-    # T = T.long()
     _test_torch_upsample_nearest1d(T,5)
 
 # def test_torch_upsample_1():

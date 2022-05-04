@@ -29,6 +29,7 @@ static void upsample_nearest1d_out_hb_template(
   int64_t channels = input_.size(1);
   int64_t input_width = input_.size(2);
 
+
   upsample_1d_shape_check(
       input_,
       Tensor(),
@@ -43,24 +44,22 @@ static void upsample_nearest1d_out_hb_template(
   output.zero_();
 
   AT_ASSERT(input_width > 0 && output_width > 0);
-  hb_offload_kernel("tensorlib_nearest1d_hb");
-  // AT_DISPATCH_FLOATING_TYPES_AND_HALF(input.scalar_type(), "upsample_nearest1d", [&] {
-  //   auto* idata = input.data_ptr();
-  //   auto* odata = output.data_ptr();
 
-  //   std::vector<eva_t> device_args;
-  //   device_args.push_back(create_device_scalar(odata));
-  //   device_args.push_back(create_device_scalar(idata));
-  //   device_args.push_back(create_device_scalar(input_width));
-  //   device_args.push_back(create_device_scalar(output_width));
-  //   device_args.push_back(create_device_scalar(nbatch));
-  //   device_args.push_back(create_device_scalar(channels));
+  int32_t nbatch_32 = (int32_t)nbatch;
+  int32_t channels_32 = (int32_t)channels;
+  int32_t input_width_32 = (int32_t)input_width;
+  int32_t output_width_32 = (int32_t)output_width;
 
-  //   // c10::hammerblade::offload_kernel("tensorlib_nearest1d_hb");
-  // //   // , device_args);
-    
-  
-  // });
+  std::vector<eva_t> scalar_args;
+  std::vector<Tensor> tensor_args;
+  tensor_args.push_back(output);
+  tensor_args.push_back(input_);
+  scalar_args.push_back(create_device_scalar(input_width_32));
+  scalar_args.push_back(create_device_scalar(output_width_32));
+  scalar_args.push_back(create_device_scalar(nbatch_32));
+  scalar_args.push_back(create_device_scalar(channels_32));
+
+  offload_tensor_scalar_impl(tensor_args,scalar_args,"tensorlib_upsample_nearest1d");
 }
 
 Tensor& upsample_nearest1d_out_hb(
@@ -73,7 +72,6 @@ Tensor& upsample_nearest1d_out_hb(
 
 Tensor upsample_nearest1d_hb(const Tensor& input, IntArrayRef output_size) {
   auto output = at::empty({0}, input.options());
-  // printf("in upsample nearest1d hb");
   upsample_nearest1d_out_hb(output, input, output_size);
   return output;
 }
