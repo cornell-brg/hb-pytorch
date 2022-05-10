@@ -47,5 +47,3 @@ def test_sigmoid_backward_random():
         grad_out = np.random.rand(y_size, x_size).tolist()
 
     _test_sigmoid_backward(inp, grad_out)
-
-# TODO: Hypothesis?
