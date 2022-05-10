@@ -36,7 +36,7 @@ def test_index_add_3():
                        [[[4, 4], [5, 5], [6, 6]], [[44, 44], [55, 55], [66, 66]]],
                        [[[7, 7], [8, 8], [9, 9]], [[77, 77], [88, 88], [99, 99]]]], dtype=torch.float)
     print(t1)
-    print("size: ", t1.size()) # 3, 2, 3, 2
+    print("size: ", t1.size())  # 3, 2, 3, 2
     print("strides: ", t1.stride())
 
     t2 = torch.rand([2, 2, 3, 2])
@@ -53,7 +53,7 @@ def test_index_add_4():
                        [[[4, 4], [5, 5], [6, 6]], [[44, 44], [55, 55], [66, 66]]],
                        [[[7, 7], [8, 8], [9, 9]], [[77, 77], [88, 88], [99, 99]]]], dtype=torch.float)
     print(t1)
-    print("size: ", t1.size()) # 3, 2, 3, 2
+    print("size: ", t1.size())  # 3, 2, 3, 2
     print("strides: ", t1.stride())
 
     t2 = torch.rand([3, 1, 3, 2])
@@ -70,7 +70,7 @@ def test_index_add_5():
                        [[[4, 4], [5, 5], [6, 6]], [[44, 44], [55, 55], [66, 66]]],
                        [[[7, 7], [8, 8], [9, 9]], [[77, 77], [88, 88], [99, 99]]]], dtype=torch.float)
     print(t1)
-    print("size: ", t1.size()) # 3, 2, 3, 2
+    print("size: ", t1.size())  # 3, 2, 3, 2
     print("strides: ", t1.stride())
 
     t2 = torch.rand([3, 2, 5, 2])
@@ -87,7 +87,7 @@ def test_index_add_6():
                        [[[4, 4], [5, 5], [6, 6]], [[44, 44], [55, 55], [66, 66]]],
                        [[[7, 7], [8, 8], [9, 9]], [[77, 77], [88, 88], [99, 99]]]], dtype=torch.float)
     print(t1)
-    print("size: ", t1.size()) # 3, 2, 3, 2
+    print("size: ", t1.size())  # 3, 2, 3, 2
     print("strides: ", t1.stride())
 
     t2 = torch.rand([3, 2, 3, 1])
