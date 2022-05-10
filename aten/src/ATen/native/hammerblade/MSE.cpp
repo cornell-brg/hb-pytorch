@@ -10,8 +10,8 @@ namespace {
 static void mse_kernel_hb(TensorIterator& iter) {
 
   AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "mse_hb", [&](){
-        offload_op_binary(iter, "tensorlib_mse");
-        });
+    offload_op_binary(iter, "tensorlib_mse");
+  });
 
 }
 
