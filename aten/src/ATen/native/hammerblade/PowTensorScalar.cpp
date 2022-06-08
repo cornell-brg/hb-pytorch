@@ -12,8 +12,8 @@ static void pow_tensor_scalar_kernel_hb(TensorIterator& iter, Scalar exp_scalar)
 
   // NOTE: Complex inputs are not supported
   AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "pow_tensor_scalar_kernel_hb", [&](){
-        offload_op_unary(iter, exp_scalar.to<scalar_t>(), "tensorlib_pow_tensor_scalar");
-        });
+    offload_op_unary(iter, exp_scalar.to<scalar_t>(), "tensorlib_pow_tensor_scalar");
+  });
 
 }
 

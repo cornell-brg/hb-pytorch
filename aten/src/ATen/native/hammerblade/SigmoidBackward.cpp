@@ -11,8 +11,8 @@ namespace {
 static void sigmoid_backward_kernel_hb(TensorIterator& iter) {
 
   AT_DISPATCH_FLOAT_TYPE_ONLY(iter.dtype(), "sigmoid_backward_hb", [&]() {
-      offload_op_binary(iter, "tensorlib_sigmoid_backward");
-      });
+    offload_op_binary(iter, "tensorlib_sigmoid_backward");
+  });
 }
 
 } // anonymous namespace
