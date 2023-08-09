@@ -28,7 +28,6 @@ extern "C" {
       calc_elements_per_output(res, input, dim);
 
     auto reduce = [](float& partial_result, float in) {
-                    // if(!partial_result) partial_result = 1;
                     partial_result *= in;
                   };
 
